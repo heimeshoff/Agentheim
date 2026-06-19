@@ -11,14 +11,13 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
+- **Todo:** 0
 - **Doing:** 0
-- **Done:** 81
+- **Done:** 82
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-t3b9k** — Carry mtimeMs on research/ADR location pointers in /api/tree (feature) — `todo/agentic-workflow-t3b9k-research-adr-pointer-mtime.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -27,6 +26,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-t3b9k** — Carry mtimeMs on research/ADR location pointers in /api/tree (feature) — `done/agentic-workflow-t3b9k-research-adr-pointer-mtime.md`
 - **agentic-workflow-h7n2c** — Board prompt bar — Inquire launch button between Modeling and Research (feature) — `done/agentic-workflow-h7n2c-board-prompt-bar-inquire-button.md`
 - **agentic-workflow-c4t8m** — What's Next columns become their own capped, scrollable cards (feature) — `done/agentic-workflow-c4t8m-whats-next-columns-as-capped-scrollable-cards.md`
 - **agentic-workflow-q7m4k** — What's Next card drops the front matter and lays its three sections out as columns (feature) — `done/agentic-workflow-q7m4k-whats-next-card-three-columns-no-frontmatter.md`

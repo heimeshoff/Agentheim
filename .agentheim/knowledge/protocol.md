@@ -5,6 +5,26 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 12:05 -- Task verified and completed: agentic-workflow-t3b9k - Carry mtimeMs on research/ADR location pointers in /api/tree
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-t3b9k - Carry mtimeMs on research/ADR location pointers in /api/tree
+**Summary:** The /api/tree projection now carries each ADR and research location pointer's mtimeMs via additive parallel meta maps (locations.adrsMeta / locations.researchMeta), keyed by the same in-root path; the flat string arrays stay byte-compatible and an unstattable file degrades to mtimeMs: null without aborting the walk. Unblocks aw-n4h7q's "modified blinks".
+**Verification:** PASS (iteration 1)
+**Files changed:** 3
+**Tests added:** 3 (dashboard suite 630 green)
+**ADRs written:** none
+
+---
+
+## 2026-06-19 12:00 -- Batch started: [agentic-workflow-t3b9k, design-system-v8k2p]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-t3b9k - Carry mtimeMs on research/ADR location pointers in /api/tree, design-system-v8k2p - Rail "new item" attention blink (TreeItem / TreeGroup ambient cue)
+**Parallel:** yes (2 workers)
+
+---
+
 ## 2026-06-19 11:30 -- Modeling / Promoted: design-system-v8k2p - Rail "new item" attention blink
 
 **Type:** Modeling / Promote

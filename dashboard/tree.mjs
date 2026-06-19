@@ -23,6 +23,37 @@ function relPointer(root, abs) {
   return path.relative(root, abs).split(path.sep).join('/');
 }
 
+/**
+ * File modification time in epoch ms, or null if the file cannot be stat'd. This
+ * is the same loss-tolerant `statSync(abs).mtimeMs` mechanism the per-task
+ * projection uses (aw-013): mtime is METADATA within ADR-0002's pointers+metadata
+ * contract (never a document body), and a stat failure degrades to null rather
+ * than aborting the walk.
+ */
+function mtimeOf(abs) {
+  try {
+    return statSync(abs).mtimeMs;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Build a parallel metadata map for a list of absolute file paths, keyed by the
+ * SAME in-root path string the flat `locations.adrs` / `locations.research`
+ * arrays use, each value carrying that file's `mtimeMs` (aw-t3b9k). Additive: the
+ * flat string arrays stay byte-compatible for `treeToLibrary` / `library-data`
+ * and the search corpus, while the read-only dashboard (ADR-0017) gains the
+ * modification time it cannot stat itself — feeding aw-n4h7q's "modified blinks".
+ */
+export function metaMap(root, absFiles) {
+  const meta = {};
+  for (const abs of absFiles) {
+    meta[relPointer(root, abs)] = { mtimeMs: mtimeOf(abs) };
+  }
+  return meta;
+}
+
 /** List `.md` files directly in `dir` (non-recursive), sorted, abs paths. */
 function listMarkdown(dir) {
   if (!existsSync(dir)) return [];
@@ -202,14 +233,24 @@ export function buildTree(root) {
     }
   }
 
+  // List once so the flat string arrays and the parallel meta maps share a
+  // single source of truth (same files, same in-root path keys).
+  const adrFiles = listMarkdown(adrsDir);
+  const researchFiles = listMarkdown(researchDir);
+
   return {
     root: absRoot,
     project: { name: projectName },
     locations: {
       vision: existsSync(visionPath) ? relPointer(absRoot, visionPath) : null,
       contextMap: existsSync(contextMapPath) ? relPointer(absRoot, contextMapPath) : null,
-      adrs: listMarkdown(adrsDir).map((abs) => relPointer(absRoot, abs)),
-      research: listMarkdown(researchDir).map((abs) => relPointer(absRoot, abs)),
+      adrs: adrFiles.map((abs) => relPointer(absRoot, abs)),
+      research: researchFiles.map((abs) => relPointer(absRoot, abs)),
+      // Additive parallel metadata maps (aw-t3b9k): same path keys, each value
+      // { mtimeMs } so the read-only dashboard can diff a doc's modification time
+      // against its session baseline (aw-n4h7q). Never a document body (ADR-0002).
+      adrsMeta: metaMap(absRoot, adrFiles),
+      researchMeta: metaMap(absRoot, researchFiles),
     },
     contexts,
   };

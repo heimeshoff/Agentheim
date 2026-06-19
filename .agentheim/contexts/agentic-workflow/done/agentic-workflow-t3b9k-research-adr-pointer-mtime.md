@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-t3b9k
 title: Carry mtimeMs on research/ADR location pointers in /api/tree
-status: todo
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-06-19
-completed:
+completed: 2026-06-19
 depends_on: []
 blocks: [agentic-workflow-n4h7q]
 tags: [dashboard, tree, projection, mtime, research, adr]
@@ -72,3 +72,19 @@ Extend the tree projection so each **research** and **ADR** location pointer car
 - Shape recommendation is the **additive parallel-meta map**; it keeps `treeToLibrary` and the
   search corpus byte-compatible and avoids touching every pointer-list reader. The `{path,
   mtimeMs}` reshape is allowed but only if every consumer moves in this task.
+
+## Outcome
+`buildTree` (`dashboard/tree.mjs`) now projects two additive parallel metadata maps,
+`locations.adrsMeta` and `locations.researchMeta`, each keyed by the same in-root path string the
+flat `locations.adrs` / `locations.research` arrays use, with values `{ mtimeMs }`. A new
+`metaMap(root, absFiles)` helper plus a shared `mtimeOf(abs)` helper reuse aw-013's
+`statSync(abs).mtimeMs` mechanism; an unstattable file degrades to `mtimeMs: null` and the walk
+never aborts. The flat string arrays are byte-unchanged, so the existing consumers
+(`dashboard/app/library-data.js`, `dashboard/search.mjs`) keep working untouched — verified by the
+suite (630/630 green). No document bodies were added (ADR-0002 contract preserved). The read-only
+dashboard (ADR-0017) can now diff a doc's modification time against a session baseline, unblocking
+aw-n4h7q's "modified also blinks". `dist/app.js` was intentionally NOT rebuilt — that is aw-n4h7q's
+job when the cue renders.
+
+Key files: `dashboard/tree.mjs` (`mtimeOf` + `metaMap` + meta maps in `buildTree`),
+`dashboard/test/tree.test.mjs` (3 new `node --test` cases).

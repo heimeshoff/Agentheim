@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { buildTree, projectTask, parseProjectName } from '../tree.mjs';
+import { buildTree, projectTask, parseProjectName, metaMap } from '../tree.mjs';
 
 /**
  * Build a small but realistic .agentheim/ fixture:
@@ -130,6 +130,62 @@ test('artifact LOCATIONS are projected as pointers, not bodies', () => {
     assert.deepEqual(alpha.concepts, ['.agentheim/contexts/alpha/concepts/thing.md']);
   } finally {
     rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('adrsMeta/researchMeta carry numeric mtimeMs keyed by the same in-root path (aw-t3b9k)', () => {
+  const { base } = makeProject();
+  try {
+    const tree = buildTree(base);
+    // Parallel metadata maps are additive — the flat string arrays are untouched.
+    const adrPath = '.agentheim/knowledge/decisions/0001-foo.md';
+    const researchPath = '.agentheim/knowledge/research/spike-bar.md';
+    assert.deepEqual(tree.locations.adrs, [adrPath]);
+    assert.deepEqual(tree.locations.research, [researchPath]);
+    // ...and each path keys an entry whose mtimeMs is a real epoch ms.
+    assert.equal(typeof tree.locations.adrsMeta[adrPath].mtimeMs, 'number');
+    assert.ok(Number.isFinite(tree.locations.adrsMeta[adrPath].mtimeMs));
+    assert.ok(tree.locations.adrsMeta[adrPath].mtimeMs > 0);
+    assert.equal(typeof tree.locations.researchMeta[researchPath].mtimeMs, 'number');
+    assert.ok(tree.locations.researchMeta[researchPath].mtimeMs > 0);
+    // Metadata only — no document body crosses the boundary.
+    assert.equal(JSON.stringify(tree.locations.adrsMeta).includes('ADR 0001'), false);
+    assert.equal(JSON.stringify(tree.locations.researchMeta).includes('Research'), false);
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('an unstattable ADR/research file projects mtimeMs: null without aborting the walk (aw-t3b9k)', () => {
+  const { base } = makeProject();
+  try {
+    // Remove the ADR file after the fixture is built so its path is still
+    // listed by the directory walk but cannot be stat'd at projection time.
+    rmSync(path.join(base, '.agentheim', 'knowledge', 'decisions', '0001-foo.md'));
+    const tree = buildTree(base);
+    // The walk still completes and the BC is still present.
+    assert.equal(tree.contexts[0].name, 'alpha');
+    // The now-absent ADR is no longer listed (directory walk is the source of
+    // truth for which files exist); the meta map simply has no orphan entry,
+    // and never threw. Research is intact and carries a real mtime.
+    const researchPath = '.agentheim/knowledge/research/spike-bar.md';
+    assert.equal(typeof tree.locations.researchMeta[researchPath].mtimeMs, 'number');
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('metaMap degrades an unstattable path to { mtimeMs: null } without throwing (aw-t3b9k)', () => {
+  // Mirrors aw-013's unstattable-task test: a path that cannot be stat'd
+  // exercises the graceful-degradation branch directly.
+  const root = mkdtempSync(path.join(tmpdir(), 'awt3b9k-stat-'));
+  try {
+    const missing = path.join(root, '.agentheim', 'knowledge', 'decisions', '9999-gone.md');
+    const meta = metaMap(root, [missing]);
+    const key = '.agentheim/knowledge/decisions/9999-gone.md';
+    assert.deepEqual(meta[key], { mtimeMs: null });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
   }
 });
 

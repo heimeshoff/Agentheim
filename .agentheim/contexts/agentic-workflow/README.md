@@ -73,7 +73,12 @@ separate BC, but today the whole tool lives in this one.
   per BC, its four lifecycle folders and each task's frontmatter projection
   (`id, title, status, type, context, path`) plus the *locations* of vision / context-map / BC
   READMEs+INDEXes+concepts / ADRs / research — pointers and metadata only, never document
-  bodies. It also carries `project: { name }` — the project name parsed server-side from
+  bodies. The ADR and research locations also carry an **additive parallel meta map**
+  (`locations.adrsMeta` / `locations.researchMeta`, keyed by the same in-root path) whose
+  values carry each file's `mtimeMs` (aw-t3b9k), so the read-only dashboard (ADR-0017) can tell
+  a *modified* doc from an untouched one (aw-n4h7q's "modified blinks"); a stat failure degrades
+  to `mtimeMs: null` and the flat `locations.adrs` / `locations.research` string arrays stay
+  byte-compatible for `library-data` and the search corpus. It also carries `project: { name }` — the project name parsed server-side from
   `vision.md`'s `# Vision: <name>` heading (aw-015), so the dashboard header can show which
   project's `.agentheim/` is being viewed; missing/headingless vision degrades to `null`. This
   is the one projection value drawn from a markdown *body* rather than frontmatter, kept to a
