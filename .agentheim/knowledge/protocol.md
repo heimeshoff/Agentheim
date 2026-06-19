@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 16:20 -- Work session ended
+
+**Type:** Work / Session end
+**Completed:** 1 (first-try PASS: 1 — agentic-workflow-m2v8d; re-dispatched: 0; skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Commits:** 1 (6285812 m2v8d)
+**Notes:**
+- Single ready task (m2v8d); both deps (design-system-001, design-system-c3p9k) done. Worker replaced the aw-072 Done-column hide control with an in-place collapse: a Done-only double-chevron button (chevrons-up ⇄ chevrons-down, ds-c3p9k consumed unforked) that height-clamps the column body to a ~3.5-card faded peek (pure `peekClampStyle`), orthogonal to grouping; persisted via the ADR-0015 store as an additive `peek` boolean with the retired `hidden` flag migrating to shown+expanded (no version bump). Presentation-only (ADR-0017). dist rebuilt; full dashboard suite 663 green. Verified PASS first try.
+- **Working-tree carry-over (untouched, as in prior sessions):** pre-existing parallel-session changes `.agentheim/knowledge/index.md` (modified) and `knowledge/research/readme-structure-developer-tool-2026-06-18.md` (untracked) were left uncommitted.
+- **Board now empty** — no todo/doing tasks remain across any BC.
+- Concept candidates: none this run.
+
+---
+
 ## 2026-06-19 16:18 -- Task verified and completed: agentic-workflow-m2v8d - Done column collapse control — clamp to ~3.5 faded tickets instead of hiding the column
 
 **Type:** Work / Task completion
