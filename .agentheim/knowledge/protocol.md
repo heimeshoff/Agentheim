@@ -13,6 +13,17 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 15:25 -- Modeling / Refined: agentic-workflow-m2v8d - Done column collapse control
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog (content todo-ready; held only by the design-system-c3p9k glyph dependency)
+**Summary:** Resolved the three open refinement questions that held m2v8d in backlog. (1) The "3.5 tickets" clamp is **height-based** (`max-height` ≈3.5 average cards + `overflow:hidden` + bottom `mask-image` fade), a visual height target not a node count — rejected the count-based "render 4, fade the 4th." (2) Collapse is **orthogonal to grouping** — the clamp applies to the whole Done column body regardless of aw-014 BC sections. (3) The chevron flip is a **glyph-name swap** (`chevrons-up` ⇄ `chevrons-down`), consuming both ds-c3p9k glyphs unforked, not a board-local CSS rotate. Acceptance criteria sharpened to lock these in. No split, no new ADR (all decisions consume ADR-0003/0015/0017 unforked).
+**Split into:** —
+**ADRs written:** —
+
+---
+
 ## 2026-06-19 15:10 -- Modeling / Captured: agentic-workflow-m2v8d + design-system-c3p9k - Done column collapse control
 
 **Type:** Modeling / Capture

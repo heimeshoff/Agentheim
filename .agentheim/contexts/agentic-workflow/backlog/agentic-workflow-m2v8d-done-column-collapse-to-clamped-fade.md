@@ -30,10 +30,12 @@ always leaves a few done tickets in view.
   as the **double-chevron pointing up** (`chevrons-up`, design-system-c3p9k). Done only —
   backlog / todo / doing carry no such control (the aw-018 default-OFF per-column-affordance
   precedent).
-- **When collapsed:** only **three and a half tickets** are visible in the Done column; the
-  half-visible last ticket **fades out** (a bottom fade-out mask), and **nothing is rendered
-  below it** in that column. The chevron **flips to point down** (`chevrons-down`) to signal the
-  expand action.
+- **When collapsed:** the Done column body is **height-clamped to ≈3.5 average cards**
+  (`max-height` + `overflow: hidden`) with a **bottom `mask-image` gradient fade**, so whatever
+  card the clamp cuts **fades out** and **nothing renders below the clamp**. "3.5" is a **visual
+  height target, not a node count** (refine 2026-06-19) — card heights vary with title length, so
+  the honest reading is a height clamp that lands ~3.5 cards tall, not "render exactly 4 nodes."
+  The chevron **flips to point down** (`chevrons-down`) to signal the expand action.
 - **When expanded (default):** the full Done list renders, chevron points up.
 - Clicking the button toggles between the two states.
 - **Persists across reloads** (user-confirmed 2026-06-19) via the existing versioned board
@@ -46,12 +48,22 @@ always leaves a few done tickets in view.
 - [ ] The Done column carries a **collapse button** in its **top-right control strip, above the
       group toggle**, using the **`chevrons-up`** glyph when expanded and **`chevrons-down`** when
       collapsed (design-system-c3p9k, consumed unforked — ADR-0003). **Done only.**
-- [ ] **Collapsed state renders exactly ~3.5 tickets:** three full cards plus a half-height
-      fourth that **fades out** toward the bottom; **no card below** the fade is rendered in the
-      Done column.
+- [ ] **Collapsed state is a height clamp, not a node count** (refine 2026-06-19): the Done
+      column body carries a `max-height` of **≈3.5 average cards** with `overflow: hidden` and a
+      bottom **`mask-image` gradient fade**, so whatever card the clamp cuts fades out toward the
+      bottom and **nothing renders below the clamp**. The ~3.5 is a visual height target — a long
+      title may show slightly fewer/more cards; that is acceptable and expected.
+- [ ] **Collapse is orthogonal to grouping** (refine 2026-06-19): when Done is grouped-by-BC
+      (aw-014), the clamp applies to the **whole column body regardless of sections** — section
+      headers and cards fall where they may inside the clamped/faded region; the clamp does **not**
+      run per-section. (Reinforces the height-clamp reading: one `max-height` on the body, grouping
+      untouched.)
 - [ ] **Expanded is the default** — no stored preference resolves to the full list.
 - [ ] Clicking the button **toggles** collapsed ⇄ expanded, and the chevron direction flips to
-      match (up = will-collapse / expanded, down = will-expand / collapsed).
+      match (up = will-collapse / expanded, down = will-expand / collapsed). The flip is a
+      **glyph-name swap** — `Icon name="chevrons-up"` ⇄ `Icon name="chevrons-down"` (refine
+      2026-06-19) — consuming **both** glyphs ds-c3p9k ships, **not** a board-local CSS rotate
+      transform on a single glyph.
 - [ ] The collapsed/expanded choice **persists across reloads** in the existing versioned
       view-state store (`dashboard/app/board-view-state.js`, ADR-0015): an additive boolean
       (e.g. `collapsed` / `peek`) on the per-column state, **back-compatible** — an old blob that
@@ -73,18 +85,26 @@ always leaves a few done tickets in view.
 - [ ] `dashboard/dist/app.js` is **rebuilt (esbuild)** so the deployed bundle carries the change.
 
 ## Notes
-- **Open refinement questions** (why this sits in backlog, not todo):
-  - **How the "3.5 tickets" clamp is measured.** Card heights vary with title length, so a fixed
-    pixel `max-height` on the column body (≈ 3.5 average cards) with `overflow: hidden` + a
-    bottom fade mask is likely simpler and more robust than counting DOM nodes. Decide between a
-    height-based clamp (CSS `max-height` + `mask-image` / gradient fade) vs a count-based clamp
-    (render the first 4, fade the 4th). The user's intent is the *visual* "3.5 + fade," so a
-    height clamp that lands ~3.5 cards tall is probably the honest reading — confirm at refine.
-  - **Does collapse interact with grouping?** When Done is grouped-by-BC (aw-014), what does
-    "3.5 tickets" mean across sections? Likely the clamp applies to the whole column body
-    regardless of grouping (clamp the rendered height, let sections fall where they may).
-  - **`chevrons-up`/`down` vs one rotated glyph.** ds-c3p9k ships both; this task picks whether
-    to swap the glyph name on toggle or rotate a single one (a board-local CSS-transform).
+- **Resolved refinement decisions (2026-06-19)** — the three open questions that held this in
+  backlog are now decided by the builder:
+  - **Clamp is height-based, not count-based.** A `max-height` on the Done column body (≈3.5
+    average cards) + `overflow: hidden` + a bottom `mask-image` gradient fade. "3.5" is a *visual
+    height target*, not a literal node count — robust to varying card heights, and the honest
+    reading of the builder's "3.5 + fade" intent. (Rejected: rendering the first 4 and half-fading
+    the 4th node.)
+  - **Collapse is orthogonal to grouping.** When Done is grouped-by-BC (aw-014) the clamp applies
+    to the **whole column body regardless of sections** — one `max-height` on the body, sections
+    fall where they may inside the faded region. Not a per-section clamp. (Falls out naturally from
+    the height-based reading.)
+  - **Chevron flip is a glyph-name swap.** `chevrons-up` (expanded) ⇄ `chevrons-down` (collapsed)
+    via the `Icon name` prop, consuming both glyphs ds-c3p9k ships exactly as designed — **not** a
+    board-local CSS rotate transform on a single glyph. (Keeps the styleguide consumed unforked,
+    ADR-0003; no board-local motion to reduced-motion-guard.)
+- **Readiness:** content is now todo-ready (all open questions resolved). It stays in **backlog**
+  only because it is **dependency-blocked** — `design-system-c3p9k` (the `chevrons-up`/`-down`
+  glyph pair) is in the design-system **todo** as of 2026-06-19 (promoted by a concurrent session)
+  but not yet done. Do not promote m2v8d until c3p9k lands and the design-system gate
+  (design-system-001) is re-reviewed (styleguide gate, below).
 - **Relationship to aw-072:** this is a deliberate **reversal** of aw-072's refinement decision.
   aw-072's notes record that "collapse-to-a-thin-strip" was *considered and rejected* in favor of
   remove-from-layout. The builder has now chosen a (different) collapse flavor — clamp-to-3.5-
