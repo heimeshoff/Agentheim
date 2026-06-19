@@ -132,7 +132,7 @@ export function SpacingSection() {
 
 // =====================  ICONOGRAPHY  =====================
 export function IconSection() {
-  const ui = ["square-kanban", "library", "search", "plus", "folder", "chevron-right", "x", "copy", "square-arrow-out-up-right", "bot", "inbox", "arrow-right", "folder-git-2", "settings-2", "trash-2", "lightbulb", "message-circle-question"];
+  const ui = ["square-kanban", "library", "search", "plus", "folder", "chevron-right", "x", "copy", "square-arrow-out-up-right", "bot", "inbox", "arrow-right", "folder-git-2", "settings-2", "trash-2", "lightbulb", "message-circle-question", "chevrons-up", "chevrons-down"];
   return html`
     <${GuideSection} index="04" title="Iconography"
       desc="Lucide at a uniform 1.5px stroke. Icons match surrounding text color in chrome, but content-type icons carry their type's color — the one place an icon is allowed to be chromatic, because color is the fastest way to tell a README from an ADR.">

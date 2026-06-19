@@ -618,6 +618,20 @@ the pattern in **section 11** (`SearchSpecimen` — type *design*, *adr*, or *zz
 > card actually renders the glyph on the board. **Builder confirmation PENDING** —
 > re-review the canvas (`styleguide/index.html` → section 04, Iconography interface set)
 > and re-confirm the gate OPEN.
+>
+> **Gate re-review reopened by the double-chevron pair (`design-system-c3p9k`).** The
+> shared icon set (`styleguide/app/icons.js`, the `LUCIDE` map) gained the
+> `chevrons-up` and `chevrons-down` glyphs at verbatim upstream Lucide geometry (two
+> stacked chevrons each — "collapse upward / expand downward") for the Done-column
+> collapse control (`agentic-workflow-m2v8d`), and both are surfaced in the section-04
+> interface-set gallery (`foundations2.js`, the curated `ui` array) — a visible
+> styleguide change that reopens the design-system gate per the `design-system-005` /
+> `007` / `009` / `014` / `015` / `017` / `r4k8m` precedent. `dist/` deliberately NOT
+> rebuilt — a derived artifact (ADR-0003) that the consuming task
+> (`agentic-workflow-m2v8d`) rebuilds when the collapse button actually renders the
+> glyph on the board. **Builder confirmation PENDING** — re-review the canvas
+> (`styleguide/index.html` → section 04, Iconography interface set) and re-confirm the
+> gate OPEN.
 
 > Live-board note: the served dashboard `dist/` is a derived artifact (ADR-0003) and
 > was rebuilt here (`node build.mjs`), but the bundle is byte-identical — the

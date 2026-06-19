@@ -1,11 +1,11 @@
 ---
 id: design-system-c3p9k
 title: Add a double-chevron glyph pair (chevrons-up / chevrons-down) to the shared icon set
-status: todo
+status: done
 type: feature
 context: design-system
 created: 2026-06-19
-completed:
+completed: 2026-06-19
 depends_on: []
 blocks: [agentic-workflow-m2v8d]
 tags: [icon, glyph, styleguide-gate]
@@ -56,5 +56,26 @@ for the collapsed→expand action (the consumer picks which way points when).
 - Prior art / precedent: ds-017 (`trash-2` glyph → aw-048), ds-r4k8m (`message-circle-question`
   → aw-h7n2c), ds-021 (`lightbulb` content-type glyph → aw-075) — all glyph-only styleguide
   additions consumed unforked by an agentic-workflow task.
+
+## Outcome
+Added `LUCIDE["chevrons-up"]` and `LUCIDE["chevrons-down"]` to
+`styleguide/app/icons.js` at verbatim upstream Lucide geometry (two stacked chevrons
+each, inner markup only — `Icon` supplies the `<svg>` wrapper). Both render through the
+existing `Icon name="..."` path with no special-casing. Appended `"chevrons-up"` and
+`"chevrons-down"` to the hand-curated `ui` array in `IconSection` (`foundations2.js`) so
+they surface in the section-04 interface-set gallery on the canvas. Added
+`styleguide/test/icons-chevrons.test.mjs` — 8 source-guard tests: each glyph resolves
+with non-empty inner markup and no self-wrapped `<svg>`, each is a doubled chevron (two
+`<path>`s), the curated gallery surfaces both, and the exact upstream geometry per glyph.
+Full styleguide suite green (130/130).
+
+Gate: visible canvas change → reopens the design-system gate (gate-reopen note added to
+the BC README per ds-017 / r4k8m / 021 precedent; builder confirmation pending).
+`dist/` deliberately NOT rebuilt — derived artifact (ADR-0003); the consuming task
+`agentic-workflow-m2v8d` rebuilds it when the collapse button renders the glyph on the
+board. No token changes, no new color.
+
+Key files: `styleguide/app/icons.js`, `styleguide/app/foundations2.js`,
+`styleguide/test/icons-chevrons.test.mjs`.
 </content>
 </invoke>

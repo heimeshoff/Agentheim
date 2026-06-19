@@ -48,6 +48,13 @@ export const LUCIDE = {
   // open = chevron pointing left into content, close = chevron pointing right.
   "panel-right-open": '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/><path d="m10 15-3-3 3-3"/>',
   "panel-right-close": '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/><path d="m8 9 3 3-3 3"/>',
+  // Double-chevron collapse/expand pair (design-system-c3p9k): the Done-column
+  // collapse control (agentic-workflow-m2v8d) needs "two arrows pointing up" to
+  // collapse, flipping to point down when collapsed. The registry only carried
+  // single `chevron-right`. Lucide `chevrons-up` / `chevrons-down` geometry copied
+  // verbatim — two stacked chevrons each. Inner markup only; Icon supplies <svg>.
+  "chevrons-up": '<path d="m17 11-5-5-5 5"/><path d="m17 18-5-5-5 5"/>',
+  "chevrons-down": '<path d="m7 6 5 5 5-5"/><path d="m7 13 5 5 5-5"/>',
 };
 
 export function Icon({ name, size = 16, stroke = 1.5, color = "currentColor", style }) {

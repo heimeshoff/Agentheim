@@ -5,6 +5,27 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 15:40 -- Task verified and completed: design-system-c3p9k - Add a double-chevron glyph pair (chevrons-up / chevrons-down) to the shared icon set
+
+**Type:** Work / Task completion
+**Task:** design-system-c3p9k - Add a double-chevron glyph pair (chevrons-up / chevrons-down) to the shared icon set
+**Summary:** Added the `chevrons-up` / `chevrons-down` glyph pair to the shared icon set at verbatim upstream Lucide geometry and surfaced both in the section-04 interface-set gallery — unblocking the Done-column collapse control (agentic-workflow-m2v8d).
+**Verification:** PASS (iteration 1)
+**Files changed:** 4
+**Tests added:** 8 (source-guard suite icons-chevrons.test.mjs); full styleguide suite 130 green
+**ADRs written:** none
+**Gate:** visible canvas change (section-04 gallery) → design-system gate REOPENED; builder re-reviews `styleguide/index.html` § 04 before m2v8d consumes the glyphs.
+
+---
+
+## 2026-06-19 15:35 -- Batch started: [design-system-c3p9k]
+
+**Type:** Work / Batch start
+**Tasks:** design-system-c3p9k - Add a double-chevron glyph pair (chevrons-up / chevrons-down) to the shared icon set
+**Parallel:** no (1 worker)
+
+---
+
 ## 2026-06-19 15:30 -- Modeling / Promoted: design-system-c3p9k - Add a double-chevron glyph pair (chevrons-up / chevrons-down) to the shared icon set
 
 **Type:** Modeling / Promote
