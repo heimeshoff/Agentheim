@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 17:16 -- Release shipped: v0.8.8
+
+**Type:** Release
+**Version:** 0.8.7 → 0.8.8 (patch — README restructured per readme-structure research; ships accumulated dashboard/Inquire work since v0.8.7)
+**Manifest:** `.claude-plugin/plugin.json` bumped, committed `51c1d4c`
+**Pushed to main:** yes (`d645789..51c1d4c` on `origin/main`)
+**Tag:** `v0.8.8` (annotated) → `51c1d4c`, pushed to origin
+**GitHub Release:** deferred (gh unavailable — notes handed to builder)
+
+---
+
 ## 2026-06-19 16:25 -- Capture / Captured: agentic-workflow-q3n7k - Update the workflow guide to reflect new features like inquire and what's next
 
 **Type:** Capture
