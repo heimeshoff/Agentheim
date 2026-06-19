@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-n4h7q
 title: Left rail blinks new or updated research docs and ADRs until clicked or reloaded
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-06-19

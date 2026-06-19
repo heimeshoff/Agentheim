@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 12:15 -- Modeling / Promoted: agentic-workflow-n4h7q - Left rail blinks new or updated research docs and ADRs
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-06-19 12:10 -- Work session ended
 
 **Type:** Work / Session end
