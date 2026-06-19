@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 16:25 -- Capture / Captured: agentic-workflow-q3n7k - Update the workflow guide to reflect new features like inquire and what's next
+
+**Type:** Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Update the workflow explainer to reflect newer skills — `inquire` and `whats-next`.
+
+---
+
 ## 2026-06-19 16:20 -- Work session ended
 
 **Type:** Work / Session end

@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 84
@@ -114,6 +114,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-q3n7k** — Update the workflow guide to reflect new features like inquire and what's next — `backlog/agentic-workflow-q3n7k-update-workflow-guide-inquire-whats-next.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
