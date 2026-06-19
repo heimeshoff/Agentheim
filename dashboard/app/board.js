@@ -185,9 +185,10 @@ function ColumnGroupToggle({ status, grouped, onToggle }) {
 // hide control: instead of dropping the column from the layout, it collapses the
 // column body to a short, height-clamped PEEK of the most-recent completions (a
 // bottom-faded ≈3.5-card window) and toggles back to the full list. A board-only
-// affordance, SIBLING of the sort / group controls — same precedent (aw-012/aw-014):
-// the styleguide kanban.js is consumed UNFORKED (ADR-0003), the control is native and
-// token-styled, no new design-system primitive. It is rendered ONLY when the column
+// affordance rendered in the HEADER ROW, right-aligned beside the column title (refine
+// 2026-06-19) — same precedent (aw-012/aw-014): the styleguide kanban.js is consumed
+// UNFORKED (ADR-0003), the control is native and token-styled, no new design-system
+// primitive. It is rendered ONLY when the column
 // opts in (the `onToggleCollapse` prop is supplied) — today that is the Done column
 // alone (Done is the one column that grows unbounded). Clicking it lifts the column's
 // `peek` boolean into persisted board view-state (ADR-0015); the pure `peekClampStyle`
@@ -223,27 +224,22 @@ function ColumnCollapseButton({ status, peek, onToggleCollapse }) {
     </button>`;
 }
 
-// The board-only control strip beneath the styleguide ColumnHeader: sort + group,
-// laid out as siblings, plus (Done only) a collapse/peek control. All are board
-// view-state affordances; none forks the styleguide (ADR-0003). `onToggleCollapse` is
-// OPTIONAL — when absent the collapse button is not rendered (the aw-018 "affordance
-// keyed off a prop, default OFF" precedent), so backlog / todo / doing carry no
-// collapse control. The collapse button renders in the strip's TOP-RIGHT (pushed there
-// by an auto left margin), ABOVE — i.e. before — nothing else on the right; the sort +
-// group controls keep the left.
-function ColumnControls({ status, sort, onSortChange, grouped, onGroupToggle, peek, onToggleCollapse }) {
+// The board-only control strip beneath the styleguide ColumnHeader: sort (left) +
+// group (right). All are board view-state affordances; none forks the styleguide
+// (ADR-0003). The group toggle is pushed to the column's right edge by an auto left
+// margin, mirroring the collapse control above it (refine 2026-06-19). The
+// collapse/peek control is NOT here — it lives up in the header row (BoardColumn),
+// right-aligned beside the column title, so it sits ABOVE the sort + group controls.
+function ColumnControls({ status, sort, onSortChange, grouped, onGroupToggle }) {
   return html`
     <div style=${{
       display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap",
       padding: "0 4px 12px", marginTop: -4,
     }}>
       <${ColumnSortControl} status=${status} value=${sort} onChange=${onSortChange} />
-      <${ColumnGroupToggle} status=${status} grouped=${grouped} onToggle=${onGroupToggle} />
-      ${typeof onToggleCollapse === "function"
-        ? html`<div style=${{ marginLeft: "auto" }}>
-            <${ColumnCollapseButton} status=${status} peek=${peek} onToggleCollapse=${onToggleCollapse} />
-          </div>`
-        : null}
+      <div style=${{ marginLeft: "auto" }}>
+        <${ColumnGroupToggle} status=${status} grouped=${grouped} onToggle=${onGroupToggle} />
+      </div>
     </div>`;
 }
 
@@ -1188,10 +1184,17 @@ function BoardColumn({
       flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column",
       borderRadius: "var(--radius-md)",
     }}>
-      <${ColumnHeader} status=${status} count=${tickets.length} />
+      ${typeof onToggleCollapse === "function"
+        ? html`
+          <div style=${{ display: "flex", alignItems: "flex-start" }}>
+            <div style=${{ flex: "1 1 0", minWidth: 0 }}>
+              <${ColumnHeader} status=${status} count=${tickets.length} />
+            </div>
+            <${ColumnCollapseButton} status=${status} peek=${peek} onToggleCollapse=${onToggleCollapse} />
+          </div>`
+        : html`<${ColumnHeader} status=${status} count=${tickets.length} />`}
       <${ColumnControls} status=${status} sort=${sort} onSortChange=${onSortChange}
-        grouped=${grouped} onGroupToggle=${onGroupToggle}
-        peek=${peek} onToggleCollapse=${onToggleCollapse} />
+        grouped=${grouped} onGroupToggle=${onGroupToggle} />
       ${tickets.length === 0
         ? html`<div style=${{ paddingBottom: 8 }}><${EmptyColumn} status=${status} /></div>`
         : html`
