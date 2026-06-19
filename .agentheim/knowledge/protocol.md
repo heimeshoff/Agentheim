@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 16:05 -- Modeling / Promoted: agentic-workflow-m2v8d - Done column collapse control — clamp to ~3.5 faded tickets instead of hiding the column
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-06-19 15:42 -- Work session ended
 
 **Type:** Work / Session end

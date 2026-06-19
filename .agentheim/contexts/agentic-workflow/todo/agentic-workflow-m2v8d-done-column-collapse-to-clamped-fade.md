@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-m2v8d
 title: Done column collapse control — clamp to ~3.5 faded tickets instead of hiding the column
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-06-19
