@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 81
@@ -111,6 +111,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-n4h7q** — Left rail blinks newly-created research docs and ADRs until clicked or reloaded (feature) — `backlog/agentic-workflow-n4h7q-rail-blinks-new-research-and-adrs-until-acknowledged.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

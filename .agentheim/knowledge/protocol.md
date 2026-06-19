@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 00:00 -- Modeling / Captured: agentic-workflow-n4h7q + design-system-v8k2p - Rail blinks new research/ADRs until acknowledged
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow, design-system
+**Filed to:** backlog
+**Summary:** When a research report or ADR is created while the dashboard is open it should blink in the left rail until clicked or the page reloads. Captured as two linked backlog tasks (the ds → aw split): design-system-v8k2p adds the styleguide "new item" attention cue (an ambient, reduced-motion-strippable blink on a TreeItem / TreeGroup header, governed by ADR-0014, never the reserved ochre accent), and agentic-workflow-n4h7q detects session-new research/ADR paths over the live tree projection and applies the cue — leaf blinks + propagates to its (possibly collapsed) group header; clicking clears only that item; reload resets the baseline. In-memory presentation state only (read-only dashboard, ADR-0017). Builder decisions: propagate to group header; clicking clears only the clicked item.
+
+---
+
 ## 2026-06-18 12:13 -- Work session ended
 
 **Type:** Work / Session end
