@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 14:56 -- Work session ended
+
+**Type:** Work / Session end
+**Completed:** 1 (first-try PASS: 1 — agentic-workflow-n4h7q; re-dispatched: 0; skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Commits:** 1 (f3d1474 n4h7q)
+**Notes:**
+- Single ready task (n4h7q); its three deps (design-system-001, design-system-v8k2p, agentic-workflow-t3b9k) were all done. Worker delivered the dashboard half of the rail "new item" cue: pure `rail-attention.js` (railMtimeIndex / flaggedPaths / annotateGroups, 19 node --test cases) + ShellRail wiring composing Collapsible + TreeItem directly (styleguide unforked, ADR-0003), dist rebuilt; ADR-0030 written; full dashboard suite 653 green. Verified PASS first try.
+- **Working-tree entanglement (builder decision):** `dashboard/app/board.js` carried a pre-existing parallel-session AboutPage typography restyle (uncommitted since before this session) intermingled with the worker's rail wiring; since the rebuilt dist bundles the whole board.js, the two could not be split at file granularity. Builder chose to BUNDLE the AboutPage change into the n4h7q commit (f3d1474). The other parallel-session changes (`.agentheim/knowledge/index.md`, the readme-structure research report) were correctly left uncommitted.
+- **Concept candidates:** none from this run's worker. (Prior session's `ambient-motion-signal-taxonomy` candidate in design-system still stands unaddressed.)
+- **Board now empty** — no todo/doing tasks remain across any BC.
+
+---
+
 ## 2026-06-19 14:55 -- Task verified and completed: agentic-workflow-n4h7q - Left rail blinks new or updated research docs and ADRs
 
 **Type:** Work / Task completion
