@@ -6,24 +6,27 @@
 .DESCRIPTION
   Idempotent: tags that already have a GitHub Release are skipped, so this is safe
   to re-run. Going forward the /release command creates the Release object itself
-  (RELEASE.md, Step 6) — this script only exists to backfill releases cut before
-  `gh` was installed.
+  (RELEASE.md, Step 6) - this script only exists to backfill releases cut before
+  gh was installed/authenticated.
 
 .PREREQUISITES
   GitHub CLI installed and authenticated:
     winget install --id GitHub.cli
-    gh auth login
+    gh auth login          (or set GH_TOKEN)
   Run from anywhere inside the Agentheim source repo.
 
 .EXAMPLE
-  pwsh ./scripts/backfill-github-releases.ps1
-  pwsh ./scripts/backfill-github-releases.ps1 -DryRun
+  powershell -File ./scripts/backfill-github-releases.ps1
+  powershell -File ./scripts/backfill-github-releases.ps1 -DryRun
 #>
 param(
   [switch]$DryRun
 )
 
-$ErrorActionPreference = 'Stop'
+# NOTE: deliberately NOT 'Stop' - gh writes benign messages (e.g. "release not
+# found") to stderr, which Windows PowerShell wraps as a NativeCommandError that
+# 'Stop' would promote to terminating. Real failures use explicit `throw` below.
+$ErrorActionPreference = 'Continue'
 
 # --- locate the repo + changelog (script lives in scripts/) ---
 $repoRoot  = Split-Path -Parent $PSScriptRoot
@@ -32,10 +35,10 @@ if (-not (Test-Path $changelog)) { throw "CHANGELOG.md not found at $changelog" 
 
 # --- gh must be present and authenticated ---
 if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
-  throw "GitHub CLI (gh) not found. Install it (winget install --id GitHub.cli) and run 'gh auth login'."
+  throw "GitHub CLI (gh) not found. Install it (winget install --id GitHub.cli) and authenticate."
 }
 gh auth status 1>$null 2>$null
-if ($LASTEXITCODE -ne 0) { throw "gh is not authenticated. Run 'gh auth login' first." }
+if ($LASTEXITCODE -ne 0) { throw "gh is not authenticated. Run 'gh auth login' or set GH_TOKEN first." }
 
 # --- parse CHANGELOG.md into version -> notes ---
 $sections = @{}
@@ -62,8 +65,8 @@ foreach ($tag in $tags) {
 
   $notes = $sections[$ver]
   if (-not $notes) {
-    Write-Host "WARN   $tag has no CHANGELOG section — using a pointer note"
-    $notes = "See [CHANGELOG.md](../blob/main/CHANGELOG.md)."
+    Write-Host "WARN   $tag has no CHANGELOG section - using a pointer note"
+    $notes = "See CHANGELOG.md."
   }
 
   if ($DryRun) { Write-Host "dryrun would create $tag"; continue }
