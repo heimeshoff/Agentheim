@@ -39,7 +39,7 @@ import { ColumnHeader, TicketCard } from "../../.agentheim/contexts/design-syste
 import { EmptyColumn } from "../../.agentheim/contexts/design-system/styleguide/app/empty.js";
 import { Icon } from "../../.agentheim/contexts/design-system/styleguide/app/icons.js";
 import { Glyph, ThemeCtx } from "../../.agentheim/contexts/design-system/styleguide/app/foundations.js";
-import { RailItem, TreeGroup } from "../../.agentheim/contexts/design-system/styleguide/app/library.js";
+import { RailItem, TreeItem } from "../../.agentheim/contexts/design-system/styleguide/app/library.js";
 import { Collapsible } from "../../.agentheim/contexts/design-system/styleguide/app/collapsible.js";
 import { Menu, MenuItem, MenuDivider } from "../../.agentheim/contexts/design-system/styleguide/app/menu.js";
 import { ThemeToggle } from "../../.agentheim/contexts/design-system/styleguide/app/live.js";
@@ -57,6 +57,7 @@ import { loadViewState, saveViewState, defaultColumnState, visibleColumns } from
 import { SlideOver } from "./slide-over.js";
 import { MainPaneReader } from "./main-pane-reader.js";
 import { treeToLibrary } from "./library-data.js";
+import { railMtimeIndex, flaggedPaths, annotateGroups } from "./rail-attention.js";
 import { resolveConfettiColors } from "./confetti-palette.js";
 import { confettiFireSequence } from "./confetti-launch.js";
 import { isTaskIntent } from "./intent-route.js";
@@ -1898,17 +1899,18 @@ function AboutCard({ children, style }) {
 // → board precedence. The profile photo is a committed served asset (/heimeshoff.jpg),
 // referenced by URL, never a filesystem path.
 function AboutPage() {
-  // Eyebrow label — the styleguide .t-label role (uppercase, tracked, --fg-3) inlined.
+  // Eyebrow label — the styleguide .t-label role rendered in the MONO face (the
+  // ledger system's display/meta voice) so it rhymes with the mono wordmark below.
   const eyebrow = (text) => html`
     <span style=${{
-      fontFamily: "var(--font-ui)", fontSize: 11, fontWeight: 500,
-      letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-3)",
+      fontFamily: "var(--font-mono)", fontSize: 10.5, fontWeight: 500,
+      letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--fg-3)",
     }}>${text}</span>`;
 
   return html`
     <section aria-label="About Agentheim" style=${{
-      display: "flex", flexDirection: "column", gap: 28,
-      maxWidth: 760, margin: "0 auto", padding: "8px 4px 16px",
+      display: "flex", flexDirection: "column", gap: 32,
+      maxWidth: 720, margin: "0 auto", padding: "12px 4px 24px",
     }}>
       <!-- Board-local entrance motion. A single gentle rise, staggered per surface,
            stripped entirely under prefers-reduced-motion (the quiet-by-default law). -->
@@ -1919,73 +1921,78 @@ function AboutPage() {
         }
       `}</style>
 
-      <!-- Masthead -->
+      <!-- Masthead — the wordmark is set in the mono display face (the ledger
+           system's --t-display voice), giving the page a quiet "built for Claude
+           Code" terminal character without reaching for a non-system font. -->
       <header className="about-rise" style=${{
-        display: "flex", flexDirection: "column", gap: 10,
+        display: "flex", flexDirection: "column", gap: 12,
         animation: "aboutRise 0.5s var(--ease-base) both",
       }}>
         ${eyebrow("About")}
         <h1 style=${{
-          margin: 0, fontFamily: "var(--font-ui)", fontSize: 30, fontWeight: 600,
-          letterSpacing: "-0.02em", lineHeight: 1.1, color: "var(--fg-1)",
+          margin: 0, fontFamily: "var(--font-mono)", fontSize: 46, fontWeight: 500,
+          letterSpacing: "-0.03em", lineHeight: 1.0, color: "var(--fg-1)",
         }}>Agentheim</h1>
         <p style=${{
-          margin: 0, maxWidth: 520, fontFamily: "var(--font-ui)", fontSize: 15,
-          lineHeight: 1.6, color: "var(--fg-3)",
+          margin: "2px 0 0", maxWidth: 540, fontFamily: "var(--font-ui)", fontSize: 15.5,
+          lineHeight: 1.65, color: "var(--fg-3)",
         }}>
           A domain-driven agentic harness for Claude Code — and the person who built it.
         </p>
         <div style=${{
-          marginTop: 6, height: 1,
-          background: "linear-gradient(90deg, var(--hairline-strong), transparent)",
+          marginTop: 10, height: 1,
+          background: "linear-gradient(90deg, var(--hairline-strong) 0%, var(--hairline) 42%, transparent 100%)",
         }} />
       </header>
 
       <!-- Card 1: Profile & contact -->
       <${AboutCard} style=${{ animationDelay: "80ms" }}>
         <!-- Identity row: framed photo + name + role -->
-        <div style=${{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
+        <div style=${{ display: "flex", gap: 22, alignItems: "center", flexWrap: "wrap" }}>
           <img
             src="/heimeshoff.jpg"
             alt="Marco Heimeshoff"
-            width=${108} height=${108}
+            width=${104} height=${104}
             style=${{
-              width: 108, height: 108, borderRadius: "50%", objectFit: "cover",
+              width: 104, height: 104, borderRadius: "50%", objectFit: "cover",
               flexShrink: 0, border: "1px solid var(--hairline-strong)",
-              boxShadow: "var(--shadow-md)",
+              boxShadow: "0 0 0 4px var(--surface-0), var(--shadow-md)",
             }} />
-          <div style=${{ display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
+          <div style=${{ display: "flex", flexDirection: "column", gap: 7, minWidth: 0 }}>
             <h2 style=${{
-              margin: 0, fontFamily: "var(--font-ui)", fontSize: 22, fontWeight: 600,
-              letterSpacing: "-0.01em", color: "var(--fg-1)",
+              margin: 0, fontFamily: "var(--font-ui)", fontSize: 23, fontWeight: 600,
+              letterSpacing: "-0.015em", color: "var(--fg-1)",
             }}>Marco Heimeshoff</h2>
             <p style=${{
-              margin: 0, fontFamily: "var(--font-ui)", fontSize: 13.5, color: "var(--fg-3)",
-            }}>Trainer · consultant · conference organiser</p>
+              margin: 0, fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 400,
+              letterSpacing: "0.01em", color: "var(--fg-3)",
+            }}>Trainer · Consultant · Conference organiser</p>
           </div>
         </div>
 
-        <!-- Bio -->
-        <div style=${{ display: "flex", flexDirection: "column", gap: 14, marginTop: 22 }}>
+        <!-- Bio. NOTE: htm strips whitespace where a newline separates a text run
+             from an inline <strong>/<em>, so every such seam carries an explicit
+             ${" "} — otherwise "focused on" + "Domain-Driven Design" render glued. -->
+        <div style=${{ display: "flex", flexDirection: "column", gap: 16, marginTop: 24 }}>
           <p style=${{
-            margin: 0, fontFamily: "var(--font-ui)", fontSize: 15, lineHeight: 1.65, color: "var(--fg-2)",
+            margin: 0, fontFamily: "var(--font-ui)", fontSize: 15.5, lineHeight: 1.7, color: "var(--fg-2)",
           }}>
-            Hi, I'm Marco — focused on
-            <strong style=${{ color: "var(--fg-1)", fontWeight: 600 }}>Domain-Driven Design</strong>
+            Hi, I'm Marco — focused on${" "}
+            <strong style=${{ color: "var(--fg-1)", fontWeight: 600 }}>Domain-Driven Design</strong>${" "}
             and <strong style=${{ color: "var(--fg-1)", fontWeight: 600 }}>collaborative modeling</strong>.
           </p>
-          <p style=${{
-            margin: 0, paddingLeft: 16, borderLeft: "2px solid var(--hairline-strong)",
-            fontFamily: "var(--font-ui)", fontSize: 14.5, fontStyle: "italic",
-            lineHeight: 1.6, color: "var(--fg-2)",
+          <blockquote style=${{
+            margin: 0, paddingLeft: 18, borderLeft: "2px solid var(--hairline-strong)",
+            fontFamily: "var(--font-ui)", fontSize: 15, fontStyle: "italic",
+            lineHeight: 1.65, color: "var(--fg-2)",
           }}>
-            DDD is all about creating a <em>ubiquitous language</em> within
+            DDD is all about creating a <em>ubiquitous language</em> within${" "}
             <em>bounded contexts</em> — and Agentheim brings that same discipline to
             building software with Claude Code, so the model corners ambiguity instead
             of producing plausible-looking mush.
-          </p>
+          </blockquote>
           <p style=${{
-            margin: 0, fontFamily: "var(--font-ui)", fontSize: 13.5, lineHeight: 1.6, color: "var(--fg-3)",
+            margin: 0, fontFamily: "var(--font-ui)", fontSize: 13.5, lineHeight: 1.65, color: "var(--fg-3)",
           }}>
             When I'm not helping teams design meaningful software, I enjoy building
             open-source tools like this one to make life a little smoother.
@@ -2022,8 +2029,8 @@ function AboutPage() {
           <p style=${{
             margin: 0, fontFamily: "var(--font-ui)", fontSize: 13.5, lineHeight: 1.6, color: "var(--fg-3)", maxWidth: 440,
           }}>
-            Otherwise, just
-            <strong style=${{ color: "var(--fg-2)", fontWeight: 600 }}>enjoy using Agentheim for free</strong>
+            Otherwise, just${" "}
+            <strong style=${{ color: "var(--fg-2)", fontWeight: 600 }}>enjoy using Agentheim for free</strong>${" "}
             — and thanks for giving it a try!
           </p>
           <div style=${{ marginTop: 4 }}>
@@ -2059,19 +2066,69 @@ function AboutPage() {
 function ShellRail({ projectName, selectedId, onOpen, onSelectBoard, mainView, onSelectWorkflow, onSelectAbout }) {
   const [groups, setGroups] = useState([]);
 
+  // --- "new item" attention cue state (agentic-workflow-n4h7q) -----------------
+  // The rail blinks research reports / ADRs that are NEW or UPDATED during the
+  // current page session, until clicked or reloaded. The detection/clearing brain
+  // is the pure rail-attention.js; here we hold the in-memory, presentation-only
+  // session state (ADR-0017 — no /api write, no localStorage, no disk):
+  //   - baselineRef — the railMtimeIndex captured ONCE on the first projection. A
+  //     page reload remounts the rail and re-captures it, so nothing is "new" on a
+  //     fresh page (acknowledgement-by-reload). null until the first load lands.
+  //   - currentIndex — the live railMtimeIndex, recomputed every re-projection.
+  //   - cleared — path → mtime the user acknowledged by clicking. mtime-versioned
+  //     so a still-newer edit of the same doc re-flags (rail-attention.flaggedPaths).
+  const baselineRef = useRef(null);
+  const [currentIndex, setCurrentIndex] = useState({});
+  const [cleared, setCleared] = useState({});
+
   // Re-project the rail tree from /api/tree (the non-task half, treeToLibrary). A
   // failed fetch leaves the tree empty rather than crashing the rail — the board's
-  // own error state already reports an unreachable server.
+  // own error state already reports an unreachable server. On every (re)projection
+  // we ALSO recompute the research/ADR mtime index (aw-t3b9k) and, on the FIRST
+  // landed projection, freeze it as the session baseline — so the very docs present
+  // at load never blink, only ones that arrive/change afterwards do.
   const loadTree = useCallback(() => {
     let alive = true;
     fetch("/api/tree")
       .then((r) => (r.ok ? r.json() : null))
-      .then((tree) => { if (alive) setGroups(tree ? treeToLibrary(tree) : []); })
-      .catch(() => { if (alive) setGroups([]); });
+      .then((tree) => {
+        if (!alive) return;
+        setGroups(tree ? treeToLibrary(tree) : []);
+        const index = tree ? railMtimeIndex(tree) : {};
+        // Capture the baseline exactly once, off the first projection that lands
+        // (even an empty one — a fresh page has no "new" artifacts by definition).
+        if (baselineRef.current === null) baselineRef.current = index;
+        setCurrentIndex(index);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setGroups([]);
+        if (baselineRef.current === null) baselineRef.current = {};
+        setCurrentIndex({});
+      });
     return () => { alive = false; };
   }, []);
   useEffect(() => loadTree(), [loadTree]);
   useLiveTree(loadTree);
+
+  // The flagged set is always the intersection of "created-or-modified vs baseline,
+  // not cleared at this mtime" with "present in the current projection" (so a
+  // vanished flagged doc drops out cleanly — no orphaned blink), with NO cap.
+  const flagged = flaggedPaths({ index: currentIndex, baseline: baselineRef.current || {}, cleared });
+  // Thread the cue onto each research/ADR leaf and DERIVE each group header's cue
+  // from its leaves (so an arrival under the collapsed Decisions group still shows).
+  const cuedGroups = annotateGroups(groups, flagged);
+
+  // Clicking a flagged entry clears ONLY that entry, recording the mtime it was
+  // cleared at (mtime-versioned: a later edit re-flags). It opens in the main pane
+  // anyway (ADR-0021), so this wraps the shell's open-intent — no new open path.
+  const openAndClear = useCallback((item) => {
+    if (item && item.path) {
+      const at = currentIndex[item.path];
+      setCleared((prev) => ({ ...prev, [item.path]: at === undefined ? null : at }));
+    }
+    if (onOpen) onOpen(item);
+  }, [onOpen, currentIndex]);
 
   return html`
     <nav style=${{
@@ -2125,10 +2182,23 @@ function ShellRail({ projectName, selectedId, onOpen, onSelectBoard, mainView, o
           padding: "0 8px 8px", fontFamily: "var(--font-ui)", fontSize: 11, fontWeight: 600,
           letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--fg-3)",
         }}>Workspace</div>
-        ${groups.map((g) => html`
-          <${TreeGroup} key=${g.group} group=${g.group} items=${g.items}
-            selectedId=${selectedId} onOpen=${onOpen}
-            defaultOpen=${g.group !== "Decisions"} />`)}
+        ${/* aw-n4h7q: the rail no longer renders the styleguide TreeGroup convenience
+              (which has no attention seam); it composes the SAME two styleguide
+              primitives TreeGroup composes — Collapsible (group header) + TreeItem
+              (rows) — directly, consumed UNFORKED (ADR-0003), so it can thread the
+              design-system-v8k2p `attention` flag the cue needs. Group header cue is
+              DERIVED (g.attention) — visible even while Decisions is collapsed; each
+              flagged research/ADR leaf carries its own `attention`. Body spacing
+              (gap 1 / paddingLeft 8) and the Decisions-collapsed-by-default (aw-066)
+              are preserved byte-for-byte. */ ""}
+        ${cuedGroups.map((g) => html`
+          <${Collapsible} key=${g.group} label=${g.group} count=${g.items.length}
+            defaultOpen=${g.group !== "Decisions"} attention=${g.attention}
+            bodyStyle=${{ gap: 1, paddingLeft: 8 }}>
+            ${g.items.map((it) => html`
+              <${TreeItem} key=${it.id} item=${it} selected=${selectedId === it.id}
+                onOpen=${openAndClear} attention=${it.attention} />`)}
+          </${Collapsible}>`)}
       </div>
     </nav>`;
 }

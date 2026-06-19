@@ -60,7 +60,11 @@ test('ShellRail is a vertical full-height nav composed from styleguide primitive
   assert.match(rail, /flexDirection:\s*"column"/, 'the rail must stack vertically (full-height column)');
   assert.match(rail, /<\$\{Glyph\}/, 'rail brand must use the styleguide Glyph');
   assert.match(rail, /<\$\{RailItem\}[\s\S]*?label="Board"/, 'rail must have a Board RailItem');
-  assert.match(rail, /<\$\{TreeGroup\}/, 'rail must render the live tree via styleguide TreeGroup');
+  // aw-n4h7q renders the live tree by composing the styleguide Collapsible (group
+  // header) + TreeItem (rows) directly — the SAME primitives TreeGroup composes —
+  // so the design-system-v8k2p attention cue can be threaded (TreeGroup has no seam).
+  assert.match(rail, /<\$\{Collapsible\}/, 'rail must render the live tree group headers via styleguide Collapsible');
+  assert.match(rail, /<\$\{TreeItem\}/, 'rail must render the live tree rows via styleguide TreeItem');
 });
 
 test('the rail nav RailItems are the built-in views (Board + Workflow + About) — no separate Library RailItem (ADR-0011 / ADR-0025)', () => {

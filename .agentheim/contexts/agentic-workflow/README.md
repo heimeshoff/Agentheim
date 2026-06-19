@@ -429,9 +429,22 @@ separate BC, but today the whole tool lives in this one.
   (aw-073) and never writes it.
   The topbar's leading slot now hosts the **global search field** (aw-052, see *Global search
   (topbar)* below). The rail is composed
-  from styleguide **primitives** (`Glyph` / `RailItem` / `TreeGroup` / `TreeItem`), **not** the demo
+  from styleguide **primitives** (`Glyph` / `RailItem` / `Collapsible` / `TreeItem`), **not** the demo
   `AppRail`, and its tree is the **live** `treeToLibrary(/api/tree)` projection (re-fetched on every SSE
-  frame, ADR-0011). The outer shell frame is **bounded to the viewport** (`height: 100dvh`,
+  frame, ADR-0011). As of **aw-n4h7q** the rail composes the group header `Collapsible` + row `TreeItem`
+  **directly** (rather than the `TreeGroup` convenience, which has no attention seam) so it can drive the
+  **"new item" attention cue** (design-system-v8k2p): a research report or ADR that is **created or
+  modified** during the current page session **blinks** in the rail until clicked or the page is
+  reloaded. The detection/clearing brain is the pure `rail-attention.js` (`railMtimeIndex` /
+  `flaggedPaths` / `annotateGroups`): on first projection it freezes a **session baseline** map of
+  research/ADR `path → mtimeMs` (from aw-t3b9k's `locations.adrsMeta` / `researchMeta`); each live
+  re-projection diffs against it — a path absent from the baseline (**created**) or carrying a newer
+  `mtimeMs` (**modified**) flags, **reconciled** against the live projection (a vanished doc drops out,
+  no orphaned blink) with **no cap**. A flagged leaf propagates a **derived** cue to its group header
+  (so an arrival under the collapsed Decisions group still shows). Clicking a flagged row clears **only**
+  that entry, **mtime-versioned** (a still-newer edit re-flags). The baseline + cleared maps are
+  **in-memory presentation state only** — a reload resets them (the acknowledgement-by-reload model);
+  no `/api` write, no `localStorage`, no disk (ADR-0017). The outer shell frame is **bounded to the viewport** (`height: 100dvh`,
   `overflow: hidden`; aw-067) so the **rail and topbar stay fixed** and the inner `scroll-quiet` content
   region (`flex: 1`, `minHeight: 0`, `overflowY: auto` — holding the board / main-pane reader / workflow /
   about page) is the **sole vertical scroll container** — the window itself never scrolls. The topbar is a
@@ -656,7 +669,8 @@ separate BC, but today the whole tool lives in this one.
   pools the locations into fixed, legible groups — Product / Bounded contexts / **Concepts** / Research /
   Decisions (Concepts sits immediately after Bounded contexts, aw-075; the rail keeps its own
   Research-above-Decisions order from aw-056, which is **not** mirrored to search) —
-  rendered through the approved styleguide `TreeGroup`/`TreeItem` (imported as-is, never forked —
+  rendered through the approved styleguide `Collapsible`/`TreeItem` (the rail composes these two
+  directly as of aw-n4h7q so the attention cue can be threaded; imported as-is, never forked —
   ADR-0003; the `concept` content type + glyph + `--ct-concept` tokens are the ds-021 registry entry).
   Concept rows are per-BC (`tree.contexts[].concepts`, paths-only) and titled by `baseName`, like
   ADRs/research. Selecting any row emits the open-intent shape `{ type, title, path }`, which the

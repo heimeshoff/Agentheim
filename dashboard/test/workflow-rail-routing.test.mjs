@@ -103,8 +103,11 @@ test('the Board RailItem predicate excludes every non-board main-pane state (ADR
   // ShellRail the selected document is the `selectedId` prop (fed from selectedDoc).
   assert.match(board[0], /active=\$\{mainView === "board" && !selectedId\}/,
     'the Board item is active only when the main pane shows the board itself and no doc is selected');
-  // The library tree selectedId still follows selectedDoc alone (no widening).
-  assert.match(rail, /selectedId=\$\{selectedId\}/, 'the tree selectedId still follows the selected document alone');
+  // The library tree selection still follows selectedDoc alone (no widening). aw-n4h7q
+  // replaced the TreeGroup convenience (which took `selectedId`) with a direct
+  // Collapsible + TreeItem composition (so the attention cue can be threaded); each
+  // TreeItem now derives its selected edge per-row from the same selectedId prop.
+  assert.match(rail, /selected=\$\{selectedId === it\.id\}/, 'each rail row selects from the selected document alone');
 });
 
 test('the shell threads mainView + onSelectWorkflow into the ShellRail', () => {

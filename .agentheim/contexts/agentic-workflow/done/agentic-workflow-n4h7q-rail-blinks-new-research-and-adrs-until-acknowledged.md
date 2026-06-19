@@ -1,14 +1,15 @@
 ---
 id: agentic-workflow-n4h7q
 title: Left rail blinks new or updated research docs and ADRs until clicked or reloaded
-status: todo
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-06-19
+completed: 2026-06-19
 depends_on: [design-system-001, design-system-v8k2p, agentic-workflow-t3b9k]
 blocks: []
 tags: [dashboard, rail, live-update, navigation, research, adr, motion]
-related_adrs: [0009, 0011, 0012, 0014, 0017, 0021]
+related_adrs: [0009, 0011, 0012, 0014, 0017, 0021, 0030]
 related_research: []
 prior_art: [agentic-workflow-009, agentic-workflow-008, agentic-workflow-066, agentic-workflow-075]
 ---
@@ -113,3 +114,47 @@ clicks them or reloads the page.
     edit re-blinks the same doc.
 - Read-only contract: clicking still routes through the existing open-intent (ADR-0021); the
   only new state is the in-memory baseline map + cleared map.
+- Decision recorded in **[[ADR-0030]]** (consumer-driven session-baseline detection +
+  composing `Collapsible`+`TreeItem` directly rather than forking `TreeGroup`).
+
+## Outcome
+Shipped the dashboard half of the rail "new item" cue. The left rail now blinks any research
+report or ADR that is **created or modified** during the current page session (design-system-v8k2p
+cue, consumed unforked), until the row is clicked or the page is reloaded.
+
+Detection/clearing is a new pure transform `dashboard/app/rail-attention.js`:
+- `railMtimeIndex(tree)` — extracts the research/ADR `path → mtimeMs` map from aw-t3b9k's
+  `locations.adrsMeta` / `researchMeta` (scope is research + ADRs only; vision/map/BC/concept/task
+  excluded). An unstattable pointer degrades to `null`.
+- `flaggedPaths({ index, baseline, cleared })` — a path flags when **created** (absent from the
+  session baseline) or **modified** (strictly newer `mtimeMs`), intersected with "present in the
+  live projection" (vanished docs drop out — no orphaned blink), minus entries cleared at a mtime
+  `>=` current. Mtime-versioned: a still-newer edit beats a cleared mark and re-flags. No cap.
+- `annotateGroups(groups, flagged)` — threads `attention` onto each research/ADR leaf and **derives**
+  each group header's `attention` from its leaves (so an arrival under the collapsed Decisions group
+  still shows).
+
+Wired into `ShellRail` (`dashboard/app/board.js`): a `baselineRef` frozen on the first projection
+(reload resets it — acknowledgement-by-reload), a live `currentIndex`, and a `cleared` map. The rail
+now composes the styleguide `Collapsible` + `TreeItem` **directly** (retiring the `TreeGroup`
+convenience, which has no attention seam) so it can pass the `attention` flag — `TreeGroup` is NOT
+forked (ADR-0003/0030). Clicking routes through `openAndClear`, which records the cleared mtime and
+then calls the existing open-intent (ADR-0021). All state is in-memory presentation state — no `/api`
+write, no `localStorage`, no disk (ADR-0017).
+
+Tests: 19 pure-transform cases (`dashboard/test/rail-attention.test.mjs`) covering created / modified /
+unchanged / vanish / flood / per-entry clearing / re-flag-after-clear / derived group cue / scope /
+totality, all red-green first. 4 source guards (`dashboard/test/rail-attention-wiring.test.mjs`) lock
+the board wiring (cue threaded, click-clears, in-memory only). Updated three existing rail source
+guards (`rail-default-open`, `workflow-rail-routing`, `shell-relayout`) to the new
+`Collapsible`+`TreeItem` idiom. Rebuilt `dashboard/dist/` via `node build.mjs`; full dashboard suite
+**653/653 green** (the dist-build test confirms the bundle is current).
+
+Key files:
+- `dashboard/app/rail-attention.js` (new pure transform)
+- `dashboard/app/board.js` (`ShellRail` cue state + render)
+- `dashboard/test/rail-attention.test.mjs`, `dashboard/test/rail-attention-wiring.test.mjs` (new)
+- `dashboard/test/{rail-default-open,workflow-rail-routing,shell-relayout}.test.mjs` (updated guards)
+- `dashboard/dist/{app.js,agentheim.css,colors_and_type.css,index.html}` (rebuilt bundle)
+- `.agentheim/knowledge/decisions/0030-...md` (ADR-0030)
+- `.agentheim/contexts/agentic-workflow/README.md` (rail cue + primitive-composition vocabulary)

@@ -5,6 +5,27 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 14:55 -- Task verified and completed: agentic-workflow-n4h7q - Left rail blinks new or updated research docs and ADRs
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-n4h7q - Left rail blinks new or updated research docs and ADRs until clicked or reloaded
+**Summary:** The dashboard left rail now blinks any research report or ADR created or modified during the current page session (consuming the design-system-v8k2p attention cue unforked) until the row is clicked or the page reloads — a pure session-baseline mtime diff over the live /api/tree projection with derived group-header cues, per-entry mtime-versioned clearing, vanish-reconciliation, and no flood cap; all in-memory presentation state (no /api write, no localStorage, no disk).
+**Verification:** PASS (iteration 1)
+**Files changed:** 9
+**Tests added:** 19 (pure rail-attention transform) + 1 wiring source-guard; full dashboard suite 653 green
+**ADRs written:** ADR-0030 (consumer-driven session baseline + direct Collapsible/TreeItem composition; scope agentic-workflow)
+**Note:** the task's dist rebuild + board.js commit also carry a pre-existing parallel-session AboutPage typography restyle (builder chose to bundle it into this commit — it could not be split at file granularity since dist bundles the whole board.js).
+
+---
+
+## 2026-06-19 14:50 -- Batch started: [agentic-workflow-n4h7q]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-n4h7q - Left rail blinks new or updated research docs and ADRs until clicked or reloaded
+**Parallel:** no (1 worker)
+
+---
+
 ## 2026-06-19 12:15 -- Modeling / Promoted: agentic-workflow-n4h7q - Left rail blinks new or updated research docs and ADRs
 
 **Type:** Modeling / Promote

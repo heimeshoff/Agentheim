@@ -11,14 +11,13 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
+- **Todo:** 0
 - **Doing:** 0
-- **Done:** 82
+- **Done:** 83
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-n4h7q** — Left rail blinks new or updated research docs and ADRs until clicked or reloaded (feature) — `todo/agentic-workflow-n4h7q-rail-blinks-new-research-and-adrs-until-acknowledged.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -27,6 +26,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-n4h7q** — Left rail blinks new or updated research docs and ADRs until clicked or reloaded (feature) — `done/agentic-workflow-n4h7q-rail-blinks-new-research-and-adrs-until-acknowledged.md`
 - **agentic-workflow-t3b9k** — Carry mtimeMs on research/ADR location pointers in /api/tree (feature) — `done/agentic-workflow-t3b9k-research-adr-pointer-mtime.md`
 - **agentic-workflow-h7n2c** — Board prompt bar — Inquire launch button between Modeling and Research (feature) — `done/agentic-workflow-h7n2c-board-prompt-bar-inquire-button.md`
 - **agentic-workflow-c4t8m** — What's Next columns become their own capped, scrollable cards (feature) — `done/agentic-workflow-c4t8m-whats-next-columns-as-capped-scrollable-cards.md`
@@ -118,6 +118,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0030** — The rail "new item" cue is consumer-driven from an in-memory session baseline (path → mtimeMs, reconciled each frame, mtime-versioned clearing, no cap), rendered by composing `Collapsible` + `TreeItem` directly instead of the seam-less `TreeGroup` convenience — keeps the styleguide unforked (ADR-0003) while threading the design-system-v8k2p `attention` cue (accepted) — `../../knowledge/decisions/0030-rail-attention-consumer-session-baseline-and-direct-primitive-composition.md`
 - **ADR-0027** — Advisory writes are distinct from lifecycle writes; the `whats-next` recommendation is an advisory write (`.agentheim/state/whats-next.md`, single-latest, git-ignored, read via `/api/doc`) (proposed) — `../../knowledge/decisions/0027-advisory-writes-distinct-from-lifecycle-writes.md`
 - **ADR-0026** — Committing doctrine: every artifact-producing skill commits its own scoped `.md`; `work` folds bookkeeping into the task commit, `commit:` field dropped, trivial-squash carve-out (accepted) — `../../knowledge/decisions/0026-committing-doctrine-bookkeeping-in-task-commit.md`
 - **ADR-0025** — The dashboard main pane gains a third view state (`mainView`) for built-in static pages, beside the task/document split; reshapes ADR-0021 (proposed) — `../../knowledge/decisions/0025-dashboard-main-pane-third-view-state-builtin-static-page.md`

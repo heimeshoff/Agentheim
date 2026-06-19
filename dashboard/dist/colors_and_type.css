@@ -132,6 +132,11 @@
      cadence, not a transition (ADR-0014). Used by the doing-card pulse; tuned
      to read as alive in peripheral vision, never as a blink. */
   --duration-ambient: 2600ms;
+  /* The "new item" attention cue's breathe cadence (design-system-v8k2p) — a
+     sibling ambient loop to --duration-ambient, kept slightly quicker so the cue
+     reads as "look here, just arrived" without ever becoming an aggressive blink
+     (ADR-0014's quiet-by-default law). Drives the rail row / group-header marker. */
+  --duration-attention: 2200ms;
 }
 
 /* ---------- Dark mode ---------- */
