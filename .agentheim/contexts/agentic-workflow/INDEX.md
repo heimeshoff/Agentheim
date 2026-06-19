@@ -11,14 +11,13 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
+- **Todo:** 0
 - **Doing:** 0
-- **Done:** 83
+- **Done:** 84
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-m2v8d** — Done column collapse control — clamp to ~3.5 faded tickets instead of hiding the column (feature) — `todo/agentic-workflow-m2v8d-done-column-collapse-to-clamped-fade.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -27,6 +26,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-m2v8d** — Done column collapse control — clamp to ~3.5 faded tickets instead of hiding the column (feature) — `done/agentic-workflow-m2v8d-done-column-collapse-to-clamped-fade.md`
 - **agentic-workflow-n4h7q** — Left rail blinks new or updated research docs and ADRs until clicked or reloaded (feature) — `done/agentic-workflow-n4h7q-rail-blinks-new-research-and-adrs-until-acknowledged.md`
 - **agentic-workflow-t3b9k** — Carry mtimeMs on research/ADR location pointers in /api/tree (feature) — `done/agentic-workflow-t3b9k-research-adr-pointer-mtime.md`
 - **agentic-workflow-h7n2c** — Board prompt bar — Inquire launch button between Modeling and Research (feature) — `done/agentic-workflow-h7n2c-board-prompt-bar-inquire-button.md`

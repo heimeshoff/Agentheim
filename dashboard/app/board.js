@@ -53,7 +53,7 @@ import { SORT_OPTIONS, DEFAULT_SORT, sortTickets } from "./board-sort.js";
 import { refineCommandFor, promoteCommandFor, dismissCommandFor, quickCaptureCommandFor, modelingCommandFor, researchCommandFor, inquireCommandFor, WORK_COMMAND, WHATS_NEXT_COMMAND, STOP_DASHBOARD_COMMAND } from "./modeling-command.js";
 import { launchOrCopy } from "./bridge-launch.js";
 import { groupTickets } from "./board-group.js";
-import { loadViewState, saveViewState, defaultColumnState, visibleColumns } from "./board-view-state.js";
+import { loadViewState, saveViewState, defaultColumnState, peekClampStyle } from "./board-view-state.js";
 import { SlideOver } from "./slide-over.js";
 import { MainPaneReader } from "./main-pane-reader.js";
 import { treeToLibrary } from "./library-data.js";
@@ -111,38 +111,6 @@ function BoardHeader({ count }) {
         fontFeatureSettings: '"tnum"',
       }}>${count} ${count === 1 ? "task" : "tasks"}</span>
     </header>`;
-}
-
-// The "Show Done (N)" RESTORE chip (agentic-workflow-072). Shown above the board —
-// in the board's count-strip region — ONLY while the Done column is hidden; N is the
-// live done-task count and tracks every SSE re-projection (it is read from the
-// re-fetched columns, not stored). Clicking it clears `hidden`, restoring the column.
-// A board-local, token-matched control (the sort <select> / group-toggle precedent),
-// styleguide consumed UNFORKED (ADR-0003). Presentation-only: restoring is a
-// view-state flip, never an /api write (ADR-0017/0001). Glyph: the existing
-// `square-kanban` board icon, consumed unforked.
-function ShowColumnChip({ status, count, onShow }) {
-  const label = status.charAt(0).toUpperCase() + status.slice(1);
-  return html`
-    <button
-      type="button"
-      className="focusable"
-      aria-label=${`Show the ${status} column (${count} ${count === 1 ? "task" : "tasks"})`}
-      title=${`Show the ${status} column again`}
-      onClick=${() => onShow()}
-      style=${{
-        display: "inline-flex", alignItems: "center", gap: 6,
-        fontFamily: "var(--font-ui)", fontSize: 11.5, fontWeight: 500,
-        color: "var(--fg-2)", background: "var(--surface-1)",
-        border: "1px solid var(--hairline)",
-        borderRadius: "var(--radius-sm)", padding: "4px 9px", cursor: "pointer",
-        transition: "color var(--duration-fast) var(--ease-base), background var(--duration-fast) var(--ease-base)",
-      }}
-      onMouseEnter=${(e) => { e.currentTarget.style.background = "var(--surface-2)"; e.currentTarget.style.color = "var(--fg-1)"; }}
-      onMouseLeave=${(e) => { e.currentTarget.style.background = "var(--surface-1)"; e.currentTarget.style.color = "var(--fg-2)"; }}>
-      <${Icon} name="square-kanban" size=${12.5} color="var(--fg-3)" />
-      <span>Show ${label} (<span style=${{ fontFamily: "var(--font-mono)", fontFeatureSettings: '"tnum"' }}>${count}</span>)</span>
-    </button>`;
 }
 
 function LoadState({ children }) {
@@ -213,44 +181,57 @@ function ColumnGroupToggle({ status, grouped, onToggle }) {
     </button>`;
 }
 
-// The per-column HIDE control (agentic-workflow-072). A board-only affordance,
-// SIBLING of the sort / group controls — same precedent (aw-012/aw-014): the
-// styleguide kanban.js is consumed UNFORKED (ADR-0003), the control is native and
+// The per-column COLLAPSE / PEEK control (agentic-workflow-m2v8d). REPLACES aw-072's
+// hide control: instead of dropping the column from the layout, it collapses the
+// column body to a short, height-clamped PEEK of the most-recent completions (a
+// bottom-faded ≈3.5-card window) and toggles back to the full list. A board-only
+// affordance, SIBLING of the sort / group controls — same precedent (aw-012/aw-014):
+// the styleguide kanban.js is consumed UNFORKED (ADR-0003), the control is native and
 // token-styled, no new design-system primitive. It is rendered ONLY when the column
-// opts in (the `onHide` prop is supplied) — today that is the Done column alone
-// (Done is the one column that grows unbounded). Clicking it lifts the column's
-// `hidden: true` into persisted board view-state (ADR-0015); the pure
-// `visibleColumns` drops it from the layout at render time, so a live SSE
-// re-projection re-applies the choice rather than resetting it. Presentation-only:
-// no /api write, no lifecycle move (ADR-0017/0001). Glyph: the existing `x` registry
-// icon (design-system-017), consumed unforked — the registry has no `eye-off`.
-function ColumnHideButton({ status, onHide }) {
+// opts in (the `onToggleCollapse` prop is supplied) — today that is the Done column
+// alone (Done is the one column that grows unbounded). Clicking it lifts the column's
+// `peek` boolean into persisted board view-state (ADR-0015); the pure `peekClampStyle`
+// height-clamps the body at render time, so a live SSE re-projection re-applies the
+// choice rather than resetting it. Presentation-only: no /api write, no lifecycle move
+// (ADR-0017/0001). The chevron is a GLYPH-NAME SWAP (not a CSS rotate) consuming both
+// glyphs design-system-c3p9k ships: `chevrons-up` when expanded (will-collapse) ⇄
+// `chevrons-down` when collapsed (will-expand), each consumed unforked (ADR-0003).
+function ColumnCollapseButton({ status, peek, onToggleCollapse }) {
   return html`
     <button
       type="button"
       className="focusable"
-      aria-label=${`Hide ${status} column`}
-      title=${`Hide the ${status} column — it drops out of the board; a "Show ${status}" chip brings it back`}
-      onClick=${() => onHide()}
+      aria-pressed=${peek}
+      aria-label=${peek ? `Expand ${status} column` : `Collapse ${status} column to a peek`}
+      title=${peek
+        ? `Expand the ${status} column — show the full list`
+        : `Collapse the ${status} column to a short peek of the most-recent completions`}
+      onClick=${() => onToggleCollapse(!peek)}
       style=${{
         display: "inline-flex", alignItems: "center", justifyContent: "center",
         gap: 5,
-        fontFamily: "var(--font-ui)", fontSize: 11.5, color: "var(--fg-2)",
-        background: "var(--surface-1)", border: "1px solid var(--hairline)",
+        fontFamily: "var(--font-ui)", fontSize: 11.5,
+        color: peek ? "var(--fg-1)" : "var(--fg-2)",
+        background: peek ? "var(--surface-2)" : "var(--surface-1)",
+        border: `1px solid ${peek ? "var(--hairline-strong)" : "var(--hairline)"}`,
         borderRadius: "var(--radius-sm)", padding: "3px 7px", cursor: "pointer",
         transition: "background var(--duration-fast) var(--ease-base)",
       }}>
-      <${Icon} name="x" size=${12.5} color="var(--fg-3)" />
-      <span>Hide</span>
+      <${Icon} name=${peek ? "chevrons-down" : "chevrons-up"} size=${12.5}
+        color=${peek ? "var(--fg-1)" : "var(--fg-3)"} />
+      <span>${peek ? "Expand" : "Collapse"}</span>
     </button>`;
 }
 
 // The board-only control strip beneath the styleguide ColumnHeader: sort + group,
-// laid out as siblings, plus (Done only) a hide control. All are board view-state
-// affordances; none forks the styleguide (ADR-0003). `onHide` is OPTIONAL — when
-// absent the hide button is not rendered (the aw-018 "affordance keyed off a prop,
-// default OFF" precedent), so backlog / todo / doing carry no hide control.
-function ColumnControls({ status, sort, onSortChange, grouped, onGroupToggle, onHide }) {
+// laid out as siblings, plus (Done only) a collapse/peek control. All are board
+// view-state affordances; none forks the styleguide (ADR-0003). `onToggleCollapse` is
+// OPTIONAL — when absent the collapse button is not rendered (the aw-018 "affordance
+// keyed off a prop, default OFF" precedent), so backlog / todo / doing carry no
+// collapse control. The collapse button renders in the strip's TOP-RIGHT (pushed there
+// by an auto left margin), ABOVE — i.e. before — nothing else on the right; the sort +
+// group controls keep the left.
+function ColumnControls({ status, sort, onSortChange, grouped, onGroupToggle, peek, onToggleCollapse }) {
   return html`
     <div style=${{
       display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap",
@@ -258,8 +239,10 @@ function ColumnControls({ status, sort, onSortChange, grouped, onGroupToggle, on
     }}>
       <${ColumnSortControl} status=${status} value=${sort} onChange=${onSortChange} />
       <${ColumnGroupToggle} status=${status} grouped=${grouped} onToggle=${onGroupToggle} />
-      ${typeof onHide === "function"
-        ? html`<${ColumnHideButton} status=${status} onHide=${onHide} />`
+      ${typeof onToggleCollapse === "function"
+        ? html`<div style=${{ marginLeft: "auto" }}>
+            <${ColumnCollapseButton} status=${status} peek=${peek} onToggleCollapse=${onToggleCollapse} />
+          </div>`
         : null}
     </div>`;
 }
@@ -1181,7 +1164,7 @@ function BoardCard({ ticket, status, selectedId, onOpen, skipPermissions = false
 
 function BoardColumn({
   status, tickets, sort, onSortChange, grouped, onGroupToggle,
-  collapsed, onToggleSection, onHide,
+  collapsed, onToggleSection, peek = false, onToggleCollapse,
   selectedId, onOpen, skipPermissions = false,
 }) {
   // Pipeline: tickets arrive ALREADY sorted (the board sorts before passing them
@@ -1193,6 +1176,13 @@ function BoardColumn({
     <${BoardCard} key=${t.id} ticket=${t} status=${status}
       selectedId=${selectedId} onOpen=${onOpen} skipPermissions=${skipPermissions} />`;
 
+  // aw-m2v8d: when collapsed (peek), the WHOLE column body is height-clamped with a
+  // bottom fade — the pure peekClampStyle. The clamp is ONE max-height on the body
+  // wrapper, ORTHOGONAL to grouping: section headers + cards fall where they may
+  // inside the clamped/faded region; the clamp never runs per-section. Expanded → an
+  // empty fragment, so the full list renders.
+  const bodyClamp = peekClampStyle(peek === true);
+
   return html`
     <div style=${{
       flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column",
@@ -1200,23 +1190,27 @@ function BoardColumn({
     }}>
       <${ColumnHeader} status=${status} count=${tickets.length} />
       <${ColumnControls} status=${status} sort=${sort} onSortChange=${onSortChange}
-        grouped=${grouped} onGroupToggle=${onGroupToggle} onHide=${onHide} />
+        grouped=${grouped} onGroupToggle=${onGroupToggle}
+        peek=${peek} onToggleCollapse=${onToggleCollapse} />
       ${tickets.length === 0
         ? html`<div style=${{ paddingBottom: 8 }}><${EmptyColumn} status=${status} /></div>`
-        : grouped
-          ? html`
-            <div style=${{ display: "flex", flexDirection: "column", gap: 6, paddingBottom: 8 }}>
-              ${sections.map((sec) => html`
-                <${Collapsible} key=${sec.bc} label=${sec.bc} count=${sec.count}
-                  open=${!sec.collapsed} onToggle=${() => onToggleSection(sec.bc)}
-                  bodyStyle=${{ gap: 10, paddingLeft: 2 }}>
-                  ${sec.tickets.map(renderCard)}
-                </${Collapsible}>`)}
-            </div>`
-          : html`
-            <div style=${{ display: "flex", flexDirection: "column", gap: 10, paddingBottom: 8 }}>
-              ${sections[0].tickets.map(renderCard)}
-            </div>`}
+        : html`
+          <div style=${{ paddingBottom: 8, ...bodyClamp }}>
+            ${grouped
+              ? html`
+                <div style=${{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  ${sections.map((sec) => html`
+                    <${Collapsible} key=${sec.bc} label=${sec.bc} count=${sec.count}
+                      open=${!sec.collapsed} onToggle=${() => onToggleSection(sec.bc)}
+                      bodyStyle=${{ gap: 10, paddingLeft: 2 }}>
+                      ${sec.tickets.map(renderCard)}
+                    </${Collapsible}>`)}
+                </div>`
+              : html`
+                <div style=${{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  ${sections[0].tickets.map(renderCard)}
+                </div>`}
+          </div>`}
     </div>`;
 }
 
@@ -1273,13 +1267,14 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
       : { ...prev, [status]: { ...prev[status], grouped } }));
   }, []);
 
-  // Hide / show one column (aw-072). Presentation-only: it flips persisted view-state
-  // `hidden`, which `visibleColumns` reads to drop the column from the layout. No
+  // Collapse / expand one column to a peek (aw-m2v8d, replacing aw-072's hide).
+  // Presentation-only: it flips persisted view-state `peek`, which peekClampStyle reads
+  // to height-clamp the column body at render time. The column stays in the layout. No
   // /api write, no lifecycle move (ADR-0017/0001).
-  const setColumnHidden = useCallback((status, hidden) => {
-    setView((prev) => (prev[status].hidden === hidden
+  const setColumnPeek = useCallback((status, peek) => {
+    setView((prev) => (prev[status].peek === peek
       ? prev
-      : { ...prev, [status]: { ...prev[status], hidden } }));
+      : { ...prev, [status]: { ...prev[status], peek } }));
   }, []);
 
   // Toggle one (column, BC) section's collapse state. Stored as the list of
@@ -1340,33 +1335,28 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
     return html`<${LoadState}><${Icon} name="triangle-alert" size=${15} color="var(--st-doing)" /> Could not load the board. Is the dashboard server running?</${LoadState}>`;
   }
 
-  // aw-072: drop every hidden column from the rendered set (the pure visibleColumns,
-  // derived at render time so it survives every SSE re-projection). Today only Done
-  // carries the hide control; a hidden Done shows a "Show Done (N)" chip above the
-  // board, N tracking the live count. The chip region renders for any hidden column,
-  // but only Done is ever wired to hide.
-  const shown = visibleColumns(COLUMN_ORDER, view);
-  const hiddenColumns = COLUMN_ORDER.filter((status) => !shown.includes(status));
-
+  // aw-m2v8d: every lifecycle column is always rendered (the aw-072 drop-from-layout
+  // is gone). Only Done carries the collapse/peek control; its `peek` boolean
+  // height-clamps the body at render time (peekClampStyle), derived so it survives
+  // every SSE re-projection — a task completing into a collapsed Done just slots into
+  // the still-clamped overflow, never auto-expanding.
   return html`
     <div>
       <${BoardPromptBar} skipPermissions=${skipPermissions} />
       <div style=${{ paddingTop: 18, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <${BoardHeader} count=${total} />
-        ${hiddenColumns.map((status) => html`
-          <${ShowColumnChip} key=${status} status=${status} count=${columns[status].length}
-            onShow=${() => setColumnHidden(status, false)} />`)}
       </div>
       <div className="scroll-quiet" style=${{ overflowX: "auto", paddingBottom: 8 }}>
         <div style=${{ minWidth: 880 }}>
           <div style=${{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-            ${shown.map((status) => html`
+            ${COLUMN_ORDER.map((status) => html`
               <${BoardColumn} key=${status} status=${status}
                 tickets=${sortTickets(columns[status], view[status].sort)}
                 sort=${view[status].sort} onSortChange=${(v) => setColumnSort(status, v)}
                 grouped=${view[status].grouped} onGroupToggle=${(g) => setColumnGrouped(status, g)}
                 collapsed=${view[status].collapsed} onToggleSection=${(bc) => toggleSection(status, bc)}
-                onHide=${status === "done" ? () => setColumnHidden(status, true) : undefined}
+                peek=${view[status].peek}
+                onToggleCollapse=${status === "done" ? (p) => setColumnPeek(status, p) : undefined}
                 selectedId=${selectedId} onOpen=${handleOpen} skipPermissions=${skipPermissions} />`)}
           </div>
         </div>

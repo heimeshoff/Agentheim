@@ -5,6 +5,26 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 16:18 -- Task verified and completed: agentic-workflow-m2v8d - Done column collapse control — clamp to ~3.5 faded tickets instead of hiding the column
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-m2v8d - Done column collapse control — clamp to ~3.5 faded tickets instead of hiding the column
+**Summary:** Replaced the Done column's aw-072 hide control with an in-place collapse/peek control — a Done-only double-chevron button (`chevrons-up` ⇄ `chevrons-down`) that height-clamps the whole column body to a ≈3.5-card faded peek (pure `peekClampStyle`), persisted via the ADR-0015 view-state store (additive `peek` boolean; retired `hidden` flag migrated to shown+expanded, no version bump).
+**Verification:** PASS (iteration 1)
+**Files changed:** 6
+**Tests added:** new `board-done-collapse.test.mjs` + extended `board-view-state.test.mjs` (full dashboard suite 663 green)
+**ADRs written:** none (consumes ADR-0015/0017/0003/0009 unforked)
+
+---
+
+## 2026-06-19 16:10 -- Batch started: [agentic-workflow-m2v8d]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-m2v8d - Done column collapse control — clamp to ~3.5 faded tickets instead of hiding the column
+**Parallel:** no (1 worker)
+
+---
+
 ## 2026-06-19 16:05 -- Modeling / Promoted: agentic-workflow-m2v8d - Done column collapse control — clamp to ~3.5 faded tickets instead of hiding the column
 
 **Type:** Modeling / Promote

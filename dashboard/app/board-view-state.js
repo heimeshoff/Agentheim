@@ -2,8 +2,8 @@
    Agentheim — dashboard board persisted view-state (agentic-workflow-014)
 
    The single, versioned localStorage store for the board's per-column VIEW
-   LENS — grouped/flat, sort choice, and per-(column, BC) collapse state — that
-   now SURVIVES a reload.
+   LENS — grouped/flat, sort choice, per-(column, BC) collapse state, and the
+   Done-column PEEK/collapse boolean — that now SURVIVES a reload.
 
    This deliberately REVERSES ADR-0009's "in-session view-state only — no
    localStorage" clause and SUPERSEDES agentic-workflow-012's in-session-only
@@ -33,34 +33,40 @@ const SORT_VALUES = new Set(SORT_OPTIONS.map((o) => o.value));
 
 /**
  * The state a column with NO stored preference falls back to: flat (not grouped),
- * the default sort, every section expanded, and SHOWN (not hidden). A brand-new
+ * the default sort, every section expanded, and EXPANDED (not peeked). A brand-new
  * bounded context, or a fresh column, lands here.
  *
- * `hidden` (agentic-workflow-072) is the Done-column hide affordance: when true the
- * column is dropped from the board layout entirely (the live columns reflow to
- * share the width) and a "Show Done (N)" chip brings it back. It defaults to
- * `false` so a column with no stored preference is VISIBLE — "shown by default" is
- * the AC. Today only the Done column renders the control, but the field lives on
- * the generic per-column shape (the cleanest fit with the existing store); the UI
- * wires the affordance for Done alone.
+ * `peek` (agentic-workflow-m2v8d) is the Done-column COLLAPSE affordance — it
+ * REPLACES aw-072's `hidden` flag (which dropped the column from the layout). When
+ * true the Done column stays in the layout but its body is HEIGHT-CLAMPED to a short
+ * peek of the most-recent completions with a bottom fade; when false the full list
+ * renders. It defaults to `false` so a column with no stored preference is EXPANDED
+ * — "expanded by default" is the AC. Today only the Done column renders the control,
+ * but the field lives on the generic per-column shape (the cleanest fit with the
+ * existing store); the UI wires the affordance for Done alone.
  */
 export function defaultColumnState() {
-  return { grouped: false, sort: DEFAULT_SORT, collapsed: [], hidden: false };
+  return { grouped: false, sort: DEFAULT_SORT, collapsed: [], peek: false };
 }
 
 // Coerce one stored (untrusted) column blob into a well-formed column state.
 // grouped → boolean; sort → a known sort value or the default; collapsed → an
-// array of strings; hidden → boolean. An OLD blob that predates `hidden` (written
-// before aw-072) simply lacks the field, which coerces to `false` (shown) — an
-// ADDITIVE, back-compatible field, so the VIEW_STATE_VERSION is NOT bumped. Never
-// NaN, never undefined, never a throw.
+// array of strings; peek → boolean. Two back-compat paths, neither needing a
+// VIEW_STATE_VERSION bump (additive field + retired field):
+//   - An OLD blob that predates `peek` simply lacks it → coerces to `false`
+//     (expanded), the AC's "no stored preference resolves to the full list".
+//   - An OLD blob carrying aw-072's retired `hidden` flag is IGNORED — `hidden` is
+//     not read or written, so a previously-hidden Done degrades to shown + expanded
+//     rather than blanking the board (the migration AC). The field is simply dropped
+//     on the next save.
+// Never NaN, never undefined, never a throw.
 function normalizeColumn(raw) {
   const r = raw && typeof raw === 'object' ? raw : {};
   const sort = SORT_VALUES.has(r.sort) ? r.sort : DEFAULT_SORT;
   const collapsed = Array.isArray(r.collapsed)
     ? r.collapsed.filter((bc) => typeof bc === 'string')
     : [];
-  return { grouped: !!r.grouped, sort, collapsed, hidden: !!r.hidden };
+  return { grouped: !!r.grouped, sort, collapsed, peek: !!r.peek };
 }
 
 /**
@@ -121,28 +127,47 @@ export function saveViewState(storage, state) {
   }
 }
 
+// The peek clamp's visual height target (agentic-workflow-m2v8d): the max-height a
+// COLLAPSED (peeked) column body is clamped to, in pixels. This is a VISUAL height
+// target of ≈3.5 average rail cards — a height clamp, NOT a node count (a long title
+// may show slightly fewer/more cards; that is acceptable). Derived from the rail
+// TicketCard's ~80px body + the 10px inter-card gap: 3.5 * 80 + 3 * 10 ≈ 310, rounded
+// to a round target. Exported so the board and its tests share one source of truth.
+export const PEEK_MAX_HEIGHT_PX = 310;
+
+// The bottom gradient FADE height (px) the peek mask runs over — the band across which
+// whatever card the clamp cuts fades to transparent toward the bottom edge.
+export const PEEK_FADE_PX = 64;
+
 /**
- * The pure column-FILTERING that drops every hidden column from the rendered set
- * (agentic-workflow-072). Given the board's column order and the per-column view
- * map, return the columns to actually render, in board order, with any column whose
- * view-state is `hidden: true` removed — so the remaining lifecycle columns reflow
- * to share the full width.
+ * The pure CSS-style fragment that HEIGHT-CLAMPS a collapsed (peeked) column body
+ * (agentic-workflow-m2v8d, replacing aw-072's drop-from-layout `visibleColumns`).
+ * Given the column's `peek` boolean, returns the style props to spread onto the column
+ * BODY container:
+ *   - peeked  → a `maxHeight` of PEEK_MAX_HEIGHT_PX, `overflow: hidden`, and a bottom
+ *     `mask-image` (+ `WebkitMaskImage`) linear-gradient fade over PEEK_FADE_PX, so the
+ *     card the clamp cuts FADES out toward the bottom and NOTHING renders below the
+ *     clamp. The clamp is ONE max-height on the whole body — orthogonal to grouping
+ *     (it does not run per-section; sections fall where they may inside the faded
+ *     region).
+ *   - expanded → an EMPTY object (no clamp, no fade — the full list renders).
  *
- * This is presentation-only (ADR-0017): hiding suppresses RENDERING, never the data
- * on disk. The hidden column's tasks still exist; only their column is dropped from
- * the layout. Derived at render time (like sort / group / collapse), so it survives
- * every SSE re-projection — a task completing into a hidden Done just bumps the
- * chip's count, it never reveals the column.
+ * Presentation-only (ADR-0017): the clamp suppresses RENDERING of the overflow only;
+ * the tasks still exist on disk and survive every SSE re-projection. A task completing
+ * into a collapsed Done just slots into the (still-clamped) overflow — it never
+ * auto-expands. Pure + total: a non-true `peek` (false / undefined / garbage) yields
+ * the expanded (empty) style; never throws.
  *
- * Defensive: a missing/garbage view map, or a column absent from it, is treated as
- * SHOWN (defaults → visible) rather than throwing — a corrupt preference must never
- * blank the board.
- *
- * @param {string[]} order — the board's column order (COLUMN_ORDER).
- * @param {Object<string, { hidden?: boolean }>} [view] — column → view-state map.
- * @returns {string[]} the columns to render, in `order`, minus the hidden ones.
+ * @param {boolean} peek — whether the column is collapsed to a peek.
+ * @returns {Object} a style fragment to spread onto the column body, or {} when expanded.
  */
-export function visibleColumns(order, view) {
-  const v = view && typeof view === 'object' ? view : {};
-  return (Array.isArray(order) ? order : []).filter((col) => !(v[col] && v[col].hidden === true));
+export function peekClampStyle(peek) {
+  if (peek !== true) return {};
+  const fade = `linear-gradient(to bottom, #000 0, #000 calc(100% - ${PEEK_FADE_PX}px), transparent 100%)`;
+  return {
+    maxHeight: PEEK_MAX_HEIGHT_PX,
+    overflow: 'hidden',
+    maskImage: fade,
+    WebkitMaskImage: fade,
+  };
 }

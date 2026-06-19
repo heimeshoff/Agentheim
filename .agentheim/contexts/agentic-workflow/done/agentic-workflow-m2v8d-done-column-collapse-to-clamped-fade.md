@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-m2v8d
 title: Done column collapse control — clamp to ~3.5 faded tickets instead of hiding the column
-status: todo
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-06-19
-completed:
+completed: 2026-06-19
 depends_on: [design-system-001, design-system-c3p9k]
 blocks: []
 tags: [dashboard, board, done-column, collapse, frontend]
@@ -116,4 +116,38 @@ always leaves a few done tickets in view.
   field + Done-only `onHide` wiring this rips out), aw-074 (an expand/collapse chevron toggle on
   the slide-over — the controlled-toggle + reduced-motion precedent), aw-014 (the persisted
   per-column view-state store this extends; the collapsible-section pattern).
-</content>
+
+## Outcome
+The Done column's aw-072 **hide** control was **replaced** with an in-place **collapse / peek**
+control. A board-only double-chevron button (`ColumnCollapseButton`) sits in the **top-right** of the
+Done column's control strip (pushed there by an auto left margin), Done-only via an optional
+`onToggleCollapse` prop (the aw-018 default-OFF precedent). The chevron is a **glyph-name swap**
+consuming the design-system-c3p9k pair unforked — **`chevrons-up`** when expanded (will-collapse) ⇄
+**`chevrons-down`** when collapsed (will-expand), no CSS rotate. Clicking it flips the column's
+persisted **`peek`** boolean.
+
+When collapsed, the **whole** Done column body is height-clamped by the pure
+`peekClampStyle(peek)` — a `max-height` of `PEEK_MAX_HEIGHT_PX` (≈3.5 average cards), `overflow:
+hidden`, and a bottom `mask-image` (+ `WebkitMaskImage`) linear-gradient fade over `PEEK_FADE_PX`.
+The clamp is **one max-height on the body wrapper**, orthogonal to grouping (aw-014): sections fall
+where they may inside the faded region, never a per-section clamp. Expanded (default) yields an empty
+style — the full list renders.
+
+**Replacement, not coexistence:** the `x` `ColumnHideButton`, the `hidden` flag, the
+`visibleColumns` drop-from-layout filter, and the **"Show Done (N)"** `ShowColumnChip` were all
+removed. The retired `hidden` field is **migrated cleanly** — `normalizeColumn` no longer reads or
+writes it, so an old blob carrying `hidden: true` degrades to **shown + expanded** (no blank board)
+and the field drops out on the next save. The additive `peek` boolean rides the existing ADR-0015
+versioned store with **no `VIEW_STATE_VERSION` bump**. Presentation-only (ADR-0017 / ADR-0001): no
+`/api` write; the clamp is derived at render so it survives every SSE re-projection.
+
+**Key files:** `dashboard/app/board-view-state.js` (`peek` in `defaultColumnState`/`normalizeColumn`
+replacing `hidden`; new pure `peekClampStyle` + `PEEK_MAX_HEIGHT_PX` / `PEEK_FADE_PX` exports;
+`visibleColumns` removed), `dashboard/app/board.js` (`ColumnCollapseButton` replacing
+`ColumnHideButton`/`ShowColumnChip`; `setColumnPeek` callback; single clamped body wrapper in
+`BoardColumn`; Done-only `onToggleCollapse` wiring), `dashboard/test/board-view-state.test.mjs`
+(`peek` + migration + `peekClampStyle` cases, 16 green), `dashboard/test/board-done-collapse.test.mjs`
+(8 new board.js static guards), `dashboard/dist/app.js` (rebuilt via `node build.mjs`).
+`.agentheim/contexts/agentic-workflow/README.md` updated (Collapsible Done column + view-state
+`peek` field). Full dashboard suite: **663 passing**. No ADR written — the design decisions were
+pre-settled in this task's refinement notes and the store change is an additive evolution of ADR-0015.

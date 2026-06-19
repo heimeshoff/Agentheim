@@ -17,9 +17,10 @@ import {
   defaultColumnState,
   loadViewState,
   saveViewState,
-  visibleColumns,
+  peekClampStyle,
+  PEEK_MAX_HEIGHT_PX,
+  PEEK_FADE_PX,
 } from '../app/board-view-state.js';
-import { COLUMN_ORDER } from '../app/board-data.js';
 import { DEFAULT_SORT } from '../app/board-sort.js';
 
 // A minimal in-memory localStorage stub: just getItem/setItem over one key.
@@ -33,14 +34,15 @@ function memoryStorage(initial) {
   };
 }
 
-test('defaultColumnState is flat + default sort + all-expanded + NOT hidden', () => {
+test('defaultColumnState is flat + default sort + all-expanded + NOT peeked', () => {
   const d = defaultColumnState();
   assert.equal(d.grouped, false);
   assert.equal(d.sort, DEFAULT_SORT);
   assert.deepEqual(d.collapsed, []);
-  // aw-072: the hide affordance defaults OFF — a column with no stored preference
-  // is shown. "Visible by default" is the AC: no stored state resolves to shown.
-  assert.equal(d.hidden, false);
+  // aw-m2v8d: the collapse/peek affordance defaults OFF — a column with no stored
+  // preference renders the FULL list. "Expanded by default" is the AC: no stored
+  // state resolves to expanded.
+  assert.equal(d.peek, false);
 });
 
 test('loadViewState on an empty store returns an empty object (every column defaults)', () => {
@@ -51,8 +53,8 @@ test('loadViewState on an empty store returns an empty object (every column defa
 test('a saved view-state round-trips through load', () => {
   const storage = memoryStorage(null);
   const state = {
-    done: { grouped: true, sort: 'title-asc', collapsed: ['infrastructure'], hidden: true },
-    todo: { grouped: false, sort: DEFAULT_SORT, collapsed: [], hidden: false },
+    done: { grouped: true, sort: 'title-asc', collapsed: ['infrastructure'], peek: true },
+    todo: { grouped: false, sort: DEFAULT_SORT, collapsed: [], peek: false },
   };
   saveViewState(storage, state);
   assert.deepEqual(loadViewState(storage), state);
@@ -103,34 +105,34 @@ test('a stored column with partial/garbage fields is normalized on load (never N
   assert.equal(loaded.todo.sort, DEFAULT_SORT);
 });
 
-// ---- aw-072: the `hidden` field (Done column hideable) ----------------------
+// ---- aw-m2v8d: the `peek` field (Done column collapse-to-clamped-fade) -------
 
-test('a stored column with hidden: true round-trips as hidden', () => {
+test('a stored column with peek: true round-trips as peeked', () => {
   const storage = memoryStorage(null);
-  saveViewState(storage, { done: { ...defaultColumnState(), hidden: true } });
-  assert.equal(loadViewState(storage).done.hidden, true);
+  saveViewState(storage, { done: { ...defaultColumnState(), peek: true } });
+  assert.equal(loadViewState(storage).done.peek, true);
 });
 
-test('hidden is coerced to a boolean (garbage / partial values never throw)', () => {
+test('peek is coerced to a boolean (garbage / partial values never throw)', () => {
   const blob = JSON.stringify({
     version: VIEW_STATE_VERSION,
     columns: {
-      done: { hidden: 'yes' },     // truthy non-boolean → true
-      todo: { hidden: 0 },         // falsy non-boolean → false
-      doing: {},                   // absent → false
+      done: { peek: 'yes' },     // truthy non-boolean → true
+      todo: { peek: 0 },         // falsy non-boolean → false
+      doing: {},                 // absent → false
     },
   });
   const storage = memoryStorage(blob);
   const loaded = loadViewState(storage);
-  assert.equal(loaded.done.hidden, true);
-  assert.equal(loaded.todo.hidden, false);
-  assert.equal(loaded.doing.hidden, false);
+  assert.equal(loaded.done.peek, true);
+  assert.equal(loaded.todo.peek, false);
+  assert.equal(loaded.doing.peek, false);
 });
 
-test('an OLD stored blob that predates `hidden` loads as hidden: false (back-compat, no version bump)', () => {
-  // A v1 blob written before aw-072 carries grouped/sort/collapsed but NO hidden
+test('an OLD stored blob that predates `peek` loads as peek: false (back-compat, no version bump)', () => {
+  // A blob written before aw-m2v8d carries grouped/sort/collapsed but NO peek
   // field. It must still load (same VIEW_STATE_VERSION — additive field, no bump)
-  // and every column must resolve to hidden: false (shown).
+  // and every column must resolve to peek: false (expanded — the full list).
   const oldBlob = JSON.stringify({
     version: VIEW_STATE_VERSION,
     columns: {
@@ -144,31 +146,60 @@ test('an OLD stored blob that predates `hidden` loads as hidden: false (back-com
   assert.equal(loaded.done.grouped, true);
   assert.equal(loaded.done.sort, 'title-asc');
   assert.deepEqual(loaded.done.collapsed, ['infrastructure']);
-  // ...and the missing hidden field back-fills to false (shown).
-  assert.equal(loaded.done.hidden, false);
-  assert.equal(loaded.todo.hidden, false);
+  // ...and the missing peek field back-fills to false (expanded).
+  assert.equal(loaded.done.peek, false);
+  assert.equal(loaded.todo.peek, false);
 });
 
-// ---- aw-072: visibleColumns — the pure column-filtering that drops Done -------
-
-test('visibleColumns drops a column whose view-state is hidden', () => {
-  const view = {};
-  for (const c of COLUMN_ORDER) view[c] = defaultColumnState();
-  view.done = { ...defaultColumnState(), hidden: true };
-  assert.deepEqual(visibleColumns(COLUMN_ORDER, view), ['backlog', 'todo', 'doing']);
+test('an OLD blob carrying aw-072 `hidden: true` migrates to shown + expanded (no blank board, no version bump)', () => {
+  // aw-m2v8d REPLACES aw-072's hide control. A blob that still carries the retired
+  // `hidden: true` flag must NOT blank or break the board: `hidden` is no longer
+  // read, the column loads with peek: false (expanded), and the retired field is
+  // simply dropped on the next save.
+  const oldBlob = JSON.stringify({
+    version: VIEW_STATE_VERSION,
+    columns: {
+      done: { grouped: false, sort: DEFAULT_SORT, collapsed: [], hidden: true },
+    },
+  });
+  const storage = memoryStorage(oldBlob);
+  const loaded = loadViewState(storage);
+  // Degrades to shown + expanded.
+  assert.equal(loaded.done.peek, false);
+  // The retired `hidden` field is not carried forward.
+  assert.equal('hidden' in loaded.done, false);
+  // Re-saving drops `hidden` entirely from the persisted blob.
+  saveViewState(storage, loaded);
+  const reparsed = JSON.parse(storage._raw());
+  assert.equal('hidden' in reparsed.columns.done, false);
 });
 
-test('visibleColumns keeps every column when none is hidden (shown by default)', () => {
-  const view = {};
-  for (const c of COLUMN_ORDER) view[c] = defaultColumnState();
-  assert.deepEqual(visibleColumns(COLUMN_ORDER, view), COLUMN_ORDER);
+// ---- aw-m2v8d: peekClampStyle — the pure height-clamp + fade style fragment ---
+
+test('peekClampStyle(true) clamps height with overflow hidden and a bottom mask fade', () => {
+  const style = peekClampStyle(true);
+  assert.equal(style.maxHeight, PEEK_MAX_HEIGHT_PX);
+  assert.equal(style.overflow, 'hidden');
+  // A bottom-edge fade via mask-image (+ webkit), running over the fade band.
+  assert.match(style.maskImage, /linear-gradient\(to bottom/);
+  assert.match(style.maskImage, new RegExp(`${PEEK_FADE_PX}px`));
+  assert.equal(style.WebkitMaskImage, style.maskImage);
 });
 
-test('visibleColumns preserves board order and is defensive about missing per-column state', () => {
-  // A column absent from the view map is treated as shown (defaults → visible).
-  const view = { done: { hidden: true } };
-  assert.deepEqual(visibleColumns(COLUMN_ORDER, view), ['backlog', 'todo', 'doing']);
-  // Missing/garbage view map → every column shown, never a throw.
-  assert.deepEqual(visibleColumns(COLUMN_ORDER, null), COLUMN_ORDER);
-  assert.deepEqual(visibleColumns(COLUMN_ORDER, undefined), COLUMN_ORDER);
+test('peekClampStyle(false) is empty — the full list renders, no clamp, no fade', () => {
+  assert.deepEqual(peekClampStyle(false), {});
+});
+
+test('peekClampStyle is defensive — a non-true peek yields the expanded (empty) style, never throws', () => {
+  assert.deepEqual(peekClampStyle(undefined), {});
+  assert.deepEqual(peekClampStyle(null), {});
+  assert.deepEqual(peekClampStyle('yes'), {});
+  assert.deepEqual(peekClampStyle(0), {});
+});
+
+test('the peek height target is a positive pixel value larger than the fade band', () => {
+  // The clamp is a visual ≈3.5-card height target; the fade band must fit inside it.
+  assert.ok(PEEK_MAX_HEIGHT_PX > 0);
+  assert.ok(PEEK_FADE_PX > 0);
+  assert.ok(PEEK_MAX_HEIGHT_PX > PEEK_FADE_PX);
 });
