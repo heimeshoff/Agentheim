@@ -45,28 +45,45 @@ Run these in order. The tag is the last step and the point of no return.
 1. **Bump the version.** Edit `.claude-plugin/plugin.json` → set `version` to the new
    `X.Y.Z` chosen above. This is the single field that matters; touch nothing else in the
    manifest unless that's part of the release.
-2. **Commit the bump.** A focused commit, e.g. `chore(release): vX.Y.Z`.
-3. **Push to `main`.** `git push origin main`. **This is the step that actually reaches
+2. **Roll the CHANGELOG.** In [`CHANGELOG.md`](CHANGELOG.md), turn the top `## [Unreleased]`
+   heading into a dated `## [X.Y.Z] - YYYY-MM-DD` section (leaving a fresh empty
+   `## [Unreleased]` above it), fill it with what shipped grouped under Keep-a-Changelog
+   subheads (`### Added` / `### Changed` / `### Fixed` / `### Docs`), and update the
+   link-reference block at the bottom (`[Unreleased]` → `vX.Y.Z...HEAD`, plus a new
+   `[X.Y.Z]: …/compare/vOLD...vX.Y.Z`). **This section is the single source of the release
+   notes** — Step 6 publishes it verbatim, so compose it once, here. Omit bookkeeping noise
+   (`chore(release)`/`chore(protocol)`/SHA-stamp/session-end commits).
+3. **Commit the bump + changelog.** A focused, scoped commit — never `git add -A`:
+   ```
+   git add .claude-plugin/plugin.json CHANGELOG.md
+   git commit -m "chore(release): vX.Y.Z"
+   ```
+4. **Push to `main`.** `git push origin main`. **This is the step that actually reaches
    marketplace users** — until the bumped manifest is on `main`'s remote, the marketplace
    cache keeps serving "already at latest" and the release has changed nothing for anyone.
-4. **Tag the release, matching the manifest exactly.** The tag string must equal the manifest
-   version with a `v` prefix — `plugin.json` `"version": "X.Y.Z"` ⇔ tag `vX.Y.Z`:
+5. **Tag the release, matching the manifest exactly.** The tag string must equal the manifest
+   version with a `v` prefix — `plugin.json` `"version": "X.Y.Z"` ⇔ tag `vX.Y.Z`. The tag now
+   captures the CHANGELOG entry, so its compare links resolve:
    ```
    git tag -a vX.Y.Z -m "vX.Y.Z"
    git push origin vX.Y.Z
    ```
-5. **Publish release notes on GitHub.** Create a GitHub Release on the tag so the change has a
-   human-readable description under `/releases`. Write the notes by hand from the protocol
-   "Release shipped" entry for this version — **do not** use `--generate-notes`, which dumps
-   every raw `chore`/protocol commit since the last tag (we commit straight to `main`):
+6. **Publish release notes on GitHub.** Create a GitHub Release on the tag so the change has a
+   human-readable description under `/releases`. The notes are the **body of the `[X.Y.Z]`
+   CHANGELOG section** from Step 2 — copy it verbatim, do not recompose. **Do not** use
+   `--generate-notes`, which dumps every raw `chore`/protocol commit since the last tag (we
+   commit straight to `main`):
    ```
-   gh release create vX.Y.Z --title "vX.Y.Z" --notes "<one-paragraph summary, semver level + what landed>"
+   gh release create vX.Y.Z --title "vX.Y.Z" --notes-file <changelog-section-body>
    ```
-   The protocol entry and the release notes say the same thing — write it once, reuse it.
+   If `gh` is unavailable, the release still counts (manifest + tag pushed, CHANGELOG live);
+   create the Release object later with `scripts/backfill-github-releases.ps1` (it reads the
+   CHANGELOG and backfills any tag missing a Release), or via the web UI.
 
 A release is complete only when the tag is pushed **and** the bumped manifest is on `main`'s
 remote. The pushed manifest is what moves users; the tag is what marks (and remembers) the
-release; the GitHub Release is where a human reads *what changed*.
+release; the CHANGELOG and the GitHub Release are where a human reads *what changed* (the
+CHANGELOG is the source; the Release mirrors it).
 
 > Requires the GitHub CLI (`gh`), authenticated once via `gh auth login`. If `gh` isn't
 > installed, the release still "counts" (tag + pushed manifest), but cut the Release object
