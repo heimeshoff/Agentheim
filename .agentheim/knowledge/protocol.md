@@ -5,6 +5,23 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 12:10 -- Work session ended
+
+**Type:** Work / Session end
+**Completed:** 2 (first-try PASS: 2 — agentic-workflow-t3b9k, design-system-v8k2p; re-dispatched: 0; skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Commits:** 2 (da6d161 t3b9k, 1b86ce2 v8k2p)
+**Notes:**
+- Parallel batch of 2 conflict-free workers (different BCs, no shared files): t3b9k carried mtimeMs on /api/tree research/ADR pointers (additive parallel meta maps — flat arrays byte-compatible; dashboard suite 630 green); v8k2p added the styleguide rail "new item" attention cue on TreeItem + Collapsible header (styleguide suite 122 green, ADR-0029 written). Both passed verification first try.
+- **Concept candidate (design-system):** `ambient-motion-signal-taxonomy` — converging on 3 artifacts (design-system-004 doing-breathe, design-system-v8k2p new-item dot, ADR-0029). Builder may want a concept page distinguishing the two ambient-motion signals.
+- **Gate note:** v8k2p is a visible styleguide change → the design-system gate is REOPENED. Builder should re-review the new AttentionCueSpecimen (section 09) on `styleguide/index.html` before aw-n4h7q ships.
+- **Working-tree caveat:** the v8k2p worker's test run left `dashboard/dist/{app.js,agentheim.css,colors_and_type.css}` rebuilt with the attention-cue source in the working tree (uncommitted). Per ADR-0003 the dist rebuild belongs to the consuming task aw-n4h7q, so these were deliberately NOT committed — scoped adds kept them out. They sit alongside the pre-existing parallel-session changes (`knowledge/index.md`, `dashboard/app/board.js`, the readme-structure research report), all left untouched.
+- **Next:** aw-n4h7q ("rail blinks new/updated research & ADRs") is now unblocked (both its deps t3b9k + v8k2p are done) but sits in backlog — promote via `modeling` to run it.
+
+---
+
 ## 2026-06-19 12:08 -- Task verified and completed: design-system-v8k2p - Rail "new item" attention blink (TreeItem / TreeGroup ambient cue)
 
 **Type:** Work / Task completion
