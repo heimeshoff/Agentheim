@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
+- **Backlog:** 2
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 81
@@ -111,7 +111,8 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-n4h7q** — Left rail blinks newly-created research docs and ADRs until clicked or reloaded (feature) — `backlog/agentic-workflow-n4h7q-rail-blinks-new-research-and-adrs-until-acknowledged.md`
+- **agentic-workflow-n4h7q** — Left rail blinks new or updated research docs and ADRs until clicked or reloaded (feature) — `backlog/agentic-workflow-n4h7q-rail-blinks-new-research-and-adrs-until-acknowledged.md`
+- **agentic-workflow-t3b9k** — Carry mtimeMs on research/ADR location pointers in /api/tree (feature) — `backlog/agentic-workflow-t3b9k-research-adr-pointer-mtime.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

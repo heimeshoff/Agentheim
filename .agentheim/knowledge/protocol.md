@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 11:26 -- Modeling / Refined: agentic-workflow-n4h7q - Left rail blinks new or updated research docs and ADRs
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Cornered the three deferred edge cases (Interrogator). Builder decisions: (1) a flagged path that vanishes before being clicked reconciles against the live projection — drops silently, group header recomputes; (2) no cap — a batch arriving in one frame all blink; (3) **modified also blinks**, not created-only. Decision (3) requires research/ADR pointers in `/api/tree` to carry mtime (they don't today — only tasks do, aw-013), so the projection change was split into its own task (aw-013 → aw-012 precedent). Reworked n4h7q's "new" definition to path+mtime baseline map with mtime-versioned clearing (a later edit re-blinks), updated acceptance criteria, and added the new task to depends_on.
+**Split into:** agentic-workflow-t3b9k (carry mtimeMs on research/ADR location pointers in /api/tree)
+**ADRs written:** none
+
+---
+
 ## 2026-06-19 00:00 -- Modeling / Captured: agentic-workflow-n4h7q + design-system-v8k2p - Rail blinks new research/ADRs until acknowledged
 
 **Type:** Modeling / Capture
