@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-t3b9k
 title: Carry mtimeMs on research/ADR location pointers in /api/tree
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-06-19
