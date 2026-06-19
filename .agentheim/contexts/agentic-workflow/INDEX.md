@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 83
@@ -113,6 +113,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-m2v8d** — Done column collapse control — clamp to ~3.5 faded tickets instead of hiding the column (feature) — `backlog/agentic-workflow-m2v8d-done-column-collapse-to-clamped-fade.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

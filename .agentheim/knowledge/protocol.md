@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 15:10 -- Modeling / Captured: agentic-workflow-m2v8d + design-system-c3p9k - Done column collapse control
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow (+ design-system)
+**Filed to:** backlog
+**Summary:** Replace the Done column's aw-072 hide control with a collapse control — a top-right double-chevron button (above the group toggle) that clamps Done to ~3.5 visible tickets with a bottom fade-out and nothing rendered below; chevron flips to expand. Persists across reloads (ADR-0015), presentation-only (ADR-0017). Spawned a design-system glyph child (`design-system-c3p9k`, the `chevrons-up`/`chevrons-down` pair the registry lacks). Builder-confirmed: full replacement of the hide control + persisted collapse state.
+
+---
+
 ## 2026-06-19 14:56 -- Work session ended
 
 **Type:** Work / Session end
