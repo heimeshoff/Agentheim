@@ -32,8 +32,8 @@ commands, and `.agentheim/` layout a user depends on:
 - **minor (`x.Y.0`)** — additive capability: a new skill, command, BC capability, or feature.
   Existing skills and commands keep working unchanged.
 - **major (`X.0.0`)** — a breaking change to the contract: a removed/renamed skill, a
-  changed/removed command surface, or a `.agentheim/` layout change that breaks existing
-  projects.
+  changed/removed command surface, a changed hook shape, or a `.agentheim/` layout change
+  that breaks existing projects.
 
 When unsure between patch and minor, pick **minor**. When unsure between minor and major,
 pick **major**.

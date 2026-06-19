@@ -1,6 +1,21 @@
+<div align="center">
+
 # agentheim
 
-A DDD-flavored agentic harness for Claude Code. Installed as a plugin once, used across projects. It turns a raw idea into a vision, a vision into a modeled backlog of bounded contexts, and a backlog into parallel, dependency-aware execution — with ADRs, a protocol log, and per-BC READMEs falling out naturally.
+**A DDD-flavored agentic harness for Claude Code — turn a raw idea into a modeled backlog of bounded contexts, then into parallel, dependency-aware execution.**
+
+[![License](https://img.shields.io/github/license/heimeshoff/agentheim)](LICENSE)
+[![Version](https://img.shields.io/github/v/tag/heimeshoff/agentheim?label=version&sort=semver)](https://github.com/heimeshoff/agentheim/tags)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/dashboard-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/dashboard-light.png">
+  <img alt="Agentheim dashboard showing the cross-context Kanban board across Backlog, To do, Doing, and Done columns" src="docs/dashboard-light.png" width="800">
+</picture>
+
+</div>
+
+Installed as a plugin once, used across projects. Agentheim turns a raw idea into a vision, a vision into a modeled backlog of bounded contexts, and a backlog into parallel, dependency-aware execution — with ADRs, a protocol log, and per-BC READMEs falling out naturally.
 
 ## Install
 
@@ -9,21 +24,13 @@ From inside Claude Code, in the project where you want the plugin:
 ```
 /plugin marketplace add heimeshoff/agentheim
 /plugin install agentheim@agentheim
+/reload-plugins
 ```
 
-The first command registers this repo as a marketplace — Claude Code clones it from GitHub for you, so no local download is needed. The `owner/repo` shorthand resolves to GitHub; the full `https://github.com/heimeshoff/agentheim` URL works too. The second command installs the plugin from the registered marketplace. Restart Claude Code afterward so hooks and skills are picked up.
+The first command registers this repo as a marketplace — Claude Code clones it from GitHub for you, so no local download is needed (the `owner/repo` shorthand resolves to GitHub; the full `https://github.com/heimeshoff/agentheim` URL works too). The second installs the plugin from that marketplace. The third reloads skills and hooks so the plugin is live in the current session. Plugin commands are namespaced by plugin name (e.g. `/agentheim:modeling`).
 
-### Updates
-
-#### Releasing a change (maintainer side)
-
-When you change anything that consumer projects should pick up — a skill, an agent, a hook, a slash command — bump the `version` field in `.claude-plugin/plugin.json` and commit. Updates are only detected when the version *changes*: that field is the authority. Use semver: bump the patch for fixes, the minor for new behavior, the major for breaking changes to skill contracts or hook shapes.
-
-If you'd rather not bump by hand, omit the `version` field entirely and Claude Code falls back to the git commit SHA — every commit then counts as a new version. The trade-off is that consumers see noise from every internal commit, not just intentional releases.
-
-After committing and pushing to GitHub, consumers can pull the change with the steps below. Tagging the release (`git tag v0.6.0 && git push --tags`) is good practice so versions are pinnable.
-
-#### Pulling a change (consumer side)
+<details>
+<summary><b>Keeping the plugin up to date (consumer side)</b></summary>
 
 Local/third-party marketplaces have auto-update **disabled** by default. To enable it, run `/plugin`, go to the **Marketplaces** tab, select `agentheim`, and choose "Enable auto-update". Claude Code will then refresh on startup and prompt you to run `/reload-plugins` when there's a new version.
 
@@ -37,9 +44,20 @@ To update manually:
 
 The first command refreshes the marketplace's view of the source repo, the second pulls the new plugin version into your project, and the third reloads skills/hooks so the change is live in the current session.
 
-## The five skills
+> **Maintainers:** cutting a release (version bump, tag, GitHub release notes) is documented in [RELEASE.md](RELEASE.md).
 
-Skills auto-trigger from natural-language phrases — no slash commands to memorize (the one deliberate exception is `/dashboard`, the local web-UI launcher — see [Dashboard](#dashboard) below). The orchestrator agent routes work to specialists (strategic-modeler, tactical-modeler, architect, researcher, worker). Two of those specialists are paired with a fresh-context **gate** that re-checks their output before it's trusted: the `verifier` audits a worker's code, and the `research-reviewer` re-verifies a researcher's factual claims against primary sources.
+</details>
+
+## How it works
+
+Agentheim is an opinionated, human-in-the-loop loop: you think out loud, the harness captures and models, and only then does it write code. The full workflow — how brainstorm, modeling, research, and work hand off to each other, the architecture-foundation pass, the orchestration layer, the task lifecycle, and the knowledge layer — is laid out in a visual guide:
+
+- **[agentheim-workflow.pdf](agentheim-workflow.pdf)** — renders inline on GitHub, one topic per page.
+- **[agentheim-workflow.html](agentheim-workflow.html)** — the same guide as an interactive page; clone the repo and open it in a browser.
+
+The work itself flows through **five skills** (below). They auto-trigger from natural-language phrasing — no slash commands to memorize (the one deliberate exception is `/dashboard`, the local web-UI launcher). Under the hood an orchestrator agent routes work to specialists (strategic-modeler, tactical-modeler, architect, researcher, worker). Two of those specialists are paired with a fresh-context **gate** that re-checks their output before it's trusted: the `verifier` audits a worker's code, and the `research-reviewer` re-verifies a researcher's factual claims against primary sources.
+
+## The five skills
 
 | Skill | Triggered by | Produces |
 |---|---|---|
@@ -50,13 +68,6 @@ Skills auto-trigger from natural-language phrases — no slash commands to memor
 | **research** | "research X", "state of the art for", "compare options for" | A markdown report in `.agentheim/knowledge/research/`. Every report passes through a fresh-context **research-reviewer** agent that re-verifies its checkable claims (versions, prices, package names, API surface) against primary sources before the report is citable. Cited by tasks and ADRs. |
 
 **`capture` vs. `modeling`** — both create backlog tasks, so disambiguate by intent. Reach for `capture` when you're dumping a thought and moving on (terse one-liners, "just", "for later", an explicit BC, multi-idea lists); reach for `modeling` when you want to *work* the idea — explore it, refine acceptance criteria, talk it through. When it's genuinely ambiguous, `capture` is the cheaper mistake: a too-thin task gets refined later, a too-heavy conversation can't be undone.
-
-## How the workflow works
-
-The full workflow — how brainstorm, modeling, research, and work hand off to each other, the architecture-foundation pass, the orchestration layer, the task lifecycle, and the knowledge layer — is laid out in a visual guide:
-
-- **[agentheim-workflow.pdf](agentheim-workflow.pdf)** — renders inline on GitHub, one topic per page.
-- **[agentheim-workflow.html](agentheim-workflow.html)** — the same guide as an interactive page; clone the repo and open it in a browser.
 
 ## Dashboard
 
@@ -72,7 +83,8 @@ It is driven by **`/dashboard`** — the single, deliberate exception to the "ph
 
 The command is a thin trigger over the one cross-platform launcher `dashboard/launch.mjs`; the server is Node-stdlib only — no framework, no `node_modules` install step, running on the Node that Claude Code already provides. See [`dashboard/README.md`](dashboard/README.md) for the runtime, endpoints, and verification status.
 
-### VS Code bridge — launch buttons that open a real terminal
+<details>
+<summary><b>Optional: VS Code bridge — launch buttons that open a real terminal</b></summary>
 
 The backlog column's **Quick Capture** and **Modeling** buttons start a seeded Claude session directly (`claude "/agentheim:quick-capture"` / `claude "/agentheim:modeling"`) instead of just copying the command. Because the dashboard runs inside VS Code's sandboxed Simple Browser, the only way to reach a real, visible terminal is a tiny local **VS Code bridge extension** — a `127.0.0.1`-only listener the dashboard talks to (see [ADR-0018](.agentheim/knowledge/decisions/0018-vscode-dashboard-terminal-bridge.md)). Without it, the buttons **silently fall back to copying the command to the clipboard** — that's a normal mode, not an error, so installing the bridge is optional.
 
@@ -92,6 +104,8 @@ Then **activate** it:
 3. Click **Quick Capture** or **Modeling** — a `Claude` terminal opens and runs the seeded command. No dashboard refresh is needed; each click re-probes the bridge, and it works from an external browser too (the bridge echoes your origin in the CORS preflight; both ends are loopback).
 
 The terminal keeps Claude's **normal permission prompts intact** — the bridge never hard-wires `--dangerously-skip-permissions`. Trust boundary is loopback-only binding plus a per-activation shared-secret token, fine for a single-user dev box but not for any networked deployment. Uninstall with `code --uninstall-extension agentheim.agentheim-bridge` (it removes `bridge.json` on deactivation). See [`vscode-extension/README.md`](vscode-extension/README.md) for the full HTTP contract and architecture.
+
+</details>
 
 ## Project state layout
 
@@ -146,4 +160,4 @@ Iteration 1 validated (2026-04-24). Benchmarked at 100% vs. 54.8% on the referen
 
 ## License
 
-See `LICENSE`.
+See [LICENSE](LICENSE).
