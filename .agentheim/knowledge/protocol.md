@@ -5,6 +5,18 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 12:08 -- Task verified and completed: design-system-v8k2p - Rail "new item" attention blink (TreeItem / TreeGroup ambient cue)
+
+**Type:** Work / Task completion
+**Task:** design-system-v8k2p - Rail "new item" attention blink — an ambient cue on a TreeItem / TreeGroup until acknowledged
+**Summary:** Added the styleguide half of the rail "new item" attention cue — a quiet breathing left-edge dot (drawn from --st-todo, never the reserved selection ochre) toggled by an opt-in `attention` flag on both a TreeItem row and a Collapsible group header; off renders byte-identical, and the cue keeps a steady static dot under reduced motion. Detection/lifecycle and the dist/ rebuild stay with the consumer (agentic-workflow-n4h7q).
+**Verification:** PASS (iteration 1)
+**Files changed:** 7 (+ ADR-0029)
+**Tests added:** 6 (styleguide suite 122 green)
+**ADRs written:** ADR-0029 (ambient attention cue is a distinct signal from the active-status pulse; scope design-system)
+
+---
+
 ## 2026-06-19 12:05 -- Task verified and completed: agentic-workflow-t3b9k - Carry mtimeMs on research/ADR location pointers in /api/tree
 
 **Type:** Work / Task completion

@@ -11,14 +11,13 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
+- **Todo:** 0
 - **Doing:** 0
-- **Done:** 21
+- **Done:** 22
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **design-system-v8k2p** — Rail "new item" attention blink — an ambient cue on a TreeItem / TreeGroup until acknowledged (feature) — `todo/design-system-v8k2p-rail-new-item-attention-blink-cue.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -27,6 +26,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **design-system-v8k2p** — Rail "new item" attention blink — an ambient cue on a TreeItem / TreeGroup until acknowledged (feature) — `done/design-system-v8k2p-rail-new-item-attention-blink-cue.md`
 - **design-system-r4k8m** — Add an inquiry/question glyph to the shared icon set (feature) — `done/design-system-r4k8m-inquire-glyph.md`
 - **design-system-021** — Concept content-type — registry entry + glyph + --ct-concept tokens for the library/search type (feature) — `done/design-system-021-concept-content-type.md`
 - **design-system-020** — Drawer gains in-place expandable width — controlled expand seam + body-top chevron + panel glyph pair (feature) — `done/design-system-020-drawer-expandable-width-chevron.md`
@@ -57,6 +57,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0029** — Ambient attention cue is a distinct signal from the active-status pulse; the rail "new item" marker draws from `--st-todo` and keeps a static dot under reduced motion (accepted) — `../../knowledge/decisions/0029-ambient-attention-cue-distinct-from-active-status-pulse.md`
 - **ADR-0024** — The search combobox's floating panel is standalone — matches the Menu's `--shadow-md` Popover elevation by convention, not by composition (accepted) — `../../knowledge/decisions/0024-search-combobox-standalone-not-on-menu.md`
 - **ADR-0016** — Theme-preview swatches use fixed (non-theming) tokens; selection by de-emphasis, never the reserved accent (accepted) — `../../knowledge/decisions/0016-theme-preview-swatches-fixed-tokens-deemphasis-selection.md`
 - **ADR-0003** — Styleguide as ES-module single source — buildless canvas, esbuild-bundled dashboard (proposed) — `../../knowledge/decisions/0003-styleguide-esm-single-source.md`

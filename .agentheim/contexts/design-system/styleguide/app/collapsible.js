@@ -37,6 +37,7 @@ import { useState } from "react";
 import { html } from "./html.js";
 import { Icon } from "./icons.js";
 import { isControlled } from "./collapsible-state.js";
+import { attentionCueClass } from "./motion.js";
 
 // Re-export the pure resolution so consumers can import either entrypoint; the
 // decision itself lives React-free in collapsible-state.js (testable without the
@@ -62,12 +63,18 @@ export { isControlled };
  * @param {object} [props.bodyStyle] — style overrides merged onto the revealed
  *        body container (each consumer keeps its own gap/padding).
  * @param {object} [props.style] — style overrides merged onto the outer wrapper.
+ * @param {boolean} [props.attention=false] — opt-in "new item" ambient cue
+ *        (design-system-v8k2p). When ON, the header carries a quiet breathing
+ *        left-edge marker so an arrival under a COLLAPSED group is still visible
+ *        (the consumer propagates "new" up to the parent group). OFF (default)
+ *        adds no class — byte-identical to today. The detection + lifecycle is
+ *        the consumer's job (agentic-workflow-n4h7q); the primitive only renders.
  * @param {any} props.children — the body, revealed only when open. Arbitrary.
  */
 export function Collapsible({
   label, count, trailing,
   open, onToggle, defaultOpen = true,
-  bodyStyle, style, children,
+  bodyStyle, style, attention = false, children,
 }) {
   const controlled = isControlled(open);
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
@@ -85,7 +92,7 @@ export function Collapsible({
 
   return html`
     <div style=${{ marginBottom: 4, ...style }}>
-      <button className="focusable" onClick=${toggle} aria-expanded=${isOpen}
+      <button className=${["focusable", attentionCueClass(attention)].filter(Boolean).join(" ")} onClick=${toggle} aria-expanded=${isOpen}
         style=${{
           display: "flex", alignItems: "center", gap: 6, width: "100%",
           padding: "6px 8px", border: "none", background: "transparent",

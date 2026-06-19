@@ -14,7 +14,7 @@ import { TypePill, StatusChip, MonoId, MetaChip } from "./primitives.js";
 import { EmptyColumn, EmptyDrawer } from "./empty.js";
 import { ColumnHeader, TicketCard } from "./kanban.js";
 import { HeaderMinimal, HeaderContextual, describeItem, Drawer } from "./drawer.js";
-import { TreeGroup } from "./library.js";
+import { TreeGroup, TreeItem } from "./library.js";
 import { Collapsible } from "./collapsible.js";
 import { Menu, MenuItem, MenuDivider } from "./menu.js";
 import { SearchField } from "./search.js";
@@ -337,6 +337,41 @@ function CollapsibleSpecimen() {
     </${DocCard}>`;
 }
 
+// The "new item" attention cue (design-system-v8k2p) — the sibling of the
+// doing-card breathe (section 06), here on the RAIL. An opt-in `attention` flag
+// (default OFF) makes a freshly-arrived TreeItem row OR its (possibly collapsed)
+// group header carry a quiet breathing left-edge dot drawn from the existing
+// --st-todo "incoming" token — never the reserved selection ochre (ADR-0016).
+// Shown beside an unflagged row/header for contrast; the cue strips to a steady
+// static dot under prefers-reduced-motion (toggle your OS setting to compare).
+// The consumer (agentic-workflow-n4h7q) owns which rows are new + the
+// until-acknowledged lifecycle; the styleguide just renders the cue.
+function AttentionCueSpecimen() {
+  const rows = LIBRARY.find((g) => g.items.length >= 2)?.items.slice(0, 2) ?? [];
+  return html`
+    <${DocCard} style=${{ flex: 1, minWidth: 300 }}>
+      <${SubHead}>New-item attention cue — flagged vs. quiet</${SubHead}>
+      <p style=${{ margin: "0 0 16px", fontFamily: "var(--font-ui)", fontSize: 12.5, lineHeight: 1.6, color: "var(--fg-3)" }}>
+        A just-arrived artifact draws the eye with a quiet breathing dot until acknowledged — the rail sibling of the doing-card breathe. Opt-in (<code>attention</code>), default off; an unflagged row is identical to today. Drawn from the existing <code>--st-todo</code> token, never the selection ochre. Honours <code>prefers-reduced-motion</code> by falling back to a steady static dot.
+      </p>
+      <${StateLabel}>Tree row — flagged (top) vs. quiet (bottom)</${StateLabel}>
+      <div style=${{ marginBottom: 18 }}>
+        ${rows[0] && html`<${TreeItem} item=${rows[0]} selected=${false} onOpen=${() => {}} attention=${true} />`}
+        ${rows[1] && html`<${TreeItem} item=${rows[1]} selected=${false} onOpen=${() => {}} />`}
+      </div>
+      <${StateLabel}>Group header — flagged (a new arrival under a collapsed group)</${StateLabel}>
+      <${Collapsible} label="research" count=${3} defaultOpen=${false} attention=${true}
+        bodyStyle=${{ gap: 6, paddingLeft: 4 }} style=${{ marginBottom: 14 }}>
+        ${["New report"].map((l) => html`<${DemoBodyRow} key=${l} label=${l} />`)}
+      </${Collapsible}>
+      <${StateLabel}>Group header — quiet (no arrival)</${StateLabel}>
+      <${Collapsible} label="decisions" count=${5} defaultOpen=${false}
+        bodyStyle=${{ gap: 6, paddingLeft: 4 }}>
+        ${["ADR-0014"].map((l) => html`<${DemoBodyRow} key=${l} label=${l} />`)}
+      </${Collapsible}>
+    </${DocCard}>`;
+}
+
 function NavSection() {
   return html`
     <${GuideSection} index="09" title="Navigation &amp; file tree"
@@ -360,6 +395,7 @@ function NavSection() {
       </div>
       <div style=${{ marginTop: 24, display: "flex", gap: 28, alignItems: "flex-start", flexWrap: "wrap" }}>
         <${CollapsibleSpecimen} />
+        <${AttentionCueSpecimen} />
       </div>
     </${GuideSection}>`;
 }

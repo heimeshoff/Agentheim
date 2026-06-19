@@ -23,3 +23,28 @@
 export function doingPulseClass(status) {
   return status === "doing" ? "ticket-rail--pulse" : "";
 }
+
+/**
+ * The "new item" attention cue (design-system-v8k2p) — sibling of the doing-card
+ * pulse above. Returns the CSS hook class that makes a rail row (TreeItem) or a
+ * group header (Collapsible) carry a quiet ambient "this just arrived — look
+ * here" marker. It is OPT-IN and default-OFF: an absent/falsy flag returns "" so
+ * an unflagged surface renders byte-identical to today.
+ *
+ * Detecting WHICH rows are new and the until-acknowledged lifecycle (clear on
+ * click / reload, propagate "new" up to a collapsed group's header) is the
+ * CONSUMER's job (agentic-workflow-n4h7q) — this styleguide half only turns the
+ * cue on or off from a boolean. The marker itself stays inside the quiet-by-
+ * default law (ADR-0014): low amplitude, drawn ONLY from the existing --st-todo
+ * status token (the "incoming/new work" hue — NOT the reserved selection accent
+ * --accent-ochre-soft, ADR-0016, and not a new hue). The breathe keyframes, the
+ * --duration-attention token, and the reduced-motion strip-to-static-marker
+ * contract live in the CSS (`styles/agentheim.css` + `styles/colors_and_type.css`);
+ * this returns only the class that turns it on.
+ *
+ * @param {boolean} [isNew] — true when the row/header should draw the eye.
+ * @returns {string} the attention class when flagged, otherwise "".
+ */
+export function attentionCueClass(isNew) {
+  return isNew ? "rail-attention" : "";
+}

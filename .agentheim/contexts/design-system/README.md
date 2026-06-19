@@ -82,7 +82,7 @@ copies `styles/fonts/` → `dist/fonts/`). Result: the canvas and the bundled da
 render the correct type with **no network at view time**. Adding non-latin glyphs later
 requires vendoring the matching subset. See ADR-0008.
 
-### Motion — transitions plus one ambient cue (ADR-0014)
+### Motion — transitions plus two ambient cues (ADR-0014, ADR-0029)
 
 Motion is **quiet and mostly transition-only**: short, event-triggered eases
 (`--duration-fast` / `--duration-base`, `--ease-base`) on hover, theme flip, and
@@ -108,6 +108,25 @@ default law: **ochre-only** (draws solely from `--st-doing`, no new hue) and
 **low amplitude**. Under `prefers-reduced-motion: reduce` it is **fully stripped**
 to a plain rail (pure progressive enhancement) — the standing contract for any
 future ambient motion: always strippable to a still-legible static baseline.
+
+As of `design-system-v8k2p` the language admits a **second ambient cue** on the
+left rail — the "new item" **attention** marker (ADR-0029). A freshly-arrived
+`TreeItem` row or its (possibly collapsed) `Collapsible` group header can carry a
+quiet **breathing left-edge dot** drawing the eye to it until acknowledged. It is
+the sibling of the doing-breathe but a *distinct* signal: it draws from the
+existing `--st-todo` "incoming" token (never the reserved selection accent
+`--accent-ochre-soft`, ADR-0016), runs on its own `--duration-attention` token
+(`@keyframes rail-attention-breathe` / `.rail-attention::before` in
+`styles/agentheim.css`), and is **opt-in, default OFF** via `attention` on both
+surfaces — off renders byte-identical to today. Detection of *which* rows are new
+and the until-acknowledged lifecycle belong to the **consumer**
+(`agentic-workflow-n4h7q`); the styleguide only renders the cue, on/off, via the
+React-free `attentionCueClass()` in `app/motion.js` (`node --test`-able, mirroring
+`doingPulseClass`). Its reduced-motion behaviour **diverges deliberately** from
+the pulse: because "new" is not otherwise encoded on the row, the cue keeps a
+**steady static dot** rather than vanishing — motion removed, signal retained
+(ADR-0029). This makes the system's ambient motion a small **taxonomy**:
+`--st-doing` breathe = *active status*, `--st-todo` dot = *new / attention*.
 
 > Live-board note: the served dashboard `dist/` is a derived artifact (ADR-0003)
 > and must be **rebuilt** to pick up this styleguide change; the source edit alone

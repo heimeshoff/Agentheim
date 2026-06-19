@@ -9,14 +9,20 @@ import { html } from "./html.js";
 import { Icon } from "./icons.js";
 import { Glyph } from "./foundations.js";
 import { Collapsible } from "./collapsible.js";
+import { attentionCueClass } from "./motion.js";
 import { CONTENT_TYPES, TICKETS, LIBRARY } from "./data.js";
 
 // ---- A single document row in the tree ----
-export function TreeItem({ item, selected, onOpen }) {
+// `attention` (opt-in, default OFF) renders the quiet "new item" ambient cue
+// (design-system-v8k2p): a breathing left-edge dot drawing the eye to a
+// freshly-arrived artifact. OFF (the default) adds no class — byte-identical to
+// today. The consumer (agentic-workflow-n4h7q) owns which rows are new and the
+// until-acknowledged lifecycle; the styleguide only renders the cue.
+export function TreeItem({ item, selected, onOpen, attention = false }) {
   const [hover, setHover] = useState(false);
   const t = CONTENT_TYPES[item.type];
   return html`
-    <button className="focusable"
+    <button className=${["focusable", attentionCueClass(attention)].filter(Boolean).join(" ")}
       onClick=${() => onOpen(item)}
       onMouseEnter=${() => setHover(true)} onMouseLeave=${() => setHover(false)}
       style=${{

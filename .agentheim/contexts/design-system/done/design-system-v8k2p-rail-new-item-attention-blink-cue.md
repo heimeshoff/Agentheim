@@ -1,15 +1,15 @@
 ---
 id: design-system-v8k2p
 title: Rail "new item" attention blink — an ambient cue on a TreeItem / TreeGroup until acknowledged
-status: todo
+status: done
 type: feature
 context: design-system
 created: 2026-06-19
-completed:
+completed: 2026-06-19
 depends_on: [design-system-001]
 blocks: [agentic-workflow-n4h7q]
 tags: [motion, rail, tree, ambient-cue, attention]
-related_adrs: [0014, 0003, 0016]
+related_adrs: [0014, 0003, 0016, 0029]
 related_research: []
 prior_art: [design-system-004]
 ---
@@ -77,3 +77,49 @@ today.
 - Open (defer to gate / refine): is "blink" a true opacity flash, a calmer pulse, or a
   static "new" dot? The quiet-by-default doctrine leans away from an aggressive flash.
 - Pairs with `agentic-workflow-n4h7q` (the dashboard detection + lifecycle).
+- **ADR written:** [[ADR-0029]] (`.agentheim/knowledge/decisions/0029-ambient-attention-cue-distinct-from-active-status-pulse.md`)
+  — the attention cue is a second, distinct ambient signal and keeps its marker
+  under reduced motion (the one principled divergence from the doing-pulse).
+
+## Outcome
+
+The left rail now carries a quiet **"new item" attention cue** — the rail sibling
+of the doing-card breathe (ADR-0014). A freshly-arrived `TreeItem` row or its
+(possibly collapsed) `Collapsible` group header can render a **breathing left-edge
+dot** that draws the eye until the consumer clears the flag. Opt-in and default
+OFF on both surfaces, so an unflagged row/header renders **byte-identical** to
+today.
+
+The settled fork (deferred to the gate): the "blink" is a **quiet breathing dot**,
+not an aggressive flash — consistent with the breathe-pulse tone.
+
+- **Pure decision:** `attentionCueClass(isNew)` in `styleguide/app/motion.js`
+  (React-free, `node --test`-able, mirrors `doingPulseClass`) — returns
+  `"rail-attention"` when flagged, `""` otherwise.
+- **Token:** `--duration-attention: 2200ms` in the motion block of
+  `styleguide/styles/colors_and_type.css`.
+- **CSS:** `@keyframes rail-attention-breathe` + `.rail-attention::before` (a
+  `--st-todo` dot) in `styleguide/styles/agentheim.css`. Drawn from the existing
+  `--st-todo` "incoming" token — **never** `--accent-ochre-soft` (ADR-0016), no
+  new hue, low amplitude (ADR-0014).
+- **Surfaces:** `attention` prop (default `false`) on `TreeItem`
+  (`styleguide/app/library.js`) and `Collapsible`
+  (`styleguide/app/collapsible.js`).
+- **Reduced motion:** a `prefers-reduced-motion: reduce` guard stops the loop but
+  **keeps a steady static dot** (`opacity: 1`) — the cue's information survives
+  the strip, the one deliberate divergence from the doing-pulse (ADR-0029).
+- **Canvas:** section 09 gains an "AttentionCueSpecimen" — a flagged vs. quiet
+  tree row, and a flagged vs. quiet collapsed group header — for the gate review.
+- **Tests:** `styleguide/test/attention-cue.test.mjs` (6 `node --test` cases) —
+  the predicate is flag-keyed and default-OFF, the token exists, the keyframes/
+  class draw from `--st-todo` and never the reserved ochre, and the reduced-motion
+  guard keeps a static marker. All 14 styleguide test files green.
+- **Consumer / `dist/`:** detection of *which* rows are new and the
+  until-acknowledged lifecycle belong to `agentic-workflow-n4h7q`, which also
+  rebuilds the derived `dist/` (ADR-0003) — **not rebuilt here**.
+
+**Gate:** this is a visible styleguide/canvas change → it **reopens the
+design-system gate** for builder re-review (section 09 attention specimen) before
+`agentic-workflow-n4h7q` ships.
+
+See ADR-0029 (`.agentheim/knowledge/decisions/0029-ambient-attention-cue-distinct-from-active-status-pulse.md`).

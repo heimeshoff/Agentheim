@@ -307,3 +307,56 @@ html, body { transition: background var(--duration-base) var(--ease-base); }
     opacity: 0.9;
   }
 }
+
+/* ============================================================
+   Rail "new item" attention cue (design-system-v8k2p)
+
+   The sibling of the doing-card breathe above (ADR-0014): a quiet
+   ambient marker that draws the eye to a freshly-arrived rail row
+   (TreeItem) or its group header (Collapsible) until the consumer
+   (agentic-workflow-n4h7q) clears the flag. Opt-in via the
+   .rail-attention class (motion.js: attentionCueClass) — an
+   unflagged surface carries no class and is byte-identical to today.
+
+   Quiet-by-default law upheld: the marker is a small left-edge dot
+   that breathes at low amplitude, drawn ONLY from the existing
+   --st-todo "incoming/new work" status token — NOT the reserved
+   selection accent --accent-ochre-soft (ADR-0016) and no new hue.
+   Composited on a cheap box-shadow + opacity loop, cadence from the
+   --duration-attention token (not a magic number). The dot is laid
+   on the row's existing left padding via ::before so the cue never
+   reflows the row text.
+   ============================================================ */
+@keyframes rail-attention-breathe {
+  0%, 100% { opacity: 0.55; box-shadow: 0 0 0 0 color-mix(in oklab, var(--st-todo) 0%, transparent); }
+  50%      { opacity: 1;    box-shadow: 0 0 5px 0 color-mix(in oklab, var(--st-todo) 45%, transparent); }
+}
+
+.rail-attention {
+  position: relative;
+}
+.rail-attention::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  border-radius: 50%;
+  background: var(--st-todo);
+  animation: rail-attention-breathe var(--duration-attention) var(--ease-base) infinite;
+  will-change: opacity;
+}
+
+/* Reduced motion: strip the loop but — unlike the doing-pulse — KEEP the marker.
+   An attention cue's job is to remain findable, so the dot falls back to a
+   steady, still-legible static marker rather than vanishing (the ADR-0014
+   reduced-motion contract, adapted: strippable to a still-legible baseline). */
+@media (prefers-reduced-motion: reduce) {
+  .rail-attention::before {
+    animation: none;
+    box-shadow: none;
+    opacity: 1;
+  }
+}
