@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 11:30 -- Modeling / Promoted: design-system-v8k2p - Rail "new item" attention blink
+
+**Type:** Modeling / Promote
+**BC:** design-system
+**From → To:** backlog → todo
+
+---
+
+## 2026-06-19 11:30 -- Modeling / Promoted: agentic-workflow-t3b9k - Carry mtimeMs on research/ADR location pointers in /api/tree
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-06-19 11:26 -- Modeling / Refined: agentic-workflow-n4h7q - Left rail blinks new or updated research docs and ADRs
 
 **Type:** Modeling / Refine

@@ -1,7 +1,7 @@
 ---
 id: design-system-v8k2p
 title: Rail "new item" attention blink — an ambient cue on a TreeItem / TreeGroup until acknowledged
-status: backlog
+status: todo
 type: feature
 context: design-system
 created: 2026-06-19
