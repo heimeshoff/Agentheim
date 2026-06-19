@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-06-19 15:30 -- Modeling / Promoted: design-system-c3p9k - Add a double-chevron glyph pair (chevrons-up / chevrons-down) to the shared icon set
+
+**Type:** Modeling / Promote
+**BC:** design-system
+**From → To:** backlog → todo
+
+---
+
 ## 2026-06-19 15:10 -- Modeling / Captured: agentic-workflow-m2v8d + design-system-c3p9k - Done column collapse control
 
 **Type:** Modeling / Capture

@@ -1,7 +1,7 @@
 ---
 id: design-system-c3p9k
 title: Add a double-chevron glyph pair (chevrons-up / chevrons-down) to the shared icon set
-status: backlog
+status: todo
 type: feature
 context: design-system
 created: 2026-06-19
