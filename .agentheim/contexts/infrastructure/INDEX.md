@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 20
@@ -50,6 +50,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **infrastructure-q8m4t** — Support quotation marks (Gänsefüsschen) in prompts — `backlog/infrastructure-q8m4t-quotation-marks-in-prompts.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-06-23 -- Capture / Captured: infrastructure-q8m4t - Support quotation marks (Gänsefüsschen) in prompts
+
+**Type:** Capture
+**BC:** infrastructure
+**Filed to:** backlog
+**Summary:** Builder wants to be able to use Gänsefüsschen (quotation marks) in prompts; likely a follow-up to the infra-020 bridge quote-escaping fix.
+
+---
+
 ## 2026-06-19 17:16 -- Release shipped: v0.8.8
 
 **Type:** Release
