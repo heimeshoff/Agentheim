@@ -10,14 +10,20 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 12
+- **Todo:** 6
 - **Doing:** 0
 - **Done:** 84
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-f7k2d** — Fix TESTS_* return-format drift — work spawn template omits the fields the verifier gates on (bug) — `todo/agentic-workflow-f7k2d-fix-tests-return-format-drift.md`
+- **agentic-workflow-w3p8n** — Fix stale README claim — dashboard has no drag-to-promote write-back (bug) — `todo/agentic-workflow-w3p8n-fix-stale-readme-dashboard-drag-claim.md`
+- **agentic-workflow-j4m6r** — Pin model frontmatter on the eight agents — decorrelate the adversarial gates, cut worker-fleet cost (feature) — `todo/agentic-workflow-j4m6r-pin-model-frontmatter-agent-routing.md`
+- **agentic-workflow-b8x2v** — Work protocol entries carry Duration and verification Iterations (feature) — `todo/agentic-workflow-b8x2v-protocol-entries-duration-iterations.md`
+- **agentic-workflow-d6q4h** — Work session-end reconciliation of stranded working-tree carry-over (feature) — `todo/agentic-workflow-d6q4h-work-session-end-carryover-reconciliation.md`
+- **agentic-workflow-g9s3w** — Pre-load the test command into the verifier spawn prompt (feature) — `todo/agentic-workflow-g9s3w-preload-test-command-into-verifier.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -114,6 +120,17 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-k5n8f** — Mechanize the bookkeeping — wire lib/task-lifecycle.mjs and script the lifecycle operations (refactor) — `backlog/agentic-workflow-k5n8f-mechanize-bookkeeping-wire-task-lifecycle.md`
+- **agentic-workflow-p4v9t** — Worktree isolation per worker — merge on PASS, quarantine on FAIL (feature) — `backlog/agentic-workflow-p4v9t-worktree-isolation-per-worker.md`
+- **agentic-workflow-s7d3k** — Single-source the duplicated doctrine into references/ files (refactor) — `backlog/agentic-workflow-s7d3k-single-source-duplicated-doctrine.md`
+- **agentic-workflow-r2c7m** — Protocol rotation — cap protocol.md and roll to monthly files (feature) — `backlog/agentic-workflow-r2c7m-protocol-rotation.md`
+- **agentic-workflow-v3h6p** — Eval-harness the verifier — measure its catch rate against planted defects (spike) — `backlog/agentic-workflow-v3h6p-eval-harness-the-verifier.md`
+- **agentic-workflow-y8b4q** — End-to-end verification step for tasks with a runtime surface (feature) — `backlog/agentic-workflow-y8b4q-end-to-end-verification-runtime-surface.md`
+- **agentic-workflow-z2f7s** — Fan-out caps — MAX_PARALLEL as a knob, research cap, global nested-spawn ceiling (feature) — `backlog/agentic-workflow-z2f7s-fanout-caps-and-spawn-budget.md`
+- **agentic-workflow-m9w5c** — Live observability — hooks write agent status to state/, dashboard renders an in-flight lane (feature) — `backlog/agentic-workflow-m9w5c-live-observability-hooks-inflight-lane.md`
+- **agentic-workflow-x4t2g** — whats-next feeds back into planning — modeling and work read the advisory at session start (feature) — `backlog/agentic-workflow-x4t2g-whats-next-feeds-back-into-planning.md`
+- **agentic-workflow-n6r8j** — Flatten single-specialist consultations — worker spawns the specialist directly (refactor) — `backlog/agentic-workflow-n6r8j-flatten-single-specialist-consultation.md`
+- **agentic-workflow-h3z5b** — Resolve the two-orchestrators naming ambiguity (chore) — `backlog/agentic-workflow-h3z5b-rename-orchestrator-ambiguity.md`
 - **agentic-workflow-q3n7k** — Update the workflow guide to reflect new features like inquire and what's next — `backlog/agentic-workflow-q3n7k-update-workflow-guide-inquire-whats-next.md`
 <!-- backlog-list:end -->
 

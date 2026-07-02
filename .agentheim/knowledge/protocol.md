@@ -5,6 +5,37 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 -- Modeling / Captured (batch): 18 tasks from the 2026-07-02 harness self-audit
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow (17), infrastructure (1)
+**Filed to:** todo (7), backlog (11)
+**Summary:** Batch capture of every actionable finding in
+`knowledge/harness-audit-2026-07-02-Fable.md` (cross-checked against the Opus
+audit). Concrete, already-refined items went straight to todo; items needing a
+design decision went to backlog.
+**Todo:** agentic-workflow-f7k2d (TESTS_* return-format drift, bug) ·
+agentic-workflow-w3p8n (stale README drag claim, bug) ·
+agentic-workflow-j4m6r (pin model frontmatter on the 8 agents) ·
+agentic-workflow-b8x2v (protocol Duration/Iterations) ·
+agentic-workflow-d6q4h (session-end carry-over reconciliation) ·
+agentic-workflow-g9s3w (pre-load test command into verifier) ·
+infrastructure-e5t9c (relocate capture-workspace eval debris)
+**Backlog:** agentic-workflow-k5n8f (mechanize bookkeeping / wire
+lib/task-lifecycle.mjs — the audit's highest-leverage change) ·
+agentic-workflow-p4v9t (worktree isolation per worker) ·
+agentic-workflow-s7d3k (single-source duplicated doctrine) ·
+agentic-workflow-r2c7m (protocol rotation) ·
+agentic-workflow-v3h6p (eval-harness the verifier, spike) ·
+agentic-workflow-y8b4q (end-to-end verification for runtime surfaces) ·
+agentic-workflow-z2f7s (fan-out caps + spawn ceiling) ·
+agentic-workflow-m9w5c (live observability hooks + dashboard in-flight lane) ·
+agentic-workflow-x4t2g (whats-next feeds back into planning) ·
+agentic-workflow-n6r8j (flatten single-specialist consultation) ·
+agentic-workflow-h3z5b (resolve two-orchestrators naming)
+
+---
+
 ## 2026-06-23 -- Capture / Captured: infrastructure-q8m4t - Support quotation marks (Gänsefüsschen) in prompts
 
 **Type:** Capture
