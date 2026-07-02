@@ -7,7 +7,7 @@ context: agentic-workflow
 created: 2026-07-02
 completed:
 depends_on: []
-blocks: []
+blocks: [agentic-workflow-c8j3w]
 tags: [harness-audit, protocol, observability, concurrency]
 related_adrs: []
 related_research: []

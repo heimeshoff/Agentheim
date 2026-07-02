@@ -5,6 +5,39 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 -- Modeling / Refined: agentic-workflow-p4v9t - Worktree isolation per worker
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** split — parent retired
+**Summary:** Ran the archaeology the task flagged: 0/5 historical verification failures were cross-task contamination (all own-work defects), ~14% of batches (16/98) ever ran parallel. Re-anchored the Why on a forward-looking structural/scaling bet (git as the real conflict detector; let MAX_PARALLEL rise) rather than contamination. Architect designed the full worktree git model; split the parent into a decision task (ratify the ADR) + an implementation task (rewrite work's git model), and wrote ADR-0032.
+**Split into:** agentic-workflow-k9t3w (ratify ADR-0032, → todo), agentic-workflow-f6m2q (implement, → backlog, depends_on k9t3w)
+**ADRs written:** ADR-0032 (scope: agentic-workflow, proposed — amends ADR-0026 with a batch-start claim commit)
+
+---
+
+## 2026-07-02 18:16 -- Modeling / Refined: agentic-workflow-c8j3w - INDEX done-list rotation
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Split the "Compaction policy for BC READMEs and the growing INDEX files" capture into two tasks — the two growth surfaces have different mechanisms (verbatim rotation vs. prose consolidation), owners (script vs. human-in-loop), and risk profiles. c8j3w now scopes to INDEX done-list rotation only: cap at N recent entries, roll older verbatim to a dated archive, with the load-bearing constraint that prior-art lookup + search corpus must still reach archived done tasks. Set depends_on: [k5n8f, r2c7m] (belongs to the lifecycle-script family; mirrors r2c7m's archive convention). No ADR — applies r2c7m's rotation decision to the INDEX artifact.
+**Split into:** agentic-workflow-w7q2m (BC README consolidation — size trigger + human-in-loop procedure)
+**ADRs written:** none
+
+---
+
+## 2026-07-02 18:15 -- Modeling / Refined: agentic-workflow-h3z5b - Resolve the two-orchestrators naming ambiguity
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** Scoped the rename by scanning every "orchestrator" use across `skills/`. Found `work/SKILL.md` is the *only* file conflating the name (all ~14 refs mean the driving loop); every other file already uses it correctly for the agent. Fixed the term (loop → **conductor**, agent keeps "orchestrator" — already the audit doc's term), tightened the acceptance criteria to that scope, corrected the inaccurate "same files as n6r8j" coordination note (they're file-independent, no `depends_on`), and promoted to todo. No ADR (vocabulary hygiene, not a decision).
+**Split into:** —
+**ADRs written:** —
+
+---
+
 ## 2026-07-02 18:12 -- Modeling / Captured: agentic-workflow-r9k2p - Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring
 
 **Type:** Modeling / Capture

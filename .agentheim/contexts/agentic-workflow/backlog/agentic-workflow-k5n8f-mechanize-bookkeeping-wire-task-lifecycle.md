@@ -7,7 +7,7 @@ context: agentic-workflow
 created: 2026-07-02
 completed:
 depends_on: []
-blocks: []
+blocks: [agentic-workflow-c8j3w]
 tags: [harness-audit, bookkeeping, task-lifecycle, scripts, index, protocol]
 related_adrs: ["0007", "0026"]
 related_research: []

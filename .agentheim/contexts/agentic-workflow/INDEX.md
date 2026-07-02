@@ -11,13 +11,15 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 14
-- **Todo:** 0
+- **Todo:** 2
 - **Doing:** 0
 - **Done:** 90
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-k9t3w** — Ratify ADR-0032 — per-worker git worktree isolation model (decision) — `todo/agentic-workflow-k9t3w-ratify-adr-0032-worktree-isolation.md`
+- **agentic-workflow-h3z5b** — Resolve the two-orchestrators naming ambiguity (chore) — `todo/agentic-workflow-h3z5b-rename-orchestrator-ambiguity.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -121,9 +123,10 @@ research touching this BC, and concept synthesis pages.
 ### Backlog
 <!-- backlog-list:start -->
 - **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature) — `backlog/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
-- **agentic-workflow-c8j3w** — Compaction policy for BC READMEs and the growing INDEX files (feature) — `backlog/agentic-workflow-c8j3w-compaction-policy-bc-readmes-and-indexes.md`
+- **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `backlog/agentic-workflow-c8j3w-index-done-list-rotation.md`
+- **agentic-workflow-w7q2m** — BC README consolidation — size trigger + human-in-loop consolidation procedure (feature) — `backlog/agentic-workflow-w7q2m-bc-readme-consolidation.md`
 - **agentic-workflow-k5n8f** — Mechanize the bookkeeping — wire lib/task-lifecycle.mjs and script the lifecycle operations (refactor) — `backlog/agentic-workflow-k5n8f-mechanize-bookkeeping-wire-task-lifecycle.md`
-- **agentic-workflow-p4v9t** — Worktree isolation per worker — merge on PASS, quarantine on FAIL (feature) — `backlog/agentic-workflow-p4v9t-worktree-isolation-per-worker.md`
+- **agentic-workflow-f6m2q** — Implement per-worker worktree isolation in work's git model (feature) — `backlog/agentic-workflow-f6m2q-implement-worktree-isolation-work-git-model.md`
 - **agentic-workflow-s7d3k** — Single-source the duplicated doctrine into references/ files (refactor) — `backlog/agentic-workflow-s7d3k-single-source-duplicated-doctrine.md`
 - **agentic-workflow-r2c7m** — Protocol rotation — cap protocol.md and roll to monthly files (feature) — `backlog/agentic-workflow-r2c7m-protocol-rotation.md`
 - **agentic-workflow-v3h6p** — Eval-harness the verifier — measure its catch rate against planted defects (spike) — `backlog/agentic-workflow-v3h6p-eval-harness-the-verifier.md`
@@ -132,13 +135,13 @@ research touching this BC, and concept synthesis pages.
 - **agentic-workflow-m9w5c** — Live observability — hooks write agent status to state/, dashboard renders an in-flight lane (feature) — `backlog/agentic-workflow-m9w5c-live-observability-hooks-inflight-lane.md`
 - **agentic-workflow-x4t2g** — whats-next feeds back into planning — modeling and work read the advisory at session start (feature) — `backlog/agentic-workflow-x4t2g-whats-next-feeds-back-into-planning.md`
 - **agentic-workflow-n6r8j** — Flatten single-specialist consultations — worker spawns the specialist directly (refactor) — `backlog/agentic-workflow-n6r8j-flatten-single-specialist-consultation.md`
-- **agentic-workflow-h3z5b** — Resolve the two-orchestrators naming ambiguity (chore) — `backlog/agentic-workflow-h3z5b-rename-orchestrator-ambiguity.md`
 - **agentic-workflow-q3n7k** — Update the workflow guide to reflect new features like inquire and what's next — `backlog/agentic-workflow-q3n7k-update-workflow-guide-inquire-whats-next.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0032** — Per-worker git worktree isolation: batch-start claim commit → private `aw/<id>` branch per worker → verifier runs in the worktree → `git merge --squash` to main folding bookkeeping into one commit (ADR-0026 preserved, one deliberate amendment: the `todo → doing` move rides in the batch-start commit); FAIL leaves main pristine by construction; pre-scan demoted to advisory (proposed) — `../../knowledge/decisions/0032-worker-worktree-isolation-git-model.md`
 - **ADR-0030** — The rail "new item" cue is consumer-driven from an in-memory session baseline (path → mtimeMs, reconciled each frame, mtime-versioned clearing, no cap), rendered by composing `Collapsible` + `TreeItem` directly instead of the seam-less `TreeGroup` convenience — keeps the styleguide unforked (ADR-0003) while threading the design-system-v8k2p `attention` cue (accepted) — `../../knowledge/decisions/0030-rail-attention-consumer-session-baseline-and-direct-primitive-composition.md`
 - **ADR-0027** — Advisory writes are distinct from lifecycle writes; the `whats-next` recommendation is an advisory write (`.agentheim/state/whats-next.md`, single-latest, git-ignored, read via `/api/doc`) (proposed) — `../../knowledge/decisions/0027-advisory-writes-distinct-from-lifecycle-writes.md`
 - **ADR-0026** — Committing doctrine: every artifact-producing skill commits its own scoped `.md`; `work` folds bookkeeping into the task commit, `commit:` field dropped, trivial-squash carve-out (accepted) — `../../knowledge/decisions/0026-committing-doctrine-bookkeeping-in-task-commit.md`
