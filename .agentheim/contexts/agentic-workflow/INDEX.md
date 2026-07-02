@@ -11,14 +11,13 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 16
-- **Todo:** 1
+- **Todo:** 0
 - **Doing:** 0
-- **Done:** 92
+- **Done:** 93
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-d8q3n** — Carry depends_on/blocks through the /api/tree per-task projection (feature) — `todo/agentic-workflow-d8q3n-carry-depends-on-blocks-tree-projection.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -27,6 +26,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-d8q3n** — Carry depends_on/blocks through the /api/tree per-task projection (feature) — `done/agentic-workflow-d8q3n-carry-depends-on-blocks-tree-projection.md`
 - **agentic-workflow-h3z5b** — Resolve the two-orchestrators naming ambiguity (chore) — `done/agentic-workflow-h3z5b-rename-orchestrator-ambiguity.md`
 - **agentic-workflow-k9t3w** — Ratify ADR-0032 — per-worker git worktree isolation model (decision) — `done/agentic-workflow-k9t3w-ratify-adr-0032-worktree-isolation.md`
 - **agentic-workflow-g9s3w** — Pre-load the test command into the verifier spawn prompt (feature) — `done/agentic-workflow-g9s3w-preload-test-command-into-verifier.md`

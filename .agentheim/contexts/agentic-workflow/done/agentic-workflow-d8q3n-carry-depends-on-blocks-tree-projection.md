@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-d8q3n
 title: Carry depends_on/blocks through the /api/tree per-task projection
-status: todo
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-02
 depends_on: []
 blocks: [agentic-workflow-k5p8w, agentic-workflow-r9k2p]
 tags: [dashboard, tree-projection, dependencies]
@@ -61,18 +61,18 @@ the consumer's job.
 `agentic-workflow-k5p8w`, not here.
 
 ## Acceptance criteria
-- [ ] A task with `depends_on: [a, b]` and `blocks: [c]` in frontmatter projects
+- [x] A task with `depends_on: [a, b]` and `blocks: [c]` in frontmatter projects
       `task.dependsOn` deep-equal to `['a', 'b']` and `task.blocks` deep-equal to
       `['c']`.
-- [ ] A task with neither key present projects both as `[]`.
-- [ ] A task with `blocks: []` projects `task.blocks` as `[]`.
-- [ ] A task with a malformed/scalar `depends_on` (no brackets) projects `[]` — never
+- [x] A task with neither key present projects both as `[]`.
+- [x] A task with `blocks: []` projects `task.blocks` as `[]`.
+- [x] A task with a malformed/scalar `depends_on` (no brackets) projects `[]` — never
       throws, never returns a bare string.
-- [ ] Duplicate ids are preserved (`depends_on: [a, a]` → `['a', 'a']`) — no
+- [x] Duplicate ids are preserved (`depends_on: [a, a]` → `['a', 'a']`) — no
       server-side dedupe.
-- [ ] An unreadable or frontmatter-less task file still produces a card (existing
+- [x] An unreadable or frontmatter-less task file still produces a card (existing
       fallback-id behavior unchanged) with `dependsOn: []`, `blocks: []`.
-- [ ] `node --test dashboard/test/tree.test.mjs` covers all of the above, mirroring
+- [x] `node --test dashboard/test/tree.test.mjs` covers all of the above, mirroring
       the existing `mtimeMs` test shapes (aw-013).
 
 ## Notes
@@ -86,3 +86,24 @@ Naming: `dependsOn`/`blocks` (camelCase for the first) matches the projection's
 existing JSON-shape convention (`mtimeMs`, not `mtime_ms`); `blocks` is already one
 word. If a worker prefers verbatim `depends_on`, that's defensible too — just keep it
 byte-consistent with whatever `board-data.treeTicket` reads downstream.
+
+## Outcome
+`projectTask` in `dashboard/tree.mjs` now adds `dependsOn: idList(fm.depends_on)` and
+`blocks: idList(fm.blocks)` to every projected task object, right after `mtimeMs`. The
+new `idList(v)` helper (sits beside `mtimeOf`) filters `fm.depends_on`/`fm.blocks` to
+non-empty strings when the frontmatter value is an array, and returns `[]` for
+anything else (missing, scalar, malformed) — raw, unresolved, no dedupe, matching
+ADR-0002's pointers+metadata contract. `parseFrontmatter` already turns bracket lists
+into string arrays, so no parsing changes were needed.
+
+Seven new `node --test` cases were added to `dashboard/test/tree.test.mjs`, mirroring
+the aw-013 `mtimeMs` test shapes: full `depends_on`/`blocks` pair, both-absent, empty
+`blocks: []`, malformed scalar `depends_on`, duplicate-id preservation, and an
+unreadable/frontmatter-less file falling back to `dependsOn: [], blocks: []`. Full
+dashboard suite (`node --test`, 669 tests) is green. `dashboard/app/board-data.js` was
+intentionally not touched — that carry belongs to `agentic-workflow-k5p8w`. The BC
+README's tree-projection paragraph was updated to list `mtimeMs` alongside the other
+per-task fields and to document the new `dependsOn`/`blocks` contract.
+
+Files: `dashboard/tree.mjs`, `dashboard/test/tree.test.mjs`,
+`.agentheim/contexts/agentic-workflow/README.md`.

@@ -79,7 +79,7 @@ separate BC, but today the whole tool lives in this one.
   navigation) and the SSE consumer all rebuild from. `GET /api/tree` (built in
   agentic-workflow-005 as `dashboard/tree.mjs`) walks the discovered `.agentheim/` and returns,
   per BC, its four lifecycle folders and each task's frontmatter projection
-  (`id, title, status, type, context, path`) plus the *locations* of vision / context-map / BC
+  (`id, title, status, type, context, path, mtimeMs`) plus the *locations* of vision / context-map / BC
   READMEs+INDEXes+concepts / ADRs / research — pointers and metadata only, never document
   bodies. The ADR and research locations also carry an **additive parallel meta map**
   (`locations.adrsMeta` / `locations.researchMeta`, keyed by the same in-root path) whose
@@ -93,7 +93,13 @@ separate BC, but today the whole tool lives in this one.
   single trimmed string so the pointers-and-metadata-only contract still holds. A task whose
   `status`/`context` frontmatter is missing falls back to its folder / BC
   name (disk is the source of truth), and malformed frontmatter degrades gracefully — the card
-  is still listed, the walk never aborts. Document bodies are carried separately by
+  is still listed, the walk never aborts. Each task also carries `dependsOn`/`blocks`
+  (agentic-workflow-d8q3n) — the **raw, unresolved** id-string arrays straight off
+  `depends_on`/`blocks` frontmatter, no server-side resolution or dedupe (an id is metadata;
+  which card it points at is a relationship the board derives client-side against the pooled
+  cross-BC projection, since one BC's walk never sees the full id universe). Absent/scalar/
+  malformed frontmatter degrades to `[]`, matching the existing loss-tolerant projection posture.
+  Document bodies are carried separately by
   `GET /api/doc?path=<in-root path>`, a validated raw-markdown carrier (rendering is
   client-side). Both endpoints are pure reads and reuse the root-resolution `startsWith(root)`
   guard; neither writes nor interprets a lifecycle move. See ADR-0002.

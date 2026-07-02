@@ -2,7 +2,8 @@
 // ADR-0002). Walks the discovered root and projects, for the dashboard's read
 // views (board aw-006, slide-over aw-007, navigation aw-008, SSE consumer aw-009):
 //   - every BC, its four lifecycle folders, and each task's frontmatter
-//     (id, title, status, type, context, path, mtimeMs) — POINTERS + METADATA only,
+//     (id, title, status, type, context, path, mtimeMs, dependsOn, blocks) —
+//     POINTERS + METADATA only,
 //   - the LOCATIONS of vision / context-map / BC READMEs+INDEXes+concepts /
 //     research reports / ADRs.
 // No document bodies cross this boundary — /api/doc carries those. "Disk is the
@@ -52,6 +53,13 @@ export function metaMap(root, absFiles) {
     meta[relPointer(root, abs)] = { mtimeMs: mtimeOf(abs) };
   }
   return meta;
+}
+
+// Frontmatter list fields (depends_on / blocks) round-trip as raw, unresolved
+// id-string arrays — pointers+metadata only (ADR-0002); the board resolves them
+// against the live tree, loss-tolerantly. Absent/scalar/malformed → [].
+function idList(v) {
+  return Array.isArray(v) ? v.filter((s) => typeof s === 'string' && s) : [];
 }
 
 /** List `.md` files directly in `dir` (non-recursive), sorted, abs paths. */
@@ -165,6 +173,12 @@ export function projectTask(root, absFile, folder, bcName) {
     context: typeof fm.context === 'string' && fm.context ? fm.context : bcName,
     path: relPointer(root, absFile),
     mtimeMs,
+    // Raw, unresolved id-string arrays from frontmatter (aw-d8q3n) — pointers +
+    // metadata only (ADR-0002). No server-side resolution or dedupe: the board
+    // resolves these against the pooled cross-BC tree, once it has the full id
+    // universe this single-BC walk never sees.
+    dependsOn: idList(fm.depends_on),
+    blocks: idList(fm.blocks),
   };
   return task;
 }

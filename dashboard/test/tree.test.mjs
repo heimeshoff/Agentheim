@@ -285,6 +285,145 @@ test('buildTree project.name is null when vision.md is missing or headingless (a
   }
 });
 
+test('a task with depends_on/blocks projects raw unresolved id arrays (aw-d8q3n)', () => {
+  const base = mkdtempSync(path.join(tmpdir(), 'awd8q3n-deps-'));
+  try {
+    const bl = path.join(base, '.agentheim', 'contexts', 'z', 'backlog');
+    mkdirSync(bl, { recursive: true });
+    writeFileSync(
+      path.join(bl, 'z-001-deps.md'),
+      [
+        '---',
+        'id: z-001',
+        'title: Has deps',
+        'status: backlog',
+        'type: feature',
+        'context: z',
+        'depends_on: [a, b]',
+        'blocks: [c]',
+        '---',
+        '',
+        'body',
+      ].join('\n')
+    );
+    const tree = buildTree(base);
+    const t = tree.contexts[0].lifecycle.backlog[0];
+    assert.deepEqual(t.dependsOn, ['a', 'b']);
+    assert.deepEqual(t.blocks, ['c']);
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('a task with neither depends_on nor blocks projects both as [] (aw-d8q3n)', () => {
+  const base = mkdtempSync(path.join(tmpdir(), 'awd8q3n-none-'));
+  try {
+    const bl = path.join(base, '.agentheim', 'contexts', 'z', 'backlog');
+    mkdirSync(bl, { recursive: true });
+    writeFileSync(
+      path.join(bl, 'z-001-nodeps.md'),
+      ['---', 'id: z-001', 'title: No deps', 'status: backlog', 'type: feature', 'context: z', '---'].join('\n')
+    );
+    const tree = buildTree(base);
+    const t = tree.contexts[0].lifecycle.backlog[0];
+    assert.deepEqual(t.dependsOn, []);
+    assert.deepEqual(t.blocks, []);
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('blocks: [] projects task.blocks as [] (aw-d8q3n)', () => {
+  const base = mkdtempSync(path.join(tmpdir(), 'awd8q3n-empty-'));
+  try {
+    const bl = path.join(base, '.agentheim', 'contexts', 'z', 'backlog');
+    mkdirSync(bl, { recursive: true });
+    writeFileSync(
+      path.join(bl, 'z-001-emptyblocks.md'),
+      [
+        '---',
+        'id: z-001',
+        'title: Empty blocks',
+        'status: backlog',
+        'type: feature',
+        'context: z',
+        'blocks: []',
+        '---',
+      ].join('\n')
+    );
+    const tree = buildTree(base);
+    const t = tree.contexts[0].lifecycle.backlog[0];
+    assert.deepEqual(t.blocks, []);
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('a malformed/scalar depends_on (no brackets) projects [] — never throws, never a bare string (aw-d8q3n)', () => {
+  const base = mkdtempSync(path.join(tmpdir(), 'awd8q3n-scalar-'));
+  try {
+    const bl = path.join(base, '.agentheim', 'contexts', 'z', 'backlog');
+    mkdirSync(bl, { recursive: true });
+    writeFileSync(
+      path.join(bl, 'z-001-scalar.md'),
+      [
+        '---',
+        'id: z-001',
+        'title: Scalar depends_on',
+        'status: backlog',
+        'type: feature',
+        'context: z',
+        'depends_on: a',
+        '---',
+      ].join('\n')
+    );
+    const tree = buildTree(base);
+    const t = tree.contexts[0].lifecycle.backlog[0];
+    assert.deepEqual(t.dependsOn, []);
+    assert.notEqual(typeof t.dependsOn, 'string');
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('duplicate ids in depends_on are preserved, no server-side dedupe (aw-d8q3n)', () => {
+  const base = mkdtempSync(path.join(tmpdir(), 'awd8q3n-dup-'));
+  try {
+    const bl = path.join(base, '.agentheim', 'contexts', 'z', 'backlog');
+    mkdirSync(bl, { recursive: true });
+    writeFileSync(
+      path.join(bl, 'z-001-dup.md'),
+      [
+        '---',
+        'id: z-001',
+        'title: Dup deps',
+        'status: backlog',
+        'type: feature',
+        'context: z',
+        'depends_on: [a, a]',
+        '---',
+      ].join('\n')
+    );
+    const tree = buildTree(base);
+    const t = tree.contexts[0].lifecycle.backlog[0];
+    assert.deepEqual(t.dependsOn, ['a', 'a']);
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('an unreadable/frontmatter-less task file still produces a card with dependsOn:[] blocks:[] (aw-d8q3n)', () => {
+  const root = mkdtempSync(path.join(tmpdir(), 'awd8q3n-unread-'));
+  try {
+    const missing = path.join(root, '.agentheim', 'contexts', 'h', 'backlog', 'h-001-gone.md');
+    const t = projectTask(root, missing, 'backlog', 'h');
+    assert.deepEqual(t.dependsOn, []);
+    assert.deepEqual(t.blocks, []);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('malformed / missing frontmatter degrades gracefully — task still listed', () => {
   const base = mkdtempSync(path.join(tmpdir(), 'aw005-bad-'));
   try {

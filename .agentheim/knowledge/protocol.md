@@ -5,6 +5,27 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 19:01 -- Task verified and completed: agentic-workflow-d8q3n - Carry depends_on/blocks through the /api/tree per-task projection
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-d8q3n - Carry depends_on/blocks through the /api/tree per-task projection
+**Summary:** `/api/tree`'s per-task projection now carries raw, unresolved `dependsOn`/`blocks` id-string arrays from task frontmatter (loss-tolerant `idList` helper, no server-side resolution or dedupe — ADR-0002 pointers+metadata contract), giving the board the pointer data to resolve dependency edges client-side.
+**Duration:** ~5m (dispatch 18:56 → verdict 19:01)
+**Verification:** PASS (iteration 1)
+**Files changed:** 3
+**Tests added:** 7
+**ADRs written:** none
+
+---
+
+## 2026-07-02 18:56 -- Batch started: [agentic-workflow-d8q3n, design-system-w4t9k]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-d8q3n - Carry depends_on/blocks through the /api/tree per-task projection, design-system-w4t9k - Dependency-highlight ring — a third ambient-motion signal on TicketCard
+**Parallel:** yes (2 workers — file-independent: d8q3n edits dashboard/tree.mjs + test; w4t9k edits design-system styleguide styles/app + writes ADR-0034)
+
+---
+
 ## 2026-07-02 18:46 -- Modeling / Promoted: design-system-w4t9k - Dependency-highlight ring — a third ambient-motion signal on TicketCard
 
 **Type:** Modeling / Promote
