@@ -5,6 +5,27 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 17:48 -- Task verified and completed: agentic-workflow-b8x2v - Work protocol entries carry Duration and verification Iterations
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-b8x2v - Work protocol entries carry Duration and verification Iterations
+**Summary:** Added an "Observability fields — measure, never fabricate" section to work/SKILL.md and extended the protocol-entry templates: Duration (orchestrator-clock wall time) on task-completion and session-end entries, a mandatory verification-iteration count, and a per-task dispatch/re-dispatch tally; token cost explicitly declined as unmeasurable.
+**Duration:** ~6m (dispatch 17:42 → verdict 17:48)
+**Verification:** PASS (iteration 1)
+**Files changed:** 1
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
+## 2026-07-02 17:42 -- Batch started: [agentic-workflow-b8x2v, agentic-workflow-j4m6r]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-b8x2v - Protocol entries carry Duration and verification Iterations, agentic-workflow-j4m6r - Pin model frontmatter on the eight agents
+**Parallel:** yes (2 workers)
+
+---
+
 ## 2026-07-02 17:37 -- Task verified and completed: infrastructure-e5t9c - Relocate capture-workspace eval debris
 
 **Type:** Work / Task completion

@@ -211,6 +211,15 @@ If `NEW_BACKLOG_ITEMS` are non-empty in the worker SUCCESS, also insert those ta
 
 The completion entries below are written in the **pre-commit bookkeeping phase** (ADR-0026), so they ride in the task's own commit. Because the commit SHA isn't known until after the commit and isn't written back anywhere, the `**Commit:**` line is **omitted** from these entries — `git log`'s `[<task-id>]` trailer is the SHA index. (The "Batch started" entry is prepended at Phase 4 step 2, before dispatch, and gets committed with the batch's tasks.)
 
+### Observability fields — measure, never fabricate
+
+`work` records the cheap-to-capture cost signals it can actually observe, and explicitly declines the ones it cannot. This is the observability floor: the protocol entries are written anyway, so carrying these fields is near-free.
+
+- **Duration** — wall time the orchestrator measures against its own clock: note the dispatch time when you spawn a worker (Phase 4) and subtract it from the time that worker's verdict lands. This is a real measurement the session already has — it needs no harness support. Record it on every task-completion entry (dispatch → verdict for that task) and record the whole-session span on the session-end entry. Express it human-readably (e.g. `4m12s`, `1h03m`).
+- **Verification iteration** — the `PASS (iteration N)` count is **mandatory**, never dropped. N is the iteration counter the verification gate already tracks (1 on a first-try pass, higher after re-dispatch). It is the signal for "is the verifier earning its spend."
+- **Dispatch / re-dispatch tally** — the session-end entry carries a per-task count of how many times each task was dispatched (1 + its re-dispatch count). The orchestrator already tracks this per task for the iteration counter; the tally just surfaces it.
+- **Token / dollar cost — deliberately omitted.** The orchestrating session has no programmatic access to its own or its subagents' token counts, so any token or cost figure here would be fabricated. It is left out on purpose (acceptance criterion: no fabricated metrics). If a future harness exposes real per-run token counts to the session, add a `**Tokens:**` line then — until it does, absence is the honest record.
+
 If `protocol.md` doesn't exist, create it with:
 ```markdown
 # Protocol
@@ -239,7 +248,8 @@ Entry formats:
 **Type:** Work / Task completion
 **Task:** <task-id> - [title]
 **Summary:** [worker's 1-line SUMMARY]
-**Verification:** PASS (iteration N)
+**Duration:** [wall time from this worker's dispatch to its verifier verdict, e.g. 4m12s]
+**Verification:** PASS (iteration N)   <!-- iteration N is REQUIRED — never omit the count -->
 **Files changed:** N
 **Tests added:** N
 **ADRs written:** [ids or "none"]
@@ -251,6 +261,7 @@ Entry formats:
 **Type:** Work / Task completion
 **Task:** <task-id> - [title]
 **Summary:** [worker's 1-line SUMMARY]
+**Duration:** [wall time from this worker's dispatch to its SUCCESS return, e.g. 4m12s]
 **Verification:** SKIPPED — [reason: decision-only task | --no-verify | non-git project]
 **Files changed:** N
 
@@ -386,10 +397,12 @@ When `todo/` is empty and all `doing/` is resolved (or the user interrupts):
    ## YYYY-MM-DD HH:MM -- Work session ended
 
    **Type:** Work / Session end
+   **Duration:** [total wall time from the first "Batch started" entry to now, e.g. 23m40s]
    **Completed:** N (first-try PASS: A, re-dispatched: B, skipped: C)
    **Bounced:** M
    **Failed:** K
    **Escalated after verification:** E
+   **Dispatches:** [per-task tally, one entry per task as `<task-id>: D` where D = 1 + its re-dispatch count, e.g. "b8x2v: 1, j4m6r: 2"]
    **Commits:** <count>
 
    ---

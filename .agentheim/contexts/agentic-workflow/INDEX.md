@@ -11,25 +11,25 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 13
-- **Todo:** 4
-- **Doing:** 0
-- **Done:** 86
+- **Todo:** 2
+- **Doing:** 1
+- **Done:** 87
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-j4m6r** — Pin model frontmatter on the eight agents — decorrelate the adversarial gates, cut worker-fleet cost (feature) — `todo/agentic-workflow-j4m6r-pin-model-frontmatter-agent-routing.md`
-- **agentic-workflow-b8x2v** — Work protocol entries carry Duration and verification Iterations (feature) — `todo/agentic-workflow-b8x2v-protocol-entries-duration-iterations.md`
 - **agentic-workflow-d6q4h** — Work session-end reconciliation of stranded working-tree carry-over (feature) — `todo/agentic-workflow-d6q4h-work-session-end-carryover-reconciliation.md`
 - **agentic-workflow-g9s3w** — Pre-load the test command into the verifier spawn prompt (feature) — `todo/agentic-workflow-g9s3w-preload-test-command-into-verifier.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-j4m6r** — Pin model frontmatter on the eight agents — decorrelate the adversarial gates, cut worker-fleet cost (feature) — `doing/agentic-workflow-j4m6r-pin-model-frontmatter-agent-routing.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-b8x2v** — Work protocol entries carry Duration and verification Iterations (feature) — `done/agentic-workflow-b8x2v-protocol-entries-duration-iterations.md`
 - **agentic-workflow-w3p8n** — Fix stale README claim — dashboard has no drag-to-promote write-back (bug) — `done/agentic-workflow-w3p8n-fix-stale-readme-dashboard-drag-claim.md`
 - **agentic-workflow-f7k2d** — Fix TESTS_* return-format drift — work spawn template omits the fields the verifier gates on (bug) — `done/agentic-workflow-f7k2d-fix-tests-return-format-drift.md`
 - **agentic-workflow-m2v8d** — Done column collapse control — clamp to ~3.5 faded tickets instead of hiding the column (feature) — `done/agentic-workflow-m2v8d-done-column-collapse-to-clamped-fade.md`
