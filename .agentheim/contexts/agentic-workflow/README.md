@@ -45,8 +45,11 @@ separate BC, but today the whole tool lives in this one.
   Agentheim's own domain.)
 - **Task** — a unit of work as a markdown file with frontmatter, moving through a
   lifecycle. `type`: feature | bug | refactor | chore | spike | decision.
-- **Orchestrator / Specialist** — the router and the focused agents it delegates to. The
-  orchestrator never writes code or does deep modeling itself.
+- **Orchestrator / Specialist** — the router agent and the focused agents it delegates to.
+  The orchestrator never writes code or does deep modeling itself. Distinct from the
+  **conductor**: the non-code-writing driving loop of the `work` skill itself (scan the
+  DAG, dispatch worker subagents, commit, log) — a role the session plays, not an agent
+  the orchestrator can route to.
 - **Adversarial gate** — a fresh-context skeptic with no exposure to the producer's
   reasoning, judging the producer's output. `verifier` audits a worker's diff before
   commit; `research-reviewer` re-verifies a report before it's citable. A deliberate,

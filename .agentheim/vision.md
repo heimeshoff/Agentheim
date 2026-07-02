@@ -78,7 +78,9 @@ against exactly that.
 - **Vision / Context map** — the two strategic artifacts: what's being built and why, and
   how the bounded contexts relate.
 - **Orchestrator** — the router agent. Never writes code; decides which specialist acts,
-  runs them (in parallel when independent), integrates the result.
+  runs them (in parallel when independent), integrates the result. Not to be confused with
+  the **conductor**: the `work` skill's own driving loop (scan, dispatch workers, commit,
+  log) — a session role, not a spawned agent.
 - **Specialists** — `strategic-modeler`, `tactical-modeler`, `architect`, `researcher`,
   `worker`. Each has a tighter focus than the orchestrator.
 - **Adversarial gate** — a fresh-context skeptic with no exposure to the producer's

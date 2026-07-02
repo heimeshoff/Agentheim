@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 18:32 -- Task verified and completed: agentic-workflow-h3z5b - Resolve the two-orchestrators naming ambiguity
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-h3z5b - Resolve the two-orchestrators naming ambiguity
+**Summary:** Renamed the `work` skill's driving-loop sense of "orchestrator" → **conductor** throughout `skills/work/SKILL.md` (all loop-sense refs incl. the "Git authority" / "Index updates" headings; grep-clean, 0 remain), and defined **conductor** distinct from the `orchestrator` agent in both ubiquitous-language sections (vision.md seed + agentic-workflow BC README). Prose-only; no agent-spawn identifier or file reference changed.
+**Duration:** ~4m (dispatch 18:28 → verdict 18:32)
+**Verification:** PASS (iteration 1)
+**Files changed:** 3
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-02 18:31 -- Task completed (verification skipped): agentic-workflow-k9t3w - Ratify ADR-0032 — per-worker git worktree isolation model
 
 **Type:** Work / Task completion

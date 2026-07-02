@@ -7,7 +7,7 @@ description: Use whenever the user wants work executed on the todo backlog — r
 
 The `work` skill turns refined `todo/` tasks into real code and real decisions. It is a loop, not a one-shot: it keeps going until todo is empty (or the user stops it), and it picks up tasks added mid-run.
 
-**The orchestrator (you) never writes code.** You coordinate: scan, build the DAG, dispatch workers, commit, log. Keeping you lean prevents context exhaustion across long batches. All coding work is delegated to subagents.
+**The conductor (you) never writes code.** You coordinate: scan, build the DAG, dispatch workers, commit, log. Keeping you lean prevents context exhaustion across long batches. All coding work is delegated to subagents.
 
 ## Phase 1: Recovery check
 
@@ -39,7 +39,7 @@ Two parallel workers touching the same file is the most common cause of merge pa
 
 For each dispatch wave:
 
-1. **Move all selected task files** from `todo/` to `doing/` (the orchestrator does this *before* spawning subagents — prevents workers racing for the same file).
+1. **Move all selected task files** from `todo/` to `doing/` (the conductor does this *before* spawning subagents — prevents workers racing for the same file).
 
 2. **Log "Batch started"** to `.agentheim/knowledge/protocol.md` (prepend — see "Protocol logging" section below).
 
@@ -144,9 +144,9 @@ Do not use Write, Edit, or any git command. You are read-only.
 
 ### Parallel verification
 
-When the orchestrator dispatched a parallel batch of N workers and several return SUCCESS, capture each worker's diff independently (use `git diff -- <FILE_LIST>` per worker if needed to scope the patch), and spawn the verifiers as parallel Agent calls in one message. Each verifier sees only its own task's diff. Commit each verified-PASS sequentially in the order verifiers return — never parallelize git writes.
+When the conductor dispatched a parallel batch of N workers and several return SUCCESS, capture each worker's diff independently (use `git diff -- <FILE_LIST>` per worker if needed to scope the patch), and spawn the verifiers as parallel Agent calls in one message. Each verifier sees only its own task's diff. Commit each verified-PASS sequentially in the order verifiers return — never parallelize git writes.
 
-## Git authority (orchestrator only)
+## Git authority (conductor only)
 
 Git is owned by `work`, not by workers or verifiers. Workers only move files and write content; verifiers only read. This is load-bearing for parallel safety — two writes to git concurrently can race.
 
@@ -185,7 +185,7 @@ The aw-064/065/066/067 one-line topbar-chrome tweaks are the canonical example. 
 
 If the project isn't a git repo, skip commits silently and note it in the end-of-run summary. (Verification is also auto-skipped in this case — see "When to skip verification".)
 
-## Index updates (orchestrator-owned)
+## Index updates (conductor-owned)
 
 Indexes track artifact movement. The work skill — **never the worker** — updates them. The worker is scope-restricted; touching `INDEX.md` files from inside a worker would fail verification. Index template lives at `references/index-template.md`.
 
@@ -206,7 +206,7 @@ Per ADR written (from `ADRS_WRITTEN` in worker SUCCESS):
 - Read the ADR's frontmatter `scope:` field.
 - `scope: <bc-name>` → insert under `<!-- adr-local:start -->` in `contexts/<bc-name>/INDEX.md`.
 - `scope: global` → insert under `<!-- adr-global:start -->` in `.agentheim/knowledge/index.md`.
-- **Bidirectional backlink:** append the ADR id to the task's `related_adrs` frontmatter, and append the task id to the ADR's `related_tasks` frontmatter. The worker writes the ADR but does not maintain these cross-links — the orchestrator does, atomically, alongside the index update.
+- **Bidirectional backlink:** append the ADR id to the task's `related_adrs` frontmatter, and append the task id to the ADR's `related_tasks` frontmatter. The worker writes the ADR but does not maintain these cross-links — the conductor does, atomically, alongside the index update.
 
 If `.agentheim/knowledge/index.md` or the BC's `INDEX.md` does not exist yet, create it from `references/index-template.md` before inserting. Do not auto-rewrite the file — only insert/remove at markers.
 
@@ -222,9 +222,9 @@ The completion entries below are written in the **pre-commit bookkeeping phase**
 
 `work` records the cheap-to-capture cost signals it can actually observe, and explicitly declines the ones it cannot. This is the observability floor: the protocol entries are written anyway, so carrying these fields is near-free.
 
-- **Duration** — wall time the orchestrator measures against its own clock: note the dispatch time when you spawn a worker (Phase 4) and subtract it from the time that worker's verdict lands. This is a real measurement the session already has — it needs no harness support. Record it on every task-completion entry (dispatch → verdict for that task) and record the whole-session span on the session-end entry. Express it human-readably (e.g. `4m12s`, `1h03m`).
+- **Duration** — wall time the conductor measures against its own clock: note the dispatch time when you spawn a worker (Phase 4) and subtract it from the time that worker's verdict lands. This is a real measurement the session already has — it needs no harness support. Record it on every task-completion entry (dispatch → verdict for that task) and record the whole-session span on the session-end entry. Express it human-readably (e.g. `4m12s`, `1h03m`).
 - **Verification iteration** — the `PASS (iteration N)` count is **mandatory**, never dropped. N is the iteration counter the verification gate already tracks (1 on a first-try pass, higher after re-dispatch). It is the signal for "is the verifier earning its spend."
-- **Dispatch / re-dispatch tally** — the session-end entry carries a per-task count of how many times each task was dispatched (1 + its re-dispatch count). The orchestrator already tracks this per task for the iteration counter; the tally just surfaces it.
+- **Dispatch / re-dispatch tally** — the session-end entry carries a per-task count of how many times each task was dispatched (1 + its re-dispatch count). The conductor already tracks this per task for the iteration counter; the tally just surfaces it.
 - **Token / dollar cost — deliberately omitted.** The orchestrating session has no programmatic access to its own or its subagents' token counts, so any token or cost figure here would be fabricated. It is left out on purpose (acceptance criterion: no fabricated metrics). If a future harness exposes real per-run token counts to the session, add a `**Tokens:**` line then — until it does, absence is the honest record.
 
 If `protocol.md` doesn't exist, create it with:
@@ -335,7 +335,7 @@ The task's `related_research` frontmatter points at research reports under `.age
 ## Recent activity
 Last ~100 lines of `.agentheim/knowledge/protocol.md` — the project's recent events. Use this for orientation; do not re-fetch the protocol yourself.
 
-<Paste the head -100 excerpt the orchestrator captured in Phase 2 verbatim.>
+<Paste the head -100 excerpt the conductor captured in Phase 2 verbatim.>
 
 ## Project context (read only if you need them)
 - .agentheim/vision.md
@@ -345,9 +345,9 @@ Last ~100 lines of `.agentheim/knowledge/protocol.md` — the project's recent e
 - .agentheim/contexts/<bc>/concepts/ (opt-in synthesis pages — grep for relevant concepts before designing)
 
 ## Rules — CRITICAL
-1. Do NOT run `git add`, `git commit`, or any git write operation. The orchestrator owns git.
-2. Do NOT modify `.agentheim/knowledge/protocol.md`. The orchestrator owns protocol logging.
-3. Do NOT modify any `INDEX.md` (`.agentheim/knowledge/index.md` or `.agentheim/contexts/*/INDEX.md`). The orchestrator owns indexes.
+1. Do NOT run `git add`, `git commit`, or any git write operation. The conductor owns git.
+2. Do NOT modify `.agentheim/knowledge/protocol.md`. The conductor owns protocol logging.
+3. Do NOT modify any `INDEX.md` (`.agentheim/knowledge/index.md` or `.agentheim/contexts/*/INDEX.md`). The conductor owns indexes.
 4. Do NOT touch any task file other than the one you were assigned.
 5. Do NOT modify other BCs' READMEs. Only the BC your task belongs to.
 6. DO write code, run tests, update YOUR BC's README, write ADRs for decisions you make.
@@ -360,7 +360,7 @@ Your context window is finite. Respect it:
 - Don't echo file contents back in your output — work with them silently.
 - Keep tool output concise (use head/tail, --quiet flags).
 - Don't re-read files you've already read unless they've changed.
-- Don't restate the task file or the BC README verbatim — the orchestrator already has them.
+- Don't restate the task file or the BC README verbatim — the conductor already has them.
 
 ## Return format — STRICT
 When done, return ONLY the following, nothing else. No prose, no preamble, no "here's what I did".

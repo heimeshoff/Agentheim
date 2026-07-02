@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 14
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 91
+- **Doing:** 0
+- **Done:** 92
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-h3z5b** — Resolve the two-orchestrators naming ambiguity (chore) — `doing/agentic-workflow-h3z5b-rename-orchestrator-ambiguity.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-h3z5b** — Resolve the two-orchestrators naming ambiguity (chore) — `done/agentic-workflow-h3z5b-rename-orchestrator-ambiguity.md`
 - **agentic-workflow-k9t3w** — Ratify ADR-0032 — per-worker git worktree isolation model (decision) — `done/agentic-workflow-k9t3w-ratify-adr-0032-worktree-isolation.md`
 - **agentic-workflow-g9s3w** — Pre-load the test command into the verifier spawn prompt (feature) — `done/agentic-workflow-g9s3w-preload-test-command-into-verifier.md`
 - **agentic-workflow-d6q4h** — Work session-end reconciliation of stranded working-tree carry-over (feature) — `done/agentic-workflow-d6q4h-work-session-end-carryover-reconciliation.md`

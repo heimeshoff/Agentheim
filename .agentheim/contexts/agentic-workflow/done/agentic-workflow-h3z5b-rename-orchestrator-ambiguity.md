@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-h3z5b
 title: Resolve the two-orchestrators naming ambiguity
-status: todo
+status: done
 type: chore
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-02
 depends_on: []
 blocks: []
 tags: [harness-audit, naming, ubiquitous-language, orchestrator, work-skill]
@@ -60,3 +60,17 @@ agent's description, this edits `work/SKILL.md` + `vision.md` + the BC README.
 The earlier "same files, one pass" note was wrong; there is no file overlap and
 no `depends_on`. Either can go first. Doing them in one sitting is still
 pleasant (both are "what does 'orchestrator' mean" cleanups) but not required.
+
+## Outcome
+
+Renamed all ~14 loop-sense "orchestrator" references in `skills/work/SKILL.md`
+to **conductor** (section headings "Git authority (conductor only)", "Index
+updates (conductor-owned)", the "(you)" line, and all inline prose mentions).
+Grep-verified zero remaining "orchestrator" occurrences in that file. Added a
+**conductor** bullet/clause to both ubiquitous-language sections
+(`.agentheim/vision.md` and this BC's `README.md`), each distinguishing it
+from the `orchestrator` agent in the same breath. No file references, paths,
+or agent-spawn identifiers (`subagent_type: "orchestrator"`,
+`agents/orchestrator.md`) were touched — confirmed by grep across `skills/`
+that all remaining "orchestrator" mentions are in other files and correctly
+refer to the agent.
