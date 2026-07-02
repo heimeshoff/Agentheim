@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 -- Modeling / Captured: agentic-workflow-c8j3w - Compaction policy for BC READMEs and the growing INDEX files
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Follow-up review of the 2026-07-02 harness audit against the captured batch found one gap-table finding that never made it into a task: no compaction policy for BC READMEs or the growing INDEX done-lists (the one named hole in the otherwise-good context/memory row). Sibling of protocol rotation (r2c7m), candidate for the k5n8f script family.
+
+---
+
 ## 2026-07-02 -- Modeling / Captured (batch): 18 tasks from the 2026-07-02 harness self-audit
 
 **Type:** Modeling / Capture
