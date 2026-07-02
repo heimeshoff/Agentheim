@@ -2,6 +2,7 @@
 name: verifier
 description: Fresh-eyes auditor for a worker's just-completed task. Reads the task file's acceptance criteria, the diff produced by the worker, and the BC README. Runs the test suite. Emits a PASS / FAIL / SKIP verdict that determines whether `work` commits or re-dispatches. Has no Write or Edit tools — never changes code, only judges it. Called by the `work` skill's post-success gate, one verifier per worker that returned SUCCESS.
 tools: Read, Grep, Glob, Bash
+model: opus
 ---
 
 # Verifier — Fresh-Eyes Audit

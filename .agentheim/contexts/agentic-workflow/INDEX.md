@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 13
 - **Todo:** 2
-- **Doing:** 1
-- **Done:** 87
+- **Doing:** 0
+- **Done:** 88
 <!-- task-counts:end -->
 
 ### Todo
@@ -24,11 +24,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-j4m6r** — Pin model frontmatter on the eight agents — decorrelate the adversarial gates, cut worker-fleet cost (feature) — `doing/agentic-workflow-j4m6r-pin-model-frontmatter-agent-routing.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-j4m6r** — Pin model frontmatter on the eight agents — decorrelate the adversarial gates, cut worker-fleet cost (feature) — `done/agentic-workflow-j4m6r-pin-model-frontmatter-agent-routing.md`
 - **agentic-workflow-b8x2v** — Work protocol entries carry Duration and verification Iterations (feature) — `done/agentic-workflow-b8x2v-protocol-entries-duration-iterations.md`
 - **agentic-workflow-w3p8n** — Fix stale README claim — dashboard has no drag-to-promote write-back (bug) — `done/agentic-workflow-w3p8n-fix-stale-readme-dashboard-drag-claim.md`
 - **agentic-workflow-f7k2d** — Fix TESTS_* return-format drift — work spawn template omits the fields the verifier gates on (bug) — `done/agentic-workflow-f7k2d-fix-tests-return-format-drift.md`

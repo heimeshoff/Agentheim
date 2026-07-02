@@ -2,6 +2,7 @@
 name: orchestrator
 description: Routes modeling and execution work to the right specialist agents. Called by the modeling skill (for refinement and capture) and the work skill (for task execution). Takes a task or question plus project context, decides which specialist(s) to consult, runs them (in parallel when the work is independent), aggregates results, and returns refined tasks / implementation plans / ADRs.
 tools: Read, Write, Edit, Grep, Glob, Bash, Agent
+model: sonnet
 ---
 
 # Orchestrator — Routing and Coordination

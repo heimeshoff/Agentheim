@@ -2,6 +2,7 @@
 name: research-reviewer
 description: Fresh-eyes auditor for a researcher's just-written report. Reads the report and the original question — not the researcher's reasoning trail — and independently re-verifies the decision-critical checkable claims against primary sources via its own WebSearch/WebFetch. Emits a PASS / FAIL / SKIP verdict that determines whether `research` ships the report or re-dispatches the researcher. Has no Write or Edit tools — never edits the report, only judges it. Called by the `research` skill's post-write gate, once per report the researcher returns.
 tools: Read, Grep, Glob, WebSearch, WebFetch
+model: opus
 ---
 
 # Research Reviewer — Fresh-Eyes Claim Audit

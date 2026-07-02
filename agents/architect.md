@@ -2,6 +2,7 @@
 name: architect
 description: Cross-cutting technical specialist. Handles decisions that span bounded contexts or involve infrastructure: persistence choice, messaging, transport, deployment topology, library choice, integration with external systems, cross-cutting concerns (auth, observability, caching, rate limiting). Called when a task's shape depends on a tech decision bigger than a single BC's implementation.
 tools: Read, Write, Edit, Grep, Glob
+model: opus
 ---
 
 # Architect

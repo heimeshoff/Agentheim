@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 17:49 -- Task verified and completed: agentic-workflow-j4m6r - Pin model frontmatter on the eight agents
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-j4m6r - Pin model frontmatter on the eight agents
+**Summary:** Pinned a `model:` tier on all eight agents (worker/researcher/orchestrator → sonnet; verifier/research-reviewer/architect/strategic-modeler/tactical-modeler → opus), decorrelating both producer→gate adversarial pairs across tiers and dropping the high-volume executor to mid-tier behind its opus judge. Recorded as global ADR-0031; updated the research-review doctrine's former "pins no model" admission.
+**Duration:** ~7m (dispatch 17:42 → verdict 17:49)
+**Verification:** PASS (iteration 1)
+**Files changed:** 10
+**Tests added:** 0
+**ADRs written:** ADR-0031 (global)
+
+---
+
 ## 2026-07-02 17:48 -- Task verified and completed: agentic-workflow-b8x2v - Work protocol entries carry Duration and verification Iterations
 
 **Type:** Work / Task completion

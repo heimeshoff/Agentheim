@@ -1,15 +1,15 @@
 ---
 id: agentic-workflow-j4m6r
 title: Pin model frontmatter on the eight agents — decorrelate the adversarial gates, cut worker-fleet cost
-status: todo
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-02
 depends_on: []
 blocks: []
 tags: [harness-audit, model-routing, agents, adversarial-gate, cost]
-related_adrs: []
+related_adrs: [ADR-0031]
 related_research: []
 prior_art: []
 ---
@@ -46,9 +46,9 @@ Add one `model:` frontmatter line per agent file, per the audit routing table:
 
 ## Acceptance criteria
 
-- [ ] All eight `agents/*.md` files carry a `model:` frontmatter field per the table.
-- [ ] An ADR records the routing policy and the decorrelation rationale (producer and its adversarial gate never share a model tier).
-- [ ] The research-review doctrine's "agentheim pins no model" admission is updated to reference the new policy.
+- [x] All eight `agents/*.md` files carry a `model:` frontmatter field per the table.
+- [x] An ADR records the routing policy and the decorrelation rationale (producer and its adversarial gate never share a model tier).
+- [x] The research-review doctrine's "agentheim pins no model" admission is updated to reference the new policy.
 
 ## Notes
 
@@ -56,3 +56,24 @@ The heuristic inverts at the gates: the executor can be mid-tier precisely becau
 the judge is top-tier. Never weaken the judge to strengthen the executor. Use model
 family names (sonnet/opus), not pinned versions, so the routing survives model
 releases.
+
+## Outcome
+
+Added a `model:` frontmatter line to all eight agent definitions
+(`agents/*.md`): `worker`, `researcher`, `orchestrator` → `sonnet`; `verifier`,
+`research-reviewer`, `architect`, `strategic-modeler`, `tactical-modeler` → `opus`.
+Family names, not pinned versions. This engages the model-tier decorrelation for both
+adversarial gates (`worker`/`verifier`, `researcher`/`research-reviewer`) and drops the
+highest-volume agent to mid-tier while the `opus` gate bounds its failure cost.
+
+Recorded the routing + decorrelation policy in
+`.agentheim/knowledge/decisions/0031-per-agent-model-routing-decorrelate-adversarial-gates.md`
+(scope: global) and updated the research-review doctrine
+(`skills/research-review/SKILL.md`, "Why a separate agent — and, if you can, a different
+model") — its former "agentheim pins no model" admission now states the policy is engaged
+and references ADR-0031.
+
+Key files:
+- `agents/{worker,researcher,orchestrator,verifier,research-reviewer,architect,strategic-modeler,tactical-modeler}.md`
+- `.agentheim/knowledge/decisions/0031-per-agent-model-routing-decorrelate-adversarial-gates.md`
+- `skills/research-review/SKILL.md`
