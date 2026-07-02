@@ -7,14 +7,15 @@ import { html } from "./html.js";
 import { Icon } from "./icons.js";
 import { StatusDot, StatusChip, MonoId, MetaChip } from "./primitives.js";
 import { EmptyColumn } from "./empty.js";
-import { doingPulseClass } from "./motion.js";
+import { doingPulseClass, dependencyRingClass } from "./motion.js";
 import { showEstimate } from "./card.js";
 import { STATUSES, COLUMN_ORDER, TICKETS } from "./data.js";
 
 // Re-export so the doing-pulse decision (design-system-004 / ADR-0014) is
 // reachable from the kanban surface as well as ./motion.js. Same for the
-// estimate-visibility decision (design-system-006).
-export { doingPulseClass, showEstimate };
+// estimate-visibility decision (design-system-006) and the dependency-ring
+// decision (design-system-w4t9k / ADR-0034).
+export { doingPulseClass, showEstimate, dependencyRingClass };
 
 // ---- Column header ----
 // onAdd: optional add-ticket affordance (agentic-workflow-018). Like EmptyColumn's
@@ -60,7 +61,13 @@ export function ColumnHeader({ status, count, onAdd }) {
 //   The card wraps whatever the prop returns in a propagation-stopping container
 //   so activating it never bubbles to the card's own onClick (the card is a
 //   button that opens the slide-over). Absent -> the card is unchanged.
-export function TicketCard({ ticket, variant = "rail", selected = false, onClick, forceHover = false, cornerAction }) {
+// dependencyRelation: optional "waiting-on" | "holding-up" (design-system-w4t9k /
+//   ADR-0034) — renders a quiet breathing ring around the card's perimeter when
+//   this card is a dependency of whatever card the builder is hovering. The
+//   styleguide only turns the ring on/off; detecting which card is the target
+//   and the hover lifecycle is the CONSUMER's job (agentic-workflow-k5p8w).
+//   Default null -> byte-identical to today.
+export function TicketCard({ ticket, variant = "rail", selected = false, onClick, forceHover = false, cornerAction, dependencyRelation = null }) {
   const [hover, setHover] = useState(false);
   const s = STATUSES[ticket.status];
   const isHover = hover || forceHover;
@@ -83,7 +90,7 @@ export function TicketCard({ ticket, variant = "rail", selected = false, onClick
   // an unselected one.
 
   return html`
-    <div className="focusable" tabIndex=${0} role="button" aria-pressed=${selected}
+    <div className=${["focusable", dependencyRingClass(dependencyRelation)].filter(Boolean).join(" ")} tabIndex=${0} role="button" aria-pressed=${selected}
       onClick=${onClick}
       onKeyDown=${(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick && onClick(); } }}
       onMouseEnter=${() => setHover(true)} onMouseLeave=${() => setHover(false)}

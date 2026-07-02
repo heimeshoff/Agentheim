@@ -137,6 +137,11 @@
      reads as "look here, just arrived" without ever becoming an aggressive blink
      (ADR-0014's quiet-by-default law). Drives the rail row / group-header marker. */
   --duration-attention: 2200ms;
+  /* The dependency-relation ring's breathe cadence (design-system-w4t9k /
+     ADR-0034) — the THIRD ambient loop, sibling to --duration-ambient /
+     --duration-attention. Rides the card perimeter, not a rail/dot, so it gets
+     its own token rather than reusing either sibling's cadence. */
+  --duration-relation: 2000ms;
 }
 
 /* ---------- Dark mode ---------- */

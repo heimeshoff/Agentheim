@@ -31,6 +31,10 @@ import { TICKETS, LIBRARY, CONTENT_TYPES, MD_ADR } from "./data.js";
 
 const SAMPLE_TICKET = TICKETS.find((t) => t.id === "AGH-128"); // status: doing
 const SAMPLE_TICKET_STATIC = TICKETS.find((t) => t.status !== "doing"); // contrast: no pulse
+// design-system-w4t9k: two more non-doing tickets so the waiting-on / holding-up
+// ring specimens don't reuse the exact same card.
+const SAMPLE_TICKET_WAITING = TICKETS.filter((t) => t.status !== "doing")[1] || SAMPLE_TICKET_STATIC;
+const SAMPLE_TICKET_HOLDING = TICKETS.filter((t) => t.status !== "doing")[2] || SAMPLE_TICKET_STATIC;
 // design-system-006: a card whose estimate is the dashboard's em-dash placeholder
 // — the "… pt" chip must NOT render (a real est would still show).
 const SAMPLE_TICKET_NO_EST = { ...SAMPLE_TICKET_STATIC, est: "—" };
@@ -162,6 +166,18 @@ function CardStates({ variant, title, note }) {
             <div style=${{ display: "flex", flexDirection: "column", gap: 10 }}>
               <${TicketCard} ticket=${SAMPLE_TICKET} variant=${variant} />
               <${TicketCard} ticket=${SAMPLE_TICKET_STATIC} variant=${variant} />
+            </div>
+          </div>`}
+        ${variant === "rail" && html`
+          <div>
+            <${StateLabel}>Dependency ring — waiting-on · holding-up · coexists with the pulse</${StateLabel}>
+            <p style=${{ margin: "0 0 10px", fontFamily: "var(--font-ui)", fontSize: 11.5, lineHeight: 1.5, color: "var(--fg-3)", maxWidth: 280 }}>
+              A third ambient signal (ADR-0034): while hovering a card, its dependencies get a quiet breathing ring around the card PERIMETER, not the rail — so it can coexist with either sibling cue. Direction rides line-style on one dedicated hue: <b>waiting-on</b> is solid, <b>holding-up</b> is dashed. The last row proves no collision with the doing rail pulse.
+            </p>
+            <div style=${{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <${TicketCard} ticket=${SAMPLE_TICKET_WAITING} variant=${variant} dependencyRelation="waiting-on" />
+              <${TicketCard} ticket=${SAMPLE_TICKET_HOLDING} variant=${variant} dependencyRelation="holding-up" />
+              <${TicketCard} ticket=${SAMPLE_TICKET} variant=${variant} dependencyRelation="waiting-on" />
             </div>
           </div>`}
       </div>

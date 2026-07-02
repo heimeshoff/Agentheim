@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 19:09 -- Task verified and completed: design-system-w4t9k - Dependency-highlight ring — a third ambient-motion signal on TicketCard
+
+**Type:** Work / Task completion
+**Task:** design-system-w4t9k - Dependency-highlight ring — a third ambient-motion signal on TicketCard
+**Summary:** Third ambient-motion signal on `TicketCard` (ADR-0034): a card-perimeter dependency-relation ring — dedicated `--rel-dep` token, `--duration-relation: 2000ms`, `dependencyRingClass`/`TicketCard.dependencyRelation`, direction by line-style (solid waiting-on / dashed holding-up), reduced-motion keeps the ring static, coexists with the doing rail-pulse. `dist/` intentionally not rebuilt (ds-020/021 pattern).
+**Duration:** ~13m (dispatch 18:56 → verdict 19:09; one re-dispatch)
+**Verification:** PASS (iteration 2)
+**Files changed:** 7
+**Tests added:** 12
+**ADRs written:** none (ADR-0034 pre-written during the r9k2p refine, committed 56b325e)
+
+---
+
+## 2026-07-02 19:06 -- Verification failed: design-system-w4t9k - Dependency-highlight ring — a third ambient-motion signal on TicketCard
+
+**Type:** Work / Verification failure
+**Task:** design-system-w4t9k - Dependency-highlight ring — a third ambient-motion signal on TicketCard
+**Iteration:** 1 of 3
+**Reasons:** `dist/` was rebuilt (dashboard/dist/agentheim.css + colors_and_type.css modified with the source additions) — violates AC-9 "dist/ is NOT rebuilt by this task"; contradicts the task's own Outcome/README "not rebuilt here". (Verifier also flagged design-system/INDEX.md — false positive: that is the conductor's own Phase-4 todo→doing bookkeeping.)
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-07-02 19:01 -- Task verified and completed: agentic-workflow-d8q3n - Carry depends_on/blocks through the /api/tree per-task projection
 
 **Type:** Work / Task completion

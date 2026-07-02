@@ -132,6 +132,59 @@ the pulse: because "new" is not otherwise encoded on the row, the cue keeps a
 > and must be **rebuilt** to pick up this styleguide change; the source edit alone
 > does not update the bundle.
 
+As of `design-system-w4t9k` the taxonomy admits a **third ambient cue**: a
+**dependency-relation ring** around a `TicketCard`'s **perimeter** (ADR-0034). While
+the builder hovers a card, its dependencies can carry a quiet breathing ring so the
+hover-driven relation ("this card is waiting on / holding up the one you're pointing
+at") reads at a glance — the styleguide capability behind
+`agentic-workflow-r9k2p`'s hover feature.
+
+- **Card perimeter, not rail — deliberately.** A hover target can simultaneously be
+  an actively-doing card (rail pulse) or a freshly-arrived one (rail attention dot);
+  a third rail-based cue would collide with either. The ring is an **inset `::after`**
+  around the whole card (clip-safe under the card's existing `overflow: hidden`), so
+  it composes with both sibling cues with no visual collision.
+- **Direction rides line-style, not a second hue.** `waiting-on` (the card is in the
+  hovered card's `depends_on`) renders a **solid** breathing ring; `holding-up` (the
+  card is in the hovered card's `blocks`) renders a **dashed** breathing ring — same
+  hue, one dedicated token, `--rel-dep` (+ `--rel-dep-tint`), added to **both** theme
+  blocks of `styles/agentheim.css`. This is a deliberate departure from ADR-0029's
+  "reuse an existing status token" guidance (ADR-0034): a dependency relation is not
+  a status, so it earns its own token rather than overloading an existing one.
+  Proposed starting hue: cyan/aqua (`#1E88A8` light / `#5FC7DE` dark), distinct from
+  every status/content-type token and from the reserved `--accent-ochre-soft`
+  (ADR-0016) — **exact hue is a gate-review item with the builder**.
+- **Its own loop token**, `--duration-relation: 2000ms`, in the motion block of
+  `styles/colors_and_type.css` beside `--duration-ambient` / `--duration-attention`.
+- **Reduced motion keeps the ring** (the ADR-0029 pattern, not ADR-0014's): the
+  loop stops but the ring stays visible as a static solid/dashed border — a
+  dependency relation has no other static encoding on the target card, so vanishing
+  would erase the signal.
+- **Opt-in via `dependencyRelation`** (`"waiting-on" | "holding-up" | null`, default
+  `null`) on `TicketCard`, appending `dependencyRingClass(dependencyRelation)`
+  (`app/motion.js`, re-exported from `app/kanban.js`) to the card root. Detection of
+  which cards are hover targets and the hover lifecycle is the **consumer's** job
+  (`agentic-workflow-k5p8w`); the styleguide only renders the ring on/off.
+
+See ADR-0034
+(`.agentheim/knowledge/decisions/0034-dependency-ring-third-ambient-signal-dedicated-token-direction-by-line-style.md`).
+
+> **Gate re-review reopened by the dependency-relation ring
+> (`design-system-w4t9k`).** A new `--rel-dep` token pair, a third `@keyframes` loop,
+> and an inset perimeter ring join `TicketCard` — a visible styleguide change that
+> reopens the design-system gate per the `design-system-005` / `007` / `009` / `014`
+> / `015` / `017` / `018` / `020` / `021` / `v8k2p` precedent. Re-review against the
+> canvas (`styleguide/index.html` → section 06, the dependency-ring specimen: solid
+> waiting-on, dashed holding-up, and a doing card wearing both the rail pulse and
+> the perimeter ring at once) **before** `agentic-workflow-k5p8w` wires the live
+> hover detection and rebuilds `dist/`.
+
+> Live-board note: the served dashboard `dist/` is a derived artifact (ADR-0003) and
+> was **not** rebuilt here — this task adds the ring capability with **no shipped
+> dashboard consumer yet** (the ds-018 / ds-020 / ds-021 live-board pattern); `dist/`
+> is rebuilt by the consuming task (`agentic-workflow-k5p8w`) when the hover-driven
+> ring actually renders on the board.
+
 ### TicketCard — estimate chip is conditional; an optional corner-action slot (design-system-006)
 
 The `TicketCard` (`app/kanban.js`) is consumed by the dashboard **unforked**
@@ -657,4 +710,5 @@ the pattern in **section 11** (`SearchSpecimen` — type *design*, *adr*, or *zz
 - Search field + grouped-results combobox: `styleguide/app/search.js` (+ React-free `search-state.js`); a standalone `--shadow-md` popover (NOT composed on `Menu`, ADR-0024) feeding the dashboard global search (`agentic-workflow-052`, fed by `/api/search` aw-050 + ADR-0023) (design-system-016)
 - Drawer in-place expandable width: `styleguide/app/drawer.js` (+ React-free `drawer-state.js`); a controlled `expanded`/`onToggleExpand`/`expandedWidth` seam with a body-top chevron (`panel-right-open`/`panel-right-close` glyphs), consumed rail-aware by the dashboard slide-over (`agentic-workflow-074`) (design-system-020)
 - `concept` content type: `styleguide/app/data.js` (`CONTENT_TYPES.concept`, `lightbulb` glyph, `--ct-concept`/`--ct-concept-tint` magenta tokens in `styles/agentheim.css`); the styleguide capability behind Concepts as a first-class artifact kind in the dashboard rail + search (`agentic-workflow-075`) (design-system-021)
+- Dependency-relation ring: `styleguide/app/motion.js` (`dependencyRingClass`, re-exported from `styleguide/app/kanban.js`), `--rel-dep`/`--rel-dep-tint` tokens + `.rel-ring` keyframes in `styles/agentheim.css`, `--duration-relation` in `styles/colors_and_type.css`; the `TicketCard.dependencyRelation` prop the dashboard's hover-dependency feature will consume (`agentic-workflow-k5p8w`), see ADR-0034 (design-system-w4t9k)
 - BC index: `INDEX.md`

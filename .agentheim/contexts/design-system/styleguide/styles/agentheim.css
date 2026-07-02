@@ -35,6 +35,15 @@
   --ct-concept:        #B0479A;
   --ct-concept-tint:   #F7E3F1;
 
+  /* Relation — the "this card is a dependency of the hovered card" ambient ring
+     (design-system-w4t9k / ADR-0034). A dedicated cyan/aqua hue, distinct from
+     every status/content-type token above, from --ct-context's teal, and from
+     the reserved selection/focus accent --accent-ochre-soft (ADR-0016). Direction
+     (waiting-on / holding-up) rides line-style, not a second hue — see
+     .rel-ring below. Exact hue is a gate-review item with the builder. */
+  --rel-dep:           #1E88A8;
+  --rel-dep-tint:      #E2F1F5;
+
   /* Elevation — used sparingly; the drawer is the main lifted surface */
   --shadow-sm: 0 1px 2px rgba(24,24,32,0.06);
   --shadow-md: 0 6px 20px rgba(24,24,32,0.10);
@@ -78,6 +87,9 @@
   --ct-adr-tint:       #271618;
   --ct-concept:        #D98AC8;
   --ct-concept-tint:   #2A1626;
+
+  --rel-dep:           #5FC7DE;
+  --rel-dep-tint:      #132228;
 
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.40);
   --shadow-md: 0 6px 22px rgba(0,0,0,0.46);
@@ -355,6 +367,62 @@ html, body { transition: background var(--duration-base) var(--ease-base); }
    reduced-motion contract, adapted: strippable to a still-legible baseline). */
 @media (prefers-reduced-motion: reduce) {
   .rail-attention::before {
+    animation: none;
+    box-shadow: none;
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   Dependency-relation ring (design-system-w4t9k / ADR-0034)
+
+   A THIRD ambient signal, extending the taxonomy started by the
+   doing-card breathe (ADR-0014) and the rail attention dot
+   (ADR-0029). A target card that is a dependency of the card the
+   builder is hovering gets a quiet breathing ring around its
+   PERIMETER (an inset ::after, not the rail) — deliberately, so it
+   can coexist with either sibling cue without collision: a hovered
+   target can simultaneously be an actively-doing card (rail pulse)
+   or a freshly-arrived one (rail attention dot), and a third
+   rail-based cue would fight one of those.
+
+   Direction rides an orthogonal LINE-STYLE channel on ONE dedicated
+   hue (--rel-dep), not two separate colors: waiting-on -> solid,
+   holding-up -> dashed, same ring. This breaks the ADR-0029 pattern
+   of reusing an existing status token — see ADR-0034 for why a
+   dependency relation is not itself a status and earns its own
+   token. The ring is inset (not an outer box-shadow) because the
+   card root is already position:relative; overflow:hidden — an
+   outer ring would be clipped.
+
+   Opt-in via .rel-ring(--waiting-on|--holding-up) (motion.js:
+   dependencyRingClass) — absent -> byte-identical to today.
+   ============================================================ */
+@keyframes rel-ring-breathe {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1; }
+}
+
+.rel-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-md);
+  pointer-events: none;
+  border: 2px solid var(--rel-dep);
+  box-shadow: inset 0 0 8px color-mix(in oklab, var(--rel-dep) 30%, transparent);
+  animation: rel-ring-breathe var(--duration-relation) var(--ease-base) infinite;
+}
+.rel-ring--waiting-on::after { border-style: solid; }
+.rel-ring--holding-up::after { border-style: dashed; }
+
+/* Reduced motion: unlike the doing-pulse (which vanishes) but LIKE the
+   attention dot, the ring's direction (solid/dashed) is not otherwise
+   encoded anywhere else on the card, so stripping it entirely would erase
+   the "this is a dependency" signal. Stop the loop but KEEP the ring as a
+   static solid/dashed border. */
+@media (prefers-reduced-motion: reduce) {
+  .rel-ring::after {
     animation: none;
     box-shadow: none;
     opacity: 1;

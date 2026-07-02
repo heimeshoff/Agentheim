@@ -11,14 +11,13 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
+- **Todo:** 0
 - **Doing:** 0
-- **Done:** 23
+- **Done:** 24
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **design-system-w4t9k** — Dependency-highlight ring — a third ambient-motion signal on TicketCard (feature) — `todo/design-system-w4t9k-dependency-highlight-ring-ticket-card.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -27,6 +26,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **design-system-w4t9k** — Dependency-highlight ring — a third ambient-motion signal on TicketCard (feature) — `done/design-system-w4t9k-dependency-highlight-ring-ticket-card.md`
 - **design-system-c3p9k** — Add a double-chevron glyph pair (chevrons-up / chevrons-down) to the shared icon set (feature) — `done/design-system-c3p9k-chevrons-up-down-glyph.md`
 - **design-system-v8k2p** — Rail "new item" attention blink — an ambient cue on a TreeItem / TreeGroup until acknowledged (feature) — `done/design-system-v8k2p-rail-new-item-attention-blink-cue.md`
 - **design-system-r4k8m** — Add an inquiry/question glyph to the shared icon set (feature) — `done/design-system-r4k8m-inquire-glyph.md`

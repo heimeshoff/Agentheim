@@ -48,3 +48,35 @@ export function doingPulseClass(status) {
 export function attentionCueClass(isNew) {
   return isNew ? "rail-attention" : "";
 }
+
+/**
+ * The dependency-relation ring (design-system-w4t9k) — a THIRD ambient signal,
+ * sibling to the doing-pulse and the attention dot above, but a card-PERIMETER
+ * treatment rather than a rail one (see ADR-0034): a hovered card's target can
+ * simultaneously be actively-doing (rail pulse) or freshly-arrived (rail
+ * attention dot), so a third rail-based cue would collide with one of those.
+ *
+ * Direction is carried by an orthogonal LINE-STYLE channel on ONE dedicated
+ * hue (--rel-dep) rather than a second color: "waiting-on" (the card is a
+ * dependency the hovered card is waiting on) renders a SOLID breathing ring;
+ * "holding-up" (the card is blocked ON the hovered card) renders a DASHED
+ * breathing ring, same hue. This breaks the ADR-0029 precedent of reusing an
+ * existing status token — a dependency relation is not a status, so it earns
+ * its own token (ADR-0034).
+ *
+ * Detection of which cards are hover targets and the hover lifecycle is the
+ * CONSUMER's job (agentic-workflow-k5p8w) — this only turns the ring on/off
+ * from a relation string. The breathe keyframes, the --rel-dep / --rel-dep-tint
+ * tokens, the --duration-relation token, and the reduced-motion
+ * strip-loop-but-keep-the-ring contract live in the CSS (`styles/agentheim.css`
+ * + `styles/colors_and_type.css`); this returns only the class(es) that turn
+ * it on.
+ *
+ * @param {string} [relation] — "waiting-on" | "holding-up" | null | undefined.
+ * @returns {string} the ring class(es) for a known relation, otherwise "".
+ */
+export function dependencyRingClass(relation) {
+  if (relation === "waiting-on") return "rel-ring rel-ring--waiting-on";
+  if (relation === "holding-up") return "rel-ring rel-ring--holding-up";
+  return "";
+}
