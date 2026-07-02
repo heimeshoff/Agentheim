@@ -428,3 +428,105 @@ html, body { transition: background var(--duration-base) var(--ease-base); }
     opacity: 1;
   }
 }
+
+/* ============================================================
+   Hidden/off-viewport dependency PRESENCE marker (design-system-b7n2s)
+
+   A sibling mechanism to the on-card ring above (ADR-0034 pt. 6), not a
+   variant of it or of the rail attention dot (ADR-0029): says "a highlighted
+   dependency target is present but not visible right now" on a COLLAPSED
+   Collapsible header, or standalone on any other element (e.g. the Done
+   column's height-clamped collapse control, which is not a Collapsible).
+
+   Reuses --rel-dep / --duration-relation (one shared visual language across
+   "pulsing on the card" and "present but hidden") but is deliberately
+   HOLLOW — a border-only dot, never filled — so it stays visually distinct
+   from the FILLED --st-todo attention dot (ADR-0029): "a dependency is
+   hidden here" must never read as "a new item is here." Direction-agnostic
+   by design: a collapsed group can hold BOTH waiting-on and holding-up
+   targets, so one marker meaning "expand to see" is enough; direction stays
+   on the on-card ring, never duplicated onto every group header.
+
+   A SEPARATE opt-in class from .rail-attention (motion.js:
+   dependencyPresentClass) — different meaning, different lifecycle. Painted
+   via ::after (the attention dot uses ::before) on the opposite edge of the
+   host element so the two markers can be applied to the SAME header at once
+   without colliding.
+   ============================================================ */
+@keyframes rel-present-breathe {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1; }
+}
+
+.rel-present {
+  position: relative;
+}
+.rel-present::after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 50%;
+  border: 1.5px solid var(--rel-dep);
+  background: transparent;
+  animation: rel-present-breathe var(--duration-relation) var(--ease-base) infinite;
+  will-change: opacity;
+}
+
+/* Reduced motion: the hollow marker has no other static encoding on a
+   collapsed header (the hidden dependency is otherwise invisible), so — the
+   ADR-0029 pattern, not ADR-0014's — stop the loop but KEEP the marker
+   visible rather than stripping it to nothing. */
+@media (prefers-reduced-motion: reduce) {
+  .rel-present::after {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   Off-viewport edge-blink — PRIMITIVE only, no new component
+   (design-system-b7n2s)
+
+   Mirrors the ADR-0003 "styleguide owns look/mechanics, consumer owns
+   placement" seam used for cornerAction (ds-006): this ships only the CSS +
+   a direction-aware helper (motion.js: edgeBlinkClass). The board
+   (agentic-workflow-h9v3m) builds and places the actual small edge
+   indicator (e.g. a --rel-dep-tinted chevron Icon pinned to the scroll
+   container's own edge) using its own scroll geometry — the styleguide
+   doesn't know the scroll container exists.
+
+   Same shared --rel-dep / --duration-relation language as the ring and the
+   presence marker above. The --top / --bottom modifier orients a directional
+   glow toward the edge the indicator sits at (the consumer supplies the
+   actual chevron glyph/rotation).
+   ============================================================ */
+@keyframes rel-edge-blink-breathe {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1; }
+}
+
+.rel-edge-blink {
+  color: var(--rel-dep);
+  animation: rel-edge-blink-breathe var(--duration-relation) var(--ease-base) infinite;
+  will-change: opacity;
+}
+.rel-edge-blink--top {
+  box-shadow: 0 -4px 6px -2px color-mix(in oklab, var(--rel-dep) 40%, transparent);
+}
+.rel-edge-blink--bottom {
+  box-shadow: 0 4px 6px -2px color-mix(in oklab, var(--rel-dep) 40%, transparent);
+}
+
+/* Reduced motion: like the ring and the presence marker, the edge-blink has
+   no other static encoding of "a target is off-viewport" — stop the loop but
+   KEEP the indicator visible. */
+@media (prefers-reduced-motion: reduce) {
+  .rel-edge-blink {
+    animation: none;
+    opacity: 1;
+  }
+}

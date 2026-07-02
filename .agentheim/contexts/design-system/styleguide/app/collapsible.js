@@ -37,7 +37,7 @@ import { useState } from "react";
 import { html } from "./html.js";
 import { Icon } from "./icons.js";
 import { isControlled } from "./collapsible-state.js";
-import { attentionCueClass } from "./motion.js";
+import { attentionCueClass, dependencyPresentClass } from "./motion.js";
 
 // Re-export the pure resolution so consumers can import either entrypoint; the
 // decision itself lives React-free in collapsible-state.js (testable without the
@@ -69,12 +69,22 @@ export { isControlled };
  *        (the consumer propagates "new" up to the parent group). OFF (default)
  *        adds no class — byte-identical to today. The detection + lifecycle is
  *        the consumer's job (agentic-workflow-n4h7q); the primitive only renders.
+ * @param {boolean} [props.hasHiddenDependency=false] — opt-in "a highlighted
+ *        dependency target is hidden in here" marker (design-system-b7n2s,
+ *        ADR-0034 pt. 6). A SEPARATE prop from `attention` — distinct meaning
+ *        (a dependency is present-but-hidden, not "new"), distinct lifecycle,
+ *        and NOT a reuse of it (ADR-0029). When ON, the header carries a
+ *        quiet breathing HOLLOW dot (never the filled attention dot) that
+ *        stays simultaneous-safe with `attention` — both may be ON at once.
+ *        OFF (default) adds no class — byte-identical to today. Detection of
+ *        which sections hold a hidden target is the consumer's job
+ *        (agentic-workflow-h9v3m/r9k2p); the primitive only renders.
  * @param {any} props.children — the body, revealed only when open. Arbitrary.
  */
 export function Collapsible({
   label, count, trailing,
   open, onToggle, defaultOpen = true,
-  bodyStyle, style, attention = false, children,
+  bodyStyle, style, attention = false, hasHiddenDependency = false, children,
 }) {
   const controlled = isControlled(open);
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
@@ -92,7 +102,7 @@ export function Collapsible({
 
   return html`
     <div style=${{ marginBottom: 4, ...style }}>
-      <button className=${["focusable", attentionCueClass(attention)].filter(Boolean).join(" ")} onClick=${toggle} aria-expanded=${isOpen}
+      <button className=${["focusable", attentionCueClass(attention), dependencyPresentClass(hasHiddenDependency)].filter(Boolean).join(" ")} onClick=${toggle} aria-expanded=${isOpen}
         style=${{
           display: "flex", alignItems: "center", gap: 6, width: "100%",
           padding: "6px 8px", border: "none", background: "transparent",

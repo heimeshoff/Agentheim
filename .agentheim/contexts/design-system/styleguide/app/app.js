@@ -28,6 +28,7 @@ import {
 import { TypographySection, SpacingSection, IconSection } from "./foundations2.js";
 import { Markdown } from "./primitives.js";
 import { TICKETS, LIBRARY, CONTENT_TYPES, MD_ADR } from "./data.js";
+import { edgeBlinkClass } from "./motion.js";
 
 const SAMPLE_TICKET = TICKETS.find((t) => t.id === "AGH-128"); // status: doing
 const SAMPLE_TICKET_STATIC = TICKETS.find((t) => t.status !== "doing"); // contrast: no pulse
@@ -388,6 +389,74 @@ function AttentionCueSpecimen() {
     </${DocCard}>`;
 }
 
+// The hidden dependency PRESENCE marker (design-system-b7n2s, ADR-0034 pt. 6)
+// — a sibling mechanism to the on-card dependency ring (section 06), not a
+// variant of it or of the attention cue above. Says "a highlighted
+// dependency target is hidden in here" on a COLLAPSED Collapsible header via
+// an opt-in `hasHiddenDependency` flag (default OFF). Reuses --rel-dep /
+// --duration-relation (the same hue + cadence as the ring) but is
+// deliberately HOLLOW — a border-only breathing dot, never filled — so it
+// never reads as the FILLED --st-todo attention cue above. Direction-
+// agnostic on purpose (a collapsed group can hold both waiting-on and
+// holding-up targets at once); direction stays on the on-card ring. Shown
+// both open and collapsed, and simultaneously with `attention` to prove the
+// two coexist without collision (a SEPARATE prop/class from `attention`,
+// never an overload, ADR-0029).
+function HiddenDependencySpecimen() {
+  return html`
+    <${DocCard} style=${{ flex: 1, minWidth: 300 }}>
+      <${SubHead}>Hidden dependency presence marker — collapsed &amp; open</${SubHead}>
+      <p style=${{ margin: "0 0 16px", fontFamily: "var(--font-ui)", fontSize: 12.5, lineHeight: 1.6, color: "var(--fg-3)" }}>
+        A sibling of the on-card dependency ring (section 06, ADR-0034): "a highlighted dependency target is hidden in here." Reuses <code>--rel-dep</code> / <code>--duration-relation</code>, but the marker is HOLLOW (border only) so it never reads as the filled attention dot above. Direction-agnostic — one marker means "expand to see," direction stays on the on-card ring. A separate <code>hasHiddenDependency</code> prop from <code>attention</code>; the last group below proves both can be ON at once without collision.
+      </p>
+      <${StateLabel}>Collapsed — a hidden waiting-on/holding-up target inside</${StateLabel}>
+      <${Collapsible} label="blocked work" count=${4} defaultOpen=${false} hasHiddenDependency=${true}
+        bodyStyle=${{ gap: 6, paddingLeft: 4 }} style=${{ marginBottom: 14 }}>
+        ${["Waiting-on target"].map((l) => html`<${DemoBodyRow} key=${l} label=${l} />`)}
+      </${Collapsible}>
+      <${StateLabel}>Open — the marker persists once expanded too</${StateLabel}>
+      <${Collapsible} label="blocked work" count=${4} defaultOpen=${true} hasHiddenDependency=${true}
+        bodyStyle=${{ gap: 6, paddingLeft: 4 }} style=${{ marginBottom: 14 }}>
+        ${["Waiting-on target", "Ordinary row"].map((l) => html`<${DemoBodyRow} key=${l} label=${l} />`)}
+      </${Collapsible}>
+      <${StateLabel}>Simultaneous-safe with the "new item" attention cue</${StateLabel}>
+      <${Collapsible} label="research" count=${2} defaultOpen=${false} attention=${true} hasHiddenDependency=${true}
+        bodyStyle=${{ gap: 6, paddingLeft: 4 }}>
+        ${["New + hidden dependency"].map((l) => html`<${DemoBodyRow} key=${l} label=${l} />`)}
+      </${Collapsible}>
+    </${DocCard}>`;
+}
+
+// Off-viewport edge-blink — a PRIMITIVE only, no new component
+// (design-system-b7n2s). Mirrors the ADR-0003 cornerAction seam (ds-006):
+// the styleguide ships only the CSS + edgeBlinkClass; the board
+// (agentic-workflow-h9v3m) builds and places the actual indicator using its
+// own scroll geometry. This specimen is a scroll-frame MOCKUP standing in
+// for that geometry — a top and a bottom --rel-dep chevron, documenting the
+// primitive's look, not a real scrollable board.
+function EdgeBlinkSpecimen() {
+  return html`
+    <${DocCard} style=${{ flex: 1, minWidth: 300 }}>
+      <${SubHead}>Off-viewport edge-blink — primitive only</${SubHead}>
+      <p style=${{ margin: "0 0 16px", fontFamily: "var(--font-ui)", fontSize: 12.5, lineHeight: 1.6, color: "var(--fg-3)" }}>
+        When a highlighted dependency target scrolls out of view, a quiet <code>--rel-dep</code> indicator breathes at the scroll area's edge nearest the target. The styleguide ships only the CSS (<code>.rel-edge-blink</code> + a <code>--top</code>/<code>--bottom</code> modifier) and the direction-aware <code>edgeBlinkClass(edge)</code> helper — the board builds and PLACES the actual indicator from its own scroll geometry (ADR-0003, the cornerAction seam). This is a mockup scroll frame, not a live scroll container.
+      </p>
+      <div style=${{
+        position: "relative", height: 140, border: "1px solid var(--hairline)",
+        borderRadius: "var(--radius-md)", background: "var(--surface-1)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}>
+        <div className=${edgeBlinkClass("top")} style=${{ position: "absolute", top: 6, left: "50%", transform: "translateX(-50%)" }}>
+          <${Icon} name="chevrons-up" size=${16} color="var(--rel-dep)" />
+        </div>
+        <span style=${{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-4)" }}>scroll area (mockup)</span>
+        <div className=${edgeBlinkClass("bottom")} style=${{ position: "absolute", bottom: 6, left: "50%", transform: "translateX(-50%)" }}>
+          <${Icon} name="chevrons-down" size=${16} color="var(--rel-dep)" />
+        </div>
+      </div>
+    </${DocCard}>`;
+}
+
 function NavSection() {
   return html`
     <${GuideSection} index="09" title="Navigation &amp; file tree"
@@ -412,6 +481,10 @@ function NavSection() {
       <div style=${{ marginTop: 24, display: "flex", gap: 28, alignItems: "flex-start", flexWrap: "wrap" }}>
         <${CollapsibleSpecimen} />
         <${AttentionCueSpecimen} />
+      </div>
+      <div style=${{ marginTop: 24, display: "flex", gap: 28, alignItems: "flex-start", flexWrap: "wrap" }}>
+        <${HiddenDependencySpecimen} />
+        <${EdgeBlinkSpecimen} />
       </div>
     </${GuideSection}>`;
 }

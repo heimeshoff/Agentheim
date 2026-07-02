@@ -80,3 +80,58 @@ export function dependencyRingClass(relation) {
   if (relation === "holding-up") return "rel-ring rel-ring--holding-up";
   return "";
 }
+
+/**
+ * The hidden/off-viewport dependency PRESENCE marker (design-system-b7n2s) — a
+ * sibling mechanism to the on-card ring above (ADR-0034 pt. 6), not a variant
+ * of it or of the rail attention dot (ADR-0029). Says "a highlighted
+ * dependency target is present but not visible right now" on a COLLAPSED
+ * `Collapsible` header or any other arbitrary element (the Done column's
+ * height-clamped collapse control, which is not a `Collapsible`).
+ *
+ * Reuses --rel-dep / --duration-relation (one shared visual language across
+ * "pulsing on the card" and "present but hidden") but renders a HOLLOW
+ * (border-only) breathing dot — deliberately distinct from the FILLED
+ * --st-todo attention dot (ADR-0029) so "a dependency is hidden here" never
+ * reads as "a new item is here." Direction-agnostic on purpose: a collapsed
+ * group can hold BOTH waiting-on and holding-up targets at once, so one
+ * marker meaning "expand to see" is enough — direction stays on the on-card
+ * ring, not duplicated onto every group header.
+ *
+ * A SEPARATE opt-in flag from `attention`/`attentionCueClass` — different
+ * meaning, different lifecycle, and (in the CSS) a different pseudo-element,
+ * so both may be applied to the same header at once without collision. The
+ * breathe keyframes, the hollow-border treatment, and the reduced-motion
+ * strip-loop-but-keep-the-marker contract live in the CSS
+ * (`styles/agentheim.css`); this returns only the class that turns it on.
+ *
+ * @param {boolean} [present] — true when a highlighted dependency target is
+ *        hidden inside the collapsed section / off-screen behind this control.
+ * @returns {string} the marker class when flagged, otherwise "".
+ */
+export function dependencyPresentClass(present) {
+  return present ? "rel-present" : "";
+}
+
+/**
+ * The off-viewport edge-blink — a PRIMITIVE only, no new component
+ * (design-system-b7n2s). Mirrors the ADR-0003 "styleguide owns look/mechanics,
+ * consumer owns placement" seam used for `cornerAction` (ds-006): the
+ * styleguide ships the CSS (`.rel-edge-blink` + a direction modifier +
+ * `@keyframes rel-edge-blink-breathe`) and this direction-aware helper; the
+ * board (`agentic-workflow-h9v3m`) builds and places the actual small edge
+ * indicator (e.g. a `--rel-dep`-tinted chevron `Icon` pinned to its own
+ * scroll container's edge) using its own scroll geometry — the styleguide
+ * doesn't know the scroll container exists.
+ *
+ * Reuses --rel-dep / --duration-relation, same shared visual language as the
+ * on-card ring and the hidden-dependency marker above.
+ *
+ * @param {string} [edge] — "top" | "bottom".
+ * @returns {string} the edge-blink class(es) for a known edge, otherwise "".
+ */
+export function edgeBlinkClass(edge) {
+  if (edge === "top") return "rel-edge-blink rel-edge-blink--top";
+  if (edge === "bottom") return "rel-edge-blink rel-edge-blink--bottom";
+  return "";
+}

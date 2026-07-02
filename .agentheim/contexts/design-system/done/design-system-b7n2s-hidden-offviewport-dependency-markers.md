@@ -1,11 +1,11 @@
 ---
 id: design-system-b7n2s
 title: Hidden and off-viewport dependency presence markers
-status: todo
+status: done
 type: feature
 context: design-system
 created: 2026-07-02
-completed:
+completed: 2026-07-03
 depends_on: [design-system-w4t9k]
 blocks: [agentic-workflow-h9v3m, agentic-workflow-r9k2p]
 tags: [motion, collapsible, dependencies]
@@ -63,23 +63,59 @@ own scroll geometry — design-system doesn't know the scroll container exists.
   mockup with a top and a bottom `--rel-dep` chevron) documenting the primitive.
 
 ## Acceptance criteria
-- [ ] `dependencyPresentClass(true)` returns a class rendering a **hollow** breathing
+- [x] `dependencyPresentClass(true)` returns a class rendering a **hollow** breathing
       dot in `--rel-dep`; `dependencyPresentClass(false|undefined)` returns `""`.
-- [ ] `Collapsible` accepts `hasHiddenDependency` (default `false`); off renders
+- [x] `Collapsible` accepts `hasHiddenDependency` (default `false`); off renders
       byte-identical to today; on renders the hollow dot on the header, independent
       of and simultaneous-safe with `attention`.
-- [ ] The `rel-present` class works standalone (no `Collapsible` required) — usable
+- [x] The `rel-present` class works standalone (no `Collapsible` required) — usable
       directly on an arbitrary element (the Done collapse button).
-- [ ] Under `prefers-reduced-motion: reduce`, the hollow dot's loop stops but stays
+- [x] Under `prefers-reduced-motion: reduce`, the hollow dot's loop stops but stays
       visible (static), never vanishes.
-- [ ] `edgeBlinkClass("top")` and `edgeBlinkClass("bottom")` each return a distinct
+- [x] `edgeBlinkClass("top")` and `edgeBlinkClass("bottom")` each return a distinct
       class producing a breathing indicator oriented toward that edge; any other
       input returns `""`.
-- [ ] Both helpers are `node --test`-covered without the canvas import map.
-- [ ] Canvas documents the `hasHiddenDependency` `Collapsible` variant (open +
+- [x] Both helpers are `node --test`-covered without the canvas import map.
+- [x] Canvas documents the `hasHiddenDependency` `Collapsible` variant (open +
       collapsed) and the edge-blink specimen.
-- [ ] `dist/` is **not** rebuilt by this task; the consuming board task
+- [x] `dist/` is **not** rebuilt by this task; the consuming board task
       (`agentic-workflow-h9v3m`) rebuilds it.
+
+## Outcome
+Shipped both sibling mechanisms as pure CSS + React-free helpers, no new component:
+
+- `dependencyPresentClass(present)` (`app/motion.js`) → `"rel-present"` / `""`.
+  `.rel-present::after` + `@keyframes rel-present-breathe` in
+  `styles/agentheim.css` render a **hollow** (border-only, `background:
+  transparent`) breathing dot in `--rel-dep`, painted via `::after` (the rail
+  attention dot uses `::before`) so the two never collide when both classes are
+  applied to the same header. Reduced motion strips the loop, keeps the dot
+  (ADR-0029 pattern).
+- `Collapsible` gained `hasHiddenDependency` (default `false`, `app/collapsible.js`),
+  wired via `dependencyPresentClass(hasHiddenDependency)` on the header button
+  alongside (not instead of) `attentionCueClass(attention)` — a fully separate prop.
+- `edgeBlinkClass(edge)` (`app/motion.js`) → `"rel-edge-blink rel-edge-blink--top"` /
+  `"...--bottom"` / `""`. `.rel-edge-blink` + `.rel-edge-blink--top`/`--bottom` +
+  `@keyframes rel-edge-blink-breathe` in `styles/agentheim.css`, reusing
+  `--rel-dep`/`--duration-relation`; each direction modifier renders a distinct
+  edge-oriented glow (`box-shadow` pointing up vs. down). No board-side placement
+  logic added — that is `agentic-workflow-h9v3m`'s job (ADR-0003 seam).
+- Canvas: section 09 gained `HiddenDependencySpecimen` (collapsed, open, and a
+  third group proving coexistence with `attention`) and `EdgeBlinkSpecimen` (a
+  mockup scroll frame with a top/bottom `chevrons-up`/`chevrons-down` `--rel-dep`
+  chevron).
+- 15 new `node --test` cases (`test/dependency-present.test.mjs`,
+  `test/edge-blink.test.mjs`); full suite 157/157 passing. `dashboard/dist/` was
+  **not** touched.
+- No new ADR: the design (hollow vs. filled, direction-agnostic marker, the
+  cornerAction-style primitive seam for the edge-blink) was already decided in
+  ADR-0034 pt. 6, which names this task explicitly.
+- BC README updated (`design-system` Motion section + Pointers) documenting both
+  mechanisms and reopening the styleguide gate for builder re-review.
+
+Key files: `styleguide/app/motion.js`, `styleguide/app/collapsible.js`,
+`styleguide/app/app.js` (canvas section 09), `styleguide/styles/agentheim.css`,
+`styleguide/test/dependency-present.test.mjs`, `styleguide/test/edge-blink.test.mjs`.
 
 ## Notes
 Reopens the design-system gate (new `Collapsible` prop + visible marker, new

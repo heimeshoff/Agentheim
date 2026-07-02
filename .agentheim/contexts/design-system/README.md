@@ -185,6 +185,69 @@ See ADR-0034
 > is rebuilt by the consuming task (`agentic-workflow-k5p8w`) when the hover-driven
 > ring actually renders on the board.
 
+As of `design-system-b7n2s` the dependency-relation language gains **two sibling
+mechanisms** covering "the target is present but not currently visible": a
+**hidden-dependency presence marker** on a collapsed `Collapsible` header (or any
+other arbitrary element), and an **off-viewport edge-blink primitive** for a scroll
+area. Both reuse `--rel-dep` / `--duration-relation` (one shared visual language
+across "pulsing on the card," "present but hidden," and "off-viewport") — no new
+hue, no new loop token.
+
+- **Hidden-dependency marker — `.rel-present` + `dependencyPresentClass(present)`
+  (`app/motion.js`).** A **hollow** (border-only, never filled) breathing dot,
+  deliberately distinct from the *filled* `--st-todo` rail attention dot (ADR-0029)
+  so "a dependency is hidden here" never reads as "a new item is here."
+  **Direction-agnostic** by design: a collapsed group can hold both `waiting-on` and
+  `holding-up` targets at once, so one marker meaning "expand to see" is enough —
+  direction stays on the on-card ring, never duplicated onto every group header.
+  Painted via `::after` (the attention dot uses `::before`), so the two markers
+  compose on the **same** header without collision.
+  - **`Collapsible`'s new `hasHiddenDependency` prop** (`app/collapsible.js`,
+    default `false`) wires the marker onto the header button — a prop **separate**
+    from `attention` in meaning, lifecycle, and rendered class; it is **not** an
+    overload of it (ADR-0029, design-system-v8k2p precedent). Off renders
+    byte-identical to today; on is simultaneous-safe with `attention`.
+  - **The `rel-present` class also works standalone**, with no `Collapsible`
+    required — usable directly on an arbitrary element (the Done column's
+    height-clamped `chevrons-up`/`chevrons-down` collapse control,
+    design-system-c3p9k, which is not a `Collapsible`).
+  - Reduced motion keeps the ADR-0029 pattern: the loop stops but the hollow dot
+    stays visible (a collapsed header has no other static encoding of "a
+    dependency is hidden here").
+- **Off-viewport edge-blink — a PRIMITIVE only, no new component.** Mirroring the
+  ADR-0003 "styleguide owns look/mechanics, consumer owns placement" seam used for
+  `cornerAction` (design-system-006): `.rel-edge-blink` + `.rel-edge-blink--top` /
+  `--bottom` + `@keyframes rel-edge-blink-breathe` in `agentheim.css`, and the
+  direction-aware `edgeBlinkClass(edge)` (`edge ∈ {"top","bottom"}`) in
+  `app/motion.js`. The board (`agentic-workflow-h9v3m`) builds and places the actual
+  small edge indicator (e.g. a `--rel-dep`-tinted chevron `Icon` pinned to its own
+  scroll container's edge) using its own scroll geometry — design-system doesn't
+  know the scroll container exists.
+- **Canvas specimens** — section 09 (`Collapsible`) gains a `hasHiddenDependency`
+  header variant (collapsed, open, and a third group proving coexistence with
+  `attention`), and a scroll-frame mockup documenting the edge-blink primitive with
+  a top and a bottom `--rel-dep` chevron.
+
+See ADR-0034 pt. 6
+(`.agentheim/knowledge/decisions/0034-dependency-ring-third-ambient-signal-dedicated-token-direction-by-line-style.md`),
+which names these as sibling mechanisms to the on-card ring, not variants of it.
+
+> **Gate re-review reopened by the hidden/off-viewport dependency markers
+> (`design-system-b7n2s`).** A new `Collapsible` prop (`hasHiddenDependency`) and
+> visible marker, plus a new off-viewport edge-blink primitive, join the canvas — a
+> visible styleguide change that reopens the design-system gate per the
+> `design-system-005` / `007` / `009` / `014` / `015` / `017` / `018` / `020` /
+> `021` / `v8k2p` / `w4t9k` precedent. Re-review against the canvas
+> (`styleguide/index.html` → section 09, the hidden-dependency and edge-blink
+> specimens) **before** `agentic-workflow-h9v3m` / `agentic-workflow-r9k2p` wire the
+> live board consumers and rebuild `dist/`.
+
+> Live-board note: the served dashboard `dist/` is a derived artifact (ADR-0003) and
+> was **not** rebuilt here — this task adds both mechanisms with **no shipped
+> dashboard consumer yet** (the ds-018 / ds-020 / ds-021 / w4t9k live-board pattern);
+> `dist/` is rebuilt by the consuming tasks (`agentic-workflow-h9v3m` /
+> `agentic-workflow-r9k2p`) when the markers actually render on the board.
+
 ### TicketCard — estimate chip is conditional; an optional corner-action slot (design-system-006)
 
 The `TicketCard` (`app/kanban.js`) is consumed by the dashboard **unforked**
@@ -711,4 +774,5 @@ the pattern in **section 11** (`SearchSpecimen` — type *design*, *adr*, or *zz
 - Drawer in-place expandable width: `styleguide/app/drawer.js` (+ React-free `drawer-state.js`); a controlled `expanded`/`onToggleExpand`/`expandedWidth` seam with a body-top chevron (`panel-right-open`/`panel-right-close` glyphs), consumed rail-aware by the dashboard slide-over (`agentic-workflow-074`) (design-system-020)
 - `concept` content type: `styleguide/app/data.js` (`CONTENT_TYPES.concept`, `lightbulb` glyph, `--ct-concept`/`--ct-concept-tint` magenta tokens in `styles/agentheim.css`); the styleguide capability behind Concepts as a first-class artifact kind in the dashboard rail + search (`agentic-workflow-075`) (design-system-021)
 - Dependency-relation ring: `styleguide/app/motion.js` (`dependencyRingClass`, re-exported from `styleguide/app/kanban.js`), `--rel-dep`/`--rel-dep-tint` tokens + `.rel-ring` keyframes in `styles/agentheim.css`, `--duration-relation` in `styles/colors_and_type.css`; the `TicketCard.dependencyRelation` prop the dashboard's hover-dependency feature will consume (`agentic-workflow-k5p8w`), see ADR-0034 (design-system-w4t9k)
+- Hidden/off-viewport dependency markers: `styleguide/app/motion.js` (`dependencyPresentClass`, `edgeBlinkClass`), `Collapsible.hasHiddenDependency` (`styleguide/app/collapsible.js`), `.rel-present` / `.rel-edge-blink(--top|--bottom)` + keyframes in `styles/agentheim.css` (reusing `--rel-dep` / `--duration-relation`); the styleguide capability the board's collapsed-section marker and scroll-edge indicator will consume (`agentic-workflow-h9v3m`, `agentic-workflow-r9k2p`), see ADR-0034 pt. 6 (design-system-b7n2s)
 - BC index: `INDEX.md`
