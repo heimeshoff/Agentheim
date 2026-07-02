@@ -5,6 +5,33 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 19:23 -- Modeling / Promoted: agentic-workflow-k5p8w - Board wiring — resolve hover dependencies and drive the on-card ring for visible targets
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+**Deps satisfied:** agentic-workflow-d8q3n ✓, design-system-w4t9k ✓ (both completed this session)
+
+---
+
+## 2026-07-02 19:23 -- Modeling / Promoted: agentic-workflow-f6m2q - Implement per-worker worktree isolation in work's git model
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+**Deps satisfied:** agentic-workflow-k9t3w ✓ (ADR-0032 ratified)
+
+---
+
+## 2026-07-02 19:23 -- Modeling / Promoted: design-system-b7n2s - Hidden and off-viewport dependency presence markers
+
+**Type:** Modeling / Promote
+**BC:** design-system
+**From → To:** backlog → todo
+**Deps satisfied:** design-system-w4t9k ✓ (completed this session)
+
+---
+
 ## 2026-07-02 19:10 -- Work session ended
 
 **Type:** Work / Session end

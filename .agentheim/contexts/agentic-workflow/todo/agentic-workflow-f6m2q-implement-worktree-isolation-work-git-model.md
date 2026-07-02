@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-f6m2q
 title: Implement per-worker worktree isolation in work's git model
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-07-02

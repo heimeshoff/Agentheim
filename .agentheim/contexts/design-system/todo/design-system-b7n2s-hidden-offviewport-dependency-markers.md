@@ -1,7 +1,7 @@
 ---
 id: design-system-b7n2s
 title: Hidden and off-viewport dependency presence markers
-status: backlog
+status: todo
 type: feature
 context: design-system
 created: 2026-07-02

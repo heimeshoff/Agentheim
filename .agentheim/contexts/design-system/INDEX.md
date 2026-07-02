@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 24
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **design-system-b7n2s** — Hidden and off-viewport dependency presence markers (feature) — `todo/design-system-b7n2s-hidden-offviewport-dependency-markers.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -54,7 +55,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **design-system-b7n2s** — Hidden and off-viewport dependency presence markers (feature) — `backlog/design-system-b7n2s-hidden-offviewport-dependency-markers.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

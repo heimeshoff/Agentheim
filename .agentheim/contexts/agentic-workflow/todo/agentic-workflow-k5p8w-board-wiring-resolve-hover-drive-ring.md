@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-k5p8w
 title: Board wiring — resolve hover dependencies and drive the on-card ring for visible targets
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-07-02
