@@ -1,5 +1,5 @@
 import os, json
-IT = r"C:/src/heimeshoff/agentic/agentheim/skills/capture-workspace/iteration-1"
+IT = r"C:/src/heimeshoff/agentic/agentheim/evals/capture-workspace/iteration-1"
 
 def g(text, passed, ev): return {"text": text, "passed": passed, "evidence": ev}
 

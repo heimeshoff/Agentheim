@@ -11,14 +11,13 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
+- **Todo:** 0
 - **Doing:** 0
-- **Done:** 20
+- **Done:** 21
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **infrastructure-e5t9c** — Relocate skills/capture-workspace eval debris out of the plugin payload (chore) — `todo/infrastructure-e5t9c-relocate-capture-workspace-eval-debris.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -27,6 +26,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **infrastructure-e5t9c** — Relocate skills/capture-workspace eval debris out of the plugin payload (chore) — `done/infrastructure-e5t9c-relocate-capture-workspace-eval-debris.md`
 - **infrastructure-020** — Bridge mangles prompts containing quotes — POSIX escaping breaks the Windows shell (bug) — `done/infrastructure-020-bridge-prompt-quote-escaping-cross-shell.md`
 - **infrastructure-019** — Dashboard origin sticks to its last-good port so an intermittent collision can't flap it (feature) — `done/infrastructure-019-dashboard-origin-sticky-last-good-port.md`
 - **infrastructure-018** — Dashboard binds a deterministic project-root port so the origin survives relaunch (decision) — `done/infrastructure-018-dashboard-deterministic-port-stable-origin.md`
