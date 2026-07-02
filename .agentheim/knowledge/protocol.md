@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 -- Modeling / Refined: agentic-workflow-p4v9t - Worktree isolation per worker
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Appended the audit's uncertainty-section validation step to the Notes: run `git log --grep 'Verification failed'` archaeology on a consumer project during refinement to measure how often verifier contamination actually bites, so the task's priority rests on data rather than structural inference.
+
+---
+
 ## 2026-07-02 -- Modeling / Captured: agentic-workflow-c8j3w - Compaction policy for BC READMEs and the growing INDEX files
 
 **Type:** Modeling / Capture

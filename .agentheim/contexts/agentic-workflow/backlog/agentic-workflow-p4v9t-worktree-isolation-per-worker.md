@@ -49,3 +49,10 @@ wrong — gitignored temp dir?), how the verifier is pointed at the worktree, ho
 `.agentheim/` bookkeeping writes (task file moves) interact with per-worker
 trees, Windows path/lock behavior, and interaction with the carry-over
 reconciliation task (agentic-workflow-d6q4h).
+
+Cheap validation before committing to the build (audit's uncertainty section):
+the contamination claim is a structural inference, not an observed incident.
+Ten minutes of `git log --grep 'Verification failed'` archaeology on a consumer
+project would measure how often verifier contamination / cross-task
+interference actually bites — run it during refinement to inform this task's
+priority (and MAX_PARALLEL sizing) with data instead of inference.
