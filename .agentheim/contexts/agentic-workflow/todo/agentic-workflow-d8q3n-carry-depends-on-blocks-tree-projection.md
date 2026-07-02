@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-d8q3n
 title: Carry depends_on/blocks through the /api/tree per-task projection
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-07-02

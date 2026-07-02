@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 2
-- **Todo:** 0
+- **Backlog:** 1
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 23
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **design-system-w4t9k** — Dependency-highlight ring — a third ambient-motion signal on TicketCard (feature) — `todo/design-system-w4t9k-dependency-highlight-ring-ticket-card.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -53,7 +54,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **design-system-w4t9k** — Dependency-highlight ring — a third ambient-motion signal on TicketCard (feature) — `backlog/design-system-w4t9k-dependency-highlight-ring-ticket-card.md`
 - **design-system-b7n2s** — Hidden and off-viewport dependency presence markers (feature) — `backlog/design-system-b7n2s-hidden-offviewport-dependency-markers.md`
 <!-- backlog-list:end -->
 

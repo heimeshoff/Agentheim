@@ -1,7 +1,7 @@
 ---
 id: design-system-w4t9k
 title: Dependency-highlight ring — a third ambient-motion signal on TicketCard
-status: backlog
+status: todo
 type: feature
 context: design-system
 created: 2026-07-02

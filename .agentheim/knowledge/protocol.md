@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 18:46 -- Modeling / Promoted: design-system-w4t9k - Dependency-highlight ring — a third ambient-motion signal on TicketCard
+
+**Type:** Modeling / Promote
+**BC:** design-system
+**From → To:** backlog → todo
+
+---
+
+## 2026-07-02 18:46 -- Modeling / Promoted: agentic-workflow-d8q3n - Carry depends_on/blocks through the /api/tree per-task projection
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-02 18:42 -- Modeling / Refined: agentic-workflow-r9k2p - Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring
 
 **Type:** Modeling / Refine

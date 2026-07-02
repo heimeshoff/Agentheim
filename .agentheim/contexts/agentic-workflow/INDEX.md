@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 17
-- **Todo:** 0
+- **Backlog:** 16
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 92
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-d8q3n** — Carry depends_on/blocks through the /api/tree per-task projection (feature) — `todo/agentic-workflow-d8q3n-carry-depends-on-blocks-tree-projection.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -123,7 +124,6 @@ research touching this BC, and concept synthesis pages.
 ### Backlog
 <!-- backlog-list:start -->
 - **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature, umbrella — delivered via d8q3n/w4t9k/b7n2s/k5p8w/h9v3m) — `backlog/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
-- **agentic-workflow-d8q3n** — Carry depends_on/blocks through the /api/tree per-task projection (feature) — `backlog/agentic-workflow-d8q3n-carry-depends-on-blocks-tree-projection.md`
 - **agentic-workflow-k5p8w** — Board wiring — resolve hover dependencies and drive the on-card ring for visible targets (feature) — `backlog/agentic-workflow-k5p8w-board-wiring-resolve-hover-drive-ring.md`
 - **agentic-workflow-h9v3m** — Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks (feature) — `backlog/agentic-workflow-h9v3m-board-wiring-collapsed-group-offviewport-blinks.md`
 - **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `backlog/agentic-workflow-c8j3w-index-done-list-rotation.md`
