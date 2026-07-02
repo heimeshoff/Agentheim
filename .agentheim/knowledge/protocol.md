@@ -5,6 +5,25 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 17:58 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** ~30m (first Batch started 17:28 → now)
+**Completed:** 7 (first-try PASS: 7, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** f7k2d: 1, w3p8n: 1, e5t9c: 1, b8x2v: 1, j4m6r: 1, d6q4h: 1, g9s3w: 1
+**Commits:** 7 (one per task)
+**Carry-over:** none — working tree clean
+**Notes:**
+- Cleared the entire 2026-07-02 harness-audit todo set (6 agentic-workflow + 1 infrastructure). Dispatched in 4 waves to respect the shared-file constraint on `skills/work/SKILL.md` (four tasks touched it) and the `agents/verifier.md` overlap between g9s3w and j4m6r.
+- One global ADR written: ADR-0031 (per-agent model routing), inserted into the global index and back-linked to j4m6r.
+- **Orchestrator git correction (surfaced, not a task failure):** the f7k2d/w3p8n/e5t9c batch-1 commits were first built with `git commit` (no pathspec), which swept the e5t9c worker's pre-staged `git mv` renames into f7k2d's commit. Detected immediately, `git reset --mixed` to before the batch, and rebuilt all three with explicit scoped `git add` so each task's code landed in its own commit. Lesson for future runs: when a worker pre-stages via `git mv`, either `git commit -- <paths>` or reset-and-rebuild — a bare `git commit` is not scoped by the preceding `git add`.
+- Concept candidates: none this run.
+
+---
+
 ## 2026-07-02 17:57 -- Task verified and completed: agentic-workflow-g9s3w - Pre-load the test command into the verifier spawn prompt
 
 **Type:** Work / Task completion
