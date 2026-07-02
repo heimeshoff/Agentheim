@@ -9,12 +9,16 @@ The `work` skill turns refined `todo/` tasks into real code and real decisions. 
 
 **The conductor (you) never writes code.** You coordinate: scan, build the DAG, dispatch workers, commit, log. Keeping you lean prevents context exhaustion across long batches. All coding work is delegated to subagents.
 
+**Git model: per-worker worktree isolation (ADR-0032).** Every parallel worker runs in its own git worktree on a private branch — never the shared main tree. Git's own 3-way merge is the conflict detector at integration time, not a prose scan at dispatch time; the verifier's test run is isolated from every sibling worker's uncommitted changes. `main` is written only by the conductor, only sequentially, exactly as ADR-0026 already required — this strengthens that invariant, it does not relax it. See "Phase 4: Batch dispatch" and "Git authority" below for the full choreography.
+
 ## Phase 1: Recovery check
 
-Before anything else, look at `contexts/*/doing/`:
-- **0 tasks** → proceed to Phase 2.
-- **1 task** → a previous session was interrupted. Resume it sequentially as the first task of this session, *before* starting any parallel dispatch.
-- **2+ tasks** → a previous parallel session was interrupted. Ask the user: "Resume all in parallel", "Resume one at a time", or "Abandon — move them back to todo". Do not guess.
+Before anything else, look at `contexts/*/doing/` **and**, if this is a git repo, run `git worktree list --porcelain` (an orphaned `aw/<task-id>` worktree is the other half of the interrupted-session signal, alongside a stranded `doing/` task):
+
+- **0 tasks, 0 non-main worktrees** → proceed to Phase 2.
+- **1 task** → a previous session was interrupted. Resume it sequentially as the first task of this session, *before* starting any parallel dispatch. If a worktree + branch `aw/<task-id>` already exists for it (a FAIL-iteration interruption), reuse that worktree — do not create a second one. If no worktree exists (the batch-start commit landed but dispatch never happened), create one fresh: `git worktree add -b aw/<task-id> .worktrees/<task-id> HEAD`.
+- **2+ tasks** → a previous parallel session was interrupted. Ask the user: "Resume all in parallel", "Resume one at a time", or "Abandon — move them back to todo". Do not guess. Resuming reuses each task's existing worktree where one exists.
+- **A non-main worktree with no matching `doing/` task** → likely an orphan from a session that ended mid-cleanup. Surface it to the user for an explicit disposition rather than silently removing it — same posture as the session-end reconciliation below.
 
 ## Phase 2: Build the dependency graph
 
@@ -26,34 +30,40 @@ Before anything else, look at `contexts/*/doing/`:
 6. **Detect cycles.** If the graph has a cycle, stop and surface the cycle to the user. Do not "just pick one".
 7. Briefly tell the user what you found: "X tasks ready across N contexts, Y tasks blocked on Z."
 
-## Phase 3: Conflict detection before batch dispatch
+## Phase 3: Conflict pre-scan — advisory only (ADR-0032 demoted this from a throttle)
 
-Two parallel workers touching the same file is the most common cause of merge pain. Defend against it:
+Textual conflict prediction used to hard-demote tasks because the shared working tree made a real collision unsafe. Per-worker worktree isolation (ADR-0032) removes that unsafety: two workers touching the same file now collide at **merge-back**, where git's real 3-way merge either resolves it cleanly or surfaces an actual conflict — never a guess from English. The pre-scan survives only as a cheap **advisory** for merge ordering:
 
 1. For each ready task, scan its `What`, `Acceptance criteria`, and `Notes` sections for file paths, directory references, and shared resources (BC READMEs, ADRs, shared modules).
-2. If two ready tasks reference the same file or directory, **demote the higher-id task to the next batch** — don't dispatch it in the current wave.
-3. Tasks targeting the same BC's README count as a conflict (only one worker updates the BC memory per batch).
-4. **Cap the batch at MAX_PARALLEL = 3** unless the user asked otherwise. Pick the lowest-numbered unblocked, non-conflicting tasks.
+2. If two ready tasks reference the same file or directory (same-BC-README overlap is the routine case), **annotate them** for sequential merge-ordering — dispatch both in the same batch, but plan to squash-merge them one after another rather than out of order, so a real conflict (if one occurs) surfaces predictably. Do **not** demote either task to a later batch on this basis alone — that throttle is retired.
+3. **Cap the batch at MAX_PARALLEL = 3** unless the user asked otherwise (isolation makes raising this safe going forward, but the default stays 3 unless asked). Pick the lowest-numbered unblocked tasks; the advisory annotation from step 2 only affects merge *order*, never selection.
 
 ## Phase 4: Batch dispatch
 
-For each dispatch wave:
+Every dispatch wave now runs each worker in its own **git worktree** on a private branch (ADR-0032) — the shared-tree model is retired. The choreography, in order:
 
-1. **Move all selected task files** from `todo/` to `doing/` (the conductor does this *before* spawning subagents — prevents workers racing for the same file).
+1. **Batch-start claim commit.** On the **main** tree: move all selected task files `todo → doing` (file move + `status:` rewrite), apply the BC `INDEX.md` `todo → doing` edits, prepend the "Batch started" `protocol.md` entry (see "Protocol logging" below), `git add` that enumerated set, and **commit**: `chore(<bc>): batch start [<id-1>] [<id-2>] …`. This is the **one** deliberate amendment to ADR-0026: the `todo → doing` half of the lifecycle move now rides in this per-batch commit instead of folding into each task's final commit — `git worktree add` checks out a *committed* state, so the worktree's base must already hold the task in `doing/`. If the project isn't a git repo, skip the commit and every worktree step below — just move the files and proceed to spawn workers against the one working tree exactly as before ADR-0032 (see "Windows & node_modules" at the end of "Git authority").
 
-2. **Log "Batch started"** to `.agentheim/knowledge/protocol.md` (prepend — see "Protocol logging" section below).
+2. **Create one worktree per task**, from that commit's HEAD:
+   ```
+   git worktree add -b aw/<task-id> .worktrees/<task-id> HEAD
+   ```
+   The worktree holds the task already in `doing/`, matching the worker prompt below.
 
-3. **Spawn one subagent per task** using the Agent tool with `subagent_type: "worker"`. Launch all subagents in **one message** (parallel tool calls). Use the Subagent Prompt Template below.
+3. **Lazily link `dashboard/node_modules` for dashboard-touching tasks only.** If the task's `What`/`Acceptance criteria` name `dashboard/`, call `linkDashboardNodeModules(worktreeRoot, mainRoot)` (`lib/worktree-node-modules.mjs`) — it junctions (Windows) / symlinks (POSIX) the worktree's `dashboard/node_modules` to the ONE real one in the main tree. No per-worktree `npm install`. Every other task's worktree gets no link and needs none. (`taskTouchesDashboard(fileList)` in the same module is a pure helper for this check once a `FILE_LIST` exists; at dispatch time you're deciding from the task's own prose.)
 
-4. **Wait for all subagents to complete.** As each returns:
+4. **Set `git config core.longpaths true`** once per session (harness setup, not per-worktree) if not already set — worktrees nest `.agentheim/` and `dashboard/` trees deep enough to approach Windows `MAX_PATH`.
+
+5. **Spawn one subagent per task** using the Agent tool with `subagent_type: "worker"`. Launch all subagents in **one message** (parallel tool calls). Use the Subagent Prompt Template below — its `## Your task` block now carries a `Workspace` field pointing at the task's worktree; every other absolute path you pass (task file, BC README, BC index) is the copy **inside that worktree**, not the main tree.
+
+6. **Wait for all subagents to complete.** As each returns:
    - Parse its strict return format (see template).
-   - For `RESULT: SUCCESS`:
-     - **Verify the result** (see "Verification gate" section below). Only commit after verification passes.
-   - For `RESULT: BOUNCED`: the worker moved the task back to `backlog/` because it was under-refined. Log "Task bounced" to protocol.md. Do not commit — the worker made no changes.
-   - For `RESULT: FAILED`: log "Task failed" to protocol.md with the error. Leave the task in `doing/` so it doesn't silently retry. Tell the user at the end.
+   - For `RESULT: SUCCESS`: **verify the result** (see "Verification gate" below). Only integrate to `main` after verification passes.
+   - For `RESULT: BOUNCED`: see "BOUNCE integration" at the end of "Verification gate" below — a small, verifier-free squash-merge back to `main`, then worktree cleanup.
+   - For `RESULT: FAILED`: log "Task failed" to protocol.md with the error, on the **main** tree (there is no worktree content worth merging). Remove the worktree + branch (`git worktree remove --force` + `git branch -D aw/<task-id>`) — the task stays in `doing/` on `main` (from the batch-start commit) so it doesn't silently retry. Tell the user at the end.
    - One failure does not block the batch — the other subagents continue and are processed normally.
 
-5. **After the batch completes**, return to Phase 2 — re-scan. New tasks may have been promoted to todo (via parallel `modeling` invocations) or new dependencies may have unblocked.
+7. **After the batch completes**, return to Phase 2 — re-scan. New tasks may have been promoted to todo (via parallel `modeling` invocations) or new dependencies may have unblocked.
 
 ## Verification gate (post-SUCCESS, pre-commit)
 
@@ -75,37 +85,51 @@ Otherwise, verify.
 
 **Resolve the test command once per batch (per BC), not per verifier and not per iteration.** Before spawning the batch's verifiers, determine the project's test command using the same discovery order the verifier uses as its fallback — the BC README first, then the project root (`package.json` scripts, `Makefile` targets, `pyproject.toml`, `Cargo.toml`, `*.csproj`, `go.mod`). Cache the resolved command per BC (different BCs may have different commands) and pass it into every verifier spawn this batch — **including re-dispatched verifiers on FAIL iterations 2 and 3: reuse the cached command, never re-resolve per iteration.** This mirrors how workers receive pre-loaded ADRs — resolve once, hand it forward. If no command is discoverable for a BC, pass the literal `none` in the block and let the verifier apply its fail-closed rule.
 
+Before capturing a diff, make the worker's committed-but-ephemeral checkpoint: **the conductor** (never the worker) stages and commits the worker's enumerated output **inside its worktree** — `git -C .worktrees/<task-id> add <FILE_LIST + moved task file + BC README + ADRs>` then `git -C .worktrees/<task-id> commit -m "wip [<task-id>] iter N"`. This commit is ephemeral: the eventual squash-merge (see "Git authority") collapses it, so it never reaches `main` history on its own. Keeping this commit with the conductor, not the worker, keeps the *worker never runs git* rule untouched.
+
 For each SUCCESS that requires verification, in parallel where the workers ran in parallel:
 
-1. Capture the diff: run `git diff` (working tree against HEAD — the worker has not committed) and `git diff --stat`. Note the exact files changed.
+1. Capture the diff **from the worktree, not the main tree**: `git -C .worktrees/<task-id> show HEAD` (the wip-commit's full diff) and `git -C .worktrees/<task-id> show HEAD --stat`. This is the isolation payoff — the diff (and the verifier's later test run) can never contain a sibling worker's uncommitted changes, because each worktree only ever holds its own task's work atop the shared batch-start commit.
 2. Track the iteration count for this task (start at 1; increments on each FAIL re-dispatch).
-3. Spawn one `verifier` subagent via Agent with `subagent_type: "verifier"` using the **Verifier Prompt Template** below. Launch verifiers for a batch's successes in the same message (parallel tool calls).
+3. Spawn one `verifier` subagent via Agent with `subagent_type: "verifier"` using the **Verifier Prompt Template** below — it now carries a `## Worktree` absolute-path field. Launch verifiers for a batch's successes in the same message (parallel tool calls).
 4. Wait for each verifier's verdict.
 
 ### Handling the verdict
 
 **`VERDICT: PASS`**
-1. Proceed to the existing "Git authority" section — it does the INDEX/protocol/task-move bookkeeping **before** the commit, then `git add`s everything and commits in one shot (per ADR-0026). Note the protocol entry written there is "Task verified and completed" (replaces the old "Task completed" entry — see Protocol logging below).
+1. Proceed to the existing "Git authority" section — **on the main tree**, squash-merge the worker's branch, fold in the INDEX/protocol/task-move bookkeeping, and make **one** commit (per ADR-0026 + ADR-0032). Note the protocol entry written there is "Task verified and completed" (replaces the old "Task completed" entry — see Protocol logging below). Tear down the worktree + branch afterward (see "Git authority").
 
 **`VERDICT: SKIP`**
-1. Commit exactly as on PASS — same before-the-commit bookkeeping. The protocol entry written in the Git authority step is "Task completed (verification skipped: <reason>)".
+1. Integrate exactly as on PASS — same squash-merge + before-the-commit bookkeeping + worktree teardown. The protocol entry written in the Git authority step is "Task completed (verification skipped: <reason>)".
 
 **`VERDICT: FAIL`, iteration 1 or 2**
-1. Do **not** commit. The worker's changes stay on the working tree but are not added or committed yet.
-2. Roll back the worker's completion claim on the task file:
+1. Do **not** merge to `main` — nothing on `main` needs to change, because `main` never held this task's unverified work in the first place (it lives only in the worktree + branch). This is the structural upside of isolation: there is no rollback to perform on `main`.
+2. **Inside the worktree**, roll back the worker's completion claim on the task file:
    - Move the task file from `done/` back to `doing/`
    - Revert frontmatter: `status: done` → `status: doing`, clear the `completed:` date
+   The conductor performs this move in the worktree (still no git command from the worker) and makes another `wip [<task-id>] iter N` commit on the same branch capturing the revert + the verifier note below — this too is collapsed by the eventual squash.
 3. Append the verifier's output to the task file as a new `## Verifier note (iteration N)` section at the bottom, containing the REASONS, SUGGESTED_FIX, and ITERATION_HINT verbatim.
-4. Log "Verification failed (iteration N)" to protocol.md.
+4. Log "Verification failed (iteration N)" to protocol.md — on the **main** tree (this entry is not part of any task's eventual squash-merge; it accumulates on `main` until the next commit that does land there — see "Reconciling stranded carry-over" for how a lone protocol edit is handled if the session ends before then).
 5. Decide re-dispatch:
    - If `ITERATION_HINT: task-under-specified` → do not re-dispatch even on iteration 1. Treat as iteration-3 below.
-   - Otherwise → **re-dispatch a worker** on this task. Use the standard Subagent Prompt Template, but prepend a paragraph telling the worker to read the task file's `## Verifier note` sections and address them. Set `iteration = N + 1` for the next verification.
+   - Otherwise → **re-dispatch a worker into the SAME worktree** (the `Workspace` field points at the same `.worktrees/<task-id>/`, so its iteration context — files, the earlier `wip` commits still pending collapse — stays live). Use the standard Subagent Prompt Template, but prepend a paragraph telling the worker to read the task file's `## Verifier note` sections and address them. Set `iteration = N + 1` for the next verification.
 
 **`VERDICT: FAIL`, iteration 3 (or earlier with `ITERATION_HINT: task-under-specified`)**
-1. Do not commit. Do not re-dispatch.
-2. Leave the task in `doing/` with all accumulated verifier notes — the user will see them.
+1. Do not merge to `main`. Do not re-dispatch.
+2. **Keep the worktree and branch** — do not remove them. The task remains in `doing/` on `main` (it was never merged to `done/`); all accumulated verifier notes are visible in the task file **inside the worktree**. Surface the worktree's absolute path alongside the task so the user can inspect the live iteration state directly.
 3. Log "Verification failed — escalating to user" to protocol.md.
-4. Surface at end-of-batch (see End-of-run reporting): summarize the task, the iteration history, and the latest verifier's SUGGESTED_FIX. The user decides whether to refine the task (re-route via `modeling` REFINE) or abandon.
+4. Surface at end-of-batch (see End-of-run reporting): summarize the task, the iteration history, the latest verifier's SUGGESTED_FIX, and the kept worktree's path. The user decides whether to refine the task (re-route via `modeling` REFINE) or abandon — either way, the worktree is reconciled at session end (see "Reconciling stranded carry-over").
+
+### BOUNCE integration
+
+A worker that returns `RESULT: BOUNCED` moved its task file `doing → backlog` **inside its worktree** and appended a `## Worker note`. This needs no verifier (no code was produced) and is small enough to integrate immediately rather than leaving it stranded once the worktree is torn down — the conservative alternative (never merging it) would silently hide the bounce, strictly worse than the pre-worktree behavior of at least leaving an uncommitted, visible change in the one shared tree. So, on the **main** tree:
+
+1. `git merge --squash aw/<task-id>` — the delta is just the `doing → backlog` move + the `## Worker note`.
+2. Apply the BC `INDEX.md` `doing → backlog` edit and prepend the "Task bounced" `protocol.md` entry (see "Protocol logging").
+3. `git add` the enumerated bookkeeping (`INDEX.md`, `protocol.md` — the squash already staged the moved task file) and commit: `chore(<bc>): task bounced — <title> [<task-id>]`.
+4. Tear down the worktree + branch exactly as on PASS/SKIP (unlink any `dashboard/node_modules` link first, then `git worktree remove --force` + `git branch -D aw/<task-id>`).
+
+This resolution is recorded in **ADR-0037** — ADR-0032 covered PASS/FAIL/SKIP explicitly but left the BOUNCE transition unaddressed.
 
 ### Verifier Prompt Template
 
@@ -115,19 +139,20 @@ Spawn each verifier with `Agent(subagent_type: "verifier", prompt: <the-below>)`
 You are a verifier agent auditing one worker's completed task with fresh context. You have no exposure to the worker's reasoning — only the task spec, the BC README, and the diff in front of you.
 
 ## Your inputs
-Task file (currently in doing/ or done/): <ABSOLUTE-PATH>
+Task file (currently in doing/ or done/, inside the worktree below): <ABSOLUTE-PATH>
 Bounded context: <BC-NAME>
 BC README: <ABSOLUTE-PATH-TO-BC-README>
+Worktree: <ABSOLUTE-PATH-TO-WORKTREE>   <!-- run the test command below FROM this directory, not the main repo root -->
 Iteration: <N> of max 3
 
 ## The worker's strict SUCCESS return
 <paste the worker's full RESULT: SUCCESS block verbatim>
 
 ## The diff to audit
-<paste `git diff --stat` output, then `git diff` output — or attach as text>
+<paste `git -C <worktree> show HEAD --stat` output, then `git -C <worktree> show HEAD` output — the worktree's one wip-commit, scoped to only this task's changes atop the shared batch-start commit>
 
 ## Pre-resolved test command
-The `work` skill resolved this project's test command once for this batch (the same command is reused across every verification iteration for this BC). Use it directly in check 2 — run it as-is instead of re-discovering. If it reads `none`, resolution found no command; fall back to your own discovery procedure, and if that also finds nothing, apply your fail-closed FAIL.
+The `work` skill resolved this project's test command once for this batch (the same command is reused across every verification iteration for this BC). **Run it from the `## Worktree` path above** — that is what makes this run isolated from any sibling worker's changes. If it reads `none`, resolution found no command; fall back to your own discovery procedure (rooted at the worktree), and if that also finds nothing, apply your fail-closed FAIL.
 
 <the resolved test command string for this BC, or `none` if resolution found nothing>
 
@@ -144,62 +169,81 @@ Do not use Write, Edit, or any git command. You are read-only.
 
 ### Parallel verification
 
-When the conductor dispatched a parallel batch of N workers and several return SUCCESS, capture each worker's diff independently (use `git diff -- <FILE_LIST>` per worker if needed to scope the patch), and spawn the verifiers as parallel Agent calls in one message. Each verifier sees only its own task's diff. Commit each verified-PASS sequentially in the order verifiers return — never parallelize git writes.
+When the conductor dispatched a parallel batch of N workers and several return SUCCESS, each worker's diff is **already isolated by construction** — it is `git -C .worktrees/<task-id> show HEAD` in that worker's own worktree, which can never contain a sibling's uncommitted changes. Spawn the verifiers as parallel Agent calls in one message; each verifier sees only its own task's diff and runs the suite in its own worktree. Integrate each verified-PASS **sequentially** on the main tree in the order verifiers return — never parallelize git writes to `main` (a worktree's own `wip` commits can happen at any time; only the squash-merge onto `main` is serialized).
 
 ## Git authority (conductor only)
 
-Git is owned by `work`, not by workers or verifiers. Workers only move files and write content; verifiers only read. This is load-bearing for parallel safety — two writes to git concurrently can race.
+Git is owned by `work`, not by workers or verifiers. Workers only move files and write content, **inside their own worktree**; verifiers only read, also inside that worktree. This is load-bearing for parallel safety: `main` is written **only** by the conductor, **only** sequentially — worktree isolation (ADR-0032) strengthens this, it does not relax it, because every worker's writes land on a private branch that cannot race anything.
 
-**The doctrine here is ADR-0026: all bookkeeping is written and `git add`ed BEFORE the commit, so a completed task's code + task-move + INDEX + protocol all land in ONE commit and the working tree is clean afterward.** There is no post-commit write step — the old `commit: <sha>` chicken-and-egg (which forced bookkeeping out of the task commit into a separate trailing per-session commit) is gone.
+**The doctrine here is ADR-0026 + ADR-0032: all bookkeeping is written and `git add`ed BEFORE the integrating commit, so a completed task's code + task-move + INDEX + protocol all land in ONE commit on `main`, and `git merge --squash` — not a prose scan — is the conflict detector.** There is no post-commit write step, and no `commit: <sha>` frontmatter field (ADR-0026).
 
-After a verifier returns `VERDICT: PASS` (or `VERDICT: SKIP`, or when verification was bypassed per the skip rules above), do all of this **before** committing:
+### PASS / SKIP — squash-merge to `main`, one commit
 
-1. `git status` to see what changed.
-2. **Write all bookkeeping now (pre-commit):**
-   - The worker already moved the task file `doing → done` and set `status: done` + `completed:`. Confirm that move is on disk.
+After a verifier returns `VERDICT: PASS` (or `VERDICT: SKIP`, or when verification was bypassed per the skip rules above), on the **main** tree:
+
+1. `git merge --squash aw/<task-id>` — stages the branch's net delta (code + `doing → done` move + BC README + ADRs, collapsed from however many `wip` commits the branch accumulated across iterations). **This is where a real conflict against an already-merged sibling surfaces** — see "Merge-back conflicts" below.
+2. **Write all bookkeeping now (pre-commit), on the main tree:**
+   - Confirm the squash staged the task file at `doing → done` with `status: done` + `completed:` set (the worker did this inside the worktree; the squash carries it forward).
    - Apply the BC `INDEX.md` doing → done edits (see "Index updates" below) for this task.
    - Apply the ADR↔task backlink maintenance and any ADR index inserts (see "Index updates").
    - Prepend the `protocol.md` entry for this task (see "Protocol logging") — write the final entry now, not after the commit.
-3. `git add` an **explicit, enumerated** list: the files from the worker's `FILE_LIST`, plus the moved task file, the updated BC README (if `BC_README_UPDATED: yes`), any ADRs in `ADRS_WRITTEN`, **and the `INDEX.md` files and `protocol.md` you just edited in step 2**. **Never `git add -A` / `git add .`** — a blanket add sweeps in the user's in-progress work or a parallel sibling worker's files still awaiting their own verification, and a concurrent `modeling` session's in-flight markdown (ADR-0026's scoped-add rule is load-bearing for concurrency safety).
+3. `git add` an **explicit, enumerated** list: the bookkeeping paths from step 2 (`INDEX.md`, `protocol.md`) — the squash in step 1 already staged the branch's own files (code, moved task file, BC README, ADRs), so you do not re-add `FILE_LIST` separately. **Never `git add -A` / `git add .`** — a blanket add sweeps in the user's in-progress work, a concurrent sibling worktree's staged-but-unmerged branch, or a concurrent `modeling` session's in-flight markdown (ADR-0026's scoped-add rule is load-bearing for concurrency safety).
 4. Commit with message:
    ```
    <type>(<bc>): <summary> [<task-id>]
    ```
    where `<type>` comes from the task's frontmatter (feature / bug / refactor / chore / spike / decision), `<bc>` is the bounded context, `<task-id>` is the task id. Example:
    `feature(books): add ReadingSession concept to Book aggregate [books-001]`
+5. **Tear down the worktree**, in order:
+   - If the task touched `dashboard/`, `unlinkDashboardNodeModules(worktreeRoot)` (`lib/worktree-node-modules.mjs`) **first** — never skip this. (De-risking spike finding, ADR-0037: `git worktree remove --force` recurses THROUGH an un-removed junction and silently deletes the real shared `node_modules`'s contents — no error, just data loss. Unlinking first is mandatory, not housekeeping.)
+   - `git worktree remove .worktrees/<task-id> --force`
+   - `git branch -D aw/<task-id>`
 
 The commit SHA is **not** written back anywhere. A task's commit is discoverable from `git log` via the `[<task-id>]` trailer in the message — that is why the `commit:` frontmatter field is dropped (ADR-0026). Do **not** add a `commit: <sha>` field and do **not** amend the task file after committing.
 
+### Merge-back conflicts — abort and surface, never auto-guess
+
+Two same-BC workers both editing the BC README (the common case the Phase 3 advisory flags) now collide at **merge-back** instead of being predicted from prose. On a clean or auto-mergeable squash-merge, proceed as above. On a **real** conflict (git leaves conflict markers, non-zero exit from step 1):
+
+1. **Abort with `git reset --hard HEAD`** — **not** `git merge --abort`. De-risking spike finding (ADR-0037): `git merge --squash` never sets `MERGE_HEAD`, so `git merge --abort` errors ("There is no merge to abort") on a squash merge; `git reset --hard HEAD` is the command that actually restores `main`'s index and working tree to their pre-merge state. `main` is never left in a conflicted state.
+2. Preserve the losing task's worktree + branch **exactly as-is** — do not remove them.
+3. **Surface to the user immediately**: name the conflicting file(s), both task ids, and the worktree path. No merge is ever auto-guessed; the user resolves manually or asks for a re-run. (An automatic rebase-and-reverify is a named future enhancement, not baseline — see ADR-0032.)
+
 ### One commit per task — and the trivial-squash carve-out
 
-**One task = one commit is the default.** Commit after each verifier passes, not in a batch — that way if the next verification fails we haven't bundled it with an already-passed one. In a parallel batch where verifiers return roughly simultaneously, commit sequentially in the order verifiers return PASS.
+**One task = one commit is the default.** Integrate after each verifier passes, not in a batch — that way if the next verification fails we haven't bundled it with an already-passed one. In a parallel batch where verifiers return roughly simultaneously, squash-merge sequentially on `main` in the order verifiers return PASS.
 
-**Trivial-squash carve-out (ADR-0026):** a *wave* of trivial follow-up tasks MAY be folded into one commit (carrying one `[<task-id>]` trailer per squashed task) **only when ALL of these hold**:
+**Trivial-squash carve-out (ADR-0026, unaddressed by ADR-0032's per-task-branch model but not precluded by it):** a *wave* of trivial follow-up tasks MAY be folded into one commit (carrying one `[<task-id>]` trailer per squashed task) **only when ALL of these hold**:
 
 - **(a) Same BC** — every task in the wave belongs to the same bounded context.
 - **(b) Same file set** — they touch the same files; no task in the wave touches a file no other task in the wave touches.
 - **(c) No-behavior-change tweaks** — each is a copy / chrome / token / formatting tweak layered on the prior one: no new test, no new code path, no acceptance criterion that a test would newly cover. (If a task adds a test or a behavior, it is not trivial — give it its own commit.)
 - **(d) Same batch** — they were dispatched in the same `work` batch and all passed verification.
 
-The aw-064/065/066/067 one-line topbar-chrome tweaks are the canonical example. When in doubt, do **not** squash — one commit per task is always safe. This carve-out bends the vision's "one task = one commit" invariant deliberately; that is why it is recorded in ADR-0026.
+The aw-064/065/066/067 one-line topbar-chrome tweaks are the canonical example. When in doubt, do **not** squash — one commit per task is always safe. When it does apply under worktree isolation, squash-merge each eligible branch in turn (`git merge --squash aw/<id-1>`, then `git merge --squash aw/<id-2>`, …) before the one shared commit. This carve-out bends the vision's "one task = one commit" invariant deliberately; that is why it is recorded in ADR-0026.
 
-If the project isn't a git repo, skip commits silently and note it in the end-of-run summary. (Verification is also auto-skipped in this case — see "When to skip verification".)
+### Windows & node_modules
+
+- **Long paths.** Worktrees nest `.agentheim/` and `dashboard/` trees; `git config core.longpaths true` is harness setup (Phase 4 step 4), relied on alongside Windows `LongPathsEnabled`. If `MAX_PATH` still bites, fall back to the bare ADR-0028 token as the worktree dir name.
+- **No per-worktree `npm install`.** Only when a task touches `dashboard/`, `linkDashboardNodeModules` lazily junctions/symlinks the worktree's `dashboard/node_modules` to the main tree's ONE real copy (Phase 4 step 3) — safe because node_modules is read-only during a build. `unlinkDashboardNodeModules` removes the link — **always before** `git worktree remove` (see the PASS/SKIP teardown above and the mandatory safety note there). The OS-divergent branch (junction vs. symlink) lives in the one helper `lib/worktree-node-modules.mjs`, mirroring how `dashboard/launch.mjs` centralizes OS-divergent spawn logic (ADR-0002).
+
+If the project isn't a git repo, skip commits and worktrees silently — workers run against the one shared working tree exactly as before ADR-0032, and note the degraded mode in the end-of-run summary. (Verification is also auto-skipped in this case — see "When to skip verification".)
 
 ## Index updates (conductor-owned)
 
 Indexes track artifact movement. The work skill — **never the worker** — updates them. The worker is scope-restricted; touching `INDEX.md` files from inside a worker would fail verification. Index template lives at `references/index-template.md`.
 
-These edits are part of the bookkeeping that is written and `git add`ed **before** the commit (ADR-0026) — the doing → done INDEX edit, the ADR backlinks, and the protocol entry all land in the same commit as the task. Do them in the Git authority step's pre-commit phase, not after.
+These edits are part of the bookkeeping that is written and `git add`ed **before** the integrating commit (ADR-0026 + ADR-0032) — the INDEX edit, the ADR backlinks, and the protocol entry all land in the same commit as the task's squash-merged (or, for the batch-start transition, batch-claimed) work. Do them in the Git authority step's pre-commit phase, not after.
 
 Per state transition in `contexts/<bc>/INDEX.md`:
 
 | Transition | Marker edits | Counts |
 |---|---|---|
-| **todo → doing** (Phase 4 step 1) | remove from `<!-- todo-list:start -->` → insert into `<!-- doing-list:start -->` | Todo −1, Doing +1 |
-| **doing → done** (pre-PASS-commit bookkeeping) | remove from `<!-- doing-list:start -->` → insert at top of `<!-- done-list:start -->` (newest first) | Doing −1, Done +1 |
-| **doing → backlog** (BOUNCED) | remove from `<!-- doing-list:start -->` → insert into `<!-- backlog-list:start -->` | Doing −1, Backlog +1 |
-| **doing → doing** (FAIL iteration N, re-dispatched) | no list move; line stays in doing-list | no count change |
-| **doing → doing-final** (FAIL iteration 3, escalated) | no list move | no count change |
+| **todo → doing** (Phase 4 step 1 — the **batch-start claim commit**, a commit of its own, separate from any task's eventual squash-merge commit) | remove from `<!-- todo-list:start -->` → insert into `<!-- doing-list:start -->` | Todo −1, Doing +1 |
+| **doing → done** (pre-squash-merge-commit bookkeeping, on `main`, PASS/SKIP) | remove from `<!-- doing-list:start -->` → insert at top of `<!-- done-list:start -->` (newest first) | Doing −1, Done +1 |
+| **doing → backlog** (BOUNCED — pre-squash-merge-commit bookkeeping, on `main`; see "BOUNCE integration") | remove from `<!-- doing-list:start -->` → insert into `<!-- backlog-list:start -->` | Doing −1, Backlog +1 |
+| **doing → doing** (FAIL iteration N, re-dispatched into the same worktree) | no list move; line stays in doing-list | no count change |
+| **doing → doing-final** (FAIL iteration 3, escalated; worktree kept) | no list move | no count change |
 
 Per ADR written (from `ADRS_WRITTEN` in worker SUCCESS):
 
@@ -216,7 +260,7 @@ If `NEW_BACKLOG_ITEMS` are non-empty in the worker SUCCESS, also insert those ta
 
 `.agentheim/knowledge/protocol.md` is the project's chronological diary. Every `work` event prepends a new entry. Keep entries terse — the diff carries the detail.
 
-The completion entries below are written in the **pre-commit bookkeeping phase** (ADR-0026), so they ride in the task's own commit. Because the commit SHA isn't known until after the commit and isn't written back anywhere, the `**Commit:**` line is **omitted** from these entries — `git log`'s `[<task-id>]` trailer is the SHA index. (The "Batch started" entry is prepended at Phase 4 step 2, before dispatch, and gets committed with the batch's tasks.)
+The completion entries below are written in the **pre-commit bookkeeping phase** (ADR-0026), so they ride in the task's own **squash-merge commit on `main`** (ADR-0032). Because the commit SHA isn't known until after the commit and isn't written back anywhere, the `**Commit:**` line is **omitted** from these entries — `git log`'s `[<task-id>]` trailer is the SHA index. (The "Batch started" entry is prepended and committed as part of the **batch-start claim commit** — Phase 4 step 1 — a commit of its own, separate from every task's eventual squash-merge commit, per ADR-0032's one deliberate ADR-0026 amendment.)
 
 ### Observability fields — measure, never fabricate
 
@@ -306,12 +350,13 @@ Entry formats:
 
 ## Subagent Prompt Template
 
-Spawn each worker with `Agent(subagent_type: "worker", prompt: <the-below>)`. Fill the placeholders.
+Spawn each worker with `Agent(subagent_type: "worker", prompt: <the-below>)`. Fill the placeholders — **every absolute path you fill in points inside the task's worktree** (ADR-0032), not the main tree. The `## Rules — CRITICAL` list below is **unchanged**: the worker still never runs git and still owns only its own `doing → done` move — only *which* tree it operates in has changed.
 
 ```
 You are a worker agent executing one refined task. Stay strictly within its scope.
 
 ## Your task
+Workspace (this task's private git worktree — run all commands, including tests, from inside it): <ABSOLUTE-PATH-TO-WORKTREE>
 Task file (currently in doing/): <ABSOLUTE-PATH>
 Bounded context: <BC-NAME>
 BC README: <ABSOLUTE-PATH-TO-BC-README>
@@ -399,7 +444,7 @@ When `todo/` is empty and all `doing/` is resolved (or the user interrupts):
 2. For each task escalated to the user: name it, summarize the iteration history, and show the latest verifier's SUGGESTED_FIX. The user decides whether to REFINE via `modeling` or abandon.
 3. **Concept candidates.** Aggregate every non-"none" `CONCEPT_CANDIDATE` from worker SUCCESS blocks across the run. If any concept name shows up in 2+ workers' returns, escalate the convergence signal more loudly. For each unique candidate: print the concept name, the BC, and the converging artifact ids. The user decides whether to create the page (per `references/concept-template.md`); never auto-create.
 4. Surface anything that surprised you mid-run: cycles detected, dependency gaps, recovered sessions, repeated verification failures pointing at a common cause.
-5. **Reconcile stranded working-tree carry-over** (see the dedicated section below). Do this *after* the last per-task commit and *before* prepending the session-end protocol entry — its dispositions feed the `**Carry-over:**` line of that entry.
+5. **Reconcile stranded carry-over — working tree AND worktrees** (see the dedicated section below). Do this *after* the last per-task integration and *before* prepending the session-end protocol entry — its dispositions feed the `**Carry-over:**` line of that entry.
 6. Prepend a final protocol entry:
    ```markdown
    ## YYYY-MM-DD HH:MM -- Work session ended
@@ -418,9 +463,11 @@ When `todo/` is empty and all `doing/` is resolved (or the user interrupts):
    ```
    This is the one `work` protocol line written *after* a commit (it summarizes the session). To honor ADR-0026's "clean working tree" rule, **commit it** with a scoped add of only `protocol.md`: `git add .agentheim/knowledge/protocol.md` then `chore(<bc>): work session end bookkeeping [<last-task-id>]` (reuse the last completed task's id as the trailer, or `chore: work session end bookkeeping` if the session committed nothing). Do not `git add -A`. This is the *only* bookkeeping-after-commit `work` performs, and it is a single line — every per-task INDEX/protocol edit already rode in its own task commit (the old trailing "record SHAs + INDEX/protocol" commit is gone). (Any *deliberately-committed* stranded file from step 5 rode in its own scoped reconciliation commit *before* this entry — see below.)
 
-## Reconciling stranded working-tree carry-over (session-end)
+## Reconciling stranded carry-over (session-end): working tree AND worktrees
 
-The scoped-`git add` rule (ADR-0026 §5) is load-bearing for concurrency, but it has a cost: anything no skill explicitly enumerated stays uncommitted **forever**. Left unmanaged this silently accumulates dirty state — the confirmed leak where the *same* files were recorded as "carry-over (untouched, as in prior sessions)" session after session, each run dutifully stepping around them. This step closes that leak by forcing an explicit, user-surfaced disposition for every stranded file — without ever loosening the scoped-add rule.
+The scoped-`git add` rule (ADR-0026 §5) is load-bearing for concurrency, but it has a cost: anything no skill explicitly enumerated stays uncommitted **forever**. Left unmanaged this silently accumulates dirty state — the confirmed leak where the *same* files were recorded as "carry-over (untouched, as in prior sessions)" session after session, each run dutifully stepping around them. This step closes that leak by forcing an explicit, user-surfaced disposition for every stranded file — without ever loosening the scoped-add rule. Per-worker git worktrees (ADR-0032) get the same treatment — see "Worktree carry-over" below, which extends this same reconciliation rather than being a separate mechanism.
+
+### Working-tree file carry-over
 
 Run this once per session, at end-of-run step 5 (after the last per-task commit, before the session-end protocol entry):
 
@@ -431,6 +478,17 @@ Run this once per session, at end-of-run step 5 (after the last per-task commit,
 3. **Concurrency caution — ask, do not assume.** A *live* concurrent session's in-flight files are byte-indistinguishable from a crashed session's orphans. Committing another session's half-written markdown is the exact failure ADR-0026 §5 exists to prevent. So this step **asks the user per file** and never infers the disposition. When the owner is uncertain, the safe default is **(B) leave behind**, not (A) commit — you can always reconcile a true orphan next session, but a wrongly-committed live file is a race you cannot cleanly undo.
 4. **The scoped-add rule is unchanged.** Reconciliation is still an enumerated `git add <path>` per deliberately-committed file. It **never** becomes `git add -A` / `git add .` — that would sweep in exactly the concurrent-sibling files disposition (B) exists to protect.
 5. **Record the dispositions.** Carry every file's disposition into the session-end protocol entry's `**Carry-over:**` line (step 6): committed files as `<path>: committed (<label>)`, left-behind files as `<path>: left behind (owner: <flow>, <reason>)`. This replaces the "carry-over untouched, as in prior sessions" boilerplate — the protocol now records *what was decided and why*, per file, instead of silently repeating the leak.
+
+### Worktree carry-over (extends this reconciliation — ADR-0032)
+
+Run this alongside the working-tree carry-over above, at the same point in the session (after the last integration, before the session-end protocol entry): per-worker worktrees (`.worktrees/<task-id>/` on branch `aw/<task-id>`) get the same explicit-disposition treatment, extending **agentic-workflow-d6q4h**'s mechanism with a worktree category rather than replacing it.
+
+1. **Detect.** Run `git worktree list --porcelain` (skip if not a git repo). Every entry other than the main worktree (the repo root) is a candidate. By this point every PASS/SKIP/BOUNCE this session completed already tore its worktree down (Git authority), so what remains is either a **known keep** (a FAIL-iteration-3 escalation from this session) or a genuine **orphan** (a session interrupted mid-cleanup, or a leftover from an earlier session).
+2. **Surface, per worktree — never auto-remove.**
+   - **Escalated this session (FAIL iteration 3)** → not an orphan, a deliberate keep. Record it plainly, no user prompt needed (the escalation itself already surfaced it in step 4 of the FAIL-iteration-3 handling above): `<path>: kept (owner: <task-id>, escalated at iteration 3 — see task notes)`.
+   - **Everything else** (no matching `doing/` task on `main`, or the matching task is already `done/`/`backlog/`) → an **orphan**. Ask the user, per worktree, the same two dispositions as the working-tree case: **discard** it (unlink any `dashboard/node_modules` link first — `unlinkDashboardNodeModules` — then `git worktree remove --force` + `git branch -D aw/<task-id>`) or **keep** it for inspection. Never guess: a live concurrent session's worktree is byte-indistinguishable from an interrupted one's, same caution as the working-tree carry-over above.
+3. **Record the disposition** on the same `**Carry-over:**` line as the working-tree entries (step 5 above) — e.g. `.worktrees/agentic-workflow-f6m2q: kept (owner: agentic-workflow-f6m2q, escalated at iteration 3)` or `.worktrees/agentic-workflow-old1: discarded (orphan, no matching doing/ task)`.
+4. **Feeds Phase 1 recovery.** An orphan or a kept escalation that survives to the *next* session is exactly the signal Phase 1's `git worktree list --porcelain` check picks up — the two mechanisms are one continuous thread across sessions, not independent.
 
 ## Do not model in work
 

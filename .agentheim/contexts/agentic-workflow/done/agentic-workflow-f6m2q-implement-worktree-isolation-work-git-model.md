@@ -1,15 +1,15 @@
 ---
 id: agentic-workflow-f6m2q
 title: Implement per-worker worktree isolation in work's git model
-status: todo
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-03
 depends_on: [agentic-workflow-k9t3w]
 blocks: []
 tags: [harness-audit, work-skill, concurrency, git, verifier, worktree]
-related_adrs: ["0032", "0026", "0007", "0017", "0028"]
+related_adrs: ["0032", "0026", "0007", "0017", "0028", "0037"]
 related_research: []
 prior_art: []
 ---
@@ -92,3 +92,48 @@ Depends on **agentic-workflow-k9t3w** (ratify ADR-0032) — do not start until t
 decision is `accepted`. This changes the orchestrator's core git model across many
 `work/SKILL.md` sections; treat it as a large, carefully-verified task, not a quick
 edit.
+
+## Outcome
+
+The de-risking spike ran first, on throwaway git fixtures under the scratchpad (never this
+repo's tracked state), and confirmed all three ADR-0032 assumptions plus surfaced two
+implementation-critical corrections (recorded in **ADR-0037**):
+
+- `git merge --squash` **does** conflict-report a same-line BC-README-style edit (exit 1,
+  `CONFLICT (content)`, `UU` status) — but the correct abort command is `git reset --hard HEAD`,
+  **not** `git merge --abort` (which errors — squash merges never set `MERGE_HEAD`).
+- A Windows directory junction (`fs.symlinkSync(target, link, 'junction')`) survived a **real**
+  esbuild build pulling actual `react`/`react-dom`/`htm`/`canvas-confetti` through it from this
+  project's own `dashboard/node_modules`, and a 358-character nested path committed cleanly
+  under `git config core.longpaths true`.
+- `git worktree remove --force` on a junctioned `node_modules` produced **no `EBUSY`** as
+  anticipated, but a worse, previously-unconfirmed failure mode when the junction is left in
+  place: it silently deletes the real target directory's **contents** (data loss, not an error).
+  Removing the junction first (confirmed safe via a plain `fs.unlinkSync`, since a Windows
+  junction reports `isSymbolicLink(): true`) avoids this entirely.
+
+`skills/work/SKILL.md` was rewritten across Phase 1 (recovery now also consults
+`git worktree list --porcelain`), Phase 3 (the textual pre-scan demoted from a hard-demote
+throttle to a merge-ordering advisory), Phase 4 (the batch-start claim commit + per-task
+worktree creation + lazy `dashboard/node_modules` linking + `core.longpaths` setup), the
+Verification gate (worktree-scoped diff capture, the ephemeral orchestrator `wip` commit, a new
+BOUNCE-integration subsection), the Verifier Prompt Template (a `## Worktree` field), the Git
+authority section (squash-merge + fold-in-bookkeeping + one commit, merge-back conflict
+abort-and-surface, Windows & node_modules doctrine), the Index-updates table, Protocol logging,
+the Subagent Prompt Template (a `Workspace` field; the `## Rules — CRITICAL` list itself is
+byte-unchanged), and the session-end reconciliation section (extended agentic-workflow-d6q4h's
+mechanism with a `git worktree list --porcelain`-driven worktree category).
+
+`lib/worktree-node-modules.mjs` is the one OS-divergent helper (mirroring `dashboard/launch.mjs`,
+ADR-0002) for the lazy `dashboard/node_modules` link: `taskTouchesDashboard`,
+`linkDashboardNodeModules`, `unlinkDashboardNodeModules` — the latter refuses to touch anything
+at the link path that isn't itself a symlink/junction, a second line of defense on top of the
+SKILL.md ordering discipline. `.gitignore` gained `/.worktrees/`.
+
+ADR-0037 records the BOUNCE-integration resolution (ADR-0032 didn't address it: squash-merge
+immediately, no verifier, one small commit) and the two spike-driven corrections above.
+
+Key files: `skills/work/SKILL.md`, `lib/worktree-node-modules.mjs`,
+`lib/test/worktree-node-modules.test.mjs`, `.gitignore`,
+`.agentheim/knowledge/decisions/0037-worktree-isolation-implementation-resolutions-spike-findings.md`,
+`.agentheim/contexts/agentic-workflow/README.md`.

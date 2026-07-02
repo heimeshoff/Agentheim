@@ -61,20 +61,48 @@ separate BC, but today the whole tool lives in this one.
   never duplicates. The memory layer for prior-art and dependency lookup.
 - **Commit doctrine** — every skill that produces `.agentheim/` markdown commits its own
   artifacts, scoped, so the working tree is clean after any session (ADR-0026). `work` folds
-  the task-move + `INDEX.md` + `protocol.md` + ADR-backlink bookkeeping into the task commit
-  **before** committing (no post-commit write), and `modeling` / `quick-capture` / `brainstorm`
-  each commit the `.md` they wrote at end-of-action. Every commit is a **scoped `git add`** of
-  only that skill's own files — **never `git add -A`** — which is load-bearing because
-  `modeling` can run concurrently with `work`. A task's commit is found in `git log` via the
-  `[<task-id>]` message trailer; there is **no `commit:` frontmatter field** (ADR-0026 dropped
-  the SHA chicken-and-egg). One task = one commit, with a bounded **trivial-squash carve-out**
-  for a same-BC / same-files / no-behavior-change / same-batch wave of follow-ups (e.g.
-  aw-064/065/066/067). At session end `work` **reconciles stranded carry-over**: it runs
-  `git status --porcelain`, and for every stranded tracked-modified or untracked file the
-  scoped-add rule left behind it surfaces an explicit per-file disposition to the user —
-  commit deliberately (own scoped, labeled commit) or leave behind with a named owner — never
-  auto-swept, never the old "untouched, as in prior sessions" boilerplate (a live concurrent
-  session's in-flight files look identical, so it asks, never assumes). See ADR-0026, ADR-0017, ADR-0007.
+  the task-move + `INDEX.md` + `protocol.md` + ADR-backlink bookkeeping into the task's
+  integrating commit **before** committing (no post-commit write), and `modeling` /
+  `quick-capture` / `brainstorm` each commit the `.md` they wrote at end-of-action. Every commit
+  is a **scoped `git add`** of only that skill's own files — **never `git add -A`** — which is
+  load-bearing because `modeling` can run concurrently with `work`. A task's commit is found in
+  `git log` via the `[<task-id>]` message trailer; there is **no `commit:` frontmatter field**
+  (ADR-0026 dropped the SHA chicken-and-egg). One task = one commit, with a bounded
+  **trivial-squash carve-out** for a same-BC / same-files / no-behavior-change / same-batch wave
+  of follow-ups (e.g. aw-064/065/066/067). At session end `work` **reconciles stranded
+  carry-over**: it runs `git status --porcelain`, and for every stranded tracked-modified or
+  untracked file the scoped-add rule left behind it surfaces an explicit per-file disposition to
+  the user — commit deliberately (own scoped, labeled commit) or leave behind with a named owner
+  — never auto-swept, never the old "untouched, as in prior sessions" boilerplate (a live
+  concurrent session's in-flight files look identical, so it asks, never assumes). See ADR-0026,
+  ADR-0017, ADR-0007.
+- **Per-worker git worktree isolation (ADR-0032, agentic-workflow-f6m2q)** — every parallel
+  `work` worker runs in its own git worktree at `<repo-root>/.worktrees/<task-id>/` on a private
+  branch `aw/<task-id>`, gitignored (`/.worktrees/`) and outside `.agentheim/`. A **batch-start
+  claim commit** moves the whole batch `todo → doing` (the one deliberate ADR-0026 amendment:
+  this half of the lifecycle move rides in its own commit, not the task's final commit) so each
+  worktree's base already holds its task in `doing/`; the worker runs unchanged inside it — no
+  git, same rules — and the conductor makes an ephemeral `wip` commit there per iteration. The
+  verifier's diff and test run are scoped to `git -C <worktree> show HEAD`, so a sibling's
+  changes are **structurally** absent, not merely un-mentioned. On PASS/SKIP the conductor
+  `git merge --squash`es the branch onto `main`, folds in the same INDEX/protocol/backlink
+  bookkeeping as before into **one** commit (ADR-0026 preserved), then tears the worktree down.
+  A `RESULT: BOUNCED` gets the same immediate squash-merge treatment with no verifier (ADR-0037).
+  On FAIL, `main` needs no rollback by construction (it never held the unverified work); the
+  worktree is reused across re-dispatch iterations and, on iteration 3, **kept** for user
+  inspection. A real merge-back conflict aborts with `git reset --hard HEAD` (**not**
+  `git merge --abort`, which errors on a squash merge — ADR-0037) and surfaces to the user rather
+  than being auto-guessed. The Phase 3 textual pre-scan is **demoted to an advisory** for merge
+  ordering — git's own 3-way merge is now the real conflict detector. Tasks touching
+  `dashboard/` get a lazily-created `node_modules` junction (Windows) / symlink (POSIX) to the
+  main tree's one real copy — no per-worktree `npm install` — via the one OS-divergent helper
+  `lib/worktree-node-modules.mjs` (mirroring `dashboard/launch.mjs`, ADR-0002); **removing that
+  link is mandatory before `git worktree remove`**, never optional housekeeping — a de-risking
+  spike found that skipping it makes `git worktree remove --force` silently delete the shared
+  `node_modules`'s contents (no error, just data loss). Session-end reconciliation (extending
+  agentic-workflow-d6q4h) and Phase 1 recovery both additionally walk
+  `git worktree list --porcelain` alongside the existing `git status --porcelain` check. See
+  ADR-0032, ADR-0037, ADR-0026, ADR-0007, ADR-0017, ADR-0028.
 - **Tree projection** — the single read model the dashboard's views (board, slide-over,
   navigation) and the SSE consumer all rebuild from. `GET /api/tree` (built in
   agentic-workflow-005 as `dashboard/tree.mjs`) walks the discovered `.agentheim/` and returns,

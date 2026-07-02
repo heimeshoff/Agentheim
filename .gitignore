@@ -30,3 +30,10 @@ dashboard/node_modules/
 # host API. node_modules and built .vsix artifacts are never committed.
 vscode-extension/node_modules/
 vscode-extension/*.vsix
+
+### Agentheim per-worker git worktrees (ADR-0032)
+# Each parallel `work` worker gets a private worktree at <repo-root>/.worktrees/<task-id>/
+# on branch aw/<task-id> — harness scratch, never a real project artifact, so it lives
+# outside .agentheim/ and is never committed. Removed on PASS/SKIP; kept (and surfaced to
+# the user) on a FAIL-iteration-3 escalation or an unresolved merge-back conflict.
+/.worktrees/
