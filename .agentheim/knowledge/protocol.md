@@ -5,6 +5,50 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 17:37 -- Task verified and completed: infrastructure-e5t9c - Relocate capture-workspace eval debris
+
+**Type:** Work / Task completion
+**Task:** infrastructure-e5t9c - Relocate skills/capture-workspace eval debris out of the plugin payload
+**Summary:** Moved the skill-creator eval workspace (fixture clone, grading script, iteration runs, ~89 KB review HTML — 209 files) from skills/capture-workspace/ to evals/capture-workspace/, repointed write_grades.py's hardcoded IT path, and confirmed no live manifest/discovery reference to the old path. skills/ now holds only real loadable skills.
+**Verification:** PASS (iteration 1)
+**Files changed:** 209 renames + 1 path fix
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
+## 2026-07-02 17:36 -- Task verified and completed: agentic-workflow-w3p8n - Fix stale README drag-to-promote claim
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-w3p8n - Fix stale README drag-to-promote claim
+**Summary:** Corrected the root README Dashboard section — the board is fully read-only (ADR-0017); its action buttons fire bridge-launched Claude sessions (ADR-0018) with clipboard fallback. Removed the stale "one write-back is dragging a card backlog→todo" claim.
+**Verification:** PASS (iteration 1)
+**Files changed:** 1
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
+## 2026-07-02 17:35 -- Task verified and completed: agentic-workflow-f7k2d - Fix TESTS_* return-format drift
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-f7k2d - Fix TESTS_* return-format drift
+**Summary:** Added TESTS_ADDED / TESTS_PASSING / TDD_SKIPPED to the worker SUCCESS return-block template in work/SKILL.md, byte-for-byte from agents/worker.md, so the verifier's test-execution gate and the protocol "Tests added" field finally have a real source.
+**Verification:** PASS (iteration 1)
+**Files changed:** 1
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
+## 2026-07-02 17:28 -- Batch started: [agentic-workflow-f7k2d, agentic-workflow-w3p8n, infrastructure-e5t9c]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-f7k2d - Fix TESTS_* return-format drift, agentic-workflow-w3p8n - Fix stale README drag-to-promote claim, infrastructure-e5t9c - Relocate capture-workspace eval debris
+**Parallel:** yes (3 workers)
+
+---
+
 ## 2026-07-02 -- Modeling / Refined: agentic-workflow-p4v9t - Worktree isolation per worker
 
 **Type:** Modeling / Refine

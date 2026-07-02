@@ -355,7 +355,12 @@ FILE_LIST: <comma-separated absolute paths of all files you created or modified,
 BC_README_UPDATED: yes | no
 ADRS_WRITTEN: <comma-separated filenames under .agentheim/knowledge/decisions/, or "none">
 NEW_BACKLOG_ITEMS: <comma-separated task ids created in a backlog/ during your work, or "none">
+TESTS_ADDED: <integer count of new tests written for this task>
+TESTS_PASSING: yes | no
+TDD_SKIPPED: <reason from the legitimate-skip categories, or "no" if TDD was followed>
 CONCEPT_CANDIDATE: <concept-name> — converging on N artifacts (<id list>) | none
+
+If `TESTS_PASSING: no`, do NOT return SUCCESS — that's a FAIL or a BOUNCE, not a success.
 
 For a bounce, return:
 RESULT: BOUNCED

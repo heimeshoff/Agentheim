@@ -11,15 +11,13 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 13
-- **Todo:** 6
+- **Todo:** 4
 - **Doing:** 0
-- **Done:** 84
+- **Done:** 86
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-f7k2d** — Fix TESTS_* return-format drift — work spawn template omits the fields the verifier gates on (bug) — `todo/agentic-workflow-f7k2d-fix-tests-return-format-drift.md`
-- **agentic-workflow-w3p8n** — Fix stale README claim — dashboard has no drag-to-promote write-back (bug) — `todo/agentic-workflow-w3p8n-fix-stale-readme-dashboard-drag-claim.md`
 - **agentic-workflow-j4m6r** — Pin model frontmatter on the eight agents — decorrelate the adversarial gates, cut worker-fleet cost (feature) — `todo/agentic-workflow-j4m6r-pin-model-frontmatter-agent-routing.md`
 - **agentic-workflow-b8x2v** — Work protocol entries carry Duration and verification Iterations (feature) — `todo/agentic-workflow-b8x2v-protocol-entries-duration-iterations.md`
 - **agentic-workflow-d6q4h** — Work session-end reconciliation of stranded working-tree carry-over (feature) — `todo/agentic-workflow-d6q4h-work-session-end-carryover-reconciliation.md`
@@ -32,6 +30,8 @@ research touching this BC, and concept synthesis pages.
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-w3p8n** — Fix stale README claim — dashboard has no drag-to-promote write-back (bug) — `done/agentic-workflow-w3p8n-fix-stale-readme-dashboard-drag-claim.md`
+- **agentic-workflow-f7k2d** — Fix TESTS_* return-format drift — work spawn template omits the fields the verifier gates on (bug) — `done/agentic-workflow-f7k2d-fix-tests-return-format-drift.md`
 - **agentic-workflow-m2v8d** — Done column collapse control — clamp to ~3.5 faded tickets instead of hiding the column (feature) — `done/agentic-workflow-m2v8d-done-column-collapse-to-clamped-fade.md`
 - **agentic-workflow-n4h7q** — Left rail blinks new or updated research docs and ADRs until clicked or reloaded (feature) — `done/agentic-workflow-n4h7q-rail-blinks-new-research-and-adrs-until-acknowledged.md`
 - **agentic-workflow-t3b9k** — Carry mtimeMs on research/ADR location pointers in /api/tree (feature) — `done/agentic-workflow-t3b9k-research-adr-pointer-mtime.md`

@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-f7k2d
 title: Fix TESTS_* return-format drift — work spawn template omits the fields the verifier gates on
-status: todo
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-02
 depends_on: []
 blocks: []
 tags: [harness-audit, verifier, work-skill, doctrine-drift]
@@ -44,3 +44,23 @@ Highest defect-severity-to-effort ratio in the audit. This is the live proof of 
 doctrine-duplication bug class that the broader single-sourcing task
 (agentic-workflow-s7d3k) exists to eliminate — fix this instance now, structurally
 prevent recurrence there.
+
+## Outcome
+
+Added `TESTS_ADDED`, `TESTS_PASSING`, and `TDD_SKIPPED` to the SUCCESS return-block
+template in `skills/work/SKILL.md` (the block a worker is spawned with), copied
+byte-for-byte from `agents/worker.md:128-130`, in the same position (between
+`NEW_BACKLOG_ITEMS` and `CONCEPT_CANDIDATE`). Also carried over the
+`TESTS_PASSING: no` guardrail note so the field's semantics are unambiguous.
+
+Effect on the sourcing chain:
+- `agents/verifier.md:49` (`If TESTS_ADDED > 0 … run the test suite`) now has a
+  real source in every compliant worker return — the trigger can actually fire.
+- The protocol task-completion entry's `**Tests added:** N`
+  (`skills/work/SKILL.md:247`) now has a source field to draw from.
+
+The three `TESTS_*` field definitions now agree byte-for-byte across
+`agents/worker.md` and `skills/work/SKILL.md`. Documentation/template-consistency
+fix only — no code, so TDD legitimately skipped (pure documentation task).
+
+Key file: `skills/work/SKILL.md` (SUCCESS return-block template).
