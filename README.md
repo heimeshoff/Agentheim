@@ -71,7 +71,7 @@ The work itself flows through **five skills** (below). They auto-trigger from na
 
 ## Dashboard
 
-A local, read-mostly web UI over the project's `.agentheim/` folder: a flat Kanban board pooling every BC's tasks across the four lifecycle columns, a universal slide-over that renders any artifact (tasks, BC READMEs, the vision, the context map, ADRs, research) as markdown, and live updates as skills move files on disk. Its one write-back is dragging a card `backlog→todo` to Promote.
+A local, **read-only** web UI over the project's `.agentheim/` folder: a flat Kanban board pooling every BC's tasks across the four lifecycle columns, a universal slide-over that renders any artifact (tasks, BC READMEs, the vision, the context map, ADRs, research) as markdown, and live updates as skills move files on disk. It never writes to the project: the board carries no drag-to-promote or any other write-back — it is a total projection of disk ([ADR-0017](.agentheim/knowledge/decisions/0017-dashboard-read-only-skills-own-lifecycle.md)), and skills alone own the task lifecycle. Its action buttons (Refine, Promote, and the backlog launchers) don't mutate anything directly; they fire a seeded Claude session into a real terminal via the VS Code bridge ([ADR-0018](.agentheim/knowledge/decisions/0018-vscode-dashboard-terminal-bridge.md)) — e.g. Promote seeds `/agentheim:modeling promote <id>` — and degrade to copying that command to the clipboard when the bridge is absent.
 
 It is driven by **`/dashboard`** — the single, deliberate exception to the "phrasing, not slash commands" rule above (the dashboard is a process-launcher, not a Socratic dialogue):
 
