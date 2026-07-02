@@ -66,7 +66,12 @@ separate BC, but today the whole tool lives in this one.
   `[<task-id>]` message trailer; there is **no `commit:` frontmatter field** (ADR-0026 dropped
   the SHA chicken-and-egg). One task = one commit, with a bounded **trivial-squash carve-out**
   for a same-BC / same-files / no-behavior-change / same-batch wave of follow-ups (e.g.
-  aw-064/065/066/067). See ADR-0026, ADR-0017, ADR-0007.
+  aw-064/065/066/067). At session end `work` **reconciles stranded carry-over**: it runs
+  `git status --porcelain`, and for every stranded tracked-modified or untracked file the
+  scoped-add rule left behind it surfaces an explicit per-file disposition to the user —
+  commit deliberately (own scoped, labeled commit) or leave behind with a named owner — never
+  auto-swept, never the old "untouched, as in prior sessions" boilerplate (a live concurrent
+  session's in-flight files look identical, so it asks, never assumes). See ADR-0026, ADR-0017, ADR-0007.
 - **Tree projection** — the single read model the dashboard's views (board, slide-over,
   navigation) and the SSE consumer all rebuild from. `GET /api/tree` (built in
   agentic-workflow-005 as `dashboard/tree.mjs`) walks the discovered `.agentheim/` and returns,

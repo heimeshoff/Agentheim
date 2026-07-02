@@ -5,6 +5,27 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 17:54 -- Task verified and completed: agentic-workflow-d6q4h - Work session-end reconciliation of stranded working-tree carry-over
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-d6q4h - Work session-end reconciliation of stranded working-tree carry-over
+**Summary:** Added an end-of-run step 5 + "Reconciling stranded working-tree carry-over" section to work/SKILL.md: detect via `git status --porcelain`, surface each stranded tracked-modified/untracked file to the user for an explicit per-file disposition (deliberate scoped commit, or leave-behind with a named owner), ask-don't-assume for concurrency safety, and record dispositions in the session-end entry's new **Carry-over:** line. Scoped-add rule unchanged. BC README updated.
+**Duration:** ~3m (dispatch 17:51 → verdict 17:54)
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
+## 2026-07-02 17:51 -- Batch started: [agentic-workflow-d6q4h]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-d6q4h - Work session-end reconciliation of stranded working-tree carry-over
+**Parallel:** no (1 worker — serialized behind g9s3w on skills/work/SKILL.md)
+
+---
+
 ## 2026-07-02 17:49 -- Task verified and completed: agentic-workflow-j4m6r - Pin model frontmatter on the eight agents
 
 **Type:** Work / Task completion

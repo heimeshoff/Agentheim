@@ -392,7 +392,8 @@ When `todo/` is empty and all `doing/` is resolved (or the user interrupts):
 2. For each task escalated to the user: name it, summarize the iteration history, and show the latest verifier's SUGGESTED_FIX. The user decides whether to REFINE via `modeling` or abandon.
 3. **Concept candidates.** Aggregate every non-"none" `CONCEPT_CANDIDATE` from worker SUCCESS blocks across the run. If any concept name shows up in 2+ workers' returns, escalate the convergence signal more loudly. For each unique candidate: print the concept name, the BC, and the converging artifact ids. The user decides whether to create the page (per `references/concept-template.md`); never auto-create.
 4. Surface anything that surprised you mid-run: cycles detected, dependency gaps, recovered sessions, repeated verification failures pointing at a common cause.
-4. Prepend a final protocol entry:
+5. **Reconcile stranded working-tree carry-over** (see the dedicated section below). Do this *after* the last per-task commit and *before* prepending the session-end protocol entry — its dispositions feed the `**Carry-over:**` line of that entry.
+6. Prepend a final protocol entry:
    ```markdown
    ## YYYY-MM-DD HH:MM -- Work session ended
 
@@ -404,10 +405,25 @@ When `todo/` is empty and all `doing/` is resolved (or the user interrupts):
    **Escalated after verification:** E
    **Dispatches:** [per-task tally, one entry per task as `<task-id>: D` where D = 1 + its re-dispatch count, e.g. "b8x2v: 1, j4m6r: 2"]
    **Commits:** <count>
+   **Carry-over:** [reconciliation disposition per stranded file, from the step-5 section — one entry each: `<path>: committed (<label>)` or `<path>: left behind (owner: <flow>, <reason>)`; or `none — working tree clean`. NEVER the old "untouched, as in prior sessions" boilerplate — every stranded file names an explicit disposition or the tree was clean.]
 
    ---
    ```
-   This is the one `work` protocol line written *after* a commit (it summarizes the session). To honor ADR-0026's "clean working tree" rule, **commit it** with a scoped add of only `protocol.md`: `git add .agentheim/knowledge/protocol.md` then `chore(<bc>): work session end bookkeeping [<last-task-id>]` (reuse the last completed task's id as the trailer, or `chore: work session end bookkeeping` if the session committed nothing). Do not `git add -A`. This is the *only* bookkeeping-after-commit `work` performs, and it is a single line — every per-task INDEX/protocol edit already rode in its own task commit (the old trailing "record SHAs + INDEX/protocol" commit is gone).
+   This is the one `work` protocol line written *after* a commit (it summarizes the session). To honor ADR-0026's "clean working tree" rule, **commit it** with a scoped add of only `protocol.md`: `git add .agentheim/knowledge/protocol.md` then `chore(<bc>): work session end bookkeeping [<last-task-id>]` (reuse the last completed task's id as the trailer, or `chore: work session end bookkeeping` if the session committed nothing). Do not `git add -A`. This is the *only* bookkeeping-after-commit `work` performs, and it is a single line — every per-task INDEX/protocol edit already rode in its own task commit (the old trailing "record SHAs + INDEX/protocol" commit is gone). (Any *deliberately-committed* stranded file from step 5 rode in its own scoped reconciliation commit *before* this entry — see below.)
+
+## Reconciling stranded working-tree carry-over (session-end)
+
+The scoped-`git add` rule (ADR-0026 §5) is load-bearing for concurrency, but it has a cost: anything no skill explicitly enumerated stays uncommitted **forever**. Left unmanaged this silently accumulates dirty state — the confirmed leak where the *same* files were recorded as "carry-over (untouched, as in prior sessions)" session after session, each run dutifully stepping around them. This step closes that leak by forcing an explicit, user-surfaced disposition for every stranded file — without ever loosening the scoped-add rule.
+
+Run this once per session, at end-of-run step 5 (after the last per-task commit, before the session-end protocol entry):
+
+1. **Detect.** Run `git status --porcelain`. Each line is a stranded working-tree entry: tracked-modified/staged (` M`, `M `, `MM`, `A `, `D `, `R `, …) **or** untracked (`??`). By this point every task this session completed has already ridden into its own commit, so a clean tree yields no lines. If the output is **empty**, there is nothing to reconcile — record `Carry-over: none — working tree clean` and skip to the protocol entry.
+2. **Surface, per file — never auto-sweep.** For **each** stranded entry (both tracked-modified and untracked), present it to the **user** with the two allowed dispositions. Do not batch them into a single yes/no; a mixed set (one orphan to commit, one live sibling to leave) is the common case.
+   - **(A) Commit deliberately.** The file is this project's own orphaned bookkeeping that no skill owns (e.g. an INDEX edit or protocol line a crashed prior session left behind). Make its **own scoped, clearly-labeled** commit: enumerate the exact path — `git add <exact-path>` (never `git add -A` / `git add .`) — then commit with `chore(<bc>): reconcile stranded <short-desc> [<last-task-id>]` (or `chore: reconcile stranded <short-desc>` if no task ran). One reconciliation commit may group several paths **only** if they are one coherent orphan set, each path still enumerated in the `git add`.
+   - **(B) Leave behind with a named owner.** The file belongs to another live flow — a concurrent `modeling` session's in-flight task, a still-un-verified worker's code, the user's own WIP, or known non-work noise (e.g. an untracked screenshot). Leave it untouched and record a leave-behind note that **names the presumed owner and the reason** (e.g. `owner: concurrent modeling session, in-flight task file`). This is a deliberate, attributed decision — not the old anonymous "untouched" boilerplate.
+3. **Concurrency caution — ask, do not assume.** A *live* concurrent session's in-flight files are byte-indistinguishable from a crashed session's orphans. Committing another session's half-written markdown is the exact failure ADR-0026 §5 exists to prevent. So this step **asks the user per file** and never infers the disposition. When the owner is uncertain, the safe default is **(B) leave behind**, not (A) commit — you can always reconcile a true orphan next session, but a wrongly-committed live file is a race you cannot cleanly undo.
+4. **The scoped-add rule is unchanged.** Reconciliation is still an enumerated `git add <path>` per deliberately-committed file. It **never** becomes `git add -A` / `git add .` — that would sweep in exactly the concurrent-sibling files disposition (B) exists to protect.
+5. **Record the dispositions.** Carry every file's disposition into the session-end protocol entry's `**Carry-over:**` line (step 6): committed files as `<path>: committed (<label>)`, left-behind files as `<path>: left behind (owner: <flow>, <reason>)`. This replaces the "carry-over untouched, as in prior sessions" boilerplate — the protocol now records *what was decided and why*, per file, instead of silently repeating the leak.
 
 ## Do not model in work
 
