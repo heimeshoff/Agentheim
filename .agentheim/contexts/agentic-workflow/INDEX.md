@@ -11,23 +11,23 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 14
-- **Todo:** 2
-- **Doing:** 0
-- **Done:** 90
+- **Todo:** 0
+- **Doing:** 1
+- **Done:** 91
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-k9t3w** — Ratify ADR-0032 — per-worker git worktree isolation model (decision) — `todo/agentic-workflow-k9t3w-ratify-adr-0032-worktree-isolation.md`
-- **agentic-workflow-h3z5b** — Resolve the two-orchestrators naming ambiguity (chore) — `todo/agentic-workflow-h3z5b-rename-orchestrator-ambiguity.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-h3z5b** — Resolve the two-orchestrators naming ambiguity (chore) — `doing/agentic-workflow-h3z5b-rename-orchestrator-ambiguity.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-k9t3w** — Ratify ADR-0032 — per-worker git worktree isolation model (decision) — `done/agentic-workflow-k9t3w-ratify-adr-0032-worktree-isolation.md`
 - **agentic-workflow-g9s3w** — Pre-load the test command into the verifier spawn prompt (feature) — `done/agentic-workflow-g9s3w-preload-test-command-into-verifier.md`
 - **agentic-workflow-d6q4h** — Work session-end reconciliation of stranded working-tree carry-over (feature) — `done/agentic-workflow-d6q4h-work-session-end-carryover-reconciliation.md`
 - **agentic-workflow-j4m6r** — Pin model frontmatter on the eight agents — decorrelate the adversarial gates, cut worker-fleet cost (feature) — `done/agentic-workflow-j4m6r-pin-model-frontmatter-agent-routing.md`
@@ -141,7 +141,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
-- **ADR-0032** — Per-worker git worktree isolation: batch-start claim commit → private `aw/<id>` branch per worker → verifier runs in the worktree → `git merge --squash` to main folding bookkeeping into one commit (ADR-0026 preserved, one deliberate amendment: the `todo → doing` move rides in the batch-start commit); FAIL leaves main pristine by construction; pre-scan demoted to advisory (proposed) — `../../knowledge/decisions/0032-worker-worktree-isolation-git-model.md`
+- **ADR-0032** — Per-worker git worktree isolation: batch-start claim commit → private `aw/<id>` branch per worker → verifier runs in the worktree → `git merge --squash` to main folding bookkeeping into one commit (ADR-0026 preserved, one deliberate amendment: the `todo → doing` move rides in the batch-start commit); FAIL leaves main pristine by construction; pre-scan demoted to advisory (accepted) — `../../knowledge/decisions/0032-worker-worktree-isolation-git-model.md`
 - **ADR-0030** — The rail "new item" cue is consumer-driven from an in-memory session baseline (path → mtimeMs, reconciled each frame, mtime-versioned clearing, no cap), rendered by composing `Collapsible` + `TreeItem` directly instead of the seam-less `TreeGroup` convenience — keeps the styleguide unforked (ADR-0003) while threading the design-system-v8k2p `attention` cue (accepted) — `../../knowledge/decisions/0030-rail-attention-consumer-session-baseline-and-direct-primitive-composition.md`
 - **ADR-0027** — Advisory writes are distinct from lifecycle writes; the `whats-next` recommendation is an advisory write (`.agentheim/state/whats-next.md`, single-latest, git-ignored, read via `/api/doc`) (proposed) — `../../knowledge/decisions/0027-advisory-writes-distinct-from-lifecycle-writes.md`
 - **ADR-0026** — Committing doctrine: every artifact-producing skill commits its own scoped `.md`; `work` folds bookkeeping into the task commit, `commit:` field dropped, trivial-squash carve-out (accepted) — `../../knowledge/decisions/0026-committing-doctrine-bookkeeping-in-task-commit.md`

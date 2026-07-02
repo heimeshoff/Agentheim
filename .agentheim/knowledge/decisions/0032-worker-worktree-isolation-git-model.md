@@ -2,7 +2,7 @@
 id: ADR-0032
 title: Per-worker git worktree isolation — batch-start claim commit, private worker branch, squash-merge to main
 scope: agentic-workflow
-status: proposed
+status: accepted
 date: 2026-07-02
 related_tasks: [agentic-workflow-k9t3w, agentic-workflow-f6m2q]
 related_adrs: [0007, 0017, 0026, 0028]
@@ -264,3 +264,36 @@ Amends **ADR-0026** (the `todo → doing` claim now rides in a batch-start commi
 clause preserved), keeps **ADR-0007**'s mover boundary intact, builds on **ADR-0017** (skills
 own lifecycle + bookkeeping), and uses **ADR-0028**'s collision-resistant ids for worktree
 naming.
+
+## Ratification note (agentic-workflow-k9t3w)
+
+Reviewed end-to-end against ADR-0026 and ADR-0007. Findings:
+
+- **The declared single amendment checks out.** The only ADR-0026 clause changed is the
+  `todo → doing` half of the lifecycle move moving from "folds into the task's final commit"
+  to "rides in a per-batch claim commit" (Decision, step 1). This is necessary and explained
+  (`git worktree add` needs a committed base holding `doing/`).
+- **Every other ADR-0026 clause survives intact:** one commit per task (step 6, the squash-merge
+  + folded bookkeeping is a single `git commit`), bookkeeping written before the commit and
+  folded in (step 6, INDEX/ADR-index/backlinks/protocol all staged before the one `git commit`),
+  the `commit:` frontmatter field stays dropped (final commit message uses the `[<task-id>]`
+  trailer, no reintroduced field), and scoped enumerated `git add` (step 6 explicitly: "`git
+  add -A` is never used and a concurrent `modeling` session's in-flight markdown is never swept
+  in").
+- **ADR-0007's mover boundary is intact.** Step 1's batch-start commit has the orchestrator (not
+  a redefined mover) performing the file move + INDEX edit + protocol entry as three separate
+  layered actions, matching "INDEX/protocol side-effects stay with the skills/orchestrator,
+  layered around the mover call." Step 6 confirms the same for `doing → done` bookkeeping,
+  explicitly restated: "the ADR-0007/0026 boundary is intact — this stays with the orchestrator,
+  never the mover, never the worker."
+- **Worker-never-runs-git is unchanged.** Steps 3 and 4 both state it explicitly, and the
+  ephemeral in-worktree wip-commit is attributed to the orchestrator, never the worker.
+- **Minor non-blocking observation:** the ADR-0026 trivial-squash carve-out (combining
+  multiple same-BC/same-batch/no-behavior-change tasks into one main-tree commit) isn't
+  discussed under the new per-task-branch squash-merge flow. Nothing in the Decision forbids
+  the orchestrator from still squash-merging two eligible sibling branches into a single main
+  commit when the carve-out's conditions hold — it's simply unaddressed, not precluded. Not a
+  violation; worth a line if ADR-0032 is ever revised.
+
+Verdict: **ratified — status set to `accepted`.** `related_tasks` already names the real child
+ids (`agentic-workflow-k9t3w`, `agentic-workflow-f6m2q`); no placeholder ids found.

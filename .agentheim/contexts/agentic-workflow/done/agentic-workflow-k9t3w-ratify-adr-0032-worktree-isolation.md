@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-k9t3w
 title: Ratify ADR-0032 — per-worker git worktree isolation model
-status: todo
+status: done
 type: decision
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-02
 depends_on: []
 blocks: [agentic-workflow-f6m2q]
 tags: [harness-audit, work-skill, concurrency, git, worktree, decision]
@@ -61,3 +61,15 @@ not a second code file.
 Blocks the implementation task **agentic-workflow-f6m2q** — impl must not start
 until the decision is ratified, so the impl worker reads an `accepted` ADR-0032
 as pre-loaded `related_adrs` context.
+
+## Outcome
+
+ADR-0032 ratified: `status: proposed → accepted`. Reviewed against ADR-0026 and
+ADR-0007 in full; confirmed the ADR's own claim that the batch-start claim commit
+is the *only* ADR-0026 amendment, and that one-commit-per-task, bookkeeping-folded-
+in, the dropped `commit:` field, and scoped enumerated `git add` all survive intact.
+Confirmed ADR-0007's mover boundary and the worker-never-runs-git invariant are
+unchanged. Added a `## Ratification note` to the ADR recording the review and one
+non-blocking observation (the ADR-0026 trivial-squash carve-out is unaddressed by
+the new per-task squash-merge flow, but not precluded by it). `related_tasks`
+frontmatter already named the real child ids — no change needed.

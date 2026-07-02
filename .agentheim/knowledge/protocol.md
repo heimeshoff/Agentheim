@@ -5,6 +5,25 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 18:31 -- Task completed (verification skipped): agentic-workflow-k9t3w - Ratify ADR-0032 — per-worker git worktree isolation model
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-k9t3w - Ratify ADR-0032 — per-worker git worktree isolation model
+**Summary:** Ratified ADR-0032 (proposed → accepted): confirmed the batch-start claim commit is the single ADR-0026 amendment, every other ADR-0026 clause and ADR-0007's mover boundary + worker-never-runs-git survive intact; recorded a non-blocking observation that the trivial-squash carve-out is unaddressed (not precluded) by the new flow.
+**Duration:** ~3m (dispatch 18:28 → SUCCESS 18:31)
+**Verification:** SKIPPED — decision-only task (FILES_CHANGED == 1, single file is the ADR)
+**Files changed:** 1
+
+---
+
+## 2026-07-02 18:28 -- Batch started: [agentic-workflow-h3z5b, agentic-workflow-k9t3w]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-h3z5b - Resolve the two-orchestrators naming ambiguity, agentic-workflow-k9t3w - Ratify ADR-0032 — per-worker git worktree isolation model
+**Parallel:** yes (2 workers — file-independent: h3z5b edits work/SKILL.md + vision.md + BC README; k9t3w edits ADR-0032 only)
+
+---
+
 ## 2026-07-02 -- Modeling / Refined: agentic-workflow-p4v9t - Worktree isolation per worker
 
 **Type:** Modeling / Refine
