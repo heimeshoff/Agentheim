@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 2
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 23
@@ -53,11 +53,14 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **design-system-w4t9k** — Dependency-highlight ring — a third ambient-motion signal on TicketCard (feature) — `backlog/design-system-w4t9k-dependency-highlight-ring-ticket-card.md`
+- **design-system-b7n2s** — Hidden and off-viewport dependency presence markers (feature) — `backlog/design-system-b7n2s-hidden-offviewport-dependency-markers.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0034** — A relational dependency-highlight is a third ambient signal — its own dedicated token (`--rel-dep`), direction coded by line-style (solid=waiting-on / dashed=holding-up) not hue, card-perimeter not rail, static (never vanished) under reduced motion (proposed) — `../../knowledge/decisions/0034-dependency-ring-third-ambient-signal-dedicated-token-direction-by-line-style.md`
 - **ADR-0029** — Ambient attention cue is a distinct signal from the active-status pulse; the rail "new item" marker draws from `--st-todo` and keeps a static dot under reduced motion (accepted) — `../../knowledge/decisions/0029-ambient-attention-cue-distinct-from-active-status-pulse.md`
 - **ADR-0024** — The search combobox's floating panel is standalone — matches the Menu's `--shadow-md` Popover elevation by convention, not by composition (accepted) — `../../knowledge/decisions/0024-search-combobox-standalone-not-on-menu.md`
 - **ADR-0016** — Theme-preview swatches use fixed (non-theming) tokens; selection by de-emphasis, never the reserved accent (accepted) — `../../knowledge/decisions/0016-theme-preview-swatches-fixed-tokens-deemphasis-selection.md`
