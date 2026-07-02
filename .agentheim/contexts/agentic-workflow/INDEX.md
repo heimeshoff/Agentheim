@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 13
+- **Backlog:** 14
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 90
@@ -120,6 +120,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature) — `backlog/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
 - **agentic-workflow-c8j3w** — Compaction policy for BC READMEs and the growing INDEX files (feature) — `backlog/agentic-workflow-c8j3w-compaction-policy-bc-readmes-and-indexes.md`
 - **agentic-workflow-k5n8f** — Mechanize the bookkeeping — wire lib/task-lifecycle.mjs and script the lifecycle operations (refactor) — `backlog/agentic-workflow-k5n8f-mechanize-bookkeeping-wire-task-lifecycle.md`
 - **agentic-workflow-p4v9t** — Worktree isolation per worker — merge on PASS, quarantine on FAIL (feature) — `backlog/agentic-workflow-p4v9t-worktree-isolation-per-worker.md`

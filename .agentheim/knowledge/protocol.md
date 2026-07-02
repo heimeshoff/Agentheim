@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 18:12 -- Modeling / Captured: agentic-workflow-r9k2p - Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Dashboard board interaction — hovering a backlog/todo card pulses a ring around the card(s) it depends_on. Captured under-refined; anticipated three-way split (carry depends_on in the /api/tree projection · a new design-system pulsing-ring ambient cue on TicketCard · the board hover→dependency wiring). Read-only presentation, must dodge the reserved ochre accent (ADR-0016) and honor the reduced-motion strip (ADR-0014/0029).
+
+---
+
 ## 2026-07-02 17:58 -- Work session ended
 
 **Type:** Work / Session end
