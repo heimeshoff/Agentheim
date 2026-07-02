@@ -33,12 +33,24 @@ Two structural weaknesses follow from the shared tree:
    holds every sibling worker's uncommitted changes. A sibling's broken change can fail an
    innocent task's verification, or mask a real one.
 
-**The empirical check ran, and it did not support the contamination motivation.**
-Archaeology over the consumer project's history (`git log --grep 'Verification failed'`):
-**0 of 5** historical verification failures were cross-task contamination — all five were
-genuine own-work defects — and only **~14% of batches (16/98)** ever ran more than one
-worker in parallel, with `MAX_PARALLEL = 3` already capping the blast radius. So weakness
-(2) is a real *structural* possibility that has **never actually been observed to bite**.
+**The empirical check ran across every Agentheim-managed project on the machine, and it did
+not support the contamination motivation.** Archaeology (`git log --grep 'Verification
+failed'` + protocol batch counts) over three independent real projects:
+
+| Project | Batches | Parallel | Verification failures | …that were contamination |
+|---|---|---|---|---|
+| this project (agentheim) | 114 | 16 (~14%) | 5 | **0** |
+| WhisperHeim | 15 | 0 (0%) | 0 | **0** |
+| Dorc | 165 | 10 (~6%) | 10 | **0** |
+| **Combined** | **294** | **26 (~9%)** | **15** | **0 / 15** |
+
+Across **294 batches and 15 verification failures, cross-task contamination was observed
+exactly zero times** — every failure was a genuine own-work defect (sign bugs, own README
+left stale, own smoke tests written as tautologies, own misindented returns). Parallelism is
+rare everywhere and nowhere exceeds ~14%; `MAX_PARALLEL = 3` already caps the blast radius,
+and WhisperHeim is a null test — it never ran a single parallel batch, so it *could not*
+contaminate by construction. So weakness (2) is a real *structural* possibility that has
+**never actually been observed to bite** in any real usage of the harness.
 
 This decision is therefore recorded honestly as a **forward-looking structural bet, not a
 bug fix**. Its value is twofold and prospective:
