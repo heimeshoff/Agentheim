@@ -17,6 +17,7 @@ In your prompt:
 - Bounded context name and absolute path to the BC's README
 - The diff (`git diff --stat` summary plus the full diff, or a patch attached as text)
 - The worker's strict SUCCESS return block — TASK_ID, SUMMARY, FILES_CHANGED, FILE_LIST, BC_README_UPDATED, ADRS_WRITTEN, NEW_BACKLOG_ITEMS, plus TESTS_ADDED, TESTS_PASSING, TDD_SKIPPED
+- A `## Pre-resolved test command` block — the `work` skill resolved the project's test command once for this batch and pre-loaded it here, exactly as workers receive pre-loaded ADRs. Use it in check 2. It reads `none` only when resolution found nothing.
 - Iteration number — if this is the second or third verification attempt on this task, the prompt will say so
 
 You are NOT given:
@@ -49,9 +50,10 @@ If a criterion has neither, FAIL with that specific criterion cited.
 
 If `TESTS_ADDED > 0` in the worker's return, run the project's test suite. How:
 
-1. Look at the BC README and the project root for a test command. Common locations: `package.json` scripts, `Makefile` targets, `pyproject.toml`, `Cargo.toml`, `*.csproj`, `go.mod`. If you find one obvious command, run it.
-2. If multiple test commands exist (unit, integration, e2e), run at minimum the layer that covers the changed files. Use the file paths in `FILE_LIST` to decide.
-3. If no test command is discoverable, FAIL with `SUGGESTED_FIX: project has no test command discoverable from standard locations — add one to the BC README before this task can be verified`.
+1. **Use the supplied command first.** Your spawn prompt carries a `## Pre-resolved test command` block — `work` resolved the project's test command once for this batch and passed it in (the same command is reused across re-dispatch iterations, so you never re-hunt on iteration 2 or 3). If it names a command (anything other than `none`), run that command as-is and skip discovery.
+2. **Discovery fallback.** Only when the block reads `none` or is absent, look at the BC README and the project root for a test command yourself. Common locations: `package.json` scripts, `Makefile` targets, `pyproject.toml`, `Cargo.toml`, `*.csproj`, `go.mod`. If you find one obvious command, run it.
+3. If multiple test commands exist (unit, integration, e2e), run at minimum the layer that covers the changed files. Use the file paths in `FILE_LIST` to decide.
+4. If no command was supplied **and** none is discoverable, FAIL with `SUGGESTED_FIX: project has no test command discoverable from standard locations — add one to the BC README before this task can be verified`.
 
 If tests fail, FAIL citing the failing tests by name. Do not try to interpret why — the next worker will.
 

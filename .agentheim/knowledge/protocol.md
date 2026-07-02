@@ -5,6 +5,27 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 17:57 -- Task verified and completed: agentic-workflow-g9s3w - Pre-load the test command into the verifier spawn prompt
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-g9s3w - Pre-load the test command into the verifier spawn prompt
+**Summary:** `work` now resolves the test command once per batch (per BC) and pre-loads it into every verifier spawn via a new `## Pre-resolved test command` block; verifier check 2 uses the supplied command first, its own discovery only as fallback, preserving fail-closed and reusing the command across re-dispatch iterations.
+**Duration:** ~2m (dispatch 17:55 → verdict 17:57)
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
+## 2026-07-02 17:55 -- Batch started: [agentic-workflow-g9s3w]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-g9s3w - Pre-load the test command into the verifier spawn prompt
+**Parallel:** no (1 worker — serialized behind d6q4h on skills/work/SKILL.md)
+
+---
+
 ## 2026-07-02 17:54 -- Task verified and completed: agentic-workflow-d6q4h - Work session-end reconciliation of stranded working-tree carry-over
 
 **Type:** Work / Task completion

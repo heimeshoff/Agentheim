@@ -73,6 +73,8 @@ Otherwise, verify.
 
 ### Verifier dispatch
 
+**Resolve the test command once per batch (per BC), not per verifier and not per iteration.** Before spawning the batch's verifiers, determine the project's test command using the same discovery order the verifier uses as its fallback — the BC README first, then the project root (`package.json` scripts, `Makefile` targets, `pyproject.toml`, `Cargo.toml`, `*.csproj`, `go.mod`). Cache the resolved command per BC (different BCs may have different commands) and pass it into every verifier spawn this batch — **including re-dispatched verifiers on FAIL iterations 2 and 3: reuse the cached command, never re-resolve per iteration.** This mirrors how workers receive pre-loaded ADRs — resolve once, hand it forward. If no command is discoverable for a BC, pass the literal `none` in the block and let the verifier apply its fail-closed rule.
+
 For each SUCCESS that requires verification, in parallel where the workers ran in parallel:
 
 1. Capture the diff: run `git diff` (working tree against HEAD — the worker has not committed) and `git diff --stat`. Note the exact files changed.
@@ -123,6 +125,11 @@ Iteration: <N> of max 3
 
 ## The diff to audit
 <paste `git diff --stat` output, then `git diff` output — or attach as text>
+
+## Pre-resolved test command
+The `work` skill resolved this project's test command once for this batch (the same command is reused across every verification iteration for this BC). Use it directly in check 2 — run it as-is instead of re-discovering. If it reads `none`, resolution found no command; fall back to your own discovery procedure, and if that also finds nothing, apply your fail-closed FAIL.
+
+<the resolved test command string for this BC, or `none` if resolution found nothing>
 
 ## Project context (read on demand if needed)
 - .agentheim/vision.md
