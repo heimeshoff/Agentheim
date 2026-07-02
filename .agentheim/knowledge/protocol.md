@@ -5,6 +5,18 @@ Newest entries on top.
 
 ---
 
+## 2026-07-02 18:42 -- Modeling / Refined: agentic-workflow-r9k2p - Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog (umbrella)
+**Summary:** Refined the under-refined capture against the builder's four settled decisions — **both** directions (`depends_on` solid ring / `blocks` dashed ring), a **dedicated** `--rel-dep` token (direction by line-style, not hue), **backlog/todo** hover trigger, and a rich off-screen behavior (pulse visible targets · mark collapsed BC sections / the Done peek that hide a target · viewport-edge blink for scrolled-off targets, resolving to a normal pulse on scroll-into-view). Decomposed via the orchestrator (architect + tactical-modeler) into an umbrella parent + five children spanning two BCs. The parent's placeholder `design-system-001` gate dependency is superseded by the real ds blockers `design-system-w4t9k`/`b7n2s`.
+**Split into:** agentic-workflow-d8q3n (carry depends_on/blocks in /api/tree), design-system-w4t9k (on-card dependency ring — the real styleguide blocker), design-system-b7n2s (hidden & off-viewport presence markers), agentic-workflow-k5p8w (board wiring — resolve + ring visible targets), agentic-workflow-h9v3m (board wiring — collapsed-group markers + off-viewport edge blinks)
+**ADRs written:** ADR-0033 (agentic-workflow — ephemeral hover-scoped DOM/viewport observation admissible board-side), ADR-0034 (design-system — dependency ring as a third ambient signal, dedicated token, direction by line-style, static under reduced motion)
+**Note:** The task files + both ADRs + the design-system INDEX were committed in `56b325e` mid-refine (scoped to uniquely-owned files) because a concurrent work session (h3z5b) then held the shared agentic-workflow INDEX + this protocol; these two shared-file updates were deferred until that session ended (ADR-0026 scoped-add / concurrency safety) and committed separately.
+
+---
+
 ## 2026-07-02 18:33 -- Work session ended
 
 **Type:** Work / Session end

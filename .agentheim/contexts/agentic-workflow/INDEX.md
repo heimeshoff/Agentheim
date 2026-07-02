@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 14
+- **Backlog:** 17
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 92
@@ -122,7 +122,10 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature) — `backlog/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
+- **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature, umbrella — delivered via d8q3n/w4t9k/b7n2s/k5p8w/h9v3m) — `backlog/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
+- **agentic-workflow-d8q3n** — Carry depends_on/blocks through the /api/tree per-task projection (feature) — `backlog/agentic-workflow-d8q3n-carry-depends-on-blocks-tree-projection.md`
+- **agentic-workflow-k5p8w** — Board wiring — resolve hover dependencies and drive the on-card ring for visible targets (feature) — `backlog/agentic-workflow-k5p8w-board-wiring-resolve-hover-drive-ring.md`
+- **agentic-workflow-h9v3m** — Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks (feature) — `backlog/agentic-workflow-h9v3m-board-wiring-collapsed-group-offviewport-blinks.md`
 - **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `backlog/agentic-workflow-c8j3w-index-done-list-rotation.md`
 - **agentic-workflow-w7q2m** — BC README consolidation — size trigger + human-in-loop consolidation procedure (feature) — `backlog/agentic-workflow-w7q2m-bc-readme-consolidation.md`
 - **agentic-workflow-k5n8f** — Mechanize the bookkeeping — wire lib/task-lifecycle.mjs and script the lifecycle operations (refactor) — `backlog/agentic-workflow-k5n8f-mechanize-bookkeeping-wire-task-lifecycle.md`
@@ -141,6 +144,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0033** — Ephemeral, hover-scoped DOM/viewport observation (IntersectionObserver rooted on the sole scroll container, mounted per-hover) is admissible board-side; ADR-0017 constrains writes to disk/lifecycle, not transient client geometry reads. Collapsed-group hiding stays a pure data derivation (no DOM node to observe) (proposed) — `../../knowledge/decisions/0033-ephemeral-hover-scoped-dom-viewport-observation-admissible-board-side.md`
 - **ADR-0032** — Per-worker git worktree isolation: batch-start claim commit → private `aw/<id>` branch per worker → verifier runs in the worktree → `git merge --squash` to main folding bookkeeping into one commit (ADR-0026 preserved, one deliberate amendment: the `todo → doing` move rides in the batch-start commit); FAIL leaves main pristine by construction; pre-scan demoted to advisory (accepted) — `../../knowledge/decisions/0032-worker-worktree-isolation-git-model.md`
 - **ADR-0030** — The rail "new item" cue is consumer-driven from an in-memory session baseline (path → mtimeMs, reconciled each frame, mtime-versioned clearing, no cap), rendered by composing `Collapsible` + `TreeItem` directly instead of the seam-less `TreeGroup` convenience — keeps the styleguide unforked (ADR-0003) while threading the design-system-v8k2p `attention` cue (accepted) — `../../knowledge/decisions/0030-rail-attention-consumer-session-baseline-and-direct-primitive-composition.md`
 - **ADR-0027** — Advisory writes are distinct from lifecycle writes; the `whats-next` recommendation is an advisory write (`.agentheim/state/whats-next.md`, single-latest, git-ignored, read via `/api/doc`) (proposed) — `../../knowledge/decisions/0027-advisory-writes-distinct-from-lifecycle-writes.md`
