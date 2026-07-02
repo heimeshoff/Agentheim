@@ -63,6 +63,14 @@ export function treeTicket(task) {
     // when absent — null means "could not stat" (ADR-0002) and the sort treats it
     // as the oldest; the TicketCard itself does not render it.
     mtimeMs: typeof t.mtimeMs === 'number' ? t.mtimeMs : null,
+    // Raw, unresolved id-string arrays the /api/tree projection carries
+    // (agentic-workflow-d8q3n, ADR-0002 — pointers+metadata only). The board
+    // resolves these against the pooled cross-BC ticket universe on hover
+    // (board-dependencies.js); absent/malformed here degrades to [] so a
+    // missing or corrupt frontmatter field never reaches the resolver as
+    // anything but an array.
+    dependsOn: Array.isArray(t.dependsOn) ? t.dependsOn : [],
+    blocks: Array.isArray(t.blocks) ? t.blocks : [],
     // Card meta the read model does not carry — defined, quiet defaults.
     est: '—',
     updated: '',

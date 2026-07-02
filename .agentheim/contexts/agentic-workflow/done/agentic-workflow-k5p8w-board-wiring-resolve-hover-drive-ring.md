@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-k5p8w
 title: Board wiring — resolve hover dependencies and drive the on-card ring for visible targets
-status: todo
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-03
 depends_on: [agentic-workflow-d8q3n, design-system-w4t9k]
 blocks: [agentic-workflow-h9v3m, agentic-workflow-r9k2p]
 tags: [dashboard, board, dependencies, motion]
@@ -93,3 +93,34 @@ blocker is confirmed landed.
 Deliberately excludes: collapsed-group markers, Done-peek markers, and off-viewport
 edge blinks — all of `agentic-workflow-h9v3m`. This task's scope boundary is "pulse
 what's rendered"; the next task's scope is "signal what isn't."
+
+## Outcome
+Shipped the full "pulse what's rendered" slice:
+- `dashboard/app/board-data.js`'s `treeTicket` now carries `dependsOn`/`blocks`
+  (absent/malformed → `[]`) onto every pooled ticket.
+- New pure module `dashboard/app/board-dependencies.js` exports
+  `resolveHoverDependencies(hoveredTicket, allTickets)`, mirroring
+  `board-sort.js`/`board-group.js`: resolves `dependsOn` → `waitingOn`,
+  `blocks` → `holdingUp`, dangling ids dropped, deduped via `Set`, hovered
+  card's own id excluded, malformed both-lists overlap resolves deterministically
+  (`waitingOn` wins), gated to backlog/todo hover sources only. 11 `node --test`
+  cases.
+- `dashboard/app/board.js`: `DashboardBoard` lifts a transient `hoveredId`
+  (ADR-0017 — no disk write), flattens all four columns into `allTickets`, and
+  calls `resolveHoverDependencies` via `useMemo`. `BoardColumn`/`BoardCard` thread
+  the resolved `dependencyRelation` ("waiting-on" | "holding-up" | undefined) into
+  the styleguide `TicketCard` for every rendered card, regardless of its own
+  column. The existing backlog/todo trash-can host `div` now also fires the hover
+  lift (`onCardHover`) and carries `data-ticket-id` for `agentic-workflow-h9v3m`.
+  A static-guard test suite (`board-dependency-hover.test.mjs`, 7 cases) locks this
+  wiring the way `board-card-dismiss.test.mjs` locks aw-048 — no DOM render harness
+  in this project.
+- `dashboard/dist/` rebuilt via `node build.mjs`; verified the ring CSS
+  (`.rel-ring--waiting-on`/`--holding-up`) and the resolver's `waiting-on`/
+  `holding-up` strings landed in the bundle.
+- All 689 dashboard tests pass (669 prior + 20 new).
+
+Key files: `dashboard/app/board-data.js`, `dashboard/app/board-dependencies.js`,
+`dashboard/app/board.js`, `dashboard/test/board-data.test.mjs`,
+`dashboard/test/board-dependencies.test.mjs`,
+`dashboard/test/board-dependency-hover.test.mjs`, `dashboard/dist/*`.

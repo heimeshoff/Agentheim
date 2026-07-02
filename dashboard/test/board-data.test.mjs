@@ -152,3 +152,27 @@ test('treeTicket leaves mtimeMs null when the read model could not stat the file
   const t2 = treeTicket({ id: 'x-2', title: 'x', status: 'todo' });
   assert.equal(t2.mtimeMs, null);
 });
+
+test('treeTicket carries dependsOn/blocks through so the hover resolver can use them (aw-d8q3n/aw-k5p8w)', () => {
+  // The /api/tree projection carries raw, unresolved id-string arrays
+  // (ADR-0002); the board-side hover resolver (board-dependencies.js) needs
+  // them on the pooled ticket. Pass them through unchanged.
+  const t = treeTicket({
+    id: 'alpha-002', title: 'A todo task', status: 'todo',
+    dependsOn: ['alpha-001'], blocks: ['alpha-003', 'alpha-004'],
+  });
+  assert.deepEqual(t.dependsOn, ['alpha-001']);
+  assert.deepEqual(t.blocks, ['alpha-003', 'alpha-004']);
+});
+
+test('treeTicket defaults dependsOn/blocks to [] when absent or malformed', () => {
+  // Absent, non-array, or otherwise malformed frontmatter must never reach the
+  // resolver as anything but an array — never undefined, never a throw.
+  const missing = treeTicket({ id: 'x-1', title: 'x', status: 'todo' });
+  assert.deepEqual(missing.dependsOn, []);
+  assert.deepEqual(missing.blocks, []);
+
+  const malformed = treeTicket({ id: 'x-2', title: 'x', status: 'todo', dependsOn: 'not-an-array', blocks: null });
+  assert.deepEqual(malformed.dependsOn, []);
+  assert.deepEqual(malformed.blocks, []);
+});

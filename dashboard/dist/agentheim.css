@@ -35,6 +35,15 @@
   --ct-concept:        #B0479A;
   --ct-concept-tint:   #F7E3F1;
 
+  /* Relation — the "this card is a dependency of the hovered card" ambient ring
+     (design-system-w4t9k / ADR-0034). A dedicated cyan/aqua hue, distinct from
+     every status/content-type token above, from --ct-context's teal, and from
+     the reserved selection/focus accent --accent-ochre-soft (ADR-0016). Direction
+     (waiting-on / holding-up) rides line-style, not a second hue — see
+     .rel-ring below. Exact hue is a gate-review item with the builder. */
+  --rel-dep:           #1E88A8;
+  --rel-dep-tint:      #E2F1F5;
+
   /* Elevation — used sparingly; the drawer is the main lifted surface */
   --shadow-sm: 0 1px 2px rgba(24,24,32,0.06);
   --shadow-md: 0 6px 20px rgba(24,24,32,0.10);
@@ -78,6 +87,9 @@
   --ct-adr-tint:       #271618;
   --ct-concept:        #D98AC8;
   --ct-concept-tint:   #2A1626;
+
+  --rel-dep:           #5FC7DE;
+  --rel-dep-tint:      #132228;
 
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.40);
   --shadow-md: 0 6px 22px rgba(0,0,0,0.46);
@@ -357,6 +369,164 @@ html, body { transition: background var(--duration-base) var(--ease-base); }
   .rail-attention::before {
     animation: none;
     box-shadow: none;
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   Dependency-relation ring (design-system-w4t9k / ADR-0034)
+
+   A THIRD ambient signal, extending the taxonomy started by the
+   doing-card breathe (ADR-0014) and the rail attention dot
+   (ADR-0029). A target card that is a dependency of the card the
+   builder is hovering gets a quiet breathing ring around its
+   PERIMETER (an inset ::after, not the rail) — deliberately, so it
+   can coexist with either sibling cue without collision: a hovered
+   target can simultaneously be an actively-doing card (rail pulse)
+   or a freshly-arrived one (rail attention dot), and a third
+   rail-based cue would fight one of those.
+
+   Direction rides an orthogonal LINE-STYLE channel on ONE dedicated
+   hue (--rel-dep), not two separate colors: waiting-on -> solid,
+   holding-up -> dashed, same ring. This breaks the ADR-0029 pattern
+   of reusing an existing status token — see ADR-0034 for why a
+   dependency relation is not itself a status and earns its own
+   token. The ring is inset (not an outer box-shadow) because the
+   card root is already position:relative; overflow:hidden — an
+   outer ring would be clipped.
+
+   Opt-in via .rel-ring(--waiting-on|--holding-up) (motion.js:
+   dependencyRingClass) — absent -> byte-identical to today.
+   ============================================================ */
+@keyframes rel-ring-breathe {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1; }
+}
+
+.rel-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-md);
+  pointer-events: none;
+  border: 2px solid var(--rel-dep);
+  box-shadow: inset 0 0 8px color-mix(in oklab, var(--rel-dep) 30%, transparent);
+  animation: rel-ring-breathe var(--duration-relation) var(--ease-base) infinite;
+}
+.rel-ring--waiting-on::after { border-style: solid; }
+.rel-ring--holding-up::after { border-style: dashed; }
+
+/* Reduced motion: unlike the doing-pulse (which vanishes) but LIKE the
+   attention dot, the ring's direction (solid/dashed) is not otherwise
+   encoded anywhere else on the card, so stripping it entirely would erase
+   the "this is a dependency" signal. Stop the loop but KEEP the ring as a
+   static solid/dashed border. */
+@media (prefers-reduced-motion: reduce) {
+  .rel-ring::after {
+    animation: none;
+    box-shadow: none;
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   Hidden/off-viewport dependency PRESENCE marker (design-system-b7n2s)
+
+   A sibling mechanism to the on-card ring above (ADR-0034 pt. 6), not a
+   variant of it or of the rail attention dot (ADR-0029): says "a highlighted
+   dependency target is present but not visible right now" on a COLLAPSED
+   Collapsible header, or standalone on any other element (e.g. the Done
+   column's height-clamped collapse control, which is not a Collapsible).
+
+   Reuses --rel-dep / --duration-relation (one shared visual language across
+   "pulsing on the card" and "present but hidden") but is deliberately
+   HOLLOW — a border-only dot, never filled — so it stays visually distinct
+   from the FILLED --st-todo attention dot (ADR-0029): "a dependency is
+   hidden here" must never read as "a new item is here." Direction-agnostic
+   by design: a collapsed group can hold BOTH waiting-on and holding-up
+   targets, so one marker meaning "expand to see" is enough; direction stays
+   on the on-card ring, never duplicated onto every group header.
+
+   A SEPARATE opt-in class from .rail-attention (motion.js:
+   dependencyPresentClass) — different meaning, different lifecycle. Painted
+   via ::after (the attention dot uses ::before) on the opposite edge of the
+   host element so the two markers can be applied to the SAME header at once
+   without colliding.
+   ============================================================ */
+@keyframes rel-present-breathe {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1; }
+}
+
+.rel-present {
+  position: relative;
+}
+.rel-present::after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 50%;
+  border: 1.5px solid var(--rel-dep);
+  background: transparent;
+  animation: rel-present-breathe var(--duration-relation) var(--ease-base) infinite;
+  will-change: opacity;
+}
+
+/* Reduced motion: the hollow marker has no other static encoding on a
+   collapsed header (the hidden dependency is otherwise invisible), so — the
+   ADR-0029 pattern, not ADR-0014's — stop the loop but KEEP the marker
+   visible rather than stripping it to nothing. */
+@media (prefers-reduced-motion: reduce) {
+  .rel-present::after {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   Off-viewport edge-blink — PRIMITIVE only, no new component
+   (design-system-b7n2s)
+
+   Mirrors the ADR-0003 "styleguide owns look/mechanics, consumer owns
+   placement" seam used for cornerAction (ds-006): this ships only the CSS +
+   a direction-aware helper (motion.js: edgeBlinkClass). The board
+   (agentic-workflow-h9v3m) builds and places the actual small edge
+   indicator (e.g. a --rel-dep-tinted chevron Icon pinned to the scroll
+   container's own edge) using its own scroll geometry — the styleguide
+   doesn't know the scroll container exists.
+
+   Same shared --rel-dep / --duration-relation language as the ring and the
+   presence marker above. The --top / --bottom modifier orients a directional
+   glow toward the edge the indicator sits at (the consumer supplies the
+   actual chevron glyph/rotation).
+   ============================================================ */
+@keyframes rel-edge-blink-breathe {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1; }
+}
+
+.rel-edge-blink {
+  color: var(--rel-dep);
+  animation: rel-edge-blink-breathe var(--duration-relation) var(--ease-base) infinite;
+  will-change: opacity;
+}
+.rel-edge-blink--top {
+  box-shadow: 0 -4px 6px -2px color-mix(in oklab, var(--rel-dep) 40%, transparent);
+}
+.rel-edge-blink--bottom {
+  box-shadow: 0 4px 6px -2px color-mix(in oklab, var(--rel-dep) 40%, transparent);
+}
+
+/* Reduced motion: like the ring and the presence marker, the edge-blink has
+   no other static encoding of "a target is off-viewport" — stop the loop but
+   KEEP the indicator visible. */
+@media (prefers-reduced-motion: reduce) {
+  .rel-edge-blink {
+    animation: none;
     opacity: 1;
   }
 }

@@ -245,6 +245,26 @@ separate BC, but today the whole tool lives in this one.
   derived at render by the pure `peekClampStyle` (`board-view-state.js`, unit-tested under `node --test`),
   so a task completing into a collapsed Done just slots into the still-clamped overflow — it never
   auto-expands. See ADR-0015, ADR-0017, ADR-0003.
+- **Hover dependency ring — "pulse what's rendered"** (agentic-workflow-k5p8w, building on the
+  `dependsOn`/`blocks` raw id arrays the projection carries — agentic-workflow-d8q3n, ADR-0002 —
+  and the styleguide's directional ring — design-system-w4t9k, ADR-0034): hovering a **backlog**
+  or **todo** card resolves its edges against the **full pooled ticket set** (every column, every
+  BC) and rings each currently-rendered target — **solid** for a `depends_on` target (**waiting-on**),
+  **dashed** for a `blocks` target (**holding-up**). Only backlog/todo cards are a hover *source*
+  (doing/done hover resolves nothing — those tasks aren't in-flight planning); a target can be *any*
+  status/column. The resolution itself is a **pure** function —
+  `dashboard/app/board-dependencies.js` (`resolveHoverDependencies`, unit-tested under
+  `node --test`, mirroring `board-sort.js`/`board-group.js`): dangling ids drop silently, ids dedupe
+  via `Set`, the hovered card's own id is excluded, and a malformed id present in **both** lists
+  resolves deterministically — **waiting-on wins** (never a throw). The React glue is thin, untested
+  DOM wiring in `board.js` (the `hostHover` idiom, aw-030): hover lifts a `hoveredId` into
+  `DashboardBoard` state (transient, client-side only — ADR-0017, never persisted, never a disk
+  write), every rendered `BoardCard` checks membership and passes the matching `dependencyRelation`
+  prop to the styleguide `TicketCard`, and the same backlog/todo host `div` used for the trash-can
+  overlay (aw-048) now also carries `data-ticket-id` for the next task's IntersectionObserver.
+  Deliberately **excludes** collapsed-group markers, Done-peek markers, and off-viewport edge blinks
+  (a target hidden inside a *collapsed* BC section has no DOM node, so it silently gets nothing extra
+  here) — that's agentic-workflow-h9v3m's layer on top. See ADR-0002, ADR-0003, ADR-0017.
 - **Persisted board view-state** — the per-column **view lens** — grouped/flat, sort choice, each
   `(column, BC)` collapse state, and the per-column **`peek`** flag (the Done collapse control, aw-m2v8d) —
   is persisted across reloads in a **single versioned `localStorage` store**

@@ -26,7 +26,7 @@
      raw event is never interpreted as a transition. As skills move
      files on disk, the board reflects it within a frame.
    ============================================================ */
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 
 // Styleguide single source (ADR-0003): import the approved Kanban components
 // across the BC boundary. They are CONSUMED, never copied — the design-system
@@ -53,6 +53,7 @@ import { SORT_OPTIONS, DEFAULT_SORT, sortTickets } from "./board-sort.js";
 import { refineCommandFor, promoteCommandFor, dismissCommandFor, quickCaptureCommandFor, modelingCommandFor, researchCommandFor, inquireCommandFor, WORK_COMMAND, WHATS_NEXT_COMMAND, STOP_DASHBOARD_COMMAND } from "./modeling-command.js";
 import { launchOrCopy } from "./bridge-launch.js";
 import { groupTickets } from "./board-group.js";
+import { resolveHoverDependencies } from "./board-dependencies.js";
 import { loadViewState, saveViewState, defaultColumnState, peekClampStyle } from "./board-view-state.js";
 import { SlideOver } from "./slide-over.js";
 import { MainPaneReader } from "./main-pane-reader.js";
@@ -1118,7 +1119,7 @@ function CardTrashCan({ ticket, hostHover, skipPermissions = false }) {
 // (the board sorts before passing it in).
 // One TicketCard. Factored out so the flat list and the grouped sections render
 // cards identically (same selection ring).
-function BoardCard({ ticket, status, selectedId, onOpen, skipPermissions = false }) {
+function BoardCard({ ticket, status, selectedId, onOpen, skipPermissions = false, dependencyRelation, onCardHover }) {
   // Backlog cards carry a Refine / Promote launch pair (aw-022) in the styleguide
   // card's bottom-right cornerAction slot (design-system-006), replacing aw-016's
   // single Copy affordance: Refine (primary) seeds `/agentheim:modeling refine
@@ -1146,13 +1147,19 @@ function BoardCard({ ticket, status, selectedId, onOpen, skipPermissions = false
   const card = html`
     <${TicketCard} key=${ticket.id} ticket=${ticket} variant="rail"
       selected=${selectedId === ticket.id} onClick=${() => onOpen(ticket)}
-      cornerAction=${cornerAction} />`;
+      cornerAction=${cornerAction} dependencyRelation=${dependencyRelation} />`;
   if (!showTrash) return card;
+  // Only backlog/todo cards are a HOVER SOURCE (agentic-workflow-k5p8w): this is
+  // the same status gate as the trash-can overlay, so it rides the host div that
+  // already exists here rather than opening a second wrapper. `data-ticket-id` is
+  // stamped for agentic-workflow-h9v3m's IntersectionObserver wiring (the next
+  // task in this slice; unused here beyond the attribute itself).
   return html`
     <div
+      data-ticket-id=${ticket.id}
       style=${{ position: "relative" }}
-      onMouseEnter=${() => setHostHover(true)}
-      onMouseLeave=${() => setHostHover(false)}>
+      onMouseEnter=${() => { setHostHover(true); if (typeof onCardHover === "function") onCardHover(ticket.id); }}
+      onMouseLeave=${() => { setHostHover(false); if (typeof onCardHover === "function") onCardHover(null); }}>
       ${card}
       <${CardTrashCan} ticket=${ticket} hostHover=${hostHover} skipPermissions=${skipPermissions} />
     </div>`;
@@ -1162,15 +1169,22 @@ function BoardColumn({
   status, tickets, sort, onSortChange, grouped, onGroupToggle,
   collapsed, onToggleSection, peek = false, onToggleCollapse,
   selectedId, onOpen, skipPermissions = false,
+  waitingOn, holdingUp, onCardHover,
 }) {
   // Pipeline: tickets arrive ALREADY sorted (the board sorts before passing them
   // in); group them into sections here (board-group.groupTickets, pure). A flat
   // column yields one null-bc section; the toggle re-shapes presentation only.
   const sections = groupTickets(tickets, { grouped, collapsed });
 
+  // agentic-workflow-k5p8w: a card rings when its own id is a resolved hover
+  // target — waitingOn (solid) beats holdingUp (dashed) on the rare malformed
+  // overlap, matching resolveHoverDependencies' own precedence. Both sets are
+  // empty (no throw, just no match) when nothing is hovered.
   const renderCard = (t) => html`
     <${BoardCard} key=${t.id} ticket=${t} status=${status}
-      selectedId=${selectedId} onOpen=${onOpen} skipPermissions=${skipPermissions} />`;
+      selectedId=${selectedId} onOpen=${onOpen} skipPermissions=${skipPermissions}
+      dependencyRelation=${waitingOn && waitingOn.has(t.id) ? "waiting-on" : (holdingUp && holdingUp.has(t.id) ? "holding-up" : undefined)}
+      onCardHover=${onCardHover} />`;
 
   // aw-m2v8d: when collapsed (peek), the WHOLE column body is height-clamped with a
   // bottom fade — the pure peekClampStyle. The clamp is ONE max-height on the body
@@ -1234,6 +1248,11 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
   const [columns, setColumns] = useState(EMPTY_COLUMNS);
   const [phase, setPhase] = useState("loading"); // loading | ready | error
   const [selectedId, setSelectedId] = useState(null);
+  // agentic-workflow-k5p8w: transient, client-side hover view-state only
+  // (ADR-0017 — no disk write, never persisted). Hovering a backlog/todo card
+  // lifts its id here; every rendered card (any column, any BC) checks whether
+  // it is a resolved dependency target of the hovered card and rings if so.
+  const [hoveredId, setHoveredId] = useState(null);
 
   // Per-column VIEW LENS — { grouped, sort, collapsed } per column, independent
   // per column. PERSISTED across reloads via the single versioned localStorage
@@ -1331,6 +1350,24 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
 
   const total = COLUMN_ORDER.reduce((n, c) => n + columns[c].length, 0);
 
+  // agentic-workflow-k5p8w: the pooled cross-BC, cross-column ticket universe
+  // resolveHoverDependencies resolves against — a target rendered ANYWHERE on
+  // the board rings, regardless of which column/BC it lives in or its scroll
+  // position (no IntersectionObserver here; that gap is agentic-workflow-h9v3m).
+  const allTickets = useMemo(
+    () => COLUMN_ORDER.flatMap((c) => columns[c]),
+    [columns],
+  );
+  const hoveredTicket = useMemo(
+    () => (hoveredId ? allTickets.find((t) => t.id === hoveredId) || null : null),
+    [hoveredId, allTickets],
+  );
+  const { waitingOn, holdingUp } = useMemo(
+    () => resolveHoverDependencies(hoveredTicket, allTickets),
+    [hoveredTicket, allTickets],
+  );
+  const handleCardHover = useCallback((id) => setHoveredId(id), []);
+
   if (phase === "loading") {
     return html`<${LoadState}><${Icon} name="loader" size=${15} color="var(--fg-4)" /> Loading board…</${LoadState}>`;
   }
@@ -1360,7 +1397,8 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
                 collapsed=${view[status].collapsed} onToggleSection=${(bc) => toggleSection(status, bc)}
                 peek=${view[status].peek}
                 onToggleCollapse=${status === "done" ? (p) => setColumnPeek(status, p) : undefined}
-                selectedId=${selectedId} onOpen=${handleOpen} skipPermissions=${skipPermissions} />`)}
+                selectedId=${selectedId} onOpen=${handleOpen} skipPermissions=${skipPermissions}
+                waitingOn=${waitingOn} holdingUp=${holdingUp} onCardHover=${handleCardHover} />`)}
           </div>
         </div>
       </div>
