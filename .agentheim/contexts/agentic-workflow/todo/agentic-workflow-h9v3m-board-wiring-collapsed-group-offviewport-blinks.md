@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-h9v3m
 title: Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-07-02

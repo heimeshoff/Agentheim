@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 08:35 -- Modeling / Promoted: agentic-workflow-j7d4k, agentic-workflow-h9v3m, agentic-workflow-s7d3k, agentic-workflow-x4t2g
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+**Summary:** Batch promotion of every ready backlog task ("promote all that are ready"). j7d4k (ratify ADR-0036 — decision, no deps, k9t3w precedent), h9v3m (board wiring collapsed-group/off-viewport cues — deps k5p8w + design-system-b7n2s both done), s7d3k (single-source doctrine — unblocked since f7k2d shipped), x4t2g (whats-next read edge — flagged ready-to-promote at its 2026-07-02 refine). Held back, with reasons surfaced to the builder: p3v9k / v3h6p / z2f7s / w7q2m / infrastructure-q8m4t (explicit builder-confirmation gates), k5n8f / r2c7m / c8j3w / t7m4c / y8b4q / r9k2p (unmet dependencies), v6d4n / q3n7k / m9w5c (under-refined).
+
+---
+
 ## 2026-07-03 00:31 -- Modeling / Refined: infrastructure-q8m4t - Support quotation marks (Gänsefüsschen) in prompts
 
 **Type:** Modeling / Refine

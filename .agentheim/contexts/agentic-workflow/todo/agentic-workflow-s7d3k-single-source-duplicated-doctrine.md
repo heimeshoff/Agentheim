@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-s7d3k
 title: Single-source the duplicated doctrine into references/ files
-status: backlog
+status: todo
 type: refactor
 context: agentic-workflow
 created: 2026-07-02

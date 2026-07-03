@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-j7d4k
 title: Ratify ADR-0036 — verifier runtime-drive end-to-end check
-status: backlog
+status: todo
 type: decision
 context: agentic-workflow
 created: 2026-07-03

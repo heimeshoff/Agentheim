@@ -10,14 +10,18 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 17
-- **Todo:** 0
+- **Backlog:** 13
+- **Todo:** 4
 - **Doing:** 0
 - **Done:** 96
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-j7d4k** — Ratify ADR-0036 — verifier runtime-drive end-to-end check (decision) — `todo/agentic-workflow-j7d4k-ratify-adr-0036-verifier-runtime-drive.md`
+- **agentic-workflow-h9v3m** — Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks (feature) — `todo/agentic-workflow-h9v3m-board-wiring-collapsed-group-offviewport-blinks.md`
+- **agentic-workflow-s7d3k** — Single-source the duplicated doctrine into references/ files (refactor) — `todo/agentic-workflow-s7d3k-single-source-duplicated-doctrine.md`
+- **agentic-workflow-x4t2g** — whats-next feeds back into planning — modeling and work read the advisory at session start (feature) — `todo/agentic-workflow-x4t2g-whats-next-feeds-back-into-planning.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -126,21 +130,17 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-j7d4k** — Ratify ADR-0036 — verifier runtime-drive end-to-end check (decision) — `backlog/agentic-workflow-j7d4k-ratify-adr-0036-verifier-runtime-drive.md`
 - **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature, umbrella — delivered via d8q3n/w4t9k/b7n2s/k5p8w/h9v3m) — `backlog/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
-- **agentic-workflow-h9v3m** — Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks (feature) — `backlog/agentic-workflow-h9v3m-board-wiring-collapsed-group-offviewport-blinks.md`
 - **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `backlog/agentic-workflow-c8j3w-index-done-list-rotation.md`
 - **agentic-workflow-w7q2m** — BC README consolidation — size trigger + human-in-loop consolidation procedure (feature) — `backlog/agentic-workflow-w7q2m-bc-readme-consolidation.md`
 - **agentic-workflow-p3v9k** — Decide the lifecycle-mechanization boundary — fail-closed depends_on ruling + 3-layer bookkeeping ADR (decision) — `backlog/agentic-workflow-p3v9k-lifecycle-mechanization-boundary-decision.md`
 - **agentic-workflow-k5n8f** — Mechanize the bookkeeping (MVP) — generalized plugin-file resolver + git-free PROMOTE lifecycle script (refactor) — `backlog/agentic-workflow-k5n8f-mechanize-bookkeeping-wire-task-lifecycle.md`
 - **agentic-workflow-t7m4c** — Mechanize CLAIM + COMPLETE lifecycle scripts against the ADR-0032 worktree / squash-merge model (refactor) — `backlog/agentic-workflow-t7m4c-claim-complete-lifecycle-scripts-worktree.md`
-- **agentic-workflow-s7d3k** — Single-source the duplicated doctrine into references/ files (refactor) — `backlog/agentic-workflow-s7d3k-single-source-duplicated-doctrine.md`
 - **agentic-workflow-r2c7m** — Protocol rotation — cap protocol.md and roll to monthly files (feature) — `backlog/agentic-workflow-r2c7m-protocol-rotation.md`
 - **agentic-workflow-v3h6p** — Eval-harness the verifier — measure its catch rate against planted defects (spike) — `backlog/agentic-workflow-v3h6p-eval-harness-the-verifier.md`
 - **agentic-workflow-y8b4q** — End-to-end verification step for tasks with a runtime surface (feature) — `backlog/agentic-workflow-y8b4q-end-to-end-verification-runtime-surface.md`
 - **agentic-workflow-z2f7s** — Fan-out caps — MAX_PARALLEL as a knob, research cap, global nested-spawn ceiling (feature) — `backlog/agentic-workflow-z2f7s-fanout-caps-and-spawn-budget.md`
 - **agentic-workflow-m9w5c** — Live observability — hooks write agent status to state/, dashboard renders an in-flight lane (feature) — `backlog/agentic-workflow-m9w5c-live-observability-hooks-inflight-lane.md`
-- **agentic-workflow-x4t2g** — whats-next feeds back into planning — modeling and work read the advisory at session start (feature) — `backlog/agentic-workflow-x4t2g-whats-next-feeds-back-into-planning.md`
 - **agentic-workflow-v6d4n** — Vision-conformance check — flag in-flight work that drifts from vision success criteria / non-goals (feature) — `backlog/agentic-workflow-v6d4n-vision-conformance-check-session-end-verify.md`
 - **agentic-workflow-q3n7k** — Update the workflow guide to reflect new features like inquire and what's next — `backlog/agentic-workflow-q3n7k-update-workflow-guide-inquire-whats-next.md`
 <!-- backlog-list:end -->
