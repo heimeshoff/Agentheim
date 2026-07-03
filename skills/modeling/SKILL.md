@@ -3,11 +3,11 @@ name: modeling
 description: Use whenever the user wants to capture an idea, bug, feature request, refinement, or change to an existing bounded context — anything from "the button should be green" to "we need a whole new subscription subsystem". Also use when the user wants to refine existing backlog items or promote refined items to ready-to-work. Triggers on phrases like "I have an idea", "let's model this", "let's do some modeling", "capture this", "add this to the backlog", "refine the auth backlog", "promote X to todo", "we should also", "what if we added", "there's a bug", "change the color of", "the domain needs to handle". Creates task markdown files in the appropriate bounded context with the right status, and can spawn deeper modeling sessions via the orchestrator. Supports six switchable conversational modes (Interrogator [default], Suggestor, Challenger, Storyteller, Facilitator, Synthesizer) during CAPTURE and REFINE — see references/modes.md.
 ---
 
-# Modeling — Capture, Refine, Promote, Dismiss
+# Modeling — Capture, Refine, Promote, Dismiss, Consolidate
 
-The `modeling` skill is the main entry point for the user's stream of ideas. Every thought — from a one-line bug to a cross-context architectural shift — enters the system here and ends up as a task file in a bounded context. It also owns the *removal* of a task that will never be worked (DISMISS), since the dashboard is read-only by design (ADR-0017) and all task-lifecycle changes belong to the skills.
+The `modeling` skill is the main entry point for the user's stream of ideas. Every thought — from a one-line bug to a cross-context architectural shift — enters the system here and ends up as a task file in a bounded context. It also owns the *removal* of a task that will never be worked (DISMISS) and the *rewrite* of a BC README that has grown past the point where it can be read in one pass (CONSOLIDATE), since the dashboard is read-only by design (ADR-0017) and all `.agentheim/` markdown changes belong to the skills.
 
-## The four actions
+## The five actions
 
 Decide which action applies based on what the user said and the current state of `.agentheim/`:
 
@@ -17,6 +17,7 @@ Decide which action applies based on what the user said and the current state of
 | **REFINE** | User wants to work through an existing backlog item, OR the user invoked model with no new idea and backlog items exist | Picks a backlog task, deepens it via the orchestrator, splits it if needed, updates acceptance criteria and dependencies. May move to `todo/` if it becomes ready. |
 | **PROMOTE** | User explicitly wants a task ready for work | Moves a task from `backlog/` to `todo/`, verifying it has enough detail to be picked up by a worker. |
 | **DISMISS** | User wants to drop a `backlog/`/`todo/` task that will never be worked — a stray capture, a duplicate, a since-abandoned idea | Hard-deletes the named task **and its entire transitive dependent subtree** under one confirmation, then reconciles all the bookkeeping (INDEX lines + counts, surviving backlinks, one protocol entry). Refuses if any task in the set is in `doing/` or `done/`. |
+| **CONSOLIDATE** | A BC's `README.md` has crossed the ~600-line consolidation threshold — self-named by the builder, or flagged by `whats-next`'s advisory line | Rewrites the README **in place**, builder-in-the-loop: merges redundant ubiquitous-language entries, folds superseded per-feature narration into settled current-state summaries. Never silently drops a term or invariant, never breaks a backlink. No archive — this is the *flag-and-consolidate* discipline (judgment, in-place), the deliberate opposite of the k5n8f family's *cap-and-roll* (verbatim, scripted, archived) used for the protocol (ADR-0039) and, prospectively, an INDEX done-list. See ADR-0041. |
 
 ### Disambiguating intent
 
@@ -24,6 +25,7 @@ Decide which action applies based on what the user said and the current state of
 - If the user invoked `modeling` with **no concrete new idea** ("let's model", "let's do some modeling", "what's in the backlog?", or a bare invocation) → run the **Opening flow** below: show the backlog, offer to refine, fall through to capture.
 - If the user says "promote X" / "X is ready" → PROMOTE
 - If the user says "dismiss X" / "delete X" / "drop X" / "remove X" / "X is dead" / "we won't do X" → DISMISS (resolve X per "Identifying which task the user means", then run the DISMISS flow). DISMISS is also the verb the dashboard's per-card trash-can fires as `/agentheim:modeling dismiss <id>`.
+- If the user says "consolidate X README" / "the X README is too big" / "shrink the X README", or is responding to a `whats-next` consolidation flag → CONSOLIDATE (resolve X to a BC, then run the CONSOLIDATE flow).
 - If ambiguous, ask once. Don't guess wrong and then have to undo. **Be especially careful before DISMISS** — it hard-deletes files (and possibly a whole subtree). Never infer DISMISS from a soft phrase; require an explicit drop/delete/dismiss intent or the literal command.
 
 ### Opening flow (bare invocation)
@@ -69,6 +71,8 @@ When there are multiple matches, show a compact summary (id, title, status, BC) 
 
 DISMISS resolves its target by the exact same rules (exact id / number / keyword, list-on-ambiguity). It additionally scans `doing/` and `done/` while resolving so it can refuse early with a clear message when the named task is already in flight or shipped — only `backlog/` and `todo/` tasks are dismissable.
 
+CONSOLIDATE targets a **bounded context**, not a task — resolve by BC name (exact or fuzzy against `contexts/*/`). If the name is ambiguous or missing, list every BC alongside its current README line count and let the user pick.
+
 ## Before acting
 
 Read the current state:
@@ -103,7 +107,7 @@ Full mode definitions and switching protocol live in `references/modes.md`. The 
 - **Facilitator** — scribe stance; minimal interjection, captures and structures what the room says. CAPTURE default.
 - **Synthesizer** — reflect back tensions and emergent themes across the backlog or a refinement thread. Best as a periodic switch-into.
 
-PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + cascade + confirm + bookkeeping) and run the same regardless of mode. Task file format, ID conventions, the styleguide gate, protocol logging, and orchestrator handoffs are all mode-agnostic.
+PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + cascade + confirm + bookkeeping) and run the same regardless of mode. CONSOLIDATE is judgment work over prose, not a conversational mode itself — it always runs builder-in-the-loop, confirming what gets folded/dropped before writing. Task file format, ID conventions, the styleguide gate, protocol logging, and orchestrator handoffs are all mode-agnostic.
 
 ## CAPTURE flow
 
@@ -234,6 +238,60 @@ The boundary mirrors ADR-0007: the raw `.md` deletes are the mechanical core; th
 7. **IDs are gone, never reused.** For new token ids this holds **by construction** (ADR-0028 §5): the generator emits a random token and never consults history, so a dismissed token is simply one of ~23M points the generator will, with overwhelming probability, never emit again — there is no counter to advance or rewind. For legacy `<bc>-NNN` ids the original rule is retained verbatim: a dismissed number is retired, consistent with "never renumber" — a future capture takes the next free number, never a dismissed one.
 
 8. **Commit the dismissal** per `references/commit-doctrine.md` (ADR-0026). Scoped `git add` of exactly the files the cascade touched — the deleted task file paths (a delete is staged with `git add`/`git rm`), every `INDEX.md` the set spanned, every surviving task file or ADR whose backlinks were stripped, and `protocol.md` — then **one** commit for the whole cascade: `chore(<bc>): dismiss <id-or-cascade-set>` (name the lead id, or the set if small). Note that even though a DISMISS legitimately spans multiple BCs, the add stays an explicit enumeration of only the cascade's files — never `git add -A`.
+
+## CONSOLIDATE flow
+
+CONSOLIDATE rewrites a BC's `README.md` **in place** to bring it back under the ~600-line
+consolidation trigger, with the builder in the loop throughout. The contract is frozen by
+**ADR-0041** — follow it precisely. Unlike DISMISS (mechanical delete) or PROMOTE (mechanical
+move + a CLI), CONSOLIDATE is **judgment work over prose**: there is no script to shell out to,
+because a machine can't safely rewrite ubiquitous language without dropping meaning. This is the
+family's **flag-and-consolidate** discipline — judgment, human-in-loop, rewritten in place, no
+archive — the deliberate opposite of the k5n8f family's **cap-and-roll** (verbatim, scripted,
+rolled to a dated archive) used for `protocol.md` (ADR-0039) and, prospectively, a BC `INDEX.md`
+done-list.
+
+1. **Resolve the target BC** (see "Identifying which task the user means" above — CONSOLIDATE
+   targets a BC, not a task). If the named README is already under the ~600-line threshold, say
+   so and ask whether the user wants a lighter consolidation anyway — CONSOLIDATE is never
+   auto-triggered by the skill itself, only requested (by the builder) or flagged (by
+   `whats-next`'s advisory line, which the builder still has to act on).
+
+2. **Read the whole README.** Page it if a single `Read` can't cover it — that ceiling is
+   exactly the problem CONSOLIDATE exists to relieve. Build a mental inventory of every
+   ubiquitous-language term, invariant, aggregate, and backlink (ADR id, task id) currently
+   stated, so nothing can be lost without you noticing.
+
+3. **Consolidate, section by section**, especially any dense per-feature narration (the
+   "aw-0NN did X, then aw-0MM superseded it, then aw-0PP removed it" chains):
+   - **Fold superseded narration into a settled, current-state summary.** Describe what's true
+     *now*; keep lineage only where it is itself load-bearing (an explicit, still-relevant
+     supersession a future reader would want to trace).
+   - **Merge redundant entries** that describe the same term or feature from more than one
+     angle or in more than one place.
+   - **Never silently delete a term or an invariant.** If something is genuinely dead (the
+     feature it named was removed), say so explicitly to the builder and get an explicit yes
+     before dropping it — CONSOLIDATE shortens prose, it does not prune domain knowledge
+     unilaterally.
+   - **Preserve backlinks.** Every ADR id / task id that remains in the rewrite must still
+     resolve (exists in `.agentheim/knowledge/decisions/` or some BC's lifecycle folders).
+     Redundant repeated citations of an id already cited nearby may be trimmed, but never an
+     id's sole remaining occurrence if it's the reader's only path to that context.
+
+4. **Verify backlinks resolve** before showing the rewrite: grep every remaining ADR id / task
+   id reference against disk. Fix or flag anything that doesn't resolve — never leave a
+   dangling reference the rewrite itself introduced.
+
+5. **Confirm with the builder** before writing — summarize what was merged, folded, and (with
+   explicit sign-off per step 3) dropped. A full diff is fine to offer but not required if the
+   summary is clear.
+
+6. **Write the rewritten `README.md` in place.** No archive file, no rolled-out history — the
+   in-place rewrite *is* the deliverable.
+
+7. **Commit the consolidation** (after the protocol update below). Scoped `git add` of exactly
+   the rewritten `README.md` and `protocol.md` — never the task files or `INDEX.md` (CONSOLIDATE
+   touches neither) — then `model(<bc>): consolidate <bc> README`. See "Committing" below.
 
 ## Task file format
 
@@ -431,17 +489,28 @@ Then prepend the appropriate entry right after the `---` on line 4:
 **Dismissed:** [one line per task in the cascade set — `<task-id> - <title> (<bc>)`]
 
 ---
+
+## YYYY-MM-DD HH:MM -- Modeling / Consolidated: <bc> README
+
+**Type:** Modeling / Consolidate
+**BC:** <bc-name>
+**Before → After:** <N> lines → <M> lines
+**Summary:** [1-2 sentences on what was merged/folded; note anything dropped, with builder sign-off]
+
+---
 ```
 
 The **PROMOTE** entry (`Modeling / Promoted: <task-id> - [title]`, `**Type:** Modeling / Promote`, `**BC:**`, `**From → To:** backlog → todo`) is no longer hand-formatted here — `lib/task-lifecycle-cli.mjs promote <id>` generates and prepends it as part of its manifest (ADR-0038); see the PROMOTE flow above.
 
 The DISMISS entry is **bare** — it records the cascade set (ids + titles) and the timestamp, no builder-typed reason. One entry per dismiss regardless of how many tasks the cascade removed.
 
+The CONSOLIDATE entry records the line-count delta and a short summary — no task ids (CONSOLIDATE never touches a task file), no `**Filed to**`/`**Status after**` (there is no lifecycle move).
+
 If the action is non-trivial (multiple tasks created from one capture, refinement that produced ADRs, batch promotion), one entry per "thing the user asked for" is enough — don't prepend five entries for a single conversation turn.
 
 ## Committing
 
-Each action — CAPTURE, REFINE, PROMOTE, DISMISS — commits its own markdown at the end of the action, so the working tree is clean afterward. Commit doctrine (scoped `git add`, never `git add -A` / `git add .`, the `[<task-id>]` trailer, message convention per action) lives in `references/commit-doctrine.md` (ADR-0026). `modeling` sometimes runs concurrently with a `work` session and with `quick-capture`, so the scoped-add rule is load-bearing here, not a style choice: each action `git add`s an explicit, enumerated list of only the `.md` files it touched — the task file(s) it wrote or moved, the BC `INDEX.md`(es), `protocol.md`, and any ADR / vision / context-map it produced.
+Each action — CAPTURE, REFINE, PROMOTE, DISMISS, CONSOLIDATE — commits its own markdown at the end of the action, so the working tree is clean afterward. Commit doctrine (scoped `git add`, never `git add -A` / `git add .`, the `[<task-id>]` trailer, message convention per action) lives in `references/commit-doctrine.md` (ADR-0026). `modeling` sometimes runs concurrently with a `work` session and with `quick-capture`, so the scoped-add rule is load-bearing here, not a style choice: each action `git add`s an explicit, enumerated list of only the `.md` files it touched — the task file(s) it wrote or moved, the BC `INDEX.md`(es), `protocol.md`, and any ADR / vision / context-map it produced. CONSOLIDATE's scope is narrower than the rest: only the rewritten BC `README.md` and `protocol.md` — never a task file, never `INDEX.md` (a README rewrite touches no task's lifecycle).
 
 `model` is a commit-message `<type>` prefix for modeling's markdown commits — it is **not** a task `type:` (those stay feature/bug/refactor/chore/spike/decision).
 

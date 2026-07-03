@@ -5,6 +5,20 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 15:32 -- Task verified and completed: agentic-workflow-w7q2m - BC README consolidation + CONSOLIDATE verb
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-w7q2m - BC README consolidation — size trigger + human-in-loop consolidation procedure
+**Summary:** Established the artifact-growth two-disciplines doctrine (ADR-0041): **cap-and-roll** (protocol/INDEX — verbatim, scripted, archived) vs **flag-and-consolidate** (READMEs — judgment, human-in-loop, in-place). Added the `modeling` **CONSOLIDATE** verb (5th beside CAPTURE/REFINE/PROMOTE/DISMISS) with a ~600-line trigger `whats-next` surfaces as a recommended move (no unattended auto-rewrite), a "never silently drop a term/invariant/backlink" guarantee, and scoped-commit doctrine (references/commit-doctrine.md, skills/modeling + whats-next SKILL.md). Demonstrated live by consolidating this BC's own README ~1006→598 lines in place, a strict superset of every prior ubiquitous-language term/invariant.
+**Duration:** ~45m (dispatched 14:47; ~22m worker + ~3m verifier, then serialized behind t7m4c/q3n7k integration + a merge-back conflict resolution)
+**Verification:** PASS (iteration 1) — verifier ran the lib suite (93/93 green), confirmed all 6 acceptance criteria, and directly verified the load-bearing property: the new README's lead-term set is a strict superset of the pre-consolidation README (57→59 terms, nothing dropped) and every ADR-id / task-id backlink resolves.
+**Merge-back conflict (ADR-0032) — RESOLVED, not escalated:** all three batch tasks touched the BC README; t7m4c and q3n7k (small additive entries) integrated first and clean, then w7q2m's wholesale 1006→598 rewrite conflicted with them on README only (every other w7q2m file merged clean). Per ADR-0032 the conductor first aborted (`git reset --hard HEAD`, main left pristine, worktree preserved) and surfaced the choice to the builder; with the builder away, the conductor resolved it deliberately (not auto-guessed): took w7q2m's consolidated README as the base and folded in t7m4c's `claimBatch`/`completeTask` + ADR-0042 ubiquitous-language entries (condensed to the consolidated density) and q3n7k's workflow-guide paragraph, then re-verified no term/invariant/backlink was lost. Final README 621 lines — Read-able in one pass (well under the ~718 un-Readable point), though now just over ADR-0041's own ~600 advisory trigger, since the two folded-in entries are net-new post-consolidation content; `whats-next` will surface it in the ordinary course. **For builder review:** the reconciled README fold-in is this commit's diff.
+**Files changed:** 5
+**Tests added:** 0 (pure doctrine/prose + in-place consolidation — TDD legitimately N/A)
+**ADRs written:** 0041-artifact-growth-two-disciplines-consolidate-verb.md
+
+---
+
 ## 2026-07-03 15:26 -- Task verified and completed: agentic-workflow-q3n7k - Update the workflow guide (inquire + whats-next)
 
 **Type:** Work / Task completion

@@ -32,8 +32,9 @@ Read these, cheapest and most informative first. Skip anything that doesn't exis
 2. **`.agentheim/context-map.md`** (if it exists) — how the bounded contexts relate; useful for spotting a context that's been named but never built into.
 3. **`.agentheim/knowledge/index.md`** (if it exists) — top-level catalog: current BCs, recent ADRs, global state.
 4. **Each `.agentheim/contexts/*/INDEX.md`** — the per-BC task counts and lists by status. This is your fastest read of the board: how many tasks sit in backlog / todo / doing / done per context, and their titles. Prefer these lists over walking the directories.
-5. **`.agentheim/knowledge/protocol.md`** — the first ~80–120 lines only (newest entries are on top). This tells you the *recent thread*: what just shipped, what was just dismissed, whether a work session ended cleanly or was interrupted, what the builder has been focused on. The live file is capped (ADR-0039) — older months roll out verbatim to `.agentheim/knowledge/protocol/YYYY-MM.md` — so this read-window stays recent-activity-only; there is no need to consult the archive here.
-6. **The actual task files in `contexts/*/doing/`, `contexts/*/todo/`, and `contexts/*/backlog/`** — read these (not just the INDEX line) when you need their frontmatter to judge readiness:
+5. **Each `.agentheim/contexts/*/README.md`'s line count** — a cheap, judgment-free check (`wc -l` or your file-read tool's reported line count; no tokenizer, no content read needed). A README at or over the **~600-line consolidation threshold** (ADR-0041) has grown past the point where it can reliably be read in one pass — flag it as a candidate `modeling` **CONSOLIDATE** recommendation (see Step 3 below). This is a background-maintenance signal, not new work the project asked for, so it rarely outranks anything live in `doing/` or a primed `todo/` — but note it so it can surface when nothing more urgent is happening, or as a brief aside.
+6. **`.agentheim/knowledge/protocol.md`** — the first ~80–120 lines only (newest entries are on top). This tells you the *recent thread*: what just shipped, what was just dismissed, whether a work session ended cleanly or was interrupted, what the builder has been focused on. The live file is capped (ADR-0039) — older months roll out verbatim to `.agentheim/knowledge/protocol/YYYY-MM.md` — so this read-window stays recent-activity-only; there is no need to consult the archive here.
+7. **The actual task files in `contexts/*/doing/`, `contexts/*/todo/`, and `contexts/*/backlog/`** — read these (not just the INDEX line) when you need their frontmatter to judge readiness:
    - `depends_on` — a todo task whose dependencies aren't all in `done/` is *not* actually ready; don't recommend running it.
    - `blocks` — finishing this one may unblock several others (a high-leverage pick).
    - `tags: [captured]` and acceptance criteria that say "To be defined during refinement" — this task is a raw capture and needs a `modeling` **refine** pass before it can be worked.
@@ -59,6 +60,8 @@ This is the usual order of priority. Read it as "what's the most valuable lever 
 
 A task in `doing/` outranks a primed `todo/`, which outranks backlog work, which outranks new modeling — because finishing beats starting, and executing decided work beats deciding more. But a tiny stale chore in `doing/` shouldn't outrank an urgent, just-surfaced bug in `todo/`; if the situation argues against the ladder, follow the situation and say why.
 
+**A README over the consolidation threshold (Step 1.5) sits outside this ladder** — it's upkeep, not new value, so it normally rides along as a brief second mention rather than displacing the top recommendation. It's worth promoting to the primary recommendation only when the ladder itself is quiet (nothing in `doing/`, nothing primed in `todo/`) — i.e. around rung 4–6 — since there's genuinely nothing more valuable to point at.
+
 ## Step 3 — Answer in plain prose
 
 Write the recommendation the way you'd say it out loud to the builder. Short, concrete, reasoned. Structure it loosely like this — adapt freely, these are not rigid headings:
@@ -69,6 +72,8 @@ Write the recommendation the way you'd say it out loud to the builder. Short, co
 - **The concrete next move.** End with the one action to take: which skill to invoke and on what — e.g. "Run `work`.", or "Say `refine agentic-workflow-063` and I'll deepen it.", or "Let's `brainstorm` the existing-code path." Make it a thing the builder can do in their next breath.
 
 Keep the whole thing tight — a few short paragraphs, plain language. No tables, no status dumps, no exhaustive backlog listings, no ticket-by-ticket walkthrough. If the builder wants the full board they have the dashboard; what they want from *you* is a clear pointer and the reasoning behind it.
+
+**When a BC's README is over the consolidation threshold** (flagged in Step 1.5), fold in a line using this exact phrasing so it stays a recognizable, greppable signal: `README <bc> is over the consolidation threshold — consolidate`. Say it as a plain aside when the main recommendation outranks it ("...and separately, `README <bc> is over the consolidation threshold — consolidate` whenever you get a spare moment"), or lead with it as the recommendation itself when the board is otherwise quiet. Never invent this line for a README you haven't actually measured.
 
 ### Tone
 

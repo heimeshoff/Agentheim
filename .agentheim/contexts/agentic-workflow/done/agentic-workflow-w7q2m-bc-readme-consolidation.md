@@ -1,15 +1,15 @@
 ---
 id: agentic-workflow-w7q2m
 title: BC README consolidation — size trigger + human-in-loop consolidation procedure
-status: todo
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-03
 depends_on: []
 blocks: []
 tags: [harness-audit, context-management, readme, compaction]
-related_adrs: ["0017", "0022", "0026", "0027"]
+related_adrs: ["0017", "0022", "0026", "0027", "0041"]
 related_research: []
 prior_art: []
 ---
@@ -106,3 +106,35 @@ task is promoted. The exact line cap (~600) and the machine-cue question stay
 
 Source: harness audit 2026-07-02, Phase 2 gap table (context/memory row). Split
 from the original c8j3w capture on the 2026-07-02 refinement; sharpened 2026-07-03.
+
+## Outcome
+
+Landed the **trigger** (a ~600-line, judgment-free line-count on a BC `README.md`), the
+**procedure** (a fifth `modeling` verb, CONSOLIDATE — builder-in-the-loop, in-place rewrite, no
+archive), and the **live demonstration** (this BC's own README, consolidated from 1006 lines
+down to 598).
+
+One unifying ADR, **ADR-0041**, fixes both the CONSOLIDATE verb's contract (mirroring DISMISS /
+ADR-0022's shape) and the broader **cap-and-roll vs. flag-and-consolidate** framing spanning the
+three growth-surface tasks (r2c7m protocol, c8j3w INDEX done-list, w7q2m README) — a single
+decision of record rather than two overlapping ones, per the task's own "do not pre-write both
+if one unifying ADR is cleaner" guidance.
+
+- `.agentheim/knowledge/decisions/0041-artifact-growth-two-disciplines-consolidate-verb.md` —
+  the ADR: trigger, the "never silently drop a term/invariant/backlink" guarantee, the commit
+  scope, and the two-disciplines split.
+- `skills/modeling/SKILL.md` — added CONSOLIDATE as the fifth action (table entry,
+  disambiguating-intent line, target-resolution note, a full "## CONSOLIDATE flow" section
+  mirroring DISMISS's structure, a protocol-entry template, and the Committing-section update).
+- `skills/whats-next/SKILL.md` — added a per-BC README line-count read step (Step 1), a ladder
+  note on when the flag outranks other work (Step 2), and the exact advisory phrasing convention
+  (`README <bc> is over the consolidation threshold — consolidate`, Step 3).
+- `references/commit-doctrine.md` — added the CONSOLIDATE message-convention row
+  (`model(<bc>): consolidate <bc> README`) and the ADR-0041 reference.
+- `.agentheim/contexts/agentic-workflow/README.md` — consolidated in place: per-feature
+  narration chains folded into settled current-state summaries; every ubiquitous-language term
+  and invariant preserved (verified every ADR id and task id still referenced resolves on
+  disk); a new ubiquitous-language entry documents the trigger/CONSOLIDATE mechanism itself.
+
+TDD does not apply — this is a doctrine + prose-consolidation task (skill-flow documentation and
+an in-place README rewrite), no executable behavior to test. See `TDD_SKIPPED` in the return.

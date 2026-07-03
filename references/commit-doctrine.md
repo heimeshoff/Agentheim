@@ -37,9 +37,10 @@ The `[<task-id>]` trailer is the `git log` index for a task's commit:
 | `modeling` REFINE | `model(<bc>): refine <task-id> — <title> [<task-id>]` |
 | `modeling` PROMOTE | `model(<bc>): promote <task-id> — <title> [<task-id>]` |
 | `modeling` DISMISS | `chore(<bc>): dismiss <id-or-cascade-set>` |
+| `modeling` CONSOLIDATE | `model(<bc>): consolidate <bc> README` |
 | `quick-capture` | `chore(<bc>): capture <task-id> — <title> [<task-id>]` |
 | `brainstorm` (session) | `chore(<bc-or-global>): brainstorm <topic> — vision created \| revised \| extended` |
 
-`model` is the commit `<type>` prefix reserved for `modeling`'s REFINE/PROMOTE actions specifically — everything else `modeling` writes (CAPTURE, DISMISS) uses `chore`.
+`model` is the commit `<type>` prefix reserved for `modeling`'s REFINE/PROMOTE/CONSOLIDATE actions specifically — everything else `modeling` writes (CAPTURE, DISMISS) uses `chore`.
 
-ADR of record: `.agentheim/knowledge/decisions/0026-committing-doctrine-bookkeeping-in-task-commit.md`.
+ADR of record: `.agentheim/knowledge/decisions/0026-committing-doctrine-bookkeeping-in-task-commit.md`. CONSOLIDATE's contract (trigger, scope, "never silently drop a term or invariant") is fixed by `.agentheim/knowledge/decisions/0041-artifact-growth-two-disciplines-consolidate-verb.md`.

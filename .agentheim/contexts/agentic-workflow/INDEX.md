@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 3
 - **Todo:** 3
-- **Doing:** 1
-- **Done:** 110
+- **Doing:** 0
+- **Done:** 111
 <!-- task-counts:end -->
 
 ### Todo
@@ -25,11 +25,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-w7q2m** — BC README consolidation — size trigger + human-in-loop consolidation procedure (feature) — `doing/agentic-workflow-w7q2m-bc-readme-consolidation.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-w7q2m** — BC README consolidation — size trigger + human-in-loop consolidation procedure (feature) — `done/agentic-workflow-w7q2m-bc-readme-consolidation.md`
 - **agentic-workflow-q3n7k** — Update the workflow guide to reflect new features like inquire and what's next (feature) — `done/agentic-workflow-q3n7k-update-workflow-guide-inquire-whats-next.md`
 - **agentic-workflow-t7m4c** — Mechanize CLAIM + COMPLETE lifecycle scripts against the ADR-0032 worktree / squash-merge model (refactor) — `done/agentic-workflow-t7m4c-claim-complete-lifecycle-scripts-worktree.md`
 - **agentic-workflow-v6d4n** — Vision-conformance check — flag in-flight work that drifts from vision success criteria / non-goals (feature) — `done/agentic-workflow-v6d4n-vision-conformance-check-session-end-verify.md`
@@ -152,6 +152,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0041** — Artifact-growth doctrine: two disciplines for the three growth surfaces — **cap-and-roll** (verbatim, scripted, rolled to a dated archive: protocol ADR-0039 / INDEX done-list c8j3w) vs **flag-and-consolidate** (judgment, human-in-the-loop, rewritten *in place*, nothing archived: BC READMEs). Adds the `modeling` **CONSOLIDATE** verb (5th beside CAPTURE/REFINE/PROMOTE/DISMISS) with a frozen contract mirroring DISMISS/ADR-0022: a ~600-line README trigger `whats-next` surfaces as a recommended move (no skill auto-rewrites prose unattended), builder-in-the-loop consolidation that merges/rewrites but **never silently drops a term, invariant, or backlink**, committing its own scoped markdown (ADR-0026); accepted — `../../knowledge/decisions/0041-artifact-growth-two-disciplines-consolidate-verb.md`
 - **ADR-0042** — The COMPLETE lifecycle script stays single-task: `completeTask` mirrors `promoteTask`'s single-id shape (moves one task, edits one BC `INDEX.md`, prepends one protocol entry) and is idempotent w.r.t. an already-in-`done/` file (worktree already moved it); the ADR-0032 trivial-squash carve-out is composed by the *caller* (the conductor runs `complete` once per task, collects N manifests, and writes the one multi-`[task-id]` squash commit) rather than built into the script — a batch-complete verb would have to invent a shared summary/`<type>` across N tasks, the judgment ADR-0038's three-layer boundary reserves for the skill; accepted — `../../knowledge/decisions/0042-complete-script-single-task-carve-out-composed-by-caller.md`
 - **ADR-0040** — Vision-conformance check lives at `work`'s session-end as an **advisory** read of two named `vision.md` sections ("What success looks like" + "Non-goals") against the just-shipped batch; flags drift via a session-end protocol line and, when warranted, a `whats-next` advisory line (ADR-0027 advisory-write family) — **never a gate** (human-in-the-loop non-goal holds); deterministic extraction/formatting in `lib/vision-conformance.mjs`, the LLM judgment exercised by should-flag/should-not-flag eval fixtures under `evals/vision-conformance-check/`; accepted — `../../knowledge/decisions/0040-vision-conformance-check-session-end-advisory.md`
 - **ADR-0039** — Protocol rotation doctrine: the live `protocol.md` is capped (~1,000 lines) and whole older months roll out **verbatim** (never rewritten/summarized) to dated `knowledge/protocol/YYYY-MM.md` archive files, newest-on-top order preserved; the current month is never rolled (steady-state cap, not a hard ceiling); implemented as the git-free k5n8f-family script `lib/protocol-rotation.mjs` (`rotateProtocol`, no `Date.now()` — month derived from entry headings, byte-for-byte slices); accepted — `../../knowledge/decisions/0039-protocol-rotation-doctrine-verbatim-monthly-archive-live-cap.md`
