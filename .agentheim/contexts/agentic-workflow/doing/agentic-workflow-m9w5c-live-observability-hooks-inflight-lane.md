@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-m9w5c
 title: Live observability — hooks write agent status to state/, dashboard renders an in-flight lane
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-02

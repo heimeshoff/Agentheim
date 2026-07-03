@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-c8j3w
 title: INDEX done-list rotation — cap the done-list and roll older entries to a dated archive
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-02

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-r9k2p
 title: Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-02

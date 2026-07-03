@@ -11,20 +11,20 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 3
-- **Todo:** 3
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 3
 - **Done:** 111
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `todo/agentic-workflow-c8j3w-index-done-list-rotation.md`
-- **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature, umbrella — delivered via d8q3n/w4t9k/b7n2s/k5p8w/h9v3m) — `todo/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
-- **agentic-workflow-m9w5c** — Live observability — hooks write agent status to state/, dashboard renders an in-flight lane (feature) — `todo/agentic-workflow-m9w5c-live-observability-hooks-inflight-lane.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-m9w5c** — Live observability — hooks write agent status to state/, dashboard renders an in-flight lane (feature) — `doing/agentic-workflow-m9w5c-live-observability-hooks-inflight-lane.md`
+- **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature) — `doing/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
+- **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `doing/agentic-workflow-c8j3w-index-done-list-rotation.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)

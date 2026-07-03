@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 17:42 -- Batch started: [agentic-workflow-c8j3w, agentic-workflow-r9k2p, agentic-workflow-m9w5c]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-c8j3w - INDEX done-list rotation — cap the done-list and roll older entries to a dated archive, agentic-workflow-r9k2p - Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring, agentic-workflow-m9w5c - Live observability — hooks write agent status to state/, dashboard renders an in-flight lane
+**Parallel:** yes (3 workers, MAX_PARALLEL=3 - all agentic-workflow BC; ready set = 3, full wave, none held)
+**Planning advisory:** whats-next (generated 2026-07-03 09:20) is STALE - older than the 15:35 session-end entry and its picks (t4x8p, p3v9k) already shipped; background weighting only
+
+---
+
 ## 2026-07-03 15:35 -- Work session ended
 
 **Type:** Work / Session end
