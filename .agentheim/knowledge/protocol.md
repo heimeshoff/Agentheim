@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 15:26 -- Task verified and completed: agentic-workflow-q3n7k - Update the workflow guide (inquire + whats-next)
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-q3n7k - Update the workflow guide to reflect new features like inquire and what's next
+**Summary:** Updated the dashboard's built-in Workflow guide page (aw-057 three-segment explainer) to add `whats-next` (positioned at the planning moment — opening the Promote & Work segment's diagram before modeling PROMOTE) and `inquire` (a new "Any time" section outside the three segments, an any-time read-only lens), with a regression test asserting the guide names AND correctly positions both skills. Static page, styleguide-unforked (ADR-0025 mainView), dist rebuilt faithfully.
+**Duration:** ~39m (dispatched 14:47; ~5m worker + ~2m verifier, then serialized behind t7m4c integration)
+**Verification:** PASS (iteration 1) — verifier ran the dashboard suite (712/712 green incl. the new regression test), confirmed the two skills' one-line roles + correct flow positioning, styleguide conformance, dist consistency (`node build.mjs` produced no drift), and check-8 runtime drive: booted the dashboard from the worktree (port 41376 from the runfile), /healthz → 200, /api/tree → 200, clean teardown.
+**Files changed:** 4
+**Tests added:** 1
+**ADRs written:** none
+
+---
+
 ## 2026-07-03 15:24 -- Task verified and completed: agentic-workflow-t7m4c - Mechanize CLAIM + COMPLETE lifecycle scripts
 
 **Type:** Work / Task completion

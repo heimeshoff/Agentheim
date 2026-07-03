@@ -1852,16 +1852,21 @@ function CapturingDiagram() {
     </span>`;
 }
 
-// Segment 3 — PROMOTE & WORK: a pipeline with a retry loop. modeling PROMOTE
-// (backlog → todo) → work (parallel TDD workers) → verifier checkpoint on the
-// edge → commit. The checkpoint shows the FAIL → re-dispatch (×2) → escalate loop
-// back to work; the user-reviews-before-work checkpoint sits on the entry edge.
+// Segment 3 — PROMOTE & WORK: a pipeline with a retry loop, opening with the
+// PLANNING moment. whats-next (advisory only — it recommends, never moves a
+// task) sits before modeling PROMOTE, at the where-do-I-pick-up decision point
+// (agentic-workflow-q3n7k). Then modeling PROMOTE (backlog → todo) → work
+// (parallel TDD workers) → verifier checkpoint on the edge → commit. The
+// checkpoint shows the FAIL → re-dispatch (×2) → escalate loop back to work;
+// the user-reviews-before-work checkpoint sits on the entry edge.
 function PromoteWorkDiagram() {
   return html`
     <span style=${{
       display: "flex", flexDirection: "column", alignItems: "center", gap: 0,
       fontFamily: "var(--font-ui)",
     }}>
+      <${WNode} kind="skill" label="whats-next" verb="advisory" />
+      <${WArrow} dir="down" label="recommends" />
       <span style=${{ display: "flex", alignItems: "center", gap: 8 }}>
         <${WNode} kind="skill" label="modeling" verb="PROMOTE" />
         <${WArrow} dir="right" label="backlog → todo" />
@@ -1885,7 +1890,8 @@ function PromoteWorkDiagram() {
 
 // The built-in WORKFLOW guide page (agentic-workflow-058 routing scaffold; real
 // three-segment layout + caption copy added by agentic-workflow-059; diagrams by
-// aw-060). Governed by ADR-0025.
+// aw-060; whats-next + inquire added by agentic-workflow-q3n7k). Governed by
+// ADR-0025.
 //
 // It explains Agentheim's workflow as THREE named segments, in order — Preparation,
 // Capturing, Promote & Work — each a labelled section carried by a hand-authored
@@ -1895,7 +1901,11 @@ function PromoteWorkDiagram() {
 // research, work) and the real adversarial gates (verifier, research-reviewer), shows
 // quick-capture AND modeling as two distinct intake doors, includes DISMISS, and
 // marks the human-in-the-loop gates (no-code brainstorm, user review before work,
-// escalation to the builder after repeated verification failure).
+// escalation to the builder after repeated verification failure). Promote & Work
+// opens with `whats-next` (advisory-only, agentic-workflow-q3n7k) at the planning
+// moment, before modeling PROMOTE. A fourth, un-numbered "Any time" note below the
+// three segments names `inquire` — a read-only lens that sits outside the flow and
+// is usable at any point, never appended into a segment's skill list.
 //
 // It is a STATIC page built into the bundle: NOT an open-intent (no lifecycle
 // `status`, no on-disk `path`), so it never enters isTaskIntent (ADR-0021,
@@ -1973,8 +1983,13 @@ function WorkflowPage() {
         ordinal=${3}
         title="Promote & Work"
         diagram=${html`<${PromoteWorkDiagram} />`}
-        diagramLabel="Promote and Work flow: modeling PROMOTE moves a task from backlog to todo; past a user-reviews-todo checkpoint the work skill runs parallel TDD workers; a verifier checkpoint on the edge guards the commit, with a FAIL re-dispatch loop (up to twice, then escalate) back to work. Every passing task becomes exactly one commit."
+        diagramLabel="Promote and Work flow: the whats-next skill recommends the next sensible task, advisory only; then modeling PROMOTE moves a task from backlog to todo; past a user-reviews-todo checkpoint the work skill runs parallel TDD workers; a verifier checkpoint on the edge guards the commit, with a FAIL re-dispatch loop (up to twice, then escalate) back to work. Every passing task becomes exactly one commit."
         gate=${html`The builder reviews the <${Wcode}>todo</${Wcode}> tasks before <${Wcode}>work</${Wcode}> runs; the <${Wcode}>verifier</${Wcode}> guards every commit; a verification that keeps failing escalates to the builder rather than committing plausible-but-wrong work.`}>
+        <${WorkflowCaption}>
+          <${Wcode}>whats-next</${Wcode}> opens this segment at the planning moment: it reads
+          the boards, the vision, and the recent protocol, then recommends the single next
+          sensible move — advisory only, it never moves a task itself.
+        </${WorkflowCaption}>
         <${WorkflowCaption}>
           <${Wcode}>modeling</${Wcode}> PROMOTE runs a readiness check and moves a task
           <${Wcode}>backlog → todo</${Wcode}>. <${Wcode}>work</${Wcode}> then resolves the
@@ -1988,6 +2003,26 @@ function WorkflowPage() {
           commit — <strong>one task = one commit</strong>.
         </${WorkflowCaption}>
       </${WorkflowSegment}>
+
+      <section aria-label="Available any time" style=${{
+        display: "flex", flexDirection: "column", gap: 10,
+        paddingTop: 20, borderTop: "1px solid var(--hairline)",
+      }}>
+        <h2 style=${{
+          margin: 0, fontFamily: "var(--font-ui)", fontSize: 14, fontWeight: 600,
+          letterSpacing: "-0.01em", color: "var(--fg-2)",
+        }}>Any time</h2>
+        <p style=${{
+          margin: 0, fontFamily: "var(--font-ui)", fontSize: 13.5, lineHeight: 1.65,
+          color: "var(--fg-3)",
+        }}>
+          <${Wcode}>inquire</${Wcode}> sits outside these three segments — a read-only,
+          code-grounded lens over the project, usable at any point in the workflow. Ask it
+          how something works or what was decided and it answers from the project's own
+          memory (index, READMEs, ADRs, boards), verified against the source; it never
+          edits code, moves a task, or commits.
+        </p>
+      </section>
     </section>`;
 }
 

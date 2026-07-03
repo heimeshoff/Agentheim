@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-q3n7k
 title: Update the workflow guide to reflect new features like inquire and what's next
-status: todo
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-06-19
-completed:
+completed: 2026-07-03
 depends_on: [design-system-001]
 blocks: []
 tags: [captured, dashboard, workflow-guide, docs]
@@ -62,3 +62,39 @@ The guide's shell + three-segment layout is aw-059; the rail item + routing scaf
 is aw-058; the hand-authored flow diagrams are aw-060 — those are the surfaces this
 edit touches. The skills to add: `inquire` (aw-h7n2c) and `whats-next` (aw-073 render
 / aw-076 advisory persist / aw-069 topbar launch).
+
+## Outcome
+
+Updated the built-in Workflow guide page (`dashboard/app/board.js`, `WorkflowPage` /
+`PromoteWorkDiagram`) to add both skills, positioned per the AC:
+
+- **`whats-next`** now opens the **Promote & Work** segment (both the hand-authored
+  diagram and its caption copy) as a new `WNode` ("advisory") with a "recommends"
+  arrow leading into `modeling` PROMOTE — the planning/where-do-I-pick-up moment,
+  before PROMOTE/`work`, not appended after the pipeline.
+- **`inquire`** is presented in a new, un-numbered "Any time" section rendered
+  *after* the three `WorkflowSegment`s (`aria-label="Available any time"`) — framed
+  as a read-only, code-grounded lens usable at any point in the workflow, kept
+  deliberately outside the three-segment flow rather than tacked onto a segment's
+  skill list.
+
+Both additions reuse existing primitives only (`WNode`, `WArrow`, `WorkflowCaption`,
+`Wcode`, design-system tokens) — no styleguide fork, no new dependency, page stays
+static/read-only (ADR-0025 honored).
+
+Added a regression test in `dashboard/test/workflow-page-content.test.mjs`
+("the guide names both inquire and whats-next, correctly positioned in the flow")
+asserting both skills are named AND correctly ordered (`whats-next` before
+`verb="PROMOTE"`; `inquire` after the last `</${WorkflowSegment}>` close) — guards
+against this regressing silently as more skills ship. Full dashboard suite
+(`node --test`, 712 tests) and `node build.mjs` both pass.
+
+Updated `.agentheim/contexts/agentic-workflow/README.md`'s Workflow-guide-page
+paragraph to describe the new whats-next/inquire placement, keeping the README in
+sync with the shipped page content.
+
+Key files:
+- `dashboard/app/board.js` (`PromoteWorkDiagram`, `WorkflowPage`)
+- `dashboard/test/workflow-page-content.test.mjs`
+- `.agentheim/contexts/agentic-workflow/README.md`
+- `dashboard/dist/app.js`, `dashboard/dist/index.html` (rebuilt bundle)

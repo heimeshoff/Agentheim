@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 3
 - **Todo:** 3
-- **Doing:** 2
-- **Done:** 109
+- **Doing:** 1
+- **Done:** 110
 <!-- task-counts:end -->
 
 ### Todo
@@ -26,11 +26,11 @@ research touching this BC, and concept synthesis pages.
 ### Doing
 <!-- doing-list:start -->
 - **agentic-workflow-w7q2m** — BC README consolidation — size trigger + human-in-loop consolidation procedure (feature) — `doing/agentic-workflow-w7q2m-bc-readme-consolidation.md`
-- **agentic-workflow-q3n7k** — Update the workflow guide to reflect new features like inquire and what's next (feature) — `doing/agentic-workflow-q3n7k-update-workflow-guide-inquire-whats-next.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-q3n7k** — Update the workflow guide to reflect new features like inquire and what's next (feature) — `done/agentic-workflow-q3n7k-update-workflow-guide-inquire-whats-next.md`
 - **agentic-workflow-t7m4c** — Mechanize CLAIM + COMPLETE lifecycle scripts against the ADR-0032 worktree / squash-merge model (refactor) — `done/agentic-workflow-t7m4c-claim-complete-lifecycle-scripts-worktree.md`
 - **agentic-workflow-v6d4n** — Vision-conformance check — flag in-flight work that drifts from vision success criteria / non-goals (feature) — `done/agentic-workflow-v6d4n-vision-conformance-check-session-end-verify.md`
 - **agentic-workflow-r2c7m** — Protocol rotation — cap protocol.md and roll to monthly files (feature) — `done/agentic-workflow-r2c7m-protocol-rotation.md`

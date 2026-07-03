@@ -118,3 +118,33 @@ test('styleguide is consumed unforked: copy uses design-system tokens (ADR-0003)
   assert.match(wf, /var\(--fg-1\)/, 'segment titles use the --fg-1 token');
   assert.match(wf, /var\(--font-ui\)/, 'copy uses the --font-ui token');
 });
+
+// Regression guard (agentic-workflow-q3n7k): the guide predates the `inquire` and
+// `whats-next` skills, so it silently omitted them once they shipped. This locks in
+// that both are named AND correctly positioned — not merely appended to a list —
+// so the guide can't go stale again the same way as more skills ship.
+test('the guide names both inquire and whats-next, correctly positioned in the flow', () => {
+  assert.match(wf, /\bwhats-next\b/, 'the guide must name the whats-next skill');
+  assert.match(wf, /\binquire\b/, 'the guide must name the inquire skill');
+
+  // whats-next sits at the planning moment: it must precede modeling PROMOTE inside
+  // the Promote & Work diagram, not be tacked on after the pipeline.
+  const promoteVerbIdx = wf.indexOf('verb="PROMOTE"');
+  const whatsNextNodeIdx = wf.indexOf('label="whats-next"');
+  assert.ok(promoteVerbIdx > -1, 'modeling PROMOTE must still be in the diagram');
+  assert.ok(whatsNextNodeIdx > -1, 'whats-next must render as a diagram node');
+  assert.ok(whatsNextNodeIdx < promoteVerbIdx,
+    'whats-next must precede modeling PROMOTE in the Promote & Work diagram (the planning moment)');
+
+  // inquire is an any-time read-only lens, OUTSIDE the three numbered segments —
+  // never merely appended into one of their skill lists. Match the rendered
+  // mention specifically (`Wcode}>inquire`), not the doc-comment prose above the
+  // function, which also legitimately names it.
+  assert.match(wf, /any time/i, 'inquire must be framed as available any time');
+  const lastSegmentCloseIdx = wf.lastIndexOf('</${WorkflowSegment}>');
+  const inquireRenderedIdx = wf.indexOf('Wcode}>inquire');
+  assert.ok(lastSegmentCloseIdx > -1, 'the three segments must still close normally');
+  assert.ok(inquireRenderedIdx > -1, 'inquire must render inline (not just in comments)');
+  assert.ok(inquireRenderedIdx > lastSegmentCloseIdx,
+    'inquire must be presented outside/after the three numbered segments, not inside one');
+});

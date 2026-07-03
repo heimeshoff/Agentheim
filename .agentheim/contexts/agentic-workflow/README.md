@@ -788,6 +788,13 @@ separate BC, but today the whole tool lives in this one.
   Gates render as **checkpoints on edges**, never as agent boxes. The `role="img"` frame
   carries a real-flow `aria-label`. It keeps the main-pane reader's centered reading measure
   (maxWidth 760, margin `0 auto` — aw-040) and stays static / read-only, styleguide consumed unforked.
+  As of **agentic-workflow-q3n7k** the guide was updated to cover the two skills that shipped
+  after aw-060 landed: **Promote & Work now opens with `whats-next`** — a `WNode` + `WArrow`
+  ("recommends") ahead of `modeling` PROMOTE in both the diagram and the caption — placed at the
+  planning/where-do-I-pick-up moment (advisory only, it never moves a task); and a **fourth,
+  un-numbered "Any time" note below the three segments** names `inquire` as a read-only,
+  code-grounded lens that sits *outside* the flow and is usable at any point — deliberately not
+  appended into any segment's skill list, since it isn't a step in the sequence.
 - **Library / navigation** — the dashboard's discovery surface (agentic-workflow-008): makes the
   *non-task* knowledge base browsable — vision, context map, every BC README, **per-BC concept pages**,
   ADRs, research —
