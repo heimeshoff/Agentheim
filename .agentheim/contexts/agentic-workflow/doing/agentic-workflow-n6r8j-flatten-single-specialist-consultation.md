@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-n6r8j
 title: Flatten single-specialist consultations — worker spawns the specialist directly
-status: todo
+status: doing
 type: refactor
 context: agentic-workflow
 created: 2026-07-02
