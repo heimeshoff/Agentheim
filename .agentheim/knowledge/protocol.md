@@ -5,6 +5,16 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 14:47 -- Batch started: [agentic-workflow-t7m4c, agentic-workflow-w7q2m, agentic-workflow-q3n7k]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-t7m4c - Mechanize CLAIM + COMPLETE lifecycle scripts (ADR-0032 worktree/squash-merge model), agentic-workflow-w7q2m - BC README consolidation (size trigger + modeling CONSOLIDATE verb), agentic-workflow-q3n7k - Update dashboard Workflow guide page (add inquire + whats-next)
+**Parallel:** yes (3 workers, MAX_PARALLEL=3 — all agentic-workflow BC; 6 ready, 3 held to next wave: c8j3w [would collide with t7m4c on lib/task-lifecycle.mjs — hold so its wave-2 worktree branches off t7m4c's merge], m9w5c, r9k2p [held by MAX_PARALLEL cap; keep only one dashboard task this wave to avoid dashboard-file collisions with q3n7k])
+**Planning advisory:** whats-next (generated 09:20) is **stale** — older than the 14:42 session-end entry and its picks (t4x8p, p3v9k) already shipped; weighted as background only.
+**Merge-order advisory:** file domains are largely disjoint — t7m4c→lib/task-lifecycle + work/SKILL.md, w7q2m→modeling/whats-next SKILL prose + new ADR, q3n7k→dashboard/** (Workflow guide page). Watch for a w7q2m/t7m4c ADR-0041 number collision (both may mint the next-free ADR — renumber one at integration, as with last session's 0039/0040).
+
+---
+
 ## 2026-07-03 14:45 -- Modeling / Captured: infrastructure-5w5gs - task-lifecycle CLI breaks on CRLF .agentheim files
 
 **Type:** Modeling / Capture

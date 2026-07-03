@@ -11,23 +11,23 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 3
-- **Todo:** 6
-- **Doing:** 0
+- **Todo:** 3
+- **Doing:** 3
 - **Done:** 108
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
 - **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `todo/agentic-workflow-c8j3w-index-done-list-rotation.md`
-- **agentic-workflow-t7m4c** — Mechanize CLAIM + COMPLETE lifecycle scripts against the ADR-0032 worktree / squash-merge model (refactor) — `todo/agentic-workflow-t7m4c-claim-complete-lifecycle-scripts-worktree.md`
-- **agentic-workflow-w7q2m** — BC README consolidation — size trigger + human-in-loop consolidation procedure (feature) — `todo/agentic-workflow-w7q2m-bc-readme-consolidation.md`
 - **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature, umbrella — delivered via d8q3n/w4t9k/b7n2s/k5p8w/h9v3m) — `todo/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
 - **agentic-workflow-m9w5c** — Live observability — hooks write agent status to state/, dashboard renders an in-flight lane (feature) — `todo/agentic-workflow-m9w5c-live-observability-hooks-inflight-lane.md`
-- **agentic-workflow-q3n7k** — Update the workflow guide to reflect new features like inquire and what's next (feature) — `todo/agentic-workflow-q3n7k-update-workflow-guide-inquire-whats-next.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-t7m4c** — Mechanize CLAIM + COMPLETE lifecycle scripts against the ADR-0032 worktree / squash-merge model (refactor) — `doing/agentic-workflow-t7m4c-claim-complete-lifecycle-scripts-worktree.md`
+- **agentic-workflow-w7q2m** — BC README consolidation — size trigger + human-in-loop consolidation procedure (feature) — `doing/agentic-workflow-w7q2m-bc-readme-consolidation.md`
+- **agentic-workflow-q3n7k** — Update the workflow guide to reflect new features like inquire and what's next (feature) — `doing/agentic-workflow-q3n7k-update-workflow-guide-inquire-whats-next.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
