@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 14:29 -- Task verified and completed: agentic-workflow-z2f7s - Fan-out caps
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-z2f7s - Fan-out caps — MAX_PARALLEL as a knob, research cap, global nested-spawn ceiling
+**Summary:** Named `MAX_PARALLEL` (default 3) as a user-settable knob in `skills/work/SKILL.md` Phase 3 with a merge-surface-vs-review-load rationale (and a b8x2v measured-basis pointer for future revisiting); gave `skills/research/SKILL.md` a matching default cap of 3 concurrent researchers, overridable by explicit ask; added a "Nested fan-out budget (worst case — documented, not enforced)" section stating `MAX_PARALLEL × (1 orchestrator + up to 4 specialists)` with n6r8j (ADR-0035) as the structural mitigation and an explicit non-enforcement disclaimer; codified the "cap triggered — never truncate silently" rule beside the Batch-started template.
+**Duration:** ~9m (dispatched 14:20; worker ~3m + verifier ~1m, serialized behind checkpoint)
+**Verification:** PASS (iteration 1) — verifier ran the lib suite (65 tests green via glob invocation) and confirmed all 4 acceptance criteria + honest "documented, not enforced" framing + clean scope (no INDEX/protocol/README/other-BC touched).
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-03 14:20 -- Batch started: [agentic-workflow-r2c7m, agentic-workflow-z2f7s, agentic-workflow-v6d4n]
 
 **Type:** Work / Batch start

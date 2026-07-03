@@ -159,6 +159,8 @@ After the report clears the review gate, prepend an entry to `.agentheim/knowled
 
 Research is naturally parallelizable. If the user asks for research on multiple distinct topics, spawn multiple researcher agents rather than serializing. Each writes its own report.
 
+**Default cap: 3 concurrent researchers**, matching `work`'s `MAX_PARALLEL` default and for the same reason — review load. Each researcher's report goes through its own `research-reviewer` gate before it ships (see "Review gate" above), so the binding constraint isn't the research itself (which parallelizes cleanly) but how many independent review verdicts the dispatching session can absorb and act on at once. If more than 3 distinct topics are requested, run the first 3 concurrently and queue the rest for the next wave rather than fanning out further. This is a default, not a hard ceiling: if the user explicitly asks for more topics in parallel ("research all 5 of these at once"), honor that — the cap only applies absent an explicit ask, exactly like `MAX_PARALLEL` in `skills/work/SKILL.md`. If the cap holds a topic back to a later wave, say so to the user when you report the wave's results — silent truncation of the requested topic list is not acceptable, matching `work`'s "never truncate silently" rule for its own batch cap.
+
 ## What NOT to do
 
 - Do not fetch URLs the user did not authorize and that you don't have independent reason to trust

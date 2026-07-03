@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 3
 - **Todo:** 6
-- **Doing:** 3
-- **Done:** 105
+- **Doing:** 2
+- **Done:** 106
 <!-- task-counts:end -->
 
 ### Todo
@@ -29,12 +29,12 @@ research touching this BC, and concept synthesis pages.
 ### Doing
 <!-- doing-list:start -->
 - **agentic-workflow-r2c7m** — Protocol rotation — cap protocol.md and roll to monthly files (feature) — `doing/agentic-workflow-r2c7m-protocol-rotation.md`
-- **agentic-workflow-z2f7s** — Fan-out caps — MAX_PARALLEL as a knob, research cap, global nested-spawn ceiling (feature) — `doing/agentic-workflow-z2f7s-fanout-caps-and-spawn-budget.md`
 - **agentic-workflow-v6d4n** — Vision-conformance check — flag in-flight work that drifts from vision success criteria / non-goals (feature) — `doing/agentic-workflow-v6d4n-vision-conformance-check-session-end-verify.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-z2f7s** — Fan-out caps — MAX_PARALLEL as a knob, research cap, global nested-spawn ceiling (feature) — `done/agentic-workflow-z2f7s-fanout-caps-and-spawn-budget.md`
 - **agentic-workflow-k5n8f** — Mechanize the bookkeeping (MVP) — generalized plugin-file resolver + git-free PROMOTE lifecycle script (refactor) — `done/agentic-workflow-k5n8f-mechanize-bookkeeping-wire-task-lifecycle.md`
 - **agentic-workflow-v3h6p** — Eval-harness the verifier — measure its catch rate against planted defects (spike) — `done/agentic-workflow-v3h6p-eval-harness-the-verifier.md`
 - **agentic-workflow-p3v9k** — Decide the lifecycle-mechanization boundary — fail-closed depends_on ruling + 3-layer bookkeeping ADR (decision) — `done/agentic-workflow-p3v9k-lifecycle-mechanization-boundary-decision.md`

@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-z2f7s
 title: Fan-out caps — MAX_PARALLEL as a knob, research cap, global nested-spawn ceiling
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-03
 depends_on: []
 blocks: []
 tags: [harness-audit, concurrency, cost, work-skill, research-skill, orchestrator]
@@ -57,10 +57,23 @@ trigger visible.
 
 ## Acceptance criteria
 
-- [ ] `skills/work/SKILL.md` documents `MAX_PARALLEL` as a **named, user-settable** knob (default 3) and carries a rationale for the default.
-- [ ] `skills/research/SKILL.md` states a **default cap** on concurrent researchers, overridable by explicit user ask.
-- [ ] A **worst-case nested fan-out budget** is written down (the `MAX_PARALLEL × (orchestrator + specialists)` math), with the low-`MAX_PARALLEL` default named as its bound and n6r8j named as the structural mitigation. It does **not** claim an enforced per-batch nested-spawn count the conductor cannot deliver.
-- [ ] Any cap that **triggers** (a batch capped below the ready set, a research fan-out held back) is surfaced in the protocol **Batch-started** entry — silent truncation is not allowed. (The practice already exists — e.g. "k5p8w held to next wave" — this codifies it.)
+- [x] `skills/work/SKILL.md` documents `MAX_PARALLEL` as a **named, user-settable** knob (default 3) and carries a rationale for the default.
+- [x] `skills/research/SKILL.md` states a **default cap** on concurrent researchers, overridable by explicit user ask.
+- [x] A **worst-case nested fan-out budget** is written down (the `MAX_PARALLEL × (orchestrator + specialists)` math), with the low-`MAX_PARALLEL` default named as its bound and n6r8j named as the structural mitigation. It does **not** claim an enforced per-batch nested-spawn count the conductor cannot deliver.
+- [x] Any cap that **triggers** (a batch capped below the ready set, a research fan-out held back) is surfaced in the protocol **Batch-started** entry — silent truncation is not allowed. (The practice already exists — e.g. "k5p8w held to next wave" — this codifies it.)
+
+## Outcome
+
+Three doctrine edits landed, all prose/rationale — no new enforcement code, matching the task's own framing.
+
+1. **`skills/work/SKILL.md` Phase 3 step 4** — `MAX_PARALLEL` is now named explicitly as a user-settable default (3), with a one-line rationale: merge-conflict surface at integration × verifier review load, plus a pointer at the b8x2v duration/iteration protocol fields as the future measured basis for revisiting the number (honestly noting no batch has enough history yet to justify moving it).
+2. **`skills/research/SKILL.md` Parallelism section** — added a default cap of 3 concurrent researchers, matching `work`'s `MAX_PARALLEL` for the same reason (review-gate load, not research-generation cost), overridable by an explicit user ask for more.
+3. **New "Nested fan-out budget (worst case — documented, not enforced)" section** in `skills/work/SKILL.md`, right after Phase 4 — states the worst case as `MAX_PARALLEL × (1 orchestrator + up to 4 specialists)` (≈15 second-order subagents at default settings), names `MAX_PARALLEL` as the only lever the conductor can actually enforce (nested spawns happen inside a worker's own subagent context, invisible to the dispatcher), and names `agentic-workflow-n6r8j` (already done — flatten-single-specialist-consultation / ADR-0035) as the structural mitigation that shrinks the per-worker fan-out the cap multiplies. Explicitly disclaims any enforced nested-spawn count.
+4. **Silent-truncation rule codified** — added a "Cap triggered — never truncate silently" note directly under the `Batch started` protocol entry template in `skills/work/SKILL.md`, pointing at the real precedent (`k5p8w held to next wave`) as the pattern to follow. Added a matching one-sentence rule to `skills/research/SKILL.md`'s Parallelism section for held-back research topics.
+
+No ADR written — these are clarifications/naming of already-adopted defaults and existing worst-case math, not novel decisions with rejected alternatives. No BC README change — no new ubiquitous language, aggregate, event, or invariant was introduced; the README's existing description of `work`/`research` behavior is unaffected by naming an existing default.
+
+Key files: `skills/work/SKILL.md`, `skills/research/SKILL.md`.
 
 ## Notes
 
