@@ -42,7 +42,7 @@ reports are listed in each BC's `INDEX.md`.
 
 - Vision: `vision.md`
 - Context map: `context-map.md` (if exists)
-- Protocol (chronological log): `knowledge/protocol.md` — newest entries on top
+- Protocol (chronological log): `knowledge/protocol.md` — newest entries on top; capped at ~1,000 lines, older months roll out verbatim to `knowledge/protocol/YYYY-MM.md` (ADR-0039)
 - All ADRs: `knowledge/decisions/`
 - All research: `knowledge/research/`
 ```

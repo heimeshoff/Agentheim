@@ -24,7 +24,7 @@ Before anything else, look at `contexts/*/doing/` **and**, if this is a git repo
 
 1. Read `.agentheim/vision.md` and `.agentheim/context-map.md` for orientation.
 2. Read `.agentheim/knowledge/index.md` (top-level catalog — current BCs and recent ADRs). If missing, surface to user that the project hasn't been indexed and offer to run `scripts/backfill-indexes.ps1` (or `.sh`) before continuing — workers will be less effective without indexes.
-3. Read the first ~100 lines of `.agentheim/knowledge/protocol.md` (newest entries are on top — this gives recent activity context). Skip if it doesn't exist yet. **Hold this excerpt in memory** — you pass it forward to each worker as `## Recent activity` so workers don't re-read the protocol themselves.
+3. Read the first ~100 lines of `.agentheim/knowledge/protocol.md` (newest entries are on top — this gives recent activity context). Skip if it doesn't exist yet. **Hold this excerpt in memory** — you pass it forward to each worker as `## Recent activity` so workers don't re-read the protocol themselves. The live file is capped (ADR-0039) — older months roll out verbatim to `.agentheim/knowledge/protocol/YYYY-MM.md`, so this ~100-line read always yields recent activity regardless of the live file's age; there is no need to consult the archive here.
 4. Scan `.agentheim/contexts/*/todo/` and `.agentheim/contexts/*/doing/`.
 5. For every todo task, read `depends_on`. A task is *ready* if every id in `depends_on` is in `done/`. **Fail-closed** (ADR-0038 Ruling A): a `depends_on` id present in NO lifecycle folder (`backlog/`, `todo/`, `doing/`, `done/`, across every BC) counts as **unsatisfied** — the task is not ready, and the dangling id is surfaced to the user, never silently treated as satisfied. This matches `dependencySatisfied()` in `lib/task-lifecycle.mjs` exactly (no code change needed there — only this prose used to disagree with it).
 6. **Detect cycles.** If the graph has a cycle, stop and surface the cycle to the user. Do not "just pick one".
@@ -280,6 +280,8 @@ If `NEW_BACKLOG_ITEMS` are non-empty in the worker SUCCESS, also insert those ta
 ## Protocol logging
 
 `.agentheim/knowledge/protocol.md` is the project's chronological diary. Every `work` event prepends a new entry. Keep entries terse — the diff carries the detail.
+
+**Rotation (ADR-0039):** the live file is capped at ~1,000 lines. Older, closed-out months roll out verbatim to `.agentheim/knowledge/protocol/YYYY-MM.md` via `lib/protocol-rotation.mjs`'s `rotateProtocol` (a k5n8f-family script — deterministic, git-free, stdlib-only). This doesn't change anything you write here — you still prepend every entry to the live file exactly as below; rotation is a separate maintenance operation over the file, not a per-entry concern.
 
 The completion entries below are written in the **pre-commit bookkeeping phase** (ADR-0026), so they ride in the task's own **squash-merge commit on `main`** (ADR-0032). Because the commit SHA isn't known until after the commit and isn't written back anywhere, the `**Commit:**` line is **omitted** from these entries — `git log`'s `[<task-id>]` trailer is the SHA index. (The "Batch started" entry is prepended and committed as part of the **batch-start claim commit** — Phase 4 step 1 — a commit of its own, separate from every task's eventual squash-merge commit, per ADR-0032's one deliberate ADR-0026 amendment.)
 

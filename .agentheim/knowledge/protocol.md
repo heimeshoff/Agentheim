@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 14:38 -- Task verified and completed: agentic-workflow-r2c7m - Protocol rotation
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-r2c7m - Protocol rotation — cap protocol.md and roll to monthly files
+**Summary:** Shipped `rotateProtocol` (`lib/protocol-rotation.mjs`), a deterministic git-free k5n8f-family script that caps the live `protocol.md` at ~1,000 lines and rolls whole *older* months out verbatim to `knowledge/protocol/YYYY-MM.md` (current month never rolled; newest-on-top order preserved; month derived from entry headings, no `Date.now()`). Recorded the archive convention in ADR-0039 (the decision-of-record c8j3w/w7q2m reuse) and pointed the work/modeling/whats-next skill prose + index-template + BC README + `knowledge/index.md` Pointers at the new rollover location.
+**Duration:** ~18m (dispatched 14:20; ~10m worker + verifier, serialized behind checkpoints)
+**Verification:** PASS (iteration 1) — verifier ran the full lib suite (78/78 green incl. 13 new tests: cap boundary, verbatim move, ordering, live recency, current-month-never-rolls, idempotent re-run, missing-file no-op, CLI); confirmed verbatim/deterministic guarantees and clean scope (conductor-owned index/INDEX pointers correctly left to the conductor).
+**Files changed:** 8
+**Tests added:** 13
+**ADRs written:** 0039-protocol-rotation-doctrine-verbatim-monthly-archive-live-cap.md
+
+---
+
 ## 2026-07-03 14:29 -- Task verified and completed: agentic-workflow-z2f7s - Fan-out caps
 
 **Type:** Work / Task completion

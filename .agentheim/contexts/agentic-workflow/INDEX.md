@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 3
 - **Todo:** 6
-- **Doing:** 2
-- **Done:** 106
+- **Doing:** 1
+- **Done:** 107
 <!-- task-counts:end -->
 
 ### Todo
@@ -28,12 +28,12 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-r2c7m** — Protocol rotation — cap protocol.md and roll to monthly files (feature) — `doing/agentic-workflow-r2c7m-protocol-rotation.md`
 - **agentic-workflow-v6d4n** — Vision-conformance check — flag in-flight work that drifts from vision success criteria / non-goals (feature) — `doing/agentic-workflow-v6d4n-vision-conformance-check-session-end-verify.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-r2c7m** — Protocol rotation — cap protocol.md and roll to monthly files (feature) — `done/agentic-workflow-r2c7m-protocol-rotation.md`
 - **agentic-workflow-z2f7s** — Fan-out caps — MAX_PARALLEL as a knob, research cap, global nested-spawn ceiling (feature) — `done/agentic-workflow-z2f7s-fanout-caps-and-spawn-budget.md`
 - **agentic-workflow-k5n8f** — Mechanize the bookkeeping (MVP) — generalized plugin-file resolver + git-free PROMOTE lifecycle script (refactor) — `done/agentic-workflow-k5n8f-mechanize-bookkeeping-wire-task-lifecycle.md`
 - **agentic-workflow-v3h6p** — Eval-harness the verifier — measure its catch rate against planted defects (spike) — `done/agentic-workflow-v3h6p-eval-harness-the-verifier.md`
@@ -152,6 +152,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0039** — Protocol rotation doctrine: the live `protocol.md` is capped (~1,000 lines) and whole older months roll out **verbatim** (never rewritten/summarized) to dated `knowledge/protocol/YYYY-MM.md` archive files, newest-on-top order preserved; the current month is never rolled (steady-state cap, not a hard ceiling); implemented as the git-free k5n8f-family script `lib/protocol-rotation.mjs` (`rotateProtocol`, no `Date.now()` — month derived from entry headings, byte-for-byte slices); accepted — `../../knowledge/decisions/0039-protocol-rotation-doctrine-verbatim-monthly-archive-live-cap.md`
 - **ADR-0038** — Lifecycle-mechanization boundary: fail-closed `depends_on` (a `depends_on` id in no lifecycle folder = unsatisfied → refuse) + three concentric bookkeeping layers, one owner each (`applyTaskMove` mover / git-free `task-lifecycle` CLI emitting an enumerated manifest / skill-or-orchestrator owning judgment + scoped git); builds on ADR-0007 (mover boundary intact), ADR-0026 (scoped-add doctrine), ADR-0032 (git-free folds into squash-merge); supersedes the duplicated bookkeeping prose across the four skills; becomes the contract for agentic-workflow-k5n8f (accepted) — `../../knowledge/decisions/0038-lifecycle-mechanization-boundary-fail-closed-dependency-three-layer-bookkeeping.md`
 - **ADR-0036** — Verifier runtime-drive check: boot-and-observe the app end-to-end in its worktree — a per-BC `## Runtime surface` README manifest (surfacePaths allowlist + launch/stop/probes) that `work` resolves once per batch, and a new final verifier "Check 8" that boots via the launcher, asserts a stdlib HTTP floor + opt-in render tier, guarantees teardown, FAILs on any floor miss; ratified from proposed (accepted) — `../../knowledge/decisions/0036-verifier-runtime-drive-end-to-end-check.md`
 - **ADR-0033** — Ephemeral, hover-scoped DOM/viewport observation (IntersectionObserver rooted on the sole scroll container, mounted per-hover) is admissible board-side; ADR-0017 constrains writes to disk/lifecycle, not transient client geometry reads. Collapsed-group hiding stays a pure data derivation (no DOM node to observe) (proposed) — `../../knowledge/decisions/0033-ephemeral-hover-scoped-dom-viewport-observation-admissible-board-side.md`

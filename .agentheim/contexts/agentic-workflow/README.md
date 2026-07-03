@@ -840,6 +840,28 @@ separate BC, but today the whole tool lives in this one.
   `.`-relative fallback. This is how the `task-lifecycle` CLI above is meant to be
   located from an installed-plugin consumer project's skill invocation, not just
   the dashboard's launcher.
+- **`rotateProtocol` / protocol rotation** — the deterministic, git-free cap-and-roll
+  script for `.agentheim/knowledge/protocol.md` (ADR-0039, agentic-workflow-r2c7m; a
+  k5n8f-family script). `lib/protocol-rotation.mjs`'s `rotateProtocol(rootDir, opts)`
+  caps the live file at `capLines` (default `DEFAULT_CAP_LINES` ≈ 1,000 — ~10x every
+  reader's ~100-line recent-activity window) and, when exceeded, rolls whole **older**
+  months out **verbatim** — oldest-first, stopping as soon as the live file is back
+  under the cap — to dated `.agentheim/knowledge/protocol/YYYY-MM.md` archive files.
+  The **current month is never rolled**, however large it grows, so every archive
+  file is written exactly once (a closed month never regains entries). Newest-on-top
+  ordering is preserved both in the live file (untouched prefix) and inside each
+  archive file (a month's entries keep their relative order). `parseProtocolEntries`
+  slices each entry's raw text — heading line through trailing separator — without
+  reformatting, so rotation is immune to whichever line-ending convention (`\n` vs
+  `\r\n`) the live file happens to be checked out with. Returns
+  `{ok:true, rotated, changed:[paths], rolledMonths:[...], liveLines}`; a thin
+  `runCli`/`main` wrapper (same testable-CLI shape as `lib/task-lifecycle-cli.mjs`)
+  makes it invocable as `node lib/protocol-rotation.mjs` directly — no verb/id argv,
+  since rotation is a single, parameterless, idempotent operation. The `work` /
+  `modeling` / `whats-next` skills' first-~100-line "recent activity" read is
+  unaffected by rotation by construction — nothing reads past that window, so rolling
+  older entries out is lossless for every reader. See ADR-0039, ADR-0038, ADR-0026,
+  ADR-0032.
 - **`findDuplicateTaskIds`** — the duplicate-id guard (`lib/duplicate-id-check.mjs`, BC-owned
   domain logic, node stdlib only), the ADR-0028 **insurance** against the residual token-collision
   tail and the legacy-vs-token clash a bug could produce. A pure, side-effect-free, loss-tolerant

@@ -1,15 +1,15 @@
 ---
 id: agentic-workflow-r2c7m
 title: Protocol rotation — cap protocol.md and roll to monthly files
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-03
 depends_on: [agentic-workflow-k5n8f]
 blocks: [agentic-workflow-c8j3w]
 tags: [harness-audit, protocol, observability, concurrency]
-related_adrs: []
+related_adrs: ["0039"]
 related_research: []
 prior_art: []
 ---
@@ -69,13 +69,37 @@ work surfaces a reason to flip it):
 
 ## Acceptance criteria
 
-- [ ] `protocol.md` stays under the stated cap (N ≈ 1,000 lines); entries beyond it are moved **verbatim** to `knowledge/protocol/YYYY-MM.md` monthly files, never rewritten or summarized.
-- [ ] Archive files preserve the live file's **newest-on-top** ordering, so a skill reading a rolled month sees the same shape as the live file.
-- [ ] Skills' "read the first ~80–120 lines" pattern still yields recent activity unchanged — the most-recent entries always stay in the live file.
-- [ ] Rotation is **deterministic** — a k5n8f-family script run the same way every time, not ad-hoc summarization or hand-edited marker surgery.
-- [ ] A rotation-doctrine ADR is written and the archive convention (verbatim move, monthly dated files, live cap, ordering) is recorded there; the ADR is backlinked into this task's `related_adrs`.
-- [ ] The indexes/pointers that reference `protocol.md` (`knowledge/index.md` Pointers, per-BC INDEX pointers, and the skills that read it) name the `knowledge/protocol/` rollover location.
-- [ ] Covered by `node --test` alongside the k5n8f lifecycle-script tests (cap boundary, verbatim move, ordering preserved, live-file recency).
+- [x] `protocol.md` stays under the stated cap (N ≈ 1,000 lines); entries beyond it are moved **verbatim** to `knowledge/protocol/YYYY-MM.md` monthly files, never rewritten or summarized.
+- [x] Archive files preserve the live file's **newest-on-top** ordering, so a skill reading a rolled month sees the same shape as the live file.
+- [x] Skills' "read the first ~80–120 lines" pattern still yields recent activity unchanged — the most-recent entries always stay in the live file.
+- [x] Rotation is **deterministic** — a k5n8f-family script run the same way every time, not ad-hoc summarization or hand-edited marker surgery.
+- [x] A rotation-doctrine ADR is written and the archive convention (verbatim move, monthly dated files, live cap, ordering) is recorded there; the ADR is backlinked into this task's `related_adrs`.
+- [x] The indexes/pointers that reference `protocol.md` (`knowledge/index.md` Pointers, per-BC INDEX pointers, and the skills that read it) name the `knowledge/protocol/` rollover location. Skill prose (`work`/`modeling`/`whats-next` SKILL.md) done by this worker; `knowledge/index.md` and per-BC `INDEX.md` pointer edits are conductor-owned (Rule 3) — left as an explicit conductor-apply list in this worker's SUCCESS return.
+- [x] Covered by `node --test` alongside the k5n8f lifecycle-script tests (cap boundary, verbatim move, ordering preserved, live-file recency).
+
+## Outcome
+
+Shipped `lib/protocol-rotation.mjs` — a k5n8f-family, git-free, deterministic script.
+`parseProtocolEntries(content)` slices each protocol entry's raw text (heading line
+through trailing separator) without reformatting, so rotation is a pure relocation,
+immune to `\n`/`\r\n` disagreement. `rotateProtocol(rootDir, opts)` caps the live file
+at `DEFAULT_CAP_LINES` (1000) and, once exceeded, rolls whole **older** months out
+oldest-first to `.agentheim/knowledge/protocol/YYYY-MM.md`, stopping as soon as the
+live file is back under the cap or only the current month remains (the current month
+is never rolled, however large). A thin `runCli`/`main` wrapper mirrors
+`lib/task-lifecycle-cli.mjs`'s testable-CLI shape (`node lib/protocol-rotation.mjs`,
+no verb/id — a single idempotent operation). ADR-0039 records the doctrine (verbatim
+move, monthly archive granularity, live cap, current-month-never-rolls, newest-on-top
+preservation) for `[[agentic-workflow-c8j3w]]` and `[[agentic-workflow-w7q2m]]` to
+cite. `skills/work/SKILL.md`, `skills/modeling/SKILL.md`, and
+`skills/whats-next/SKILL.md`'s protocol-read prose now name the rollover location;
+`work/SKILL.md`'s "Protocol logging" section also gained a short rotation-doctrine
+note. 13 new tests in `lib/test/protocol-rotation.test.mjs` (cap boundary — under,
+exactly-at, over; verbatim byte-for-byte move; newest-on-top ordering preserved in
+the archive; current-month-never-rolls; multi-month oldest-first stop-as-soon-as-fit;
+idempotent re-run; missing-file no-op; `runCli` + real-process invocation), full
+`lib/test/` suite green (78/78). Two index/pointer edits are conductor-owned per Rule
+3 and are listed verbatim in this worker's SUCCESS return for the conductor to apply.
 
 ## Notes
 
