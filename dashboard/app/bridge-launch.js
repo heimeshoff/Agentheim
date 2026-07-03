@@ -21,8 +21,9 @@
         with a ~800 ms timeout (a stale bridge.json from a dead host carries a
         token no live listener accepts, so the probe is what stops a false positive).
      3. Launch: `POST /run { prompt }` to `127.0.0.1:<port>` with the
-        `X-Agentheim-Bridge-Token` header. The extension wraps the prompt as
-        `claude "<prompt>"` and opens the terminal.
+        `X-Agentheim-Bridge-Token` header. The extension passes the prompt to
+        `claude` as a single raw argv element (no shell, no quoting) and opens
+        the terminal (ADR-0018, amended by infrastructure-020).
 
    THE ABSENCE CONTRACT (the spine of the task): EVERY failure mode — present:false,
    timeout, connection-refused, non-200, CORS rejection, not-in-Simple-Browser, any
@@ -115,8 +116,9 @@ async function probeHealth(fetchImpl, { port, token }, timeoutMs) {
  * `{ prompt }`, plus `skipPermissions: true` ONLY when strictly armed — when OFF
  * the field is OMITTED (never sent `false`), so the OFF body is byte-identical to
  * today and matches the contract's strict-`true` activation (amended ADR-0018;
- * honoured by the bridge in infrastructure-016, which seeds
- * `claude --dangerously-skip-permissions "<prompt>"` only on strict-`true`).
+ * honoured by the bridge in infrastructure-016, which prepends
+ * `--dangerously-skip-permissions` as its own raw argv element before the
+ * prompt, only on strict-`true`; no shell wrap, per infrastructure-020).
  * The custom header makes this a CORS-preflighted request — the extension answers
  * the preflight (ADR-0018); a CORS rejection here just throws and we fall back.
  * @returns {Promise<boolean>} Never throws.
@@ -160,7 +162,8 @@ async function runOnBridge(fetchImpl, { port, token, prompt, skipPermissions }) 
  * @param {number} [args.healthTimeoutMs] — liveness-probe budget (default ~800 ms).
  * @param {boolean} [args.skipPermissions] — the armed toggle (aw-021). When strict
  *   `true`, the POST /run body carries `skipPermissions: true` and the bridge
- *   seeds `claude --dangerously-skip-permissions "<prompt>"`; OFF/absent OMITS the
+ *   prepends `--dangerously-skip-permissions` as a raw argv element ahead of the
+ *   prompt (no shell wrap, infrastructure-020); OFF/absent OMITS the
  *   field (never sends `false`). It affects ONLY the bridge POST — the clipboard
  *   fallback can NEVER carry the bypass (it copies a slash command to paste into a
  *   RUNNING session; `--dangerously-skip-permissions` is startup-only), so the

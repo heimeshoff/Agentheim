@@ -36,7 +36,8 @@ export const MODELING_COMMAND = '/agentheim:modeling';
 // idea-dump skill, renamed to `/agentheim:quick-capture` in aw-019. The backlog
 // add affordance is now TWO launch buttons (Quick Capture / Modeling); this is
 // the exact prompt the Quick Capture button hands to the bridge's POST /run (the
-// extension wraps it as `claude "<prompt>"`, ADR-0018) and the exact text it
+// extension passes it to `claude` as a raw argv element — no shell wrap, ADR-0018
+// amended by infrastructure-020) and the exact text it
 // copies to the clipboard on the bridge-absent fallback path. Bare and
 // fully-qualified for the same reason MODELING_COMMAND is — it resolves
 // regardless of the builder's alias setup.
@@ -44,8 +45,9 @@ export const QUICK_CAPTURE_COMMAND = '/agentheim:quick-capture';
 
 // The fully-qualified research command (agentic-workflow-036) — the board prompt
 // bar's third launch button (beside Quick Capture / Modeling) hands this exact
-// string to the bridge's POST /run (the extension wraps it as `claude "<prompt>"`,
-// ADR-0018) and copies the same on the bridge-absent fallback. Like the other two
+// string to the bridge's POST /run (the extension passes it to `claude` as a raw
+// argv element — no shell wrap, ADR-0018 amended by infrastructure-020) and
+// copies the same on the bridge-absent fallback. Like the other two
 // authoring buttons it CONSUMES the typed prompt (researchCommandFor), so the bare
 // constant is the empty-prompt fallback only. Bare and fully-qualified for the same
 // reason MODELING_COMMAND is — it resolves regardless of the builder's alias setup.
@@ -53,7 +55,8 @@ export const RESEARCH_COMMAND = '/agentheim:research';
 
 // The fully-qualified inquire command (agentic-workflow-h7n2c) — the board prompt
 // bar's fourth launch button (between Modeling and Research) hands this exact string
-// to the bridge's POST /run (the extension wraps it as `claude "<prompt>"`, ADR-0018)
+// to the bridge's POST /run (the extension passes it to `claude` as a raw argv
+// element — no shell wrap, ADR-0018 amended by infrastructure-020)
 // and copies the same on the bridge-absent fallback. Like the other authoring buttons
 // it CONSUMES the typed prompt (inquireCommandFor), so the bare constant is the
 // empty-prompt fallback only. The `inquire` skill answers questions toward the codebase
@@ -119,7 +122,8 @@ function safePrompt(prompt) {
 /**
  * Build the QUICK CAPTURE command, optionally seeded with the board prompt-bar's
  * typed prompt (aw-023). The relocated column button hands the bridge this exact
- * string (the extension wraps it as `claude "<prompt>"`, ADR-0018) and copies it on
+ * string (the extension passes it to `claude` as a raw argv element — no shell
+ * wrap, ADR-0018 amended by infrastructure-020) and copies it on
  * the bridge-absent fallback.
  * @param {string} [prompt] — the live textarea contents.
  * @returns {string} `"/agentheim:quick-capture <prompt>"` for a real prompt (one

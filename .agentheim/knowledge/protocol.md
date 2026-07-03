@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 12:39 -- Task verified and completed: infrastructure-q8m4t - Support quotation marks (Gänsefüsschen) in prompts
+
+**Type:** Work / Task completion
+**Task:** infrastructure-q8m4t - Support quotation marks (Gänsefüsschen) in prompts
+**Summary:** Added byte-for-byte typographic-quote (`„ " » «`) round-trip fixtures to `vscode-extension/test/bridge.test.mjs` (real node:http POST → readBody UTF-8 → JSON.parse → `{command:'claude', args:[prompt]}`) and `dashboard/test/bridge-launch.test.mjs` (POST /run body + clipboard fallback) — transport proved Unicode-clean; corrected 8 stale `claude "<prompt>"` shell-wrap doc comments across 3 dashboard/app files to the raw-argv reality. Residual risk localized to the terminal-launch codepage layer (extension.js createTerminal on win32), left as a documented manual builder follow-up (a worker can't drive a live launch).
+**Duration:** ~25m (dispatched 12:12; serialized behind p3v9k integration)
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 4
+**ADRs written:** none
+
+---
+
 ## 2026-07-03 12:35 -- Task completed (verification skipped): agentic-workflow-p3v9k - Decide the lifecycle-mechanization boundary
 
 **Type:** Work / Task completion

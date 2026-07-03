@@ -223,6 +223,36 @@ test('metacharacter survival (infra-020 guard): shell metachars reach args[0] ve
   }
 });
 
+test('typographic-quote survival (infrastructure-q8m4t): German Gänsefüsschen/guillemets survive the readBody(UTF-8)->JSON.parse->trim()->descriptor round-trip byte-for-byte', async () => {
+  // The non-ASCII sibling of the infra-020 metacharacter guard: „ " (Gänsefüsschen)
+  // and » « (guillemets) are not shell syntax, so infra-020's shell-parsing fix
+  // does not touch them — this fixture proves the JSON transport itself (UTF-8
+  // readBody -> JSON.parse -> .trim() -> single raw argv element) is Unicode-clean,
+  // localizing any real-world corruption to the terminal-launch codepage layer
+  // (extension.js createTerminal on win32), not this code path.
+  const base = makeProject();
+  const launched = [];
+  const bridge = await startBridge({ root: base, launchClaude: (d) => launched.push(d), ...EPHEMERAL });
+  try {
+    const prompts = ['„Titel"', '»Titel«', '"x"'];
+    for (const prompt of prompts) {
+      launched.length = 0;
+      const res = await request(bridge.port, {
+        method: 'POST',
+        pathName: '/run',
+        headers: { [TOKEN_HEADER]: bridge.token },
+        body: Buffer.from(JSON.stringify({ prompt }), 'utf8'),
+      });
+      assert.ok(res.status >= 200 && res.status < 300, `expected 2xx for ${prompt}, got ${res.status}`);
+      assert.equal(launched.length, 1);
+      assert.deepEqual(launched[0], { command: 'claude', args: [prompt] });
+      assert.equal(launched[0].args[0], prompt, `"${prompt}" must survive byte-for-byte`);
+    }
+  } finally {
+    cleanup(base, bridge);
+  }
+});
+
 test('metacharacter survival under skipPermissions: flag prepended, prompt still one verbatim element', async () => {
   const base = makeProject();
   const launched = [];

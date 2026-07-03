@@ -170,6 +170,45 @@ test('the clipboard fallback NEVER carries the bypass — it copies only the pro
   assert.deepEqual(copy.copied, [PROMPT]); // exactly the prompt, no bypass marker.
 });
 
+// ---- typographic-quote survival (infrastructure-q8m4t) ----------------------
+//
+// The non-ASCII sibling of infra-020's shell-metachar guard: German Gänsefüsschen
+// `„ "` and guillemets `» «` are not shell syntax, so infra-020's raw-argv fix
+// does not touch them — this fixture proves the JSON-body seam (JSON.stringify
+// here, mirrored by the bridge's readBody(UTF-8)->JSON.parse on the other end)
+// carries them byte-for-byte, both on the POST /run path and the clipboard
+// fallback path.
+
+test('POST /run body carries German typographic quotes byte-for-byte (infrastructure-q8m4t)', async () => {
+  for (const prompt of ['„Titel"', '»Titel«', '"x"']) {
+    let runCall = null;
+    const fetchImpl = makeFetch([
+      ['/api/bridge', () => jsonResponse(200, { port: 31440, token: 'q', v: 1 })],
+      ['/health', () => jsonResponse(200, { ok: true })],
+      ['/run', (url, opts) => { runCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
+    ]);
+
+    const result = await launchOrCopy({ prompt, fetchImpl, copy: makeCopy() });
+
+    assert.equal(result.via, 'bridge');
+    assert.deepEqual(JSON.parse(runCall.opts.body), { prompt }, `"${prompt}" must round-trip byte-for-byte through the JSON body`);
+  }
+});
+
+test('clipboard fallback copies German typographic quotes verbatim (infrastructure-q8m4t)', async () => {
+  for (const prompt of ['„Titel"', '»Titel«', '"x"']) {
+    const fetchImpl = makeFetch([
+      ['/api/bridge', () => jsonResponse(200, { present: false })],
+    ]);
+    const copy = makeCopy();
+
+    const result = await launchOrCopy({ prompt, fetchImpl, copy });
+
+    assert.equal(result.via, 'clipboard');
+    assert.deepEqual(copy.copied, [prompt], `clipboard fallback must copy "${prompt}" verbatim`);
+  }
+});
+
 test('the health probe carries the token header and targets the advertised port', async () => {
   let healthCall = null;
   const fetchImpl = makeFetch([

@@ -5,8 +5,9 @@
    The dashboard's bridge launch buttons start a real, interactive `claude`
    session. When this setting is ARMED, every bridge launch requests a
    skip-permissions session — the bridge then seeds
-   `claude --dangerously-skip-permissions "<prompt>"` (the opt-in contract frozen
-   in infrastructure-015 / honoured in infrastructure-016, amended ADR-0018).
+   `--dangerously-skip-permissions` as its own raw argv element ahead of the
+   prompt (no shell wrap, infrastructure-020) — the opt-in contract frozen in
+   infrastructure-015 / honoured in infrastructure-016, amended ADR-0018.
 
    This module is the dashboard-side STATE behind that control — WHETHER the
    bypass is armed, and how it is remembered. It is a SIBLING of theme-state.js

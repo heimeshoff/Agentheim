@@ -1,11 +1,11 @@
 ---
 id: infrastructure-q8m4t
 title: Support quotation marks (Gänsefüsschen) in prompts
-status: doing
+status: done
 type: bug
 context: infrastructure
 created: 2026-06-23
-completed:
+completed: 2026-07-03
 depends_on: []
 blocks: []
 tags: [captured, bridge, i18n]
@@ -116,3 +116,51 @@ fresh, sharply-scoped capture at the terminal-launch layer.
 
 Related: `infrastructure-020` (raw-argv `createTerminal` launch, ADR-0018) is the direct
 predecessor that closed the shell-parsing half of this problem.
+
+## Outcome
+
+**Round-trip proved clean.** Added a byte-for-byte regression fixture —
+`„Titel"`, `»Titel«`, `"x"` — to `vscode-extension/test/bridge.test.mjs`
+(`typographic-quote survival (infrastructure-q8m4t)`), driving the real
+`readBody`(UTF-8)→`JSON.parse`→`.trim()`→`{ command:'claude', args:[prompt] }`
+seam in `vscode-extension/src/bridge.js` over an actual `node:http` request
+(not just JSON.stringify/parse in isolation). All three fixtures round-trip
+verbatim: the JSON transport is Unicode-clean, exactly as ADR-0018 predicted.
+Mirrored the same three fixtures into `dashboard/test/bridge-launch.test.mjs`
+for (a) the `POST /run` body built by `launchOrCopy`/`runOnBridge` in
+`dashboard/app/bridge-launch.js`, and (b) the clipboard-fallback path — both
+carry `„ " » «` byte-for-byte.
+
+**Doc-drift rider landed.** Corrected every stale `claude "<prompt>"` /
+`claude --dangerously-skip-permissions "<prompt>"` shell-wrap comment (the
+pre-infra-020 description) to the raw-argv reality (a single argv element,
+no shell, no quoting): `dashboard/app/bridge-launch.js` (3 sites),
+`dashboard/app/modeling-command.js` (4 sites), `dashboard/app/skip-permissions-state.js`
+(1 site). Left the legitimate `"/agentheim:… <prompt>"` `*CommandFor` return-value
+docs in `modeling-command.js` untouched (those describe the command string, not
+a shell wrap). Also confirmed `dashboard/app/board.js`'s 3 references to
+`claude --dangerously-skip-permissions` (without the `"<prompt>"` shell-wrap
+suffix) are accurate as-is and out of scope.
+
+**Residual risk localized.** With the transport proven Unicode-clean at the
+code layer, any real-world mojibake the builder hit is confined to the
+**terminal-launch codepage layer** — `vscode-extension/extension.js`
+`createTerminal` on win32 (VS Code's argv→command-line quoting / Windows
+console codepage), the one layer a worker cannot drive live. **Manual builder
+follow-up (not a gate):** on the current `.vsix`, seed a dashboard prompt
+containing `„ " » «` and confirm the launched `claude` terminal displays them
+verbatim; if it doesn't, capture a fresh, sharply-scoped task at the
+terminal-launch layer.
+
+**Test note:** two pre-existing, unrelated `vscode-extension/test/bridge.test.mjs`
+tests (`binds 127.0.0.1 on the preferred fixed port...`, `falls back along
+31425→31426→31427...`) fail in this environment because real, live VS Code
+processes on this machine are already bound to ports 31425-31427 (confirmed via
+`Get-NetTCPConnection` → `Get-Process`, all three owning PIDs are `Code.exe`).
+This is environmental port contention predating this task (those tests bind
+literal fixed ports and don't touch anything this task changed); all other
+tests, including every new fixture, pass. Full `dashboard` suite: 711/711 green.
+
+Files: `vscode-extension/test/bridge.test.mjs`, `dashboard/test/bridge-launch.test.mjs`,
+`dashboard/app/bridge-launch.js`, `dashboard/app/modeling-command.js`,
+`dashboard/app/skip-permissions-state.js`.
