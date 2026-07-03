@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 3
 - **Todo:** 9
-- **Doing:** 1
-- **Done:** 104
+- **Doing:** 0
+- **Done:** 105
 <!-- task-counts:end -->
 
 ### Todo
@@ -31,11 +31,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-k5n8f** — Mechanize the bookkeeping (MVP) — generalized plugin-file resolver + git-free PROMOTE lifecycle script (refactor) — `doing/agentic-workflow-k5n8f-mechanize-bookkeeping-wire-task-lifecycle.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-k5n8f** — Mechanize the bookkeeping (MVP) — generalized plugin-file resolver + git-free PROMOTE lifecycle script (refactor) — `done/agentic-workflow-k5n8f-mechanize-bookkeeping-wire-task-lifecycle.md`
 - **agentic-workflow-v3h6p** — Eval-harness the verifier — measure its catch rate against planted defects (spike) — `done/agentic-workflow-v3h6p-eval-harness-the-verifier.md`
 - **agentic-workflow-p3v9k** — Decide the lifecycle-mechanization boundary — fail-closed depends_on ruling + 3-layer bookkeeping ADR (decision) — `done/agentic-workflow-p3v9k-lifecycle-mechanization-boundary-decision.md`
 - **agentic-workflow-y8b4q** — End-to-end verification step for tasks with a runtime surface (feature) — `done/agentic-workflow-y8b4q-end-to-end-verification-runtime-surface.md`

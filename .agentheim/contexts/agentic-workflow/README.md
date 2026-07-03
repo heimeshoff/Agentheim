@@ -808,6 +808,38 @@ separate BC, but today the whole tool lives in this one.
   the **bare id** but resolves the real on-disk file `<id>-<slug>.md` (anchored so `alpha-001`
   never collides with `alpha-0010`) and preserves that filename across the move — only the folder
   changes, the id is stable (ADR-0012). See ADR-0017, ADR-0007, ADR-0012.
+- **`promoteTask` / the `task-lifecycle` CLI** — the git-free, mechanized PROMOTE
+  lifecycle script (ADR-0038, agentic-workflow-k5n8f). Three concentric layers,
+  one owner each: (1) `applyTaskMove` (above) — move + status rewrite +
+  precondition + gates, unchanged; (2) `promoteTask(rootDir, id, opts)` in
+  `lib/task-lifecycle.mjs` — calls the mover, then performs the deterministic
+  bookkeeping *around* it (INDEX.md marker edit + count delta, the protocol.md
+  prepend, and backlink reconciliation — a no-op for PROMOTE, since a folder move
+  invalidates no other task's or ADR's backlinks); NEVER runs `git`; its sole
+  output is an enumerated manifest `{ changed: [paths], message, verb, id }` on
+  success, or `applyTaskMove`'s own `{ ok: false, code, reason }` verbatim on
+  rejection, with nothing written; (3) `lib/task-lifecycle-cli.mjs` — a thin
+  argv/flag → `discoverRoot(cwd)` → handler → print-manifest → exit-code wrapper
+  (`isMain` guard for direct `node lib/task-lifecycle-cli.mjs promote <id>` use;
+  an exported `main(argv)` for the env-free `node -e` bootstrap that dynamically
+  `import()`s it, mirroring `dashboard/resolve-launcher.mjs`'s bootstrap) — (4)
+  the `modeling` skill's PROMOTE flow owns the remaining judgment (readiness) and
+  git (scoped `git add` of the manifest's `changed` + commit with its `message`).
+  CLAIM/COMPLETE are the same shape, descoped to agentic-workflow-t7m4c. See
+  ADR-0038, ADR-0007, ADR-0026.
+- **`lib/resolve-plugin-file.mjs`** — the env-independent in-plugin file resolver
+  (generalizes infrastructure-010's `dashboard/resolve-launcher.mjs`, which now
+  delegates to it — agentic-workflow-k5n8f). `locatePluginFile(relPath, opts)`
+  resolves an arbitrary path inside the installed plugin cache
+  (`<home>/.claude/plugins/cache/agentheim/agentheim/<newest-semver>/<relPath>`),
+  or short-circuits to a repo-local copy when running from the Agentheim repo
+  itself (`import.meta.url`-derived by default, or an explicit
+  `repoLocalPath`/`repoRoot` override for a caller with its own repo-local
+  neighbor, e.g. `dashboard/resolve-launcher.mjs`). Never trusts
+  `$CLAUDE_PLUGIN_ROOT` for correctness (infrastructure-010); fails loud, never a
+  `.`-relative fallback. This is how the `task-lifecycle` CLI above is meant to be
+  located from an installed-plugin consumer project's skill invocation, not just
+  the dashboard's launcher.
 - **`findDuplicateTaskIds`** — the duplicate-id guard (`lib/duplicate-id-check.mjs`, BC-owned
   domain logic, node stdlib only), the ADR-0028 **insurance** against the residual token-collision
   tail and the legacy-vs-token clash a bug could produce. A pure, side-effect-free, loss-tolerant

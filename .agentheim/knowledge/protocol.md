@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 13:04 -- Task verified and completed: agentic-workflow-k5n8f - Mechanize the bookkeeping (MVP)
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-k5n8f - Mechanize the bookkeeping (MVP) — generalized plugin-file resolver + git-free PROMOTE lifecycle script
+**Summary:** Landed ADR-0038's pattern-MVP on the PROMOTE path: new `lib/resolve-plugin-file.mjs` (env-free plugin-file resolver; `dashboard/resolve-launcher.mjs` ported to delegate, behavior-preserving); `promoteTask` wired live into `lib/task-lifecycle.mjs` (calls `applyTaskMove`, does the INDEX/protocol/backlink surgery, returns a git-free enumerated manifest `{changed,message,verb,id}`); new `lib/task-lifecycle-cli.mjs`; `modeling`/`work` SKILL prose rewritten (PROMOTE delegates to the CLI, missing-`depends_on` now fail-closed per Ruling A). Unblocks r2c7m / t7m4c / c8j3w.
+**Duration:** ~19m
+**Verification:** PASS (iteration 1) — **first live check-8 runtime drive**: verifier booted `dashboard/launch.mjs` (port 41536 from the runfile), `/healthz` → 200, `/api/tree` → 200, torn down cleanly — the resolver port is behavior-preserving.
+**Files changed:** 10
+**Tests added:** 23
+**ADRs written:** none
+
+---
+
 ## 2026-07-03 12:44 -- Batch started: [agentic-workflow-k5n8f]
 
 **Type:** Work / Batch start

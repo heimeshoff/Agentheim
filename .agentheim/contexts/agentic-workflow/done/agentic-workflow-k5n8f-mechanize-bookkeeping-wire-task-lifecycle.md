@@ -1,15 +1,15 @@
 ---
 id: agentic-workflow-k5n8f
 title: Mechanize the bookkeeping (MVP) — generalized plugin-file resolver + git-free PROMOTE lifecycle script
-status: doing
+status: done
 type: refactor
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-03
 depends_on: [agentic-workflow-p3v9k]
 blocks: [agentic-workflow-c8j3w, agentic-workflow-r2c7m, agentic-workflow-t7m4c]
 tags: [harness-audit, bookkeeping, task-lifecycle, scripts, index, protocol]
-related_adrs: ["0007", "0026", "0032"]
+related_adrs: ["0007", "0026", "0032", "0038"]
 related_research: []
 prior_art: [agentic-workflow-003, agentic-workflow-078, agentic-workflow-080, agentic-workflow-063]
 ---
@@ -95,3 +95,54 @@ Deliver, against the [[agentic-workflow-p3v9k]] boundary decision:
   [[agentic-workflow-t7m4c]] (`depends_on` f6m2q, built against the final worktree
   choreography); rotate stays [[agentic-workflow-c8j3w]]. The audit's "four findings at
   once" argument still holds across the family; this task lands the reusable spine.
+
+## Outcome
+
+Landed the ADR-0038 pattern-MVP end-to-end on the PROMOTE path.
+
+- **`lib/resolve-plugin-file.mjs`** (new) — generalizes `dashboard/resolve-launcher.mjs`'s
+  env-free resolver to an arbitrary in-plugin `relPath`: `resolvePluginFile(root, relPath,
+  label)` walks version dirs newest-first by semver; `locatePluginFile(relPath, opts)` adds
+  the repo-local short-circuit (default: derived from this module's own `import.meta.url` one
+  level under the repo root; `opts.repoLocalPath`/`repoRoot`/`moduleDir` let a caller with its
+  own neighbor, like the launcher, override it). `dashboard/resolve-launcher.mjs` now delegates
+  `cacheRoot`/`pickNewestVersion`/`resolveLauncher`/`locateLauncher` to it — byte-identical
+  fail-loud message ("no cached launcher found…") preserved via a `label` param — and its
+  original 14 tests stay green untouched, plus the full 710-test dashboard suite passes.
+- **`lib/task-lifecycle.mjs`**: added `promoteTask(rootDir, id, opts)` — calls `applyTaskMove`
+  (unchanged, ADR-0007), then performs the INDEX.md marker edit + count delta and the
+  protocol.md prepend (git-free; never runs `git`); backlink reconciliation is an explicit
+  no-op for PROMOTE (a folder move invalidates no other task's/ADR's backlinks) kept for shape
+  parity with the sibling CLAIM/COMPLETE scripts. Returns `{ok:true, changed, message, verb:
+  'promote', id}` on success or `applyTaskMove`'s own rejection verbatim (nothing written) on
+  a fail-closed `depends_on`/illegal-move/stale-precondition reject.
+- **`lib/task-lifecycle-cli.mjs`** (new) — `runCli(argv, opts)` (verb/id parse →
+  `discoverRoot` → handler → `{exitCode, output}`, injectable for tests) and an exported
+  `main(argv)` for the `node -e` bootstrap (mirrors `resolve-launcher.mjs`'s `run()`) plus an
+  `isMain` guard for direct `node lib/task-lifecycle-cli.mjs promote <id>` use. `discoverRoot`
+  is reused from `dashboard/discovery.mjs` as-is (the architect's flagged `lib`→`dashboard`
+  follow-on, not done here).
+- **`skills/modeling/SKILL.md`**: PROMOTE flow rewritten — steps 1/2/4 (judgment) and step 5
+  (git) kept; step 3 now runs the CLI via the same env-free `node -e` bootstrap pattern as
+  `/dashboard`. Removed the hand-edit PROMOTE row from "Updating indexes" and the "Modeling /
+  Promoted" protocol-entry template (replaced with pointers — the CLI now generates both).
+- **`skills/work/SKILL.md`** (AC#1): Phase 2 step 5's "treat missing as satisfied, but warn"
+  rewritten to fail-closed, matching `dependencySatisfied()` and ADR-0038 Ruling A.
+- **BC README**: added `promoteTask`/CLI and `lib/resolve-plugin-file.mjs` entries under
+  Domain logic.
+- **Tests** (`node --test`, TDD red→green throughout): `lib/test/resolve-plugin-file.test.mjs`
+  (new, 12), `lib/test/task-lifecycle.test.mjs` (+4 `promoteTask` tests, extending the existing
+  22 → 26), `lib/test/task-lifecycle-cli.test.mjs` (new, 7, incl. one real `execFileSync`
+  spawn proving the `isMain` guard + argv wiring). Full `lib/test/` suite: 65/65 green. Full
+  `dashboard` suite: 710/710 green (unchanged, proving the resolver port is behavior-preserving).
+  Manually booted `node dashboard/launch.mjs` and confirmed `/healthz` + `/api/tree` respond,
+  then `stop` — the runtime-surface check the recent-activity note flagged.
+- **Verification-realism caveat carried forward (infrastructure-010)**: the `node -e`
+  bootstrap syntax pasted into `modeling/SKILL.md`'s PROMOTE flow (and the CLI it targets) is
+  simulated/unit-tested here (real `node lib/task-lifecycle-cli.mjs promote <id>` spawn,
+  real `discoverRoot`, real files) but never actually run through the literal cross-shell
+  `node -e "…"` invocation form as a skill would type it — that confirmation is a post-release
+  maintainer step, same caveat infrastructure-010 recorded for `/dashboard`.
+- **Not done here (explicitly out of scope)**: CLAIM/COMPLETE lifecycle scripts
+  ([[agentic-workflow-t7m4c]]); promoting `discoverRoot` from `dashboard/discovery.mjs` to
+  `lib/` (architect-flagged follow-on, not blocking).

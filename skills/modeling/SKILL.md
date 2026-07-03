@@ -157,18 +157,45 @@ PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + casca
 
 ## PROMOTE flow
 
+PROMOTE's mechanics — the `backlog → todo` move, the INDEX marker edit + count
+delta, and the protocol prepend — are mechanized (ADR-0038): `lib/task-lifecycle-cli.mjs
+promote <id>` performs all of it and returns an enumerated manifest
+`{changed, message, verb, id}`, or a structured `{ok:false, code, reason}` rejection.
+This flow keeps only the two things the CLI deliberately does NOT decide —
+**judgment** (readiness) and **git** (the scoped commit) — per ADR-0038's
+three-layer boundary (`applyTaskMove` mover / git-free CLI / skill judgment+git).
+
 1. Find the task (user may name it by id or title, or describe it).
 
 2. Check readiness:
    - Has an acceptance criteria section with at least one concrete criterion
    - Has a clear scope (not "improve the UX")
-   - Dependencies are known and either met or tracked
+   - Dependencies are known and either met or tracked — **fail-closed** (ADR-0038
+     Ruling A): a `depends_on` id in no lifecycle folder blocks promotion. The CLI
+     enforces this via `applyTaskMove`'s gate in step 3, surfacing a rejection
+     rather than a hand-check.
 
-3. If ready, move the file from `backlog/` to `todo/`. Update its frontmatter `status` field.
+3. If ready, run the CLI — git-free, it only writes files, never `git`:
 
-4. If not ready, tell the user what's missing and offer to switch to the REFINE action on this task.
+   ```
+   node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','task-lifecycle-cli.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','task-lifecycle-cli.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no task-lifecycle CLI found under '+c+' (is the plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>m.main(process.argv.slice(1))).catch(e=>{console.error(e.message);process.exit(1)});" promote <task-id>
+   ```
 
-5. **Commit the promotion** (after the index + protocol updates below). Scoped `git add` of just the moved task file, the BC `INDEX.md`, and `protocol.md` — then `model(<bc>): promote <task-id> — <title> [<task-id>]`. See "Committing" below. (Nothing to commit if the task wasn't ready and stayed in `backlog/`.)
+   (The same env-free homedir→cache→semver-max bootstrap infrastructure-010
+   established for `/dashboard`, generalized by `lib/resolve-plugin-file.mjs` —
+   runs in-process, cwd = the project, so `discoverRoot` finds the right
+   `.agentheim/`.) It prints the manifest on success, or `{ok:false, code, reason}`
+   on a domain rejection (e.g. `blocked-dependency`, `illegal-move`) — treat a
+   rejection the same as "not ready" in step 4.
+
+4. If not ready (step 2's checklist fails, or the CLI rejects in step 3), tell the
+   user what's missing and offer to switch to the REFINE action on this task.
+
+5. **Commit the promotion.** Scoped `git add` of exactly the manifest's `changed`
+   paths from step 3 — then commit with the manifest's `message` (already the
+   `model(<bc>): promote <task-id> — <title> [<task-id>]` convention — see
+   `references/commit-doctrine.md`). Never `git add -A` / `git add .`. Nothing to
+   commit if the task wasn't ready and stayed in `backlog/`.
 
 ## DISMISS flow
 
@@ -349,7 +376,7 @@ After writing or moving a task file, update the BC's `INDEX.md` so other skills 
 
 - **CAPTURE writing to `backlog/`:** insert under `<!-- backlog-list:start -->` in `contexts/<bc>/INDEX.md`. Increment Backlog count under `<!-- task-counts:start -->`.
 - **CAPTURE writing directly to `todo/`:** insert under `<!-- todo-list:start -->`. Increment Todo count.
-- **PROMOTE (backlog → todo):** remove the line from the backlog list, insert at the top of the todo list. Decrement Backlog, increment Todo.
+- **PROMOTE (backlog → todo):** mechanized (ADR-0038) — `lib/task-lifecycle-cli.mjs promote <id>` performs the marker edit and count delta as part of its manifest; see the PROMOTE flow above. Nothing to hand-edit here.
 - **REFINE that splits a task:** remove the parent line, insert child task lines. Update counts.
 - **DISMISS:** for each id in the cascade set, remove its line from its BC `INDEX.md` and decrement the matching Backlog/Todo count at the markers. The set may span BCs — editing several BCs' indexes in one DISMISS is the sanctioned exception below.
 
@@ -398,14 +425,6 @@ Then prepend the appropriate entry right after the `---` on line 4:
 
 ---
 
-## YYYY-MM-DD HH:MM -- Modeling / Promoted: <task-id> - [title]
-
-**Type:** Modeling / Promote
-**BC:** <bc-name>
-**From → To:** backlog → todo
-
----
-
 ## YYYY-MM-DD HH:MM -- Modeling / Dismissed: <id-or-id-list>
 
 **Type:** Modeling / Dismiss
@@ -413,6 +432,8 @@ Then prepend the appropriate entry right after the `---` on line 4:
 
 ---
 ```
+
+The **PROMOTE** entry (`Modeling / Promoted: <task-id> - [title]`, `**Type:** Modeling / Promote`, `**BC:**`, `**From → To:** backlog → todo`) is no longer hand-formatted here — `lib/task-lifecycle-cli.mjs promote <id>` generates and prepends it as part of its manifest (ADR-0038); see the PROMOTE flow above.
 
 The DISMISS entry is **bare** — it records the cascade set (ids + titles) and the timestamp, no builder-typed reason. One entry per dismiss regardless of how many tasks the cascade removed.
 

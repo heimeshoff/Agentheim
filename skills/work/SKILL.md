@@ -26,7 +26,7 @@ Before anything else, look at `contexts/*/doing/` **and**, if this is a git repo
 2. Read `.agentheim/knowledge/index.md` (top-level catalog — current BCs and recent ADRs). If missing, surface to user that the project hasn't been indexed and offer to run `scripts/backfill-indexes.ps1` (or `.sh`) before continuing — workers will be less effective without indexes.
 3. Read the first ~100 lines of `.agentheim/knowledge/protocol.md` (newest entries are on top — this gives recent activity context). Skip if it doesn't exist yet. **Hold this excerpt in memory** — you pass it forward to each worker as `## Recent activity` so workers don't re-read the protocol themselves.
 4. Scan `.agentheim/contexts/*/todo/` and `.agentheim/contexts/*/doing/`.
-5. For every todo task, read `depends_on`. A task is *ready* if every id in `depends_on` is in `done/` (or doesn't exist — treat missing as satisfied, but warn the user).
+5. For every todo task, read `depends_on`. A task is *ready* if every id in `depends_on` is in `done/`. **Fail-closed** (ADR-0038 Ruling A): a `depends_on` id present in NO lifecycle folder (`backlog/`, `todo/`, `doing/`, `done/`, across every BC) counts as **unsatisfied** — the task is not ready, and the dangling id is surfaced to the user, never silently treated as satisfied. This matches `dependencySatisfied()` in `lib/task-lifecycle.mjs` exactly (no code change needed there — only this prose used to disagree with it).
 6. **Detect cycles.** If the graph has a cycle, stop and surface the cycle to the user. Do not "just pick one".
 7. Briefly tell the user what you found: "X tasks ready across N contexts, Y tasks blocked on Z."
 
