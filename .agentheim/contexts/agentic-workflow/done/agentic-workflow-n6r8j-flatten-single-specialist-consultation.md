@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-n6r8j
 title: Flatten single-specialist consultations — worker spawns the specialist directly
-status: doing
+status: done
 type: refactor
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-03
 depends_on: []
 blocks: []
 tags: [harness-audit, orchestrator, worker, consultation, cost]
@@ -112,3 +112,22 @@ ADR-0035's Negative consequences.
 `depends_on`). Sibling naming cleanup **agentic-workflow-h3z5b** (done) resolved
 the orchestrator/conductor name and is the reason AC-4 exists. No hard
 dependency edges — can be worked any time.
+
+## Outcome
+
+Flattened the worker→orchestrator→specialist consultation path per ADR-0035.
+`agents/worker.md`'s "Second action: plan briefly" now instructs direct
+`Agent`-tool consultation of a specialist for single-specialist questions,
+carrying the compact Signal→Specialist routing hint, the verbatim boundary
+rule, and the minimum-context-block spec (AC-1, AC-3). `agents/orchestrator.md`
+gained a matching "When a worker bypasses me" section with the identical
+boundary rule and a description update stating its remaining reason to exist
+during execution is aggregation + conflict-surfacing (AC-2). Corrected the
+four loop-sense "orchestrator" mentions in worker.md (lines 14, 21, 34, 116 —
+who assembles/passes the spawn prompt and parses the return) to **conductor**;
+grep-verified the only remaining "orchestrator" occurrences in worker.md are
+agent-sense (routing/consultation) (AC-4). No BC README change needed — the
+conductor term is already documented there from h3z5b. No new ADR — ADR-0035
+already recorded the decision this task implements.
+
+Files touched: `agents/worker.md`, `agents/orchestrator.md`.
