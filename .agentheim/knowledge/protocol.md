@@ -5,6 +5,21 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 13:06 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** ~1h17m (first batch start 11:49 → 13:06)
+**Completed:** 6 (first-try PASS: 5 — t4x8p, y8b4q, q8m4t, v3h6p, k5n8f; skipped: 1 — p3v9k decision-only)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** t4x8p: 1, y8b4q: 1, p3v9k: 1, v3h6p: 1, q8m4t: 1, k5n8f: 1 (no re-dispatches — every task passed/skipped on iteration 1)
+**Commits:** 10 (3 batch-start claims + 6 task integrations + this session-end entry)
+**Carry-over:** none — working tree clean; no non-main worktrees
+**Notes:** Three waves under ADR-0032 worktree isolation. Wave 1 = t4x8p / y8b4q (parallel); wave 2 = p3v9k / v3h6p / q8m4t (parallel, spanned agentic-workflow + infrastructure BCs); wave 3 = k5n8f (solo, the bookkeeping-chain keystone). No merge-back conflicts (disjoint file sets by construction). **Milestones:** y8b4q shipped the verifier's runtime-drive check 8 (ADR-0036), and k5n8f's verification was the **first live check-8 drive** — booted the dashboard, probed /healthz + /api/tree, clean teardown. p3v9k ratified ADR-0038 (fail-closed depends_on + 3-layer bookkeeping), which k5n8f then implemented on the PROMOTE path — now unblocking r2c7m / t7m4c / c8j3w. v3h6p gave the verifier gate its first measured catch rate (15/15 catch + right-reason). A concurrent `modeling` session promoted the full backlog (13 tasks) to todo mid-run; picked up as they became ready. New backlog items filed: agentic-workflow-fq2j8, hz9m3, bx7k5 (from v3h6p). ADRs written: 0038. No concept candidates. **Board still has ~8 ready todo tasks** (q3n7k, r9k2p, m9w5c, v6d4n, w7q2m, z2f7s + the newly-unblocked r2c7m, t7m4c) — session paused here as a deliberate checkpoint, not an empty board; re-invoke `work` to continue.
+
+---
+
 ## 2026-07-03 13:04 -- Task verified and completed: agentic-workflow-k5n8f - Mechanize the bookkeeping (MVP)
 
 **Type:** Work / Task completion
