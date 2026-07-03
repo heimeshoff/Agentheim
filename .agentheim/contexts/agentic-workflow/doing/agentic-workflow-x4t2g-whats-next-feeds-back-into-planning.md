@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-x4t2g
 title: whats-next feeds back into planning — modeling and work read the advisory at session start
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-02

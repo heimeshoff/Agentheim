@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 09:06 -- Batch started: [agentic-workflow-x4t2g]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-x4t2g - whats-next feeds back into planning — modeling and work read the advisory at session start
+**Parallel:** no (1 worker — wave 2; the only remaining ready task, sequenced after s7d3k's doctrine relocation)
+
+---
+
 ## 2026-07-03 09:04 -- Task verified and completed: agentic-workflow-h9v3m - Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks
 
 **Type:** Work / Task completion
