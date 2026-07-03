@@ -177,6 +177,17 @@ Git is owned by `work`, not by workers or verifiers. Workers only move files and
 
 **The doctrine here is ADR-0026 + ADR-0032: all bookkeeping is written and `git add`ed BEFORE the integrating commit, so a completed task's code + task-move + INDEX + protocol all land in ONE commit on `main`, and `git merge --squash` — not a prose scan — is the conflict detector.** There is no post-commit write step, and no `commit: <sha>` frontmatter field (ADR-0026).
 
+### Anchor every git command to its tree — the CWD-drift trap
+
+Worktree isolation means the conductor is juggling **two working trees at once**: `main` (the repo root) and each live `.worktrees/<task-id>/` on branch `aw/<task-id>`. The shell's working directory **persists between commands**, so a `cd .worktrees/<task-id> && …` you ran for discovery or a `wip` checkpoint silently leaves every *later* bare `git` command executing **inside that worktree on the private branch**, not on `main`. That defeats the whole invariant above — `main` writes are supposed to be the conductor's alone, sequentially. A misdirected `git merge --squash` degrades to a confusing self-merge no-op ("Already up to date"); a misdirected `git reset --hard` / `git commit` would corrupt the wrong tree with no warning.
+
+**Rule — never rely on the inherited CWD for a git write.** For every git command that targets a specific tree, make the target explicit, one of:
+
+- `git -C <absolute-path>` — the preferred form for worktree writes (e.g. the `wip` checkpoint: `git -C .worktrees/<task-id> commit …`); it names the tree per-invocation and cannot drift.
+- Prefix a fresh `cd <main-repo-root>` at the start of the command whenever you need to operate on `main` (the squash-merge, the integrating commit, worktree teardown, all bookkeeping) — do **not** assume you're already there.
+
+When a git result looks off (an unexpected "Already up to date", a clean tree you expected to be dirty, a branch name you didn't expect), your first check is `git rev-parse --abbrev-ref HEAD` — confirm which tree/branch you're actually on before running anything destructive.
+
 ### PASS / SKIP — squash-merge to `main`, one commit
 
 After a verifier returns `VERDICT: PASS` (or `VERDICT: SKIP`, or when verification was bypassed per the skip rules above), on the **main** tree:
