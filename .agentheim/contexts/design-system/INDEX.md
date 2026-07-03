@@ -26,6 +26,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **design-system-b7n2s** — Hidden and off-viewport dependency presence markers (feature) — `done/design-system-b7n2s-hidden-offviewport-dependency-markers.md`
 - **design-system-w4t9k** — Dependency-highlight ring — a third ambient-motion signal on TicketCard (feature) — `done/design-system-w4t9k-dependency-highlight-ring-ticket-card.md`
 - **design-system-c3p9k** — Add a double-chevron glyph pair (chevrons-up / chevrons-down) to the shared icon set (feature) — `done/design-system-c3p9k-chevrons-up-down-glyph.md`
 - **design-system-v8k2p** — Rail "new item" attention blink — an ambient cue on a TreeItem / TreeGroup until acknowledged (feature) — `done/design-system-v8k2p-rail-new-item-attention-blink-cue.md`
