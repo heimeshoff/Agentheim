@@ -77,8 +77,9 @@ Read the current state:
 3. `.agentheim/contexts/*/README.md` (to know what BCs exist and their language)
 4. `.agentheim/knowledge/index.md` (top-level catalog — current BCs, recent ADRs, global state) — if missing, the project hasn't been indexed; surface this and continue
 5. `.agentheim/knowledge/protocol.md` — read the first ~100 lines (newest entries are on top, so this gives recent activity). Skip if it doesn't exist yet.
-6. `.agentheim/contexts/*/backlog/*.md` (to understand what's pending)
-7. **For CAPTURE only:** once you've identified the candidate BC, scan `.agentheim/contexts/<bc>/done/` for prior art on keywords/tags from the user's idea. See the "Prior art lookup" section.
+6. **Check the planning advisory (read-only weight, never a directive).** If `.agentheim/state/whats-next.md` exists, read it and note its latest *recommended move* + age (`generated` timestamp) to the builder in **one line** before acting — e.g. `whats-next (2h ago): <recommended move>`. Compare `generated` against the newest `## … -- Work / …` entry in the protocol excerpt just read in step 5: newer than that entry → surface as **current**; older → surface as **stale — background context**, weighted less; no Work entries yet in the protocol → not stale. Let this weight which REFINE/CAPTURE questions you lean into (e.g. lean toward the recommended area when opening REFINE, or note alignment/drift during CAPTURE) — it **never** auto-picks a task to refine, auto-routes a capture, or overrides the user's explicit ask (ADR-0027 §4, ADR-0017). A missing artifact is silent — no line, no error. A malformed / partial / headingless artifact degrades gracefully: read whatever is parseable (at minimum the `generated` stamp or a recommended-move line, if either is present) and proceed without blocking the session; never throw.
+7. `.agentheim/contexts/*/backlog/*.md` (to understand what's pending)
+8. **For CAPTURE only:** once you've identified the candidate BC, scan `.agentheim/contexts/<bc>/done/` for prior art on keywords/tags from the user's idea. See the "Prior art lookup" section.
 
 If no bounded contexts exist yet, and the idea is non-trivial, propose running `brainstorm` first. Small ideas (bug fixes, copy changes) in a greenfield project can get a default `contexts/main/` until real structure emerges.
 

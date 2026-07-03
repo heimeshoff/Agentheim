@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-x4t2g
 title: whats-next feeds back into planning — modeling and work read the advisory at session start
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-03
 depends_on: []
 blocks: []
 tags: [harness-audit, whats-next, vision, planning, three-loops]
@@ -80,11 +80,11 @@ behavior gate on disk.)
 
 ## Acceptance criteria
 
-- [ ] `modeling`'s "Before acting" reads `state/whats-next.md` when it exists and surfaces the latest *recommended move* + its age to the builder in one line before acting; a missing artifact is silent (no line, no error).
-- [ ] `work`'s batch-planning step reads `state/whats-next.md` when it exists and lets it inform ordering/priority among already-ready tasks, surfaced in the batch rationale; a missing artifact is silent.
-- [ ] The advisory stays advisory: neither skill auto-moves, auto-promotes, auto-picks, or overrides the user's explicit ask or the dependency DAG (ADR-0027 advisory-write boundary + ADR-0017 hold).
-- [ ] Staleness is respected: an advisory whose `generated` predates the newest Work entry in `protocol.md` is surfaced as **stale/context**, not directive; a fresher advisory is surfaced as current. No Work entries → not stale.
-- [ ] A malformed / partial / headingless advisory degrades gracefully — the skill reads what it can and proceeds; it never blocks the session or throws.
+- [x] `modeling`'s "Before acting" reads `state/whats-next.md` when it exists and surfaces the latest *recommended move* + its age to the builder in one line before acting; a missing artifact is silent (no line, no error).
+- [x] `work`'s batch-planning step reads `state/whats-next.md` when it exists and lets it inform ordering/priority among already-ready tasks, surfaced in the batch rationale; a missing artifact is silent.
+- [x] The advisory stays advisory: neither skill auto-moves, auto-promotes, auto-picks, or overrides the user's explicit ask or the dependency DAG (ADR-0027 advisory-write boundary + ADR-0017 hold).
+- [x] Staleness is respected: an advisory whose `generated` predates the newest Work entry in `protocol.md` is surfaced as **stale/context**, not directive; a fresher advisory is surfaced as current. No Work entries → not stale.
+- [x] A malformed / partial / headingless advisory degrades gracefully — the skill reads what it can and proceeds; it never blocks the session or throws.
 
 ## Notes
 
@@ -101,3 +101,39 @@ behavior gate on disk.)
 - **Ready to promote** after this refine: concrete scope, testable criteria,
   unblocked (whats-next write aw-076 + dashboard read aw-073 both `done`). Left in
   `backlog/` for the builder to promote deliberately.
+
+## Outcome
+
+Closed the Why→What advisory loop's READ edge: `modeling` and `work` now surface the
+`whats-next` advisory to the builder before acting, as visible influence only — never a
+lifecycle gate — per ADR-0027 §4.
+
+- **`skills/modeling/SKILL.md`** — "Before acting" gained step 6 (after the protocol read,
+  renumbering the old steps 6-7 to 7-8): if `state/whats-next.md` exists, note the latest
+  *recommended move* + age in one line, weighted current/stale by comparing `generated`
+  against the newest `Work / …` protocol entry (no Work entries → not stale). Lets it weight
+  REFINE/CAPTURE questions; never auto-picks a task or auto-routes a capture. Missing file is
+  silent; malformed/partial/headingless degrades gracefully (reads what's parseable, never
+  blocks or throws).
+- **`skills/work/SKILL.md`** — Phase 3 (Conflict pre-scan) gained step 3, "Weigh the planning
+  advisory," between the merge-order annotation (old step 2) and the batch cap / lowest-numbered
+  pick (old step 3, renumbered to step 4): the advisory can nudge ordering/priority among
+  already-ready tasks (e.g. tie-breaking, dispatch-earlier-in-batch) with the same
+  current/stale staleness rule against the newest `Work / …` protocol entry — it never
+  overrides the DAG, promotes an un-ready task, or demotes a ready one. Added an optional
+  `**Planning advisory:**` line to the "Batch started" protocol-entry format (Protocol logging
+  section) so the weighting is surfaced in the batch rationale when present, and omitted
+  entirely when the artifact is absent.
+- **`.agentheim/contexts/agentic-workflow/README.md`** — extended the existing advisory-write
+  paragraph (originally written for aw-076/aw-073) with one paragraph noting the two new READ
+  consumers and their posture, so future sessions don't think the dashboard is still the only
+  reader.
+
+Both edits keep the advisory strictly advisory per ADR-0027 §4 (frontmatter `generated` is a
+descriptive staleness cue, not load-bearing) and do not re-open ADR-0017's
+read-only-over-lifecycle stance — a reasoning skill weighing an artifact less when stale is
+still advisory, not a behavior gate on disk. Doctrine-only change (no runtime code, no new
+ADR — ADR-0027 already governs); TDD does not apply, per the task's own scoping note.
+
+Split-off `agentic-workflow-v6d4n` (session-end/verify-path vision-conformance check) remains
+independent, cross-referenced only, no `depends_on` edge.

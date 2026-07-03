@@ -529,7 +529,14 @@ separate BC, but today the whole tool lives in this one.
   still moves no task, promotes nothing, edits no `INDEX.md` / `protocol.md`, and runs no `git` action. The
   `state/` directory is a third top-level write location under `.agentheim/` (sibling of `knowledge/` and
   `contexts/`), the git-ignored home for advisory machine-written signals; the dashboard reads this artifact
-  (aw-073) and never writes it.
+  (aw-073) and never writes it. As of **aw-x4t2g**, the advisory feeds back into planning too: `modeling`'s
+  "Before acting" and `work`'s Phase 3 batch-planning both read `state/whats-next.md` when present and
+  surface its *recommended move* + age to the builder — `modeling` letting it weight REFINE/CAPTURE
+  questions, `work` letting it inform ordering/priority among already-ready tasks — never auto-picking,
+  auto-promoting, or overriding the dependency DAG (ADR-0027 §4). Staleness is computed against the newest
+  `Work / …` `protocol.md` entry (older → surfaced as background context, not directive); a missing or
+  malformed artifact degrades silently. This closes the Why→What advisory loop without re-opening
+  ADR-0017's read-only-over-lifecycle stance.
   The topbar's leading slot now hosts the **global search field** (aw-052, see *Global search
   (topbar)* below). The rail is composed
   from styleguide **primitives** (`Glyph` / `RailItem` / `Collapsible` / `TreeItem`), **not** the demo

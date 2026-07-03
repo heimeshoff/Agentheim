@@ -36,7 +36,8 @@ Textual conflict prediction used to hard-demote tasks because the shared working
 
 1. For each ready task, scan its `What`, `Acceptance criteria`, and `Notes` sections for file paths, directory references, and shared resources (BC READMEs, ADRs, shared modules).
 2. If two ready tasks reference the same file or directory (same-BC-README overlap is the routine case), **annotate them** for sequential merge-ordering — dispatch both in the same batch, but plan to squash-merge them one after another rather than out of order, so a real conflict (if one occurs) surfaces predictably. Do **not** demote either task to a later batch on this basis alone — that throttle is retired.
-3. **Cap the batch at MAX_PARALLEL = 3** unless the user asked otherwise (isolation makes raising this safe going forward, but the default stays 3 unless asked). Pick the lowest-numbered unblocked tasks; the advisory annotation from step 2 only affects merge *order*, never selection.
+3. **Weigh the planning advisory (read-only influence, never a selector).** If `.agentheim/state/whats-next.md` exists, read it and note its latest *recommended move* + age (`generated` timestamp) — this informs **ordering/priority among the already-ready tasks** picked in step 4 below, surfaced in the batch rationale (see the "Batch started" protocol entry's optional `**Planning advisory:**` line under "Protocol logging"). Compare `generated` against the newest `## … -- Work / …` entry in the protocol excerpt already read in Phase 2 step 3: newer than that entry → treat as **current**, and let it nudge which ready tasks get priority (e.g. break a tie between two equally-ready tasks toward the recommended one, or dispatch the recommended task earlier within the batch); older → treat as **stale — background context**, weighted less; no Work entries yet in the protocol → not stale. It **never** overrides the dependency DAG, never promotes an un-ready task into the batch, and never demotes a task the DAG says is ready — it only informs ordering among tasks step 4 was already going to select from. A missing artifact is silent — no note, no weighting. A malformed / partial / headingless artifact degrades gracefully: read whatever is parseable and proceed without blocking batch planning; never throw.
+4. **Cap the batch at MAX_PARALLEL = 3** unless the user asked otherwise (isolation makes raising this safe going forward, but the default stays 3 unless asked). Pick the lowest-numbered unblocked tasks, adjusted by the advisory weighting from step 3 where it applies; the merge-order annotation from step 2 only affects merge *order*, never selection.
 
 ## Phase 4: Batch dispatch
 
@@ -295,6 +296,7 @@ Entry formats:
 **Type:** Work / Batch start
 **Tasks:** task-id-1 - [title], task-id-2 - [title]
 **Parallel:** yes / no (N workers)
+**Planning advisory:** [omit this line entirely if `.agentheim/state/whats-next.md` was absent; otherwise one line — the recommended move + current/stale age — per Phase 3 step 3]
 
 ---
 

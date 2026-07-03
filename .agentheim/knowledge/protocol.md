@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 09:12 -- Task verified and completed: agentic-workflow-x4t2g - whats-next feeds back into planning
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-x4t2g - whats-next feeds back into planning — modeling and work read the advisory at session start
+**Summary:** `modeling` ("Before acting") and `work` (batch planning) now read `.agentheim/state/whats-next.md` when present and surface its recommended move + staleness age to the builder — modeling weighting REFINE/CAPTURE questions, work informing ordering among already-ready tasks. Strictly advisory per ADR-0027 §4: no auto-move/promote/pick, no DAG override; staleness (vs the newest Work protocol entry) softens weight only, missing/malformed degrades silently.
+**Duration:** ~6m
+**Verification:** PASS (iteration 1)
+**Files changed:** 3
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-03 09:06 -- Batch started: [agentic-workflow-x4t2g]
 
 **Type:** Work / Batch start
