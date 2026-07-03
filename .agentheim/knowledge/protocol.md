@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 08:40 -- Batch started: [agentic-workflow-j7d4k, agentic-workflow-h9v3m, agentic-workflow-s7d3k]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-j7d4k - Ratify ADR-0036 — verifier runtime-drive end-to-end check, agentic-workflow-h9v3m - Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks, agentic-workflow-s7d3k - Single-source the duplicated doctrine into references/ files
+**Parallel:** yes (3 workers)
+
+---
+
 ## 2026-07-03 08:35 -- Modeling / Promoted: agentic-workflow-j7d4k, agentic-workflow-h9v3m, agentic-workflow-s7d3k, agentic-workflow-x4t2g
 
 **Type:** Modeling / Promote

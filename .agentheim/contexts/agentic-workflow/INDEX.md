@@ -11,21 +11,21 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 13
-- **Todo:** 4
-- **Doing:** 0
+- **Todo:** 1
+- **Doing:** 3
 - **Done:** 96
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-j7d4k** — Ratify ADR-0036 — verifier runtime-drive end-to-end check (decision) — `todo/agentic-workflow-j7d4k-ratify-adr-0036-verifier-runtime-drive.md`
-- **agentic-workflow-h9v3m** — Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks (feature) — `todo/agentic-workflow-h9v3m-board-wiring-collapsed-group-offviewport-blinks.md`
-- **agentic-workflow-s7d3k** — Single-source the duplicated doctrine into references/ files (refactor) — `todo/agentic-workflow-s7d3k-single-source-duplicated-doctrine.md`
 - **agentic-workflow-x4t2g** — whats-next feeds back into planning — modeling and work read the advisory at session start (feature) — `todo/agentic-workflow-x4t2g-whats-next-feeds-back-into-planning.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-j7d4k** — Ratify ADR-0036 — verifier runtime-drive end-to-end check (decision) — `doing/agentic-workflow-j7d4k-ratify-adr-0036-verifier-runtime-drive.md`
+- **agentic-workflow-h9v3m** — Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks (feature) — `doing/agentic-workflow-h9v3m-board-wiring-collapsed-group-offviewport-blinks.md`
+- **agentic-workflow-s7d3k** — Single-source the duplicated doctrine into references/ files (refactor) — `doing/agentic-workflow-s7d3k-single-source-duplicated-doctrine.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
