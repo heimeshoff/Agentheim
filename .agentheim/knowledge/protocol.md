@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 09:28 -- Modeling / Refined: agentic-workflow-t4x8p - Fix CRLF-sensitive byte-identical guard regexes
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Resolved the task's one open item (the "grep the rest of the suite for the same fragility" hunt deferred to the worker). Swept `dashboard/test/` for the literal-char-then-bare-`\n` regex-literal signature and pinned the scope to exactly two lines — `about-rail-routing.test.mjs:187` and `workflow-rail-routing.test.mjs:161`, the identical `isTaskIntent` byte-identical guard — with no hidden third file (`[\s\S]`-class and dynamic `new RegExp` forms absorb `\r` and aren't affected). Tightened What/AC to the confirmed two-file scope, added related_adrs [0021, 0025] (the decisions the guard protects), recorded the fix locations. Now a closed, ready-to-work fix.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-07-03 09:14 -- Work session ended
 
 **Type:** Work / Session end
