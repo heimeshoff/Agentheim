@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 12
-- **Doing:** 2
-- **Done:** 100
+- **Doing:** 1
+- **Done:** 101
 <!-- task-counts:end -->
 
 ### Todo
@@ -34,12 +34,12 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-t4x8p** — Fix CRLF-sensitive byte-identical guard regexes in intent-route rail-routing tests (bug) — `doing/agentic-workflow-t4x8p-fix-crlf-sensitive-byte-identical-guard-regexes.md`
 - **agentic-workflow-y8b4q** — End-to-end verification step for tasks with a runtime surface (feature) — `doing/agentic-workflow-y8b4q-end-to-end-verification-runtime-surface.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-t4x8p** — Fix CRLF-sensitive byte-identical guard regexes in intent-route rail-routing tests (bug) — `done/agentic-workflow-t4x8p-fix-crlf-sensitive-byte-identical-guard-regexes.md`
 - **agentic-workflow-x4t2g** — whats-next feeds back into planning — modeling and work read the advisory at session start (feature) — `done/agentic-workflow-x4t2g-whats-next-feeds-back-into-planning.md`
 - **agentic-workflow-h9v3m** — Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks (feature) — `done/agentic-workflow-h9v3m-board-wiring-collapsed-group-offviewport-blinks.md`
 - **agentic-workflow-s7d3k** — Single-source the duplicated doctrine into references/ files (refactor) — `done/agentic-workflow-s7d3k-single-source-duplicated-doctrine.md`

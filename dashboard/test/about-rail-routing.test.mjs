@@ -184,7 +184,7 @@ test('the Ko-fi button is a solid var(--st-doing) fill, not a gradient (aw-070)'
 
 test('isTaskIntent (ADR-0021 discriminator) is BYTE-UNCHANGED', () => {
   assert.match(intentRouteSrc,
-    /export function isTaskIntent\(intent\) \{\n  return Boolean\(intent && intent\.status\);\n\}/,
+    /export function isTaskIntent\(intent\) \{\r?\n  return Boolean\(intent && intent\.status\);\r?\n\}/,
     'isTaskIntent must remain byte-identical (ADR-0021 / ADR-0025 decision 2)');
 });
 

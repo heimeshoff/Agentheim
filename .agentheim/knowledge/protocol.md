@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 12:04 -- Task verified and completed: agentic-workflow-t4x8p - Fix CRLF-sensitive byte-identical guard regexes
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-t4x8p - Fix CRLF-sensitive byte-identical guard regexes in intent-route rail-routing tests
+**Summary:** The two `isTaskIntent` byte-identical guard regexes now use `\r?\n` instead of a bare `\n`, so they pass on a CRLF (Windows) checkout while still failing if `isTaskIntent`'s body changes — the ADR-0021/0025 decision-2 body-lock is preserved, only line-ending sensitivity was removed.
+**Duration:** ~9m
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-03 12:00 -- Modeling / Refined + Promoted: full backlog sweep (13 tasks → todo)
 
 **Type:** Modeling / Refine + Promote

@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-t4x8p
 title: Fix CRLF-sensitive byte-identical guard regexes in intent-route rail-routing tests
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-03
-completed:
+completed: 2026-07-03
 depends_on: []
 blocks: []
 tags: [tests, windows, crlf]
@@ -52,12 +52,12 @@ using a `[\s\S]`-class or dynamic ``new RegExp(`…\\n…`)`` absorb the `\r` an
 fragile, which is why only these two lines are affected.
 
 ## Acceptance criteria
-- [ ] Both `isTaskIntent` byte-identical guard tests pass on a Windows (CRLF) checkout
+- [x] Both `isTaskIntent` byte-identical guard tests pass on a Windows (CRLF) checkout
       (`test/about-rail-routing.test.mjs`, `test/workflow-rail-routing.test.mjs`).
-- [ ] They still correctly FAIL if `isTaskIntent`'s actual body changes (the guard's
+- [x] They still correctly FAIL if `isTaskIntent`'s actual body changes (the guard's
       purpose — locking ADR-0021/0025 decision 2 — must not be weakened; keep matching the
       exact body, only line breaks become `\r?\n`).
-- [ ] Full dashboard suite passes on a Windows checkout with no CRLF-related failures
+- [x] Full dashboard suite passes on a Windows checkout with no CRLF-related failures
       (confirms no third file shares the fragility — refinement verified none does, this AC
       is the regression backstop).
 
@@ -75,3 +75,17 @@ guards. So this is a closed, two-line fix — the worker does not need to re-run
 to preserve the guard's body-locking intent (AC #2). The two `related_adrs` (ADR-0021 /
 ADR-0025) are the decisions the guard exists to protect — decision 2's `isTaskIntent`
 discriminator must stay byte-identical after the fix.
+
+## Outcome
+
+Fixed both regex literals by changing the bare `\n` line-break tokens to `\r?\n` so the
+`isTaskIntent` byte-identical guard matches on any checkout line-ending convention:
+
+- `test/about-rail-routing.test.mjs:187`
+- `test/workflow-rail-routing.test.mjs:161`
+
+Verified: (1) both guard tests pass on this CRLF checkout, (2) a temporary mutation of
+`app/intent-route.js`'s `isTaskIntent` body still makes both guards FAIL as expected (the
+locking power over ADR-0021/0025 decision 2 is preserved, only line-ending sensitivity was
+removed), (3) full dashboard suite (`node --test`) — 709 tests, 0 failures, no CRLF-related
+failures remaining.

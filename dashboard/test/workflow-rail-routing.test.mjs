@@ -158,6 +158,6 @@ test('the scaffold is read-only: no write verb introduced over .agentheim (ADR-0
 test('isTaskIntent (ADR-0021 discriminator) is BYTE-UNCHANGED — the static page never enters it', () => {
   // The exact source of the discriminator function body, locked verbatim.
   assert.match(intentRouteSrc,
-    /export function isTaskIntent\(intent\) \{\n  return Boolean\(intent && intent\.status\);\n\}/,
+    /export function isTaskIntent\(intent\) \{\r?\n  return Boolean\(intent && intent\.status\);\r?\n\}/,
     'isTaskIntent must remain byte-identical (ADR-0021 / ADR-0025 decision 2)');
 });
