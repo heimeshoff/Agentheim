@@ -14,7 +14,10 @@
 //   - only backlog/todo cards are a hover SOURCE (the same status gate as the
 //     existing trash-can overlay — hovering doing/done never lifts hoveredId);
 //   - moving the pointer off a card clears the hover (onMouseLeave -> null);
-//   - the host div carries data-ticket-id for agentic-workflow-h9v3m.
+//   - EVERY card (not just backlog/todo hover sources) carries data-ticket-id
+//     (widened by agentic-workflow-h9v3m: a doing/done card can be a resolved
+//     dependency TARGET just as easily as a backlog/todo one, so its
+//     IntersectionObserver wiring needs a DOM node to find on every status).
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -104,15 +107,21 @@ test('BoardColumn computes waiting-on (solid) before holding-up (dashed), matchi
 
 test('only backlog/todo cards are a hover source — the same gate as the trash-can overlay', () => {
   const card = fn('BoardCard');
-  // The hover lift lives inside the existing host div that is ONLY rendered for
-  // showTrash === (status === "backlog" || status === "todo"); doing/done return
-  // the bare card with no onCardHover wiring at all.
+  // The hover lift (onMouseEnter/onMouseLeave -> onCardHover) and the trash-can
+  // overlay live ONLY behind showTrash === (status === "backlog" || status ===
+  // "todo"). doing/done cards return a bare data-ticket-id wrapper (agentic-
+  // workflow-h9v3m: every card is a potential dependency TARGET, so it still
+  // needs a DOM node the IntersectionObserver can find) with NO hover wiring.
   assert.match(
     card,
     /const showTrash = status === "backlog" \|\| status === "todo";/,
     'the hover-lift host div must reuse the existing backlog/todo-only gate',
   );
-  assert.match(card, /if \(!showTrash\) return card;/, 'doing/done cards must return the bare card with no hover wiring');
+  assert.match(
+    card,
+    /if \(!showTrash\) return html`<div data-ticket-id=\$\{ticket\.id\}>\$\{card\}<\/div>`;/,
+    'doing/done cards must return a bare data-ticket-id wrapper with no hover wiring (onCardHover, trash-can)',
+  );
 });
 
 test('moving the pointer off a hovered card clears it (onMouseLeave lifts null)', () => {
@@ -129,11 +138,11 @@ test('moving the pointer off a hovered card clears it (onMouseLeave lifts null)'
   );
 });
 
-test('the hover-source host div carries data-ticket-id for agentic-workflow-h9v3m', () => {
+test('every card — hover-source or not — carries data-ticket-id (agentic-workflow-h9v3m)', () => {
   const card = fn('BoardCard');
-  assert.match(
-    card,
-    /data-ticket-id=\$\{ticket\.id\}/,
-    'the host div must stamp data-ticket-id so the next task can wire an IntersectionObserver over it',
-  );
+  // Both branches (the showTrash host div AND the bare doing/done wrapper) must
+  // stamp data-ticket-id — every card is a potential IntersectionObserver target,
+  // not just backlog/todo hover sources.
+  const occurrences = card.match(/data-ticket-id=\$\{ticket\.id\}/g) || [];
+  assert.equal(occurrences.length, 2, 'both the showTrash host div and the bare doing/done wrapper must stamp data-ticket-id');
 });

@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-h9v3m
 title: Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-03
 depends_on: [agentic-workflow-k5p8w, design-system-b7n2s]
 blocks: [agentic-workflow-r9k2p]
 tags: [dashboard, board, dependencies, motion, viewport]
@@ -91,30 +91,30 @@ otherwise clipped from the viewport).
 classes as shipped.
 
 ## Acceptance criteria
-- [ ] `board-dependency-groups.js`'s section-derivation function is pure,
+- [x] `board-dependency-groups.js`'s section-derivation function is pure,
       `node --test`-covered, and mirrors `rail-attention.annotateGroups`'s shape
       (given sections + collapsed set + target ids → per-section
       `hasHiddenDependency`).
-- [ ] `classifyEdge` is pure, `node --test`-covered, given plain rect-shaped objects
+- [x] `classifyEdge` is pure, `node --test`-covered, given plain rect-shaped objects
       (no DOM, no IntersectionObserver in the test).
-- [ ] Hovering a backlog/todo card whose dependency target lives inside a
+- [x] Hovering a backlog/todo card whose dependency target lives inside a
       **collapsed** BC section shows the hidden-dependency marker on that section's
       header, not on any card (none is rendered).
-- [ ] Hovering a card whose target lives in a **peeked (collapsed) Done column, below
+- [x] Hovering a card whose target lives in a **peeked (collapsed) Done column, below
       the clamp** shows the marker on the Done collapse control.
-- [ ] Hovering a card whose target lives in a **peeked Done column but still within
+- [x] Hovering a card whose target lives in a **peeked Done column but still within
       the visible clamp window** pulses the card directly (no marker).
-- [ ] Hovering a card whose target is rendered, section open, not clamped, but
+- [x] Hovering a card whose target is rendered, section open, not clamped, but
       **scrolled above** the visible viewport shows a blink at the **top** edge of
       the scroll container.
-- [ ] Same for **below** → **bottom** edge.
-- [ ] Scrolling an off-viewport target into view, while the hover is still active,
+- [x] Same for **below** → **bottom** edge.
+- [x] Scrolling an off-viewport target into view, while the hover is still active,
       replaces its edge blink with the normal on-card pulse without re-hovering.
-- [ ] Moving the pointer off the hovered card disconnects all observers and clears
+- [x] Moving the pointer off the hovered card disconnects all observers and clears
       every marker/blink.
-- [ ] No observer is mounted except during an active backlog/todo hover session (no
+- [x] No observer is mounted except during an active backlog/todo hover session (no
       always-on global observer).
-- [ ] The dashboard `dist/` is rebuilt so the live board picks up
+- [x] The dashboard `dist/` is rebuilt so the live board picks up
       `design-system-b7n2s`'s primitives.
 
 ## Notes
@@ -133,3 +133,15 @@ The IntersectionObserver wiring itself, the scroll-container ref threading, and 
 edge-indicator overlay elements are DOM/browser-only glue and are not unit-tested
 (the existing `autoGrowField`/`fireConfetti` precedent in `board.js`) — only the pure
 rect-math and data-derivation slices carry `node --test` coverage.
+
+## Outcome
+Shipped the full "signal what isn't [rendered]" slice on top of k5p8w's ring:
+
+- New pure module `dashboard/app/board-dependency-groups.js`: `annotateSectionHiddenDependency(sections, targetIds)` mirrors `rail-attention.annotateGroups`'s shape — flags a `groupTickets` section `hasHiddenDependency` when it is currently collapsed and holds ≥1 resolved target id (a closed `Collapsible` has no DOM node to observe, ADR-0033 pt. 3, so this stays pure/data-layer). `donePeekHasHiddenDependency(doneTickets, targetIds, peek)` narrows the Done-peek candidate the same way. `classifyEdge(rect, rootBounds)` is the one pure rect-math seam (`'above'|'below'|'visible'`, safe-degrades to `'visible'` on malformed input, no DOM). `unionTargetIds(waitingOn, holdingUp)` combines k5p8w's two directional sets into the one direction-agnostic id universe the markers test against. 20 new `node --test` cases.
+- `dashboard/app/board.js` DOM wiring: `BoardColumn` now runs sections through `annotateSectionHiddenDependency` and wires `hasHiddenDependency` onto each section's `Collapsible`. `ColumnCollapseButton` gained a `hasHiddenDependency` prop merging `dependencyPresentClass` into its className (the Done control's standalone `rel-present` consumption). `BoardCard`'s `data-ticket-id` stamp is **widened to every card, any status** — not just backlog/todo hover sources — since a doing/done ticket can be a resolved dependency target too and needs a DOM node the observer can find (`board-dependency-hover.test.mjs` updated to lock the new bare `<div data-ticket-id=...>` wrapper for doing/done). `DashboardApp` threads a `scrollContainerRef` (attached to its sole vertical `scroll-quiet` region) down into `DashboardBoard`. `DashboardBoard` runs one hover-scoped `useEffect`: mounts an `IntersectionObserver` rooted on that scroll container only while a backlog/todo hover is active (disconnected on hover-end — no always-on global observer), classifies non-intersecting targets above/below via `classifyEdge` into `edgeBlinks` state driving a new `EdgeBlinkOverlay` (`--rel-dep` `chevrons-up`/`chevrons-down`, `edgeBlinkClass`, `position: fixed` against the scroll container's own measured rect), and resolves Done-peek candidates with a one-time bounded rect check against the clamp body's own rect (`doneBodyRef` + `PEEK_MAX_HEIGHT_PX`) — genuinely-below-the-clamp routes to the Done collapse control's marker instead of a live observer/edge-blink; still-within-the-clamp-window falls through to the ordinary on-card pulse.
+- `dashboard/dist/` rebuilt via `node build.mjs`; verified `rel-present`/`rel-edge-blink` CSS and `hasHiddenDependency`/`data-ticket-id` wiring landed in the bundle.
+- Full dashboard suite: 709 tests, 707 passing. The 2 failures (`about-rail-routing.test.mjs`, `workflow-rail-routing.test.mjs` — an `isTaskIntent` byte-identical guard regex that assumes `\n` line endings against a `\r\n`-checked-out `intent-route.js` on this Windows worktree) are **pre-existing and unrelated**: confirmed via `git stash` that they fail identically on the untouched base commit, and neither `intent-route.js` nor its tests were touched by this task. Captured as follow-up `agentic-workflow-t4x8p` in backlog rather than fixed here (out of this task's scope).
+- No new ADR: ADR-0033 (pre-loaded, already covers the pure/DOM seam and the ephemeral-observation admissibility this task exercises) was left as-is per the task's explicit "do not rewrite it" instruction — no genuinely new sub-decision was made beyond what it already covers.
+- BC README updated (`agentic-workflow` — new bullet immediately after the k5p8w hover-ring entry, documenting all three classification states, the pure/DOM seam, and the Done-peek refinement).
+
+Key files: `dashboard/app/board-dependency-groups.js`, `dashboard/app/board.js`, `dashboard/test/board-dependency-groups.test.mjs`, `dashboard/test/board-dependency-hover.test.mjs`, `dashboard/dist/*`, `.agentheim/contexts/agentic-workflow/README.md`, `.agentheim/contexts/agentic-workflow/backlog/agentic-workflow-t4x8p-fix-crlf-sensitive-byte-identical-guard-regexes.md`.

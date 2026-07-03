@@ -41,6 +41,7 @@ import { Icon } from "../../.agentheim/contexts/design-system/styleguide/app/ico
 import { Glyph, ThemeCtx } from "../../.agentheim/contexts/design-system/styleguide/app/foundations.js";
 import { RailItem, TreeItem } from "../../.agentheim/contexts/design-system/styleguide/app/library.js";
 import { Collapsible } from "../../.agentheim/contexts/design-system/styleguide/app/collapsible.js";
+import { dependencyPresentClass, edgeBlinkClass } from "../../.agentheim/contexts/design-system/styleguide/app/motion.js";
 import { Menu, MenuItem, MenuDivider } from "../../.agentheim/contexts/design-system/styleguide/app/menu.js";
 import { ThemeToggle } from "../../.agentheim/contexts/design-system/styleguide/app/live.js";
 import { ConfirmDialog } from "../../.agentheim/contexts/design-system/styleguide/app/confirm-dialog.js";
@@ -54,7 +55,8 @@ import { refineCommandFor, promoteCommandFor, dismissCommandFor, quickCaptureCom
 import { launchOrCopy } from "./bridge-launch.js";
 import { groupTickets } from "./board-group.js";
 import { resolveHoverDependencies } from "./board-dependencies.js";
-import { loadViewState, saveViewState, defaultColumnState, peekClampStyle } from "./board-view-state.js";
+import { annotateSectionHiddenDependency, donePeekHasHiddenDependency, unionTargetIds, classifyEdge } from "./board-dependency-groups.js";
+import { loadViewState, saveViewState, defaultColumnState, peekClampStyle, PEEK_MAX_HEIGHT_PX } from "./board-view-state.js";
 import { SlideOver } from "./slide-over.js";
 import { MainPaneReader } from "./main-pane-reader.js";
 import { treeToLibrary } from "./library-data.js";
@@ -198,11 +200,17 @@ function ColumnGroupToggle({ status, grouped, onToggle }) {
 // (ADR-0017/0001). The chevron is a GLYPH-NAME SWAP (not a CSS rotate) consuming both
 // glyphs design-system-c3p9k ships: `chevrons-up` when expanded (will-collapse) ⇄
 // `chevrons-down` when collapsed (will-expand), each consumed unforked (ADR-0003).
-function ColumnCollapseButton({ status, peek, onToggleCollapse }) {
+// hasHiddenDependency (agentic-workflow-h9v3m, design-system-b7n2s): the Done
+// column's peek clamp is board-local CSS, not a Collapsible, so this control
+// carries the standalone `rel-present` class directly (Consumption 2 of the
+// hidden-dependency marker) instead of a Collapsible prop. Detection (whether
+// a hover target sits below the clamp's visible window) lives in
+// DashboardBoard; this only renders the boolean.
+function ColumnCollapseButton({ status, peek, onToggleCollapse, hasHiddenDependency = false }) {
   return html`
     <button
       type="button"
-      className="focusable"
+      className=${["focusable", dependencyPresentClass(hasHiddenDependency)].filter(Boolean).join(" ")}
       aria-pressed=${peek}
       aria-label=${peek ? `Expand ${status} column` : `Collapse ${status} column to a peek`}
       title=${peek
@@ -1148,12 +1156,14 @@ function BoardCard({ ticket, status, selectedId, onOpen, skipPermissions = false
     <${TicketCard} key=${ticket.id} ticket=${ticket} variant="rail"
       selected=${selectedId === ticket.id} onClick=${() => onOpen(ticket)}
       cornerAction=${cornerAction} dependencyRelation=${dependencyRelation} />`;
-  if (!showTrash) return card;
-  // Only backlog/todo cards are a HOVER SOURCE (agentic-workflow-k5p8w): this is
-  // the same status gate as the trash-can overlay, so it rides the host div that
-  // already exists here rather than opening a second wrapper. `data-ticket-id` is
-  // stamped for agentic-workflow-h9v3m's IntersectionObserver wiring (the next
-  // task in this slice; unused here beyond the attribute itself).
+  // agentic-workflow-h9v3m: EVERY card, any status, is a potential dependency
+  // TARGET — a backlog/todo card's dependsOn/blocks can point at a doing or
+  // done ticket just as easily as another backlog/todo one — so every card
+  // needs a `data-ticket-id` host node for the IntersectionObserver wiring
+  // below to find. Only backlog/todo cards are additionally a HOVER SOURCE
+  // (agentic-workflow-k5p8w) and get the trash-can overlay + onCardHover lift;
+  // that status gate is unchanged.
+  if (!showTrash) return html`<div data-ticket-id=${ticket.id}>${card}</div>`;
   return html`
     <div
       data-ticket-id=${ticket.id}
@@ -1170,11 +1180,20 @@ function BoardColumn({
   collapsed, onToggleSection, peek = false, onToggleCollapse,
   selectedId, onOpen, skipPermissions = false,
   waitingOn, holdingUp, onCardHover,
+  targetIds, doneMarker = false, bodyRef,
 }) {
   // Pipeline: tickets arrive ALREADY sorted (the board sorts before passing them
   // in); group them into sections here (board-group.groupTickets, pure). A flat
   // column yields one null-bc section; the toggle re-shapes presentation only.
-  const sections = groupTickets(tickets, { grouped, collapsed });
+  // agentic-workflow-h9v3m: annotateSectionHiddenDependency (also pure) then
+  // flags every section that is CURRENTLY COLLAPSED and holds a resolved
+  // dependency target id (targetIds, the union of waitingOn/holdingUp) — a
+  // data-layer answer, since a closed Collapsible has no body/DOM node to
+  // find a rendered position for (ADR-0033 pt. 3).
+  const sections = annotateSectionHiddenDependency(
+    groupTickets(tickets, { grouped, collapsed }),
+    targetIds,
+  );
 
   // agentic-workflow-k5p8w: a card rings when its own id is a resolved hover
   // target — waitingOn (solid) beats holdingUp (dashed) on the rare malformed
@@ -1204,7 +1223,8 @@ function BoardColumn({
             <div style=${{ flex: "1 1 0", minWidth: 0 }}>
               <${ColumnHeader} status=${status} count=${tickets.length} />
             </div>
-            <${ColumnCollapseButton} status=${status} peek=${peek} onToggleCollapse=${onToggleCollapse} />
+            <${ColumnCollapseButton} status=${status} peek=${peek} onToggleCollapse=${onToggleCollapse}
+              hasHiddenDependency=${doneMarker} />
           </div>`
         : html`<${ColumnHeader} status=${status} count=${tickets.length} />`}
       <${ColumnControls} status=${status} sort=${sort} onSortChange=${onSortChange}
@@ -1212,14 +1232,15 @@ function BoardColumn({
       ${tickets.length === 0
         ? html`<div style=${{ paddingBottom: 8 }}><${EmptyColumn} status=${status} /></div>`
         : html`
-          <div style=${{ paddingBottom: 8, ...bodyClamp }}>
+          <div ref=${bodyRef} style=${{ paddingBottom: 8, ...bodyClamp }}>
             ${grouped
               ? html`
                 <div style=${{ display: "flex", flexDirection: "column", gap: 6 }}>
                   ${sections.map((sec) => html`
                     <${Collapsible} key=${sec.bc} label=${sec.bc} count=${sec.count}
                       open=${!sec.collapsed} onToggle=${() => onToggleSection(sec.bc)}
-                      bodyStyle=${{ gap: 10, paddingLeft: 2 }}>
+                      bodyStyle=${{ gap: 10, paddingLeft: 2 }}
+                      hasHiddenDependency=${sec.hasHiddenDependency}>
                       ${sec.tickets.map(renderCard)}
                     </${Collapsible}>`)}
                 </div>`
@@ -1228,6 +1249,35 @@ function BoardColumn({
                   ${sections[0].tickets.map(renderCard)}
                 </div>`}
           </div>`}
+    </div>`;
+}
+
+// The off-viewport edge-blink INDICATOR (agentic-workflow-h9v3m, ADR-0003's
+// "styleguide owns look/mechanics, consumer owns placement" seam per
+// design-system-b7n2s: design-system ships only `.rel-edge-blink` + the
+// direction helper; the board builds and places the actual element using its
+// own scroll geometry). One small `--rel-dep`-tinted chevrons icon per edge,
+// `position: fixed` against the sole scroll container's OWN measured rect —
+// fixed rather than absolute/sticky so it never moves as that container's
+// content scrolls underneath it. Untested DOM/browser-only glue (ADR-0033;
+// matches the autoGrowField/fireConfetti precedent) — no marker to place when
+// nothing is off-viewport.
+function EdgeBlinkOverlay({ scrollContainerRef, top, bottom }) {
+  if (!top && !bottom) return null;
+  const el = scrollContainerRef && scrollContainerRef.current;
+  if (!el || typeof el.getBoundingClientRect !== "function") return null;
+  const rect = el.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  return html`
+    <div style=${{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 40 }}>
+      ${top && html`
+        <div className=${edgeBlinkClass("top")} style=${{ position: "fixed", top: rect.top + 8, left: centerX, transform: "translateX(-50%)" }}>
+          <${Icon} name="chevrons-up" size=${18} color="var(--rel-dep)" />
+        </div>`}
+      ${bottom && html`
+        <div className=${edgeBlinkClass("bottom")} style=${{ position: "fixed", top: rect.bottom - 26, left: centerX, transform: "translateX(-50%)" }}>
+          <${Icon} name="chevrons-down" size=${18} color="var(--rel-dep)" />
+        </div>`}
     </div>`;
 }
 
@@ -1243,8 +1293,13 @@ function BoardColumn({
  *
  * @param {(ticket: object) => void} [onOpen] — open-intent sink (aw-007 wires it).
  * @param {string} [treeUrl] — overridable for tests / alternate mounts.
+ * @param {{current: (HTMLElement|null)}} [scrollContainerRef] — a ref onto the
+ *        app's SOLE vertical scroll container (DashboardApp's outer
+ *        `scroll-quiet` region), threaded down so agentic-workflow-h9v3m's
+ *        IntersectionObserver can root itself there (ADR-0033 pt. 1) instead
+ *        of the browser viewport.
  */
-export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions = false }) {
+export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions = false, scrollContainerRef }) {
   const [columns, setColumns] = useState(EMPTY_COLUMNS);
   const [phase, setPhase] = useState("loading"); // loading | ready | error
   const [selectedId, setSelectedId] = useState(null);
@@ -1253,6 +1308,23 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
   // lifts its id here; every rendered card (any column, any BC) checks whether
   // it is a resolved dependency target of the hovered card and rings if so.
   const [hoveredId, setHoveredId] = useState(null);
+
+  // agentic-workflow-h9v3m: the Done column's height-clamped peek body — the
+  // one column body that needs its own rect (PEEK_MAX_HEIGHT_PX below its
+  // top) to tell "genuinely clipped below the clamp" from "still within the
+  // visible clamp window" (ADR-0033's Notes; the clamp is a height clamp, not
+  // a node-count cut, so classifyEdge against the outer scroll root alone
+  // would misclassify a clamp-clipped-but-in-viewport card as visible).
+  const doneBodyRef = useRef(null);
+
+  // Off-viewport edge-blink state: ticket id -> "above" | "below", for every
+  // hover-target id currently off the sole scroll container's visible
+  // window. Empty whenever nothing is hovered or nothing is off-viewport.
+  const [edgeBlinks, setEdgeBlinks] = useState({});
+  // Whether the Done column's peek collapse control should carry the
+  // hidden-dependency marker (a target sits in Done, Done is peeked, AND the
+  // target is genuinely below the clamp's visible window).
+  const [donePeekMarker, setDonePeekMarker] = useState(false);
 
   // Per-column VIEW LENS — { grouped, sort, collapsed } per column, independent
   // per column. PERSISTED across reloads via the single versioned localStorage
@@ -1368,6 +1440,97 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
   );
   const handleCardHover = useCallback((id) => setHoveredId(id), []);
 
+  // agentic-workflow-h9v3m: the direction-agnostic id universe the group/Done
+  // markers test membership against (design-system-b7n2s: "one marker meaning
+  // 'expand to see' is enough — direction stays on the on-card ring").
+  const targetIds = useMemo(
+    () => unionTargetIds(waitingOn, holdingUp),
+    [waitingOn, holdingUp],
+  );
+  // The pure narrowing candidate (board-dependency-groups.js): is it even
+  // worth running the Done-peek clamp rect check below? False whenever Done
+  // isn't peeked or holds no target at all.
+  const donePeekCandidate = donePeekHasHiddenDependency(columns.done, targetIds, view.done.peek);
+
+  // Ephemeral, hover-scoped DOM/viewport observation (ADR-0033): mounted only
+  // while a backlog/todo hover session is active, disconnected on hover-end —
+  // no always-on global observer. For every resolved target id that IS
+  // currently rendered (has a data-ticket-id DOM node — a target hidden
+  // inside a collapsed group has none, ADR-0033 pt. 3), classify it against
+  // the sole scroll container: intersecting -> already pulsing (nothing to
+  // do); not intersecting -> above/below drives the edge-blink. Scroll-
+  // reactivity is free: IntersectionObserver re-fires as the target scrolls
+  // through the root, so off-viewport -> visible replaces the blink with the
+  // normal pulse live, no manual scroll listener, no re-hover needed. The
+  // Done column's peeked target ids are resolved with a one-time bounded rect
+  // check against the clamp's own visible window instead (the clamp doesn't
+  // move relative to its own body on outer scroll, so no observer needed
+  // there) — genuinely below the clamp routes to the Done marker instead of
+  // an edge-blink or a live observer.
+  useEffect(() => {
+    const root = scrollContainerRef && scrollContainerRef.current;
+
+    if (!hoveredTicket || targetIds.size === 0 || !root) {
+      setEdgeBlinks({});
+      setDonePeekMarker(false);
+      return undefined;
+    }
+
+    const clampedIds = new Set();
+    if (donePeekCandidate && doneBodyRef.current) {
+      const bodyRect = doneBodyRef.current.getBoundingClientRect();
+      const clampWindow = { top: bodyRect.top, bottom: bodyRect.top + PEEK_MAX_HEIGHT_PX };
+      let peekHidden = false;
+      for (const t of columns.done) {
+        if (!t || !targetIds.has(t.id)) continue;
+        const node = root.querySelector(`[data-ticket-id="${t.id}"]`);
+        if (!node) continue;
+        if (classifyEdge(node.getBoundingClientRect(), clampWindow) === "below") {
+          peekHidden = true;
+          clampedIds.add(t.id);
+        }
+      }
+      setDonePeekMarker(peekHidden);
+    } else {
+      setDonePeekMarker(false);
+    }
+
+    if (typeof IntersectionObserver !== "function") {
+      setEdgeBlinks({});
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      setEdgeBlinks((prev) => {
+        const next = { ...prev };
+        for (const entry of entries) {
+          const id = entry.target.getAttribute("data-ticket-id");
+          if (!id) continue;
+          if (entry.isIntersecting) {
+            delete next[id];
+            continue;
+          }
+          const rootBounds = entry.rootBounds || root.getBoundingClientRect();
+          const edge = classifyEdge(entry.boundingClientRect, rootBounds);
+          if (edge === "above" || edge === "below") next[id] = edge;
+          else delete next[id];
+        }
+        return next;
+      });
+    }, { root, threshold: 0 });
+
+    for (const id of targetIds) {
+      if (clampedIds.has(id)) continue; // resolved by the Done-peek check above.
+      const node = root.querySelector(`[data-ticket-id="${id}"]`);
+      if (node) observer.observe(node);
+    }
+
+    return () => {
+      observer.disconnect();
+      setEdgeBlinks({});
+    };
+  }, [hoveredTicket, targetIds, donePeekCandidate, columns.done, scrollContainerRef]);
+
   if (phase === "loading") {
     return html`<${LoadState}><${Icon} name="loader" size=${15} color="var(--fg-4)" /> Loading board…</${LoadState}>`;
   }
@@ -1398,10 +1561,16 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
                 peek=${view[status].peek}
                 onToggleCollapse=${status === "done" ? (p) => setColumnPeek(status, p) : undefined}
                 selectedId=${selectedId} onOpen=${handleOpen} skipPermissions=${skipPermissions}
-                waitingOn=${waitingOn} holdingUp=${holdingUp} onCardHover=${handleCardHover} />`)}
+                waitingOn=${waitingOn} holdingUp=${holdingUp} onCardHover=${handleCardHover}
+                targetIds=${targetIds}
+                doneMarker=${status === "done" ? donePeekMarker : false}
+                bodyRef=${status === "done" ? doneBodyRef : undefined} />`)}
           </div>
         </div>
       </div>
+      <${EdgeBlinkOverlay} scrollContainerRef=${scrollContainerRef}
+        top=${Object.values(edgeBlinks).includes("above")}
+        bottom=${Object.values(edgeBlinks).includes("below")} />
     </div>`;
 }
 
@@ -2556,6 +2725,14 @@ function BoardTopbar({ theme, setTheme, skipPermissions = false, setSkipPermissi
  * stays read-only (ADR-0017): opening a doc performs no write.
  */
 export function DashboardApp() {
+  // agentic-workflow-h9v3m: a ref onto the SOLE vertical scroll container (the
+  // inner `scroll-quiet` region below, per the BC README's shell layout — the
+  // outer shell frame is `overflow: hidden`, the window itself never
+  // scrolls). Threaded down to DashboardBoard so its hover-scoped
+  // IntersectionObserver can root itself there (ADR-0033 pt. 1) instead of
+  // the browser viewport.
+  const scrollContainerRef = useRef(null);
+
   // Theme is owned here and fed to the ThemeCtx.Provider + the data-theme effect.
   // First paint resolves from a persisted override (versioned localStorage) or,
   // on a first visit, the OS prefers-color-scheme — mirroring the styleguide's
@@ -2741,14 +2918,14 @@ export function DashboardApp() {
             skipPermissions=${skipPermissions} setSkipPermissions=${onSkipPermissionsChange}
             onStopped=${onStopped} onOpen=${onOpenSearch} />
           <div style=${{ flex: 1, minHeight: 0, position: "relative", display: "flex", flexDirection: "column" }}>
-            <div className="scroll-quiet" style=${{ flex: 1, overflowY: "auto", padding: "22px 24px 40px" }}>
+            <div ref=${scrollContainerRef} className="scroll-quiet" style=${{ flex: 1, overflowY: "auto", padding: "22px 24px 40px" }}>
               ${mainView === "workflow"
                 ? html`<${WorkflowPage} />`
                 : mainView === "about"
                   ? html`<${AboutPage} />`
                   : selectedDoc
                     ? html`<${MainPaneReader} doc=${selectedDoc} />`
-                    : html`<${DashboardBoard} onOpen=${onOpen} skipPermissions=${skipPermissions} />`}
+                    : html`<${DashboardBoard} onOpen=${onOpen} skipPermissions=${skipPermissions} scrollContainerRef=${scrollContainerRef} />`}
             </div>
             ${stopped ? html`<${StoppedOverlay} />` : null}
           </div>

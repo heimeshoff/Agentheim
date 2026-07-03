@@ -10,10 +10,10 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 13
+- **Backlog:** 14
 - **Todo:** 1
-- **Doing:** 1
-- **Done:** 98
+- **Doing:** 0
+- **Done:** 99
 <!-- task-counts:end -->
 
 ### Todo
@@ -23,11 +23,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-h9v3m** — Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks (feature) — `doing/agentic-workflow-h9v3m-board-wiring-collapsed-group-offviewport-blinks.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-h9v3m** — Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks (feature) — `done/agentic-workflow-h9v3m-board-wiring-collapsed-group-offviewport-blinks.md`
 - **agentic-workflow-s7d3k** — Single-source the duplicated doctrine into references/ files (refactor) — `done/agentic-workflow-s7d3k-single-source-duplicated-doctrine.md`
 - **agentic-workflow-j7d4k** — Ratify ADR-0036 — verifier runtime-drive end-to-end check (decision) — `done/agentic-workflow-j7d4k-ratify-adr-0036-verifier-runtime-drive.md`
 - **agentic-workflow-n6r8j** — Flatten single-specialist consultations — worker spawns the specialist directly (refactor) — `done/agentic-workflow-n6r8j-flatten-single-specialist-consultation.md`
@@ -130,6 +130,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-t4x8p** — Fix CRLF-sensitive byte-identical guard regexes in intent-route rail-routing tests (bug) — `backlog/agentic-workflow-t4x8p-fix-crlf-sensitive-byte-identical-guard-regexes.md`
 - **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature, umbrella — delivered via d8q3n/w4t9k/b7n2s/k5p8w/h9v3m) — `backlog/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
 - **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `backlog/agentic-workflow-c8j3w-index-done-list-rotation.md`
 - **agentic-workflow-w7q2m** — BC README consolidation — size trigger + human-in-loop consolidation procedure (feature) — `backlog/agentic-workflow-w7q2m-bc-readme-consolidation.md`

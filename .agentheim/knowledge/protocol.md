@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 09:04 -- Task verified and completed: agentic-workflow-h9v3m - Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-h9v3m - Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks
+**Summary:** Board now signals dependency targets k5p8w's on-card ring can't reach: a pure-data hidden-dependency marker on collapsed BC sections + the peeked Done collapse control, and a scroll-reactive off-viewport edge-blink driven by a hover-scoped IntersectionObserver rooted on the sole scroll container (ADR-0033 seam honored — pure derivation for the hidden case, DOM-only glue untested). Filed backlog t4x8p for the pre-existing CRLF byte-identity test failures noticed en route.
+**Duration:** ~20m
+**Verification:** PASS (iteration 1)
+**Files changed:** 7
+**Tests added:** 20
+**ADRs written:** none
+
+---
+
 ## 2026-07-03 09:00 -- Task verified and completed: agentic-workflow-s7d3k - Single-source the duplicated doctrine into references/ files
 
 **Type:** Work / Task completion

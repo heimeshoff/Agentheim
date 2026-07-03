@@ -265,6 +265,39 @@ separate BC, but today the whole tool lives in this one.
   Deliberately **excludes** collapsed-group markers, Done-peek markers, and off-viewport edge blinks
   (a target hidden inside a *collapsed* BC section has no DOM node, so it silently gets nothing extra
   here) — that's agentic-workflow-h9v3m's layer on top. See ADR-0002, ADR-0003, ADR-0017.
+- **Hidden and off-viewport dependency markers — "signal what isn't [rendered]"**
+  (agentic-workflow-h9v3m, closing the gap k5p8w left, consuming design-system-b7n2s's
+  `hasHiddenDependency` / `rel-present` / `edgeBlinkClass` primitives): the same hover session
+  classifies every resolved target id into exactly one of three states. **(1) Hidden in a
+  collapsed group** — a **pure, data-layer** derivation (no DOM: a closed `Collapsible` renders no
+  body, so there is nothing to observe — ADR-0033 pt. 3), mirroring `rail-attention.annotateGroups`'s
+  "propagate a flag to a possibly-collapsed header" shape: `dashboard/app/board-dependency-groups.js`'s
+  `annotateSectionHiddenDependency(sections, targetIds)` flags a `groupTickets` section
+  `hasHiddenDependency` when it is **currently collapsed** and holds ≥1 target id, wired onto the
+  section's `Collapsible` header; `donePeekHasHiddenDependency(doneTickets, targetIds, peek)` narrows
+  the **peeked Done column** case the same way (`peek === true` **and** Done holds a target — a
+  candidate only, since the peek clamp is a height clamp, not a node-count cut). **(2) Visible vs.
+  off-viewport** — an `IntersectionObserver` rooted on the app's **sole vertical scroll container**
+  (a ref threaded from `DashboardApp`'s outer `scroll-quiet` region down through `DashboardBoard`,
+  ADR-0033 pt. 1), mounted **only** for the duration of an active backlog/todo hover and disconnected
+  on hover-end (pt. 2) — no always-on global observer. Every target id that IS currently rendered (has
+  a `data-ticket-id` DOM node — **widened by this task to every card, any status**, not just
+  backlog/todo hover sources, since a doing/done ticket can be a target too) is observed; intersecting
+  stays the ordinary on-card pulse (k5p8w), not intersecting classifies **above**/**below** via the one
+  pure rect-math seam, `classifyEdge(rect, rootBounds)` (`board-dependency-groups.js`, no DOM), driving
+  a board-built edge indicator (`--rel-dep` `chevrons-up`/`chevrons-down`, `edgeBlinkClass`) pinned to
+  the scroll container's own measured top/bottom edge. Scroll-reactivity is **free** — the observer
+  re-fires as the target scrolls through the root, so off-viewport → visible swaps the blink for the
+  normal pulse live, no manual scroll listener, no re-hover. **(3) Done-peek refinement** — for a
+  candidate Done target, ONE bounded rect check (`classifyEdge` again, this time against the clamp
+  body's own rect + `PEEK_MAX_HEIGHT_PX`, not the scroll root) tells "genuinely below the clamp" (routes
+  to the Done collapse control's `rel-present` marker) from "still within the visible clamp window"
+  (routes to the ordinary on-card pulse, no marker) — a one-time check, since the clamp doesn't move
+  relative to its own body on outer scroll. Every read here is **transient hover-scoped presentation
+  state only** — no disk write, no persisted view-state, no lifecycle interpretation (ADR-0033 pt. 4).
+  The pure/DOM seam holds: `board-dependency-groups.js` is fully `node --test`-covered; the observer
+  wiring + edge-indicator overlay (`EdgeBlinkOverlay`) are untested DOM/browser-only glue, matching the
+  existing `autoGrowField`/`fireConfetti` precedent. See ADR-0033, ADR-0017, ADR-0014, ADR-0029.
 - **Persisted board view-state** — the per-column **view lens** — grouped/flat, sort choice, each
   `(column, BC)` collapse state, and the per-column **`peek`** flag (the Done collapse control, aw-m2v8d) —
   is persisted across reloads in a **single versioned `localStorage` store**
