@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 12:35 -- Task completed (verification skipped): agentic-workflow-p3v9k - Decide the lifecycle-mechanization boundary
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-p3v9k - Decide the lifecycle-mechanization boundary — fail-closed depends_on ruling + 3-layer bookkeeping ADR
+**Summary:** Ratified ADR-0038 — fail-closed `depends_on` (a dep id in no lifecycle folder = unsatisfied → refuse, matching `dependencySatisfied()`) + three concentric bookkeeping layers (mover / git-free CLI-emitting-manifest / skill-owns-judgment+git); builds on ADR-0007/0026/0032, supersedes the duplicated bookkeeping prose across the four skills, becomes k5n8f's contract. Filed as 0038 (0037 was already taken by the worktree-isolation spike-findings ADR).
+**Duration:** ~2m30s
+**Verification:** SKIPPED — decision-only task (single ADR file)
+**Files changed:** 1
+
+---
+
 ## 2026-07-03 12:10 -- Batch started: [agentic-workflow-p3v9k, agentic-workflow-v3h6p, infrastructure-q8m4t]
 
 **Type:** Work / Batch start

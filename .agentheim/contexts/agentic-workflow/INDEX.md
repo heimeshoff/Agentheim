@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 10
-- **Doing:** 2
-- **Done:** 102
+- **Doing:** 1
+- **Done:** 103
 <!-- task-counts:end -->
 
 ### Todo
@@ -32,12 +32,12 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-p3v9k** — Decide the lifecycle-mechanization boundary — fail-closed depends_on ruling + 3-layer bookkeeping ADR (decision) — `doing/agentic-workflow-p3v9k-lifecycle-mechanization-boundary-decision.md`
 - **agentic-workflow-v3h6p** — Eval-harness the verifier — measure its catch rate against planted defects (spike) — `doing/agentic-workflow-v3h6p-eval-harness-the-verifier.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-p3v9k** — Decide the lifecycle-mechanization boundary — fail-closed depends_on ruling + 3-layer bookkeeping ADR (decision) — `done/agentic-workflow-p3v9k-lifecycle-mechanization-boundary-decision.md`
 - **agentic-workflow-y8b4q** — End-to-end verification step for tasks with a runtime surface (feature) — `done/agentic-workflow-y8b4q-end-to-end-verification-runtime-surface.md`
 - **agentic-workflow-t4x8p** — Fix CRLF-sensitive byte-identical guard regexes in intent-route rail-routing tests (bug) — `done/agentic-workflow-t4x8p-fix-crlf-sensitive-byte-identical-guard-regexes.md`
 - **agentic-workflow-x4t2g** — whats-next feeds back into planning — modeling and work read the advisory at session start (feature) — `done/agentic-workflow-x4t2g-whats-next-feeds-back-into-planning.md`
@@ -149,6 +149,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0038** — Lifecycle-mechanization boundary: fail-closed `depends_on` (a `depends_on` id in no lifecycle folder = unsatisfied → refuse) + three concentric bookkeeping layers, one owner each (`applyTaskMove` mover / git-free `task-lifecycle` CLI emitting an enumerated manifest / skill-or-orchestrator owning judgment + scoped git); builds on ADR-0007 (mover boundary intact), ADR-0026 (scoped-add doctrine), ADR-0032 (git-free folds into squash-merge); supersedes the duplicated bookkeeping prose across the four skills; becomes the contract for agentic-workflow-k5n8f (accepted) — `../../knowledge/decisions/0038-lifecycle-mechanization-boundary-fail-closed-dependency-three-layer-bookkeeping.md`
 - **ADR-0036** — Verifier runtime-drive check: boot-and-observe the app end-to-end in its worktree — a per-BC `## Runtime surface` README manifest (surfacePaths allowlist + launch/stop/probes) that `work` resolves once per batch, and a new final verifier "Check 8" that boots via the launcher, asserts a stdlib HTTP floor + opt-in render tier, guarantees teardown, FAILs on any floor miss; ratified from proposed (accepted) — `../../knowledge/decisions/0036-verifier-runtime-drive-end-to-end-check.md`
 - **ADR-0033** — Ephemeral, hover-scoped DOM/viewport observation (IntersectionObserver rooted on the sole scroll container, mounted per-hover) is admissible board-side; ADR-0017 constrains writes to disk/lifecycle, not transient client geometry reads. Collapsed-group hiding stays a pure data derivation (no DOM node to observe) (proposed) — `../../knowledge/decisions/0033-ephemeral-hover-scoped-dom-viewport-observation-admissible-board-side.md`
 - **ADR-0032** — Per-worker git worktree isolation: batch-start claim commit → private `aw/<id>` branch per worker → verifier runs in the worktree → `git merge --squash` to main folding bookkeeping into one commit (ADR-0026 preserved, one deliberate amendment: the `todo → doing` move rides in the batch-start commit); FAIL leaves main pristine by construction; pre-scan demoted to advisory (accepted) — `../../knowledge/decisions/0032-worker-worktree-isolation-git-model.md`

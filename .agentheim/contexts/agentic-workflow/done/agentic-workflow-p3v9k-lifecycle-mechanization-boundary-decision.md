@@ -1,15 +1,15 @@
 ---
 id: agentic-workflow-p3v9k
 title: Decide the lifecycle-mechanization boundary — fail-closed depends_on ruling + 3-layer bookkeeping ADR
-status: doing
+status: done
 type: decision
 context: agentic-workflow
 created: 2026-07-03
-completed:
+completed: 2026-07-03
 depends_on: []
 blocks: [agentic-workflow-k5n8f]
 tags: [harness-audit, bookkeeping, task-lifecycle, decision, dependency-gate]
-related_adrs: ["0007", "0026", "0032"]
+related_adrs: ["0007", "0026", "0032", "0038"]
 related_research: []
 prior_art: [agentic-workflow-002, agentic-workflow-003, agentic-workflow-063]
 ---
@@ -85,3 +85,33 @@ Reference (cross-BC, not `prior_art`): **infrastructure-010** — the env-free
 plugin-file resolver pattern k5n8f reuses; not a dependency of this decision.
 
 Source: harness audit 2026-07-02; extracted from k5n8f during the 2026-07-03 refine.
+
+## Outcome
+
+Recorded **ADR-0038** (`.agentheim/knowledge/decisions/0038-lifecycle-mechanization-boundary-fail-closed-dependency-three-layer-bookkeeping.md`),
+ratifying both rulings as k5n8f's contract:
+
+- **Ruling A (fail-closed `depends_on`)** — a `depends_on` id present in no lifecycle folder
+  is unsatisfied; promote/claim is refused and the dangling id surfaced. Confirmed this
+  already matches `dependencySatisfied()` (`lib/task-lifecycle.mjs:98-114`, read not edited);
+  the only remaining change is rewriting the contradicting `work/SKILL.md` "treat missing as
+  satisfied, but warn" prose — deferred to k5n8f, gated on this ADR.
+- **Ruling B (three-layer boundary)** — `applyTaskMove` (mover, unchanged, ADR-0007) →
+  git-free `task-lifecycle` CLI (mechanized bookkeeping, emits an enumerated manifest
+  `{ changed, message, verb, id }`, no judgment calls) → skill/orchestrator (owns judgment +
+  the scoped `git add`/commit, per ADR-0026/ADR-0032). The ADR names explicitly what it
+  builds on (ADR-0007, ADR-0026, ADR-0032, all left intact) and what it supersedes (the
+  duplicated bookkeeping-mechanics prose across `work`, `modeling`, `quick-capture`, and
+  `brainstorm` — not ADR-0007 itself).
+
+**Numbering note:** the task brief reserved ADR-0037, but that number had already been
+consumed by a different, earlier-merged decision
+(`0037-worktree-isolation-implementation-resolutions-spike-findings.md`, agentic-workflow-f6m2q)
+by the time this worker ran. Filed as **ADR-0038** instead, the next actually-free number.
+
+No code or SKILL.md prose changed here (that edit is explicitly deferred to k5n8f). No BC
+README change — no new ubiquitous-language term introduced beyond what ADR-0007/0026/0032
+already recorded.
+
+Key files:
+- `.agentheim/knowledge/decisions/0038-lifecycle-mechanization-boundary-fail-closed-dependency-three-layer-bookkeeping.md`
