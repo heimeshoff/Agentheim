@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 13
 - **Todo:** 1
-- **Doing:** 3
-- **Done:** 96
+- **Doing:** 2
+- **Done:** 97
 <!-- task-counts:end -->
 
 ### Todo
@@ -23,13 +23,13 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-j7d4k** — Ratify ADR-0036 — verifier runtime-drive end-to-end check (decision) — `doing/agentic-workflow-j7d4k-ratify-adr-0036-verifier-runtime-drive.md`
 - **agentic-workflow-h9v3m** — Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks (feature) — `doing/agentic-workflow-h9v3m-board-wiring-collapsed-group-offviewport-blinks.md`
 - **agentic-workflow-s7d3k** — Single-source the duplicated doctrine into references/ files (refactor) — `doing/agentic-workflow-s7d3k-single-source-duplicated-doctrine.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-j7d4k** — Ratify ADR-0036 — verifier runtime-drive end-to-end check (decision) — `done/agentic-workflow-j7d4k-ratify-adr-0036-verifier-runtime-drive.md`
 - **agentic-workflow-n6r8j** — Flatten single-specialist consultations — worker spawns the specialist directly (refactor) — `done/agentic-workflow-n6r8j-flatten-single-specialist-consultation.md`
 - **agentic-workflow-k5p8w** — Board wiring — resolve hover dependencies and drive the on-card ring for visible targets (feature) — `done/agentic-workflow-k5p8w-board-wiring-resolve-hover-drive-ring.md`
 - **agentic-workflow-f6m2q** — Implement per-worker worktree isolation in work's git model (feature) — `done/agentic-workflow-f6m2q-implement-worktree-isolation-work-git-model.md`
@@ -148,6 +148,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0036** — Verifier runtime-drive check: boot-and-observe the app end-to-end in its worktree — a per-BC `## Runtime surface` README manifest (surfacePaths allowlist + launch/stop/probes) that `work` resolves once per batch, and a new final verifier "Check 8" that boots via the launcher, asserts a stdlib HTTP floor + opt-in render tier, guarantees teardown, FAILs on any floor miss; ratified from proposed (accepted) — `../../knowledge/decisions/0036-verifier-runtime-drive-end-to-end-check.md`
 - **ADR-0033** — Ephemeral, hover-scoped DOM/viewport observation (IntersectionObserver rooted on the sole scroll container, mounted per-hover) is admissible board-side; ADR-0017 constrains writes to disk/lifecycle, not transient client geometry reads. Collapsed-group hiding stays a pure data derivation (no DOM node to observe) (proposed) — `../../knowledge/decisions/0033-ephemeral-hover-scoped-dom-viewport-observation-admissible-board-side.md`
 - **ADR-0032** — Per-worker git worktree isolation: batch-start claim commit → private `aw/<id>` branch per worker → verifier runs in the worktree → `git merge --squash` to main folding bookkeeping into one commit (ADR-0026 preserved, one deliberate amendment: the `todo → doing` move rides in the batch-start commit); FAIL leaves main pristine by construction; pre-scan demoted to advisory (accepted) — `../../knowledge/decisions/0032-worker-worktree-isolation-git-model.md`
 - **ADR-0030** — The rail "new item" cue is consumer-driven from an in-memory session baseline (path → mtimeMs, reconciled each frame, mtime-versioned clearing, no cap), rendered by composing `Collapsible` + `TreeItem` directly instead of the seam-less `TreeGroup` convenience — keeps the styleguide unforked (ADR-0003) while threading the design-system-v8k2p `attention` cue (accepted) — `../../knowledge/decisions/0030-rail-attention-consumer-session-baseline-and-direct-primitive-composition.md`

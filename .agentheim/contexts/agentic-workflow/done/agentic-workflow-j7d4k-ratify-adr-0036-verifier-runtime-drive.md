@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-j7d4k
 title: Ratify ADR-0036 — verifier runtime-drive end-to-end check
-status: doing
+status: done
 type: decision
 context: agentic-workflow
 created: 2026-07-03
-completed:
+completed: 2026-07-03
 depends_on: []
 blocks: [agentic-workflow-y8b4q]
 tags: [harness-audit, verifier, verification, e2e, adr]
@@ -54,4 +54,31 @@ Output is the ratified ADR, not code. If ratification materially changes the des
 re-sync y8b4q's acceptance criteria before it is promoted. Pairs with the verifier
 eval-harness task (agentic-workflow-v3h6p): once this check exists, the eval measures
 whether the runtime drive actually catches planted UI/runtime defects.
+
+## Outcome
+
+ADR-0036 ratified: `status: proposed → accepted`. All three directional decisions
+(verifier drives, tiered HTTP-floor + opt-in render observation, diff-path `surfacePaths`
+allowlist trigger) confirmed as designed. Open questions settled in the ADR body: manifest
+home = BC README `## Runtime surface` fenced block; boot timeout = FAIL (no grace path);
+render-tier assertion shape (DOM vs screenshot) deferred to a follow-up ADR.
+
+One factual staleness found during review and corrected (consulted `architect` directly,
+single-specialist transport question under ADR-0002): the ADR's Context and Decision point
+4 claimed the dashboard launcher binds "an ephemeral loopback port" — actually, ADR-0002's
+infra-018/019 addenda changed it to a deterministic project-root-derived, last-good-sticky
+port. Corrected the Context, Decision point 4, and the "Fixed port" alternative to state
+the real requirement (port unique per worktree, read from the runfile — the dashboard's
+existing per-root derivation + ladder already satisfies this via ADR-0032's distinct
+worktree roots). Also corrected a mis-citation: `cwd: tmpdir()` is ADR-0004's decision
+(verified live in `dashboard/launch.mjs`), not ADR-0002's; ADR-0004 added to `related_adrs`.
+
+Because y8b4q's own acceptance criteria (AC #56) and Notes baked in the same stale
+ephemeral-port claim as literal text, re-synced y8b4q per this task's explicit exception —
+narrow edits only, no change to manifest shape or check behavior. `blocks:
+[agentic-workflow-y8b4q]` held throughout; y8b4q was never worked before this ratified.
+
+Key files: `.agentheim/knowledge/decisions/0036-verifier-runtime-drive-end-to-end-check.md`
+(ratified), `.agentheim/contexts/agentic-workflow/backlog/agentic-workflow-y8b4q-end-to-end-verification-runtime-surface.md`
+(re-synced).
 </content>

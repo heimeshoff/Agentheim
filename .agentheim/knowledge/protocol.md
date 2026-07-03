@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 08:57 -- Task verified and completed: agentic-workflow-j7d4k - Ratify ADR-0036 — verifier runtime-drive end-to-end check
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-j7d4k - Ratify ADR-0036 — verifier runtime-drive end-to-end check
+**Summary:** ADR-0036 ratified proposed → accepted — all three directional decisions (verifier drives / tiered HTTP-floor + opt-in render / diff-path allowlist trigger) confirmed; open questions settled (manifest = BC README fenced block, boot timeout = FAIL, render-tier shape deferred); one factual staleness (launcher port is deterministic-sticky per ADR-0002 §infra-018/019, not ephemeral) corrected and y8b4q re-synced to match.
+**Duration:** ~13m
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** 0036 (ratified)
+
+---
+
 ## 2026-07-03 08:40 -- Batch started: [agentic-workflow-j7d4k, agentic-workflow-h9v3m, agentic-workflow-s7d3k]
 
 **Type:** Work / Batch start

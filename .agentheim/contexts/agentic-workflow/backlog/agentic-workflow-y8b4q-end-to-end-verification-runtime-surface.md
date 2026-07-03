@@ -53,26 +53,31 @@ may shift the shape below). In outline:
 - [ ] The worker's "manually exercised" self-report is no longer sufficient on its own for a runtime-surface change — the doctrine carve-out in `agents/verifier.md` (check 1) and `skills/verification-before-completion/SKILL.md` is narrowed accordingly.
 - [ ] Tasks with no runtime surface (docs, doctrine, pure refactors, any diff touching no `surfacePath`) trigger no drive — exempt by default, no cargo-cult ceremony.
 - [ ] `work` resolves the runtime-surface manifest once per batch per BC and passes a `## Pre-resolved launch command` block into the verifier spawn; the verifier consumes it without re-hunting (parity with the pre-resolved test command).
-- [ ] The drive works from inside a per-worker `aw/<id>` worktree (ADR-0032): boots on the launcher's ephemeral loopback port (no fixed port), and teardown is guaranteed via `stop` so a leaked server never wedges the batch. A boot from a clean worktree that never binds → FAIL.
+- [ ] The drive works from inside a per-worker `aw/<id>` worktree (ADR-0032): the `launch` command binds a port unique per worktree (the dashboard's existing per-root-derived + last-good-sticky bind, ADR-0002 §infra-018/019, or a true ephemeral `:0` bind — either satisfies uniqueness; never a shared fixed literal), the check reads the *actual* bound port from the launcher's runfile rather than assuming a value, and teardown is guaranteed via `stop` so a leaked server never wedges the batch. A boot from a clean worktree that never binds → FAIL.
 - [ ] The render tier is opt-in (`runtime_render: true` + an already-present browser capability) and mandates no new heavy dependency; the HTTP floor is stdlib-only. Absent render infra, only the visual-DOM delta falls back to the manual note.
 - [ ] The agentic-workflow BC README carries a `## Runtime surface` manifest for the dashboard (`surfacePaths`, `launch`/`stop` via `dashboard/launch.mjs`, and `probes` for at least the read endpoints — e.g. `/api/tree`).
 - [ ] The verifier stays read-only (no Write/Edit, no git-write) and its strict PASS/FAIL/SKIP verdict format is unchanged, so `work` still parses it deterministically.
 
 ## Notes
 
-**Blocked on ADR-0036 ratification (agentic-workflow-j7d4k).** The three directional
-choices baked into the AC above are recommended defaults, unconfirmed by the builder at
-refine time (they were away): verifier drives (vs `work`/worker), tiered HTTP-floor +
-opt-in render (vs HTTP-only or mandatory browser), diff-path trigger (vs frontmatter flag
-or verifier judgment). If ratification overturns any, re-sync these criteria.
+**Ratified 2026-07-03 (agentic-workflow-j7d4k).** The three directional choices baked into
+the AC above — verifier drives, tiered HTTP-floor + opt-in render, diff-path trigger — were
+all **confirmed as designed**. One clause was corrected at ratification and is re-synced
+into AC above and the paragraph below: the port-isolation claim. This task is now unblocked
+(`depends_on: [agentic-workflow-j7d4k]` — ratification is done; promote when ready).
 
-**Why the worktree interaction is not a blocker (ADR-0032 already designed it out):** the
-launcher spawns the server with `cwd: tmpdir()` — so even a leaked process holds no lock
-that could wedge `git worktree remove --force` — and binds an ephemeral `127.0.0.1` port,
-so parallel worktree drives never collide and no Windows firewall prompt fires. The
-dashboard server is stdlib-only, so the HTTP floor boots without `node_modules`; only the
-render tier needs the ADR-0032 node_modules junction, which is already linked whenever a
-`dashboard/` diff is in play.
+**Why the worktree interaction is not a blocker (ADR-0032 already designed it out), corrected
+port claim:** the launcher spawns the server with `cwd: tmpdir()` (ADR-0004) — so even a
+leaked process holds no lock that could wedge `git worktree remove --force`. Its port is
+**not** literally ephemeral: ADR-0002 (§infra-018/019 addenda) derives it deterministically
+from the worktree's own absolute root, with an 8-rung ladder fallback, and persists the
+last-good bind — since each ADR-0032 worktree has a distinct root, this already gives
+low-but-nonzero-collision, ladder-backed isolation across parallel worktree drives with zero
+new infra (no Windows firewall prompt fires, same as before). The implementing worker must
+read the *actual* bound port from the runfile, not assume the derived value, because the
+ladder can move it. The dashboard server is stdlib-only, so the HTTP floor boots without
+`node_modules`; only the render tier needs the ADR-0032 node_modules junction, which is
+already linked whenever a `dashboard/` diff is in play.
 
 **Cross-OS:** all OS-divergent boot/teardown stays inside `dashboard/launch.mjs`
 (ADR-0002) — the verifier must delegate boot and teardown to the launcher, never
