@@ -11,21 +11,19 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 12
-- **Doing:** 0
+- **Todo:** 10
+- **Doing:** 2
 - **Done:** 102
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-p3v9k** — Decide the lifecycle-mechanization boundary — fail-closed depends_on ruling + 3-layer bookkeeping ADR (decision) — `todo/agentic-workflow-p3v9k-lifecycle-mechanization-boundary-decision.md`
 - **agentic-workflow-k5n8f** — Mechanize the bookkeeping (MVP) — generalized plugin-file resolver + git-free PROMOTE lifecycle script (refactor) — `todo/agentic-workflow-k5n8f-mechanize-bookkeeping-wire-task-lifecycle.md`
 - **agentic-workflow-r2c7m** — Protocol rotation — cap protocol.md and roll to monthly files (feature) — `todo/agentic-workflow-r2c7m-protocol-rotation.md`
 - **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `todo/agentic-workflow-c8j3w-index-done-list-rotation.md`
 - **agentic-workflow-t7m4c** — Mechanize CLAIM + COMPLETE lifecycle scripts against the ADR-0032 worktree / squash-merge model (refactor) — `todo/agentic-workflow-t7m4c-claim-complete-lifecycle-scripts-worktree.md`
 - **agentic-workflow-w7q2m** — BC README consolidation — size trigger + human-in-loop consolidation procedure (feature) — `todo/agentic-workflow-w7q2m-bc-readme-consolidation.md`
 - **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature, umbrella — delivered via d8q3n/w4t9k/b7n2s/k5p8w/h9v3m) — `todo/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
-- **agentic-workflow-v3h6p** — Eval-harness the verifier — measure its catch rate against planted defects (spike) — `todo/agentic-workflow-v3h6p-eval-harness-the-verifier.md`
 - **agentic-workflow-z2f7s** — Fan-out caps — MAX_PARALLEL as a knob, research cap, global nested-spawn ceiling (feature) — `todo/agentic-workflow-z2f7s-fanout-caps-and-spawn-budget.md`
 - **agentic-workflow-m9w5c** — Live observability — hooks write agent status to state/, dashboard renders an in-flight lane (feature) — `todo/agentic-workflow-m9w5c-live-observability-hooks-inflight-lane.md`
 - **agentic-workflow-v6d4n** — Vision-conformance check — flag in-flight work that drifts from vision success criteria / non-goals (feature) — `todo/agentic-workflow-v6d4n-vision-conformance-check-session-end-verify.md`
@@ -34,6 +32,8 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-p3v9k** — Decide the lifecycle-mechanization boundary — fail-closed depends_on ruling + 3-layer bookkeeping ADR (decision) — `doing/agentic-workflow-p3v9k-lifecycle-mechanization-boundary-decision.md`
+- **agentic-workflow-v3h6p** — Eval-harness the verifier — measure its catch rate against planted defects (spike) — `doing/agentic-workflow-v3h6p-eval-harness-the-verifier.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)

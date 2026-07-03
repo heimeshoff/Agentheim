@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 12:10 -- Batch started: [agentic-workflow-p3v9k, agentic-workflow-v3h6p, infrastructure-q8m4t]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-p3v9k - Decide the lifecycle-mechanization boundary (fail-closed depends_on + 3-layer bookkeeping ADR), agentic-workflow-v3h6p - Eval-harness the verifier, infrastructure-q8m4t - Support quotation marks (Gänsefüsschen) in prompts
+**Parallel:** yes (3 workers, MAX_PARALLEL — spans 2 BCs)
+**Planning advisory:** whats-next (12:00 modeling sweep is the newest planning input; the 09:20 whats-next flagged p3v9k as the higher-leverage unblock). Picked p3v9k for leverage (unblocks the k5n8f→r2c7m/t7m4c→c8j3w chain), infrastructure-q8m4t as a clean separate-BC parallel, and v3h6p (spike) building on the just-shipped verifier/runtime work. Disjoint file surfaces (ADR / infra bridge+dashboard-app / evals harness).
+
+---
+
 ## 2026-07-03 12:05 -- Task verified and completed: agentic-workflow-y8b4q - End-to-end verification step for tasks with a runtime surface
 
 **Type:** Work / Task completion

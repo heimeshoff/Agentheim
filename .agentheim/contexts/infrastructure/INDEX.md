@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 21
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **infrastructure-q8m4t** — Support quotation marks (Gänsefüsschen) in prompts — `todo/infrastructure-q8m4t-quotation-marks-in-prompts.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **infrastructure-q8m4t** — Support quotation marks (Gänsefüsschen) in prompts — `doing/infrastructure-q8m4t-quotation-marks-in-prompts.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)

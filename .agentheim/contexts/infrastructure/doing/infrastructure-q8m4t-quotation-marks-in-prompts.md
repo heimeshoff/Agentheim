@@ -1,7 +1,7 @@
 ---
 id: infrastructure-q8m4t
 title: Support quotation marks (Gänsefüsschen) in prompts
-status: todo
+status: doing
 type: bug
 context: infrastructure
 created: 2026-06-23

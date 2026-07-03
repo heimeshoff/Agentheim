@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-p3v9k
 title: Decide the lifecycle-mechanization boundary — fail-closed depends_on ruling + 3-layer bookkeeping ADR
-status: todo
+status: doing
 type: decision
 context: agentic-workflow
 created: 2026-07-03

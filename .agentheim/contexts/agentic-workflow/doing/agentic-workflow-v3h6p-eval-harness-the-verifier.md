@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-v3h6p
 title: Eval-harness the verifier — measure its catch rate against planted defects
-status: todo
+status: doing
 type: spike
 context: agentic-workflow
 created: 2026-07-02
