@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 18:09 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** ~27m (batch start 17:42 → 18:09)
+**Completed:** 3 (first-try PASS: 3 — r9k2p, c8j3w, m9w5c; re-dispatched: 0; skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** r9k2p: 1, c8j3w: 1, m9w5c: 1 (no re-dispatches — every task passed on iteration 1)
+**Commits:** 5 (1 batch-start claim [4c260fa] + 3 task integrations [r9k2p 8e498cc, c8j3w d035fc2, m9w5c edad0d5] + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (r9k2p/c8j3w/m9w5c all serve durable knowledge + visible parallel execution; m9w5c's hooks are observability-only and its lane is read-only — honoring ADR-0017 and the "Not autonomous" non-goal, not driving the workflow)
+**Carry-over:** none — working tree clean; no non-main worktrees
+**Notes:** Single wave of 3 under ADR-0032 worktree isolation, all agentic-workflow BC, all first-try PASS. **Blocker hit and worked around — infrastructure-5w5gs confirmed live:** the mechanized `claim` failed twice at batch start — first because the `doing/` directory had been pruned to empty by the prior session (recreated it), then the captured CRLF bug (`removeIndexLine`'s `-->\n` regex cannot match this Windows checkout's CRLF `INDEX.md`/`protocol.md`). Since `core.autocrlf=true` and the committed blobs are LF, normalized the two script-touched files to LF in the working tree — a content no-op to git (verified via empty `--stat`) — which unblocked the mechanized `claim` + all three `completeTask` runs. **infrastructure-5w5gs should be prioritized** — it breaks the entire mechanized lifecycle on any CRLF `.agentheim` checkout until fixed at the read/write boundary in `lib/task-lifecycle.mjs`. **Clean README 3-way-merge:** c8j3w and m9w5c both added additive ubiquitous-language bullets to the BC README; git auto-merged both cleanly at squash-merge (no conflict) — re-validating the demoted-to-advisory pre-scan (additive edits merge; only wholesale rewrites conflict). **Node v25 test-command form:** the resolved `node --test lib/test/ dashboard/test/` (bare-dir) errors on this machine's Node v25.2.0; the glob form `node --test "lib/test/*.test.mjs" "dashboard/test/*.test.mjs"` runs clean — flagged by c8j3w's verifier, corrected for m9w5c's. **New ADR:** 0043 (live-observability hook heartbeat, BC-local, extends ADR-0027/0017). **For builder review (non-blocking):** m9w5c's ADR-0043 / README / Outcome prose claims a "real-subprocess smoke test" for `lib/hook-agent-signal.mjs`, but the test file uses injected-dependency `runHook` tests (no actual subprocess spawn); the verifier judged it a prose inaccuracy, not a defect against any acceptance criterion — PASS stands, but the wording is worth correcting. No bounces, no failures, no concept candidates. Board fully drained (todo + doing empty across all BCs).
+
+---
+
 ## 2026-07-03 18:07 -- Task verified and completed: agentic-workflow-m9w5c - Live observability — hooks write agent status to state/, dashboard renders an in-flight lane
 
 **Type:** Work / Task completion
