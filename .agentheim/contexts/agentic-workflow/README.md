@@ -500,6 +500,26 @@ separate BC, but today the whole tool lives in this one.
   invocable directly (`node lib/protocol-rotation.mjs`, no verb/id argv). Every skill's
   first-~100-line read is unaffected by construction. See ADR-0039, ADR-0038, ADR-0026,
   ADR-0032.
+- **`rotateIndexDoneList` / INDEX done-list rotation** — the deterministic, git-free cap-and-roll
+  script for a BC's `INDEX.md` `done-list` block (agentic-workflow-c8j3w; applies ADR-0039's
+  convention, established for `protocol.md`, to a second growth surface — a k5n8f-family
+  script). `rotateIndexDoneList(rootDir, context, opts)` (`lib/index-rotation.mjs`) caps the live
+  list at `capEntries` (default ≈30) and, when exceeded, rolls whole **older** months out
+  **verbatim** — oldest-first, stopping once back under the cap — to dated
+  `contexts/<bc>/done-archive/YYYY-MM.md` archive files. A done-list line carries no date of its
+  own, so an entry's month is derived from the `completed:` frontmatter of the task file it
+  points at (mtime, then `'unknown'`, as loss-tolerant fallbacks). The **current month is never
+  rolled**; the `### Done (...)` header is rewritten to name the archive location only when a
+  rotation actually happens; the `**Done:** N` lifetime count and the actual
+  `done/<id>-<slug>.md` task files are never touched, so `depends_on`/`blocks` resolution
+  (`resolveTaskFile` walks `done/` directly) and the dashboard search corpus (`buildTree`,
+  ADR-0023) stay unaffected by rotation by construction — only `modeling`'s Backlink-lookup
+  prior-art matcher, which reads the done-list's rendered text, needed pointing at
+  `done-archive/` as an additional input. `rotateAllIndexDoneLists(rootDir, opts)` rotates every
+  BC found under `contexts/`; returns `{ok:true, rotated, changed, contexts}`; invocable directly
+  (`node lib/index-rotation.mjs`, no verb/id argv, no context argv — like `rotateProtocol`, the
+  invocation point/schedule is a non-decision deferred to a future wiring task). See ADR-0039,
+  ADR-0041, ADR-0023, ADR-0038, ADR-0026.
 - **`findDuplicateTaskIds`** — the duplicate-id guard (`lib/duplicate-id-check.mjs`, BC-owned,
   node stdlib only), the ADR-0028 **insurance** against the residual token-collision tail and
   the legacy-vs-token clash a bug could produce. A pure, loss-tolerant whole-tree walk collects

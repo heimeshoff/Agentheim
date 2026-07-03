@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-c8j3w
 title: INDEX done-list rotation — cap the done-list and roll older entries to a dated archive
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-03
 depends_on: [agentic-workflow-k5n8f, agentic-workflow-r2c7m]
 blocks: []
 tags: [harness-audit, context-management, index, compaction]
@@ -69,3 +69,48 @@ rather than deciding something new.
 
 Source: harness audit 2026-07-02, Phase 2 gap table (context/memory row), captured
 on the 2026-07-02 follow-up review. Refined + split 2026-07-02.
+
+## Outcome
+
+Shipped `lib/index-rotation.mjs` — `rotateIndexDoneList(rootDir, context, opts)` mirrors
+`rotateProtocol`'s (ADR-0039, agentic-workflow-r2c7m) cap-and-roll shape but on an
+**entry-count** cap (`DEFAULT_CAP_ENTRIES = 30`, task's proposed N) rather than a line-count
+cap, since a done-list line is a single-line pointer, not a multi-line prose entry. A line
+carries no date of its own, so an entry's month is derived from the `completed:` frontmatter of
+the task file it points at (falling back to mtime, then `'unknown'` — loss-tolerant). Whole
+older (non-current) months roll out oldest-first, verbatim, to
+`contexts/<bc>/done-archive/YYYY-MM.md`; the current month is never rolled; newest-on-top order
+is preserved live and per-archive; the `### Done (...)` header is rewritten in place to name the
+archive location only when a rotation actually occurs; the `**Done:** N` lifetime count is
+untouched (it's a total-ever-completed counter, not a live-list size).
+
+**Reachability (the task's load-bearing constraint) turned out to be mostly free by
+construction**, once traced: rotation only ever moves the INDEX.md done-list's one-line pointer
+— it never touches the actual `done/<id>-<slug>.md` task file. `lib/task-lifecycle.mjs`'s
+`resolveTaskFile` (backing `depends_on`/`blocks` resolution) and `dashboard/tree.mjs`'s
+`buildTree` (backing the ADR-0023 search corpus) both walk each BC's `done/` folder **directly**
+on disk — neither reads `INDEX.md`'s done-list text — so both stay fully reachable after
+rotation with zero code change. The one reader that DOES read the done-list's rendered text is
+`modeling`'s Backlink-lookup prior-art matcher (`skills/modeling/SKILL.md`), which was updated
+to also check `contexts/<bc>/done-archive/*.md` when present — the archived line is
+byte-identical to its old live-list line, so the same slug/tag matcher scores it unchanged.
+
+`rotateAllIndexDoneLists(rootDir, opts)` rotates every BC found under `contexts/` in one call; a
+thin `runCli`/`main` (same shape as `protocol-rotation.mjs`) makes it invocable directly via
+`node lib/index-rotation.mjs`, no verb/id/context argv. Per ADR-0039's own precedent (its
+Non-decisions section explicitly deferred protocol rotation's invocation point/schedule), this
+task ships the deterministic mechanism + tests only — wiring it into a skill's flow (or a
+periodic maintenance action) is left to a follow-on task, and the real
+`contexts/agentic-workflow/INDEX.md` was deliberately left un-rotated (its done-list bookkeeping
+belongs to the conductor, not this worker — moving 80+ live entries to archive right now would
+race other in-flight batch workers' `completeTask` calls).
+
+Documentation: `references/index-template.md` (per-BC template's `### Done` section and
+`## Pointers`) now documents the cap-and-roll convention for every future/regenerated
+`INDEX.md`. No new ADR — this applies ADR-0039's decision to a second artifact, per the task's
+own Notes.
+
+Key files: `lib/index-rotation.mjs`, `lib/test/index-rotation.test.mjs` (17 tests, including an
+explicit CRLF-checkout fixture per the infrastructure-5w5gs caution),
+`skills/modeling/SKILL.md` (Backlink lookup Inputs), `references/index-template.md`,
+`.agentheim/contexts/agentic-workflow/README.md`.

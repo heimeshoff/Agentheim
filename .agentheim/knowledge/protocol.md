@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 18:00 -- Task verified and completed: agentic-workflow-c8j3w - INDEX done-list rotation — cap the done-list and roll older entries to a dated archive
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-c8j3w - INDEX done-list rotation — cap the done-list and roll older entries to a dated archive
+**Summary:** cap-and-roll INDEX done-list rotation (rotateIndexDoneList) mirroring ADR-0039 - archives older months verbatim to done-archive/YYYY-MM.md
+**Duration:** ~15m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 17
+**ADRs written:** none
+
+---
+
 ## 2026-07-03 17:54 -- Task verified and completed: agentic-workflow-r9k2p - Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring
 
 **Type:** Work / Task completion

@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 3
 - **Todo:** 0
-- **Doing:** 2
-- **Done:** 112
+- **Doing:** 1
+- **Done:** 113
 <!-- task-counts:end -->
 
 ### Todo
@@ -23,11 +23,11 @@ research touching this BC, and concept synthesis pages.
 ### Doing
 <!-- doing-list:start -->
 - **agentic-workflow-m9w5c** — Live observability — hooks write agent status to state/, dashboard renders an in-flight lane (feature) — `doing/agentic-workflow-m9w5c-live-observability-hooks-inflight-lane.md`
-- **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `doing/agentic-workflow-c8j3w-index-done-list-rotation.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `done/agentic-workflow-c8j3w-index-done-list-rotation.md`
 - **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature) — `done/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
 - **agentic-workflow-w7q2m** — BC README consolidation — size trigger + human-in-loop consolidation procedure (feature) — `done/agentic-workflow-w7q2m-bc-readme-consolidation.md`
 - **agentic-workflow-q3n7k** — Update the workflow guide to reflect new features like inquire and what's next (feature) — `done/agentic-workflow-q3n7k-update-workflow-guide-inquire-whats-next.md`

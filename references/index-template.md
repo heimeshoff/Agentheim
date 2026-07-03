@@ -87,6 +87,16 @@ research touching this BC, and concept synthesis pages.
 - **<task-id>** — <title> — <YYYY-MM-DD completed> — `done/<task-id>-<slug>.md`
 <!-- done-list:end -->
 
+Capped at ~30 live entries (`lib/index-rotation.mjs`'s `DEFAULT_CAP_ENTRIES`); once rotation has
+rolled a month out, this header is rewritten in place to name the archive location and the block
+above holds only the live cap. Rolled-out months land verbatim, newest-on-top, in
+`contexts/<bc>/done-archive/YYYY-MM.md` — the same cap-and-roll convention ADR-0039 established
+for `protocol.md` (agentic-workflow-r2c7m), applied here to the INDEX done-list
+(agentic-workflow-c8j3w). Rotation never touches the actual `done/<task-id>-<slug>.md` files or
+the `**Done:** N` lifetime count above, so `depends_on`/`blocks` resolution and the dashboard
+search corpus (ADR-0023) are unaffected; `modeling`'s prior-art matcher additionally checks
+`done-archive/` when present.
+
 ### Backlog
 <!-- backlog-list:start -->
 - **<task-id>** — <title> — `backlog/<task-id>-<slug>.md`
@@ -113,6 +123,7 @@ research touching this BC, and concept synthesis pages.
 ## Pointers
 
 - BC README (ubiquitous language, invariants): `README.md`
+- Done-list archive (entries rolled out beyond the live cap, if any): `done-archive/YYYY-MM.md` (ADR-0039 convention, agentic-workflow-c8j3w)
 ```
 
 ## Append rules

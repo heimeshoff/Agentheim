@@ -390,6 +390,7 @@ The point is to stop workers arriving in isolation. Whenever a task is being wri
 
 - The candidate task's `title`, `tags`, `What` body, and target BC.
 - The target BC's `INDEX.md` (already loaded in "Before acting") — has the per-BC ADR list, research list, done-task list.
+- If the BC's done-list has been rotated (ADR-0039's cap-and-roll convention applied to the INDEX done-list, agentic-workflow-c8j3w), it names its archive location in the `### Done (...)` header — check `contexts/<bc>/done-archive/*.md` too so a task rolled out of the live list is still findable by keyword. The archived line is byte-identical to its old live-list line, so the same slug/tag matcher applies unchanged.
 - The top-level `.agentheim/knowledge/index.md` — has the global ADR list and cross-BC research list.
 
 ### Matcher (cheap-first)
