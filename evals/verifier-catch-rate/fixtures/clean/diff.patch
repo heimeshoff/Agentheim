@@ -1,0 +1,51 @@
+diff --git a/src/widget.js b/src/widget.js
+new file mode 100644
+--- /dev/null
++++ b/src/widget.js
+@@ -0,0 +1,24 @@
++const Color = Object.freeze({ RED: 'red', BLUE: 'blue', GREEN: 'green' });
++
++class AlreadyPaintedError extends Error {
++  constructor(color) {
++    super(`Widget is already painted ${color}`);
++    this.name = 'AlreadyPaintedError';
++  }
++}
++
++class Widget {
++  constructor() {
++    this.color = null;
++  }
++
++  paint(color) {
++    if (!Object.values(Color).includes(color)) {
++      throw new TypeError(`paint() requires a Color enum value, got ${color}`);
++    }
++    if (this.color === color) {
++      throw new AlreadyPaintedError(color);
++    }
++    this.color = color;
++  }
++}
++
++module.exports = { Widget, Color, AlreadyPaintedError };
+diff --git a/test/widget.test.js b/test/widget.test.js
+new file mode 100644
+--- /dev/null
++++ b/test/widget.test.js
+@@ -0,0 +1,14 @@
++const { test } = require('node:test');
++const assert = require('node:assert');
++const { Widget, Color, AlreadyPaintedError } = require('../src/widget.js');
++
++test('painting a widget sets its color', () => {
++  const w = new Widget();
++  w.paint(Color.RED);
++  assert.strictEqual(w.color, Color.RED);
++});
++
++test('painting an already-painted widget with the same color throws AlreadyPaintedError', () => {
++  const w = new Widget();
++  w.paint(Color.BLUE);
++  assert.throws(() => w.paint(Color.BLUE), AlreadyPaintedError);
++});

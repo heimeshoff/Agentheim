@@ -1,0 +1,37 @@
+diff --git a/src/widget.js b/src/widget.js
+new file mode 100644
+--- /dev/null
++++ b/src/widget.js
+@@ -0,0 +1,13 @@
++const { EventEmitter } = require('node:events');
++
++class Widget extends EventEmitter {
++  constructor() {
++    super();
++    this.color = null;
++  }
++
++  paint(color) {
++    this.color = color;
++    // New domain event, introduced by this diff, not reflected in the README.
++    this.emit('WidgetRepainted', { color });
++  }
++}
++
++module.exports = { Widget };
+diff --git a/test/widget.test.js b/test/widget.test.js
+new file mode 100644
+--- /dev/null
++++ b/test/widget.test.js
+@@ -0,0 +1,9 @@
++const { test } = require('node:test');
++const assert = require('node:assert');
++const { Widget } = require('../src/widget.js');
++
++test('painting a widget emits a WidgetRepainted event', () => {
++  const w = new Widget();
++  let seen = null;
++  w.on('WidgetRepainted', (evt) => { seen = evt; });
++  w.paint('red');
++  assert.deepStrictEqual(seen, { color: 'red' });
++});

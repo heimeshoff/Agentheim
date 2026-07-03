@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-v3h6p
 title: Eval-harness the verifier — measure its catch rate against planted defects
-status: doing
+status: done
 type: spike
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-03
 depends_on: []
 blocks: []
 tags: [harness-audit, verifier, evals, quality-gate]
@@ -105,3 +105,43 @@ driver → **real**; (2) full 7-check coverage vs the 4 originally listed → **
 subset allowed if logged; (3) N-runs rate vs single-pass boolean → **N-runs**;
 (4) right-reason-required vs any-FAIL-counts → **right-reason required**, lucky
 catches logged apart. All four stand as the task's contract.
+
+## Outcome
+
+Built the full 9-fixture set (`evals/verifier-catch-rate/fixtures/`) covering
+checks 1, 2, 3, 4, 5, 6, 6b, 7 plus a clean true-negative — each fixture
+doubling as a self-contained "worktree" with real, runnable `node --test`
+code (no simulated test results), the worker's strict SUCCESS block,
+`diff.patch`, and pinned `expected.json` ground truth. Real-spawned the live
+`agentheim:verifier` agent (opus-pinned, ADR-0031) against 6 of the 9
+fixtures, k = 3 runs each (18 scored runs, plus 3 more runs against a v1
+`clean` fixture that turned out to have a self-contradiction — see below).
+
+**Headline numbers**: catch rate 15/15 = 100%, right-reason rate 15/15 =
+100% (zero lucky catches), false-FAIL rate 0/3 = 0%, verdict variance 0
+across all 6 measured fixtures. Full per-run table:
+`evals/verifier-catch-rate/results/2026-07-03-run.md`. Full write-up:
+`.agentheim/knowledge/verifier-catch-rate-eval-2026-07-03.md`.
+
+**One real finding**: the first version of the `clean` fixture used raw
+string color literals while its own BC README banned exactly that
+("`Color`... never as a raw string") — the real verifier correctly `FAIL`ed
+it 3/3 under check 4, catching a genuine bug I introduced while authoring
+the fixture, not a false positive. Fixed by introducing an actual `Color`
+enum; corrected fixture came back `PASS` 3/3. Recorded as a lesson (the
+verifier enforces README wording, including representation-level clauses,
+completely literally) rather than a verifier-prompt defect — no code change
+to `agents/verifier.md` was warranted.
+
+**Left unmeasured, logged not silently skipped**: `stale-readme` (check 5),
+`missing-adr` (check 6), `contradicts-adr` (check 6b) are fully built but
+not real-spawned this pass (spike budget) — follow-up
+`agentic-workflow-fq2j8`. Check 8 (runtime drive, ADR-0036, added same-day)
+has no fixture at all — needs a runtime-surface BC — follow-up
+`agentic-workflow-hz9m3`. The opus-vs-sonnet A/B this baseline now makes
+possible (per ADR-0031) is filed as `agentic-workflow-bx7k5`.
+
+Key files: `evals/verifier-catch-rate/README.md` (runbook),
+`evals/verifier-catch-rate/fixtures/*/` (9 fixtures),
+`evals/verifier-catch-rate/results/2026-07-03-run.md`,
+`.agentheim/knowledge/verifier-catch-rate-eval-2026-07-03.md`.

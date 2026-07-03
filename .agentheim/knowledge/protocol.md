@@ -5,6 +5,20 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 12:40 -- Task verified and completed: agentic-workflow-v3h6p - Eval-harness the verifier
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-v3h6p - Eval-harness the verifier — measure its catch rate against planted defects
+**Summary:** Built a 9-fixture verifier-catch-rate eval under `evals/verifier-catch-rate/` (each fixture carries the full verifier-input tuple + `expected.json` ground truth) and real-spawned the live opus-pinned `agentheim:verifier` (k=3) against 6 of them: **catch rate 15/15, right-reason 15/15 (zero lucky catches), false-FAIL 0/3, zero verdict variance**. Report at `.agentheim/knowledge/verifier-catch-rate-eval-2026-07-03.md`. Remaining 3 fixtures logged built-but-unmeasured; check 8 (runtime drive) named as a known gap. First real measurement of the load-bearing quality gate — it earns its keep on the checks exercised.
+**Duration:** ~28m (dispatched 12:12; long spike with nested real-verifier spawns, serialized behind two integrations)
+**Verification:** PASS (iteration 1)
+**Files changed:** 81
+**Tests added:** 0 (spike — fixtures are eval ground-truth data, not dashboard-suite tests)
+**ADRs written:** none
+**New backlog items:** agentic-workflow-fq2j8 (run remaining fixtures), agentic-workflow-hz9m3 (add a check-8 fixture), agentic-workflow-bx7k5 (A/B verifier opus-vs-sonnet)
+
+---
+
 ## 2026-07-03 12:39 -- Task verified and completed: infrastructure-q8m4t - Support quotation marks (Gänsefüsschen) in prompts
 
 **Type:** Work / Task completion

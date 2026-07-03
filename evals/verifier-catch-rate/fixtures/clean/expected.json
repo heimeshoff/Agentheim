@@ -1,0 +1,7 @@
+{
+  "verdict": "PASS",
+  "check": null,
+  "planted_defect": null,
+  "notes": "True negative: both criteria are covered by real, passing tests; no scope creep, no new undocumented vocabulary, no stale README, no missing ADR, no related ADRs to violate, no index/protocol tampering. Colors are represented via a genuine Color enum (Color.RED/BLUE/GREEN), matching the README's 'never a raw string' constraint on the Color term.",
+  "revision_note": "v1 of this fixture used raw string literals ('red'/'blue') for colors, which the real verifier correctly FAILed 3/3 under check 4 (ubiquitous language) because the README defines Color as 'the enum, never a raw string' — a genuine fixture-design bug, not a verifier flaw. v2 (this version) introduces an actual Color enum object and re-verifies. See the eval report's Known gaps / lessons section."
+}

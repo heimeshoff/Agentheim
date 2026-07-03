@@ -1,0 +1,12 @@
+RESULT: SUCCESS
+TASK_ID: widgets-sc1
+SUMMARY: Added Widget.paint(color) so a widget's color can be set; also tidied up Invoice rounding while in the area.
+FILES_CHANGED: 3
+FILE_LIST: src/widget.js, test/widget.test.js, src/billing/invoice.js
+BC_README_UPDATED: no
+ADRS_WRITTEN: none
+NEW_BACKLOG_ITEMS: none
+TESTS_ADDED: 1
+TESTS_PASSING: yes
+TDD_SKIPPED: no
+CONCEPT_CANDIDATE: none

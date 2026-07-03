@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL",
+  "check": "1-acceptance-criteria-coverage",
+  "planted_defect": "Second acceptance criterion (repaint with same color throws AlreadyPaintedError) has neither an implementation nor a test; paint() silently overwrites the color instead.",
+  "notes": "Real tests pass (the single test for AC1 is genuine and green) — the defect is coverage, not test failure, so this fixture is clean under check 2."
+}

@@ -1,0 +1,33 @@
+diff --git a/src/widget.js b/src/widget.js
+new file mode 100644
+--- /dev/null
++++ b/src/widget.js
+@@ -0,0 +1,11 @@
++class Widget {
++  constructor() {
++    // Decision, embedded with no ADR: colors are now raw hex strings, not the
++    // Color enum — a clear "why not keep the enum?" choice for a future
++    // maintainer, undocumented.
++    this.color = null;
++  }
++
++  paint(hexColor) {
++    this.color = hexColor;
++  }
++}
++
++module.exports = { Widget };
+diff --git a/test/widget.test.js b/test/widget.test.js
+new file mode 100644
+--- /dev/null
++++ b/test/widget.test.js
+@@ -0,0 +1,8 @@
++const { test } = require('node:test');
++const assert = require('node:assert');
++const { Widget } = require('../src/widget.js');
++
++test('painting a widget with a hex color sets its color', () => {
++  const w = new Widget();
++  w.paint('#ff0000');
++  assert.strictEqual(w.color, '#ff0000');
++});

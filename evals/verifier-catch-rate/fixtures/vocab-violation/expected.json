@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL",
+  "check": "4-ubiquitous-language",
+  "planted_defect": "Introduces `WidgetLacqueringStrategy` / \"Lacquering\" — a new domain term absent from the BC README's Ubiquitous language section — with BC_README_UPDATED: no.",
+  "notes": "Behavior and test are correct; the only defect is the undocumented new term."
+}

@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL",
+  "check": "3-scope-discipline",
+  "planted_defect": "The diff touches src/billing/invoice.js, an unrelated production file not implied by the task's `## What` or acceptance criteria.",
+  "notes": "widget.js and its test are correct and in scope; the only defect is the unrelated invoice.js edit."
+}

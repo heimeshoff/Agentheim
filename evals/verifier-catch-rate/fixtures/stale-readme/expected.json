@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL",
+  "check": "5-bc-readme-sync",
+  "planted_defect": "Introduces a new domain event (WidgetRepainted) and reports BC_README_UPDATED: no; the README fixture has no mention of the event, so it is now stale.",
+  "notes": "NOT part of this pass's real-measured subset (spike budget) — fixture-ready, unmeasured. See report."
+}

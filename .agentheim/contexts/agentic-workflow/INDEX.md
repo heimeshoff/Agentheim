@@ -10,10 +10,10 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 3
 - **Todo:** 10
-- **Doing:** 1
-- **Done:** 103
+- **Doing:** 0
+- **Done:** 104
 <!-- task-counts:end -->
 
 ### Todo
@@ -32,11 +32,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-v3h6p** — Eval-harness the verifier — measure its catch rate against planted defects (spike) — `doing/agentic-workflow-v3h6p-eval-harness-the-verifier.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-v3h6p** — Eval-harness the verifier — measure its catch rate against planted defects (spike) — `done/agentic-workflow-v3h6p-eval-harness-the-verifier.md`
 - **agentic-workflow-p3v9k** — Decide the lifecycle-mechanization boundary — fail-closed depends_on ruling + 3-layer bookkeeping ADR (decision) — `done/agentic-workflow-p3v9k-lifecycle-mechanization-boundary-decision.md`
 - **agentic-workflow-y8b4q** — End-to-end verification step for tasks with a runtime surface (feature) — `done/agentic-workflow-y8b4q-end-to-end-verification-runtime-surface.md`
 - **agentic-workflow-t4x8p** — Fix CRLF-sensitive byte-identical guard regexes in intent-route rail-routing tests (bug) — `done/agentic-workflow-t4x8p-fix-crlf-sensitive-byte-identical-guard-regexes.md`
@@ -144,6 +144,9 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-fq2j8** — Run the remaining verifier-catch-rate fixtures against the real verifier (stale-readme, missing-adr, contradicts-adr) (spike) — `backlog/agentic-workflow-fq2j8-run-remaining-verifier-catch-rate-fixtures.md`
+- **agentic-workflow-hz9m3** — Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval (spike) — `backlog/agentic-workflow-hz9m3-add-check8-runtime-drive-fixture-to-verifier-eval.md`
+- **agentic-workflow-bx7k5** — A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures (spike) — `backlog/agentic-workflow-bx7k5-ab-verifier-model-routing-opus-vs-sonnet.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

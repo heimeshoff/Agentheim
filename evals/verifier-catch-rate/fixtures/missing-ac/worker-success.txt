@@ -1,0 +1,12 @@
+RESULT: SUCCESS
+TASK_ID: widgets-mac1
+SUMMARY: Added Widget.paint(color) so a widget's color can be set.
+FILES_CHANGED: 2
+FILE_LIST: src/widget.js, test/widget.test.js
+BC_README_UPDATED: no
+ADRS_WRITTEN: none
+NEW_BACKLOG_ITEMS: none
+TESTS_ADDED: 1
+TESTS_PASSING: yes
+TDD_SKIPPED: no
+CONCEPT_CANDIDATE: none

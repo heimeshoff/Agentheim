@@ -1,0 +1,44 @@
+diff --git a/src/widget.js b/src/widget.js
+new file mode 100644
+--- /dev/null
++++ b/src/widget.js
+@@ -0,0 +1,9 @@
++class Widget {
++  constructor() {
++    this.color = null;
++  }
++
++  paint(color) {
++    this.color = color;
++  }
++}
++
++module.exports = { Widget };
+diff --git a/test/widget.test.js b/test/widget.test.js
+new file mode 100644
+--- /dev/null
++++ b/test/widget.test.js
+@@ -0,0 +1,8 @@
++const { test } = require('node:test');
++const assert = require('node:assert');
++const { Widget } = require('../src/widget.js');
++
++test('painting a widget sets its color', () => {
++  const w = new Widget();
++  w.paint('red');
++  assert.strictEqual(w.color, 'red');
++});
+diff --git a/.agentheim/contexts/widgets/INDEX.md b/.agentheim/contexts/widgets/INDEX.md
+--- a/.agentheim/contexts/widgets/INDEX.md
++++ b/.agentheim/contexts/widgets/INDEX.md
+@@ -1,8 +1,8 @@
+ <!-- todo-list:start -->
+ <!-- todo-list:end -->
+ <!-- doing-list:start -->
+-- widgets-it1 — Add paint behavior to Widget
+ <!-- doing-list:end -->
+ <!-- backlog-list:start -->
+ <!-- backlog-list:end -->
+ <!-- done-list:start -->
++- widgets-it1 — Add paint behavior to Widget (moved here by the WORKER, not `work` — this is the planted violation)
+ <!-- done-list:end -->

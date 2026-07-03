@@ -1,0 +1,32 @@
+diff --git a/src/widget.js b/src/widget.js
+new file mode 100644
+--- /dev/null
++++ b/src/widget.js
+@@ -0,0 +1,10 @@
++class Widget {
++  constructor() {
++    this.color = null;
++  }
++
++  paint(color) {
++    // Violates ADR-0001: stores whatever raw string is passed in, not the
++    // Color enum.
++    this.color = String(color);
++  }
++}
++
++module.exports = { Widget };
+diff --git a/test/widget.test.js b/test/widget.test.js
+new file mode 100644
+--- /dev/null
++++ b/test/widget.test.js
+@@ -0,0 +1,8 @@
++const { test } = require('node:test');
++const assert = require('node:assert');
++const { Widget } = require('../src/widget.js');
++
++test('painting a widget sets its color', () => {
++  const w = new Widget();
++  w.paint('not-an-enum-value');
++  assert.strictEqual(w.color, 'not-an-enum-value');
++});

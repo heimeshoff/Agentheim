@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL",
+  "check": "6-adrs-for-decisions",
+  "planted_defect": "Embeds a clear \"why not keep the Color enum?\" representational decision with ADRS_WRITTEN: none.",
+  "notes": "NOT part of this pass's real-measured subset (spike budget) — fixture-ready, unmeasured. See report."
+}

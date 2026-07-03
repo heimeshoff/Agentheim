@@ -1,0 +1,5 @@
+{
+  "test_command": "node --test",
+  "launch_command": "none",
+  "iteration": 1
+}

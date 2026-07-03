@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL",
+  "check": "6b-honored-related-adrs",
+  "planted_defect": "task.related_adrs names ADR-0001 (\"Widget colors are the Color enum, never a raw string\"); the diff stores color as String(color) — a direct contradiction.",
+  "notes": "NOT part of this pass's real-measured subset (spike budget) — fixture-ready, unmeasured. See report."
+}
