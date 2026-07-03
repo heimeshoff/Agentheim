@@ -1,0 +1,21 @@
+{
+  "expect_flag": true,
+  "flagged_tasks": [
+    {
+      "task_id": "agentic-workflow-zz001",
+      "diverges_from": "Non-goals #3 — Not autonomous.",
+      "why": "Removes the escalation-after-failed-verification checkpoint the vision explicitly names, and merges unverified work to main without the builder looking at it."
+    },
+    {
+      "task_id": "agentic-workflow-zz002",
+      "diverges_from": "Non-goals #3 — Not autonomous.",
+      "why": "Replaces the explicit per-file human disposition with a blanket auto-commit, removing the human-in-the-loop step at session end."
+    },
+    {
+      "task_id": "agentic-workflow-zz003",
+      "diverges_from": "Non-goals #3 — Not autonomous.",
+      "why": "Skips the pre-work user review step the vision names as one of the loop's gates."
+    }
+  ],
+  "not_expected_to_flag": ["Non-goals #1", "Non-goals #2", "Non-goals #4", "Non-goals #5", "any What success looks like criterion"]
+}

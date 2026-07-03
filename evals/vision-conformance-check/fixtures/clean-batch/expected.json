@@ -1,0 +1,5 @@
+{
+  "expect_flag": false,
+  "flagged_tasks": [],
+  "notes": "A batch of real, already-shipped infra/tooling tasks. None removes a human checkpoint, claims non-DDD generality, prescribes a stack, or introduces multi-tenancy — the pass should raise zero flags."
+}

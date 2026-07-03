@@ -103,6 +103,24 @@ separate BC, but today the whole tool lives in this one.
   agentic-workflow-d6q4h) and Phase 1 recovery both additionally walk
   `git worktree list --porcelain` alongside the existing `git status --porcelain` check. See
   ADR-0032, ADR-0037, ADR-0026, ADR-0007, ADR-0017, ADR-0028.
+- **Vision-conformance check (session-end, ADR-0040, agentic-workflow-v6d4n)** — a bounded
+  advisory pass folded into `work`'s end-of-run reporting (step 5, right before the
+  carry-over reconciliation d6q4h added), closing the Why→What loop the 2026-07-02 harness
+  audit called for. It reads exactly two named `vision.md` sections — "What success looks
+  like" and "Non-goals" (`lib/vision-conformance.mjs`'s `extractVisionSections`) — plus the
+  session batch's already-summarized completed-task entries, and asks one judgment question
+  per shipped task: does it pull toward a stated non-goal, or away from a stated success
+  criterion? A conforming batch produces zero flags; any flag names the specific diverged-from
+  line (`labelFor`'s leading-bold-phrase convention, e.g. "Not autonomous."). It **never
+  blocks** — the ADR-0027 advisory-write family, not a gate: always a `**Vision-conformance:**`
+  protocol-entry line (`formatConformanceLine`), and, only when a flag is worth the builder's
+  attention (`worthSurfacing`), an (over)write of the same single-latest
+  `.agentheim/state/whats-next.md` artifact `whats-next` itself writes — read back by the next
+  session's `work` Phase 3 planning and `modeling`'s "Before acting" step (agentic-workflow-x4t2g),
+  so a session-end drift note naturally becomes planning input for whatever runs next. The
+  LLM judgment is exercised by `evals/vision-conformance-check/`'s planted-drift and
+  clean-batch fixtures (a documented runbook, not a full k=3 measured eval); the deterministic
+  extraction/formatting halves are unit-tested (`lib/test/vision-conformance.test.mjs`).
 - **Tree projection** — the single read model the dashboard's views (board, slide-over,
   navigation) and the SSE consumer all rebuild from. `GET /api/tree` (built in
   agentic-workflow-005 as `dashboard/tree.mjs`) walks the discovered `.agentheim/` and returns,

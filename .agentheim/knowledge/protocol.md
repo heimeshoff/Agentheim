@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 14:39 -- Task verified and completed: agentic-workflow-v6d4n - Vision-conformance check
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-v6d4n - Vision-conformance check — flag in-flight work that drifts from vision success criteria / non-goals
+**Summary:** Added a bounded, advisory vision-conformance pass to `work`'s session-end reporting (new step in `skills/work/SKILL.md`, extending d6q4h's carry-over reconciliation home): it reads only `vision.md`'s "What success looks like" + "Non-goals" sections plus the batch's completed-task summaries and flags drift via a session-end protocol line and, when warranted, the shared `whats-next.md` advisory (ADR-0027 family) — never a gate. Deterministic helpers in `lib/vision-conformance.mjs` (15 unit tests), plus a should-flag/should-not-flag eval runbook under `evals/vision-conformance-check/`. Mechanism recorded in ADR-0040.
+**Duration:** ~19m (dispatched 14:20; ~9m worker + verifier, serialized behind r2c7m integration)
+**Verification:** PASS (iteration 1) — verifier ran the lib suite (80/80 green incl. 15 new), confirmed advisory-only/never-blocks property, the two-section bounded read against the real vision.md headings, and the flag/no-flag eval pair; clean scope.
+**Files changed:** 13
+**Tests added:** 15
+**ADRs written:** 0040-vision-conformance-check-session-end-advisory.md (renumbered from a 0039 draft to resolve an in-batch ADR-number collision with r2c7m)
+
+---
+
 ## 2026-07-03 14:38 -- Task verified and completed: agentic-workflow-r2c7m - Protocol rotation
 
 **Type:** Work / Task completion
