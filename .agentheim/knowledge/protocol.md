@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 18:07 -- Task verified and completed: agentic-workflow-m9w5c - Live observability — hooks write agent status to state/, dashboard renders an in-flight lane
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-m9w5c - Live observability — hooks write agent status to state/, dashboard renders an in-flight lane
+**Summary:** Stop/SubagentStop hooks heartbeat advisory state/in-flight.json (ADR-0043); read-only InFlightLane renders live work-session activity, self-suppressing on stale heartbeat
+**Duration:** ~22m
+**Verification:** PASS (iteration 1)
+**Files changed:** 15
+**Tests added:** 36
+**ADRs written:** 0043-live-observability-hook-heartbeat-second-advisory-artifact.md
+
+---
+
 ## 2026-07-03 18:00 -- Task verified and completed: agentic-workflow-c8j3w - INDEX done-list rotation — cap the done-list and roll older entries to a dated archive
 
 **Type:** Work / Task completion

@@ -75,6 +75,7 @@ import {
   formatStaleness,
   splitWhatsNextSections,
 } from "./whats-next-state.js";
+import { IN_FLIGHT_DOC_PATH, deriveInFlightView } from "./in-flight-state.js";
 
 /**
  * React hook: subscribe to the SSE live-update stream and call `onResync` on
@@ -864,6 +865,80 @@ async function defaultFetchWhatsNext() {
   return res.text();
 }
 
+// The live IN-FLIGHT LANE (agentic-workflow-m9w5c / ADR-0043).
+//
+// Two Claude Code `Stop`/`SubagentStop` hooks (lib/hook-agent-signal.mjs) write a
+// session-liveness heartbeat + recent worker/verifier completions to
+// `.agentheim/state/in-flight.json` — a SECOND advisory artifact (ADR-0027's
+// category, extended by ADR-0043) alongside `state/whats-next.md`. This lane READS
+// it via the SAME GET /api/doc body carrier the WhatsNextPanel above uses
+// (ADR-0021/0023 — never /api/tree, which is pointers/metadata only, ADR-0002).
+//
+// Behaviour:
+//   - ABSENT artifact (404 / fetch failure) → renders NOTHING.
+//   - STALE heartbeat (past the ADR-0043 staleness window) → renders NOTHING —
+//     the crash-safety mechanism (work-session-presence-lock research): there is
+//     no reliable "session ended" hook, so a heartbeat that stops updating just
+//     ages out rather than leaving a zombie "in flight" lane once the session
+//     that wrote it has crashed or been killed (AC3).
+//   - LIVE: shows how many workers/verifiers have run this session and since
+//     when the session started (AC1), and re-fetches on every SSE frame (the
+//     existing consumer, ADR-0006) so it advances/reaps live as the board watches.
+//
+// Read-only over the artifact (ADR-0017): this component never writes it — only
+// the two hooks do. fetchDoc is overridable for tests.
+function InFlightLane({ fetchDoc = defaultFetchInFlight }) {
+  const [raw, setRaw] = useState(null);
+
+  const reload = useCallback(() => {
+    let alive = true;
+    fetchDoc()
+      .then((text) => { if (alive) setRaw(typeof text === "string" ? text : null); })
+      // Absent artifact / any fetch failure → render nothing (absence is normal).
+      .catch(() => { if (alive) setRaw(null); });
+    return () => { alive = false; };
+  }, [fetchDoc]);
+
+  useEffect(() => reload(), [reload]);
+  // Re-fetch on every SSE frame (ADR-0006): a fresher heartbeat, or the window
+  // going stale after the tab has sat idle, both need re-evaluating live.
+  useLiveTree(reload);
+
+  const view = deriveInFlightView(raw, Date.now());
+  if (!view) return null;
+
+  const since = formatStaleness(view.startedAt, Date.now());
+
+  return html`
+    <section aria-label="Work in flight this session" style=${{
+      display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap",
+      margin: "10px 4px 0", padding: "6px 12px",
+      background: "var(--surface-1)", border: "1px solid var(--hairline)",
+      borderRadius: "var(--radius-md)",
+    }}>
+      <span aria-hidden="true" style=${{
+        width: 7, height: 7, borderRadius: "50%",
+        background: "var(--st-doing)", flex: "0 0 auto",
+      }} />
+      <span style=${{
+        fontFamily: "var(--font-ui)", fontSize: 12.5, fontWeight: 600,
+        letterSpacing: "-0.01em", color: "var(--fg-1)",
+      }}>Work in flight</span>
+      <span style=${{
+        fontFamily: "var(--font-ui)", fontSize: 11.5, color: "var(--fg-4)",
+      }}>
+        ${view.workerCount} worker${view.workerCount === 1 ? "" : "s"}, ${view.verifierCount} verifier${view.verifierCount === 1 ? "" : "s"} this session${since ? ` · running since ${since}` : ""}
+      </span>
+    </section>`;
+}
+
+/** Default fetch for the in-flight artifact: GET /api/doc → raw JSON text (client-side). */
+async function defaultFetchInFlight() {
+  const res = await fetch(docUrl(IN_FLIGHT_DOC_PATH));
+  if (!res.ok) throw new Error(`/api/doc ${res.status}`);
+  return res.text();
+}
+
 function BoardPromptBar({ skipPermissions = false }) {
   const [prompt, setPrompt] = useState("");
   const [confettiKey, setConfettiKey] = useState(0);
@@ -1549,6 +1624,11 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
       <div style=${{ paddingTop: 18, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <${BoardHeader} count=${total} />
       </div>
+      ${/* agentic-workflow-m9w5c: the live in-flight lane sits below the board header,
+            above the columns. Read-only (ADR-0017) over the ADR-0043 advisory heartbeat
+            artifact; self-suppresses (renders null) when absent or stale — no zombie
+            lane surviving a crashed/killed work session. */ ""}
+      <${InFlightLane} />
       <div className="scroll-quiet" style=${{ overflowX: "auto", paddingBottom: 8 }}>
         <div style=${{ minWidth: 880 }}>
           <div style=${{ display: "flex", gap: 20, alignItems: "flex-start" }}>

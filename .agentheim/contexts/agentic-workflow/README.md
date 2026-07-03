@@ -313,6 +313,24 @@ separate BC, but today the whole tool lives in this one.
   re-shows). Read-only over the artifact (ADR-0017): dismiss touches `localStorage` only. Every
   degraded path (absent/malformed artifact, stale store) resolves to "render nothing" / "not
   dismissed", never a throw.
+- **`InFlightLane`** (agentic-workflow-m9w5c / ADR-0043) — sits below the board header, above
+  the columns: renders **live observability** for a running `work` batch — how many
+  workers/verifiers have run this session, and since when. Reads a SECOND advisory artifact
+  (`.agentheim/state/in-flight.json`, the ADR-0027 category extended by ADR-0043) through the
+  same `/api/doc` carrier `WhatsNextPanel` uses. Unlike `whats-next.md` (written by a skill's
+  prose), this artifact is written by real Claude Code **`Stop`/`SubagentStop` command hooks**:
+  a `Stop` hook in `skills/work/SKILL.md`'s own frontmatter heartbeats it every orchestrator
+  turn while `work` is active, and a `Stop` hook in each of `agents/worker.md` /
+  `agents/verifier.md`'s frontmatter (auto-converted to `SubagentStop` when that subagent
+  completes) records `{agentType, agentId, completedAt}`. The pure transition core
+  (`lib/agent-heartbeat.mjs`) and the dashboard-side reader (`dashboard/app/in-flight-state.js`)
+  share ONE crash-safety rule: a heartbeat older than the staleness window (5 minutes) is
+  treated as a dead session — the hook starts a fresh record, and the panel renders **nothing**
+  rather than a zombie lane surviving a crashed/killed session. Read-only over the artifact
+  (ADR-0017) — only the hooks write it; the panel never does. Deliberately does **not** touch
+  the existing doing-column pulse (`doingPulseClass`, design-system ADR-0014) — a different,
+  already-shipped, cross-BC signal this feature leaves untouched. See ADR-0043, ADR-0027,
+  ADR-0017, ADR-0014.
 - **Shell layout (aw-026, styleguide §05)** — the live shell is the styleguide "Components in
   context" full-height **left rail** beside a **main column**: a ~52px **topbar** (the global
   **search field**, aw-052 — plus two standing launches: secondary **What's next** and primary
@@ -527,6 +545,19 @@ separate BC, but today the whole tool lives in this one.
   by more than one file, **shape-agnostic** (compared as whole strings). Exercised by
   `node --test` (the repo has no CI), whose suite also asserts the **live** tree has no
   duplicates. See ADR-0028, ADR-0022, ADR-0012.
+- **`lib/agent-heartbeat.mjs` / `lib/hook-agent-signal.mjs`** (agentic-workflow-m9w5c, ADR-0043)
+  — the live-observability hook signal behind `InFlightLane` above. `agent-heartbeat.mjs` is the
+  PURE transition core (`applyHeartbeat`, `applyAgentCompletion`, `isStale`, `STALE_WINDOW_MS`) —
+  I/O-free, fully unit-tested. `hook-agent-signal.mjs` is the thin CLI glue a Claude Code `Stop`/
+  `SubagentStop` command hook invokes: reads the hook's stdin JSON payload, resolves the project
+  root (`${CLAUDE_PROJECT_DIR}` first, `discoverRoot` fallback), applies the matching pure
+  transition, and writes `.agentheim/state/in-flight.json` — an ADVISORY write (ADR-0027
+  category), never a lifecycle write. `runHook(mode, deps)` is exported so tests drive it with
+  injected stdin/root/clock rather than a real subprocess; a real-subprocess smoke test additionally
+  confirms the CLI entrypoint itself (real stdin, real `${CLAUDE_PROJECT_DIR}`) works end to end.
+  Every failure path (unreadable stdin, unresolvable root, an unwritable `state/` dir) is
+  swallowed and the script exits 0 — a hook must never crash the session it observes. See
+  ADR-0043, ADR-0027.
 
 ## Aggregates
 

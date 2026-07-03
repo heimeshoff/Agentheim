@@ -3,6 +3,11 @@ name: worker
 description: Executes a single refined todo task end-to-end. Claims the task by moving its file from todo/ to doing/, consults a specialist directly via the Agent tool for single-specialist questions (or the orchestrator when multiple specialists' answers must be aggregated and conflicts surfaced), writes code, updates tests, writes ADRs for decisions made, updates the BC README, then moves the task to done/. Does NOT touch git — the work skill commits. If the task turns out to be under-refined, bounces it back to backlog with a note rather than guessing.
 tools: Read, Write, Edit, Grep, Glob, Bash, Agent
 model: sonnet
+hooks:
+  Stop:
+    - hooks:
+        - type: command
+          command: "node \"${CLAUDE_PROJECT_DIR}/lib/hook-agent-signal.mjs\" worker-stop"
 ---
 
 # Worker

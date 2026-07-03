@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 3
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 113
+- **Doing:** 0
+- **Done:** 114
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-m9w5c** — Live observability — hooks write agent status to state/, dashboard renders an in-flight lane (feature) — `doing/agentic-workflow-m9w5c-live-observability-hooks-inflight-lane.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-m9w5c** — Live observability — hooks write agent status to state/, dashboard renders an in-flight lane (feature) — `done/agentic-workflow-m9w5c-live-observability-hooks-inflight-lane.md`
 - **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `done/agentic-workflow-c8j3w-index-done-list-rotation.md`
 - **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature) — `done/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
 - **agentic-workflow-w7q2m** — BC README consolidation — size trigger + human-in-loop consolidation procedure (feature) — `done/agentic-workflow-w7q2m-bc-readme-consolidation.md`
@@ -152,6 +152,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0043** — Live observability: a `Stop`/`SubagentStop` hook heartbeat is a second advisory artifact — the hooks write `.agentheim/state/in-flight.json` (an advisory write extending ADR-0027, git-ignored, machine-written) and the dashboard's read-only `InFlightLane` (ADR-0017) renders live worker/verifier activity for the current `work` session, self-suppressing via a staleness window so a crashed/killed session draws no zombie lane; accepted — `../../knowledge/decisions/0043-live-observability-hook-heartbeat-second-advisory-artifact.md`
 - **ADR-0041** — Artifact-growth doctrine: two disciplines for the three growth surfaces — **cap-and-roll** (verbatim, scripted, rolled to a dated archive: protocol ADR-0039 / INDEX done-list c8j3w) vs **flag-and-consolidate** (judgment, human-in-the-loop, rewritten *in place*, nothing archived: BC READMEs). Adds the `modeling` **CONSOLIDATE** verb (5th beside CAPTURE/REFINE/PROMOTE/DISMISS) with a frozen contract mirroring DISMISS/ADR-0022: a ~600-line README trigger `whats-next` surfaces as a recommended move (no skill auto-rewrites prose unattended), builder-in-the-loop consolidation that merges/rewrites but **never silently drops a term, invariant, or backlink**, committing its own scoped markdown (ADR-0026); accepted — `../../knowledge/decisions/0041-artifact-growth-two-disciplines-consolidate-verb.md`
 - **ADR-0042** — The COMPLETE lifecycle script stays single-task: `completeTask` mirrors `promoteTask`'s single-id shape (moves one task, edits one BC `INDEX.md`, prepends one protocol entry) and is idempotent w.r.t. an already-in-`done/` file (worktree already moved it); the ADR-0032 trivial-squash carve-out is composed by the *caller* (the conductor runs `complete` once per task, collects N manifests, and writes the one multi-`[task-id]` squash commit) rather than built into the script — a batch-complete verb would have to invent a shared summary/`<type>` across N tasks, the judgment ADR-0038's three-layer boundary reserves for the skill; accepted — `../../knowledge/decisions/0042-complete-script-single-task-carve-out-composed-by-caller.md`
 - **ADR-0040** — Vision-conformance check lives at `work`'s session-end as an **advisory** read of two named `vision.md` sections ("What success looks like" + "Non-goals") against the just-shipped batch; flags drift via a session-end protocol line and, when warranted, a `whats-next` advisory line (ADR-0027 advisory-write family) — **never a gate** (human-in-the-loop non-goal holds); deterministic extraction/formatting in `lib/vision-conformance.mjs`, the LLM judgment exercised by should-flag/should-not-flag eval fixtures under `evals/vision-conformance-check/`; accepted — `../../knowledge/decisions/0040-vision-conformance-check-session-end-advisory.md`

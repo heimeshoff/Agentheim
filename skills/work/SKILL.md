@@ -1,6 +1,11 @@
 ---
 name: work
 description: Use whenever the user wants work executed on the todo backlog — running tasks, building features, implementing what has already been modeled. Triggers on phrases like "start working", "execute the todo", "work on it", "build it", "implement the backlog", "let's go", "run the workers", "pick up where you left off", "ship what's ready". Spawns parallel worker sub-agents that resolve task dependencies and claim ready tasks from `contexts/*/todo/`. Workers follow TDD per `skills/test-driven-development/SKILL.md`. Every worker SUCCESS goes through a `verifier` agent (see `skills/verification-before-completion/SKILL.md`) before commit — failed verification re-dispatches the worker up to twice, then escalates to the user. New tasks promoted to todo during the run are picked up automatically as they become ready. Does not do modeling — only executes already-refined tasks.
+hooks:
+  Stop:
+    - hooks:
+        - type: command
+          command: "node \"${CLAUDE_PROJECT_DIR}/lib/hook-agent-signal.mjs\" session-heartbeat"
 ---
 
 # Work — Parallel Dependency-Aware Worker Loop
@@ -10,6 +15,8 @@ The `work` skill turns refined `todo/` tasks into real code and real decisions. 
 **The conductor (you) never writes code.** You coordinate: scan, build the DAG, dispatch workers, commit, log. Keeping you lean prevents context exhaustion across long batches. All coding work is delegated to subagents.
 
 **Git model: per-worker worktree isolation (ADR-0032).** Every parallel worker runs in its own git worktree on a private branch — never the shared main tree. Git's own 3-way merge is the conflict detector at integration time, not a prose scan at dispatch time; the verifier's test run is isolated from every sibling worker's uncommitted changes. `main` is written only by the conductor, only sequentially, exactly as ADR-0026 already required — this strengthens that invariant, it does not relax it. See "Phase 4: Batch dispatch" and "Git authority" below for the full choreography.
+
+**Live observability (ADR-0043, agentic-workflow-m9w5c).** This skill's own `Stop` hook (frontmatter above) fires on every orchestrator turn while `work` is active and heartbeats `.agentheim/state/in-flight.json` — a git-ignored ADVISORY artifact (ADR-0027's category), never a lifecycle write. `agents/worker.md` and `agents/verifier.md` carry their own `Stop` hook (auto-converted to `SubagentStop` when that subagent finishes) recording each completion. The dashboard's `InFlightLane` reads this artifact read-only (ADR-0017) and self-suppresses once the heartbeat goes stale — no zombie lane survives a crashed/killed session. This is pure side-channel observability: it changes nothing about how `work` dispatches, verifies, or commits.
 
 ## Phase 1: Recovery check
 
