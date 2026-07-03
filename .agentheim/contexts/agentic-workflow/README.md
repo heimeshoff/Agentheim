@@ -843,8 +843,55 @@ separate BC, but today the whole tool lives in this one.
   `import()`s it, mirroring `dashboard/resolve-launcher.mjs`'s bootstrap) — (4)
   the `modeling` skill's PROMOTE flow owns the remaining judgment (readiness) and
   git (scoped `git add` of the manifest's `changed` + commit with its `message`).
-  CLAIM/COMPLETE are the same shape, descoped to agentic-workflow-t7m4c. See
-  ADR-0038, ADR-0007, ADR-0026.
+  See ADR-0038, ADR-0007, ADR-0026.
+- **`claimBatch` / `completeTask`** — the git-free, mechanized CLAIM and COMPLETE
+  lifecycle scripts, matched to the final ADR-0032 worktree/squash-merge model
+  (agentic-workflow-t7m4c). Same three-layer boundary as `promoteTask`, two
+  shape variants:
+  - **`claimBatch(rootDir, ids, opts)` — BATCH-shaped, not per-task.** ADR-0032's
+    batch-start claim commit moves a whole ready set `todo → doing` in one commit
+    (`work`'s Phase 4 step 1), so this handler takes a list of ids and returns
+    ONE manifest for the whole batch: every id's `todo → doing` move via
+    `applyTaskMove`, the `INDEX.md` marker/count edits grouped **per BC**
+    (a batch may legitimately span more than one bounded context — `work`'s
+    Phase 2 scans every BC's `todo/` at once), and exactly one `protocol.md`
+    "Batch started" entry naming every claimed id. Fail-loud, no rollback: every
+    id is pre-checked to resolve in `todo/` **before any move happens**, so one
+    missing id aborts the whole batch with nothing moved; a rarer mid-batch race
+    after the pre-check (another session pulled a file out from under it) is
+    surfaced immediately, with whichever ids already moved this call named in
+    the rejection — they are not rolled back. The commit `message` drops the
+    `<bc>` token (`chore: batch start […]`) when the batch spans multiple
+    contexts; a single-BC batch keeps `chore(<bc>): batch start […]`.
+  - **`completeTask(rootDir, id, opts)` — single-task-shaped, mirrors
+    `promoteTask`.** Under ADR-0032 the `doing → done` move happens inside the
+    WORKER's private worktree; by the time the conductor runs `complete` on
+    `main`, after the `git merge --squash`, the file is typically **already**
+    in `done/`. This handler is **idempotent** w.r.t. that state: if
+    `applyTaskMove`'s `doing → done` attempt rejects `stale-precondition` and
+    the task resolves in `done/` already, that is treated as a no-op move (not
+    an error) and bookkeeping (the `INDEX.md` marker/count edit, the
+    `protocol.md` "Task verified and completed" / "Task completed (verification
+    skipped)" entry) proceeds against the file already there. Any other
+    rejection propagates untouched. **ADR-0042 decision:** `completeTask` has
+    no batch mode — the ADR-0032 trivial-squash carve-out (folding several
+    eligible same-BC/same-batch tasks' squash-merges into one commit) is
+    composed by the CALLER, not built into the script: `work` runs `complete`
+    once per task in the carve-out set and folds the resulting manifests'
+    `changed` paths + `[<id>]` trailers into one commit itself. A batch-complete
+    verb would have to invent a shared summary line/`<type>` across
+    potentially-different tasks — exactly the judgment call ADR-0038's
+    three-layer boundary reserves for the skill.
+  Both handlers reuse the same `lib/task-lifecycle-cli.mjs` — `claim
+  <id-1>,<id-2>,...` (comma-separated batch) and `complete <task-id>` — with an
+  optional third argv positional carrying a JSON opts blob (`runCli`'s
+  `taskOpts` injection point takes precedence over it for tests), since
+  `complete`'s richer bookkeeping fields (summary, duration, verification,
+  filesChanged, testsAdded, adrsWritten) don't fit a bare id/verb pair. `work`'s
+  Phase 4 step 1 (claim) and Git authority PASS/SKIP section (complete) own the
+  remaining judgment (batch composition, ADR backlink maintenance) and git
+  (scoped `git add` + commit with the manifest's `message`). See ADR-0038,
+  ADR-0007, ADR-0026, ADR-0032, ADR-0042.
 - **`lib/resolve-plugin-file.mjs`** — the env-independent in-plugin file resolver
   (generalizes infrastructure-010's `dashboard/resolve-launcher.mjs`, which now
   delegates to it — agentic-workflow-k5n8f). `locatePluginFile(relPath, opts)`

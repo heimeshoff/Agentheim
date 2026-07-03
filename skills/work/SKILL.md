@@ -43,7 +43,11 @@ Textual conflict prediction used to hard-demote tasks because the shared working
 
 Every dispatch wave now runs each worker in its own **git worktree** on a private branch (ADR-0032) — the shared-tree model is retired. The choreography, in order:
 
-1. **Batch-start claim commit.** On the **main** tree: move all selected task files `todo → doing` (file move + `status:` rewrite), apply the BC `INDEX.md` `todo → doing` edits, prepend the "Batch started" `protocol.md` entry (see "Protocol logging" below), `git add` that enumerated set, and **commit**: `chore(<bc>): batch start [<id-1>] [<id-2>] …`. This is the **one** deliberate amendment to ADR-0026: the `todo → doing` half of the lifecycle move now rides in this per-batch commit instead of folding into each task's final commit — `git worktree add` checks out a *committed* state, so the worktree's base must already hold the task in `doing/`. If the project isn't a git repo, skip the commit and every worktree step below — just move the files and proceed to spawn workers against the one working tree exactly as before ADR-0032 (see "Windows & node_modules" at the end of "Git authority").
+1. **Batch-start claim commit.** On the **main** tree, the `todo → doing` batch move + `INDEX.md` edits + the "Batch started" `protocol.md` entry are **mechanized** (ADR-0038, agentic-workflow-t7m4c): run the CLAIM verb of `lib/task-lifecycle-cli.mjs` against a comma-separated id list —
+   ```
+   node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','task-lifecycle-cli.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','task-lifecycle-cli.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no task-lifecycle CLI found under '+c+' (is the plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>m.main(process.argv.slice(1))).catch(e=>{console.error(e.message);process.exit(1)});" claim <id-1>,<id-2>,... '{"parallel":"<the Parallel: line value you already composed in Phase 3 step 4 / the cap-triggered note below>","planningAdvisory":"<Phase 3 step 3's advisory line, if any — omit the whole key when absent>"}'
+   ```
+   (Same env-free homedir→cache→semver-max bootstrap infrastructure-010 established for `/dashboard`, reused verbatim from `modeling/SKILL.md`'s PROMOTE flow — runs in-process, cwd = the project. The trailing JSON is optional; omit the whole third argument for a plain, un-annotated batch.) It prints **one** manifest `{changed, message, verb:'claim', ids}` covering the whole batch — grouped per-BC internally if the batch spans more than one bounded context (`work`'s Phase 2 scans every BC's `todo/` at once, so this is a real shape, not a hypothetical) — or a structured `{ok:false, code, reason}` rejection if a selected id no longer resolves in `todo/` (a race with a concurrent `modeling` session; **nothing is moved** when this happens — the pre-check runs before any file touches disk, so retry after re-scanning). `git add` the manifest's `changed` paths and **commit** with its `message` verbatim: `chore(<bc>): batch start [<id-1>] [<id-2>] …` (single-BC batch), or `chore: batch start […]` — no `<bc>` token — when the batch spans multiple contexts. This is the **one** deliberate amendment to ADR-0026: the `todo → doing` half of the lifecycle move now rides in this per-batch commit instead of folding into each task's final commit — `git worktree add` checks out a *committed* state, so the worktree's base must already hold the task in `doing/`. If the project isn't a git repo, skip the commit and every worktree step below — just run the `claim` script anyway to get the files moved (ignore its manifest/message, there's nothing to commit) and proceed to spawn workers against the one working tree exactly as before ADR-0032 (see "Windows & node_modules" at the end of "Git authority").
 
 2. **Create one worktree per task**, from that commit's HEAD:
    ```
@@ -210,18 +214,14 @@ When a git result looks off (an unexpected "Already up to date", a clean tree yo
 After a verifier returns `VERDICT: PASS` (or `VERDICT: SKIP`, or when verification was bypassed per the skip rules above), on the **main** tree:
 
 1. `git merge --squash aw/<task-id>` — stages the branch's net delta (code + `doing → done` move + BC README + ADRs, collapsed from however many `wip` commits the branch accumulated across iterations). **This is where a real conflict against an already-merged sibling surfaces** — see "Merge-back conflicts" below.
-2. **Write all bookkeeping now (pre-commit), on the main tree:**
-   - Confirm the squash staged the task file at `doing → done` with `status: done` + `completed:` set (the worker did this inside the worktree; the squash carries it forward).
-   - Apply the BC `INDEX.md` doing → done edits (see "Index updates" below) for this task.
-   - Apply the ADR↔task backlink maintenance and any ADR index inserts (see "Index updates").
-   - Prepend the `protocol.md` entry for this task (see "Protocol logging") — write the final entry now, not after the commit.
-3. `git add` an **explicit, enumerated** list: the bookkeeping paths from step 2 (`INDEX.md`, `protocol.md`) — the squash in step 1 already staged the branch's own files (code, moved task file, BC README, ADRs), so you do not re-add `FILE_LIST` separately. Never `git add -A` / `git add .` — see `references/commit-doctrine.md` for why the scoped-add rule is load-bearing here.
-4. Commit with message:
+2. **Run the COMPLETE script (pre-commit), on the main tree** — the `doing → done` `INDEX.md` edit and the completion `protocol.md` entry are **mechanized** (ADR-0038, agentic-workflow-t7m4c):
    ```
-   <type>(<bc>): <summary> [<task-id>]
+   node -e "<the same bootstrap as the claim verb in Phase 4 step 1>" complete <task-id> '{"summary":"<worker SUMMARY>","duration":"<dispatch→verdict wall time, e.g. 4m12s>","verification":"PASS (iteration N)","filesChanged":<FILES_CHANGED>,"testsAdded":<TESTS_ADDED>,"adrsWritten":"<ADRS_WRITTEN, comma-joined, or \"none\">"}'
    ```
-   where `<type>` comes from the task's frontmatter (feature / bug / refactor / chore / spike / decision), `<bc>` is the bounded context, `<task-id>` is the task id. Example:
-   `feature(books): add ReadingSession concept to Book aggregate [books-001]`
+   (For a `VERDICT: SKIP` completion, swap the trailing JSON for `{"summary":"...","duration":"...","skipped":true,"skipReason":"<decision-only task | --no-verify | non-git project>","filesChanged":<FILES_CHANGED>}` — this selects the "Task completed (verification skipped)" entry shape instead, which carries no `Tests added:` / `ADRs written:` lines.) The script is **idempotent** w.r.t. the squash: the worker already moved the task file `doing → done` inside its own worktree, and the squash in step 1 already carried that move onto `main` — so by the time this runs, `applyTaskMove`'s own `doing → done` attempt sees `stale-precondition` (the file is no longer in `doing/`) and, because the file resolves in `done/` already, treats that as a no-op move and proceeds straight into the `INDEX.md`/`protocol.md` bookkeeping rather than rejecting. It prints one manifest `{changed, message, verb:'complete', id, idempotent}` — or `applyTaskMove`'s own rejection verbatim on a genuine problem (the file resolves in neither `doing/` nor `done/`, which should never happen after a clean squash and is worth investigating, never silently retried).
+   - Still apply the ADR↔task backlink maintenance and any ADR index inserts yourself (see "Index updates" below) — those are not part of the `complete` manifest. A task's `ADRS_WRITTEN` list is conductor-only knowledge (read off the worker's SUCCESS block) that the script has no way to see.
+3. `git add` an **explicit, enumerated** list: the `complete` manifest's `changed` paths (`INDEX.md`, `protocol.md` — the task file itself, already staged `doing → done` by the squash in step 1, is not re-added) plus any ADR/task files touched by the backlink maintenance above. Never `git add -A` / `git add .` — see `references/commit-doctrine.md` for why the scoped-add rule is load-bearing here.
+4. Commit with the `complete` manifest's `message` verbatim — already the doctrine-compliant `<type>(<bc>): <summary> [<task-id>]` (`<type>` read from the task's own frontmatter, `<summary>` from the JSON opts above, falling back to the task title when omitted). Do not hand-compose this string. Example: `feature(books): add ReadingSession concept to Book aggregate [books-001]`.
 5. **Tear down the worktree**, in order:
    - If the task touched `dashboard/`, `unlinkDashboardNodeModules(worktreeRoot)` (`lib/worktree-node-modules.mjs`) **first** — never skip this. (De-risking spike finding, ADR-0037: `git worktree remove --force` recurses THROUGH an un-removed junction and silently deletes the real shared `node_modules`'s contents — no error, just data loss. Unlinking first is mandatory, not housekeeping.)
    - `git worktree remove .worktrees/<task-id> --force`
@@ -243,6 +243,8 @@ Two same-BC workers both editing the BC README (the common case the Phase 3 advi
 
 The trivial-squash carve-out and its four conditions (same BC, same file set, no-behavior-change, same batch) are defined in `references/commit-doctrine.md` (ADR-0026, unaddressed by ADR-0032's per-task-branch model but not precluded by it). The aw-064/065/066/067 one-line topbar-chrome tweaks are the canonical example. When in doubt, do **not** squash — one commit per task is always safe. When it does apply under worktree isolation, squash-merge each eligible branch in turn (`git merge --squash aw/<id-1>`, then `git merge --squash aw/<id-2>`, …) before the one shared commit.
 
+**The `complete` script stays single-task-shaped (ADR-0042) — it has no batch mode.** Unlike `claim` (a real batch verb, because ADR-0032's batch-start commit is inherently one-per-batch), `completeTask` mirrors `promoteTask`'s single-id shape: it moves one task, edits one BC's `INDEX.md`, and prepends one protocol entry. When the trivial-squash carve-out applies to N eligible tasks, run the `complete` script **once per task** in the set — after step 1's `git merge --squash` for each branch — collect their N manifests, then compose the one shared commit yourself: `git add` the union of every manifest's `changed` paths, and write a commit message that concatenates each manifest's own `[<task-id>]` trailer onto one summary line (the aw-064/065/066/067 shape: `feature(agentic-workflow): one-line topbar-chrome tweaks [aw-064] [aw-065] [aw-066] [aw-067]`). The script itself never attempts this composition — a batch-complete verb would have to invent a shared summary line and a shared `<type>` across N potentially-different tasks, which is exactly the judgment call ADR-0038's three-layer boundary reserves for the skill, not the script.
+
 ### Windows & node_modules
 
 - **Long paths.** Worktrees nest `.agentheim/` and `dashboard/` trees; `git config core.longpaths true` is harness setup (Phase 4 step 4), relied on alongside Windows `LongPathsEnabled`. If `MAX_PATH` still bites, fall back to the bare ADR-0028 token as the worktree dir name.
@@ -260,9 +262,9 @@ Per state transition in `contexts/<bc>/INDEX.md`:
 
 | Transition | Marker edits | Counts |
 |---|---|---|
-| **todo → doing** (Phase 4 step 1 — the **batch-start claim commit**, a commit of its own, separate from any task's eventual squash-merge commit) | remove from `<!-- todo-list:start -->` → insert into `<!-- doing-list:start -->` | Todo −1, Doing +1 |
-| **doing → done** (pre-squash-merge-commit bookkeeping, on `main`, PASS/SKIP) | remove from `<!-- doing-list:start -->` → insert at top of `<!-- done-list:start -->` (newest first) | Doing −1, Done +1 |
-| **doing → backlog** (BOUNCED — pre-squash-merge-commit bookkeeping, on `main`; see "BOUNCE integration") | remove from `<!-- doing-list:start -->` → insert into `<!-- backlog-list:start -->` | Doing −1, Backlog +1 |
+| **todo → doing** (Phase 4 step 1 — the **batch-start claim commit**, a commit of its own, separate from any task's eventual squash-merge commit) | **Mechanized** (ADR-0038, agentic-workflow-t7m4c) — `lib/task-lifecycle-cli.mjs claim <ids>` performs the marker edit + count delta for every id in the batch (grouped per BC) as part of its manifest; nothing to hand-edit here. | Todo −1, Doing +1 |
+| **doing → done** (pre-squash-merge-commit bookkeeping, on `main`, PASS/SKIP) | **Mechanized** — `lib/task-lifecycle-cli.mjs complete <id>` performs the marker edit + count delta (idempotently, whether or not the squash already carried the file to `done/`) as part of its manifest; nothing to hand-edit here. | Doing −1, Done +1 |
+| **doing → backlog** (BOUNCED — pre-squash-merge-commit bookkeeping, on `main`; see "BOUNCE integration") | remove from `<!-- doing-list:start -->` → insert into `<!-- backlog-list:start -->` (still hand-edited — BOUNCE is not mechanized by this task) | Doing −1, Backlog +1 |
 | **doing → doing** (FAIL iteration N, re-dispatched into the same worktree) | no list move; line stays in doing-list | no count change |
 | **doing → doing-final** (FAIL iteration 3, escalated; worktree kept) | no list move | no count change |
 
@@ -306,7 +308,7 @@ Newest entries on top.
 
 Then every entry is prepended right after the `---` on line 4.
 
-Entry formats:
+Entry formats — the "Batch started", "Task verified and completed", and "Task completed (verification skipped)" shapes below are **no longer hand-formatted here**: `lib/task-lifecycle-cli.mjs`'s `claim` and `complete` verbs generate and prepend them as part of their manifests (ADR-0038, agentic-workflow-t7m4c) — see Phase 4 step 1 and the Git authority PASS/SKIP section above. They're kept below as the human-readable contract (what the script actually writes, so a reader can spot drift), not as instructions to compose by hand. "Verification failed", "Task bounced", and "Task failed" (further below) are **not** mechanized — those stay hand-written exactly as before:
 
 ```markdown
 ## YYYY-MM-DD HH:MM -- Batch started: [task-id-1, task-id-2, ...]
@@ -314,12 +316,12 @@ Entry formats:
 **Type:** Work / Batch start
 **Tasks:** task-id-1 - [title], task-id-2 - [title]
 **Parallel:** yes / no (N workers)
-**Planning advisory:** [omit this line entirely if `.agentheim/state/whats-next.md` was absent; otherwise one line — the recommended move + current/stale age — per Phase 3 step 3]
+**Planning advisory:** [omitted entirely if you passed no `planningAdvisory` in the `claim` call's JSON opts; otherwise one line — the recommended move + current/stale age — per Phase 3 step 3]
 
 ---
 ```
 
-**Cap triggered — never truncate silently.** If the ready set (Phase 2 step 7's tally) is larger than the batch you're actually dispatching — whether because `MAX_PARALLEL` held tasks back or the conflict pre-scan's merge-ordering pushed one to a later wave — name the held-back task ids and the reason in the `**Parallel:**` line's parenthetical, the same way an earlier session did it: `**Parallel:** yes (2 workers — ... k5p8w held to next wave — it conflicts with both, same agentic-workflow README as f6m2q ...)`. A batch that is smaller than the ready set with no stated reason is a protocol gap, not an acceptable shorthand.
+**Cap triggered — never truncate silently.** If the ready set (Phase 2 step 7's tally) is larger than the batch you're actually dispatching — whether because `MAX_PARALLEL` held tasks back or the conflict pre-scan's merge-ordering pushed one to a later wave — compose the held-back task ids and the reason into the `parallel` value you pass to the `claim` call's JSON opts, the same way an earlier session did it: `"parallel":"yes (2 workers — ... k5p8w held to next wave — it conflicts with both, same agentic-workflow README as f6m2q ...)"`. A batch that is smaller than the ready set with no stated reason is a protocol gap, not an acceptable shorthand — the script only prints what you hand it.
 
 ```markdown
 

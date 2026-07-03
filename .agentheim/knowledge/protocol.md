@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 15:24 -- Task verified and completed: agentic-workflow-t7m4c - Mechanize CLAIM + COMPLETE lifecycle scripts
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-t7m4c - Mechanize CLAIM + COMPLETE lifecycle scripts against the ADR-0032 worktree / squash-merge model
+**Summary:** Landed `claimBatch` (batch CLAIM — claims a set of ids, groups per-BC INDEX edits, one protocol entry, git-free manifest) and `completeTask` (idempotent single-task COMPLETE — tolerates the worktree's already-done doing→done move: `stale-precondition` + resolves-in-target → no-op move, proceed to bookkeeping) in `lib/task-lifecycle.mjs`, wired both into `lib/task-lifecycle-cli.mjs` (`claim`/`complete` verbs), and rewrote `skills/work/SKILL.md` to delegate CLAIM/COMPLETE bookkeeping to the scripts. ADR-0042 records keeping `complete` single-task-shaped, with the trivial-squash carve-out composed by the conductor (run `complete` per task, collect N manifests, write one multi-`[task-id]` commit).
+**Duration:** ~37m (dispatched 14:47; ~16m worker + ~2m verifier, then serialized behind ADR-0041→0042 renumber + integration)
+**Verification:** PASS (iteration 1) — verifier ran the full lib suite from the worktree (108/108 green incl. 19 new tests), confirmed the handlers are git-free (no child_process/git), the idempotent-complete test genuinely fails without the production branch, work/SKILL.md delegation replaced the old prose (not duplicated), and clean scope (no INDEX/protocol tampering).
+**Files changed:** 8
+**Tests added:** 19
+**ADRs written:** 0042-complete-script-single-task-carve-out-composed-by-caller.md (minted by the worker as 0041; conductor renumbered to 0042 to resolve an in-batch collision with w7q2m's ADR-0041, updating all internal references)
+
+---
+
 ## 2026-07-03 14:47 -- Batch started: [agentic-workflow-t7m4c, agentic-workflow-w7q2m, agentic-workflow-q3n7k]
 
 **Type:** Work / Batch start
