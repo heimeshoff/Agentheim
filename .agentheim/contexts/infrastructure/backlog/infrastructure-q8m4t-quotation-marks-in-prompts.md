@@ -58,12 +58,26 @@ already do since infra-020.
       ASCII metacharacters.
 - [ ] **Doc-drift rider (do regardless):** the stale `claude "<prompt>"` comments — which
       describe the pre-infra-020 shell-wrap that no longer exists — are corrected to the
-      raw-argv reality. Known sites: `dashboard/app/bridge-launch.js:24`,
-      `dashboard/app/modeling-command.js:41,47,58` (and any sibling `*CommandFor` doc that
-      repeats the phrase).
+      raw-argv reality (the extension passes the prompt as a **raw argv element**; no shell
+      wraps it). **Grep, don't trust line numbers** — they have already drifted since this
+      task was written. Search `dashboard/app/` for the literal shell-wrap phrasing
+      `claude "<prompt>"` and its skip-permissions variant
+      `claude --dangerously-skip-permissions "<prompt>"`. Current hits (re-verified
+      2026-07-03): `bridge-launch.js` (3×: the wrap phrase + 2 skip-variant docstrings),
+      `modeling-command.js` (4×), `skip-permissions-state.js` (1×) — the last was **missing**
+      from the original site list. **Exclude** the legitimate `"/agentheim:… <prompt>"`
+      return-value placeholders in `modeling-command.js` (the `*CommandFor` docs) — those
+      describe the command string, not a shell wrap, and are correct.
 
 ## Notes
-Captured via `quick-capture` on 2026-06-23 — raw, unrefined. Refined 2026-07-03.
+Captured via `quick-capture` on 2026-06-23 — raw, unrefined. Refined 2026-07-03 (twice).
+Second refine (2026-07-03) re-verified the code citations against the live tree while the
+builder was away: the launch path is unchanged (`bridge.js` builds the raw-argv descriptor
+around lines 176–191; `extension.js` — at `vscode-extension/extension.js`, *not* `src/` —
+spawns it via `createTerminal` around lines 83–90). The hypothesis and promote gate are
+untouched; the only substantive edit was making the doc-drift rider **grep-anchored** after
+finding its line-number citations had already drifted and it had missed
+`skip-permissions-state.js`.
 
 **Full path traced (all Unicode-clean on paper):**
 dashboard textarea → `safePrompt` (trims ends only, no sanitizing —
