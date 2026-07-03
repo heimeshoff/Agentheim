@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-r2c7m
 title: Protocol rotation — cap protocol.md and roll to monthly files
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-07-02
@@ -33,8 +33,9 @@ other two ([[agentic-workflow-c8j3w]], [[agentic-workflow-w7q2m]]) reuse.
 
 Cap the live `protocol.md` and roll older entries, **verbatim**, to dated
 monthly files under `knowledge/protocol/`. Refinement settled the four open
-questions (recommended defaults, taken while the builder was away — revisit any
-if wrong; each is a one-line change):
+questions; the recommended defaults below are **confirmed 2026-07-03** under the
+builder's autonomous-refinement authorization (each remains a one-line change if
+work surfaces a reason to flip it):
 
 1. **Mechanism — a k5n8f-family script.** Rotation is a deterministic step in
    the [[agentic-workflow-k5n8f]] lifecycle-script family, not skill prose or

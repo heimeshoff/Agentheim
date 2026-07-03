@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-v3h6p
 title: Eval-harness the verifier — measure its catch rate against planted defects
-status: backlog
+status: todo
 type: spike
 context: agentic-workflow
 created: 2026-07-02
@@ -99,9 +99,9 @@ spend?": re-running the fixtures with the verifier pinned to sonnet vs opus A/Bs
 the gate model, and re-running after any spawn-prompt change (cf. `g9s3w`, `f7k2d`)
 guards against catch-rate regressions.
 
-**Four design calls made on the builder's behalf (builder was away during
-refine — ratify or flip before promote):** (1) spawn the real verifier vs a
-scripted driver → real; (2) full 7-check coverage vs the 4 originally listed →
-full, subset allowed if logged; (3) N-runs rate vs single-pass boolean → N-runs;
-(4) right-reason-required vs any-FAIL-counts → right-reason required, lucky
-catches logged apart.
+**Four design calls — ratified 2026-07-03** (under the builder's
+autonomous-refinement authorization): (1) spawn the real verifier vs a scripted
+driver → **real**; (2) full 7-check coverage vs the 4 originally listed → **full**,
+subset allowed if logged; (3) N-runs rate vs single-pass boolean → **N-runs**;
+(4) right-reason-required vs any-FAIL-counts → **right-reason required**, lucky
+catches logged apart. All four stand as the task's contract.

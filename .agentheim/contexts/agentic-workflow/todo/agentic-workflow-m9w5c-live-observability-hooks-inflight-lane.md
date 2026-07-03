@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-m9w5c
 title: Live observability — hooks write agent status to state/, dashboard renders an in-flight lane
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-07-02
@@ -43,6 +43,14 @@ exactly this. (Harness audit 2026-07-02, ⊕ finding from the Opus cross-check.)
 
 Note the audit's caveat: hooks are session-wide and can't distinguish worker
 from orchestrator for *guardrails* — but observability hooks don't need to
-distinguish; they just record. Split candidate at refinement: (1) hook + state
-schema, (2) dashboard lane UI. Both prior research reports are directly on
-point — read them first.
+distinguish; they just record. Both prior research reports are directly on
+point — **read them first.**
+
+**Promoted 2026-07-03** under the builder's autonomous-refinement authorization.
+Dependency satisfied: `design-system-001` (the styleguide gate) is **done**
+(approved 2026-06-05) — the in-flight-lane UI has its styleguide foundation. The
+split candidate ((1) `SubagentStop`/`Stop` hook + `state/` schema, (2) dashboard
+in-flight lane UI) is left to the worker's discretion at implementation — do it as
+one task or split into a child if the hook layer lands first; either satisfies the
+four AC. The state schema is an advisory write (ADR-0027) and the lane is read-only
+(ADR-0017); honor both seams.

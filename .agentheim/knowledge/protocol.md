@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 12:00 -- Modeling / Refined + Promoted: full backlog sweep (13 tasks → todo)
+
+**Type:** Modeling / Refine + Promote
+**BC:** agentic-workflow (12), infrastructure (1)
+**From → To:** backlog → todo (all 13); backlog now empty across both BCs
+**Summary:** Builder delegated best-default answers ("refine all tasks and backlog, promote to todo so the running worker picks them up — I don't want to be at the helm"). So every held builder-confirmation gate from the 09:34 sweep was resolved with best judgment and promoted. **Keystone:** confirmed **p3v9k Ruling A = fail-closed** `depends_on` (missing target ⇒ unsatisfied ⇒ refuse) — matches `dependencySatisfied()`, the vision's catch-wrong-work-by-structure ethos, and ADR-0022's dead-id stripping — which unblocks the bookkeeping chain **p3v9k → k5n8f → {r2c7m → c8j3w, t7m4c}** (t7m4c's other dep f6m2q is done; verified on disk). **Ratified best-judgment defaults:** w7q2m (5th modeling verb CONSOLIDATE signed off), v3h6p (all 4 eval-design calls), z2f7s (kept-as-one-task + documented-not-enforced spawn budget), m9w5c (dep design-system-001 styleguide is done → gate satisfied). **r9k2p** promoted as an end-to-end **integration close** — all five children (d8q3n / w4t9k / b7n2s / k5p8w / h9v3m) are done; worker boots via ADR-0036 runtime-drive, confirms composed hover behavior, closes. **Refined 3 under-specified tasks to concrete AC:** v6d4n (settled forks → `work` session-end home / advisory-only never-blocks / two-vision-section bounded read), q3n7k (target confirmed = dashboard Workflow guide page; added satisfied styleguide dep; cleaned malformed capture tail), infrastructure-q8m4t (reframed the manual reproduce-first gate — which a worker can't drive — into a code-layer round-trip regression fixture + do-regardless grep-anchored doc-drift rider; live-launch codepage confirmation demoted to a documented builder follow-up). Worker DAG-orders the 12 aw todo items via `depends_on` under the now-confirmed fail-closed gate.
+**Split into:** none (v6d4n/q3n7k/q8m4t refined in place; m9w5c/r9k2p carry optional worker-discretion split notes)
+**ADRs written:** none by modeling — p3v9k, r2c7m, w7q2m, v6d4n each write their ADR when worked
+
+---
+
 ## 2026-07-03 11:49 -- Batch started: [agentic-workflow-t4x8p, agentic-workflow-y8b4q]
 
 **Type:** Work / Batch start

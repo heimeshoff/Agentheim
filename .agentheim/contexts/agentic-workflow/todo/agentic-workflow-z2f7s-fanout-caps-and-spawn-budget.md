@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-z2f7s
 title: Fan-out caps — MAX_PARALLEL as a knob, research cap, global nested-spawn ceiling
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-07-02
@@ -78,15 +78,13 @@ Related cost work: model-pinning the agent fleet (agentic-workflow-j4m6r, done)
 and worktree isolation (ADR-0032) share the "bound the parallel-worker cost"
 theme.
 
-**Refinement decisions defaulted while the builder was away (please ratify):**
+**Refinement decisions — confirmed 2026-07-03** (under the builder's
+autonomous-refinement authorization):
 1. **Scope — kept as one task.** All three surfaces are the same "bound +
    document + rationalize fan-out" concern in adjacent doctrine; splitting into
-   three micro-edits adds DAG overhead for no gain. (Alternative: split per
-   surface.)
+   three micro-edits adds DAG overhead for no gain.
 2. **Spawn surface — documented worst-case budget + mitigation, not an enforced
-   ceiling.** Reframed because the conductor genuinely cannot police spawns
-   inside worker subagent contexts. (Alternatives considered: insist on a hard
-   enforced ceiling via a budget threaded into the worker spawn prompt that the
-   worker self-polices; or drop the third surface into n6r8j.) Left in
-   `backlog/` rather than promoted so these two calls can be confirmed before a
-   worker picks it up.
+   ceiling.** The conductor genuinely cannot police spawns inside worker subagent
+   contexts, so the honest deliverable is a documented worst-case budget + the
+   low-`MAX_PARALLEL` lever + n6r8j as the structural shrink — no invented
+   enforcement mechanism. Both calls stand; promoted.

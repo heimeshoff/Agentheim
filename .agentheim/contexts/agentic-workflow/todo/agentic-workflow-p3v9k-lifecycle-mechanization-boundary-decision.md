@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-p3v9k
 title: Decide the lifecycle-mechanization boundary — fail-closed depends_on ruling + 3-layer bookkeeping ADR
-status: backlog
+status: todo
 type: decision
 context: agentic-workflow
 created: 2026-07-03
@@ -35,8 +35,8 @@ any code assumes a semantics is the "decisions as tasks" discipline.
 Write one ADR (next free number, `scope: agentic-workflow`) ruling on both, which
 becomes k5n8f's contract.
 
-**Ruling A — fail-closed `depends_on`** *(provisional builder call 2026-07-03 — see
-Notes; revisit)*: a `depends_on` id present in *no* lifecycle folder counts as
+**Ruling A — fail-closed `depends_on`** *(confirmed 2026-07-03 — see Notes)*: a
+`depends_on` id present in *no* lifecycle folder counts as
 **unsatisfied** — promote/claim is refused and the dangling id surfaced. This already
 matches `dependencySatisfied()`, so the script inherits it for free; the only change
 is rewriting the contradicting `work/SKILL.md:25` prose. Rationale: the vision's
@@ -72,10 +72,14 @@ the prose restatement** of bookkeeping across the four skills — *not* ADR-0007
 
 ## Notes
 
-**Provisional.** Ruling A (fail-closed vs fail-open) was chosen by the modeler while
-the builder was away (2026-07-03). Flag for the builder to confirm before this is
-worked — it is the one genuinely reversible product call here; Ruling B follows
-mechanically from the architect brief and the existing ADR-0007/0026/0032 doctrine.
+**Confirmed 2026-07-03.** Ruling A (fail-closed) is the builder's call — confirmed
+under the builder's autonomous-refinement authorization ("refine the whole backlog with
+best-default answers"). The rationale held: the vision's "catch wrong work by structure"
+ethos, DISMISS (ADR-0022) already strips dead ids from surviving `depends_on`, and
+`dependencySatisfied()` already implements fail-closed — so a genuine missing target
+signals a defect, not a normal state. Ruling B follows mechanically from the architect
+brief and the existing ADR-0007/0026/0032 doctrine. No open product call remains; ready
+to work.
 
 Reference (cross-BC, not `prior_art`): **infrastructure-010** — the env-free
 plugin-file resolver pattern k5n8f reuses; not a dependency of this decision.

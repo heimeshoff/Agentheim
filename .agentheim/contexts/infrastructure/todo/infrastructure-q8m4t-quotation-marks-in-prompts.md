@@ -1,7 +1,7 @@
 ---
 id: infrastructure-q8m4t
 title: Support quotation marks (Gänsefüsschen) in prompts
-status: backlog
+status: todo
 type: bug
 context: infrastructure
 created: 2026-06-23
@@ -44,18 +44,31 @@ already do since infra-020.
    surprises already surface (see `resolveExecutable`'s PATH×PATHEXT wart on win32).
 
 ## Acceptance criteria
-- [ ] **Reproduce first.** With the *current* (infra-020) bridge `.vsix` installed, seed a
-      dashboard prompt containing each style — `„Titel"`, `»Titel«`, and a plain `"x"` —
-      and record what actually reaches the launched `claude` session (verbatim / mojibake /
-      dropped / `?`). Confirm whether the failure is real on today's build or was a stale
-      pre-infra-020 install.
-- [ ] If it reproduces: the launched session receives `„ " » «` **byte-for-byte** identical
-      to what was typed in the dashboard prompt-bar (no mojibake, no `?`, no dropped chars).
-- [ ] The clipboard-fallback path (bridge absent) copies the same characters verbatim.
-- [ ] A regression test at the layer that broke — extend the bridge/handler tests
-      (`vscode-extension/test/…`, `dashboard/test/bridge-*.test.mjs`) with a non-ASCII
-      typographic-quote fixture so the round-trip is guarded, mirroring how infra-020 guarded
-      ASCII metacharacters.
+
+**Reframed 2026-07-03 for autonomous work.** The original AC#1 was a manual
+human-at-the-dashboard reproduce step (seed a prompt in VS Code, watch the live
+`claude` launch) — a worker cannot drive a live terminal launch. Since the whole
+transport path is Unicode-clean on paper and the most likely cause is a **stale
+`.vsix`** (cause 1 below), the meaningful automated reproduction lives at the **code
+layer**, and the live-launch codepage confirmation becomes a documented builder
+follow-up rather than a blocking gate.
+
+- [ ] **Regression fixture = the code-layer reproduction.** Extend the bridge/handler
+      tests (`dashboard/test/bridge-*.test.mjs` and/or `vscode-extension/test/…`) with a
+      non-ASCII typographic-quote fixture — `„Titel"`, `»Titel«`, and a plain `"x"` —
+      asserting the prompt survives the transport round-trip (`readBody` UTF-8 →
+      `JSON.parse` → `.trim()` → descriptor `{ command, args:[prompt] }`) **byte-for-byte**,
+      mirroring how infra-020 guarded ASCII metacharacters. This is the layer any real bug
+      would live at, and the durable guard against silent regression.
+- [ ] **On green, localize + document the residual.** If the round-trip fixture passes,
+      the transport layer is proven Unicode-clean; record (in the task's completion note /
+      protocol) that the residual risk is confined to the **terminal-launch codepage layer**
+      (`extension.js` `createTerminal` on win32) and leave a **manual builder follow-up**:
+      confirm on a live VS Code launch with the current `.vsix` that `„ " » «` arrive
+      verbatim. If the fixture instead **fails**, fix at the failing layer and keep the
+      fixture as the guard.
+- [ ] The clipboard-fallback path (bridge absent) copies `„ " » «` verbatim — covered by
+      the same or a sibling fixture.
 - [ ] **Doc-drift rider (do regardless):** the stale `claude "<prompt>"` comments — which
       describe the pre-infra-020 shell-wrap that no longer exists — are corrected to the
       raw-argv reality (the extension passes the prompt as a **raw argv element**; no shell
@@ -91,15 +104,15 @@ no ASCII-only assumption in the code. So the most likely real-world causes, in o
    even though the argv bytes are correct — a genuine encoding gap infra-020 never touched.
 3. A path the trace missed (needs the builder's repro to surface).
 
-**Still needs the builder to confirm before this can promote** (asked during refine, unanswered):
-- *Where* it broke — dashboard prompt-bar / Claude terminal directly / a skill-command argument
-  / the clipboard-paste fallback.
-- *Which* quotes — German `„ "` / guillemets `» «` / straight ASCII `" '` / all.
-- *Symptom* — dropped, mangled, wrong characters (mojibake/`?`), command errored, or nothing launched.
-
-One builder answer away from `todo`: the reproduction AC is the gate. If it turns out to be
-a stale-install (cause 1), this closes as "reinstall + doc-drift rider only" and the
-regression fixture still lands so it can't silently regress.
+**Promoted 2026-07-03** under the builder's autonomous-refinement authorization. The
+three questions the earlier refine wanted from the builder (*where* it broke, *which*
+quotes, *symptom*) are **not** promote gates anymore — the reframed AC lands the
+autonomous value (the code-layer round-trip fixture + the do-regardless doc-drift
+rider) without needing them, and localizes the residual to a documented manual
+follow-up. If the round-trip fixture passes, this closes as "transport proven clean +
+doc-drift rider landed", with the live-launch codepage check left as a builder
+follow-up note; if the builder later reports a real live-launch failure, that becomes a
+fresh, sharply-scoped capture at the terminal-launch layer.
 
 Related: `infrastructure-020` (raw-argv `createTerminal` launch, ADR-0018) is the direct
 predecessor that closed the shell-parsing half of this problem.

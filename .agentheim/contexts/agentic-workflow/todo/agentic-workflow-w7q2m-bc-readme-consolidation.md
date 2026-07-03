@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-w7q2m
 title: BC README consolidation — size trigger + human-in-loop consolidation procedure
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-07-02
@@ -98,10 +98,11 @@ This BC's own README is the live poster child — 811 lines, past the Read cap, 
 exact artifact both the original split and this refinement had to page.
 
 **Refinement note (2026-07-03).** The three "decide during work" forks — procedure
-home, threshold metric, flag mechanism — were resolved to (CONSOLIDATE sub-action /
-~600-line count / whats-next advisory) by **best judgment while the builder was
-away**, not by confirmed decision. Left in `backlog/` deliberately: adding a 5th
-modeling verb is a doctrine change that wants builder sign-off before PROMOTE.
+home, threshold metric, flag mechanism — resolved to (CONSOLIDATE sub-action /
+~600-line count / whats-next advisory). The doctrine change (a 5th modeling verb) is
+**signed off 2026-07-03** under the builder's autonomous-refinement authorization; the
+task is promoted. The exact line cap (~600) and the machine-cue question stay
+"decide during work" as the task already states.
 
 Source: harness audit 2026-07-02, Phase 2 gap table (context/memory row). Split
 from the original c8j3w capture on the 2026-07-02 refinement; sharpened 2026-07-03.

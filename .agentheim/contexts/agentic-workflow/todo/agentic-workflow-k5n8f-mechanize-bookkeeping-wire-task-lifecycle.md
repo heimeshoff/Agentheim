@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-k5n8f
 title: Mechanize the bookkeeping (MVP) — generalized plugin-file resolver + git-free PROMOTE lifecycle script
-status: backlog
+status: todo
 type: refactor
 context: agentic-workflow
 created: 2026-07-02

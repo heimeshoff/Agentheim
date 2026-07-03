@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-t7m4c
 title: Mechanize CLAIM + COMPLETE lifecycle scripts against the ADR-0032 worktree / squash-merge model
-status: backlog
+status: todo
 type: refactor
 context: agentic-workflow
 created: 2026-07-03

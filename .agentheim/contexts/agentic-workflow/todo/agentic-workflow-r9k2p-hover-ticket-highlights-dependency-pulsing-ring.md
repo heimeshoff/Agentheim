@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-r9k2p
 title: Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-07-02
@@ -77,6 +77,15 @@ lifecycle move, no `/api` write — hover in, cues on; hover out, cues off.
 - [ ] Hover-highlighting writes nothing to disk (read-only dashboard, ADR-0017).
 
 ## Notes
+
+**Promoted 2026-07-03 as an end-to-end integration close.** All five children are
+**done** (`d8q3n`, `design-system-w4t9k`, `design-system-b7n2s`, `k5p8w`, `h9v3m` —
+verified on disk). This umbrella is now a worker-run **integration verification**: boot
+the dashboard via the ADR-0036 runtime-drive surface, confirm the composed hover-
+dependency behavior satisfies every AC bullet above end-to-end (solid/dashed rings,
+collapsed-group + Done-peek markers, off-viewport edge blinks, reduced-motion strip,
+read-only), and close to `done`. No new implementation is expected — if a gap surfaces,
+bounce it back as a fresh child capture rather than widening this umbrella.
 
 Decomposed at refine (2026-07-02) via the orchestrator, consulting `architect` (the
 `/api/tree` projection shape and the off-screen/collapsed-group DOM-orchestration
