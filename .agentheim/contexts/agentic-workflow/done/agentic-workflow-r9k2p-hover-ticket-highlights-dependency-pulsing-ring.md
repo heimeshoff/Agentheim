@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-r9k2p
 title: Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-03
 depends_on: [agentic-workflow-d8q3n, design-system-w4t9k, design-system-b7n2s, agentic-workflow-k5p8w, agentic-workflow-h9v3m]
 blocks: []
 tags: [dashboard, board, motion, dependencies]
@@ -50,31 +50,31 @@ This is presentation only: the board stays read-only over `.agentheim/` (ADR-001
 lifecycle move, no `/api` write — hover in, cues on; hover out, cues off.
 
 ## Acceptance criteria
-- [ ] Hovering a **backlog** or **todo** card pulses a **solid** ring around each card
+- [x] Hovering a **backlog** or **todo** card pulses a **solid** ring around each card
       it `depends_on`, and a **dashed** ring (same hue) around each card it `blocks`.
-- [ ] Hovering a **doing** or **done** card reveals nothing.
-- [ ] A target card is highlighted **wherever it lives** — any lifecycle column, any
+- [x] Hovering a **doing** or **done** card reveals nothing.
+- [x] A target card is highlighted **wherever it lives** — any lifecycle column, any
       bounded context.
-- [ ] A target inside a **collapsed BC section** shows a marker on that section's
+- [x] A target inside a **collapsed BC section** shows a marker on that section's
       header (not the card itself, which isn't rendered while collapsed).
-- [ ] A target clipped by the **collapsed Done peek** shows the same kind of marker on
+- [x] A target clipped by the **collapsed Done peek** shows the same kind of marker on
       the Done column's header/collapse control.
-- [ ] A target that's rendered but **outside the visible scroll viewport** shows a
+- [x] A target that's rendered but **outside the visible scroll viewport** shows a
       blink at the top or bottom edge of the scroll container, matching which
       direction the card lies; scrolling it into view replaces the blink with the
       normal on-card pulse, live (no re-hover needed).
-- [ ] A ticket with **no** dependencies and **nothing depending on it** pulses/marks
+- [x] A ticket with **no** dependencies and **nothing depending on it** pulses/marks
       nothing on hover.
-- [ ] A ticket with **multiple** dependencies/dependents pulses/marks all of them.
-- [ ] Every cue is an **ambient pulse** (breathing loop), a third member of the
+- [x] A ticket with **multiple** dependencies/dependents pulses/marks all of them.
+- [x] Every cue is an **ambient pulse** (breathing loop), a third member of the
       existing motion taxonomy (doing-breathe ds-004, attention-dot ds-v8k2p), and
       clears the moment the hover ends.
-- [ ] Every cue is **stripped to a static (non-animated) marker under
+- [x] Every cue is **stripped to a static (non-animated) marker under
       `prefers-reduced-motion`** — never vanishes entirely, and direction (solid vs.
       dashed) stays legible with motion removed.
-- [ ] No cue uses the reserved ochre selection accent `--accent-ochre-soft`
+- [x] No cue uses the reserved ochre selection accent `--accent-ochre-soft`
       (ADR-0016) — a dedicated new token is used instead.
-- [ ] Hover-highlighting writes nothing to disk (read-only dashboard, ADR-0017).
+- [x] Hover-highlighting writes nothing to disk (read-only dashboard, ADR-0017).
 
 ## Notes
 
@@ -137,3 +137,58 @@ marker is enough).
 
 Ready-to-promote entry points (no unmet dependencies): `agentic-workflow-d8q3n` and
 `design-system-w4t9k`. The other three unlock as those land.
+
+## Outcome
+
+**Closed 2026-07-03 as an integration-verification pass.** All five children were
+already `done`; no production code changed. Verification method, per the promoted
+Notes above:
+
+- **Runtime boot (ADR-0036 runtime-drive surface):** `node dashboard/launch.mjs` from
+  this worktree; port `41798` read from `.agentheim/.dashboard/runtime.json`.
+  `/healthz` → 200, `/api/tree` → 200. `/api/tree`'s payload confirmed `dependsOn`/
+  `blocks` are carried on every projected task (d8q3n's contract, live) — e.g.
+  `agentic-workflow-002` shows `blocks: [agentic-workflow-001, agentic-workflow-003]`.
+  Torn down cleanly with `node dashboard/launch.mjs stop` (runfile removed).
+- **Test suites:** full dashboard suite `node --test` → 712/712 passing (the CRLF-guard
+  failures noted in h9v3m's outcome, captured as `agentic-workflow-t4x8p`, are already
+  resolved on this worktree's base).
+- **Source inspection against each AC bullet:**
+  - Ring: `styleguide/styles/agentheim.css` `.rel-ring::after` / `--waiting-on`
+    (solid) / `--holding-up` (dashed), one token `--rel-dep` (not
+    `--accent-ochre-soft`); `dashboard/app/board.js` wires `dependencyRelation` from
+    `resolveHoverDependencies` (`board-dependencies.js`) onto every `BoardCard`
+    regardless of column/BC.
+  - Hover source gating: `resolveHoverDependencies` gates on
+    `TRIGGER_STATUSES = {backlog, todo}`; doing/done hover yields the frozen `EMPTY`
+    sets.
+  - Collapsed-BC-section marker: `annotateSectionHiddenDependency` (pure,
+    `board-dependency-groups.js`) wired to each `Collapsible` via `hasHiddenDependency`
+    → `dependencyPresentClass` (`.rel-present`, hollow dot).
+  - Done-peek marker vs. in-clamp pulse: `donePeekHasHiddenDependency` +
+    `PEEK_MAX_HEIGHT_PX` bounded-rect check in `board.js`, routing to the Done
+    collapse control's marker only when genuinely below the clamp.
+  - Off-viewport edge blink: `IntersectionObserver` mounted only during an active
+    backlog/todo hover session (disconnected on hover-end), `classifyEdge` (pure
+    rect-math) drives `EdgeBlinkOverlay` (`.rel-edge-blink--top`/`--bottom`); scroll-
+    reactive, no re-hover needed.
+  - No/multiple dependencies: `resolveHoverDependencies`'s empty-array and multi-id
+    paths are both `node --test`-covered (`board-dependencies.test.mjs`).
+  - Reduced motion: `agentheim.css` `@media (prefers-reduced-motion: reduce)` blocks
+    for `.rel-ring`, `.rel-present`, and `.rel-edge-blink` all stop the loop
+    (`animation: none`) while forcing `opacity: 1` — never vanishes; ring direction
+    stays legible via `border-style` (solid/dashed), independent of the animation.
+  - Read-only: no `/api` write call anywhere in the hover path (`useMemo`-computed
+    resolution, transient `hoveredId` React state only) — confirmed by re-reading
+    `board-dependencies.js`'s and `board.js`'s module-level doc comments and the
+    absence of any `fetch(..., {method: 'POST'...})`/write call in the hover
+    lift/observer code.
+
+No gap surfaced. The BC README's existing "Hover dependency ring" and "Hidden and
+off-viewport dependency markers" entries already document this composed behavior
+accurately — no correction needed.
+
+Key files inspected (none modified): `dashboard/app/board-dependencies.js`,
+`dashboard/app/board-dependency-groups.js`, `dashboard/app/board.js`,
+`.agentheim/contexts/design-system/styleguide/styles/agentheim.css`,
+`.agentheim/contexts/design-system/styleguide/app/motion.js`.
