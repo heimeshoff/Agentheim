@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 13
 - **Todo:** 1
-- **Doing:** 2
-- **Done:** 97
+- **Doing:** 1
+- **Done:** 98
 <!-- task-counts:end -->
 
 ### Todo
@@ -24,11 +24,11 @@ research touching this BC, and concept synthesis pages.
 ### Doing
 <!-- doing-list:start -->
 - **agentic-workflow-h9v3m** — Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks (feature) — `doing/agentic-workflow-h9v3m-board-wiring-collapsed-group-offviewport-blinks.md`
-- **agentic-workflow-s7d3k** — Single-source the duplicated doctrine into references/ files (refactor) — `doing/agentic-workflow-s7d3k-single-source-duplicated-doctrine.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-s7d3k** — Single-source the duplicated doctrine into references/ files (refactor) — `done/agentic-workflow-s7d3k-single-source-duplicated-doctrine.md`
 - **agentic-workflow-j7d4k** — Ratify ADR-0036 — verifier runtime-drive end-to-end check (decision) — `done/agentic-workflow-j7d4k-ratify-adr-0036-verifier-runtime-drive.md`
 - **agentic-workflow-n6r8j** — Flatten single-specialist consultations — worker spawns the specialist directly (refactor) — `done/agentic-workflow-n6r8j-flatten-single-specialist-consultation.md`
 - **agentic-workflow-k5p8w** — Board wiring — resolve hover dependencies and drive the on-card ring for visible targets (feature) — `done/agentic-workflow-k5p8w-board-wiring-resolve-hover-drive-ring.md`

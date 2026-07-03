@@ -175,7 +175,7 @@ When the conductor dispatched a parallel batch of N workers and several return S
 
 Git is owned by `work`, not by workers or verifiers. Workers only move files and write content, **inside their own worktree**; verifiers only read, also inside that worktree. This is load-bearing for parallel safety: `main` is written **only** by the conductor, **only** sequentially — worktree isolation (ADR-0032) strengthens this, it does not relax it, because every worker's writes land on a private branch that cannot race anything.
 
-**The doctrine here is ADR-0026 + ADR-0032: all bookkeeping is written and `git add`ed BEFORE the integrating commit, so a completed task's code + task-move + INDEX + protocol all land in ONE commit on `main`, and `git merge --squash` — not a prose scan — is the conflict detector.** There is no post-commit write step, and no `commit: <sha>` frontmatter field (ADR-0026).
+**The doctrine here is ADR-0026 + ADR-0032: all bookkeeping is written and `git add`ed BEFORE the integrating commit, so a completed task's code + task-move + INDEX + protocol all land in ONE commit on `main`, and `git merge --squash` — not a prose scan — is the conflict detector.** Commit doctrine (scoped add, message convention, the dropped `commit:` field) lives in `references/commit-doctrine.md`.
 
 ### Anchor every git command to its tree — the CWD-drift trap
 
@@ -198,7 +198,7 @@ After a verifier returns `VERDICT: PASS` (or `VERDICT: SKIP`, or when verificati
    - Apply the BC `INDEX.md` doing → done edits (see "Index updates" below) for this task.
    - Apply the ADR↔task backlink maintenance and any ADR index inserts (see "Index updates").
    - Prepend the `protocol.md` entry for this task (see "Protocol logging") — write the final entry now, not after the commit.
-3. `git add` an **explicit, enumerated** list: the bookkeeping paths from step 2 (`INDEX.md`, `protocol.md`) — the squash in step 1 already staged the branch's own files (code, moved task file, BC README, ADRs), so you do not re-add `FILE_LIST` separately. **Never `git add -A` / `git add .`** — a blanket add sweeps in the user's in-progress work, a concurrent sibling worktree's staged-but-unmerged branch, or a concurrent `modeling` session's in-flight markdown (ADR-0026's scoped-add rule is load-bearing for concurrency safety).
+3. `git add` an **explicit, enumerated** list: the bookkeeping paths from step 2 (`INDEX.md`, `protocol.md`) — the squash in step 1 already staged the branch's own files (code, moved task file, BC README, ADRs), so you do not re-add `FILE_LIST` separately. Never `git add -A` / `git add .` — see `references/commit-doctrine.md` for why the scoped-add rule is load-bearing here.
 4. Commit with message:
    ```
    <type>(<bc>): <summary> [<task-id>]
@@ -210,7 +210,7 @@ After a verifier returns `VERDICT: PASS` (or `VERDICT: SKIP`, or when verificati
    - `git worktree remove .worktrees/<task-id> --force`
    - `git branch -D aw/<task-id>`
 
-The commit SHA is **not** written back anywhere. A task's commit is discoverable from `git log` via the `[<task-id>]` trailer in the message — that is why the `commit:` frontmatter field is dropped (ADR-0026). Do **not** add a `commit: <sha>` field and do **not** amend the task file after committing.
+The commit SHA is **not** written back anywhere — see `references/commit-doctrine.md` for the `[<task-id>]` trailer / dropped `commit:` field convention. Do **not** add a `commit: <sha>` field and do **not** amend the task file after committing.
 
 ### Merge-back conflicts — abort and surface, never auto-guess
 
@@ -224,14 +224,7 @@ Two same-BC workers both editing the BC README (the common case the Phase 3 advi
 
 **One task = one commit is the default.** Integrate after each verifier passes, not in a batch — that way if the next verification fails we haven't bundled it with an already-passed one. In a parallel batch where verifiers return roughly simultaneously, squash-merge sequentially on `main` in the order verifiers return PASS.
 
-**Trivial-squash carve-out (ADR-0026, unaddressed by ADR-0032's per-task-branch model but not precluded by it):** a *wave* of trivial follow-up tasks MAY be folded into one commit (carrying one `[<task-id>]` trailer per squashed task) **only when ALL of these hold**:
-
-- **(a) Same BC** — every task in the wave belongs to the same bounded context.
-- **(b) Same file set** — they touch the same files; no task in the wave touches a file no other task in the wave touches.
-- **(c) No-behavior-change tweaks** — each is a copy / chrome / token / formatting tweak layered on the prior one: no new test, no new code path, no acceptance criterion that a test would newly cover. (If a task adds a test or a behavior, it is not trivial — give it its own commit.)
-- **(d) Same batch** — they were dispatched in the same `work` batch and all passed verification.
-
-The aw-064/065/066/067 one-line topbar-chrome tweaks are the canonical example. When in doubt, do **not** squash — one commit per task is always safe. When it does apply under worktree isolation, squash-merge each eligible branch in turn (`git merge --squash aw/<id-1>`, then `git merge --squash aw/<id-2>`, …) before the one shared commit. This carve-out bends the vision's "one task = one commit" invariant deliberately; that is why it is recorded in ADR-0026.
+The trivial-squash carve-out and its four conditions (same BC, same file set, no-behavior-change, same batch) are defined in `references/commit-doctrine.md` (ADR-0026, unaddressed by ADR-0032's per-task-branch model but not precluded by it). The aw-064/065/066/067 one-line topbar-chrome tweaks are the canonical example. When in doubt, do **not** squash — one commit per task is always safe. When it does apply under worktree isolation, squash-merge each eligible branch in turn (`git merge --squash aw/<id-1>`, then `git merge --squash aw/<id-2>`, …) before the one shared commit.
 
 ### Windows & node_modules
 
@@ -419,32 +412,9 @@ Your context window is finite. Respect it:
 - Don't restate the task file or the BC README verbatim — the conductor already has them.
 
 ## Return format — STRICT
-When done, return ONLY the following, nothing else. No prose, no preamble, no "here's what I did".
-
-RESULT: SUCCESS
-TASK_ID: <id>
-SUMMARY: <one or two sentences, domain-language>
-FILES_CHANGED: <integer>
-FILE_LIST: <comma-separated absolute paths of all files you created or modified, EXCLUDING the moved task file>
-BC_README_UPDATED: yes | no
-ADRS_WRITTEN: <comma-separated filenames under .agentheim/knowledge/decisions/, or "none">
-NEW_BACKLOG_ITEMS: <comma-separated task ids created in a backlog/ during your work, or "none">
-TESTS_ADDED: <integer count of new tests written for this task>
-TESTS_PASSING: yes | no
-TDD_SKIPPED: <reason from the legitimate-skip categories, or "no" if TDD was followed>
-CONCEPT_CANDIDATE: <concept-name> — converging on N artifacts (<id list>) | none
+When done, the worker returns ONLY a `RESULT: SUCCESS | BOUNCED | FAILED` block, nothing else — no prose, no preamble, no "here's what I did". The exact fields (SUCCESS's `SUMMARY` / `FILE_LIST` / `TESTS_ADDED` / `TESTS_PASSING` / `TDD_SKIPPED` / `CONCEPT_CANDIDATE` / etc., plus BOUNCED's and FAILED's shapes) are the single source in `references/worker-return-format.md` — paste that file's content into the spawn prompt here so the worker has it inline without a read hop.
 
 If `TESTS_PASSING: no`, do NOT return SUCCESS — that's a FAIL or a BOUNCE, not a success.
-
-For a bounce, return:
-RESULT: BOUNCED
-TASK_ID: <id>
-REASON: <one or two sentences on what was missing>
-
-For a failure, return:
-RESULT: FAILED
-TASK_ID: <id>
-ERROR: <where and why it went wrong, one or two sentences>
 ```
 
 ## End-of-run reporting
@@ -472,7 +442,7 @@ When `todo/` is empty and all `doing/` is resolved (or the user interrupts):
 
    ---
    ```
-   This is the one `work` protocol line written *after* a commit (it summarizes the session). To honor ADR-0026's "clean working tree" rule, **commit it** with a scoped add of only `protocol.md`: `git add .agentheim/knowledge/protocol.md` then `chore(<bc>): work session end bookkeeping [<last-task-id>]` (reuse the last completed task's id as the trailer, or `chore: work session end bookkeeping` if the session committed nothing). Do not `git add -A`. This is the *only* bookkeeping-after-commit `work` performs, and it is a single line — every per-task INDEX/protocol edit already rode in its own task commit (the old trailing "record SHAs + INDEX/protocol" commit is gone). (Any *deliberately-committed* stranded file from step 5 rode in its own scoped reconciliation commit *before* this entry — see below.)
+   This is the one `work` protocol line written *after* a commit (it summarizes the session). To honor the "clean working tree" rule (`references/commit-doctrine.md`, ADR-0026), **commit it** with a scoped add of only `protocol.md`: `git add .agentheim/knowledge/protocol.md` then `chore(<bc>): work session end bookkeeping [<last-task-id>]` (reuse the last completed task's id as the trailer, or `chore: work session end bookkeeping` if the session committed nothing). This is the *only* bookkeeping-after-commit `work` performs, and it is a single line — every per-task INDEX/protocol edit already rode in its own task commit (the old trailing "record SHAs + INDEX/protocol" commit is gone). (Any *deliberately-committed* stranded file from step 5 rode in its own scoped reconciliation commit *before* this entry — see below.)
 
 ## Reconciling stranded carry-over (session-end): working tree AND worktrees
 
@@ -484,10 +454,10 @@ Run this once per session, at end-of-run step 5 (after the last per-task commit,
 
 1. **Detect.** Run `git status --porcelain`. Each line is a stranded working-tree entry: tracked-modified/staged (` M`, `M `, `MM`, `A `, `D `, `R `, …) **or** untracked (`??`). By this point every task this session completed has already ridden into its own commit, so a clean tree yields no lines. If the output is **empty**, there is nothing to reconcile — record `Carry-over: none — working tree clean` and skip to the protocol entry.
 2. **Surface, per file — never auto-sweep.** For **each** stranded entry (both tracked-modified and untracked), present it to the **user** with the two allowed dispositions. Do not batch them into a single yes/no; a mixed set (one orphan to commit, one live sibling to leave) is the common case.
-   - **(A) Commit deliberately.** The file is this project's own orphaned bookkeeping that no skill owns (e.g. an INDEX edit or protocol line a crashed prior session left behind). Make its **own scoped, clearly-labeled** commit: enumerate the exact path — `git add <exact-path>` (never `git add -A` / `git add .`) — then commit with `chore(<bc>): reconcile stranded <short-desc> [<last-task-id>]` (or `chore: reconcile stranded <short-desc>` if no task ran). One reconciliation commit may group several paths **only** if they are one coherent orphan set, each path still enumerated in the `git add`.
+   - **(A) Commit deliberately.** The file is this project's own orphaned bookkeeping that no skill owns (e.g. an INDEX edit or protocol line a crashed prior session left behind). Make its **own scoped, clearly-labeled** commit: enumerate the exact path — `git add <exact-path>`, never `git add -A` / `git add .` (`references/commit-doctrine.md`) — then commit with `chore(<bc>): reconcile stranded <short-desc> [<last-task-id>]` (or `chore: reconcile stranded <short-desc>` if no task ran). One reconciliation commit may group several paths **only** if they are one coherent orphan set, each path still enumerated in the `git add`.
    - **(B) Leave behind with a named owner.** The file belongs to another live flow — a concurrent `modeling` session's in-flight task, a still-un-verified worker's code, the user's own WIP, or known non-work noise (e.g. an untracked screenshot). Leave it untouched and record a leave-behind note that **names the presumed owner and the reason** (e.g. `owner: concurrent modeling session, in-flight task file`). This is a deliberate, attributed decision — not the old anonymous "untouched" boilerplate.
 3. **Concurrency caution — ask, do not assume.** A *live* concurrent session's in-flight files are byte-indistinguishable from a crashed session's orphans. Committing another session's half-written markdown is the exact failure ADR-0026 §5 exists to prevent. So this step **asks the user per file** and never infers the disposition. When the owner is uncertain, the safe default is **(B) leave behind**, not (A) commit — you can always reconcile a true orphan next session, but a wrongly-committed live file is a race you cannot cleanly undo.
-4. **The scoped-add rule is unchanged.** Reconciliation is still an enumerated `git add <path>` per deliberately-committed file. It **never** becomes `git add -A` / `git add .` — that would sweep in exactly the concurrent-sibling files disposition (B) exists to protect.
+4. **The scoped-add rule is unchanged.** Reconciliation is still an enumerated `git add <path>` per deliberately-committed file — never `git add -A` / `git add .` (`references/commit-doctrine.md`), which would sweep in exactly the concurrent-sibling files disposition (B) exists to protect.
 5. **Record the dispositions.** Carry every file's disposition into the session-end protocol entry's `**Carry-over:**` line (step 6): committed files as `<path>: committed (<label>)`, left-behind files as `<path>: left behind (owner: <flow>, <reason>)`. This replaces the "carry-over untouched, as in prior sessions" boilerplate — the protocol now records *what was decided and why*, per file, instead of silently repeating the leak.
 
 ### Worktree carry-over (extends this reconciliation — ADR-0032)

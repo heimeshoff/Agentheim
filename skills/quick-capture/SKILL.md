@@ -151,16 +151,7 @@ may mention it in one line when reporting — but never block the capture on it.
 
 ### ID convention
 
-Emit a fresh id `<bc>-<token>`, where `<token>` is **exactly 5 characters** from the alphabet
-`0123456789abcdefghjkmnpqrstvwxyz` (Crockford base32, lowercase, minus the look-alikes
-`i l o u`); the **first character is a letter** (`[a-hjkmnp-tv-z]`), the remaining four are any
-token character. Generate it randomly — **never scan existing files for a "next number".** See
-ADR-0028 §1.
-
-IDs are stable and never reused — never renumber. With a random token this holds **by
-construction**: the generator never consults history, so there is no counter to advance or
-collide. When capturing several tasks into the same BC at once, mint an independent fresh token
-for each. Legacy `<bc>-NNN` ids already on disk are kept as-is — never rewrite them.
+Emit a fresh id `<bc>-<token>` per the id grammar in `references/id-grammar.md` (ADR-0028 §1) — generate the token randomly, never scan existing files for a "next number". When capturing several tasks into the same BC at once, mint an independent fresh token for each. Legacy `<bc>-NNN` ids already on disk are kept as-is — never rewrite them.
 
 ## Updating the index
 
@@ -198,20 +189,14 @@ the protocol is a diary, not a transcript.
 
 ## Committing
 
-Quick-capture commits its own markdown so the working tree is clean after a capture
-(ADR-0026). After writing the task file(s), updating the index, and logging the protocol:
+Quick-capture commits its own markdown so the working tree is clean after a capture. Commit doctrine lives in `references/commit-doctrine.md` (ADR-0026) — scoped `git add` is mandatory here too: `quick-capture` can run while a `work` or `modeling` session has its own in-flight files on the working tree, so a blanket add would bundle or race them. After writing the task file(s), updating the index, and logging the protocol:
 
 1. `git add` an **explicit, enumerated** list of *only* this capture's artifacts: the new
-   task file(s), the target BC's `INDEX.md`, and `.agentheim/knowledge/protocol.md`.
-   **Never `git add -A` / `git add .`** — `quick-capture` can run while a `work` or
-   `modeling` session has its own in-flight files on the working tree; a blanket add would
-   bundle or race them. Scoped add is load-bearing for that concurrency (ADR-0026).
+   task file(s), the target BC's `INDEX.md`, and `.agentheim/knowledge/protocol.md`. Never `git add -A` / `git add .`.
 2. Commit silently (no confirmation prompt — capture's whole point is speed) with:
    ```
    chore(<bc>): capture <task-id> — <title> [<task-id>]
    ```
-   The `[<task-id>]` trailer is the `git log` index for this task (there is no `commit:`
-   frontmatter field — ADR-0026 dropped it).
 3. **Multi-idea dump:** one commit **per task** keeps the per-task granularity (each carries
    its own `[<task-id>]` trailer), which the later refine/work passes rely on. Commit each
    task with its own scoped add as you write it.
@@ -228,8 +213,8 @@ one's (fixing both Backlog counts), and append a one-line protocol note. Don't r
 or renumber — it's the same task, only its home changed. (If the BC short-code is part of
 the id, keep the original id; ids are stable and renumbering breaks references.) Then
 **commit the re-route** with a scoped add of exactly those touched files (the moved task
-file's new and old paths, both BCs' `INDEX.md`, and `protocol.md`) — never `git add -A` —
-under `chore(<new-bc>): re-route <task-id> → <new-bc> [<task-id>]` (ADR-0026).
+file's new and old paths, both BCs' `INDEX.md`, and `protocol.md`) — never `git add -A`,
+per `references/commit-doctrine.md` — under `chore(<new-bc>): re-route <task-id> → <new-bc> [<task-id>]` (ADR-0026).
 
 ## Handoff to modeling — why "raw" is fine
 

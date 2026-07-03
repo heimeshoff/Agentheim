@@ -16,7 +16,7 @@ In your prompt:
 - Absolute path to the task file (currently in `doing/`)
 - Bounded context name and absolute path to the BC's README
 - The diff (`git diff --stat` summary plus the full diff, or a patch attached as text)
-- The worker's strict SUCCESS return block — TASK_ID, SUMMARY, FILES_CHANGED, FILE_LIST, BC_README_UPDATED, ADRS_WRITTEN, NEW_BACKLOG_ITEMS, plus TESTS_ADDED, TESTS_PASSING, TDD_SKIPPED
+- The worker's strict SUCCESS return block — the fields are defined in `references/worker-return-format.md` (TASK_ID, SUMMARY, FILES_CHANGED, FILE_LIST, BC_README_UPDATED, ADRS_WRITTEN, NEW_BACKLOG_ITEMS, TESTS_ADDED, TESTS_PASSING, TDD_SKIPPED, CONCEPT_CANDIDATE)
 - A `## Pre-resolved test command` block — the `work` skill resolved the project's test command once for this batch and pre-loaded it here, exactly as workers receive pre-loaded ADRs. Use it in check 2. It reads `none` only when resolution found nothing.
 - Iteration number — if this is the second or third verification attempt on this task, the prompt will say so
 
@@ -48,7 +48,7 @@ If a criterion has neither, FAIL with that specific criterion cited.
 
 ### 2. Test execution
 
-If `TESTS_ADDED > 0` in the worker's return, run the project's test suite. How:
+If `TESTS_ADDED > 0` in the worker's return (see `references/worker-return-format.md` for the field's source), run the project's test suite. How:
 
 1. **Use the supplied command first.** Your spawn prompt carries a `## Pre-resolved test command` block — `work` resolved the project's test command once for this batch and passed it in (the same command is reused across re-dispatch iterations, so you never re-hunt on iteration 2 or 3). If it names a command (anything other than `none`), run that command as-is and skip discovery.
 2. **Discovery fallback.** Only when the block reads `none` or is absent, look at the BC README and the project root for a test command yourself. Common locations: `package.json` scripts, `Makefile` targets, `pyproject.toml`, `Cargo.toml`, `*.csproj`, `go.mod`. If you find one obvious command, run it.

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 09:00 -- Task verified and completed: agentic-workflow-s7d3k - Single-source the duplicated doctrine into references/ files
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-s7d3k - Single-source the duplicated doctrine into references/ files
+**Summary:** Relocated the three duplicated doctrine blocks (id grammar, commit doctrine, worker return format) into repo-root `references/{id-grammar,commit-doctrine,worker-return-format}.md`, collapsing every inline copy across the four skills and two agents to a one-line summary + repo-relative pointer (the `references/modes.md` pattern). Grep-verified single authoritative home per block; the f7k2d drift cannot recur since `work`'s spawn template pastes the single return-format source at dispatch.
+**Duration:** ~16m
+**Verification:** PASS (iteration 1)
+**Files changed:** 9
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-03 08:57 -- Task verified and completed: agentic-workflow-j7d4k - Ratify ADR-0036 — verifier runtime-drive end-to-end check
 
 **Type:** Work / Task completion

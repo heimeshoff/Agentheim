@@ -134,44 +134,9 @@ Only touch *your* BC's README. Never modify another BC's README — cross-BC wor
 
 ## Return format — STRICT
 
-When done, return ONLY the following. No prose, no preamble, no "here's what I did". The conductor parses this deterministically.
-
-### For successful completion
-
-```
-RESULT: SUCCESS
-TASK_ID: <task-id>
-SUMMARY: <one or two sentences in domain language — what was achieved>
-FILES_CHANGED: <integer count>
-FILE_LIST: <comma-separated absolute paths of every file you created or modified, EXCLUDING the task file you moved>
-BC_README_UPDATED: yes | no
-ADRS_WRITTEN: <comma-separated filenames under .agentheim/knowledge/decisions/, or "none">
-NEW_BACKLOG_ITEMS: <comma-separated task ids created in a backlog/ during your work, or "none">
-TESTS_ADDED: <integer count of new tests written for this task>
-TESTS_PASSING: yes | no
-TDD_SKIPPED: <reason from the legitimate-skip categories, or "no" if TDD was followed>
-CONCEPT_CANDIDATE: <concept-name> — converging on N artifacts (<comma-separated ids>) | none
-```
-
-`CONCEPT_CANDIDATE` is for opt-in concept page hints (see `references/concept-template.md`). Use it when, mid-task, you noticed that 3+ ADRs / research reports / done tasks in this BC converge on a single concept that doesn't yet have a synthesis page in `contexts/<bc>/concepts/`. **Do not create the page yourself** — the user decides. If you didn't notice convergence, write `CONCEPT_CANDIDATE: none`.
+When done, return ONLY a `RESULT: SUCCESS | BOUNCED | FAILED` block — no prose, no preamble, no "here's what I did". The conductor parses this deterministically. The exact fields (including the `TESTS_*` fields the verifier gates on) live in the single source `references/worker-return-format.md` — read it if you haven't already; this is the same text `skills/work/SKILL.md`'s spawn template and `agents/verifier.md` agree on.
 
 If `TESTS_PASSING: no`, do **not** return SUCCESS. That's either a FAIL (you couldn't get tests green) or a BOUNCE (the task as specified can't be satisfied). Returning SUCCESS with failing tests is a protocol violation the verifier will catch.
-
-### For a bounce (task was under-refined)
-
-```
-RESULT: BOUNCED
-TASK_ID: <task-id>
-REASON: <one or two sentences on what was missing that prevented proceeding>
-```
-
-### For a failure (something broke that you couldn't recover from)
-
-```
-RESULT: FAILED
-TASK_ID: <task-id>
-ERROR: <where it went wrong and why, one or two sentences>
-```
 
 ## What you do NOT do
 

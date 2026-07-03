@@ -205,7 +205,7 @@ The boundary mirrors ADR-0007: the raw `.md` deletes are the mechanical core; th
 
 7. **IDs are gone, never reused.** For new token ids this holds **by construction** (ADR-0028 §5): the generator emits a random token and never consults history, so a dismissed token is simply one of ~23M points the generator will, with overwhelming probability, never emit again — there is no counter to advance or rewind. For legacy `<bc>-NNN` ids the original rule is retained verbatim: a dismissed number is retired, consistent with "never renumber" — a future capture takes the next free number, never a dismissed one.
 
-8. **Commit the dismissal** (ADR-0026). Scoped `git add` of exactly the files the cascade touched — the deleted task file paths (a delete is staged with `git add`/`git rm`), every `INDEX.md` the set spanned, every surviving task file or ADR whose backlinks were stripped, and `protocol.md` — then **one** commit for the whole cascade: `chore(<bc>): dismiss <id-or-cascade-set>` (name the lead id, or the set if small). **Never `git add -A`** — even though a DISMISS legitimately spans multiple BCs, the add stays an explicit enumeration of only the cascade's files, so a concurrent `work`/`modeling` session's in-flight markdown is never swept in (the scoped-add rule is load-bearing for concurrency, ADR-0026).
+8. **Commit the dismissal** per `references/commit-doctrine.md` (ADR-0026). Scoped `git add` of exactly the files the cascade touched — the deleted task file paths (a delete is staged with `git add`/`git rm`), every `INDEX.md` the set spanned, every surviving task file or ADR whose backlinks were stripped, and `protocol.md` — then **one** commit for the whole cascade: `chore(<bc>): dismiss <id-or-cascade-set>` (name the lead id, or the set if small). Note that even though a DISMISS legitimately spans multiple BCs, the add stays an explicit enumeration of only the cascade's files — never `git add -A`.
 
 ## Task file format
 
@@ -260,13 +260,7 @@ field legend lives here instead:
 
 ### ID convention
 
-Emit a fresh id `<bc>-<token>`, where `<token>` is **exactly 5 characters** from the alphabet
-`0123456789abcdefghjkmnpqrstvwxyz` (Crockford base32, lowercase, minus the look-alikes
-`i l o u`); the **first character is a letter** (`[a-hjkmnp-tv-z]`), the remaining four are any
-token character. Generate it randomly — **never scan existing files for a "next number".** See
-ADR-0028 §1.
-
-Example: `agentic-workflow-k3f9q`. Keep IDs stable — never renumber. With a random token this holds **by construction** (the generator never consults history). Legacy `<bc>-NNN` ids (e.g. `auth-003`) already on disk are kept as-is — never rewrite them.
+Emit a fresh id `<bc>-<token>` per the id grammar in `references/id-grammar.md` (ADR-0028 §1) — generate the token randomly, never scan existing files for a "next number". Legacy `<bc>-NNN` ids (e.g. `auth-003`) already on disk are kept as-is — never rewrite them.
 
 ## Decisions as tasks
 
@@ -425,18 +419,7 @@ If the action is non-trivial (multiple tasks created from one capture, refinemen
 
 ## Committing
 
-Each action — CAPTURE, REFINE, PROMOTE, DISMISS — commits its own markdown at the end of the action, so the working tree is clean afterward (ADR-0026). This is the same auto-commit discipline `work` and `quick-capture` follow: the skill that owns the bookkeeping owns the commit of that bookkeeping (ADR-0017).
-
-**Scoped `git add` only — never `git add -A` / `git add .`.** `modeling` sometimes runs concurrently with a `work` session (and with `quick-capture`). Each action `git add`s an explicit, enumerated list of *only* the `.md` files it touched — the task file(s) it wrote or moved, the BC `INDEX.md`(es), `protocol.md`, and any ADR / vision / context-map it produced. A blanket add would sweep in a concurrent worker's un-verified code or another skill's in-flight markdown and bundle or race it into the wrong commit. This is load-bearing for concurrency safety, not a style choice (ADR-0026).
-
-**Message convention** (the `[<task-id>]` trailer is the `git log` index — there is no `commit:` frontmatter field, ADR-0026 dropped it):
-
-| Action | Message |
-|---|---|
-| CAPTURE | `chore(<bc>): capture <task-id> — <title> [<task-id>]` (one commit + trailer per task if a capture produced several) |
-| REFINE | `model(<bc>): refine <task-id> — <title> [<task-id>]` (one trailer per task if it split) |
-| PROMOTE | `model(<bc>): promote <task-id> — <title> [<task-id>]` |
-| DISMISS | `chore(<bc>): dismiss <id-or-cascade-set>` (one commit for the whole cascade) |
+Each action — CAPTURE, REFINE, PROMOTE, DISMISS — commits its own markdown at the end of the action, so the working tree is clean afterward. Commit doctrine (scoped `git add`, never `git add -A` / `git add .`, the `[<task-id>]` trailer, message convention per action) lives in `references/commit-doctrine.md` (ADR-0026). `modeling` sometimes runs concurrently with a `work` session and with `quick-capture`, so the scoped-add rule is load-bearing here, not a style choice: each action `git add`s an explicit, enumerated list of only the `.md` files it touched — the task file(s) it wrote or moved, the BC `INDEX.md`(es), `protocol.md`, and any ADR / vision / context-map it produced.
 
 `model` is a commit-message `<type>` prefix for modeling's markdown commits — it is **not** a task `type:` (those stay feature/bug/refactor/chore/spike/decision).
 

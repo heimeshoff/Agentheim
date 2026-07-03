@@ -166,7 +166,7 @@ For each significant area the architect surfaced, create a `type: decision` task
 
 The test: *"if any single BC didn't exist, would this decision still need to be made?"* If yes, it's globally true. If no, it's BC-local.
 
-These decision tasks are **ordinary captures**, not foundation tasks — they get random token ids, not `-001`-style ids. Mint each one fresh: emit a fresh id `<bc>-<token>`, where `<token>` is **exactly 5 characters** from the alphabet `0123456789abcdefghjkmnpqrstvwxyz` (Crockford base32, lowercase, minus the look-alikes `i l o u`); the **first character is a letter** (`[a-hjkmnp-tv-z]`), the remaining four are any token character. Generate it randomly — **never scan existing files for a "next number".** See ADR-0028 §1. The only ids `brainstorm` mints deterministically are the two reserved foundation ids below (the walking skeleton and the styleguide, ADR-0028 §7).
+These decision tasks are **ordinary captures**, not foundation tasks — they get random token ids, not `-001`-style ids. Mint each one fresh, per the id grammar in `references/id-grammar.md` (ADR-0028 §1). The only ids `brainstorm` mints deterministically are the two reserved foundation ids below (the walking skeleton and the styleguide, ADR-0028 §7).
 
 Drop the architect's ADR draft into the task's `Notes` section so the worker has it ready. Place these in `todo/` — foundation choices the architect just refined are by definition ready enough to act on. Acceptance criteria: "ADR committed, justification matches the architect's draft (or user-amended version), no code change required".
 
@@ -245,9 +245,9 @@ For each `type: decision` / `type: spike` / `type: feature` task emitted during 
 
 ## Committing
 
-`brainstorm` commits the markdown it produced, so the working tree is clean after a session (ADR-0026). After the session's artifacts, indexes, and protocol entry are written:
+`brainstorm` commits the markdown it produced, so the working tree is clean after a session. Commit doctrine lives in `references/commit-doctrine.md` (ADR-0026). After the session's artifacts, indexes, and protocol entry are written:
 
-1. `git add` an **explicit, enumerated** list of *only* the files this session wrote or changed: `.agentheim/vision.md`, `.agentheim/context-map.md` (if produced), each new `contexts/<bc>/README.md` + `contexts/<bc>/INDEX.md`, every foundation task file (decision / walking-skeleton spike / styleguide), `.agentheim/knowledge/index.md`, any **strategic** ADR written this session, and `.agentheim/knowledge/protocol.md`. **Never `git add -A` / `git add .`** — keep the add scoped to this session's files so an unrelated in-flight change isn't swept in (ADR-0026's scoped-add rule).
+1. `git add` an **explicit, enumerated** list of *only* the files this session wrote or changed: `.agentheim/vision.md`, `.agentheim/context-map.md` (if produced), each new `contexts/<bc>/README.md` + `contexts/<bc>/INDEX.md`, every foundation task file (decision / walking-skeleton spike / styleguide), `.agentheim/knowledge/index.md`, any **strategic** ADR written this session, and `.agentheim/knowledge/protocol.md`. Never `git add -A` / `git add .`, per `references/commit-doctrine.md`.
 2. Commit with a single message for the session:
    ```
    chore(<bc-or-global>): brainstorm <topic> — vision created | vision revised | vision extended
