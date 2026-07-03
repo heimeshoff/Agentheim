@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-y8b4q
 title: End-to-end verification step for tasks with a runtime surface
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-02

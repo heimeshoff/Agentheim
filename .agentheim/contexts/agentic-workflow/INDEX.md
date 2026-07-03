@@ -11,19 +11,19 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 12
-- **Todo:** 2
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 2
 - **Done:** 100
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-t4x8p** — Fix CRLF-sensitive byte-identical guard regexes in intent-route rail-routing tests (bug) — `todo/agentic-workflow-t4x8p-fix-crlf-sensitive-byte-identical-guard-regexes.md`
-- **agentic-workflow-y8b4q** — End-to-end verification step for tasks with a runtime surface (feature) — `todo/agentic-workflow-y8b4q-end-to-end-verification-runtime-surface.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-t4x8p** — Fix CRLF-sensitive byte-identical guard regexes in intent-route rail-routing tests (bug) — `doing/agentic-workflow-t4x8p-fix-crlf-sensitive-byte-identical-guard-regexes.md`
+- **agentic-workflow-y8b4q** — End-to-end verification step for tasks with a runtime surface (feature) — `doing/agentic-workflow-y8b4q-end-to-end-verification-runtime-surface.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)

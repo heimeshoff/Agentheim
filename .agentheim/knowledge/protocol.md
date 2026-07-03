@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 11:49 -- Batch started: [agentic-workflow-t4x8p, agentic-workflow-y8b4q]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-t4x8p - Fix CRLF-sensitive byte-identical guard regexes in intent-route rail-routing tests, agentic-workflow-y8b4q - End-to-end verification step for tasks with a runtime surface
+**Parallel:** yes (2 workers)
+**Planning advisory:** whats-next (generated 2026-07-03T09:20:00Z, current — newer than last Work entry 09:14) recommends t4x8p first as the zero-deliberation quick win; ordered first within the batch.
+
+---
+
 ## 2026-07-03 09:34 -- Modeling / Promoted: agentic-workflow-t4x8p, agentic-workflow-y8b4q
 
 **Type:** Modeling / Promote
