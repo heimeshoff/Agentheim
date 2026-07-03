@@ -11,14 +11,13 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 3
-- **Todo:** 10
-- **Doing:** 0
+- **Todo:** 9
+- **Doing:** 1
 - **Done:** 104
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-k5n8f** — Mechanize the bookkeeping (MVP) — generalized plugin-file resolver + git-free PROMOTE lifecycle script (refactor) — `todo/agentic-workflow-k5n8f-mechanize-bookkeeping-wire-task-lifecycle.md`
 - **agentic-workflow-r2c7m** — Protocol rotation — cap protocol.md and roll to monthly files (feature) — `todo/agentic-workflow-r2c7m-protocol-rotation.md`
 - **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `todo/agentic-workflow-c8j3w-index-done-list-rotation.md`
 - **agentic-workflow-t7m4c** — Mechanize CLAIM + COMPLETE lifecycle scripts against the ADR-0032 worktree / squash-merge model (refactor) — `todo/agentic-workflow-t7m4c-claim-complete-lifecycle-scripts-worktree.md`
@@ -32,6 +31,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-k5n8f** — Mechanize the bookkeeping (MVP) — generalized plugin-file resolver + git-free PROMOTE lifecycle script (refactor) — `doing/agentic-workflow-k5n8f-mechanize-bookkeeping-wire-task-lifecycle.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)

@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 12:44 -- Batch started: [agentic-workflow-k5n8f]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-k5n8f - Mechanize the bookkeeping (MVP) — generalized plugin-file resolver + git-free PROMOTE lifecycle script
+**Parallel:** no (1 worker — run solo for a focused, low-risk integration; it's the keystone unblocking the k5n8f→r2c7m/t7m4c→c8j3w bookkeeping chain, and its contract ADR-0038 just landed)
+**Planning advisory:** whats-next (12:00 modeling sweep is the newest planning input). k5n8f chosen for maximal unblock leverage now that p3v9k/ADR-0038 is accepted.
+
+---
+
 ## 2026-07-03 12:40 -- Task verified and completed: agentic-workflow-v3h6p - Eval-harness the verifier
 
 **Type:** Work / Task completion
