@@ -11,26 +11,26 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 3
-- **Todo:** 9
-- **Doing:** 0
+- **Todo:** 6
+- **Doing:** 3
 - **Done:** 105
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-r2c7m** — Protocol rotation — cap protocol.md and roll to monthly files (feature) — `todo/agentic-workflow-r2c7m-protocol-rotation.md`
 - **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `todo/agentic-workflow-c8j3w-index-done-list-rotation.md`
 - **agentic-workflow-t7m4c** — Mechanize CLAIM + COMPLETE lifecycle scripts against the ADR-0032 worktree / squash-merge model (refactor) — `todo/agentic-workflow-t7m4c-claim-complete-lifecycle-scripts-worktree.md`
 - **agentic-workflow-w7q2m** — BC README consolidation — size trigger + human-in-loop consolidation procedure (feature) — `todo/agentic-workflow-w7q2m-bc-readme-consolidation.md`
 - **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature, umbrella — delivered via d8q3n/w4t9k/b7n2s/k5p8w/h9v3m) — `todo/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
-- **agentic-workflow-z2f7s** — Fan-out caps — MAX_PARALLEL as a knob, research cap, global nested-spawn ceiling (feature) — `todo/agentic-workflow-z2f7s-fanout-caps-and-spawn-budget.md`
 - **agentic-workflow-m9w5c** — Live observability — hooks write agent status to state/, dashboard renders an in-flight lane (feature) — `todo/agentic-workflow-m9w5c-live-observability-hooks-inflight-lane.md`
-- **agentic-workflow-v6d4n** — Vision-conformance check — flag in-flight work that drifts from vision success criteria / non-goals (feature) — `todo/agentic-workflow-v6d4n-vision-conformance-check-session-end-verify.md`
 - **agentic-workflow-q3n7k** — Update the workflow guide to reflect new features like inquire and what's next (feature) — `todo/agentic-workflow-q3n7k-update-workflow-guide-inquire-whats-next.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-r2c7m** — Protocol rotation — cap protocol.md and roll to monthly files (feature) — `doing/agentic-workflow-r2c7m-protocol-rotation.md`
+- **agentic-workflow-z2f7s** — Fan-out caps — MAX_PARALLEL as a knob, research cap, global nested-spawn ceiling (feature) — `doing/agentic-workflow-z2f7s-fanout-caps-and-spawn-budget.md`
+- **agentic-workflow-v6d4n** — Vision-conformance check — flag in-flight work that drifts from vision success criteria / non-goals (feature) — `doing/agentic-workflow-v6d4n-vision-conformance-check-session-end-verify.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)

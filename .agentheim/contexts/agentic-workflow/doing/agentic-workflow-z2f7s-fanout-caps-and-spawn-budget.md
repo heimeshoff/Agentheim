@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-z2f7s
 title: Fan-out caps — MAX_PARALLEL as a knob, research cap, global nested-spawn ceiling
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-02

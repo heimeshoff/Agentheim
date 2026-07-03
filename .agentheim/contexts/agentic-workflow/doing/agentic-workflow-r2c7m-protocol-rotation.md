@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-r2c7m
 title: Protocol rotation — cap protocol.md and roll to monthly files
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-02

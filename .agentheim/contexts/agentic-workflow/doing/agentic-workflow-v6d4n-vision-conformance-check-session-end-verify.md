@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-v6d4n
 title: Vision-conformance check — flag in-flight work that drifts from vision success criteria / non-goals
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-03

@@ -5,6 +5,16 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 14:20 -- Batch started: [agentic-workflow-r2c7m, agentic-workflow-z2f7s, agentic-workflow-v6d4n]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-r2c7m - Protocol rotation (cap protocol.md, roll to monthly files), agentic-workflow-z2f7s - Fan-out caps (MAX_PARALLEL knob, research cap, nested-spawn budget), agentic-workflow-v6d4n - Vision-conformance check (session-end drift advisory)
+**Parallel:** yes (3 workers, MAX_PARALLEL — all agentic-workflow BC)
+**Planning advisory:** whats-next (generated 09:20) is **stale** — older than the 13:06 session-end entry, and its picks (t4x8p, p3v9k) already shipped; weighted as background only. Batch chosen for leverage (r2c7m unblocks c8j3w) + light preload; t7m4c held back to avoid a guaranteed lib/task-lifecycle.mjs self-conflict with r2c7m. **Cap note:** 6 ready todo tasks remain beyond this batch of 3 (m9w5c, q3n7k, r9k2p, t7m4c, w7q2m) — held to later waves by MAX_PARALLEL=3, not dropped.
+**Merge-order advisory:** all three touch `skills/work/SKILL.md` in disjoint sections (z2f7s→Phase 3 fan-out, v6d4n→End-of-run session-end, r2c7m→Protocol-logging) — squash-merge sequentially; expect clean 3-way auto-merge (ADR-0032).
+
+---
+
 ## 2026-07-03 13:06 -- Work session ended
 
 **Type:** Work / Session end
