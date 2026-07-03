@@ -5,6 +5,120 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 00:31 -- Modeling / Refined: infrastructure-q8m4t - Support quotation marks (Gänsefüsschen) in prompts
+
+**Type:** Modeling / Refine
+**BC:** infrastructure
+**Status after:** backlog
+**Summary:** Second refine pass (builder away — the three reproduction questions from the first pass went unanswered again, so the promote gate stays shut). Re-verified the task's code citations against the live tree: launch path unchanged (raw-argv descriptor in `bridge.js` ~176–191, `createTerminal` in `vscode-extension/extension.js` ~83–90). Found the doc-drift rider's citations had already drifted (`bridge-launch.js:24`→25/119/163, `modeling-command.js:41,47,58`→39/47/56/122) and missed `skip-permissions-state.js` — rewrote the rider to be **grep-anchored** (search for the literal `claude "<prompt>"` phrase) instead of line-pinned, with the current hit set and the legitimate `*CommandFor` placeholders excluded. Hypothesis and reproduction-first AC untouched.
+**Split into:** none
+**ADRs written:** none
+
+---
+
+## 2026-07-03 00:20 -- Modeling / Refined: agentic-workflow-k5n8f - Mechanize the bookkeeping
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Refined via architect consultation and split three ways. Settled the two open forks: the missing-`depends_on`-target divergence is ruled **fail-closed** (matches `dependencySatisfied()`; overrides `work/SKILL.md:25`), and the mechanized script is **git-free** — it emits an enumerated manifest, the caller commits. Re-cut k5n8f to a **PROMOTE-first pattern MVP** (generalized env-free plugin-file resolver + git-free promote handler + CLI skeleton) because ADR-0032 worktrees make COMPLETE/CLAIM entangled and they collide with the in-flight f6m2q.
+**Split into:** agentic-workflow-p3v9k (type:decision — the fail-closed ruling + 3-layer boundary ADR, blocks k5n8f), agentic-workflow-t7m4c (CLAIM + COMPLETE against the worktree/squash-merge model, depends_on k5n8f + f6m2q).
+**ADRs written:** none yet — the boundary ADR is p3v9k's worked output.
+
+---
+
+## 2026-07-03 00:14 -- Modeling / Refined: agentic-workflow-n6r8j - Flatten single-specialist consultations — worker spawns the specialist directly
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo (refined to ready, promoted in the same pass)
+**Summary:** Sharpened the flatten-consultation refactor into a workable task: added the concrete Signal→Specialist routing hint to inline in `worker.md`, a minimum-context-block spec for AC-3 (so a directly-spawned specialist sees orchestrator-quality context), a verbatim single-vs-multi boundary rule for both agent docs, and AC-4 to fix `worker.md:14`'s stale "orchestrator passes these" (→ conductor). Wired `related_adrs: [0035]` and `prior_art: [agentic-workflow-h3z5b]`.
+**Split into:** none
+**ADRs written:** ADR-0035 (proposed) — worker spawns a single specialist directly; orchestrator reserved for multi-specialist aggregation
+
+---
+
+## 2026-07-03 00:08 -- Modeling / Refined: infrastructure-q8m4t - Support quotation marks (Gänsefüsschen) in prompts
+
+**Type:** Modeling / Refine
+**BC:** infrastructure
+**Status after:** backlog
+**Summary:** Traced the full dashboard→bridge→terminal prompt path; established infra-020 already closed the shell-*parsing* half (ASCII quotes as syntax survive via raw argv) and reframed the residual gap as a separable *encoding* dimension for non-ASCII German typographic quotes `„ " » «` (likely a Windows console codepage / mojibake issue at the `createTerminal` layer, or a stale pre-infra-020 `.vsix`). Rewrote Why/What, made AC reproduction-first, added a doc-drift rider for stale `claude "<prompt>"` comments, and linked related_adrs:[0018] + prior_art:[infrastructure-020]. Kept in backlog — three builder-confirmation questions (where / which quotes / symptom) went unanswered, and the reproduction AC is the promote gate.
+**Split into:** none
+**ADRs written:** none
+
+## 2026-07-03 00:08 -- Modeling / Refined: agentic-workflow-s7d3k - Single-source the duplicated doctrine into references/ files
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Grounded the task against the actual skill/agent files: confirmed the three duplicated doctrine blocks and their exact definition sites (ID grammar → brainstorm/modeling/quick-capture; commit doctrine → work/modeling/quick-capture/brainstorm; worker `TESTS_*` return format → agents/worker.md + agents/verifier.md + work/SKILL.md). Its sequencing gate is now satisfied (f7k2d done → unblocked). Resolved the path-resolution caveat by reusing the proven repo-root `references/` convention already pointed at by both a skill (modeling→modes.md) and an agent (worker→concept-template.md) — plugin-install resolution ruled out of scope (pre-existing, shared with k5n8f). Scoped as a single relocation task; acceptance criteria sharpened to grep-checkable, no-behavior-change form (must not re-introduce the f7k2d drift). Populated related_adrs [0026, 0028] and prior_art [f7k2d].
+**Split into:** none
+**ADRs written:** none
+
+## 2026-07-03 00:08 -- Modeling / Refined: agentic-workflow-w7q2m - BC README consolidation — size trigger + human-in-loop consolidation procedure
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Cornered the three "decide during work" forks (builder away — recommended defaults, flagged for revisit): (1) **procedure home** → a new `modeling` **CONSOLIDATE** sub-action (5th verb beside CAPTURE/REFINE/PROMOTE/DISMISS), mirroring how DISMISS/aw-046 added a verb with ADR-0022 falling out; (2) **trigger metric** → a **line-count** threshold (~600 lines), calibrated to the ~25k-token Read cap (this README is ~34.8 tok/line → un-Readable ~718 lines, flag at 600 for headroom), checkable without a tokenizer; (3) **flag mechanism** → a **whats-next advisory line** in its recommended-move section (rides ADR-0027's advisory write; no skill auto-rewrites prose). Framed the family split: cap-and-roll/verbatim (r2c7m, c8j3w) vs. flag-and-consolidate/judgment/in-place (this) — so it needs neither an archive convention nor a k5n8f dependency (`depends_on: []`). Rewrote acceptance criteria to be testable; added related_adrs 0022/0026/0027. **Left in backlog** — a 5th modeling verb is a doctrine change wanting builder sign-off before PROMOTE.
+**Split into:** none
+**ADRs written:** none (two ADR candidates noted for work: the CONSOLIDATE-verb contract, and a unifying two-disciplines artifact-growth ADR)
+
+---
+
+## 2026-07-03 -- Modeling / Refined: agentic-workflow-z2f7s - Fan-out caps — MAX_PARALLEL as a knob, research cap, global nested-spawn ceiling
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Sharpened the three fan-out surfaces into concrete edits across `work/SKILL.md` + `research/SKILL.md`. Reframed the "global nested-spawn ceiling" from an enforced count (the conductor cannot police spawns inside worker subagent contexts) to a **documented worst-case fan-out budget + mitigation** (low `MAX_PARALLEL` default + prefer-direct-consultation n6r8j). Noted blocker b8x2v is now **done**, so cap values can be data-informed. Kept as one task; linked prior_art b8x2v. Two decisions (scope-as-one, budget-not-ceiling) defaulted while builder away — left in backlog for ratification rather than promoted.
+**Split into:** none
+**ADRs written:** none
+
+---
+
+## 2026-07-03 00:08 -- Modeling / Refined: agentic-workflow-v3h6p - Eval-harness the verifier — measure its catch rate against planted defects
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Pinned the spike's shape. A fixture is now defined as the verifier's real input tuple (task file, BC README, diff, worker SUCCESS return block, pre-resolved test command, iteration number) + `expected.json` ground truth, under `evals/verifier-catch-rate/fixtures/`. Four design forks resolved on best-judgment defaults (builder away): (1) spawn the real opus-pinned verifier agent, not a scripted reproduction; (2) cover the full 7-check surface, not just the 4 originally listed; (3) score N runs → catch/false-FAIL/variance rates; (4) a catch must cite the check the defect was planted under (lucky catches logged apart). AC rewritten to five concrete criteria; added a right-reason-rate metric. Linked ADR-0031 (verifier opus pin) + prior art j4m6r/g9s3w/f7k2d (all shape the fixture format). depends_on stays empty — j4m6r/ADR-0031 already shipped. Kept in backlog for the builder to ratify the four calls before promote.
+**Split into:** none
+**ADRs written:** none
+
+---
+
+## 2026-07-03 00:07 -- Modeling / Refined: agentic-workflow-r2c7m - Protocol rotation — cap protocol.md and roll to monthly files
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Settled the four open questions (builder away — recommended defaults, flagged for revisit): (1) rotation is a k5n8f-family deterministic script → added `depends_on: k5n8f` (path resolution + atomic prepend closes the line-4 collision, symmetry with c8j3w); (2) trigger reconciled to cap-triggered / month-named (live cap N≈1,000, roll whole older months to `knowledge/protocol/YYYY-MM.md` verbatim, newest-on-top preserved); (3) a rotation-doctrine ADR is written during work so c8j3w/w7q2m cite a stable decision of record; (4) machine-readable `runs/` JSONL ruled out of scope (belongs with m9w5c). Bidirectional edge added to k5n8f (`blocks: +r2c7m`).
+**Split into:** none
+**ADRs written:** none yet (rotation-doctrine ADR deferred to work)
+
+---
+
+## 2026-07-03 00:00 -- Modeling / Refined: agentic-workflow-x4t2g - whats-next feeds back into planning
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Scoped x4t2g to the READ edge only (modeling + work consume the whats-next advisory at session start / batch planning). Decided three points: surface the advisory explicitly to the builder (never silent), compute staleness against the newest Work entry in protocol.md, and keep it strictly advisory (no lifecycle gate — ADR-0027/0017 hold). Rewrote acceptance criteria to be testable; now promote-ready, left in backlog for deliberate promotion.
+**Split into:** agentic-workflow-v6d4n (the heavier session-end/verify-path vision-conformance check that lived in x4t2g's Notes — an independent sibling, no depends_on edge)
+**ADRs written:** none (ADR-0027 already draws the advisory-write boundary; this task only adds consumers)
+
+---
+
+## 2026-07-02 23:59 -- Batch started: [agentic-workflow-f6m2q, design-system-b7n2s]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-f6m2q - Implement per-worker worktree isolation in work's git model, design-system-b7n2s - Hidden and off-viewport dependency presence markers
+**Parallel:** yes (2 workers — file-independent across BCs: f6m2q edits skills/work/SKILL.md + .gitignore + an OS junction helper; b7n2s edits the design-system styleguide styles/app + canvas. k5p8w held to next wave — it conflicts with both, same agentic-workflow README as f6m2q and a build-input race with b7n2s's styleguide edits.)
+
+---
+
 ## 2026-07-02 19:23 -- Modeling / Promoted: agentic-workflow-k5p8w - Board wiring — resolve hover dependencies and drive the on-card ring for visible targets
 
 **Type:** Modeling / Promote
