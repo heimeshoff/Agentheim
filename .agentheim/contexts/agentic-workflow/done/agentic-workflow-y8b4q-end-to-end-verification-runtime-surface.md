@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-y8b4q
 title: End-to-end verification step for tasks with a runtime surface
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-02
-completed:
+completed: 2026-07-03
 depends_on: [agentic-workflow-j7d4k]
 blocks: []
 tags: [harness-audit, verifier, verification, e2e, ui]
@@ -96,4 +96,47 @@ the pre-resolved block + trigger, then (b) verifier check 8 + doctrine rewrite d
 
 Pairs with **agentic-workflow-v3h6p** (eval-harness the verifier): once this check exists,
 the eval can measure whether the runtime drive actually catches planted runtime/UI defects.
+
+## Outcome
+
+Implemented ADR-0036's runtime-drive check as pure doctrine (no new JS runtime code needed —
+`dashboard/launch.mjs` already returns `{action, pid, port}`, supports `stop`, and writes
+`.agentheim/.dashboard/runtime.json`):
+
+- `.agentheim/contexts/agentic-workflow/README.md` — added the `## Runtime surface` manifest
+  (a fenced YAML block) declaring the dashboard's `surfacePaths` (`dashboard/**`), `launch`/`stop`
+  via `dashboard/launch.mjs`, the `runfile` path to read the actual bound port from, and two
+  read-only `probes` (`/healthz`, `/api/tree`) — satisfying AC7.
+- `agents/verifier.md` — added the `## Pre-resolved launch command` input to "What you are
+  given"; narrowed check 1's TDD-skip list so a runtime-surface diff's manual-exercise note is
+  never sufficient on its own (covers only the visual-DOM delta when render infra is absent);
+  inserted new check 8 "Runtime drive" as the final, most-expensive check — fires only when
+  the diff touches a `surfacePath`, boots via the manifest's `launch` from the worktree, reads
+  the actual port from the runfile (never the derived/assumed value), asserts the stdlib-only
+  HTTP floor against `probes`, runs the opt-in render tier only under `runtime_render: true` +
+  a present browser capability, and always tears down via `stop` — satisfying AC1, AC3, AC5, AC6.
+- `skills/verification-before-completion/SKILL.md` — narrowed check 1's manual-exercise
+  carve-out to match verifier.md's language, and added check 8 to the ordered list — satisfying
+  AC2.
+- `skills/work/SKILL.md` — added launch-descriptor resolution beside the existing test-command
+  resolution (parse the BC README's `## Runtime surface` block once per batch per BC, cache,
+  reuse across FAIL iterations, `none` when absent), and added the `## Pre-resolved launch
+  command` block to the Verifier Prompt Template beside the existing `## Pre-resolved test
+  command` block — satisfying AC4.
+- The strict PASS/FAIL/SKIP verdict format and the verifier's read-only tool grant
+  (Read/Grep/Glob/Bash, no Write/Edit, no git) are unchanged — satisfying AC8.
+
+**Deviation:** none from the ratified ADR-0036 design. No sub-split was needed — the whole
+task (manifest + `work` resolution + pre-resolved block + verifier check 8 + doctrine
+narrowing) completed coherently in one pass.
+
+**Tests:** this is a doctrine/spec task (`agents/verifier.md`, two `SKILL.md` files, one BC
+README) — no new executable code was introduced, so TDD does not apply (legitimate skip:
+documentation/doctrine). Ran the BC's full suite (`cd dashboard && node --test`) before and
+after the change: 707 passing both times; 2 pre-existing failures
+(`test/about-rail-routing.test.mjs`, `test/workflow-rail-routing.test.mjs`, both asserting
+`isTaskIntent` is byte-identical) are unrelated to this diff — confirmed by stashing this
+task's changes and re-running, which reproduces the same 2 failures on the unmodified
+worktree base. They are owned by the sibling batch task **agentic-workflow-t4x8p**
+(CRLF-sensitive byte-identical guard regex fix), not this task.
 </content>

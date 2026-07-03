@@ -18,6 +18,7 @@ In your prompt:
 - The diff (`git diff --stat` summary plus the full diff, or a patch attached as text)
 - The worker's strict SUCCESS return block — the fields are defined in `references/worker-return-format.md` (TASK_ID, SUMMARY, FILES_CHANGED, FILE_LIST, BC_README_UPDATED, ADRS_WRITTEN, NEW_BACKLOG_ITEMS, TESTS_ADDED, TESTS_PASSING, TDD_SKIPPED, CONCEPT_CANDIDATE)
 - A `## Pre-resolved test command` block — the `work` skill resolved the project's test command once for this batch and pre-loaded it here, exactly as workers receive pre-loaded ADRs. Use it in check 2. It reads `none` only when resolution found nothing.
+- A `## Pre-resolved launch command` block — the `work` skill resolved the BC's `## Runtime surface` manifest (ADR-0036) once for this batch, from the BC README, and pre-loaded it here. Use it in check 8. It reads `none` when the BC declares no runtime surface at all — in that case check 8 never fires, for any task in that BC.
 - Iteration number — if this is the second or third verification attempt on this task, the prompt will say so
 
 You are NOT given:
@@ -42,7 +43,8 @@ Stop at the first failing check and emit a FAIL. Earlier checks are cheaper and 
 Read the task's `## Acceptance criteria` section. For each `- [ ]` (or `- [x]` if the worker marked them off — same thing for your purposes), map it to either:
 
 - An executable test in the diff. The test must be **named after the criterion's behavior**, not after an implementation function. The test must contain at least one assertion. Crucially: the test must be one that *would fail* if the production code change were absent. A test that's pre-existing and unmodified does not count as new coverage.
-- For TDD-skip categories: a concrete artifact you can inspect. ADR file for a `decision` task; integration config + a boot check for config tasks; the README diff for documentation tasks; a manual-exercise note in the task's `## Outcome` section for UI tasks where no UI test infra exists yet.
+- For TDD-skip categories: a concrete artifact you can inspect. ADR file for a `decision` task; integration config + a boot check for config tasks; the README diff for documentation tasks.
+- **UI tasks, narrowed (ADR-0036):** if the diff touches a `surfacePath` (see check 8), a self-reported "exercised manually" note is **never sufficient on its own** — the criterion needs check 8's HTTP-floor drive to pass. A manual-exercise note in the task's `## Outcome` section covers **only the visual-DOM delta**, and only when no render infra is present; it never substitutes for the HTTP floor. If the diff touches no `surfacePath` (or the BC has no `## Runtime surface` manifest at all), the old manual-note carve-out still applies as before.
 
 If a criterion has neither, FAIL with that specific criterion cited.
 
@@ -115,6 +117,25 @@ If `related_adrs` is empty, skip this check.
 ### 7. No protocol, index, or git tampering
 
 Confirm the diff does not modify `.agentheim/knowledge/protocol.md` or any `INDEX.md` (`.agentheim/knowledge/index.md`, `.agentheim/contexts/*/INDEX.md`). Confirm the worker's output did not contain `git add`, `git commit`, `git push`, or similar. If any is violated, FAIL — the worker broke a structural rule. (Protocol and indexes are owned by the `work` skill, not workers.)
+
+### 8. Runtime drive (ADR-0036) — FINAL check, most expensive, runs last
+
+Read the `## Pre-resolved launch command` block from your spawn prompt.
+
+- **If it reads `none`** — this BC declares no runtime surface. Skip this check entirely (it never fires for this BC's tasks) and proceed straight to your verdict.
+- **Otherwise**, it carries the BC's `## Runtime surface` manifest: `surfacePaths`, `launch`, `stop`, `runfile`, `probes`, optional `renderPaths`.
+
+**Trigger.** Compare `FILE_LIST` (from the worker's return) and the diff's changed paths against `surfacePaths`. If **none** of the changed paths match any `surfacePaths` glob, this check does not fire for this task — move on to your verdict with no drive performed. If at least one changed path matches, the check fires.
+
+**Boot.** From the `## Worktree` path (never the main tree), run the manifest's `launch` command. Wait for it to report ready, then read the *actual* bound port from `runfile` (the absolute path given, resolved under the worktree root) — **never assume the derived/literal port**, a ladder fallback can move it. A boot that never produces a usable runfile/port within a reasonable wait, or that errors, is a **FAIL** citing the boot failure (`ITERATION_HINT: likely-fixable`) — proceed straight to teardown, do not attempt probes.
+
+**HTTP floor (mandatory, stdlib-only).** For each entry in `probes`, issue a loopback GET (or the declared method) to `http://127.0.0.1:<actual-port><path>` using Node's `http` stdlib module only — no new dependency. Assert the declared `status` and that the body matches the declared `bodyShape` (structurally — key presence / type, not byte-for-byte). Any mismatch is a **FAIL** citing the probe: expected vs. observed status/shape (`ITERATION_HINT: likely-fixable`).
+
+**Render tier (opt-in, conditional).** Only run this tier when the task file's frontmatter has `runtime_render: true` **and** a browser-driving capability is already present in this environment (do not install one). If either condition is false, skip the render tier silently — it is never itself a FAIL reason. When it does run, exercise the `renderPaths` and assert the visual/DOM delta the task describes.
+
+**Teardown — always, unconditionally.** Whether the floor passed, failed, or the boot itself failed, delegate teardown to the manifest's `stop` command before finishing this check (or before FAILing). Never hand-roll a kill — always go through `stop`. A teardown failure does not change an otherwise-PASS floor result, but note it in your verdict's evidence/reasons either way.
+
+If the floor passes (and the render tier, when it ran, also passed), this check passes; proceed to your verdict.
 
 ## Verdicts — strict format
 

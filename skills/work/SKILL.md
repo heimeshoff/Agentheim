@@ -86,6 +86,8 @@ Otherwise, verify.
 
 **Resolve the test command once per batch (per BC), not per verifier and not per iteration.** Before spawning the batch's verifiers, determine the project's test command using the same discovery order the verifier uses as its fallback — the BC README first, then the project root (`package.json` scripts, `Makefile` targets, `pyproject.toml`, `Cargo.toml`, `*.csproj`, `go.mod`). Cache the resolved command per BC (different BCs may have different commands) and pass it into every verifier spawn this batch — **including re-dispatched verifiers on FAIL iterations 2 and 3: reuse the cached command, never re-resolve per iteration.** This mirrors how workers receive pre-loaded ADRs — resolve once, hand it forward. If no command is discoverable for a BC, pass the literal `none` in the block and let the verifier apply its fail-closed rule.
 
+**Resolve the runtime-surface manifest once per batch (per BC), same seam (ADR-0036).** Alongside the test command, read the BC README for a `## Runtime surface` fenced block. If present, parse its `surfacePaths`, `launch`, `stop`, `runfile`, `probes`, and optional `renderPaths` once — cache per BC, reuse across every verifier spawn this batch **including re-dispatched verifiers on FAIL iterations 2 and 3**, never re-parse per iteration. If the BC README carries no such block, cache `none` for that BC — every verifier spawned for it then skips check 8 entirely, for every task, regardless of what the diff touches. Pass the cached manifest (or `none`) into every verifier spawn as the `## Pre-resolved launch command` block below.
+
 Before capturing a diff, make the worker's committed-but-ephemeral checkpoint: **the conductor** (never the worker) stages and commits the worker's enumerated output **inside its worktree** — `git -C .worktrees/<task-id> add <FILE_LIST + moved task file + BC README + ADRs>` then `git -C .worktrees/<task-id> commit -m "wip [<task-id>] iter N"`. This commit is ephemeral: the eventual squash-merge (see "Git authority") collapses it, so it never reaches `main` history on its own. Keeping this commit with the conductor, not the worker, keeps the *worker never runs git* rule untouched.
 
 For each SUCCESS that requires verification, in parallel where the workers ran in parallel:
@@ -156,6 +158,11 @@ Iteration: <N> of max 3
 The `work` skill resolved this project's test command once for this batch (the same command is reused across every verification iteration for this BC). **Run it from the `## Worktree` path above** — that is what makes this run isolated from any sibling worker's changes. If it reads `none`, resolution found no command; fall back to your own discovery procedure (rooted at the worktree), and if that also finds nothing, apply your fail-closed FAIL.
 
 <the resolved test command string for this BC, or `none` if resolution found nothing>
+
+## Pre-resolved launch command
+The `work` skill resolved this BC's `## Runtime surface` manifest (ADR-0036) once for this batch (the same manifest is reused across every verification iteration for this BC). If it reads `none`, this BC declares no runtime surface — skip check 8 entirely, for every task, regardless of what the diff touches. Otherwise it carries the manifest's `surfacePaths`, `launch`, `stop`, `runfile`, `probes`, and optional `renderPaths` (JSON below): if the diff touches a `surfacePath`, boot via `launch` **from the `## Worktree` path above**, read the actual bound port from `runfile` (never assume the derived value), assert `probes`, and **always** tear down via `stop`.
+
+<the resolved runtime-surface manifest as a JSON object for this BC, or `none` if the BC declares no runtime surface>
 
 ## Project context (read on demand if needed)
 - .agentheim/vision.md

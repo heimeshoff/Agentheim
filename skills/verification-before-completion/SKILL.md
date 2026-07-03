@@ -40,7 +40,7 @@ The verifier is explicitly NOT given:
 
 In order, stopping at the first failing check:
 
-1. **Acceptance criteria coverage.** Every `- [ ]` bullet in the task's `## Acceptance criteria` section maps to either: (a) an executable test in the diff that would fail without the production code change, or (b) — for the legitimate TDD-skip categories — a concrete artifact the verifier can inspect (ADR file, config validation, integration smoke check, manual exercise note).
+1. **Acceptance criteria coverage.** Every `- [ ]` bullet in the task's `## Acceptance criteria` section maps to either: (a) an executable test in the diff that would fail without the production code change, or (b) — for the legitimate TDD-skip categories — a concrete artifact the verifier can inspect (ADR file, config validation, integration smoke check). **Narrowed by ADR-0036:** for a task whose diff touches a runtime surface, a self-reported "exercised manually" note is *never* sufficient on its own — that criterion needs check 8's HTTP-floor drive to pass. A manual note still covers only the visual-DOM delta when render infra is absent; it never substitutes for the HTTP floor. The old unrestricted manual-note carve-out survives only for diffs that touch no runtime surface (or whose BC declares none).
 
 2. **Test execution.** If `TESTS_ADDED > 0`, the verifier runs the test suite and confirms `TESTS_PASSING: yes` is true *now*, not just at the moment the worker reported it.
 
@@ -53,6 +53,8 @@ In order, stopping at the first failing check:
 6. **ADRs for decisions.** If the diff embeds a decision a future maintainer would ask about (library choice, pattern choice, an invariant chosen over alternatives), is there a corresponding ADR in `ADRS_WRITTEN`? Missing ADR for a real decision is a FAIL.
 
 7. **No protocol or git tampering.** The diff must not touch `.agentheim/knowledge/protocol.md` (work owns it) and must contain no git operations in the worker's output. Violation is a FAIL — the worker broke a protocol rule.
+
+8. **Runtime drive (ADR-0036).** The verifier's final and most expensive check. Fires only when the diff touches a `surfacePath` declared in the BC's `## Runtime surface` README manifest — absent manifest, or a diff that touches none of its `surfacePaths`, means the check does not run at all for this task. When it fires: boot the app from the worktree via the manifest's `launch` command, read the *actual* bound port from its runfile (never assume the derived value), assert the declared `probes` (stdlib-only HTTP GETs — status + body shape), run the opt-in render tier only when the task sets `runtime_render: true` and a browser capability is already present, and **always** tear down via the manifest's `stop` command regardless of outcome. A boot failure or any probe mismatch is a FAIL citing the probe. This check replaces the self-reported manual-exercise note as sufficient evidence for a runtime-surface change (see the narrowed check 1 above).
 
 ## Verdicts
 

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 12:05 -- Task verified and completed: agentic-workflow-y8b4q - End-to-end verification step for tasks with a runtime surface
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-y8b4q - End-to-end verification step for tasks with a runtime surface
+**Summary:** Implemented ADR-0036's runtime-drive check as doctrine — added the verifier's final check 8 (fires on a `surfacePath`-touching diff, boots via the BC manifest's `launch`, reads the actual bound port from the runfile, asserts stdlib-only HTTP-floor `probes`, always tears down via `stop`), narrowed the manual-exercise carve-out in both `agents/verifier.md` and the verification SKILL, wired `work`'s launch-descriptor resolution + `## Pre-resolved launch command` block beside the test-command seam, and gave the agentic-workflow BC README its `## Runtime surface` manifest for the dashboard.
+**Duration:** ~13m
+**Verification:** PASS (iteration 1)
+**Files changed:** 4
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-03 12:04 -- Task verified and completed: agentic-workflow-t4x8p - Fix CRLF-sensitive byte-identical guard regexes
 
 **Type:** Work / Task completion

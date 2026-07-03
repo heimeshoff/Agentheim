@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 12
-- **Doing:** 1
-- **Done:** 101
+- **Doing:** 0
+- **Done:** 102
 <!-- task-counts:end -->
 
 ### Todo
@@ -34,11 +34,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-y8b4q** — End-to-end verification step for tasks with a runtime surface (feature) — `doing/agentic-workflow-y8b4q-end-to-end-verification-runtime-surface.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-y8b4q** — End-to-end verification step for tasks with a runtime surface (feature) — `done/agentic-workflow-y8b4q-end-to-end-verification-runtime-surface.md`
 - **agentic-workflow-t4x8p** — Fix CRLF-sensitive byte-identical guard regexes in intent-route rail-routing tests (bug) — `done/agentic-workflow-t4x8p-fix-crlf-sensitive-byte-identical-guard-regexes.md`
 - **agentic-workflow-x4t2g** — whats-next feeds back into planning — modeling and work read the advisory at session start (feature) — `done/agentic-workflow-x4t2g-whats-next-feeds-back-into-planning.md`
 - **agentic-workflow-h9v3m** — Board wiring — collapsed-group markers and scroll-reactive off-viewport edge blinks (feature) — `done/agentic-workflow-h9v3m-board-wiring-collapsed-group-offviewport-blinks.md`

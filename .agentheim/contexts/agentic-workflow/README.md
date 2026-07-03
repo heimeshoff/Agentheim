@@ -873,6 +873,42 @@ decisions); `/dashboard stop` terminates it and removes the runfile; `/dashboard
 running/not-running + port from the runfile only (never launches or stops). The command is a thin
 trigger over `dashboard/launch.mjs`.
 
+## Runtime surface
+
+The manifest the verifier's **runtime-drive check** (check 8, ADR-0036) resolves once per batch
+and reuses across every re-dispatch iteration — mirroring how the pre-resolved test command is
+resolved once and reused. Declares what to boot, how, and what "up" means for this BC's one
+runtime surface, the dashboard. Absent-manifest BCs get no check 8 at all; a manifest present but
+un-touched by a given diff (no changed path matches `surfacePaths`) also draws no drive for that
+task — exempt by default, no cargo-cult ceremony.
+
+```yaml
+surfacePaths:
+  - dashboard/**
+launch: node dashboard/launch.mjs
+stop: node dashboard/launch.mjs stop
+runfile: .agentheim/.dashboard/runtime.json   # read the ACTUAL bound port from here — never
+                                               # assume the derived value; the 8-rung ladder
+                                               # (ADR-0002 §infra-018/019) can move it
+probes:
+  - path: /healthz
+    method: GET
+    status: 200
+    bodyShape: '{ status: "ok", root: string }'
+  - path: /api/tree
+    method: GET
+    status: 200
+    bodyShape: '{ contexts/lifecycle/task projection per ADR-0002 — pointers+metadata, not bodies }'
+renderPaths: []   # opt-in only via a task's `runtime_render: true`; no browser capability is
+                  # wired into this project yet, so the render tier never fires today
+```
+
+`launch`/`stop` delegate all OS-divergent spawn/kill logic to the one cross-platform launcher,
+`dashboard/launch.mjs` (ADR-0002) — the check never hand-rolls `process.kill`. Both probes are
+**reads** (ADR-0017: the dashboard is read-only, so every `probes` entry here must stay a read
+endpoint). `launch` binds `cwd: tmpdir()` (ADR-0004), so a leaked server from a failed teardown
+holds no lock on the worktree that spawned it.
+
 ## Relationships with other contexts
 
 - **design-system** — this BC's first UI-bearing feature (the `dashboard`,
