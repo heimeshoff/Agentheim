@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 09:34 -- Modeling / Promoted: agentic-workflow-t4x8p, agentic-workflow-y8b4q
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+**Summary:** Promoted t4x8p (CRLF byte-identity test fix — explicit builder request; refined to a closed two-file scope this session) and y8b4q (end-to-end runtime-surface verification — its blocker j7d4k / ADR-0036 ratification is done, 7 concrete AC, the task itself flagged "promote when ready"). Swept the rest of the backlog for "unblocked AND refined enough": **r9k2p** is an umbrella parent already complete-by-children (all five of d8q3n / w4t9k / b7n2s / k5p8w / h9v3m are done) — surfaced to the builder for closure to done rather than promoted. Held: p3v9k / v3h6p / z2f7s / w7q2m (builder-confirmation gates); infrastructure-q8m4t (refined but its reproduce-first round-trip is a manual human-at-the-dashboard step — flagged for the builder); k5n8f / r2c7m / c8j3w / t7m4c (unmet deps on the p3v9k bookkeeping chain); v6d4n / q3n7k / m9w5c (under-refined).
+
+---
+
 ## 2026-07-03 09:28 -- Modeling / Refined: agentic-workflow-t4x8p - Fix CRLF-sensitive byte-identical guard regexes
 
 **Type:** Modeling / Refine

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-t4x8p
 title: Fix CRLF-sensitive byte-identical guard regexes in intent-route rail-routing tests
-status: backlog
+status: todo
 type: bug
 context: agentic-workflow
 created: 2026-07-03
