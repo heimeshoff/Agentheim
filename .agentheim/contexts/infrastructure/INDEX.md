@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 22
@@ -52,6 +52,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **infrastructure-5w5gs** — task-lifecycle CLI breaks on CRLF-line-ending .agentheim files — promote/move bookkeeping fails mid-operation (bug) — `backlog/infrastructure-5w5gs-task-lifecycle-cli-crlf-line-endings.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

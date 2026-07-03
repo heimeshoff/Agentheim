@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-03 14:45 -- Modeling / Captured: infrastructure-5w5gs - task-lifecycle CLI breaks on CRLF .agentheim files
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** backlog
+**Summary:** `lib/task-lifecycle.mjs` assumes LF line endings in its INDEX/protocol edit functions (`removeIndexLine` start-marker regex `-->\n`, `insertIndexLineAtTop` `indexOf('-->\n')`, `prependProtocolEntry` `indexOf('\n---\n\n')`), so on CRLF `.agentheim` files — the Windows norm — a `promote` throws *after* `applyTaskMove` has already moved the file, stranding the board in a half-promoted state. Discovered live promoting `design-system-pv3mq` in the Mediatheca consumer repo (that promote was reconciled by hand). Captured as a bug with a concrete fix map (normalize EOL+BOM on the read/write boundary, keep the regex logic unchanged) and acceptance criteria covering CRLF/LF/BOM round-trips + new `lib/test/` fixtures. Left under-refined in backlog; optional hardening noted (dry-validate markers before moving so it fails closed).
+
+---
+
 ## 2026-07-03 14:42 -- Work session ended
 
 **Type:** Work / Session end
