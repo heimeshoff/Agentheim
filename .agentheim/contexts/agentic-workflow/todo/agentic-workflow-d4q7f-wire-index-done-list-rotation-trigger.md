@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-d4q7f
 title: Wire a trigger for INDEX done-list rotation — rotateIndexDoneList is never invoked
-status: backlog
+status: todo
 type: bug
 context: agentic-workflow
 created: 2026-07-04

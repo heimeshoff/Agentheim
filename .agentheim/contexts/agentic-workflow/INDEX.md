@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 121
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-d4q7f** — Wire a trigger for INDEX done-list rotation — rotateIndexDoneList is never invoked (bug) — `todo/agentic-workflow-d4q7f-wire-index-done-list-rotation-trigger.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -151,7 +152,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-d4q7f** — Wire a trigger for INDEX done-list rotation — rotateIndexDoneList is never invoked (bug) — `backlog/agentic-workflow-d4q7f-wire-index-done-list-rotation-trigger.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

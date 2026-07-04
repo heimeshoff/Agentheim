@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 21:12 -- Modeling / Promoted: agentic-workflow-d4q7f - Wire a trigger for INDEX done-list rotation — rotateIndexDoneList is never invoked
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-04 21:11 -- Modeling / Refined: agentic-workflow-d4q7f - Wire a trigger for INDEX done-list rotation
 
 **Type:** Modeling / Refine
