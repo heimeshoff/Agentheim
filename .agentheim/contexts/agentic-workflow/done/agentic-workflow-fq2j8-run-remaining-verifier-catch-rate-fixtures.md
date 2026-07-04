@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-fq2j8
 title: Complete the verifier-catch-rate eval — one coherent full 9-fixture pass against the current verifier
-status: doing
+status: done
 type: spike
 context: agentic-workflow
 created: 2026-07-03
-completed:
+completed: 2026-07-04
 depends_on: []
 blocks: [agentic-workflow-bx7k5]
 tags: [harness-audit, verifier, evals]
@@ -86,3 +86,29 @@ file and a dated eval report, superseding the 2026-07-03 partial.
   command errors on the harness's own Node, fall back to the glob form.
 - Spike deliverable is the measurement and what it teaches — the durable artifacts
   are the recorded numbers, not new harness code.
+
+## Outcome
+
+Ran the full 9-fixture x k=3 matrix (27 real, independent opus-pinned
+`agentheim:verifier` spawns) against the current `agents/verifier.md`. All 9
+fixtures landed their expected verdict unanimously across their 3 runs:
+`missing-ac` (check 1), `tests-fail` (check 2), `scope-creep` (check 3),
+`vocab-violation` (check 4), `stale-readme` (check 5), `missing-adr` (check
+6), `contradicts-adr` (check 6b), `index-tampering` (check 7) all FAILed
+citing their planted check; `clean` PASSed 3/3. Combined: catch rate 24/24 =
+100%, right-reason rate 24/24 = 100% (zero lucky catches), false-FAIL rate
+0/3 = 0%, per-fixture verdict variance 0 across all 9. No fixture required
+correction (all matched `expected.json` as authored by `v3h6p`). Before
+finalizing, 2 additional confirmatory spawns (`contradicts-adr`, `clean`)
+were re-run to validate the dataset's provenance across the task's
+worktree-continuation boundary — both reproduced the recorded verdicts.
+
+No verifier-prompt weakness was exposed; no follow-up backlog item filed
+against the verifier itself. This full-9 baseline is what
+`agentic-workflow-bx7k5` (opus-vs-sonnet routing A/B) builds on.
+
+Key files:
+- `evals/verifier-catch-rate/results/2026-07-04-run.md` — the full run table and totals
+- `.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md` — the write-up, superseding the 2026-07-03 report as dataset of record
+- `evals/verifier-catch-rate/README.md` — "Results" and "Known gaps" sections updated to point at the completed pass
+- `evals/verifier-catch-rate/results/2026-07-03-run.md` — "not run" section updated to note supersession

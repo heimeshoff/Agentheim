@@ -79,20 +79,25 @@ between runs). Score:
 
 ## Results
 
-See `results/2026-07-03-run.md` for the recorded numbers from this spike's
-real-spawn pass, and the eval report at
-`.agentheim/knowledge/verifier-catch-rate-eval-2026-07-03.md` for the full
-write-up, per-fixture variance, and follow-up captures.
+See `results/2026-07-04-run.md` for the recorded numbers from the completed
+full 9-fixture x k=3 pass (`agentic-workflow-fq2j8`), and the eval report at
+`.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md` for the full
+write-up, per-fixture variance, and follow-up captures. That pass supersedes
+`results/2026-07-03-run.md` (the original spike's 6-fixture partial) as the
+dataset of record — see the latter file for why it was superseded (the
+verifier definition changed underneath it: check 8 / ADR-0036, and the
+ADR-0043 heartbeat hook).
 
-## Known gaps (logged, not measured this pass)
+## Known gaps (logged, not measured)
 
 - **Check 8 (runtime drive, ADR-0036)** is out of scope for this fixture set —
   it needs a `## Runtime surface` manifest + a `## Pre-resolved launch
   command` carrying a real `launch`/`stop`/`probes` tuple, which this
   synthetic `widgets` BC does not declare. `meta.json.launch_command` is
   `"none"` everywhere, so check 8 never fires for any fixture here — by
-  design, not omission.
-- **`stale-readme`, `missing-adr`, `contradicts-adr`** fixtures are fully
-  built (task file, diff, worker-success, expected.json) but were **not**
-  run against the real verifier in this pass — see the report for why
-  (spike time/spend budget) and what a follow-up run would need.
+  design, not omission. See `agentic-workflow-hz9m3` for a dedicated
+  check-8 fixture.
+- **`stale-readme`, `missing-adr`, `contradicts-adr`** — previously unmeasured
+  as of 2026-07-03; all three were real-spawned and landed their planted
+  checks in the 2026-07-04 full pass (see `results/2026-07-04-run.md`). No
+  gap remains here.

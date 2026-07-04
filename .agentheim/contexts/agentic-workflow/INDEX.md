@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 1
-- **Doing:** 1
-- **Done:** 114
+- **Doing:** 0
+- **Done:** 115
 <!-- task-counts:end -->
 
 ### Todo
@@ -23,11 +23,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-fq2j8** — Complete the verifier-catch-rate eval — one coherent full 9-fixture pass against the current verifier (spike) — `doing/agentic-workflow-fq2j8-run-remaining-verifier-catch-rate-fixtures.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-fq2j8** — Complete the verifier-catch-rate eval — one coherent full 9-fixture pass against the current verifier (spike) — `done/agentic-workflow-fq2j8-run-remaining-verifier-catch-rate-fixtures.md`
 - **agentic-workflow-m9w5c** — Live observability — hooks write agent status to state/, dashboard renders an in-flight lane (feature) — `done/agentic-workflow-m9w5c-live-observability-hooks-inflight-lane.md`
 - **agentic-workflow-c8j3w** — INDEX done-list rotation — cap the done-list and roll older entries to a dated archive (feature) — `done/agentic-workflow-c8j3w-index-done-list-rotation.md`
 - **agentic-workflow-r9k2p** — Hover a backlog/todo ticket to highlight its dependencies with a pulsing ring (feature) — `done/agentic-workflow-r9k2p-hover-ticket-highlights-dependency-pulsing-ring.md`
