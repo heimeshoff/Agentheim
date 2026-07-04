@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 11:29 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** ~16m (batch start 11:13 → 11:29)
+**Completed:** 1 (first-try PASS: 1 — infrastructure-5w5gs; re-dispatched: 0; skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** infrastructure-5w5gs: 1 (no re-dispatches — passed on iteration 1)
+**Commits:** 3 (1 batch-start claim [d9f3123] + 1 task integration [infrastructure-5w5gs 8175992] + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (the CRLF/BOM fix + fail-closed atomicity guard directly serve "wrong work is caught by structure"; no pull toward any non-goal)
+**Carry-over:** none — working tree clean; no non-main worktrees
+**Notes:** Single-task session; the sole ready task was the very CRLF lifecycle bug that had broken prior sessions (protocol 2026-07-03 18:09), now fixed at the read/write boundary in `lib/task-lifecycle.mjs` (EOL+BOM detect-on-read / restore-on-write, plus a pre-move dry-validation guard across promoteTask/claimBatch/completeTask). Verifier PASS iter 1, full suite 161/161. **Blocker worked around (not the CRLF bug — a second, latent one): the task id `infrastructure-5w5gs` has a leading-DIGIT token (`5w5gs`), which violates ADR-0028's leading-letter rule `[a-hjkmnp-tv-z]`.** `deriveContext` (`lib/task-lifecycle.mjs:254`) therefore cannot parse it and returns the whole id as the BC, so the mechanized `claim` and `complete` both failed with "not found in todo/" until I passed an explicit `contexts`/`context` BC override in the CLI's JSON opts. This is a real go-forward defect worth its own backlog item — either the id-generator emitted an out-of-spec token, or `deriveContext` should tolerate a leading digit. Also recreated the git-pruned empty `contexts/infrastructure/doing/` before the claim (same empty-dir-pruning residue noted last session). No bounces, no failures, no concept candidates. Board fully drained.
+
+---
+
 ## 2026-07-04 11:28 -- Task verified and completed: infrastructure-5w5gs - task-lifecycle bookkeeping breaks on CRLF .agentheim files — promote/claim/complete strand the board mid-operation
 
 **Type:** Work / Task completion
