@@ -1,11 +1,11 @@
 ---
 id: infrastructure-5w5gs
 title: task-lifecycle bookkeeping breaks on CRLF .agentheim files — promote/claim/complete strand the board mid-operation
-status: doing
+status: done
 type: bug
 context: infrastructure
 created: 2026-07-03
-completed:
+completed: 2026-07-04
 depends_on: []
 blocks: []
 tags: [task-lifecycle, cli, crlf, line-endings, windows, promote, claim, complete, bookkeeping, atomicity, adr-0038]
@@ -96,25 +96,25 @@ posture (`reject(code, reason)`). Applies to all three verbs.
 
 ## Acceptance criteria
 
-- [ ] `promoteTask` completes fully against a CRLF `INDEX.md` + CRLF `protocol.md`:
+- [x] `promoteTask` completes fully against a CRLF `INDEX.md` + CRLF `protocol.md`:
       file moved, both INDEX list markers updated, both counts adjusted, protocol
       entry prepended, manifest returned — no throw, no partial state.
-- [ ] `claimBatch` and `completeTask` do the same against CRLF fixtures — including
+- [x] `claimBatch` and `completeTask` do the same against CRLF fixtures — including
       `claimBatch`'s **per-BC** INDEX edits (a batch may span BCs, each file with its
       own EOL) and `completeTask`'s idempotent already-in-`done/` path. (Claim is the
       verb that broke live; it must be covered end-to-end, not by inference.)
-- [ ] The same holds against LF files (no regression) and against a BOM-prefixed
+- [x] The same holds against LF files (no regression) and against a BOM-prefixed
       `INDEX.md` (BOM preserved on write, not doubled or dropped).
-- [ ] Written files keep their original line-ending style — a CRLF file stays CRLF
+- [x] Written files keep their original line-ending style — a CRLF file stays CRLF
       (no mixed `\n`/`\r\n` lines introduced by `split/join` or by the freshly
       inserted list line / protocol entry), an LF file stays LF; an already-mixed
       file normalizes to its dominant EOL.
-- [ ] **Fail-closed atomicity:** each verb dry-validates that every marker it will
+- [x] **Fail-closed atomicity:** each verb dry-validates that every marker it will
       edit is matchable *before* `applyTaskMove` moves the file; on any mismatch it
       rejects (structured `{ok:false, code, reason}`) with the task file **not**
       moved and no INDEX/protocol write. A test asserts a deliberately marker-broken
       `INDEX.md` leaves the task in its source folder.
-- [ ] New unit tests in `lib/test/` cover the CRLF (and BOM, and mixed-EOL) cases for
+- [x] New unit tests in `lib/test/` cover the CRLF (and BOM, and mixed-EOL) cases for
       `removeIndexLine`, `insertIndexLineAtTop`, `prependProtocolEntry`, plus
       end-to-end CRLF `promoteTask` / `claimBatch` / `completeTask` on fixtures, and
       the fail-closed guard. Existing LF tests still pass.
@@ -140,3 +140,41 @@ posture (`reject(code, reason)`). Applies to all three verbs.
   `contexts/infrastructure/INDEX.md` is CRLF right now, so the mechanized promote of
   *this very task* had to LF-normalize it first (a git no-op under `autocrlf`). The
   fix removes that dance permanently.
+
+## Outcome
+
+Implemented the preferred boundary-normalization design in
+`lib/task-lifecycle.mjs`: a new EOL/BOM block (`detectDominantEol`,
+`normalizeText`, `denormalizeText`, `readNormalizedFile`, `writeNormalizedFile`,
+`readProtocolOrDefault`) reads `INDEX.md`/`protocol.md` once, strips a leading
+UTF-8 BOM if present, detects the file's *dominant* EOL (majority `\r\n` vs lone
+`\n`, so an already-mixed file — the residue of a prior half-broken run —
+normalizes cleanly rather than staying mixed), and canonicalizes to `\n` before
+handing content to the unchanged `removeIndexLine`/`insertIndexLineAtTop`/
+`prependProtocolEntry` marker logic. Writes restore the original EOL/BOM,
+converting the freshly-inserted list line / protocol entry to the file's style
+too (the mixed-ending failure mode a bare `\r?\n`-in-each-regex patch would have
+left behind).
+
+Added a fail-closed atomicity guard (`validateBookkeepingMarkers` +
+`hasSectionBlock`/`hasSectionStartMarker`/`hasProtocolMarker`) that every one of
+`promoteTask`, `claimBatch`, `completeTask` runs *before* calling
+`applyTaskMove`: it dry-validates every INDEX/protocol marker the verb is about
+to edit and rejects with a structured `{ok:false, code:'bookkeeping-marker-mismatch', reason}`
+on any mismatch, moving nothing. `claimBatch` validates every BC's `INDEX.md` in
+the batch (a batch may span BCs, each file with its own EOL) before moving any
+task. `lib/index-rotation.mjs`/`lib/protocol-rotation.mjs` were left untouched —
+already CRLF-safe per the task's own note — as was `applyTaskMove`'s own logic.
+
+Added `lib/test/task-lifecycle-eol.test.mjs` (19 new tests): unit-level
+round-trips of `detectDominantEol`/`normalizeText`/`denormalizeText` and of
+`removeIndexLine`/`insertIndexLineAtTop`/`prependProtocolEntry` against CRLF,
+BOM+CRLF, and already-mixed-EOL fixtures; end-to-end CRLF `promoteTask` /
+`claimBatch` (single-BC and two-BC-spanning) / `completeTask` (incl. the
+idempotent already-in-`done/` path); a BOM-preservation test; and a
+fail-closed-guard test per verb (deliberately marker-broken CRLF `INDEX.md`
+leaves the task file in its source folder, no INDEX/protocol write). Full suite:
+`node --test "lib/test/*.test.mjs"` → 161/161 passing (48 pre-existing
+task-lifecycle + cli tests unchanged, no regression).
+
+Files: `lib/task-lifecycle.mjs`, `lib/test/task-lifecycle-eol.test.mjs`.

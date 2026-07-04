@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 11:28 -- Task verified and completed: infrastructure-5w5gs - task-lifecycle bookkeeping breaks on CRLF .agentheim files — promote/claim/complete strand the board mid-operation
+
+**Type:** Work / Task completion
+**Task:** infrastructure-5w5gs - task-lifecycle bookkeeping breaks on CRLF .agentheim files — promote/claim/complete strand the board mid-operation
+**Summary:** EOL/BOM boundary-normalization for task-lifecycle bookkeeping (promote/claim/complete) — CRLF & BOM INDEX.md/protocol.md no longer strand the board; fail-closed marker dry-validation before any move
+**Duration:** ~11m
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 19
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 11:14 -- Batch started: [infrastructure-5w5gs]
 
 **Type:** Work / Batch start
