@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 16:22 -- Modeling / Refined: agentic-workflow-n7q4d - Harden the verifier-catch-rate corpus with discriminating fixtures
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Cornered a conflation in the fixture-retention bar: it treated "opus shows non-zero verdict variance" as an unqualified keep signal, but opus flip-flops for two structurally different reasons — (a) hard-but-unambiguous (near its reasoning ceiling on a fixture with one right answer → a weaker tier reliably does worse; a real discriminator) vs (b) contested ground truth (even opus can't settle it → a weaker tier flip-flopping measures noise, not tier). Retaining (b) is worse than the false tie bx7k5 already guards against: it's a **false vindication of the incumbent on noise** (bx7k5 could read "opus 2/3, sonnet 1/3" as vindicating judgment-density when both tiers merely guess). Tightened the bar to require **unambiguous ground truth AND a reasoning-depth strain** — variance alone no longer suffices to retain (What + AC 3). Extended AC 4 to require a "what makes a valid tier-discriminator" methodology note in the eval README. Added two Notes bullets: the (a)/(b) distinction, and that check 8 (objective probe-shape ground truth) is the ambiguity-safe discriminator while checks 5/6/6b are where "borderline" shades into "contested." No split, no ADR; stays backlog.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 16:11 -- Modeling / Refined: agentic-workflow-bx7k5 - A/B the verifier's model routing (opus vs sonnet)
 
 **Type:** Modeling / Refine

@@ -50,13 +50,20 @@ mismatches (check 8) — following the fixture shape and runbook in
 fixtures also carry a `## Runtime surface` manifest + a real stdlib server).
 
 For each candidate, run the **opus**-pinned verifier (k ≥ 3, same runbook) to
-establish whether it discriminates. A fixture earns its place only if it
-*strains* opus — a miss, a lucky/wrong-reason catch, non-zero verdict variance,
-or otherwise anything short of a trivial unanimous right-reason catch. Target
-**discriminating potential, not raw difficulty**: a fixture where opus still
-trivially 100%s teaches nothing about a weaker tier and should be reworked or
-dropped, with the reasoning noted (though a fixture opus catches cleanly *may*
-be kept if there's an explicit argument it could still trip a weaker tier).
+establish whether it discriminates. A fixture earns its place only if it is
+*both* (a) **hard** — it strains opus on reasoning depth (a miss or a
+lucky/wrong-reason catch) — *and* (b) **unambiguous** — the planted defect is one
+a fair reader agrees is genuinely there, not a contested FAIL/PASS call. Target
+**discriminating potential, not raw difficulty, and not contested difficulty**: a
+fixture where opus still trivially 100%s teaches nothing about a weaker tier; but
+a fixture where opus flip-flops only because its *ground truth* is contested
+teaches nothing either — a weaker tier flip-flopping there measures noise, not
+tier (the false-vindication trap; see Notes). Non-zero opus verdict variance is a
+retain signal **only once the fixture's ground truth is shown uncontested** —
+otherwise it's a reason to rework, not keep. Fixtures that teach nothing (opus
+ceilings) or whose ground truth is contested are reworked or dropped, with the
+reasoning noted (though a fixture opus catches cleanly *may* be kept if there's
+an explicit argument it could still trip a weaker tier).
 
 Record the new fixtures' opus baseline alongside the existing dataset — a new
 results file under `evals/verifier-catch-rate/results/` and a dated report under
@@ -71,14 +78,21 @@ the whole hardened surface.
       (5 / 6 / 6b) and the harder runtime check (8).
 - [ ] Each new fixture run k ≥ 3 against the **opus**-pinned verifier; per-fixture
       opus result recorded (verdict, cited check, verdict variance).
-- [ ] Each *retained* fixture is shown to **strain opus** (a miss, lucky-catch, or
-      non-zero variance) — or, if kept despite opus catching cleanly, an explicit
-      rationale for why it may still discriminate a weaker tier. Fixtures that
-      teach nothing are reworked or dropped, noted.
+- [ ] Each *retained* fixture has **unambiguous ground truth** (a planted defect a
+      fair reader agrees is genuinely there — not a contested FAIL/PASS call) **and**
+      is shown to **strain opus on reasoning depth** (a miss or a lucky/wrong-reason
+      catch). **Non-zero verdict variance alone is not sufficient to retain** — on a
+      contested fixture opus flip-flops for lack of a stable answer, so a weaker tier
+      flip-flopping there measures noise, not tier (a false-vindication trap for
+      `bx7k5`). A fixture opus catches cleanly may still be kept only with an explicit
+      argument it could trip a weaker tier. Fixtures that teach nothing — opus
+      ceilings, *or* whose ground truth is contested — are reworked or dropped, noted.
 - [ ] New fixtures' opus baseline recorded in
       `evals/verifier-catch-rate/results/` and a dated report under
       `.agentheim/knowledge/`, extending (not replacing) the `fq2j8` dataset of
-      record; the eval `README.md` updated; a protocol entry written.
+      record; the eval `README.md` updated (including a short *"what makes a valid
+      tier-discriminator"* methodology note — hard **and** unambiguous, never
+      contested); a protocol entry written.
 - [ ] `bx7k5`'s comparison surface is the hardened corpus (the existing 12
       fixtures + the new ones); this task's `blocks: [agentic-workflow-bx7k5]`
       edge holds and `bx7k5`'s `depends_on` lists this id.
@@ -94,6 +108,26 @@ the whole hardened surface.
   you *can* reject the trivial ones: any fixture opus unanimously right-reason
   catches at zero variance is, on this evidence, corpus-limited and should be
   hardened further. The bar here is "opus is not already at the ceiling on it."
+- **A valid discriminator is hard *and* unambiguous — not merely hard.** Opus can
+  flip-flop on a fixture for two structurally different reasons: (a) it's near its
+  reasoning ceiling on a fixture with **one correct answer** — a weaker tier
+  reliably does worse (a real discriminator); or (b) the fixture's **ground truth
+  is genuinely contested** — even opus can't settle it, so a weaker tier's
+  flip-flopping measures noise, not tier. Only (a) earns a place. Retaining (b) is
+  *worse* than a false tie: `bx7k5` could read "opus 2/3, sonnet 1/3" as
+  vindicating the judgment-density pillar when both tiers are merely guessing with
+  different bias — a **false vindication of the incumbent on noise**, the mirror of
+  the false-tie failure `bx7k5`'s decision rule already guards against, and the one
+  it does *not*. Hence variance is a keep signal only *after* the ground truth is
+  shown uncontested.
+- **Check 8 is the ambiguity-safe discriminator; 5 / 6 / 6b are where the trap
+  bites.** A runtime-probe mismatch (check 8) has **objective** ground truth — the
+  *documented* body shape vs the *observed* one — so it is structurally immune to
+  the contested-ground trap; harden it freely. The judgment checks (5 stale-readme /
+  6 missing-adr / 6b contradicts-adr) are exactly where "genuinely borderline"
+  shades into "genuinely contested," so author those with the unambiguous-ground-
+  truth gate front of mind: borderline ADR-worthiness must still resolve to a
+  defensible right answer, not a coin-flip.
 - **Budget.** Opus-only, k ≥ 3 × the new fixtures (≈9–12 opus spawns for 3–4
   fixtures). Budget-light measurement spike; the durable artifacts are the new
   fixtures + their recorded opus baseline, not new harness code.
