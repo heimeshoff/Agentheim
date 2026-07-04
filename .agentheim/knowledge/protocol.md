@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 16:26 -- Batch started: [agentic-workflow-n7q4d]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-n7q4d - Harden the verifier-catch-rate corpus with discriminating fixtures (opus ceilings the current set)
+**Parallel:** no (1 worker — sole ready task; whats-next advisory stale, no weighting)
+
+---
+
 ## 2026-07-04 16:24 -- Modeling / Promoted: agentic-workflow-n7q4d - Harden the verifier-catch-rate corpus with discriminating fixtures (opus ceilings the current set)
 
 **Type:** Modeling / Promote

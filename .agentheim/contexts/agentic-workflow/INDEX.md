@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 116
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-n7q4d** — Harden the verifier-catch-rate corpus with discriminating fixtures (opus ceilings the current set) (spike) — `todo/agentic-workflow-n7q4d-harden-verifier-catch-rate-corpus-discriminating-fixtures.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-n7q4d** — Harden the verifier-catch-rate corpus with discriminating fixtures (opus ceilings the current set) (spike) — `doing/agentic-workflow-n7q4d-harden-verifier-catch-rate-corpus-discriminating-fixtures.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
