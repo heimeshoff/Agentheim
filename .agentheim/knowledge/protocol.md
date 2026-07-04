@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 12:24 -- Modeling / Promoted: agentic-workflow-fq2j8 - Complete the verifier-catch-rate eval — one coherent full 9-fixture pass against the current verifier
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-04 12:25 -- Modeling / Refined: agentic-workflow-fq2j8 - Complete the verifier-catch-rate eval — one coherent full 9-fixture pass against the current verifier
 
 **Type:** Modeling / Refine

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-fq2j8
 title: Complete the verifier-catch-rate eval — one coherent full 9-fixture pass against the current verifier
-status: backlog
+status: todo
 type: spike
 context: agentic-workflow
 created: 2026-07-03
