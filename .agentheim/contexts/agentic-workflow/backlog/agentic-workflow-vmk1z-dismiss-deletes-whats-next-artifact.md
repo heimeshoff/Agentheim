@@ -8,10 +8,10 @@ created: 2026-07-04
 completed:
 depends_on: []
 blocks: []
-tags: [dashboard, whats-next, advisory-write, frontend]
-related_adrs: [0027, 0017]
+tags: [dashboard, whats-next, advisory-write, advisory-delete, frontend]
+related_adrs: [0046, 0027, 0017, 0006]
 related_research: []
-prior_art: [agentic-workflow-073, agentic-workflow-076]
+prior_art: [agentic-workflow-073, agentic-workflow-076, agentic-workflow-m9w5c]
 ---
 
 ## Why
@@ -24,47 +24,103 @@ stale thing** — press dismiss, the recommendation is gone, not just hidden.
 
 ## What
 When the builder dismisses the What's next panel on the dashboard, the underlying advisory
-artifact `.agentheim/state/whats-next.md` is deleted (not merely suppressed in `localStorage`),
-so a dismissed recommendation is genuinely gone until `whats-next` next runs and writes a
-fresh one.
+artifact `.agentheim/state/whats-next.md` is **deleted from disk** (not merely suppressed in
+`localStorage`), so a dismissed recommendation is genuinely gone — across browsers, across
+store resets — until `whats-next` next runs and writes a fresh one.
 
-## Decision gate (must be settled in REFINE before this can be worked)
-This reopens a **deliberately frozen boundary** and therefore cannot go straight to `todo/`:
+The direction is settled by **ADR-0046** (ratified this same refinement round): the dashboard
+gains its first write since ADR-0017 — a narrow, delete-only, advisory-only endpoint
+`DELETE /api/whats-next` that can remove that one literal file and nothing else. This is a
+bounded exception to ADR-0017 (whose read-only stance is over *lifecycle*, which this does not
+touch) and a narrowing amendment to ADR-0027 §4.5. See ADR-0046 for the full contract.
 
-- **ADR-0027 §4 guard-rail 5** states, verbatim: *"The dashboard is read-only over it too. The
-  dashboard reads and renders it; it never writes, edits, **or deletes it**. Only `whats-next`
-  writes it."* Delete-on-dismiss contradicts this.
-- **ADR-0017** removed every dashboard write path — the server exposes only reads
-  (`/api/tree`, `/api/doc`, SSE, `/healthz`). A dismiss-delete needs a *new* write endpoint.
-
-Two honest directions for the architect to settle (do **not** pre-decide here):
-
-- **A — narrow "advisory delete" write path.** Amend ADR-0027 §4.5 and ADR-0017's read-only
-  stance (which is really *read-only over lifecycle*) to permit the dashboard to delete
-  advisory artifacts under `state/` **only** — never lifecycle files. New tightly-scoped
-  endpoint (e.g. `DELETE`/`POST /api/whats-next/dismiss`) guarded to the single advisory path.
-  Delivers exactly what the builder asked for; likely splits into a `decision` task (the ADR
-  amendment) that this feature depends on, plus the server + client work.
-- **B — kill the staleness without a dashboard write.** Keep both ADRs intact: e.g. the panel
-  auto-hides past a staleness threshold, or `whats-next` / `work` clears its own stale artifact
-  at session boundaries. Doesn't literally delete-on-dismiss, but may fully address the
-  stale-file pain. Lower architectural cost, but weaker on the "dismiss = gone now" intent.
+## Decision
+Settled — no separate decision task needed. **ADR-0046** is the decision:
+`DELETE /api/whats-next`, no request body, no client-supplied path, exact-equality allowlist
+over the one resolved absolute path, idempotent (already-absent → success), zero lifecycle
+side-effects, panel disappears through the existing SSE mechanism, `localStorage` dismiss store
+retired. This feature task proceeds straight to `todo/` once refined.
 
 ## Acceptance criteria
-_(provisional — will firm up once the direction above is chosen)_
-- [ ] The chosen direction is ratified in an ADR (amending ADR-0027 §4.5 / ADR-0017 if
-      direction A, or documenting why no write path is added if direction B).
-- [ ] Dismissing the panel removes the stale recommendation so it does not re-surface (in this
-      or another browser / after a `localStorage` reset).
-- [ ] If a write path is added (A): it is scoped to `.agentheim/state/whats-next.md` **only**,
-      guarded by the same in-root check every read uses, and cannot touch lifecycle files.
-- [ ] The panel disappears live over the existing SSE consumer (ADR-0006) once the artifact is
-      gone; absent artifact still renders nothing (aw-073 contract preserved).
-- [ ] Pure helpers unit-tested under `node --test`; dashboard `dist/` rebuilt; suite green.
+
+### Server — the delete endpoint
+- [ ] `dashboard/server.mjs` dispatches `DELETE /api/whats-next` **before** the existing
+      `if (req.method !== 'GET' && req.method !== 'HEAD') return 405` gate (placed beside the
+      `GET /api/events` block, which already sits above that gate). A test asserts the route is
+      reachable via `DELETE` and that the `405` gate still rejects other non-GET methods
+      (including any other method on `/api/whats-next`) unchanged.
+- [ ] The handler takes **no** `?path=` query parameter and reads **no** request body: the
+      target path is derived server-side from the hardcoded constant
+      `.agentheim/state/whats-next.md` through `resolveInRoot(root, …)`.
+- [ ] On success (file existed and was removed) the endpoint returns **`204 No Content`**.
+- [ ] **Idempotency:** deleting an already-absent file returns success (`204`), never `404`.
+      A repeat `DELETE` (delete twice in a row) also returns `204`. A test covers both.
+- [ ] A genuine non-`ENOENT` filesystem failure returns `500` (not `204`), and deletes nothing.
+
+### Server — the allowlist guard (unit-tested)
+- [ ] The handler compares the resolved target against a **precomputed allowed absolute path
+      by exact string equality** (`target === ALLOWED`), never a prefix/glob match, before any
+      `unlink`.
+- [ ] A unit test proves the guard: any attempt to make the handler delete anything other than
+      the exact `state/whats-next.md` path is rejected and deletes nothing — **explicitly
+      including an attempt aimed at the sibling advisory artifact
+      `.agentheim/state/in-flight.json`** (a prefix match on `state/` would have matched it; the
+      exact-equality check must not), and including any `contexts/`-lifecycle path. After the
+      full test run, `state/in-flight.json` (if present) is verifiably untouched.
+- [ ] A test asserts the in-root traversal guard (`resolveInRoot`) is still exercised on the
+      resolved constant (defense-in-depth even though no client path is supplied).
+
+### Client — rewire dismiss
+- [ ] `dashboard/app/board.js`'s `WhatsNextPanel` dismiss handler (`onDismiss`) is rewired to
+      call `DELETE /api/whats-next` **instead of** `saveDismissed(...)`. On click it also clears
+      the local panel body optimistically (`setBody(null)`) so the panel vanishes immediately;
+      disk convergence (unlink → SSE → `404` fetch → renders nothing) is the durable truth
+      behind that optimistic hide.
+- [ ] The panel disappears **live** via the existing SSE `tree-changed` mechanism (ADR-0006)
+      once the file is gone: the panel's re-fetch on the frame now `404`s and renders nothing,
+      reusing aw-073's already-shipped "absent artifact renders nothing" contract. No new client
+      state-sync path is introduced.
+- [ ] The `localStorage` dismiss store is **retired entirely**: `loadDismissed`,
+      `saveDismissed`, `isDismissed`, `WHATS_NEXT_KEY`, and `WHATS_NEXT_VERSION` are removed
+      from `dashboard/app/whats-next-state.js`, and their imports/usages in `board.js`
+      (`isDismissed(storage, generated)` gate, the `force`/`generatedStamp`-for-dismiss
+      plumbing) are removed. `WHATS_NEXT_DOC_PATH`, `splitWhatsNextSections`, and
+      `formatStaleness` remain (still used by the render path). Their existing unit tests are
+      updated to drop the retired-store cases while keeping the pure-helper coverage.
+
+### Tests / build / regression
+- [ ] Pure helpers and any new pure server-side logic are unit-tested under
+      `node --test lib/test/*.test.mjs` (and the dashboard's own test layout for the endpoint
+      handler + allowlist).
+- [ ] The dashboard `dist/` is rebuilt via esbuild after the `board.js` / `whats-next-state.js`
+      changes.
+- [ ] The full existing suite stays green (no regression to `/api/doc`, `/api/tree`,
+      `/api/events`, `/api/bridge`, `/api/search`, or the `405` gate behavior).
 
 ## Notes
-Directly modifies shipped behavior from **aw-073** (the dismissible panel) and reads the
-artifact **aw-076** writes. Refinement should route through the **architect** (via the
-orchestrator) to settle A vs B; direction A almost certainly splits off a `type: decision`
-task for the ADR amendment that this feature then `depends_on`. Left in `backlog/`
-deliberately — it is decision-gated and not workable as-is.
+- This task went through an **architect round** (routed via the orchestrator per ADR-0035),
+  which produced and ratified **ADR-0046** as the settled decision — so this stays a single
+  feature task with no separate blocking decision sub-task; it can proceed straight to `todo/`.
+- **Endpoint contract chosen:** `DELETE /api/whats-next` — truthful method, idempotent,
+  dispatched before the `405` gate; **no client-supplied path** (the server alone knows the one
+  file — stronger than `/api/doc`'s client-named path); **exact-equality allowlist** over the
+  one resolved absolute path (a prefix match on `state/` was rejected precisely because it would
+  also match `in-flight.json`); `204` success; already-absent is success, never `404`; zero
+  lifecycle side-effects (an advisory artifact has no `INDEX.md`/`protocol.md`/backlink
+  bookkeeping).
+- **localStorage call:** the dismiss store is **retired entirely**, not kept as
+  defense-in-depth. Once the file is really deleted, an absent file already renders nothing and
+  a fresh `whats-next` run has no prior dismissal to consult; the only remaining race
+  (delete-in-flight vs. a stale cached fetch) is covered by the optimistic local hide plus SSE
+  convergence, so the store guards nothing and would only be dead state keyed to a `generated`
+  stamp that names no file.
+- **ADR-0027 §4.5** is the only guard rail amended (before/after wording in ADR-0046); guard
+  rails 1, 2, 3, 4, 6 are untouched, and ADR-0043 §5.5 (dashboard read-only over
+  `in-flight.json`) stays fully intact — the allowlist makes touching `in-flight.json`
+  unreachable.
+- **Two implementation nits flagged by the architect** (not blockers): (a) `204 No Content` vs
+  a `200 {deleted:true}` body is a free swap if the worker/reviewer prefers symmetry with
+  `handleBridge`; (b) confirm the ADR-0006 recursive watcher actually emits `tree-changed` on
+  file **removal** (not just create/overwrite) — if it doesn't, the optimistic local hide still
+  covers the single-browser outcome and cross-browser convergence falls to the next natural
+  re-fetch. Resolve inline during implementation.

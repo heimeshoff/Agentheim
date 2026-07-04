@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 15:05 -- Modeling / Refined: agentic-workflow-vmk1z - Dismissing the What's next panel deletes its advisory artifact
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Builder locked direction A (delete-on-dismiss, not auto-hide). Architect round (via orchestrator) settled the contract and ratified ADR-0046: the dashboard gains its first write since ADR-0017 — a delete-only, advisory-only `DELETE /api/whats-next` that removes only `.agentheim/state/whats-next.md` (exact-equality allowlist, no client path, idempotent `204`, zero lifecycle side-effects); the `localStorage` dismiss store is retired. Task refined to concrete testable AC, kept single (no decision sub-task), ready to promote pending builder review of ADR-0046.
+**Split into:** —
+**ADRs written:** ADR-0046 (proposed)
+
+---
+
 ## 2026-07-04 14:30 -- Modeling / Captured: agentic-workflow-vmk1z - Dismissing the What's next panel deletes its advisory artifact
 
 **Type:** Modeling / Capture
