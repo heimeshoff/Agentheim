@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-s7gev
 title: Prompt bar gains a keyboard-committed single-selection highlight model
-status: todo
+status: doing
 type: decision
 context: agentic-workflow
 created: 2026-07-05

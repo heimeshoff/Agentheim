@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 01:38 -- Batch started: [agentic-workflow-s7gev, design-system-t896s, agentic-workflow-vk6mc]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-s7gev - Prompt bar gains a keyboard-committed single-selection highlight model, design-system-t896s - TicketCard — bump corner radius toward 1b's 10px, agentic-workflow-vk6mc - Topbar — recolor What's-next to the ochre CTA; regression-guard the unchanged parts
+**Parallel:** yes (3 workers — s7gev ADR-only + t896s design-system/styleguide radius + vk6mc dashboard topbar recolor, zero file overlap this wave; wsfsk + a2pm1 held to next wave — both also edit dashboard/app/board.js like vk6mc, deferred to avoid a three-way board.js merge scramble)
+
+---
+
 ## 2026-07-05 01:33 -- Modeling / Promoted: agentic-workflow-a2pm1 - What's Next panel — 3-step flight plan with ochre step-2 hero
 
 **Type:** Modeling / Promote

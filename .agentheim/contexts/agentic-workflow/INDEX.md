@@ -11,8 +11,8 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 2
-- **Todo:** 4
-- **Doing:** 0
+- **Todo:** 2
+- **Doing:** 2
 - **Done:** 123
 <!-- task-counts:end -->
 
@@ -20,12 +20,12 @@ research touching this BC, and concept synthesis pages.
 <!-- todo-list:start -->
 - **agentic-workflow-a2pm1** — What's Next panel — 3-step flight plan with ochre step-2 hero (feature) — `todo/agentic-workflow-a2pm1-whats-next-flight-plan-hero.md`
 - **agentic-workflow-wsfsk** — Left nav — 1a single-panel shape (width, tree label, footer status line) (feature) — `todo/agentic-workflow-wsfsk-left-nav-1a-single-panel-shape.md`
-- **agentic-workflow-vk6mc** — Topbar — recolor What's-next to the ochre CTA; regression-guard the unchanged parts (feature) — `todo/agentic-workflow-vk6mc-topbar-whats-next-ochre-cta.md`
-- **agentic-workflow-s7gev** — Prompt bar gains a keyboard-committed single-selection highlight model (decision) — `todo/agentic-workflow-s7gev-prompt-bar-keyboard-selection-model.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-vk6mc** — Topbar — recolor What's-next to the ochre CTA; regression-guard the unchanged parts (feature) — `doing/agentic-workflow-vk6mc-topbar-whats-next-ochre-cta.md`
+- **agentic-workflow-s7gev** — Prompt bar gains a keyboard-committed single-selection highlight model (decision) — `doing/agentic-workflow-s7gev-prompt-bar-keyboard-selection-model.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

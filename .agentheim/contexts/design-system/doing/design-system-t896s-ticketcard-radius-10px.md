@@ -1,7 +1,7 @@
 ---
 id: design-system-t896s
 title: TicketCard — bump corner radius toward 1b's 10px
-status: todo
+status: doing
 type: refactor
 context: design-system
 created: 2026-07-05

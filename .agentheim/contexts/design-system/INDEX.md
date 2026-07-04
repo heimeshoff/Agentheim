@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 28
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **design-system-t896s** — TicketCard — bump corner radius toward 1b's 10px (refactor) — `todo/design-system-t896s-ticketcard-radius-10px.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **design-system-t896s** — TicketCard — bump corner radius toward 1b's 10px (refactor) — `doing/design-system-t896s-ticketcard-radius-10px.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)

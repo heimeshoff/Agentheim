@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-vk6mc
 title: Topbar — recolor What's-next to the ochre CTA; regression-guard the unchanged parts
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-05
