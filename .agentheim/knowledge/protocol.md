@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 12:25 -- Modeling / Refined: agentic-workflow-fq2j8 - Complete the verifier-catch-rate eval — one coherent full 9-fixture pass against the current verifier
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo (promoted immediately — see Promoted entry above)
+**Summary:** Reshaped from "run the 3 remaining fixtures" to a full 9-fixture re-run in one coherent pass. Grounded the scope in a methodology check: `agents/verifier.md` changed after the 2026-07-03 baseline (check-8/runtime-drive from y8b4q; ADR-0043 Stop-hook from m9w5c, commit edad0d5), so splicing the old 6-fixture numbers onto a fresh 3 would be apples-to-oranges. Builder chose re-run-all-9 (~27 opus spawns) over the cheaper 3-only combine for a single internally-consistent dataset that re-baselines the original 6. Sharpened AC (per-fixture planted-check targets, combined full-9 reporting, fixture-bug-correction rule, new dated results/report + README/2026-07-03 pointer updates), added related_adrs [0031,0036], folded in the runbook + Node v25 test-command gotcha. `blocks: [bx7k5]` (concurrent backlink) preserved — this pass is the A/B baseline. Promoted to todo.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 12:21 -- Modeling / Captured: infrastructure-m3q7k - deriveContext can't parse a leading-digit token id — mechanized lifecycle verbs fail on an out-of-spec ADR-0028 token
 
 **Type:** Modeling / Capture

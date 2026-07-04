@@ -145,7 +145,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-fq2j8** — Run the remaining verifier-catch-rate fixtures against the real verifier (stale-readme, missing-adr, contradicts-adr) (spike) — `backlog/agentic-workflow-fq2j8-run-remaining-verifier-catch-rate-fixtures.md`
+- **agentic-workflow-fq2j8** — Complete the verifier-catch-rate eval — one coherent full 9-fixture pass against the current verifier (spike) — `backlog/agentic-workflow-fq2j8-run-remaining-verifier-catch-rate-fixtures.md`
 - **agentic-workflow-bx7k5** — A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures (spike) — `backlog/agentic-workflow-bx7k5-ab-verifier-model-routing-opus-vs-sonnet.md`
 <!-- backlog-list:end -->
 
