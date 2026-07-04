@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 3
-- **Todo:** 0
+- **Backlog:** 2
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 114
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-hz9m3** — Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval (spike) — `todo/agentic-workflow-hz9m3-add-check8-runtime-drive-fixture-to-verifier-eval.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -145,7 +146,6 @@ research touching this BC, and concept synthesis pages.
 ### Backlog
 <!-- backlog-list:start -->
 - **agentic-workflow-fq2j8** — Run the remaining verifier-catch-rate fixtures against the real verifier (stale-readme, missing-adr, contradicts-adr) (spike) — `backlog/agentic-workflow-fq2j8-run-remaining-verifier-catch-rate-fixtures.md`
-- **agentic-workflow-hz9m3** — Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval (spike) — `backlog/agentic-workflow-hz9m3-add-check8-runtime-drive-fixture-to-verifier-eval.md`
 - **agentic-workflow-bx7k5** — A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures (spike) — `backlog/agentic-workflow-bx7k5-ab-verifier-model-routing-opus-vs-sonnet.md`
 <!-- backlog-list:end -->
 

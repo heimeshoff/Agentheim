@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 12:18 -- Modeling / Promoted: agentic-workflow-hz9m3 - Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-04 11:31 -- Modeling / Refined: agentic-workflow-hz9m3 - Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval
 
 **Type:** Modeling / Refine
