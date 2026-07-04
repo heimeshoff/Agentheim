@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 17:58 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 46m (batch start 17:12 → 17:58)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-bx7k5: 1
+**Commits:** 3 (batch-start claim [99fbca0] + task integration [fd978a1] + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (the sonnet-arm A/B empirically tested the verifier gate's judgment-density rationale and surfaced a real tier-independent check-6 gate gap — directly serving "wrong work is caught by structure, not luck"; no pull toward any non-goal, and the routing decision was correctly deferred to a human / superseding ADR, honoring "Not autonomous").
+**Carry-over:** none — working tree clean; no non-main worktrees.
+**Notes:** Single ready task (bx7k5), dispatched solo; whats-next advisory stale (generated 2026-07-03, older than the newest Work entry, its named tasks t4x8p/p3v9k already resolved — no weighting). **Standout result:** the sonnet-pinned verifier (per-spawn `model: "sonnet"` override, `agents/verifier.md` untouched) ran the full 16-fixture hardened corpus k≥3 (51 real spawns) and **caught the opus-floor `missing-adr-borderline` 6/6 where the opus-pinned incumbent misses it 0/6** — the "weaker tier outperformed" branch of the pre-registered decision rule. Scored (correctly, per contract) as evidence *against* ADR-0031's judgment-density pillar — reproducible across two independent k=3 batches — retiring that pillar on this corpus, but the worker **did not** move the verifier to sonnet: the decorrelation pillar (structurally unmeasurable by a catch-rate eval) independently holds the opus pin, and any routing change needs its own superseding ADR. The divergence traced to a **tier-independent wording gap in verifier check 6** (task-file-narrated decisions wrongly waived from needing an ADR), filed as new backlog item `agentic-workflow-q7x2k` (bug) rather than fixed under this spike. Verifier PASS iteration 1; 176/176 project tests green; it flagged one non-blocking labeling imprecision (51 real spawns vs 50 scored runs, transparently reconciled in the report) that did not affect any conclusion. **Recurring friction (6th session running):** git pruned the empty `doing/` before session start — recreated before the claim, else the mechanized claim throws ENOENT. No bounces, failures, escalations, or concept candidates.
+
+---
+
 ## 2026-07-04 17:56 -- Task verified and completed: agentic-workflow-bx7k5 - A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures
 
 **Type:** Work / Task completion
