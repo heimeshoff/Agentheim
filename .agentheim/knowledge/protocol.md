@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 17:56 -- Task verified and completed: agentic-workflow-bx7k5 - A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-bx7k5 - A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures
+**Summary:** Ran the 16-fixture verifier-catch-rate set against a sonnet-pinned verifier (per-spawn model override, agents/verifier.md untouched); sonnet tied opus at ceiling on all 15 ceiling fixtures and caught the opus-floor missing-adr-borderline 6/6 where opus missed 0/6 — retiring ADR-0031 judgment-density on this corpus but licensing no routing change (decorrelation pillar holds); traced the divergence to a tier-independent verifier check-6 wording gap, filed as agentic-workflow-q7x2k.
+**Duration:** 43m01s
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 17:12 -- Batch started: [agentic-workflow-bx7k5]
 
 **Type:** Work / Batch start

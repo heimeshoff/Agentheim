@@ -181,6 +181,25 @@ spawns across 16 fixtures.** `agentic-workflow-bx7k5`'s sonnet arm now has a
 same-set opus baseline that includes at least one fixture (`missing-adr-borderline`)
 with demonstrated discriminating potential, not only a ceiling-saturated set.
 
+### The sonnet arm (`agentic-workflow-bx7k5`): judgment-density pillar tested, opus pin unchanged
+
+`agentic-workflow-bx7k5` real-spawned the verifier with a per-spawn
+`model: "sonnet"` override (no edit to `agents/verifier.md`) across all 16
+fixtures, k ≥ 3 (51 scored spawns; k = 6 for `missing-adr-borderline` across
+two independent batches). Result: sonnet tied opus at ceiling on all 15
+opus-ceiling fixtures (inconclusive on those, by construction), and **caught
+the opus-floor `missing-adr-borderline` 6/6 where opus missed it 0/6** —
+direct evidence against ADR-0031's judgment-density rationale on this corpus,
+but **not** a license to route the verifier to sonnet: ADR-0031's
+decorrelation pillar is independent, unmeasured by any catch-rate eval, and
+alone sufficient to keep the opus pin given `worker = sonnet`. Full numbers:
+`evals/verifier-catch-rate/results/2026-07-04-sonnet-arm-run.md`. Full
+write-up and the decision-rule application:
+`.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md`'s
+`agentic-workflow-bx7k5` addendum. The `missing-adr-borderline` divergence
+turned out to be a **verifier check-6 wording gap**, not a tier effect —
+tracked as `agentic-workflow-q7x2k`.
+
 ### Check-8 (runtime drive, ADR-0036) fixtures
 
 Three additive fixtures close the check-8 gap noted below:
@@ -224,6 +243,20 @@ after the boot failure and the probe mismatch.
   `runtime-probe-subtle-mismatch`) were added and real-spawned k≥3 against
   opus; `missing-adr-borderline` is a demonstrated, reproducible opus miss
   (see "Hardened corpus" under Results above and
-  `results/2026-07-04-hardened-run.md`). The remaining gap — actually running
-  the sonnet arm against this hardened 16-fixture corpus — is
-  `agentic-workflow-bx7k5` itself.
+  `results/2026-07-04-hardened-run.md`).
+- ~~The remaining gap — actually running the sonnet arm against this hardened
+  16-fixture corpus — is `agentic-workflow-bx7k5` itself.~~ — **closed by
+  `agentic-workflow-bx7k5`**: 51 real sonnet-pinned spawns across all 16
+  fixtures (see "The sonnet arm" under Results above and
+  `results/2026-07-04-sonnet-arm-run.md`). Sonnet tied opus at ceiling on all
+  15 opus-ceiling fixtures and caught the opus-floor `missing-adr-borderline`
+  6/6 where opus missed it 0/6 — evidence against ADR-0031's judgment-density
+  rationale on this corpus, but not a license to route the verifier to
+  sonnet (decorrelation, pillar 2, is independent and unmeasured here — see
+  the addendum in `.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md`).
+  The divergence traced to a verifier check-6 wording gap, not a tier effect
+  — tracked separately as `agentic-workflow-q7x2k`.
+  This eval's designed surface is now fully measured on both tiers; any future
+  work here is either the check-6 fix above or generalizing the harness to
+  the `research-reviewer` structural twin noted in the sibling-tasks note
+  below.

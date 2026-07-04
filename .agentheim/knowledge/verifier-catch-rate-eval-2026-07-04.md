@@ -257,3 +257,101 @@ per-fixture opus baseline, and the retention reasoning for each fixture:
   saturates everywhere.
 - **Cost:** 21 real opus-pinned verifier spawns (12 scored + 3 discarded + 6
   scored reconfirmation), ~16-25k tokens/spawn.
+
+## Addendum (`agentic-workflow-bx7k5`, same date): the sonnet arm — judgment-density pillar tested, not retired for routing
+
+This addendum is a **measurement spike**, not a routing change. It real-spawns
+the verifier with a per-spawn `model: "sonnet"` override
+(`Agent(subagent_type: "agentheim:verifier", model: "sonnet", ...)`) across the
+full 16-fixture hardened surface above, k ≥ 3 per fixture (51 scored spawns),
+and compares against the opus baseline recorded in this file and its two
+addenda. `agents/verifier.md` itself is unmodified — the override is
+spawn-time only. Full per-fixture table:
+`evals/verifier-catch-rate/results/2026-07-04-sonnet-arm-run.md`.
+
+**Headline numbers.** Catch rate 45/45 = 100%, right-reason 44/45 = 97.8%,
+false-FAIL 0/5 = 0%, verdict variance 0 across all 16 fixtures (identical
+decisiveness to opus). Sonnet reproduced the opus result exactly on all 12
+original + runtime fixtures and on 3 of the 4 hardened fixtures
+(`stale-readme-partial`, `contradicts-adr-partial`, `runtime-probe-subtle-mismatch`
+— all opus-ceiling, all tied by sonnet at ceiling). The fourth hardened
+fixture, the opus-**floor** `missing-adr-borderline` (opus PASS 0/6), is where
+the two tiers diverge:
+
+**Sonnet caught `missing-adr-borderline` 6/6 (unanimous FAIL across two
+independent k=3 batches) where opus missed it 0/6 (also across two independent
+batches).** 5/6 sonnet runs explicitly cited check 6 and the exact planted
+defect (the `PaintHistory` truncation's undocumented downstream-analytics
+consequence); the sixth caught it via a different, also-real defect
+(`AlreadyPaintedError` never being enforced — a lucky catch, not a miss of the
+FAIL verdict). Per this task's own decision rule (**"sonnet catches it → the
+weaker tier outperformed opus on a judgment check → direct evidence against
+judgment-density... flag it, re-run at higher k, and report it as anti-density
+either way"**), a second independent k=3 batch was run before drawing any
+conclusion; both batches agree, so this is not sampling noise on sonnet's side.
+
+### Applying the decision rule, by fixture direction
+
+**Opus-ceiling fixtures (15 of 16 — the 12 original/runtime + `stale-readme-partial`,
+`contradicts-adr-partial`, `runtime-probe-subtle-mismatch`):** sonnet tied
+opus at ceiling on every one, zero drops. Per the rule, a tie at ceiling is
+**inconclusive / corpus-limited by construction** — opus itself never left
+room to distinguish a weaker tier here, so none of these 15 fixtures vindicate
+*or* retire the judgment-density claim. They confirm sonnet is at minimum
+competent on the checks opus already saturates, nothing more.
+
+**Opus-floor fixture (`missing-adr-borderline`):** sonnet caught it 6/6,
+5/6 right-reason. Per the rule, this scores as **direct evidence against the
+judgment-density rationale on this fixture** — the weaker tier outperformed
+the tier the gate is pinned to, on the one fixture in the corpus specifically
+built to strain judgment. This is not a fluke: it replicates the same pattern
+`n7q4d` found for opus (reproducible across two independent batches on each
+side), just with the tiers' outcomes inverted.
+
+**Combined verdict on the judgment-density pillar.** Across the hardened
+corpus's one genuine discriminator, the weaker tier did not merely tie — it
+outperformed. Combined with zero ceiling-fixture drops (no fixture where
+sonnet demonstrated *worse* judgment than opus), **this corpus's evidence does
+not support ADR-0031's judgment-density rationale as a standalone
+justification for pinning the verifier to opus.** Per the decision rule, the
+most likely resolution given this evidence is stated explicitly: **decorrelation
+alone carries the pin** — pillar 2 (the worker→verifier tier-decorrelation
+requirement, load-bearing and structurally unmeasurable by any catch-rate
+eval) is untouched by this result and independently sufficient, and given
+`worker = sonnet` plus ADR-0031's own "never weaken the judge to strengthen the
+executor," `opus` (or a peer/stronger family) remains essentially forced
+regardless of this pillar-1 finding.
+
+### What this spike does NOT license
+
+**No result here moves the verifier to `sonnet`.** Doing so would re-correlate
+the worker→verifier pair — the exact outcome ADR-0031 rejects outright
+("downgrade the gates to match their producers"). Pillar 2 (decorrelation) is
+untouched by a catch-rate eval by construction and independently holds the
+pin. If a spend-saving routing change is ever wanted on the strength of this
+finding, it must ship as its **own** superseding ADR that reasons about
+decorrelation explicitly and keeps the judge not-weaker-than the `sonnet`
+producer — not as an edit made under this spike.
+
+### The real, actionable finding: a verifier gate gap, not a tier problem
+
+`missing-adr-borderline`'s divergence is not "sonnet is smarter than opus."
+Both tiers were tested against the *same* underlying gap in
+`agents/verifier.md`'s check 6: opus consistently reasons that a decision
+narrated in the task file's own `## Why`/`## What` prose doesn't need an ADR
+("the task file already explains it"), a reading check 6's text does not
+support and this exact corpus's own `missing-adr` fixture contradicts. Sonnet,
+on 5 of 6 runs, applied check 6's text more literally and caught it. This is a
+**wording gap in the gate itself**, reproducible independent of model tier —
+tracked as its own backlog item
+(`agentic-workflow-q7x2k`) rather than folded
+into this spike's routing question, per the "no result here moves the
+verifier" rule above. Fixing the gate's wording benefits whichever tier runs
+it.
+
+### Cost
+
+51 real sonnet-pinned verifier spawns across the 16-fixture surface (k ≥ 3 per
+fixture, k = 6 for `missing-adr-borderline` across two independent batches,
+mirroring `n7q4d`'s own reconfirmation methodology for the same fixture).
+Full breakdown: `evals/verifier-catch-rate/results/2026-07-04-sonnet-arm-run.md`.

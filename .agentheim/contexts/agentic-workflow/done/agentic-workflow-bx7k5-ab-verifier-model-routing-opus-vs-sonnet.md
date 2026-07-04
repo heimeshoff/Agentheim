@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-bx7k5
 title: A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures
-status: doing
+status: done
 type: spike
 context: agentic-workflow
 created: 2026-07-03
-completed:
+completed: 2026-07-04
 depends_on: [agentic-workflow-fq2j8, agentic-workflow-n7q4d]
 blocks: []
 tags: [harness-audit, verifier, evals, model-routing]
@@ -112,19 +112,19 @@ side-by-side.
 
 ## Acceptance criteria
 
-- [ ] The **16-fixture hardened surface** — `fq2j8`'s 9 + `hz9m3`'s 3 runtime +
+- [x] The **16-fixture hardened surface** — `fq2j8`'s 9 + `hz9m3`'s 3 runtime +
       `n7q4d`'s 4 new discriminating fixtures — run against a `sonnet`-pinned
       verifier via a per-spawn `model: "sonnet"` override (no edit to
       `agents/verifier.md`), k ≥ 3 per fixture, using the runbook in
       `evals/verifier-catch-rate/README.md`.
-- [ ] Catch rate / right-reason rate / false-FAIL rate / per-fixture variance
+- [x] Catch rate / right-reason rate / false-FAIL rate / per-fixture variance
       reported **side-by-side** with the same-surface `opus` baseline of record —
       `.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md` plus
       `evals/verifier-catch-rate/results/2026-07-04-run.md` and
       `.../2026-07-04-hardened-run.md` — in a dated follow-up report under
       `.agentheim/knowledge/` (and per-run numbers under
       `evals/verifier-catch-rate/results/`), plus a protocol entry.
-- [ ] The decision rule in Notes is applied and its verdict stated explicitly,
+- [x] The decision rule in Notes is applied and its verdict stated explicitly,
       **scored strictly as evidence about ADR-0031's judgment-density pillar**
       and **by fixture direction**: the ceiling caveat honored (a ~100% tie on a
       fixture opus *also* ceilinged is **inconclusive / corpus-limited** — branch
@@ -137,13 +137,13 @@ side-by-side.
       opus" is evidence against the judgment-density rationale only on a fixture
       `n7q4d` showed to strain opus — and **never** evidence about the
       decorrelation pillar, which this eval cannot measure.
-- [ ] The report states explicitly that **no result here moves the verifier to
+- [x] The report states explicitly that **no result here moves the verifier to
       `sonnet`** (that re-correlates the worker→verifier pair, ADR-0031's
       load-bearing rule). If the evidence retires the judgment-density claim, any
       proposed spend-saving routing change ships as its **own** ADR superseding
       ADR-0031 that reasons about decorrelation explicitly — not as an edit made
       under this spike.
-- [ ] `agents/verifier.md` is unchanged by this task (verified — the override
+- [x] `agents/verifier.md` is unchanged by this task (verified — the override
       method touches no tracked agent file).
 
 ## Notes
@@ -210,3 +210,45 @@ the structural twin for the *other* adversarial gate — and note it faces the
 **same** pillar split: `research-reviewer` (opus) audits a `sonnet` researcher,
 so any A/B there measures its judgment-density, not the decorrelation that
 ADR-0031 also rests on. A candidate to generalize the harness toward later.
+
+## Outcome
+
+Real-spawned the `agentheim:verifier` with a per-spawn `model: "sonnet"`
+override across all 16 fixtures, k ≥ 3 (k = 6 for `missing-adr-borderline`
+across two independent batches) — 51 scored spawns, `agents/verifier.md`
+untouched. **Headline: catch 45/45 = 100%, right-reason 44/45 = 97.8%,
+false-FAIL 0/5 = 0%, verdict variance 0 across all 16 fixtures.** Sonnet tied
+opus at ceiling on all 15 opus-ceiling fixtures (inconclusive on those, by
+construction) and **caught the opus-floor `missing-adr-borderline` 6/6 where
+opus missed it 0/6** (5/6 right-reason, 1/6 a lucky catch on a different real
+defect) — confirmed reproducible across two independent k=3 batches per the
+decision rule's "flag + re-run at higher k" instruction.
+
+**Applying the decision rule:** the 15 ceiling fixtures are corpus-limited /
+inconclusive by construction. The floor fixture is direct evidence *against*
+ADR-0031's judgment-density rationale on this corpus — the weaker tier
+outperformed the tier the gate is pinned to, on the one fixture built to
+strain judgment. Combined verdict: **this corpus's evidence does not support
+judgment-density as a standalone justification for the opus pin.** Per the
+rule, the resolution is **decorrelation alone carries the pin** — ADR-0031's
+pillar 2 (worker→verifier tier-decorrelation, load-bearing, structurally
+unmeasurable by any catch-rate eval) is untouched by this finding and
+independently sufficient; given `worker = sonnet` and "never weaken the judge
+to strengthen the executor," `opus` remains essentially forced regardless.
+**No result here moves the verifier to `sonnet`** — that would re-correlate
+the worker→verifier pair, which ADR-0031 rejects outright. Any spend-saving
+routing change is out of this spike's scope; it would need its own superseding
+ADR reasoning about decorrelation explicitly.
+
+The `missing-adr-borderline` divergence traced to a genuine **wording gap in
+`agents/verifier.md`'s check 6** (task-file-narrated decisions are wrongly
+treated as not needing an ADR) reproducible independent of model tier — not a
+tier effect. Captured as its own backlog item (id `agentic-workflow-q7x2k`)
+rather than fixed here:
+`.agentheim/contexts/agentic-workflow/backlog/agentic-workflow-q7x2k-verifier-check6-task-prose-gate-gap.md`.
+
+Key files: `evals/verifier-catch-rate/results/2026-07-04-sonnet-arm-run.md`
+(full per-fixture sonnet-arm table), `.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md`
+(the `agentic-workflow-bx7k5` addendum — decision-rule application in full),
+`evals/verifier-catch-rate/README.md` (Results + Known gaps updated to close
+this eval's originally-scoped surface on both tiers).

@@ -10,10 +10,10 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 117
+- **Doing:** 0
+- **Done:** 118
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-bx7k5** — A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures (spike) — `doing/agentic-workflow-bx7k5-ab-verifier-model-routing-opus-vs-sonnet.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-bx7k5** — A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures (spike) — `done/agentic-workflow-bx7k5-ab-verifier-model-routing-opus-vs-sonnet.md`
 - **agentic-workflow-n7q4d** — Harden the verifier-catch-rate corpus with discriminating fixtures (opus ceilings the current set) (spike) — `done/agentic-workflow-n7q4d-harden-verifier-catch-rate-corpus-discriminating-fixtures.md`
 - **agentic-workflow-hz9m3** — Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval (spike) — `done/agentic-workflow-hz9m3-add-check8-runtime-drive-fixture-to-verifier-eval.md`
 - **agentic-workflow-fq2j8** — Complete the verifier-catch-rate eval — one coherent full 9-fixture pass against the current verifier (spike) — `done/agentic-workflow-fq2j8-run-remaining-verifier-catch-rate-fixtures.md`
@@ -148,6 +148,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-q7x2k** — Verifier check 6 gate gap — decisions narrated only in task-file prose are not flagged for an ADR (bug) — `backlog/agentic-workflow-q7x2k-verifier-check6-task-prose-gate-gap.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
