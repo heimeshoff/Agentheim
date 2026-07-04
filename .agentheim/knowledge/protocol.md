@@ -5,6 +5,18 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 22:30 -- Release shipped: v0.8.10
+
+**Type:** Release
+**Version:** 0.8.9 → 0.8.10 (patch — What's Next dismiss now deletes its advisory artifact server-side; INDEX done-list rotation wired into work session-end)
+**Manifest:** `.claude-plugin/plugin.json` bumped, committed `ab4f653`
+**Changelog:** `CHANGELOG.md` `[Unreleased]` → `[0.8.10]` section rolled (same commit)
+**Pushed to main:** yes (`48fc064..ab4f653` on `origin/main`)
+**Tag:** `v0.8.10` (annotated) → `ab4f653`, pushed to origin
+**GitHub Release:** created via `gh` (from CHANGELOG)
+
+---
+
 ## 2026-07-04 22:10 -- Work session ended
 
 **Type:** Work / Session end
