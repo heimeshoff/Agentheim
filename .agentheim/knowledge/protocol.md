@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 18:05 -- Modeling / Refined: agentic-workflow-q7x2k - Verifier check 6 gate gap
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Verified the gap diagnosis against the `missing-adr-borderline` fixture's own task file (`widgets-mab1`) on disk — its `## Why`/`## What` do narrate the silent-drop tradeoff and its downstream-analytics consequence, yet expect FAIL, so the task-file-narration loophole is real and the fix is aimed correctly. Added a false-positive/over-flag constraint to `## What` (the sharpen removes only the carve-out, must not lower the "would ask why?" bar) and a new **no-regression ceiling-fixture** acceptance criterion so the fix can't trade one false-negative for false-positives elsewhere; sharpened the worked-example AC to anchor on `widgets-mab1`. No split, no ADR (wording sharpen, not a routing change). Task is now worker-ready but left in backlog per the refine-only ask.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 17:58 -- Work session ended
 
 **Type:** Work / Session end
