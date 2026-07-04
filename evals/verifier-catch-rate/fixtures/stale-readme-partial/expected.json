@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL",
+  "check": "5-bc-readme-sync",
+  "planted_defect": "The diff adds Widget.resize(weight) and documents the new Resize/MaxWeight vocabulary in the README's Ubiquitous language section (BC_README_UPDATED: yes is true, and the diff genuinely touches the README), but the README's Aggregates section still lists only `Widget — command: paint(color)` and was never updated to include the new resize(weight) command. The README sync is real but incomplete.",
+  "notes": "Deliberately harder than the original stale-readme fixture: BC_README_UPDATED: yes is TRUE and the diff genuinely touches the README, so a verifier that only checks 'was the README touched at all' passes this. Catching it requires reading the Aggregates section specifically and noticing the command list itself was never refreshed to include resize(weight)."
+}

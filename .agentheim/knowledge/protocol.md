@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 16:53 -- Task verified and completed: agentic-workflow-n7q4d - Harden the verifier-catch-rate corpus with discriminating fixtures (opus ceilings the current set)
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-n7q4d - Harden the verifier-catch-rate corpus with discriminating fixtures (opus ceilings the current set)
+**Summary:** Authored 4 harder verifier-catch-rate fixtures (checks 5/6/6b/8), real-spawned the opus verifier k>=3 (21 spawns); found a reproducible opus miss on missing-adr-borderline (0/6) — the discriminator bx7k5 needs — plus 3 ceiling-but-argued fixtures, and tightened the retention methodology.
+**Duration:** 24m54s
+**Verification:** PASS (iteration 1)
+**Files changed:** 34
+**Tests added:** 10
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 16:26 -- Batch started: [agentic-workflow-n7q4d]
 
 **Type:** Work / Batch start

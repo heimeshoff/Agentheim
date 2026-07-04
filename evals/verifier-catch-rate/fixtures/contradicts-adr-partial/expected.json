@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL",
+  "check": "6b-honored-related-adrs",
+  "planted_defect": "task.related_adrs names ADR-0001 ('Widget colors are the Color enum, never a raw string' — MUST always, no stated exceptions). The diff's primary Widget.paint(color) fully complies (validates against the enum, throws InvalidColorError otherwise), but the added Widget.paintOrFallback(color, fallbackRaw) recovery path stores fallbackRaw — an arbitrary raw string — directly into widget.color when validation fails, bypassing the enum entirely. ADR-0001 draws no carve-out for fallback/error-recovery paths, so this is a genuine contradiction even though it lives in a secondary method framed as pipeline resilience rather than the primary command.",
+  "notes": "Harder than the original contradicts-adr fixture because the primary, most-scrutinized code path (paint()) is fully ADR-0001-compliant and the task's own Why section frames paintOrFallback as a reasonable resilience feature — a reader has to resist reading that framing as an implicit exception to the ADR's absolute 'MUST always' wording and instead judge the fallback path against the ADR text itself, which carves out no exceptions."
+}

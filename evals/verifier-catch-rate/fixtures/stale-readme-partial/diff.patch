@@ -1,0 +1,68 @@
+diff --git a/.agentheim/contexts/widgets/README.md b/.agentheim/contexts/widgets/README.md
+index e3c1a11..7b2f9aa 100644
+--- a/.agentheim/contexts/widgets/README.md
++++ b/.agentheim/contexts/widgets/README.md
+@@ -6,11 +6,14 @@ of the real Agentheim product — do not treat as domain guidance for any othe
+ task.
+
+ ## Ubiquitous language
+-- **Widget** — the aggregate; a paintable unit with a `color`.
++- **Widget** — the aggregate; a paintable, resizable unit with a `color` and a
++  `weight`.
+ - **Paint** — the operation of applying a `Color` to a `Widget`.
++- **Resize** — the operation of changing a `Widget`'s `weight`, bounded by
++  `MaxWeight`.
+ - **Color** — one of `red`, `blue`, `green`, represented as the `Color` enum,
+   never as a raw string.
++- **MaxWeight** — 100; the upper bound a `Widget`'s `weight` may reach via
++  `resize`.
+ - **AlreadyPaintedError** — thrown when a `Widget` is painted with the `Color`
+   it already has.
+
+diff --git a/src/widget.js b/src/widget.js
+new file mode 100644
+--- /dev/null
++++ b/src/widget.js
+@@ -0,0 +1,20 @@
++const MAX_WEIGHT = 100;
++
++class MaxWeightExceededError extends Error {}
++
++class Widget {
++  constructor() {
++    this.color = null;
++    this.weight = 0;
++  }
++
++  paint(color) {
++    this.color = color;
++  }
++
++  resize(weight) {
++    if (weight > MAX_WEIGHT) {
++      throw new MaxWeightExceededError(`weight ${weight} exceeds MaxWeight (${MAX_WEIGHT})`);
++    }
++    this.weight = weight;
++  }
++}
++
++module.exports = { Widget, MaxWeightExceededError, MAX_WEIGHT };
+diff --git a/test/widget.test.js b/test/widget.test.js
+new file mode 100644
+--- /dev/null
++++ b/test/widget.test.js
+@@ -0,0 +1,13 @@
++const { test } = require('node:test');
++const assert = require('node:assert');
++const { Widget, MaxWeightExceededError } = require('../src/widget.js');
++
++test('resizing a widget within MaxWeight sets its weight', () => {
++  const w = new Widget();
++  w.resize(50);
++  assert.strictEqual(w.weight, 50);
++});
++
++test('resizing a widget above MaxWeight throws', () => {
++  const w = new Widget();
++  assert.throws(() => w.resize(150), MaxWeightExceededError);
++});

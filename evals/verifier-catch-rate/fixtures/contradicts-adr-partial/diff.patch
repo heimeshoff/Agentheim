@@ -1,0 +1,62 @@
+diff --git a/src/widget.js b/src/widget.js
+new file mode 100644
+--- /dev/null
++++ b/src/widget.js
+@@ -0,0 +1,26 @@
++const COLORS = new Set(['red', 'blue', 'green']);
++
++class InvalidColorError extends Error {}
++
++class Widget {
++  constructor() {
++    this.color = null;
++  }
++
++  paint(color) {
++    if (!COLORS.has(color)) {
++      throw new InvalidColorError(`${color} is not a valid Color`);
++    }
++    this.color = color;
++  }
++
++  paintOrFallback(color, fallbackRaw) {
++    try {
++      this.paint(color);
++    } catch (err) {
++      if (err instanceof InvalidColorError) {
++        // Fallback: keep the pipeline moving with whatever raw value the
++        // upstream integration sent, rather than dropping the record.
++        this.color = fallbackRaw;
++        return;
++      }
++      throw err;
++    }
++  }
++}
++
++module.exports = { Widget, InvalidColorError };
+diff --git a/test/widget.test.js b/test/widget.test.js
+new file mode 100644
+--- /dev/null
++++ b/test/widget.test.js
+@@ -0,0 +1,16 @@
++const { test } = require('node:test');
++const assert = require('node:assert');
++const { Widget, InvalidColorError } = require('../src/widget.js');
++
++test('paint throws InvalidColorError for a value outside the Color enum', () => {
++  const w = new Widget();
++  assert.throws(() => w.paint('not-an-enum-value'), InvalidColorError);
++});
++
++test('paintOrFallback paints normally when color is valid', () => {
++  const w = new Widget();
++  w.paintOrFallback('red', 'unused');
++  assert.strictEqual(w.color, 'red');
++});
++
++test('paintOrFallback stores the raw fallback value when color is invalid', () => {
++  const w = new Widget();
++  w.paintOrFallback('not-an-enum-value', '#ff0000-from-upstream');
++  assert.strictEqual(w.color, '#ff0000-from-upstream');
++});

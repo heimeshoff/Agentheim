@@ -183,3 +183,77 @@ against `agents/verifier.md` from this addendum.
 teardown cycle is visibly more expensive than checks 1-7 alone, consistent
 with ADR-0036 pt 3 placing it last as "the most expensive check"). No spawns
 discarded to a fixture correction.
+
+## Addendum (`agentic-workflow-n7q4d`, same date): the corpus hardened — a real opus miss found
+
+The 36 scored runs above (12 fixtures, `fq2j8` + `hz9m3`) landed **zero
+variance across every fixture** — including the three judgment checks
+(`stale-readme`/5, `missing-adr`/6, `contradicts-adr`/6b) that were supposed
+to be where a model-tier gap surfaces. That ceiling meant the planned
+opus-vs-sonnet A/B (`agentic-workflow-bx7k5`) had no discriminating corpus to
+run against — it would most likely land "both ~100%, inconclusive." This
+task hardens the corpus before spending the sonnet arm. Full detail,
+per-fixture opus baseline, and the retention reasoning for each fixture:
+`evals/verifier-catch-rate/results/2026-07-04-hardened-run.md`. Summary:
+
+- **Four new fixtures**, each targeting a judgment check (5, 6, 6b) or a
+  harder check-8 shape, k=3 real opus-pinned spawns each (12 scored + 9
+  discarded/rework spawns for `missing-adr-borderline`, 21 total).
+- **`stale-readme-partial`** (check 5, partial README sync — `BC_README_UPDATED: yes`
+  is literally true but only one of two relevant README sections was
+  refreshed): FAIL 3/3, right-reason 3/3, zero variance. Ceilings opus;
+  retained on an explicit argument (a weaker tier could plausibly stop at
+  "README was touched" without checking which section).
+- **`missing-adr-borderline`** (check 6, a `PaintHistory`-truncation decision
+  with a documented downstream-analytics consequence, narrated in the task's
+  own `## Why`/`## What` rather than flagged by a code comment): **a genuine,
+  reproducible opus MISS** — 0/6 catch across two independent k=3 batches
+  (the first batch needed a rework: its README inherited an unrelated
+  "Color... never as a raw string" mandate the fixture's own code violated,
+  contaminating one run with a lucky wrong-reason catch; removing that
+  confound and re-running produced a clean, unanimous 3/3 PASS, replicating
+  the first batch's other 2/3). Opus consistently reasons the decision "is
+  dictated by the task's own `## What`, not an independent worker choice, so
+  no ADR is owed" — a reading check 6's text does not support (it asks only
+  whether a decision needing "why?" lacks an ADR) and that this exact
+  corpus's own sibling fixture (`missing-adr`, narrated identically in its own
+  `## What`) was correctly FAILed for. This is the standout finding of the
+  hardening pass: a real, articulable, reproducible judgment gap in the
+  current opus-pinned verifier, not corpus noise — directly useful to
+  `bx7k5`.
+- **`contradicts-adr-partial`** (check 6b, ADR-0001 compliant in the primary
+  `paint()` path, violated only in a secondary `paintOrFallback()` resilience
+  method framed sympathetically in the task's own `## Why`): FAIL 3/3,
+  right-reason 3/3 (all three additionally flagged `ITERATION_HINT:
+  task-under-specified`, reasoning the acceptance criteria themselves bake in
+  the contradiction — a sharper read than planted, still scored as a
+  substantive check-6b catch). Ceilings opus; retained on an explicit
+  argument (a shallower read that stops at "the primary command honors the
+  ADR" is a real risk this fixture is built to expose).
+- **`runtime-probe-subtle-mismatch`** (check 8, a nested per-item field-name
+  mismatch — `color` declared, `colour` served — behind a top-level shape
+  that is correct and, unlike the original `runtime-probe-mismatch`, a unit
+  suite that genuinely drives `/widgets` over live HTTP): FAIL 3/3,
+  right-reason 3/3, boot/probe/teardown clean on every run. Ceilings opus;
+  retained on an explicit argument (a weaker tier could plausibly stop at
+  "route is HTTP-tested, top-level shape matches"), and check 8's ground
+  truth is additionally the most immune to any contested-ground concern —
+  `color` vs `colour` is a textual, structural fact, not a judgment call.
+- **Methodology tightened**: the eval README now carries a "what makes a
+  valid tier-discriminator" note (hard AND unambiguous — never contested)
+  addressing a conflation this task's own refinement caught: non-zero opus
+  variance is a keep signal only *after* a fixture's ground truth is shown
+  uncontested, since a fixture whose ground truth even opus can't settle would
+  make a weaker tier's flip-flopping measure noise, not tier — a false
+  vindication of the incumbent, worse than a false tie. None of the four new
+  fixtures actually needed this clause in the end (all four resolved to
+  defensible, uncontested ground truth once `missing-adr-borderline`'s
+  authoring confound was removed) — but it governed how `missing-adr-borderline`'s
+  v1 contaminated result was read and discarded rather than mistakenly kept.
+- **Combined dataset of record: 54 scored real verifier spawns across 16
+  fixtures.** `bx7k5`'s sonnet arm now has a same-set opus baseline with at
+  least one demonstrated discriminating fixture (`missing-adr-borderline`)
+  plus three ceiling-but-argued fixtures, rather than a corpus that opus
+  saturates everywhere.
+- **Cost:** 21 real opus-pinned verifier spawns (12 scored + 3 discarded + 6
+  scored reconfirmation), ~16-25k tokens/spawn.

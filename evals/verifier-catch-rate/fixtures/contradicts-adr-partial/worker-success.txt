@@ -1,0 +1,12 @@
+RESULT: SUCCESS
+TASK_ID: widgets-cap1
+SUMMARY: Added Widget.paint(color) with Color-enum validation per ADR-0001, plus a paintOrFallback(color, fallbackRaw) resilience path for the integration adapter.
+FILES_CHANGED: 2
+FILE_LIST: src/widget.js, test/widget.test.js
+BC_README_UPDATED: no
+ADRS_WRITTEN: none
+NEW_BACKLOG_ITEMS: none
+TESTS_ADDED: 3
+TESTS_PASSING: yes
+TDD_SKIPPED: no
+CONCEPT_CANDIDATE: none

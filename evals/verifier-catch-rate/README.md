@@ -85,22 +85,101 @@ between runs). Score:
 - **Miss** — `VERDICT: PASS` (or `SKIP`) on a defect fixture.
 - **False FAIL** — `VERDICT: FAIL` on the `clean` fixture (any reason).
 
+## What makes a valid tier-discriminator (methodology)
+
+A fixture earns its place in this corpus only if it is **both**:
+
+- **(a) Hard** — it strains the pinned model on reasoning depth: a miss, a
+  lucky/wrong-reason catch, or a flip-flop across k runs. A fixture the model
+  unanimously right-reason catches at zero variance teaches nothing about a
+  weaker tier on its own — it is corpus-limited (the model is already at
+  ceiling on it). It may still be kept, but only with an **explicit,
+  fixture-specific argument** for why a weaker tier could plausibly diverge
+  even though the pinned model did not (e.g. "the naive shortcut a weaker
+  tier might take — checking X — is satisfied here, so only a deeper read of
+  Y catches it").
+- **(b) Unambiguous** — the planted defect is one a fair reader agrees is
+  genuinely there, not a contested FAIL/PASS call.
+
+**Non-zero verdict variance across k runs is a keep signal only *after*
+ground truth is shown uncontested — never on its own.** A fixture can produce
+variance for two structurally different reasons: the model is near its
+reasoning ceiling on a fixture with **one correct answer** (a real
+discriminator — a weaker tier would likely do worse), or the fixture's
+**ground truth is itself genuinely contested**, in which case even the
+strongest pinned model can't settle it, and a weaker tier's flip-flopping on
+the same fixture measures noise, not tier. Retaining the second kind is
+*worse* than a false tie: it lets an A/B read "opus 2/3, sonnet 1/3" as
+vindicating a judgment-density hypothesis when both tiers are merely guessing
+with different bias — a false vindication of the incumbent on noise, not a
+genuine tier signal. Concretely: before treating any variance as a retain
+signal, show the ground truth is uncontested (ideally by anchoring the
+fixture's expected verdict against an established precedent elsewhere in the
+corpus, the way `agentic-workflow-n7q4d`'s `missing-adr-borderline` fixture
+was checked against the original `missing-adr` fixture's identical narration
+pattern).
+
+**Objective, structurally-verifiable ground truth (e.g. check 8's declared
+vs. observed body shape — a textual/structural fact, not a judgment call) is
+inherently immune to the contested-ground trap and can be hardened freely.**
+The judgment checks (5 BC-README-sync, 6 ADRs-for-decisions, 6b
+honored-related-ADRs) are exactly where "genuinely borderline" can shade into
+"genuinely contested" — author and evaluate those with this gate explicitly
+in mind; borderline ADR-worthiness (or README-staleness, or
+ADR-honoring) must still resolve to a defensible right answer, not a
+coin-flip, before any variance on it is trusted.
+
 ## Results
 
 See `results/2026-07-04-run.md` for the recorded numbers from the completed
 full 9-fixture x k=3 pass (`agentic-workflow-fq2j8`), plus that same file's
 addendum section (`agentic-workflow-hz9m3`) covering the 3 check-8 fixtures
-below. The eval report at
-`.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md` (and its own
-addendum) has the full write-up, per-fixture variance, and follow-up
+below, and `results/2026-07-04-hardened-run.md` (`agentic-workflow-n7q4d`)
+for the 4 additional, deliberately harder fixtures. The eval reports at
+`.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md` (and its two
+addenda) have the full write-ups, per-fixture variance, and follow-up
 captures. The `agentic-workflow-fq2j8` pass supersedes `results/2026-07-03-run.md`
 (the original spike's 6-fixture partial) as the dataset of record — see the
 latter file for why it was superseded (the verifier definition changed
 underneath it: check 8 / ADR-0036, and the ADR-0043 heartbeat hook).
 
-**Combined dataset of record: 36 scored real verifier spawns across 12
-fixtures** — catch rate 30/30 = 100%, right-reason rate 30/30 = 100%,
-false-FAIL rate 0/6 = 0%, verdict variance 0 across all 12 fixtures.
+**Combined dataset of record (original 12-fixture pass): 36 scored real
+verifier spawns across 12 fixtures** — catch rate 30/30 = 100%, right-reason
+rate 30/30 = 100%, false-FAIL rate 0/6 = 0%, verdict variance 0 across all 12
+fixtures. That zero-variance ceiling — including on the three judgment
+checks — is exactly why `agentic-workflow-n7q4d` hardened the corpus further;
+see below.
+
+### Hardened corpus (`agentic-workflow-n7q4d`): 4 new fixtures, one real miss found
+
+Four additional fixtures target the judgment checks (5/6/6b) and a harder
+check-8 shape, each real-spawned k≥3 against the opus-pinned verifier (21
+total spawns: 12 scored + 3 discarded-to-a-fixture-fix + 6 scored
+reconfirmation). Full detail and retention reasoning:
+`evals/verifier-catch-rate/results/2026-07-04-hardened-run.md`.
+
+- `stale-readme-partial` (check 5, partial not absent README sync) — FAIL
+  3/3, right-reason 3/3, zero variance. Ceilings opus; retained on an
+  explicit argument.
+- `missing-adr-borderline` (check 6, decision narrated in the task's own
+  prose rather than flagged by a code comment) — **PASS 0/6 across two
+  independent k=3 batches — a genuine, reproducible opus miss**, not corpus
+  noise (checked against this exact corpus's own `missing-adr` fixture as
+  precedent). The standout finding: a real judgment-density gap in the
+  current verifier.
+- `contradicts-adr-partial` (check 6b, contradiction confined to a secondary,
+  sympathetically-framed method) — FAIL 3/3, right-reason 3/3, zero variance.
+  Ceilings opus; retained on an explicit argument.
+- `runtime-probe-subtle-mismatch` (check 8, nested field-name mismatch behind
+  a correct top-level shape and a genuinely HTTP-driving unit test) — FAIL
+  3/3, right-reason 3/3, zero variance, clean boot/probe/teardown every run.
+  Ceilings opus; retained on an explicit argument; ground truth objectively
+  uncontested (`color` vs `colour`).
+
+**Combined dataset of record across both passes: 54 scored real verifier
+spawns across 16 fixtures.** `agentic-workflow-bx7k5`'s sonnet arm now has a
+same-set opus baseline that includes at least one fixture (`missing-adr-borderline`)
+with demonstrated discriminating potential, not only a ceiling-saturated set.
 
 ### Check-8 (runtime drive, ADR-0036) fixtures
 
@@ -138,3 +217,13 @@ after the boot failure and the probe mismatch.
   as of 2026-07-03; all three were real-spawned and landed their planted
   checks in the 2026-07-04 full pass (see `results/2026-07-04-run.md`). No
   gap remains here.
+- ~~The 12-fixture corpus ceilings opus (zero variance everywhere), so it
+  cannot discriminate model tiers for `agentic-workflow-bx7k5`'s planned
+  A/B~~ — addressed by `agentic-workflow-n7q4d`: 4 new, harder fixtures
+  (`stale-readme-partial`, `missing-adr-borderline`, `contradicts-adr-partial`,
+  `runtime-probe-subtle-mismatch`) were added and real-spawned k≥3 against
+  opus; `missing-adr-borderline` is a demonstrated, reproducible opus miss
+  (see "Hardened corpus" under Results above and
+  `results/2026-07-04-hardened-run.md`). The remaining gap — actually running
+  the sonnet arm against this hardened 16-fixture corpus — is
+  `agentic-workflow-bx7k5` itself.

@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-n7q4d
 title: Harden the verifier-catch-rate corpus with discriminating fixtures (opus ceilings the current set)
-status: doing
+status: done
 type: spike
 context: agentic-workflow
 created: 2026-07-04
-completed:
+completed: 2026-07-04
 depends_on: []
 blocks: [agentic-workflow-bx7k5]
 tags: [harness-audit, verifier, evals, model-routing]
@@ -131,3 +131,70 @@ the whole hardened surface.
 - **Budget.** Opus-only, k ≥ 3 × the new fixtures (≈9–12 opus spawns for 3–4
   fixtures). Budget-light measurement spike; the durable artifacts are the new
   fixtures + their recorded opus baseline, not new harness code.
+
+## Outcome
+
+Authored 4 new fixtures under `evals/verifier-catch-rate/fixtures/` and
+real-spawned the live opus-pinned `agentheim:verifier` k≥3 against each (21
+total spawns: 12 scored + 3 discarded-to-a-fixture-fix + 6 scored
+reconfirmation), following the existing runbook exactly. All four retained,
+each with a per-fixture retention argument recorded in
+`evals/verifier-catch-rate/results/2026-07-04-hardened-run.md`:
+
+- `stale-readme-partial` (check 5, partial-not-absent README sync — `BC_README_UPDATED: yes`
+  is true but only one of two relevant sections was refreshed): FAIL 3/3,
+  right-reason 3/3, zero variance. Ceilings opus; retained on an explicit
+  argument that a weaker tier could stop at "README was touched" without
+  checking which section.
+- `missing-adr-borderline` (check 6, a `PaintHistory`-cap decision narrated in
+  the task's own `## Why`/`## What` rather than flagged by a code comment):
+  **a genuine, reproducible opus MISS — PASS 0/6 across two independent k=3
+  batches.** The first batch was contaminated by an authoring bug (the
+  fixture's README inherited an irrelevant "Color... never as a raw string"
+  mandate its own code violated, producing one lucky wrong-reason catch); this
+  was fixed (the mandate sentence removed) and a fresh k=3 re-run PASSed
+  unanimously, replicating the first batch's other 2/3 PASSes. Checked against
+  this exact corpus's own `missing-adr` fixture (narrated identically in its
+  own `## What`, correctly FAILed 3/3) as precedent for uncontested ground
+  truth — this is the standout finding: a real, reproducible judgment-density
+  gap in the current verifier, not corpus noise. Retained.
+- `contradicts-adr-partial` (check 6b, ADR-0001 honored in the primary
+  `paint()` path, violated only in a secondary `paintOrFallback()` method
+  framed sympathetically as pipeline resilience): FAIL 3/3, right-reason 3/3
+  (all three additionally flagged the sharper `ITERATION_HINT: task-under-specified`,
+  still scored as a substantive check-6b catch). Ceilings opus; retained on an
+  explicit argument that a shallower read stopping at "primary command honors
+  the ADR" is a real risk.
+- `runtime-probe-subtle-mismatch` (check 8, nested per-item field-name
+  mismatch — `color` declared vs `colour` served — behind a correct top-level
+  shape and, unlike the original `runtime-probe-mismatch`, a unit suite that
+  genuinely drives `/widgets` over live HTTP): FAIL 3/3, right-reason 3/3,
+  clean boot/probe/teardown every run. Ceilings opus; retained on an explicit
+  argument, and ground truth is objectively uncontested (a textual key-name
+  mismatch).
+
+Updated `evals/verifier-catch-rate/README.md` with a new "What makes a valid
+tier-discriminator" methodology note (hard AND unambiguous — never
+contested; non-zero variance is a keep signal only after ground truth is
+shown uncontested) plus an updated Results/Known-gaps section reflecting the
+16-fixture combined corpus. Wrote
+`evals/verifier-catch-rate/results/2026-07-04-hardened-run.md` (new results
+file, full per-fixture table and retention-disposition table) and appended an
+addendum to `.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md`
+(extending, not replacing, the dataset of record — now 54 scored real
+verifier spawns across 16 fixtures). No ADR was warranted (ADR-0036 already
+governs the fixture shape; no new architectural decision was made here). No
+BC README change was needed (no new ubiquitous language/aggregates/events
+introduced to the real `agentic-workflow` BC — only synthetic fixture
+material changed, matching the precedent set by `v3h6p`/`fq2j8`/`hz9m3`).
+`bx7k5`'s `depends_on` already listed this task's id (no cross-task edit
+needed); this task's `blocks: [agentic-workflow-bx7k5]` edge holds unchanged.
+
+Key files:
+- `evals/verifier-catch-rate/fixtures/stale-readme-partial/`
+- `evals/verifier-catch-rate/fixtures/missing-adr-borderline/`
+- `evals/verifier-catch-rate/fixtures/contradicts-adr-partial/`
+- `evals/verifier-catch-rate/fixtures/runtime-probe-subtle-mismatch/`
+- `evals/verifier-catch-rate/results/2026-07-04-hardened-run.md`
+- `evals/verifier-catch-rate/README.md`
+- `.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md`

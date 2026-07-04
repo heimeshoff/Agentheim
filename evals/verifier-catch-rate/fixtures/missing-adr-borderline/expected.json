@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL",
+  "check": "6-adrs-for-decisions",
+  "planted_defect": "Caps Widget.paintHistory at the 5 most recent paints, silently dropping older entries, with no code comment or ADR flagging it as a decision. The README documents PaintHistory as the input to downstream repaint-frequency analytics, so silently truncating it changes what that analytics correctly sees for any widget painted more than 5 times. The choice (silent drop vs erroring on overflow vs unbounded growth vs compaction) has real, documented downstream consequences a future maintainer would clearly ask 'why 5, and why silent?' about. ADRS_WRITTEN: none.",
+  "notes": "Deliberately harder than the original missing-adr fixture: no giveaway code comment naming the decision, and the cap looks like an unremarkable technical bound (a fixed-size buffer) rather than an obviously flagged design choice — the ADR-worthiness has to be inferred by connecting the README's stated use of PaintHistory (downstream analytics) to the diff's silent-truncation behavior."
+}
