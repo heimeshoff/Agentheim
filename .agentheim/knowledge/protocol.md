@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 16:54 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 28m (batch start 16:26 → 16:54)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-n7q4d: 1
+**Commits:** 3 (batch-start claim [506cf06] + task integration [ffc03a8] + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (hardening the verifier-catch-rate corpus and surfacing a genuine reproducible opus miss directly serves "wrong work is caught by structure, not luck" — it gives the model-routing A/B bx7k5 a real tier-discriminator instead of a ceilinged corpus; no pull toward any non-goal)
+**Carry-over:** none — working tree clean; no non-main worktrees
+**Notes:** Single ready task, dispatched solo (whats-next advisory stale — generated 2026-07-03, older than the newest Work entry, and its named tasks t4x8p/p3v9k already resolved; no weighting). Worker authored 4 new fixtures deliberately harder than the ceilinged 12-fixture corpus (targeting judgment checks 5/6/6b and objective check 8) and real-spawned the opus-pinned verifier k≥3 against each (21 spawns). **Standout result:** `missing-adr-borderline` is a genuine, reproducible opus MISS — 0/6 catch across two independent batches — with an uncontested-ground-truth argument (README documents PaintHistory feeding downstream analytics), exactly the hard-AND-unambiguous tier-discriminator bx7k5 was blocked waiting for; three ceiling fixtures retained under the methodology's explicit-argument clause. Worker correctly discarded a v1 variance observation as authoring contamination rather than retaining it on bare variance (the AC3 false-vindication trap this task exists to prevent). Verifier PASS iteration 1, 176/176 project tests; it specifically re-audited the false-vindication trap and confirmed no fixture retained on variance alone. Report extends (not replaces) fq2j8's dataset of record; README carries the new "what makes a valid tier-discriminator" methodology note. bx7k5 (depends_on n7q4d) is now unblocked. **Recurring friction (5th session running):** git pruned the empty `contexts/agentic-workflow/doing/` before session start — recreated it before the claim, else the mechanized claim throws ENOENT. No bounces, failures, escalations, or concept candidates.
+
+---
+
 ## 2026-07-04 16:53 -- Task verified and completed: agentic-workflow-n7q4d - Harden the verifier-catch-rate corpus with discriminating fixtures (opus ceilings the current set)
 
 **Type:** Work / Task completion
