@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 15:30 -- Batch started: [infrastructure-h8k2m]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-h8k2m - Mechanized batch-start leaves a stale duplicate file in todo/ after moving a task into doing/
+**Parallel:** no (1 worker — sole ready task; whats-next advisory stale, no weighting)
+
+---
+
 ## 2026-07-04 15:28 -- Modeling / Promoted: infrastructure-h8k2m - Mechanized batch-start leaves a stale duplicate file in todo/ after moving a task into doing/
 
 **Type:** Modeling / Promote

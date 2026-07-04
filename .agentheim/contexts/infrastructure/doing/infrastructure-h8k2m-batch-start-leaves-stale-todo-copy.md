@@ -1,7 +1,7 @@
 ---
 id: infrastructure-h8k2m
 title: Mechanized batch-start leaves a stale duplicate file in todo/ after moving a task into doing/
-status: todo
+status: doing
 type: bug
 context: infrastructure
 created: 2026-07-04
