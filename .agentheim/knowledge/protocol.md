@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 01:53 -- Batch started: [agentic-workflow-a2pm1, agentic-workflow-wsfsk]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-a2pm1 - What's Next panel — 3-step flight plan with ochre step-2 hero, agentic-workflow-wsfsk - Left nav — 1a single-panel shape (width, tree label, footer status line)
+**Parallel:** yes (2 workers — a2pm1 WhatsNextPanel + wsfsk ShellRail, both in dashboard/app/board.js but different functions; sequential merge-order at integration, dist rebuilt per-integration)
+
+---
+
 ## 2026-07-05 01:52 -- Task verified and completed: agentic-workflow-vk6mc - Topbar — recolor What's-next to the ochre CTA; regression-guard the unchanged parts
 
 **Type:** Work / Task completion
