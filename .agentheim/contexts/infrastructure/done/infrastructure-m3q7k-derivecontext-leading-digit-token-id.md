@@ -1,15 +1,15 @@
 ---
 id: infrastructure-m3q7k
 title: deriveContext can't parse a leading-digit token id — mechanized lifecycle verbs fail on an out-of-spec ADR-0028 token
-status: doing
+status: done
 type: bug
 context: infrastructure
 created: 2026-07-04
-completed:
+completed: 2026-07-04
 depends_on: []
 blocks: []
 tags: [task-lifecycle, cli, task-ids, adr-0028, id-grammar, derive-context, promote, claim, complete, validation]
-related_adrs: [0028, 0038]
+related_adrs: [0028, 0038, 0044]
 related_research: []
 prior_art: [infrastructure-5w5gs]
 ---
@@ -186,3 +186,40 @@ wrong home for well-formedness logic.
 - Refined 2026-07-04 with the `architect` specialist; builder chose the Postel
   split + the 5-char-any-lead resolver style. Design fully settled — no open
   questions block work.
+
+## Outcome
+
+Shipped the Postel split exactly as refined. `ADR-0044` (amending ADR-0028 §3-4)
+written first. `deriveContext` (`lib/task-lifecycle.mjs`) loosened its token
+branch to `/^(.*)-(?:\d+|[0-9a-hjkmnp-tv-z]{5})$/`, dropping the leading-letter
+constraint while keeping length=5 + charset; doc comment rewritten. The
+`agentic-workflow-078` test (now asserting `agentic-workflow-3f9qx` resolves,
+not falls through) plus new regression tests (legacy tails incl. reserved
+foundation ids, hyphenated BC names, 6-char digit-lead still falls through,
+`uuuuu` still rejected, `infrastructure-5w5gs` resolves) added to
+`lib/test/task-lifecycle.test.mjs`.
+
+New pure module `lib/id-grammar.mjs` (mirrors `lib/duplicate-id-check.mjs`'s
+shape doctrine) exports `classifyTaskId` (strict ADR-0028 §1 grammar),
+`isWellFormedTaskId`, a frozen `GRANDFATHERED_IDS = ['infrastructure-5w5gs']`
+(citing ADR-0028 §5), and `findMalformedTaskIds(root)` (live-tree scan). New
+`lib/test/id-grammar.test.mjs` (9 tests) covers all classification branches
+plus the live-tree gate — currently zero non-grandfathered malformed ids.
+Capture-time enforcement documented in `skills/modeling/SKILL.md` and
+`skills/quick-capture/SKILL.md`: verify-and-auto-re-mint via `classifyTaskId`
+after minting a new id.
+
+Full suite: `node --test "lib/test/*.test.mjs"` → 174/174 passing.
+
+While unblocking this task's own test run, found and cleaned up an unrelated
+pre-existing artifact: a stray duplicate copy of this task's own file in
+`todo/` (left behind by an earlier `batch-start` move that never removed the
+source path — `infrastructure-m3q7k`'s token itself is well-formed, so this is
+a *different* bug than the one this task fixes). Filed as backlog item
+`infrastructure-h8k2m` for root-cause and fix; deleted the stray `todo/` copy
+so `lib/test/duplicate-id-check.test.mjs`'s live-tree test passes again.
+
+Key files: `lib/task-lifecycle.mjs`, `lib/id-grammar.mjs`,
+`lib/test/task-lifecycle.test.mjs`, `lib/test/id-grammar.test.mjs`,
+`skills/modeling/SKILL.md`, `skills/quick-capture/SKILL.md`,
+`.agentheim/knowledge/decisions/0044-derivecontext-digit-lead-tolerant-resolver-stricter-minter.md`.

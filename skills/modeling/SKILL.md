@@ -348,6 +348,8 @@ field legend lives here instead:
 
 Emit a fresh id `<bc>-<token>` per the id grammar in `references/id-grammar.md` (ADR-0028 §1) — generate the token randomly, never scan existing files for a "next number". Legacy `<bc>-NNN` ids (e.g. `auth-003`) already on disk are kept as-is — never rewrite them.
 
+After minting, verify the new id with `classifyTaskId` from `lib/id-grammar.mjs`: if `classifyTaskId(newId) !== 'token'`, the token is out-of-spec (e.g. it leads with a digit) — discard it and mint a fresh one, no need to ask the user (a random token is free and non-interactive). This is the mint-time backstop ADR-0044 added after an out-of-spec token (`infrastructure-5w5gs`) shipped and stranded the mechanized lifecycle verbs; `lib/id-grammar.mjs`'s live-tree test is the always-on gate if this step is ever skipped.
+
 ## Decisions as tasks
 
 When modeling surfaces a genuine architectural or domain decision that deserves its own treatment (rather than being an implementation detail of a feature), create a task with `type: decision`. Its output when worked is an ADR in `.agentheim/knowledge/decisions/`, not code. This lets decisions flow through the same backlog discipline as features.

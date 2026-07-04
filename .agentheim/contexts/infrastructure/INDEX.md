@@ -10,10 +10,10 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 23
+- **Doing:** 0
+- **Done:** 24
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **infrastructure-m3q7k** — deriveContext can't parse a leading-digit token id — mechanized lifecycle verbs fail on an out-of-spec ADR-0028 token (bug) — `doing/infrastructure-m3q7k-derivecontext-leading-digit-token-id.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **infrastructure-m3q7k** — deriveContext can't parse a leading-digit token id — mechanized lifecycle verbs fail on an out-of-spec ADR-0028 token (bug) — `done/infrastructure-m3q7k-derivecontext-leading-digit-token-id.md`
 - **infrastructure-5w5gs** — task-lifecycle bookkeeping breaks on CRLF .agentheim files — promote/claim/complete strand the board mid-operation (bug) — `done/infrastructure-5w5gs-task-lifecycle-cli-crlf-line-endings.md`
 - **infrastructure-q8m4t** — Support quotation marks (Gänsefüsschen) in prompts (bug) — `done/infrastructure-q8m4t-quotation-marks-in-prompts.md`
 - **infrastructure-e5t9c** — Relocate skills/capture-workspace eval debris out of the plugin payload (chore) — `done/infrastructure-e5t9c-relocate-capture-workspace-eval-debris.md`
@@ -54,6 +54,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **infrastructure-h8k2m** — Mechanized batch-start leaves a stale duplicate file in todo/ after moving a task into doing/ (bug) — `backlog/infrastructure-h8k2m-batch-start-leaves-stale-todo-copy.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

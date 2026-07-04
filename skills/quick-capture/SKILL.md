@@ -153,6 +153,8 @@ may mention it in one line when reporting — but never block the capture on it.
 
 Emit a fresh id `<bc>-<token>` per the id grammar in `references/id-grammar.md` (ADR-0028 §1) — generate the token randomly, never scan existing files for a "next number". When capturing several tasks into the same BC at once, mint an independent fresh token for each. Legacy `<bc>-NNN` ids already on disk are kept as-is — never rewrite them.
 
+After minting, verify each new id with `classifyTaskId` from `lib/id-grammar.mjs`: if `classifyTaskId(newId) !== 'token'` (e.g. it leads with a digit), discard it and mint a fresh one — no need to ask the user, a random token is free and non-interactive (ADR-0044).
+
 ## Updating the index
 
 Insert a line **immediately after** `<!-- backlog-list:start -->` in

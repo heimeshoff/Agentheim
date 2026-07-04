@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 15:22 -- Task verified and completed: infrastructure-m3q7k - deriveContext can't parse a leading-digit token id — mechanized lifecycle verbs fail on an out-of-spec ADR-0028 token
+
+**Type:** Work / Task completion
+**Task:** infrastructure-m3q7k - deriveContext can't parse a leading-digit token id — mechanized lifecycle verbs fail on an out-of-spec ADR-0028 token
+**Summary:** deriveContext tolerates digit-leading 5-char token tails; new id-grammar mint-time lint + grandfather allowlist (ADR-0044)
+**Duration:** 11m
+**Verification:** PASS (iteration 1)
+**Files changed:** 9
+**Tests added:** 15
+**ADRs written:** 0044-derivecontext-digit-lead-tolerant-resolver-stricter-minter.md
+
+---
+
 ## 2026-07-04 15:09 -- Batch started: [infrastructure-m3q7k]
 
 **Type:** Work / Batch start
