@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 00:19 -- Modeling / Captured: dashboard redesign — 10-task set across design-system + agentic-workflow
+
+**Type:** Modeling / Capture
+**BC:** design-system (4), agentic-workflow (6)
+**Filed to:** backlog
+**Summary:** Captured the builder's "overdo the dashboard design" cherry-pick from `inspiration/Agentheim UX Explorations.html` (directions 1a/1b/1c). Dark palette + condensed columns + condensed ticket card + singular View chip + 1b What's-Next flight-plan (X-only, no reload) + 1b bottom docked prompt bar with a new Ctrl+←/→ / Ctrl+Enter keyboard model, all taken from **1b**; the search bar's header-left position and the single-panel left nav from **1a**; light palette to be derived. Orchestrator decomposed component-level (architect + tactical-modeler consulted), splitting design-system *look* tasks from agentic-workflow *wiring* per ADR-0003 with gate-aware dependencies. Three foundation decisions surfaced as `type: decision` tasks (provisional ADR-0048 accent carve-out vs ADR-0016, ADR-0049 palette identity, ADR-0050 prompt-bar selection model). **Two open conflicts flagged for refine:** (1) the left-nav active-item color — the brief literally asked for 1a's ochre inset rail but the architect ruled it against ADR-0016; captured with the de-emphasis default pending builder sign-off; (2) the singular View chip reverses ADR-0015's per-column view-state scope (folded into that task's AC, not a separate decision). Tasks: design-system-vw12e/e9apx/a31e0/t896s; agentic-workflow-s7gev/vk6mc/wsfsk/bz3az/a2pm1/c2ver.
+
+---
+
 ## 2026-07-04 22:30 -- Release shipped: v0.8.10
 
 **Type:** Release

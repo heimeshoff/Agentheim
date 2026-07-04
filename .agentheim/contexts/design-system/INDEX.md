@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 4
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 25
@@ -55,6 +55,10 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **design-system-vw12e** — Accent carve-out — ochre marks the primed primary action, not passive selection (decision) — `backlog/design-system-vw12e-accent-carveout-ochre-primary-action.md`
+- **design-system-e9apx** — Command-deck palette identity — cool neutrals supersede the warm-Ledger heritage (decision) — `backlog/design-system-e9apx-command-deck-palette-identity.md`
+- **design-system-a31e0** — Retokenize the palette — Command-deck dark + derived light, across both token files (feature) — `backlog/design-system-a31e0-retokenize-palette-dark-derived-light.md`
+- **design-system-t896s** — TicketCard — bump corner radius toward 1b's 10px (refactor) — `backlog/design-system-t896s-ticketcard-radius-10px.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
