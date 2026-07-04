@@ -1,15 +1,15 @@
 ---
 id: design-system-vw12e
 title: Accent carve-out — ochre marks the primed primary action, not passive selection
-status: doing
+status: done
 type: decision
 context: design-system
 created: 2026-07-05
-completed:
+completed: 2026-07-05
 depends_on: []
 blocks: [design-system-a31e0, agentic-workflow-vk6mc, agentic-workflow-wsfsk, agentic-workflow-bz3az, agentic-workflow-a2pm1]
 tags: [dashboard-redesign, accent, adr, color-law]
-related_adrs: [0016]
+related_adrs: [0016, 0048]
 related_research: []
 prior_art: [design-system-007, design-system-010, design-system-016]
 ---
@@ -54,3 +54,29 @@ peers as current). Apply the test explicitly to the five tension surfaces the re
   focus ring is the sanctioned accent use).
 - One of three foundation decisions for the dashboard redesign; the other two are
   [[design-system-e9apx]] (palette identity) and [[agentic-workflow-s7gev]] (prompt selection model).
+
+## Outcome
+
+Wrote ADR-0048 (`.agentheim/knowledge/decisions/0048-accent-carveout-primed-primary-action-not-passive-selection.md`),
+refining ADR-0016 with the fires/commits-vs-passive-equivalent-state test and
+applying it to all five tension surfaces:
+
+- **What's-next CTA** and **prompt Enter button** — fire/commit, ochre permitted.
+- **Highlighted prompt-mode tab** — passive selection, ochre forbidden; stays
+  de-emphasis per ADR-0016.
+- **Flight-plan step-2 hero border** — a bounded emphasis allowance (reads as
+  "next to run," not selection-among-peers), gated behind a new named token,
+  `--emphasis-border` (specified by name/intent only; the value/CSS addition is
+  design-system-a31e0's job, not this task's — no CSS file touched here).
+- **Left-nav active item** — the builder's 1a ochre inset rail
+  (`inset 2px 0 0 var(--accent-ochre)`) is kept as a bounded, single-surface
+  wayfinding exception, explicitly stated so it cannot be cited to justify
+  ochre on any other equivalent-state selection.
+
+Added a one-line "see ADR-0048" pointer to ADR-0016
+(`.agentheim/knowledge/decisions/0016-theme-preview-swatches-fixed-tokens-deemphasis-selection.md`)
+under its Consequences section; ADR-0016's own text and `status: accepted` are
+untouched. No CSS/token file was touched (per task instruction — a31e0 adds the
+token). No README change made (README's identity framing belongs to the
+parallel sibling task design-system-e9apx; no other design-system README
+section needed updating for this accent-usage decision).

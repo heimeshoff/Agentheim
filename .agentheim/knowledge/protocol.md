@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 00:50 -- Task verified and completed: design-system-vw12e - Accent carve-out — ochre marks the primed primary action, not passive selection
+
+**Type:** Work / Task completion
+**Task:** design-system-vw12e - Accent carve-out — ochre marks the primed primary action, not passive selection
+**Summary:** Wrote ADR-0048 refining ADR-0016 with a fires/commits-vs-passive-selection test applied to all five accent tension surfaces; the left-nav active item keeps 1a ochre inset rail as a bounded single-surface wayfinding exception; a named --emphasis-border token specified for the hero border
+**Duration:** 6m
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** 0048
+
+---
+
 ## 2026-07-05 00:40 -- Batch started: [design-system-vw12e, design-system-e9apx]
 
 **Type:** Work / Batch start

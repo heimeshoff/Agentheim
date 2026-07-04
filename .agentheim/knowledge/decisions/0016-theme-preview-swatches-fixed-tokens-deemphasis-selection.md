@@ -79,3 +79,8 @@ dashboard `ShellRail`. The de-emphasis transition follows the quiet-motion law
   to *be* the thing it selects?" — if yes, swatch + de-emphasis.
 - The dashboard `dist/` is a derived artifact (ADR-0003) and was rebuilt
   (`node build.mjs`) to carry the new control + tokens.
+
+> See ADR-0048 for a refinement of the "no accent for ordinary selection" rule:
+> a discriminating test (fires/commits vs. passive equivalent-state selection)
+> and a bounded, single-surface wayfinding exception for the left-nav active
+> item. This rule (de-emphasis for peer selection) otherwise stands unchanged.
