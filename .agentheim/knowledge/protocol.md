@@ -5,6 +5,46 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 01:33 -- Modeling / Promoted: agentic-workflow-a2pm1 - What's Next panel — 3-step flight plan with ochre step-2 hero
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
+## 2026-07-05 01:33 -- Modeling / Promoted: agentic-workflow-wsfsk - Left nav — 1a single-panel shape (width, tree label, footer status line)
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
+## 2026-07-05 01:33 -- Modeling / Promoted: agentic-workflow-vk6mc - Topbar — recolor What's-next to the ochre CTA; regression-guard the unchanged parts
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
+## 2026-07-05 01:33 -- Modeling / Promoted: agentic-workflow-s7gev - Prompt bar gains a keyboard-committed single-selection highlight model
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
+## 2026-07-05 01:33 -- Modeling / Promoted: design-system-t896s - TicketCard — bump corner radius toward 1b's 10px
+
+**Type:** Modeling / Promote
+**BC:** design-system
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-05 01:23 -- Work session ended
 
 **Type:** Work / Session end

@@ -10,14 +10,18 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 6
-- **Todo:** 0
+- **Backlog:** 2
+- **Todo:** 4
 - **Doing:** 0
 - **Done:** 123
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-a2pm1** — What's Next panel — 3-step flight plan with ochre step-2 hero (feature) — `todo/agentic-workflow-a2pm1-whats-next-flight-plan-hero.md`
+- **agentic-workflow-wsfsk** — Left nav — 1a single-panel shape (width, tree label, footer status line) (feature) — `todo/agentic-workflow-wsfsk-left-nav-1a-single-panel-shape.md`
+- **agentic-workflow-vk6mc** — Topbar — recolor What's-next to the ochre CTA; regression-guard the unchanged parts (feature) — `todo/agentic-workflow-vk6mc-topbar-whats-next-ochre-cta.md`
+- **agentic-workflow-s7gev** — Prompt bar gains a keyboard-committed single-selection highlight model (decision) — `todo/agentic-workflow-s7gev-prompt-bar-keyboard-selection-model.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -69,11 +73,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-s7gev** — Prompt bar gains a keyboard-committed single-selection highlight model (decision) — `backlog/agentic-workflow-s7gev-prompt-bar-keyboard-selection-model.md`
-- **agentic-workflow-vk6mc** — Topbar — recolor What's-next to the ochre CTA; regression-guard the unchanged parts (feature) — `backlog/agentic-workflow-vk6mc-topbar-whats-next-ochre-cta.md`
-- **agentic-workflow-wsfsk** — Left nav — 1a single-panel shape (width, tree label, footer status line) (feature) — `backlog/agentic-workflow-wsfsk-left-nav-1a-single-panel-shape.md`
 - **agentic-workflow-bz3az** — Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab (feature) — `backlog/agentic-workflow-bz3az-prompt-bar-modes-keyboard-model.md`
-- **agentic-workflow-a2pm1** — What's Next panel — 3-step flight plan with ochre step-2 hero (feature) — `backlog/agentic-workflow-a2pm1-whats-next-flight-plan-hero.md`
 - **agentic-workflow-c2ver** — Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label (feature) — `backlog/agentic-workflow-c2ver-columns-singular-view-chip.md`
 <!-- backlog-list:end -->
 

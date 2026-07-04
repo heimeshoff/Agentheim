@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-a2pm1
 title: What's Next panel — 3-step flight plan with ochre step-2 hero
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-07-05

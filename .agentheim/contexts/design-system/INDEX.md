@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 28
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **design-system-t896s** — TicketCard — bump corner radius toward 1b's 10px (refactor) — `todo/design-system-t896s-ticketcard-radius-10px.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -58,7 +59,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **design-system-t896s** — TicketCard — bump corner radius toward 1b's 10px (refactor) — `backlog/design-system-t896s-ticketcard-radius-10px.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-wsfsk
 title: Left nav — 1a single-panel shape (width, tree label, footer status line)
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-07-05
