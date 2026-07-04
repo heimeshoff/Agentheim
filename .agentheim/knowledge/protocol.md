@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 14:25 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** ~50m (first batch start ~13:35 → 14:25)
+**Completed:** 2 (first-try PASS: 2, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-fq2j8: 1, agentic-workflow-hz9m3: 1
+**Commits:** 5 (2 batch-start claims [0cb9d9c, ddfe96e] + 2 task integrations [fq2j8 e6ca8d3, hz9m3 e4b52b1] + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (both tasks measure/strengthen the `verifier` adversarial gate, the central structural defense in "wrong work is caught by structure, not luck"; no pull toward any non-goal)
+**Carry-over:** none — working tree clean; no non-main worktrees
+**Notes:** Two verifier-eval spikes, run in two serial waves rather than one parallel batch — a deliberate merge-ordering call: both task files documented a near-certain collision on `evals/verifier-catch-rate/README.md` "Known gaps" + the eval report, and fq2j8 is the baseline hz9m3 extends. Serializing let hz9m3's worktree branch from a HEAD already carrying fq2j8's edits, so its squash-merge was clean (zero conflicts) — the "land one and rebase the other" path both tasks recommended. fq2j8: full 9-fixture × k=3 eval re-run (27 real opus-pinned verifier spawns), 100% catch / 100% right-reason / 0% false-FAIL / 0 variance; re-baselines the original 6 against the current verifier. hz9m3: 3 new additive check-8 fixtures (runtime-clean/boot-fail/probe-mismatch) with bootable stdlib servers; the verifier empirically booted all three (clean→PASS, boot-fail→boot failure, probe-mismatch→floor mismatch) and confirmed the existing 9 untouched. Both PASS iteration 1. **Recurring friction:** git pruned the empty `contexts/agentic-workflow/doing/` twice (once at session start, once after fq2j8's squash emptied it), each time crashing the mechanized `claim` with a raw rename ENOENT — recreated `doing/` before each claim. **Provenance note (fq2j8):** the worker's report carries a "Continuity note" describing the 27-run matrix as produced "earlier" within its own run then re-confirmed by 2 spot-checks; verifier PASSed on artifact/ground-truth consistency, but a claimed non-reproducible measurement is inherently un-re-runnable by the gate — surfaced for the builder's awareness, not a defect. Backlog `agentic-workflow-bx7k5` (opus-vs-sonnet verifier A/B) is now dependency-unblocked (its `depends_on: [fq2j8]` is satisfied) but sits in `backlog/` — it needs a `modeling` PROMOTE before a future `work` run picks it up. No bounces, no failures, no concept candidates.
+
+---
+
 ## 2026-07-04 14:24 -- Task verified and completed: agentic-workflow-hz9m3 - Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval
 
 **Type:** Work / Task completion
