@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 15:06 -- Modeling / Promoted: infrastructure-m3q7k - deriveContext can't parse a leading-digit token id — mechanized lifecycle verbs fail on an out-of-spec ADR-0028 token
+
+**Type:** Modeling / Promote
+**BC:** infrastructure
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-04 14:40 -- Modeling / Refined: infrastructure-m3q7k - deriveContext can't parse a leading-digit token id
 
 **Type:** Modeling / Refine

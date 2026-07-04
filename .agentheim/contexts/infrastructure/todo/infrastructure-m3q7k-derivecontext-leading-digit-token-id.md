@@ -1,7 +1,7 @@
 ---
 id: infrastructure-m3q7k
 title: deriveContext can't parse a leading-digit token id — mechanized lifecycle verbs fail on an out-of-spec ADR-0028 token
-status: backlog
+status: todo
 type: bug
 context: infrastructure
 created: 2026-07-04
