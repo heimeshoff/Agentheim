@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 11:31 -- Modeling / Refined: agentic-workflow-hz9m3 - Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Grounded the spike against the real harness (`evals/verifier-catch-rate/`, ADR-0036, the check-8 spec in `agents/verifier.md`). Sharpened from "extend widgets or add a BC" to four concrete traps the check-8 spec imposes: (1) new additive fixture dirs bearing a `## Runtime surface` manifest, existing 9 untouched; (2) a real stdlib launcher binding ephemeral `:0` + runfile + stop (ADR-0036 pt4 permits `:0`); (3) the `diff.patch` must touch a `surfacePath` or check 8 no-ops; (4) the fixture must pass checks 1–7 or the verifier never reaches check 8 (the v3h6p clean-fixture lesson). Set the target set to runtime-clean + both distinct FAIL paths (boot-fail, probe-mismatch). Added j7d4k to prior_art; flagged the fq2j8 shared-file collision (README Known-gaps + report) as a batching note, not a depends_on.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 11:29 -- Work session ended
 
 **Type:** Work / Session end
