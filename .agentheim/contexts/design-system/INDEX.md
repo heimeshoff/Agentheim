@@ -11,19 +11,19 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 2
-- **Todo:** 2
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 2
 - **Done:** 25
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **design-system-e9apx** — Command-deck palette identity — cool neutrals supersede the warm-Ledger heritage (decision) — `todo/design-system-e9apx-command-deck-palette-identity.md`
-- **design-system-vw12e** — Accent carve-out — ochre marks the primed primary action, not passive selection (decision) — `todo/design-system-vw12e-accent-carveout-ochre-primary-action.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **design-system-e9apx** — Command-deck palette identity — cool neutrals supersede the warm-Ledger heritage (decision) — `doing/design-system-e9apx-command-deck-palette-identity.md`
+- **design-system-vw12e** — Accent carve-out — ochre marks the primed primary action, not passive selection (decision) — `doing/design-system-vw12e-accent-carveout-ochre-primary-action.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)

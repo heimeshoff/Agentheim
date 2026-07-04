@@ -1,7 +1,7 @@
 ---
 id: design-system-vw12e
 title: Accent carve-out — ochre marks the primed primary action, not passive selection
-status: todo
+status: doing
 type: decision
 context: design-system
 created: 2026-07-05
