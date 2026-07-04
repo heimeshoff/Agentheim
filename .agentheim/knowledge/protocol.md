@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 15:09 -- Batch started: [infrastructure-m3q7k]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-m3q7k - deriveContext can't parse a leading-digit token id — mechanized lifecycle verbs fail on an out-of-spec ADR-0028 token
+**Parallel:** no (1 worker — sole ready task; whats-next advisory stale, no weighting)
+
+---
+
 ## 2026-07-04 15:06 -- Modeling / Promoted: infrastructure-m3q7k - deriveContext can't parse a leading-digit token id — mechanized lifecycle verbs fail on an out-of-spec ADR-0028 token
 
 **Type:** Modeling / Promote
