@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 20:30 -- Modeling / Captured: agentic-workflow-g7p2x - Observability hook command path breaks in consumer plugin installs
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** The three ADR-0043 hook registrations (worker/verifier Stop hooks, work session heartbeat) invoke `node "${CLAUDE_PROJECT_DIR}/lib/hook-agent-signal.mjs"`, which only resolves in this source repo — in consumer plugin installs the script lives under the plugin root, so the hook fails silently and the in-flight lane never works outside dogfood. Fix the command path (`${CLAUDE_PLUGIN_ROOT}` if supported, else the resolve-plugin-file bootstrap); the script's internal `CLAUDE_PROJECT_DIR` write-target use stays. Flagged by the 2026-07-04 harness-audit follow-up.
+
+---
+
 ## 2026-07-04 20:28 -- Modeling / Captured: agentic-workflow-v8n3t - Wire a trigger for protocol rotation
 
 **Type:** Modeling / Capture
