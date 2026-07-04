@@ -10,10 +10,10 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
-- **Doing:** 2
-- **Done:** 119
+- **Doing:** 1
+- **Done:** 120
 <!-- task-counts:end -->
 
 ### Todo
@@ -23,11 +23,11 @@ research touching this BC, and concept synthesis pages.
 ### Doing
 <!-- doing-list:start -->
 - **agentic-workflow-g7p2x** — Observability hook command path breaks in consumer plugin installs (bug) — `doing/agentic-workflow-g7p2x-fix-observability-hook-path-consumer-installs.md`
-- **agentic-workflow-v8n3t** — Wire a trigger for protocol rotation — rotateProtocol is never invoked (bug) — `doing/agentic-workflow-v8n3t-wire-protocol-rotation-trigger.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-v8n3t** — Wire a trigger for protocol rotation — rotateProtocol is never invoked (bug) — `done/agentic-workflow-v8n3t-wire-protocol-rotation-trigger.md`
 - **agentic-workflow-q7x2k** — Verifier check 6 gate gap — decisions narrated only in task-file prose are not flagged for an ADR (bug) — `done/agentic-workflow-q7x2k-verifier-check6-task-prose-gate-gap.md`
 - **agentic-workflow-bx7k5** — A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures (spike) — `done/agentic-workflow-bx7k5-ab-verifier-model-routing-opus-vs-sonnet.md`
 - **agentic-workflow-n7q4d** — Harden the verifier-catch-rate corpus with discriminating fixtures (opus ceilings the current set) (spike) — `done/agentic-workflow-n7q4d-harden-verifier-catch-rate-corpus-discriminating-fixtures.md`
@@ -151,11 +151,13 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-d4q7f** — Wire a trigger for INDEX done-list rotation — rotateIndexDoneList is never invoked (bug) — `backlog/agentic-workflow-d4q7f-wire-index-done-list-rotation-trigger.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0045** — Protocol rotation trigger: `work`'s session-end check invokes `rotateProtocol` (via the env-free homedir→cache→semver-max plugin bootstrap, script stays git-free, skill owns the scoped `git add` + commit — the ADR-0038 three-layer boundary), closing ADR-0039's deferred "who invokes it" non-decision; the first real rotation on this repo rolled 2026-06 out to `knowledge/protocol/2026-06.md` (live `protocol.md` back near the ~1,000-line cap); accepted — `../../knowledge/decisions/0045-protocol-rotation-trigger-work-session-end-check.md`
 - **ADR-0043** — Live observability: a `Stop`/`SubagentStop` hook heartbeat is a second advisory artifact — the hooks write `.agentheim/state/in-flight.json` (an advisory write extending ADR-0027, git-ignored, machine-written) and the dashboard's read-only `InFlightLane` (ADR-0017) renders live worker/verifier activity for the current `work` session, self-suppressing via a staleness window so a crashed/killed session draws no zombie lane; accepted — `../../knowledge/decisions/0043-live-observability-hook-heartbeat-second-advisory-artifact.md`
 - **ADR-0041** — Artifact-growth doctrine: two disciplines for the three growth surfaces — **cap-and-roll** (verbatim, scripted, rolled to a dated archive: protocol ADR-0039 / INDEX done-list c8j3w) vs **flag-and-consolidate** (judgment, human-in-the-loop, rewritten *in place*, nothing archived: BC READMEs). Adds the `modeling` **CONSOLIDATE** verb (5th beside CAPTURE/REFINE/PROMOTE/DISMISS) with a frozen contract mirroring DISMISS/ADR-0022: a ~600-line README trigger `whats-next` surfaces as a recommended move (no skill auto-rewrites prose unattended), builder-in-the-loop consolidation that merges/rewrites but **never silently drops a term, invariant, or backlink**, committing its own scoped markdown (ADR-0026); accepted — `../../knowledge/decisions/0041-artifact-growth-two-disciplines-consolidate-verb.md`
 - **ADR-0042** — The COMPLETE lifecycle script stays single-task: `completeTask` mirrors `promoteTask`'s single-id shape (moves one task, edits one BC `INDEX.md`, prepends one protocol entry) and is idempotent w.r.t. an already-in-`done/` file (worktree already moved it); the ADR-0032 trivial-squash carve-out is composed by the *caller* (the conductor runs `complete` once per task, collects N manifests, and writes the one multi-`[task-id]` squash commit) rather than built into the script — a batch-complete verb would have to invent a shared summary/`<type>` across N tasks, the judgment ADR-0038's three-layer boundary reserves for the skill; accepted — `../../knowledge/decisions/0042-complete-script-single-task-carve-out-composed-by-caller.md`

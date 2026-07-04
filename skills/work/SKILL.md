@@ -479,6 +479,7 @@ When `todo/` is empty and all `doing/` is resolved (or the user interrupts):
    ---
    ```
    This is the one `work` protocol line written *after* a commit (it summarizes the session). To honor the "clean working tree" rule (`references/commit-doctrine.md`, ADR-0026), **commit it** with a scoped add of only `protocol.md`: `git add .agentheim/knowledge/protocol.md` then `chore(<bc>): work session end bookkeeping [<last-task-id>]` (reuse the last completed task's id as the trailer, or `chore: work session end bookkeeping` if the session committed nothing). This is the *only* bookkeeping-after-commit `work` performs, and it is a single line — every per-task INDEX/protocol edit already rode in its own task commit (the old trailing "record SHAs + INDEX/protocol" commit is gone). (Any *deliberately-committed* stranded file from step 6 rode in its own scoped reconciliation commit *before* this entry — see below.)
+8. **Protocol rotation check (session-end)** (see the dedicated section below). Run this immediately after step 7's session-end protocol entry has been committed — the file has just grown, making this the natural, self-firing checkpoint that closes ADR-0039's deferred "who invokes it" non-decision (ADR-0045, ADR-0041's cap-and-roll doctrine).
 
 ## Vision-conformance check (session-end)
 
@@ -517,6 +518,38 @@ Run this alongside the working-tree carry-over above, at the same point in the s
    - **Everything else** (no matching `doing/` task on `main`, or the matching task is already `done/`/`backlog/`) → an **orphan**. Ask the user, per worktree, the same two dispositions as the working-tree case: **discard** it (unlink any `dashboard/node_modules` link first — `unlinkDashboardNodeModules` — then `git worktree remove --force` + `git branch -D aw/<task-id>`) or **keep** it for inspection. Never guess: a live concurrent session's worktree is byte-indistinguishable from an interrupted one's, same caution as the working-tree carry-over above.
 3. **Record the disposition** on the same `**Carry-over:**` line as the working-tree entries (step 6 above) — e.g. `.worktrees/agentic-workflow-f6m2q: kept (owner: agentic-workflow-f6m2q, escalated at iteration 3)` or `.worktrees/agentic-workflow-old1: discarded (orphan, no matching doing/ task)`.
 4. **Feeds Phase 1 recovery.** An orphan or a kept escalation that survives to the *next* session is exactly the signal Phase 1's `git worktree list --porcelain` check picks up — the two mechanisms are one continuous thread across sessions, not independent.
+
+## Protocol rotation check (session-end)
+
+Run this once per session, immediately after step 7's session-end protocol entry has been
+committed (ADR-0045, closing ADR-0039's deferred "who invokes it" non-decision). This is the
+self-firing cap-and-roll check ADR-0041 calls for: cheap, deterministic, and it runs exactly when
+the live file has just grown from the entry step 7 just committed.
+
+1. **Invoke `rotateProtocol` via the standard env-free plugin bootstrap** — the same
+   homedir→cache→semver-max resolution the `claim`/`complete` CLI invocations already use (ADR-0038),
+   pointed at `lib/protocol-rotation.mjs` instead of `lib/task-lifecycle-cli.mjs`:
+   ```
+   node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','protocol-rotation.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','protocol-rotation.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no protocol-rotation script found under '+c+' (is the plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>m.main(process.argv.slice(1))).catch(e=>{console.error(e.message);process.exit(1)});"
+   ```
+   This prints one manifest `{ok:true, rotated, changed:[paths], rolledMonths:[...], liveLines}` on
+   stdout and exits 0 (or a structured `{ok:false, ...}` on some unexpected error — treat a non-zero
+   exit / `ok:false` as a soft failure: change nothing, mention it in the end-of-run summary, and
+   never let it block or fail the session).
+2. **`rotated: false`** (the common case — the live file is still under the ~1,000-line cap) →
+   nothing to do: no commit, no protocol entry. Silent no-op is correct — this check is meant to be
+   invisible on every session that doesn't need it.
+3. **`rotated: true`** → `git add` exactly the manifest's `changed` paths (the rewritten
+   `protocol.md` plus every new/appended `.agentheim/knowledge/protocol/YYYY-MM.md` archive file it
+   lists) — never `git add -A` / `git add .` (`references/commit-doctrine.md`) — and commit as its
+   **own scoped commit**, separate from step 7's session-end-entry commit:
+   `chore(agentic-workflow): rotate protocol — <rolledMonths joined with ", "> [<last-task-id>]`
+   (or `chore: rotate protocol — ...` if the session completed no task, mirroring step 7's fallback
+   trailer convention).
+4. **No protocol log entry for the rotation itself.** Rotation is infrastructure housekeeping, not a
+   project event worth a diary line — logging it would just add another entry pushing the file
+   closer to needing rotation again. The commit message and the archive files themselves are the
+   audit trail.
 
 ## Do not model in work
 

@@ -516,7 +516,11 @@ separate BC, but today the whole tool lives in this one.
   rolled**, so every archive file is written exactly once; newest-on-top order is preserved
   both live and per-archive. Returns `{ok:true, rotated, changed, rolledMonths, liveLines}`;
   invocable directly (`node lib/protocol-rotation.mjs`, no verb/id argv). Every skill's
-  first-~100-line read is unaffected by construction. See ADR-0039, ADR-0038, ADR-0026,
+  first-~100-line read is unaffected by construction. **Trigger wired (ADR-0045,
+  agentic-workflow-v8n3t):** `work`'s end-of-run flow invokes it once per session, immediately
+  after the session-end protocol entry is committed, via the standard env-free plugin bootstrap;
+  a `rotated: true` manifest gets its own scoped commit of the `changed` paths, closing ADR-0039's
+  previously-deferred "who invokes it" non-decision. See ADR-0039, ADR-0045, ADR-0038, ADR-0026,
   ADR-0032.
 - **`rotateIndexDoneList` / INDEX done-list rotation** — the deterministic, git-free cap-and-roll
   script for a BC's `INDEX.md` `done-list` block (agentic-workflow-c8j3w; applies ADR-0039's
@@ -535,9 +539,12 @@ separate BC, but today the whole tool lives in this one.
   prior-art matcher, which reads the done-list's rendered text, needed pointing at
   `done-archive/` as an additional input. `rotateAllIndexDoneLists(rootDir, opts)` rotates every
   BC found under `contexts/`; returns `{ok:true, rotated, changed, contexts}`; invocable directly
-  (`node lib/index-rotation.mjs`, no verb/id argv, no context argv — like `rotateProtocol`, the
-  invocation point/schedule is a non-decision deferred to a future wiring task). See ADR-0039,
-  ADR-0041, ADR-0023, ADR-0038, ADR-0026.
+  (`node lib/index-rotation.mjs`, no verb/id argv, no context argv — **unlike `rotateProtocol`,
+  whose trigger ADR-0045/agentic-workflow-v8n3t wired into `work`'s session-end flow**, this
+  script's invocation point/schedule remains a non-decision deferred to a future wiring task; the
+  extra done-list reachability wrinkle — `modeling`'s prior-art matcher reads the done-list — means
+  it needs its own trigger design, not a copy of ADR-0045's mechanics). See ADR-0039, ADR-0041,
+  ADR-0023, ADR-0038, ADR-0026, ADR-0045.
 - **`findDuplicateTaskIds`** — the duplicate-id guard (`lib/duplicate-id-check.mjs`, BC-owned,
   node stdlib only), the ADR-0028 **insurance** against the residual token-collision tail and
   the legacy-vs-token clash a bug could produce. A pure, loss-tolerant whole-tree walk collects
