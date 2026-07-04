@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 17:06 -- Modeling / Refined: agentic-workflow-bx7k5 - A/B the verifier's model routing (opus vs sonnet)
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** Blocker `n7q4d` completed 2026-07-04 and its *result* (not just status) clears bx7k5's readiness gate: it hardened the corpus 12→16 fixtures and produced `missing-adr-borderline` — a genuine, reproducible **opus MISS (0/6)** on uncontested ground truth, the hard-AND-unambiguous tier-discriminator bx7k5 was blocked waiting for, plus 3 opus-ceiling-but-argued fixtures. Folded the now-known unblocked state through Why/What/AC (concrete 16-fixture surface; the three opus-arm files-of-record named; readiness gate marked satisfied). **Key correction to the decision rule:** it was pre-registered assuming opus *ceilings* every fixture (tie = corpus-too-easy) and had **no branch for the weaker tier outperforming** — but `missing-adr-borderline` is the inverse (opus at the *floor*). Rewrote the rule to score **by fixture direction**: opus-ceiling fixtures (sonnet-drop → density vindicated; sonnet-tie → corpus-limited) vs the opus-floor fixture (sonnet-also-misses → tie-at-floor = density unsupported here + a surfaced gate gap; sonnet-CATCHES → weaker tier outperformed = evidence *against* density, flag + re-run at higher k). No result still licenses `verifier → sonnet` (decorrelation pillar independently holds). No split, no ADR. Promoted backlog → todo (gate satisfied).
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 16:54 -- Work session ended
 
 **Type:** Work / Session end
