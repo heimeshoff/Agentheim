@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 16:05 -- Modeling / Refined: agentic-workflow-bx7k5 - A/B the verifier's model routing (opus vs sonnet)
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Blocker `fq2j8` (opus baseline) is done, but its result — 24/24 catch, 24/24 right-reason, 0/3 false-FAIL, **variance 0 across all 9**, including the three judgment checks (5/6/6b) — shows the existing 12-fixture corpus sits at a zero-variance opus ceiling and cannot discriminate model tiers. Split off a prerequisite corpus-hardening spike; rewrote bx7k5 to run the sonnet arm over the **hardened** surface (existing 12 + new fixtures), pre-register the ceiling caveat (a ~100% tie on a ceilinged fixture is corpus-limited, not a sonnet win), fix the opus-baseline pointer to the 2026-07-04 report, and bring hz9m3's 3 runtime fixtures in scope.
+**Split into:** agentic-workflow-n7q4d (Harden the verifier-catch-rate corpus with discriminating fixtures — blocks bx7k5)
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 15:41 -- Work session ended
 
 **Type:** Work / Session end

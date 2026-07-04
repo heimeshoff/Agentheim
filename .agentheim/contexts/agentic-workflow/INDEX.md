@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
+- **Backlog:** 2
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 116
@@ -147,6 +147,7 @@ research touching this BC, and concept synthesis pages.
 ### Backlog
 <!-- backlog-list:start -->
 - **agentic-workflow-bx7k5** — A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures (spike) — `backlog/agentic-workflow-bx7k5-ab-verifier-model-routing-opus-vs-sonnet.md`
+- **agentic-workflow-n7q4d** — Harden the verifier-catch-rate corpus with discriminating fixtures (opus ceilings the current set) (spike) — `backlog/agentic-workflow-n7q4d-harden-verifier-catch-rate-corpus-discriminating-fixtures.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
