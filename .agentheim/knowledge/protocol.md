@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 11:07 -- Modeling / Refined: infrastructure-5w5gs - task-lifecycle bookkeeping breaks on CRLF .agentheim files
+
+**Type:** Modeling / Refine
+**BC:** infrastructure
+**Status after:** todo
+**Summary:** Verified every technical claim against `lib/task-lifecycle.mjs`. Corrected scope: the fix lives in the three shared helpers (`removeIndexLine`/`insertIndexLineAtTop`/`prependProtocolEntry`), so it must cover all three verbs — `promoteTask`, `claimBatch` (the verb that actually broke a live session), `completeTask` — not just promote. Noted `applyTaskMove` is already EOL-safe and the two rotation modules are already CRLF-safe (out of scope). Folded in (builder-confirmed) a fail-closed atomicity guard: dry-validate all markers before the move so a future mismatch strands nothing. Widened acceptance criteria + tests to match; promoted to todo.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-07-03 18:09 -- Work session ended
 
 **Type:** Work / Session end
