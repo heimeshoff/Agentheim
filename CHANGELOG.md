@@ -8,6 +8,32 @@ its **plugin contract** (skills, commands, `.agentheim/` layout) with
 
 ## [Unreleased]
 
+## [0.8.9] - 2026-07-04
+
+### Added
+- **Live work-session activity** — Stop/SubagentStop hooks heartbeat an advisory `state/in-flight.json` (ADR-0043); a read-only InFlightLane renders in-flight work on the board and self-suppresses when the heartbeat goes stale.
+- **Dependency-aware board** — hovering a ticket resolves its dependencies and drives an on-card ring; hidden and off-viewport dependencies surface as presence markers and edge blinks; collapsed groups carry markers; `depends_on`/`blocks` now flow through the `/api/tree` projection.
+- **Per-worker git worktree isolation** in the `work` skill's git model (ADR-0032) — parallel workers no longer contend on a shared working tree.
+- **Verifier runtime-drive check** (check 8, ADR-0036) — the verifier boots the runtime surface end-to-end from a per-task runtime-surface manifest, and the resolved test command is pre-loaded into its spawn prompt.
+- Fan-out caps — a `MAX_PARALLEL` knob, a research fan-out cap, and a documented nested-spawn budget.
+- Verbatim monthly rotation for `protocol.md` and the INDEX done-list (ADR-0039), each keeping a live cap and archiving older months intact.
+- Session-end advisories — a vision-conformance check and reconciliation of stranded working-tree carry-over; protocol entries now carry Duration and mandatory verification-iteration counts.
+- **What's Next** advisory now feeds back into modeling and work planning; the workflow guide surfaces `inquire` and `whats-next`.
+
+### Changed
+- **Lifecycle bookkeeping mechanized** — PROMOTE, CLAIM, and COMPLETE run through git-free lifecycle scripts with an env-free plugin-file resolver, ratifying the mechanization boundary (ADR-0038).
+- Per-agent model tiers are pinned to decorrelate the adversarial verifier/worker gates.
+- Single-specialist consultation flattened — a worker spawns the specialist directly (ADR-0035); the "two orchestrators" naming resolved (the work loop is the conductor).
+- BC READMEs gain a CONSOLIDATE verb and consolidation doctrine; duplicated doctrine single-sourced into `references/` files.
+
+### Fixed
+- Task-lifecycle bookkeeping no longer strands the board on CRLF/BOM `INDEX.md`/`protocol.md` (EOL/BOM boundary-normalization with fail-closed marker validation before any move).
+- `applyTaskMove` enumerates the vacated source path so a scoped `git add` stages a lifecycle move atomically (no stale duplicate left in `todo/`).
+- `deriveContext` tolerates leading-digit token tails, with a mint-time id-grammar lint and grandfather allowlist (ADR-0044).
+- Typographic quotes survive the raw-argv round-trip; `isTaskIntent` byte-identical guards made CRLF-agnostic.
+- Verifier check 6 sharpened to close the task-file-prose-narration loophole — a decision narrated only in a task file still requires an ADR.
+- README dashboard section corrected (read-only, bridge-launched); `work` SUCCESS return template carries the `TESTS_*` fields.
+
 ## [0.8.8] - 2026-06-19
 
 ### Added
@@ -146,7 +172,8 @@ its **plugin contract** (skills, commands, `.agentheim/` layout) with
 ### Added
 - Initial plugin design.
 
-[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.8.8...HEAD
+[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.8.9...HEAD
+[0.8.9]: https://github.com/heimeshoff/Agentheim/compare/v0.8.8...v0.8.9
 [0.8.8]: https://github.com/heimeshoff/Agentheim/compare/v0.8.7...v0.8.8
 [0.8.7]: https://github.com/heimeshoff/Agentheim/compare/v0.8.6...v0.8.7
 [0.8.6]: https://github.com/heimeshoff/Agentheim/compare/v0.8.5...v0.8.6
