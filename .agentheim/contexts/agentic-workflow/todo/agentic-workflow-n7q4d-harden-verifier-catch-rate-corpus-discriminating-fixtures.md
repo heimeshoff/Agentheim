@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-n7q4d
 title: Harden the verifier-catch-rate corpus with discriminating fixtures (opus ceilings the current set)
-status: backlog
+status: todo
 type: spike
 context: agentic-workflow
 created: 2026-07-04

@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 16:24 -- Modeling / Promoted: agentic-workflow-n7q4d - Harden the verifier-catch-rate corpus with discriminating fixtures (opus ceilings the current set)
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-04 16:22 -- Modeling / Refined: agentic-workflow-n7q4d - Harden the verifier-catch-rate corpus with discriminating fixtures
 
 **Type:** Modeling / Refine
