@@ -11,13 +11,14 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 119
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-v8n3t** — Wire a trigger for protocol rotation — rotateProtocol is never invoked (bug) — `todo/agentic-workflow-v8n3t-wire-protocol-rotation-trigger.md`
 <!-- todo-list:end -->
 
 ### Doing

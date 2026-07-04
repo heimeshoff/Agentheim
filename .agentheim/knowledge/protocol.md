@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 20:28 -- Modeling / Captured: agentic-workflow-v8n3t - Wire a trigger for protocol rotation
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** ADR-0039's cap-and-roll mechanism (`lib/protocol-rotation.mjs`) is built and tested but nothing ever invokes it — the live protocol.md sits at 7,161 lines against the ~1,000 cap with no archive dir. Task decides the trigger (leading candidate: `work` session-end check), records it as an ADR closing 0039's deferred non-decision, and runs the first real rotation on this repo. Flagged by the 2026-07-04 harness-audit follow-up.
+
+---
+
 ## 2026-07-04 18:33 -- Release shipped: v0.8.9
 
 **Type:** Release
