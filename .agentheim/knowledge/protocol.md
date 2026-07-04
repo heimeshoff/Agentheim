@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 13:35 -- Batch started: [agentic-workflow-fq2j8]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-fq2j8 - Complete the verifier-catch-rate eval — one coherent full 9-fixture pass against the current verifier
+**Parallel:** no (1 worker — hz9m3 held to next wave: documented near-certain collision with fq2j8 on evals/verifier-catch-rate/README.md Known-gaps + the eval report; hz9m3 rebases cleanly once fq2j8 baseline lands on main, per both task notes land-one-and-rebase-the-other)
+
+---
+
 ## 2026-07-04 12:24 -- Modeling / Promoted: agentic-workflow-fq2j8 - Complete the verifier-catch-rate eval — one coherent full 9-fixture pass against the current verifier
 
 **Type:** Modeling / Promote
