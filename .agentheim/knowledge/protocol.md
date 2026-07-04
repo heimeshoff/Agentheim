@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 01:52 -- Task verified and completed: agentic-workflow-vk6mc - Topbar — recolor What's-next to the ochre CTA; regression-guard the unchanged parts
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-vk6mc - Topbar — recolor What's-next to the ochre CTA; regression-guard the unchanged parts
+**Summary:** Recolored the What's-next LaunchButton in BoardTopbar to a new ochre cta emphasis (--accent-ochre text on --accent-ochre-soft fill/border, ADR-0048 carve-out), left Work's primary treatment untouched, and regression-guarded search-leftmost, gear→What's-next→Work ordering, and the armed --obligation red icon cue
+**Duration:** 15m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 6
+**ADRs written:** none
+
+---
+
 ## 2026-07-05 01:50 -- Task verified and completed: design-system-t896s - TicketCard — bump corner radius toward 1b's 10px
 
 **Type:** Work / Task completion

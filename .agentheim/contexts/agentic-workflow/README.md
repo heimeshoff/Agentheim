@@ -341,14 +341,21 @@ separate BC, but today the whole tool lives in this one.
   ADR-0017, ADR-0014.
 - **Shell layout (aw-026, styleguide §05)** — the live shell is the styleguide "Components in
   context" full-height **left rail** beside a **main column**: a ~52px **topbar** (the global
-  **search field**, aw-052 — plus two standing launches: secondary **What's next** and primary
+  **search field**, aw-052 — plus two standing launches: ochre-CTA **What's next** and primary
   **Work**) over the scrollable board. **Work** launches the bare `/agentheim:work` via
   `launchOrCopy`, `emphasis="primary"`, threading `skipPermissions`; as of **aw-064** it renders
-  `Work ↗` with the glyph trailing the label. **What's next** (aw-064, quiet chip) fires the
-  bare `/agentheim:whats-next` through the same path — the read-only `whats-next` skill, which
-  itself performs **one** *advisory write* (ADR-0027): a single-latest, git-ignored
+  `Work ↗` with the glyph trailing the label. **What's next** (aw-064; recolored **aw-vk6mc**)
+  fires the bare `/agentheim:whats-next` through the same path — the read-only `whats-next`
+  skill, which itself performs **one** *advisory write* (ADR-0027): a single-latest, git-ignored
   recommendation at `.agentheim/state/whats-next.md`, an opinion *about* the state rather than a
-  change *to* it, so it does not re-open ADR-0017's read-only stance. As of **aw-x4t2g** the
+  change *to* it, so it does not re-open ADR-0017's read-only stance. **aw-vk6mc** recolors the
+  What's-next button to a new `LaunchButton` `emphasis="cta"` treatment — `--accent-ochre` text
+  on an `--accent-ochre-soft` fill with an `--accent-ochre` border — licensed by ADR-0048's
+  accent carve-out (design-system-vw12e): the button *fires* the whats-next skill, so it is a
+  primed primary action, not the passive equivalent-state selection ADR-0016 reserves the accent
+  from. **Work** is untouched (still `emphasis="primary"`, no ochre). The armed
+  skip-permissions cue still wins over every idle treatment (aw-041): the launch icon tints
+  `--obligation` red regardless of emphasis, including the new ochre `cta` fill. As of **aw-x4t2g** the
   advisory feeds back into planning: `modeling`'s "Before acting" and `work`'s Phase 3
   batch-planning both read it when present and surface its *recommended move* + age — never
   auto-picking, auto-promoting, or overriding the dependency DAG. The rail is composed from

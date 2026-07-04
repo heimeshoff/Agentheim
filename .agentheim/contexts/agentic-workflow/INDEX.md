@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 2
 - **Todo:** 2
-- **Doing:** 1
-- **Done:** 124
+- **Doing:** 0
+- **Done:** 125
 <!-- task-counts:end -->
 
 ### Todo
@@ -24,11 +24,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-vk6mc** — Topbar — recolor What's-next to the ochre CTA; regression-guard the unchanged parts (feature) — `doing/agentic-workflow-vk6mc-topbar-whats-next-ochre-cta.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-vk6mc** — Topbar — recolor What's-next to the ochre CTA; regression-guard the unchanged parts (feature) — `done/agentic-workflow-vk6mc-topbar-whats-next-ochre-cta.md`
 - **agentic-workflow-s7gev** — Prompt bar gains a keyboard-committed single-selection highlight model (decision) — `done/agentic-workflow-s7gev-prompt-bar-keyboard-selection-model.md`
 - **agentic-workflow-vmk1z** — Dismissing the What's next panel deletes its advisory artifact (feature) — `done/agentic-workflow-vmk1z-dismiss-deletes-whats-next-artifact.md`
 - **agentic-workflow-d4q7f** — Wire a trigger for INDEX done-list rotation — rotateIndexDoneList is never invoked (bug) — `done/agentic-workflow-d4q7f-wire-index-done-list-rotation-trigger.md`

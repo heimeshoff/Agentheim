@@ -85,18 +85,17 @@ test('What\'s next carries the sun glyph and threads skipPermissions, passing no
   assert.doesNotMatch(block, /onResult/, 'What\'s next passes no onResult (read-only, no prompt consumed)');
 });
 
-test('What\'s next is a bordered SECONDARY chip — not the quiet gear, not the primary Work, and never ochre', () => {
+test('What\'s next is the ochre CTA — not the quiet gear, not the primary Work (ADR-0048 carve-out, aw-vk6mc)', () => {
   const topbar = fn(boardSrc, 'BoardTopbar');
   // Slice the LaunchButton ELEMENT (open tag through its self-close), not the gap up
-  // to the next button — so a neighbouring comment that says "no ochre" never bleeds in.
+  // to the next button — so a neighbouring comment never bleeds in.
   const start = topbar.indexOf('label="What\'s next"');
   const block = topbar.slice(start, topbar.indexOf('/>', start) + 2);
-  // The default LaunchButton emphasis is the bordered surface-1 chip — secondary,
-  // sitting between the quiet gear and the primary Work. It must NOT be primary/quiet.
+  // What's-next carries the dedicated `cta` emphasis — it must NOT be primary/quiet
+  // (those are Work / the gear cluster respectively).
+  assert.match(block, /emphasis="cta"/, 'What\'s next must carry the ochre `cta` emphasis (ADR-0048)');
   assert.doesNotMatch(block, /emphasis="primary"/, 'What\'s next is not the primary emphasis (that is Work)');
   assert.doesNotMatch(block, /emphasis="quiet"/, 'What\'s next is not the quiet emphasis (that is the gear cluster)');
-  // ADR-0016: no ochre anywhere on this button.
-  assert.doesNotMatch(block, /ochre/i, 'What\'s next must not use the reserved ochre accent');
 });
 
 test('Work keeps its primary fill and gains the trailing up-right diagonal glyph (no ochre)', () => {

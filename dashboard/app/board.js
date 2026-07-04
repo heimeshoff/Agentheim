@@ -340,14 +340,23 @@ function LaunchButton({ label, command, icon, emphasis = "default", isolateClick
   // primary action (the Work launch); the styleguide section-05 BoardTopbar uses
   // exactly this treatment. Consumed by emphasis, not forked from the styleguide.
   const inverse = emphasis === "inverse";
+  // `cta` (aw-vk6mc): the ochre "primed primary action" treatment licensed by
+  // ADR-0048's accent carve-out (a discriminating exception to ADR-0016's
+  // "no ochre for peer selection" rule — this button FIRES the whats-next skill,
+  // it does not record a passive equivalent-state selection). Orange text on
+  // the warm accent fill/border, all three from the reserved --accent-ochre
+  // family (never a raw hex) — do not "fix" this back to de-emphasis.
+  const cta = emphasis === "cta";
   // Idle treatment by emphasis (all token-styled, no new hue):
   //   inverse -> filled --fg-1 + --surface-0 text (the §05 topbar action);
   //   primary -> filled surface-2 + stronger hairline + fg-1 (draws the eye);
   //   quiet   -> transparent, no border, fg-3 (recedes — text-weight);
+  //   cta     -> the ADR-0048 ochre CTA: --accent-ochre text on an
+  //              --accent-ochre-soft fill with an --accent-ochre border;
   //   default -> the column pair's bordered surface-1 chip.
-  let idleColor = inverse ? "var(--surface-0)" : primary ? "var(--fg-1)" : quiet ? "var(--fg-3)" : "var(--fg-2)";
-  let idleBg = inverse ? "var(--fg-1)" : primary ? "var(--surface-2)" : quiet ? "transparent" : "var(--surface-1)";
-  let idleBorder = inverse ? "1px solid var(--fg-1)" : quiet ? "1px solid transparent" : `1px solid ${primary ? "var(--hairline-strong)" : "var(--hairline)"}`;
+  let idleColor = inverse ? "var(--surface-0)" : primary ? "var(--fg-1)" : quiet ? "var(--fg-3)" : cta ? "var(--accent-ochre)" : "var(--fg-2)";
+  let idleBg = inverse ? "var(--fg-1)" : primary ? "var(--surface-2)" : quiet ? "transparent" : cta ? "var(--accent-ochre-soft)" : "var(--surface-1)";
+  let idleBorder = inverse ? "1px solid var(--fg-1)" : quiet ? "1px solid transparent" : cta ? "1px solid var(--accent-ochre)" : `1px solid ${primary ? "var(--hairline-strong)" : "var(--hairline)"}`;
   // aw-068: liftOnHover NORMALISES the resting chrome to the quiet/default look
   // (--surface-1 / --fg-2 / plain --hairline) regardless of `emphasis`, then borrows
   // the former primary highlight (--surface-2 / --fg-1 / --hairline-strong) only on
@@ -383,8 +392,13 @@ function LaunchButton({ label, command, icon, emphasis = "default", isolateClick
         color=${flashed
           ? "var(--st-done)"
           : armed
+            // aw-041 + ADR-0048 re-verified: the armed --obligation red cue wins over
+            // EVERY idle treatment, including the new ochre `cta` fill — the danger
+            // signal must never be masked by the accent.
             ? "var(--obligation)"
-            : (inverse ? "var(--surface-0)" : primary ? "var(--fg-2)" : "var(--fg-3)")} />`;
+            : cta
+              ? "var(--accent-ochre)"
+              : (inverse ? "var(--surface-0)" : primary ? "var(--fg-2)" : "var(--fg-3)")} />`;
   const labelEl = html`<span>${labelText}</span>`;
   return html`
     <button
@@ -400,7 +414,7 @@ function LaunchButton({ label, command, icon, emphasis = "default", isolateClick
       style=${{
         display: "inline-flex", alignItems: "center", gap: large ? 7 : 5,
         fontFamily: "var(--font-ui)", fontSize: large ? 13.5 : 11.5,
-        fontWeight: primary || inverse ? 600 : 500,
+        fontWeight: primary || inverse || cta ? 600 : 500,
         color: flashed ? "var(--st-done)" : idleColor,
         background: flashed ? "var(--surface-1)" : idleBg,
         border: flashed ? "1px solid var(--st-done)" : idleBorder,
@@ -2798,16 +2812,22 @@ function BoardTopbar({ theme, setTheme, skipPermissions = false, setSkipPermissi
           theme=${theme} setTheme=${setTheme}
           skipPermissions=${skipPermissions} setSkipPermissions=${setSkipPermissions}
           onStopped=${onStopped} />
-        ${/* aw-064: the "What's next" standing launch — a bordered SECONDARY chip
-              (default LaunchButton emphasis) sitting between the quiet gear and the
-              primary Work. It fires the interim raw WHATS_NEXT_COMMAND prompt through
-              the same launchOrCopy path (bridge → terminal; silent clipboard
-              fallback, ADR-0018), threading the armed skipPermissions cue, passing NO
-              onResult — a read-only next-steps overview, no lifecycle write
-              (ADR-0017). The sun glyph is consumed unforked from the styleguide
-              registry (ADR-0003). NO ochre (ADR-0016). */ ""}
+        ${/* aw-064/aw-vk6mc: the "What's next" standing launch sits between the quiet
+              gear and the primary Work. It fires the interim raw WHATS_NEXT_COMMAND
+              prompt through the same launchOrCopy path (bridge → terminal; silent
+              clipboard fallback, ADR-0018), threading the armed skipPermissions cue,
+              passing NO onResult — a read-only next-steps overview, no lifecycle
+              write (ADR-0017). The sun glyph is consumed unforked from the styleguide
+              registry (ADR-0003). Recolored to the ochre CTA treatment (emphasis
+              "cta") per ADR-0048's accent carve-out: this button FIRES the
+              whats-next skill (a primed primary action), which is exactly the case
+              ADR-0048 distinguishes from the passive equivalent-state selection
+              ADR-0016 forbids ochre on — this is NOT a reopening of ADR-0016. No
+              liftOnHover here: the ochre CTA fill is a persistent idle treatment,
+              not the quiet-until-hover chrome liftOnHover normalises everything
+              else to. */ ""}
         <${LaunchButton} label="What's next" command=${WHATS_NEXT_COMMAND}
-          icon="sun" liftOnHover=${true} large=${true} skipPermissions=${skipPermissions} />
+          icon="sun" emphasis="cta" large=${true} skipPermissions=${skipPermissions} />
         ${/* aw-064: Work keeps its primary-surface fill (no ochre, ADR-0016 untouched
               — the aw-033 --surface-2 / --fg-1 / --hairline-strong chrome) and now
               reads "Work ↗": the glyph moves to the RIGHT of the label (trailingIcon)
