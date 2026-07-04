@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 17:06 -- Modeling / Promoted: agentic-workflow-bx7k5 - A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-04 17:06 -- Modeling / Refined: agentic-workflow-bx7k5 - A/B the verifier's model routing (opus vs sonnet)
 
 **Type:** Modeling / Refine

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-bx7k5
 title: A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures
-status: backlog
+status: todo
 type: spike
 context: agentic-workflow
 created: 2026-07-03
