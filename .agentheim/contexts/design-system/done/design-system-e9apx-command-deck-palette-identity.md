@@ -1,15 +1,15 @@
 ---
 id: design-system-e9apx
 title: Command-deck palette identity — cool neutrals supersede the warm-Ledger heritage
-status: doing
+status: done
 type: decision
 context: design-system
 created: 2026-07-05
-completed:
+completed: 2026-07-05
 depends_on: []
 blocks: [design-system-a31e0, design-system-t896s]
 tags: [dashboard-redesign, palette, adr, color-identity]
-related_adrs: [0016]
+related_adrs: [0016, 0049]
 related_research: []
 prior_art: [design-system-001, design-system-003]
 ---
@@ -44,3 +44,31 @@ to record the superseded heritage.
   `#f2f5f9`/`#aeb8c4`/`#7d8794`/`#48515c`, accent `#e5a13c` (on-card `#f0c584`).
 - Foundation decision for the redesign; blocks the palette retokenization [[design-system-a31e0]]
   and the ticket-card radius tweak [[design-system-t896s]].
+- ADR: `.agentheim/knowledge/decisions/0049-command-deck-palette-identity-supersedes-warm-ledger-heritage.md`
+
+## Outcome
+
+Wrote ADR-0049 recording the palette identity shift: Command-deck (cool neutral) supersedes the
+Ledger-derived warm-paper heritage, values-only (token names/roles frozen). It rules explicitly on
+the two open questions:
+
+- **Light-theme derivation** — derive from the 1b dark stack's hierarchy (step relationships +
+  cool blue-grey undertone), anchored at the existing `--swatch-light` hex `#FAF8F4` (same
+  lightness, re-hued), rather than lifting a separate 1a/1c light mock. This is binding on the
+  downstream retokenization task (`design-system-a31e0`).
+- **Frozen-swatch question (ADR-0016)** — `--swatch-light` / `--swatch-dark` **re-pin** to the new
+  `--surface-0` values (not the retired warm-paper hexes), because ADR-0016's freeze was relative
+  to the `[data-theme]` attribute (theme-toggle invariance), not to a specific palette generation;
+  keeping the old hexes would make the `ThemeToggle` preview the wrong theme once `--surface-0`
+  moves.
+
+Also updated the design-system README's "The styleguide" section with a callout recording the
+superseded Ledger/warm-paper heritage framing, pointing at ADR-0049, without touching the
+Motion/accent-law sections (sibling ADR-0048's lane).
+
+No code/tests — this is a `type: decision` task; the retokenization itself is
+`design-system-a31e0`.
+
+Key files:
+- `.agentheim/knowledge/decisions/0049-command-deck-palette-identity-supersedes-warm-ledger-heritage.md`
+- `.agentheim/contexts/design-system/README.md` (§ "The styleguide")

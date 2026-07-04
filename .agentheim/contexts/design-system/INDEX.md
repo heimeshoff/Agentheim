@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 2
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 26
+- **Doing:** 0
+- **Done:** 27
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **design-system-e9apx** — Command-deck palette identity — cool neutrals supersede the warm-Ledger heritage (decision) — `doing/design-system-e9apx-command-deck-palette-identity.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **design-system-e9apx** — Command-deck palette identity — cool neutrals supersede the warm-Ledger heritage (decision) — `done/design-system-e9apx-command-deck-palette-identity.md`
 - **design-system-vw12e** — Accent carve-out — ochre marks the primed primary action, not passive selection (decision) — `done/design-system-vw12e-accent-carveout-ochre-primary-action.md`
 - **design-system-b7n2s** — Hidden and off-viewport dependency presence markers (feature) — `done/design-system-b7n2s-hidden-offviewport-dependency-markers.md`
 - **design-system-w4t9k** — Dependency-highlight ring — a third ambient-motion signal on TicketCard (feature) — `done/design-system-w4t9k-dependency-highlight-ring-ticket-card.md`
@@ -64,6 +64,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0049** — Command-deck palette identity: cool neutrals supersede the Ledger-derived warm-paper heritage — a values-only shift (token names/roles frozen, only hexes move in both `[data-theme]` blocks); the light theme is *derived* from the 1b dark stack anchored at the existing `--swatch-light` `#FAF8F4`, and ADR-0016's frozen preview swatches re-pin to the new `--surface-0` values; the hex substitution itself is design-system-a31e0 (proposed) — `../../knowledge/decisions/0049-command-deck-palette-identity-supersedes-warm-ledger-heritage.md`
 - **ADR-0048** — Accent carve-out: ochre marks the *primed primary action*, not passive selection — a discriminating test (fires/commits vs. passive equivalent-state) refining ADR-0016, applied to all five dashboard-redesign tension surfaces; the single left-nav active item keeps 1a's ochre inset rail as a bounded wayfinding exception, and a named `--emphasis-border` token (added later by design-system-a31e0) carries the one hero-border allowance (proposed) — `../../knowledge/decisions/0048-accent-carveout-primed-primary-action-not-passive-selection.md`
 - **ADR-0034** — A relational dependency-highlight is a third ambient signal — its own dedicated token (`--rel-dep`), direction coded by line-style (solid=waiting-on / dashed=holding-up) not hue, card-perimeter not rail, static (never vanished) under reduced motion (proposed) — `../../knowledge/decisions/0034-dependency-ring-third-ambient-signal-dedicated-token-direction-by-line-style.md`
 - **ADR-0029** — Ambient attention cue is a distinct signal from the active-status pulse; the rail "new item" marker draws from `--st-todo` and keeps a static dot under reduced motion (accepted) — `../../knowledge/decisions/0029-ambient-attention-cue-distinct-from-active-status-pulse.md`

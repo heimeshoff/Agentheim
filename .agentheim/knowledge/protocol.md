@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 00:51 -- Task verified and completed: design-system-e9apx - Command-deck palette identity — cool neutrals supersede the warm-Ledger heritage
+
+**Type:** Work / Task completion
+**Task:** design-system-e9apx - Command-deck palette identity — cool neutrals supersede the warm-Ledger heritage
+**Summary:** Wrote ADR-0049 recording the Command-deck cool-neutral palette identity superseding the Ledger warm-paper heritage (values-only, names/roles frozen); ruled that the light theme is derived from the 1b dark stack anchored at --swatch-light #FAF8F4 and that ADR-0016 frozen swatches re-pin to the new --surface-0 values; updated the design-system README identity framing
+**Duration:** 9m
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** 0049
+
+---
+
 ## 2026-07-05 00:50 -- Task verified and completed: design-system-vw12e - Accent carve-out — ochre marks the primed primary action, not passive selection
 
 **Type:** Work / Task completion

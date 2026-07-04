@@ -28,8 +28,24 @@ the builder before any BC implements its UI.
 The styleguide artifact lives at `styleguide/` and is the reviewed visual language all UI
 conforms to. Direction (decided 2026-06-05): a refined, content-first developer tool —
 "Linear precision, Notion calm, Vercel restraint" — **dark-first with a light toggle**,
-quiet by default, color used only to signal **ticket status** and **content type**. Derived
-from the Ledger design system. Tokens are the source of truth in
+quiet by default, color used only to signal **ticket status** and **content type**.
+
+> **Palette heritage superseded (`design-system-e9apx`, ADR-0049, 2026-07-05).** The neutral
+> family originally described as "derived from the Ledger design system" — a warm-paper
+> `--surface-0` (`#FAF8F4` light / `#0F1115` dark) — is retired in favor of a cooler, bluer
+> **"Command deck"** identity (the dashboard-redesign brief's 1b direction). This is a
+> **values-only** shift: every token keeps its existing name and structural role
+> (`--surface-0/1/2`, the `--fg-1`…`--fg-4` text ramp, hairlines, accent) — only the hex values
+> move, in both `[data-theme]` blocks. The light theme is *derived* from the 1b dark reference
+> (not a separate light mock), anchored on the existing `--swatch-light` (`#FAF8F4`) starting
+> point; the ADR-0016 frozen preview swatches (`--swatch-light` / `--swatch-dark`) re-pin to the
+> new `--surface-0` values so the `ThemeToggle` keeps previewing the theme it actually switches
+> to. See ADR-0049
+> (`.agentheim/knowledge/decisions/0049-command-deck-palette-identity-supersedes-warm-ledger-heritage.md`).
+> The actual hex substitution is the downstream `design-system-a31e0` task; accent-usage policy
+> is the separate, sibling ADR-0048.
+
+Tokens are the source of truth in
 `styleguide/styles/colors_and_type.css` (surfaces, type, spacing, radii, motion) and
 `styleguide/styles/agentheim.css` (status + content-type palettes, elevation, markdown
 reading scale). The canvas (`styleguide/index.html`) documents the tokens and renders every
