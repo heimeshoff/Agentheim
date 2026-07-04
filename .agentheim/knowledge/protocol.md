@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 15:24 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** ~17m (first batch start 15:07 → 15:24)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** infrastructure-m3q7k: 1
+**Commits:** 3 (batch-start claim [0fea549] + task integration [f6cec0b] + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (the fix hardens the task-id → BC-resolution lifecycle tooling that underpins "independent work runs in parallel, respecting the dependency DAG" and "wrong work is caught by structure, not luck"; no pull toward any non-goal)
+**Carry-over:** none — working tree clean; no non-main worktrees
+**Notes:** Single ready task, dispatched solo. infrastructure-m3q7k (Postel split): `deriveContext` loosened to tolerate a digit-leading 5-char token tail (unstranding the already-shipped out-of-spec id `infrastructure-5w5gs`), plus a new pure `lib/id-grammar.mjs` mint-time lint (`classifyTaskId`/`isWellFormedTaskId`/`findMalformedTaskIds` + `GRANDFATHERED_IDS` allowlist + `node --test` live-tree scan) that is *stricter* than the parser, backed by new global **ADR-0044** amending ADR-0028 §3–§4. Deliberately reversed the tested aw-078 refuse-to-parse choice (rewrote its test + doc comment). Verifier PASS iteration 1, 174/174 tests. **Batch-start bug surfaced (filed `infrastructure-h8k2m`, backlog):** the mechanized `claim`'s `applyTaskMove` renamed the task todo→doing in the working tree, but the manifest's `changed` list reported only the doing/ *destination* — not the todo/ *source* deletion — so the conductor's scoped `git add` of manifest paths left a **stale duplicate todo/ copy** tracked in the batch-start commit (confirmed present on `main`'s batch-start tree). The worker independently detected both copies in its worktree base, removed the stale one, and filed the bug; the squash-merge carried the deletion so `main`'s final state has the task only in done/. Root cause is either `claimBatch`'s manifest omitting the source-path deletion or the SKILL's scoped-add prose — worth the builder's attention (h8k2m needs a `modeling` PROMOTE to be picked up). **Recurring friction:** git had pruned the empty `contexts/infrastructure/doing/` before session start — recreated it before the claim, else the mechanized `claim` throws a rename ENOENT (same friction logged the prior two sessions). Worker also maintained the ADR↔task backlinks itself (correct values; the SKILL nominally assigns that to the conductor — no re-edit needed). No bounces, failures, escalations, or concept candidates.
+
+---
+
 ## 2026-07-04 15:22 -- Task verified and completed: infrastructure-m3q7k - deriveContext can't parse a leading-digit token id — mechanized lifecycle verbs fail on an out-of-spec ADR-0028 token
 
 **Type:** Work / Task completion
