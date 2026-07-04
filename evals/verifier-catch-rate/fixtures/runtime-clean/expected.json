@@ -1,0 +1,6 @@
+{
+  "verdict": "PASS",
+  "check": null,
+  "planted_defect": null,
+  "notes": "True negative for check 8: the server genuinely boots via src/launch.js (true ephemeral :0 bind), the runfile carries the actual bound port, and both probes (GET /healthz -> 200 {status:'ok'}, GET /widgets -> 200 {widgets: array}) match the manifest exactly. Also clean on checks 1-7: both AC covered by real passing tests, no scope creep, no undocumented vocabulary, README already declares the Runtime surface manifest this diff's surfacePath (src/**) falls under, no related ADRs, no index/protocol tampering."
+}

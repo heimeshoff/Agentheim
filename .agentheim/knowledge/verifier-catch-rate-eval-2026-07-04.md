@@ -106,7 +106,10 @@ not counted in the 27-run matrix above.
 
 ## Follow-ups already tracked (unaffected by this pass)
 
-- Check 8 (runtime drive) has no fixture in this set — `agentic-workflow-hz9m3`.
+- ~~Check 8 (runtime drive) has no fixture in this set~~ — closed by
+  `agentic-workflow-hz9m3` (addendum below): three new fixtures
+  (`runtime-clean`, `runtime-boot-fail`, `runtime-probe-mismatch`) now
+  measure check 8 directly.
 - Opus-vs-sonnet routing A/B on the verifier — `agentic-workflow-bx7k5`, which
   this full-9 pass is the baseline for.
 
@@ -115,3 +118,68 @@ not counted in the 27-run matrix above.
 27 real opus-pinned verifier spawns, ~14-18k tokens each, ~15-70s wall time
 per spawn. No spawns were discarded to a fixture correction (contrast
 v3h6p's 3 discarded `clean` v1 runs).
+
+## Addendum (`agentic-workflow-hz9m3`, same date): check 8 (runtime drive, ADR-0036) measured
+
+The 27-run matrix above ran with every fixture declaring
+`meta.json.launch_command: "none"` — no fixture had a `## Runtime surface`
+manifest, so check 8 (the newest, final, most expensive check) never fired
+anywhere in this eval. This addendum closes that gap with three **new**,
+additive fixtures (the existing 9 and their recorded numbers above are
+untouched):
+
+- `runtime-clean` — a genuine stdlib-only HTTP server (`GET /healthz`, `GET
+  /widgets`) that boots via `src/launch.js` (true ephemeral `:0` bind,
+  actual port read back from `.tmp/runtime.json`, per ADR-0036 pt 4's
+  recommended stronger isolation), with both probes matching the manifest.
+  Expected/observed: PASS, 3/3.
+- `runtime-boot-fail` — `src/serve.js` (the detached boot entrypoint) calls
+  `warmCache()`, a function `src/server.js` never exports; the child throws
+  synchronously before `server.listen()`, so no runfile is ever written.
+  `src/launch.js`'s wait loop times out deterministically (~4s) and reports
+  the boot failure with a nonzero exit; no probe is attempted. The unit
+  suite passes regardless (it imports `server.js` directly and never
+  exercises the boot path), so only the live drive exposes the defect.
+  Expected/observed: FAIL citing the boot/runfile timeout, 3/3, right-reason
+  3/3.
+- `runtime-probe-mismatch` — the server boots cleanly, but the `/widgets`
+  route hand-rolls a stale singular response (`{ widget: <first> }`) instead
+  of calling the correct, unit-tested `buildWidgetsPayload()` helper
+  (`{ widgets: [...] }`). No test drives `/widgets` over real HTTP, so
+  `node --test` passes 2/2 and the acceptance criterion reads as met on
+  paper. Only the check-8 HTTP-floor probe exposes the shape mismatch (`200`
+  observed vs. `200` expected — status matches, body shape does not).
+  Expected/observed: FAIL citing the `/widgets` probe's expected-vs-observed
+  body, 3/3, right-reason 3/3.
+
+**Totals for the addendum (9 further scored runs, 3 fixtures):** catch rate
+6/6 = 100% (defect fixtures only), right-reason rate 6/6 = 100%, false-FAIL
+rate (`runtime-clean`) 0/3 = 0%, verdict variance 0. No fixture required
+correction against its `expected.json` — unlike v3h6p's `clean` v1→v2 fix,
+every run matched its prediction on the first pass, so nothing was
+discarded or re-run. Teardown (`stop`) was confirmed clean on every run,
+including after `runtime-boot-fail`'s boot failure and
+`runtime-probe-mismatch`'s probe mismatch, satisfying ADR-0036 pt 3's
+unconditional-teardown requirement.
+
+**Combined dataset of record for this BC: 36 scored real verifier spawns
+across 12 fixtures** — catch rate 30/30 = 100%, right-reason rate 30/30 =
+100%, false-FAIL rate 0/6 = 0%, verdict variance 0 across all 12 fixtures.
+Full table: `evals/verifier-catch-rate/results/2026-07-04-run.md`'s
+addendum section.
+
+**What this teaches, specific to check 8:** the two realistic defect shapes
+this addendum planted — a boot-time wiring bug invisible to unit tests
+because they import the module directly rather than exercising the actual
+process entrypoint, and a route-handler bug invisible to unit tests because
+they cover the underlying helper function but never drive the route itself
+over real HTTP — are exactly the class of gap ADR-0036 was written to close.
+Both were caught, with the correct reason, on every single real spawn. No
+verifier-prompt weakness was exposed; no new follow-up capture is warranted
+against `agents/verifier.md` from this addendum.
+
+**Cost (addendum):** 9 further real opus-pinned verifier spawns
+(~18-20k tokens each, ~44-70s wall time per spawn — check 8's boot+probe+
+teardown cycle is visibly more expensive than checks 1-7 alone, consistent
+with ADR-0036 pt 3 placing it last as "the most expensive check"). No spawns
+discarded to a fixture correction.

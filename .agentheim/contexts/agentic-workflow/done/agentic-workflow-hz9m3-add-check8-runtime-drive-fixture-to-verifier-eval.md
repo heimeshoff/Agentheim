@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-hz9m3
 title: Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval
-status: doing
+status: done
 type: spike
 context: agentic-workflow
 created: 2026-07-03
-completed:
+completed: 2026-07-04
 depends_on: []
 blocks: []
 tags: [harness-audit, verifier, evals, adr-0036]
@@ -137,5 +137,49 @@ variance alongside the existing numbers.
 - Spike deliverable, per `v3h6p`: the durable artifacts are the fixtures, the
   pinned `expected.json` ground truth, and the recorded numbers — not a polished
   runner. The measurement is the point.
+
+## Outcome
+
+Added three new, additive fixtures under `evals/verifier-catch-rate/fixtures/`
+that each declare a real `## Runtime surface` manifest and ship a genuinely
+bootable stdlib-only HTTP server (`src/server.js` — `createServer()` +
+`buildWidgetsPayload()`; `src/serve.js` — the detached boot entrypoint;
+`src/launch.js` — a cross-platform launch/stop CLI mirroring
+`dashboard/launch.mjs`'s pattern, binding a true ephemeral `:0` port per
+ADR-0036 pt 4 and writing the actual bound port to `.tmp/runtime.json`):
+
+- `runtime-clean` — both `GET /healthz` and `GET /widgets` boot and match the
+  manifest's declared probes; expected/measured PASS, 3/3, false-FAIL 0/3.
+- `runtime-boot-fail` — `serve.js` calls `warmCache()`, which `server.js`
+  never exports, so the detached child throws before `server.listen()` and
+  no runfile is ever written; `launch.js`'s wait loop times out
+  deterministically (~4s). Unit tests still pass (they import `server.js`
+  directly, never `serve.js`), so only the live drive exposes the defect.
+  Expected/measured FAIL citing the boot/runfile timeout, 3/3, right-reason
+  3/3.
+- `runtime-probe-mismatch` — the server boots, but the `/widgets` route
+  hand-rolls a stale `{ widget: <first> }` shape instead of calling the
+  correct, unit-tested `buildWidgetsPayload()`; no test drives `/widgets`
+  over real HTTP so the unit suite passes and the AC reads as met on paper.
+  Expected/measured FAIL citing the `/widgets` probe's expected-vs-observed
+  body, 3/3, right-reason 3/3.
+
+Real-spawned the live `agentheim:verifier` (opus-pinned) k=3 per fixture (9
+total real spawns). All 9 runs matched their fixture's `expected.json`
+exactly on the first pass — no fixture-correction cycle was needed (unlike
+v3h6p's `clean` v1→v2 fix). Teardown (`stop`) was confirmed clean on every
+run, including after the boot failure and the probe mismatch, satisfying
+ADR-0036 pt 3's unconditional-teardown requirement. Full numbers recorded in
+`evals/verifier-catch-rate/results/2026-07-04-run.md`'s addendum section and
+`.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md`'s addendum
+section; `evals/verifier-catch-rate/README.md`'s "Known gaps" and "Results"
+sections updated to reflect check 8 now being measured (combined dataset of
+record: 36 scored real verifier spawns across 12 fixtures, 100% catch rate,
+100% right-reason rate, 0% false-FAIL, 0 verdict variance). The original 9
+fixtures and their recorded numbers are untouched (verified via `git
+status` — only additive new directories plus the three doc files above).
+
+No ADR was warranted — ADR-0036 already governs the manifest/check-8 shape;
+this task only builds fixtures against the existing, ratified design.
 </content>
 </invoke>

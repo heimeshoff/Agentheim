@@ -1,0 +1,5 @@
+{
+  "test_command": "node --test",
+  "launch_command": "surfacePaths:\n  - src/**\nlaunch: node src/launch.js\nstop: node src/launch.js stop\nrunfile: .tmp/runtime.json\nprobes:\n  - path: /healthz\n    method: GET\n    status: 200\n    bodyShape: '{ status: string }'\n  - path: /widgets\n    method: GET\n    status: 200\n    bodyShape: '{ widgets: array }'\n",
+  "iteration": 1
+}

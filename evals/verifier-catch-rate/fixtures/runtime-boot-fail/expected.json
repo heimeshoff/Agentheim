@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL",
+  "check": "8-runtime-drive-boot-failure",
+  "planted_defect": "src/serve.js (the detached boot entrypoint launch.js actually spawns) calls warmCache(), a function server.js never exports, so the child process throws synchronously and exits before the HTTP server ever binds a port or a runfile is written. launch.js's own wait loop times out (~4s) and reports the boot failure with a nonzero exit. The unit tests (test/server.test.js) import server.js directly via createServer()/buildWidgetsPayload() and never execute serve.js, so `node --test` passes cleanly and the AC read as met on paper -- only the live drive (actually running launch.js and waiting on the runfile) exposes the crash.",
+  "notes": "Checks 1-7 must all read clean here (both AC covered by genuinely-passing tests, no scope creep, no vocabulary drift, README already declares the manifest, no related ADRs, no index/protocol tampering) so the verifier reaches check 8 and the boot failure is the only thing that trips a FAIL. Expect REASONS to cite the boot/runfile timeout, not a test failure."
+}

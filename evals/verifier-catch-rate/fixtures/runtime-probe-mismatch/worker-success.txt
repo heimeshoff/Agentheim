@@ -1,0 +1,12 @@
+RESULT: SUCCESS
+TASK_ID: widgets-rpm1
+SUMMARY: Added the Widgets status HTTP endpoint (GET /healthz, GET /widgets) with a stdlib-only server, a boot entrypoint, and a cross-platform launch/stop CLI.
+FILES_CHANGED: 4
+FILE_LIST: src/server.js, src/serve.js, src/launch.js, test/server.test.js
+BC_README_UPDATED: no
+ADRS_WRITTEN: none
+NEW_BACKLOG_ITEMS: none
+TESTS_ADDED: 2
+TESTS_PASSING: yes
+TDD_SKIPPED: no
+CONCEPT_CANDIDATE: none

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 14:24 -- Task verified and completed: agentic-workflow-hz9m3 - Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-hz9m3 - Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval
+**Summary:** Add check-8 runtime-drive fixtures (runtime-clean/boot-fail/probe-mismatch) with bootable stdlib servers; real verifier k=3 each — check 8 now measured
+**Duration:** 24m (dispatch 14:00 → verdict 14:24)
+**Verification:** PASS (iteration 1)
+**Files changed:** 33
+**Tests added:** 8
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 14:00 -- Batch started: [agentic-workflow-hz9m3]
 
 **Type:** Work / Batch start

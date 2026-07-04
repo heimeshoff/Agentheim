@@ -1,0 +1,231 @@
+diff --git a/src/server.js b/src/server.js
+new file mode 100644
+index 0000000..e6ad824
+--- /dev/null
++++ b/src/server.js
+@@ -0,0 +1,33 @@
++'use strict';
++
++const http = require('node:http');
++
++const WIDGETS = [
++  { id: 1, color: 'red' },
++  { id: 2, color: 'blue' },
++];
++
++/** Pure helper: shapes the /widgets response body. */
++function buildWidgetsPayload() {
++  return { widgets: WIDGETS };
++}
++
++/** Creates (but does not start) the widgets status HTTP server. */
++function createServer() {
++  return http.createServer((req, res) => {
++    if (req.method === 'GET' && req.url === '/healthz') {
++      res.writeHead(200, { 'content-type': 'application/json' });
++      res.end(JSON.stringify({ status: 'ok' }));
++      return;
++    }
++    if (req.method === 'GET' && req.url === '/widgets') {
++      res.writeHead(200, { 'content-type': 'application/json' });
++      res.end(JSON.stringify(buildWidgetsPayload()));
++      return;
++    }
++    res.writeHead(404, { 'content-type': 'application/json' });
++    res.end(JSON.stringify({ error: 'not found' }));
++  });
++}
++
++module.exports = { createServer, buildWidgetsPayload };
+diff --git a/src/serve.js b/src/serve.js
+new file mode 100644
+index 0000000..b6062eb
+--- /dev/null
++++ b/src/serve.js
+@@ -0,0 +1,21 @@
++#!/usr/bin/env node
++// Detached child entrypoint: actually binds the port and writes the runfile.
++// Spawned by launch.js; never run directly by a human.
++'use strict';
++
++const fs = require('node:fs');
++const path = require('node:path');
++const { createServer } = require('./server.js');
++
++const RUNFILE = process.argv[2];
++if (!RUNFILE) {
++  console.error('serve.js requires an absolute runfile path as argv[2]');
++  process.exit(1);
++}
++
++const server = createServer();
++server.listen(0, '127.0.0.1', () => {
++  const { port } = server.address();
++  fs.mkdirSync(path.dirname(RUNFILE), { recursive: true });
++  fs.writeFileSync(RUNFILE, JSON.stringify({ pid: process.pid, port, startedAt: Date.now() }));
++});
+diff --git a/src/launch.js b/src/launch.js
+new file mode 100644
+index 0000000..14c2998
+--- /dev/null
++++ b/src/launch.js
+@@ -0,0 +1,105 @@
++#!/usr/bin/env node
++// Cross-platform launcher for the widgets status server (mirrors
++// dashboard/launch.mjs's detached-spawn + runfile pattern, ADR-0036 pt 4).
++//
++// Usage:
++//   node src/launch.js         # boot detached, wait for runfile, print pid/port
++//   node src/launch.js stop    # read runfile, kill pid, remove runfile
++'use strict';
++
++const { spawn, execFileSync } = require('node:child_process');
++const fs = require('node:fs');
++const os = require('node:os');
++const path = require('node:path');
++
++const ROOT = process.cwd();
++const RUNFILE = path.join(ROOT, '.tmp', 'runtime.json');
++const SERVE_ENTRY = path.join(__dirname, 'serve.js');
++
++function readRunfile() {
++  try {
++    return JSON.parse(fs.readFileSync(RUNFILE, 'utf8'));
++  } catch {
++    return null;
++  }
++}
++
++function deleteRunfile() {
++  try {
++    fs.unlinkSync(RUNFILE);
++  } catch {
++    /* already gone */
++  }
++}
++
++function isPidAlive(pid) {
++  try {
++    process.kill(pid, 0);
++    return true;
++  } catch {
++    return false;
++  }
++}
++
++async function waitForRunfile(timeoutMs = 4000) {
++  const start = Date.now();
++  while (Date.now() - start < timeoutMs) {
++    const rf = readRunfile();
++    if (rf && isPidAlive(rf.pid)) return rf;
++    await new Promise((r) => setTimeout(r, 50));
++  }
++  return null;
++}
++
++async function launch() {
++  deleteRunfile(); // reap any stale runfile before boot
++  const child = spawn(process.execPath, [SERVE_ENTRY, RUNFILE], {
++    cwd: os.tmpdir(),
++    detached: true,
++    windowsHide: true,
++    stdio: 'ignore',
++  });
++  child.unref();
++
++  const rf = await waitForRunfile();
++  if (!rf) {
++    console.error('widgets status server did not report a runfile within the timeout (boot failure)');
++    process.exitCode = 1;
++    return;
++  }
++  console.log(`launched pid ${rf.pid} port ${rf.port}`);
++}
++
++function terminate(pid) {
++  if (!isPidAlive(pid)) return;
++  try {
++    process.kill(pid);
++  } catch {
++    /* fall through to platform fallback */
++  }
++  if (process.platform === 'win32' && isPidAlive(pid)) {
++    try {
++      execFileSync('taskkill', ['/PID', String(pid), '/F', '/T'], { stdio: 'ignore' });
++    } catch {
++      /* best effort */
++    }
++  }
++}
++
++function stop() {
++  const rf = readRunfile();
++  if (!rf) {
++    console.log('no runfile; nothing to stop');
++    return;
++  }
++  terminate(rf.pid);
++  deleteRunfile();
++  console.log(`stopped pid ${rf.pid}`);
++}
++
++const cmd = process.argv[2];
++if (cmd === 'stop') {
++  stop();
++} else {
++  launch();
++}
+diff --git a/test/server.test.js b/test/server.test.js
+new file mode 100644
+index 0000000..28dbdbe
+--- /dev/null
++++ b/test/server.test.js
+@@ -0,0 +1,48 @@
++'use strict';
++
++const { test } = require('node:test');
++const assert = require('node:assert');
++const http = require('node:http');
++const { createServer, buildWidgetsPayload } = require('../src/server.js');
++
++function get(port, path) {
++  return new Promise((resolve, reject) => {
++    http.get({ host: '127.0.0.1', port, path }, (res) => {
++      let body = '';
++      res.on('data', (chunk) => (body += chunk));
++      res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(body) }));
++    }).on('error', reject);
++  });
++}
++
++test('buildWidgetsPayload shapes a { widgets: array } body', () => {
++  const payload = buildWidgetsPayload();
++  assert.ok(Array.isArray(payload.widgets));
++  assert.ok(payload.widgets.length > 0);
++});
++
++test('GET /healthz returns 200 { status: "ok" }', async () => {
++  const server = createServer();
++  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
++  const { port } = server.address();
++  try {
++    const { status, body } = await get(port, '/healthz');
++    assert.strictEqual(status, 200);
++    assert.strictEqual(body.status, 'ok');
++  } finally {
++    server.close();
++  }
++});
++
++test('GET /widgets returns 200 { widgets: array }', async () => {
++  const server = createServer();
++  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
++  const { port } = server.address();
++  try {
++    const { status, body } = await get(port, '/widgets');
++    assert.strictEqual(status, 200);
++    assert.ok(Array.isArray(body.widgets));
++  } finally {
++    server.close();
++  }
++});

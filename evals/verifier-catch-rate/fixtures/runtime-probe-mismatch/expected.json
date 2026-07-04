@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL",
+  "check": "8-runtime-drive-probe-mismatch",
+  "planted_defect": "The GET /widgets route handler in src/server.js never calls buildWidgetsPayload(); it returns { widget: <first widget> } (a stale singular shape) instead of the manifest's declared { widgets: array }. Status is 200 (matches), but the body shape does not: no `widgets` key is present at all. buildWidgetsPayload() itself is correct and unit-tested, but test/server.test.js never drives the /widgets route over real HTTP, so `node --test` passes and the AC reads as met on paper -- only the live HTTP-floor probe against the actually-booted server exposes the mismatch.",
+  "notes": "Checks 1-7 must all read clean here (both AC read as covered by genuinely-passing tests, no scope creep, no vocabulary drift, README already declares the manifest, no related ADRs, no index/protocol tampering) so the verifier reaches check 8, boots the server successfully (unlike runtime-boot-fail), and the /widgets probe is the only thing that trips a FAIL. Expect REASONS to cite the /widgets probe (expected {widgets: array} vs observed {widget: object}), not the /healthz probe (which matches) and not a test failure."
+}
