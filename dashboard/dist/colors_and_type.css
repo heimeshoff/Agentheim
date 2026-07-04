@@ -31,20 +31,27 @@
 
 :root {
   /* ---------- Color: surfaces ---------- */
-  --surface-0: #FAF8F4;          /* page background — warm paper */
-  --surface-1: #F5F2EB;          /* hover row, subtle inset */
-  --surface-2: #ECE7DB;          /* pressed, very rare */
-  --surface-inverse: #0F1115;    /* dark contexts */
+  /* Command-deck retokenization (design-system-a31e0, ADR-0049): values-only —
+     names/roles unchanged. The light ramp is DERIVED from the 1b dark reference
+     stack (see the dark block below), anchored at the pre-existing --surface-0
+     hex (#FAF8F4, unchanged) and walking the rest of the ramp by re-applying
+     the dark stack's step sizes + shared cool blue-grey hue, inverted — one
+     system read in both directions, not two independently art-directed
+     palettes. */
+  --surface-0: #FAF8F4;          /* page background — anchor, unchanged */
+  --surface-1: #EFF1F4;          /* hover row, subtle inset */
+  --surface-2: #E4E7ED;          /* pressed, very rare */
+  --surface-inverse: #090C12;    /* dark contexts — mirrors the new dark --surface-0 */
 
   /* ---------- Color: foreground ---------- */
-  --fg-1: #1A1A1F;               /* primary text, numbers */
-  --fg-2: #4A4A52;               /* secondary text, captions */
-  --fg-3: #8A8A92;               /* tertiary, meta, placeholders */
-  --fg-4: #B8B5AC;               /* disabled, hairline-adjacent */
+  --fg-1: #0C0E12;               /* primary text, numbers */
+  --fg-2: #414956;               /* secondary text, captions */
+  --fg-3: #6D788B;               /* tertiary, meta, placeholders */
+  --fg-4: #A8B0BD;               /* disabled, hairline-adjacent */
 
   /* ---------- Color: hairlines ---------- */
-  --hairline: #E5E1D8;           /* default 1px borders */
-  --hairline-strong: #D4CFC2;    /* table headers, dividers w/ weight */
+  --hairline: #D9DDE4;           /* default 1px borders */
+  --hairline-strong: #C2C9D4;    /* table headers, dividers w/ weight */
 
   /* ---------- Color: theme-preview swatches (FIXED — never flip, ADR-0016) ----------
      The ThemeToggle's two buttons each PREVIEW the theme they switch to, so their
@@ -55,14 +62,14 @@
      each swatch in BOTH themes. Selection is signalled by de-emphasis, never accent
      (ochre stays status/focus-only, ADR-0014). */
   --swatch-light: #FAF8F4;       /* light theme preview bg (frozen light --surface-0) */
-  --swatch-dark: #0F1115;        /* dark theme preview bg (frozen dark --surface-0) */
-  --swatch-light-fg: #1A1A1F;    /* on the light swatch — dark text/icon */
-  --swatch-dark-fg: #E8E8EC;     /* on the dark swatch — light text/icon */
+  --swatch-dark: #090C12;        /* dark theme preview bg (frozen dark --surface-0, re-pinned ADR-0049 §3) */
+  --swatch-light-fg: #0C0E12;    /* on the light swatch — dark text/icon (new light --fg-1) */
+  --swatch-dark-fg: #F2F5F9;     /* on the dark swatch — light text/icon (new dark --fg-1) */
 
   /* ---------- Color: accent (reserved) ---------- */
-  --accent-ochre: #B8741A;       /* zero-money day ONLY */
-  --accent-ochre-soft: #E8C896;  /* accent fill background */
-  --accent-ochre-tint: #FBF3E4;  /* accent surface tint */
+  --accent-ochre: #B87619;       /* zero-money day ONLY */
+  --accent-ochre-soft: #E6C28E;  /* accent fill background */
+  --accent-ochre-tint: #FBF2DF;  /* accent surface tint */
 
   /* ---------- Color: semantic (numbers) ---------- */
   --paid: #3F6B4A;               /* paid income, positive deltas */
@@ -144,24 +151,24 @@
   --duration-relation: 2000ms;
 }
 
-/* ---------- Dark mode ---------- */
+/* ---------- Dark mode — "Command deck" (ADR-0049, 1b reference) ---------- */
 .dark, [data-theme="dark"] {
-  --surface-0: #0F1115;
-  --surface-1: #1A1D24;
-  --surface-2: #22252C;
-  --surface-inverse: #FAF8F4;
+  --surface-0: #090C12;          /* app bg */
+  --surface-1: #0D1119;          /* panel */
+  --surface-2: #121826;          /* ticket card / most-raised surface */
+  --surface-inverse: #FAF8F4;    /* unchanged light --surface-0 anchor */
 
-  --fg-1: #E8E8EC;
-  --fg-2: #A8A8B0;
-  --fg-3: #6A6A72;
-  --fg-4: #3E3E46;
+  --fg-1: #F2F5F9;
+  --fg-2: #AEB8C4;
+  --fg-3: #7D8794;
+  --fg-4: #48515C;
 
-  --hairline: #22252C;
-  --hairline-strong: #2E323A;
+  --hairline: #1C2330;           /* hairline-low */
+  --hairline-strong: #2B3548;    /* hairline-high */
 
-  --accent-ochre: #D49653;
-  --accent-ochre-soft: #5C3F1A;
-  --accent-ochre-tint: #1F1812;
+  --accent-ochre: #E5A13C;
+  --accent-ochre-soft: #5E4015;
+  --accent-ochre-tint: #211A0D;
 
   --paid: #6E9E7A;
   --paid-soft: #1F2A23;

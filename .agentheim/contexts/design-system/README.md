@@ -45,6 +45,33 @@ quiet by default, color used only to signal **ticket status** and **content type
 > The actual hex substitution is the downstream `design-system-a31e0` task; accent-usage policy
 > is the separate, sibling ADR-0048.
 
+> **Hex substitution landed (`design-system-a31e0`, 2026-07-05).** Both `[data-theme]`
+> blocks of `styles/colors_and_type.css` now carry the Command-deck values — every token
+> keeps its name and role (values only, no rename): dark `--surface-0/1/2` →
+> `#090C12` / `#0D1119` / `#121826` (app bg / panel / ticket-card — the 1b brief's four-rung
+> stack collapsed onto the system's three surface slots, dropping the intermediate
+> "panel-2" rung as redundant against the token count), `--hairline` / `--hairline-strong` →
+> `#1C2330` / `#2B3548`, the `--fg-1`…`--fg-4` ramp → `#F2F5F9` / `#AEB8C4` / `#7D8794` /
+> `#48515C`, and `--accent-ochre` → `#E5A13C` (`-soft` `#5E4015`, `-tint` `#211A0D`). The
+> light theme is *derived*, not separately art-directed: `--surface-0` stays pinned at the
+> `#FAF8F4` anchor, and the rest of the light ramp (surfaces, hairlines, the `--fg-1`…`--fg-4`
+> ramp) is computed by re-applying the dark stack's HSL step sizes on the same cool
+> blue-grey hue family, inverted — landing `--surface-1/2` at `#EFF1F4` / `#E4E7ED`,
+> hairlines at `#D9DDE4` / `#C2C9D4`, and `--fg-1`…`--fg-4` at `#0C0E12` / `#414956` /
+> `#6D788B` / `#A8B0BD`. Light `--accent-ochre` derives to `#B87619` (`-soft` `#E6C28E`,
+> `-tint` `#FBF2DF`) — nearly unchanged from the prior warm-paper accent, since the 1b hue
+> sits in the same amber family. Per ADR-0049 §3 the frozen preview swatches re-pin:
+> `--swatch-dark` → `#090C12` (new dark `--surface-0`), `--swatch-light` stays `#FAF8F4`,
+> and both fixed on-swatch fg tokens now mirror the new `--fg-1` values
+> (`theme-toggle.test.mjs` updated to assert the re-pinned lock). Status/content-type
+> tokens in `styles/agentheim.css` (`--st-*`, `--ct-*`, `--rel-dep*`, `--code-bg`/
+> `--code-block-bg`) are **unchanged** — out of this task's scope; only the new
+> `--emphasis-border` token (ADR-0048) was added there, in both theme blocks
+> (`color-mix(in oklab, var(--accent-ochre) 50%/40%, transparent)` light/dark — a
+> border-suited softened alpha, not a bare `--accent-ochre` reuse), with no consumer
+> wired yet. `dashboard/dist/` was rebuilt (`node build.mjs`, twice, byte-identical on
+> the second pass) to fold the new hexes into the served bundle.
+
 Tokens are the source of truth in
 `styleguide/styles/colors_and_type.css` (surfaces, type, spacing, radii, motion) and
 `styleguide/styles/agentheim.css` (status + content-type palettes, elevation, markdown
@@ -772,6 +799,30 @@ the pattern in **section 11** (`SearchSpecimen` — type *design*, *adr*, or *zz
 > is not yet pulled into `dist/app.js`. The build was re-run to keep `dist/` provably
 > in sync with source; `dist/` folds `SearchField` in when `agentic-workflow-052`
 > actually renders it on the board.
+
+### Command-deck retokenization (design-system-a31e0, ADR-0048, ADR-0049)
+
+See the identity-framing note above (under "The styleguide") for the full hex table.
+Every surface, hairline, foreground, and accent value in **both** `[data-theme]` blocks
+of `styles/colors_and_type.css` changed (values only, no rename), the frozen preview
+swatches re-pinned (ADR-0049 §3), and `styles/agentheim.css` gained the
+`--emphasis-border` token pair (ADR-0048, no consumer wired yet).
+
+> **Gate re-review reopened by the Command-deck retokenization
+> (`design-system-a31e0`).** This is the single biggest visual change the canvas has
+> taken to date — every component's chrome now renders in the cooler, darker
+> Command-deck palette instead of the warm-paper-derived one. **One consolidated
+> re-review of the whole canvas** (`styleguide/index.html`, every section) is needed
+> with the builder, not a per-component pass, per the `design-system-005` / `007` /
+> `009` / `014` / `015` / `017` / `018` / `020` / `021` / `v8k2p` / `w4t9k` / `b7n2s`
+> precedent. This unlocks the downstream agentic-workflow wiring set (`vk6mc` /
+> `wsfsk` / `bz3az` / `a2pm1` / `c2ver`) and the sibling radius task (`t896s`).
+> **Builder confirmation PENDING.**
+
+> Live-board note: the served dashboard `dist/` is a derived artifact (ADR-0003) and
+> **was rebuilt** (`node build.mjs`, from `dashboard/`) in this task — verified
+> reproducible (a second run produced no further diff) — so the live dashboard picks
+> up the new hexes immediately, ahead of any downstream agentic-workflow consumer.
 
 ## Relationships with other contexts
 

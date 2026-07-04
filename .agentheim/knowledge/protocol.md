@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 01:22 -- Task verified and completed: design-system-a31e0 - Retokenize the palette — Command-deck dark + derived light, across both token files
+
+**Type:** Work / Task completion
+**Task:** design-system-a31e0 - Retokenize the palette — Command-deck dark + derived light, across both token files
+**Summary:** Retokenized both [data-theme] blocks of colors_and_type.css to the Command-deck 1b dark palette with a derived light counterpart (ADR-0049), re-pinned the frozen preview swatches, and added the --emphasis-border token pair to agentheim.css (ADR-0048); dashboard/dist rebuilt reproducibly
+**Duration:** 11m30s
+**Verification:** PASS (iteration 1)
+**Files changed:** 6
+**Tests added:** 1
+**ADRs written:** none
+
+---
+
 ## 2026-07-05 01:07 -- Batch started: [design-system-a31e0]
 
 **Type:** Work / Batch start

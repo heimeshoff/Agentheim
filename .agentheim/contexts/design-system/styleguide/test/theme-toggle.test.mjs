@@ -50,9 +50,9 @@ function fnBody(src, name) {
     .join('\n');
 }
 
-test('the fixed swatch tokens exist in :root with the locked values', () => {
-  assert.match(rootBlock, /--swatch-light:\s*#FAF8F4/i, '--swatch-light must be #FAF8F4 in :root');
-  assert.match(rootBlock, /--swatch-dark:\s*#0F1115/i, '--swatch-dark must be #0F1115 in :root');
+test('the fixed swatch tokens exist in :root with the locked values (re-pinned to the Command-deck --surface-0 values, ADR-0049)', () => {
+  assert.match(rootBlock, /--swatch-light:\s*#FAF8F4/i, '--swatch-light must be #FAF8F4 in :root (unchanged light --surface-0 anchor)');
+  assert.match(rootBlock, /--swatch-dark:\s*#090C12/i, '--swatch-dark must be #090C12 in :root (re-pinned to the new dark --surface-0)');
 });
 
 test('the swatch tokens are NOT redefined under .dark / [data-theme="dark"]', () => {
@@ -110,4 +110,20 @@ test('the styleguide TopBar uses ThemeToggle (not Segmented) for the theme contr
   // app.js are the card-variant and drawer-header switchers (section 05).
   assert.match(appSrc, /<\$\{ThemeToggle\}/, 'app.js TopBar must render ThemeToggle');
   assert.match(appSrc, /import\s*\{[^}]*\bThemeToggle\b[^}]*\}\s*from\s*["']\.\/live\.js["']/, 'app.js must import ThemeToggle from live.js');
+});
+
+// --emphasis-border (ADR-0048, wired by design-system-a31e0's Command-deck
+// retokenization). The accent-carve-out border token named/intent-only in
+// ADR-0048 — a softened-alpha ochre-derived border, distinct from a direct
+// --accent-ochre reuse, added to agentheim.css (not colors_and_type.css).
+const agentheimCss = readFileSync(join(STYLES, 'agentheim.css'), 'utf8');
+const agentheimDarkSel = agentheimCss.search(/^\.dark,\s*\[data-theme="dark"\]/m);
+const agentheimRootBlock = agentheimCss.slice(0, agentheimDarkSel);
+const agentheimDarkBlock = agentheimCss.slice(agentheimDarkSel);
+
+test('the --emphasis-border token exists in both theme blocks of agentheim.css (ADR-0048)', () => {
+  assert.match(agentheimRootBlock, /--emphasis-border\s*:/, '--emphasis-border must be defined in the light :root block');
+  assert.match(agentheimDarkBlock, /--emphasis-border\s*:/, '--emphasis-border must be defined in the dark block');
+  // It is a border-suited softened alpha, not a direct reuse of --accent-ochre.
+  assert.doesNotMatch(agentheimRootBlock.match(/--emphasis-border\s*:[^;]+/)[0], /^--emphasis-border\s*:\s*var\(--accent-ochre\)\s*$/, 'must not be a bare alias of --accent-ochre');
 });

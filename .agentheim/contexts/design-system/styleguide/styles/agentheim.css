@@ -60,6 +60,14 @@
   --code-bg: #F2EFE7;
   --code-block-bg: #F5F2EB;
   --code-border: var(--hairline);
+
+  /* Emphasis border (ADR-0048, design-system-a31e0) — the flight-plan
+     step-2 hero-border treatment: an ochre-DERIVED border, kept as its own
+     named token (not raw rgba, not a direct --accent-ochre reuse) so its
+     value is independently tunable — a softened alpha suited to a BORDER,
+     not a fill or focus ring. This task adds the token only; no consumer is
+     wired here. */
+  --emphasis-border: color-mix(in oklab, var(--accent-ochre) 50%, transparent);
 }
 
 /* ---------- DARK (cool slate) — primary ---------- */
@@ -99,6 +107,10 @@
   --code-bg: #1E222A;
   --code-block-bg: #15181E;
   --code-border: var(--hairline-strong);
+
+  /* See the light block's comment — a slightly lower alpha reads correctly
+     against the darker Command-deck card surface. */
+  --emphasis-border: color-mix(in oklab, var(--accent-ochre) 40%, transparent);
 }
 
 /* ============================================================
