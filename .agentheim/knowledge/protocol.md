@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 14:00 -- Batch started: [agentic-workflow-hz9m3]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-hz9m3 - Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval
+**Parallel:** no (1 worker — sole remaining ready task; hz9m3 was held from the prior wave to land after fq2j8 baseline, now rebases cleanly on fq2j8 README/report edits already on main)
+
+---
+
 ## 2026-07-04 13:59 -- Task verified and completed: agentic-workflow-fq2j8 - Complete the verifier-catch-rate eval — one coherent full 9-fixture pass against the current verifier
 
 **Type:** Work / Task completion

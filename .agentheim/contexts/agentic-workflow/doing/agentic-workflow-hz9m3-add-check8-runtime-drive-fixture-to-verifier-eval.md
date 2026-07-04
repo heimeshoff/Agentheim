@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-hz9m3
 title: Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval
-status: todo
+status: doing
 type: spike
 context: agentic-workflow
 created: 2026-07-03

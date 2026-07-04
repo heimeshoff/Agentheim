@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 115
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-hz9m3** — Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval (spike) — `todo/agentic-workflow-hz9m3-add-check8-runtime-drive-fixture-to-verifier-eval.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-hz9m3** — Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval (spike) — `doing/agentic-workflow-hz9m3-add-check8-runtime-drive-fixture-to-verifier-eval.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
