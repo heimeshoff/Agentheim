@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 17:12 -- Batch started: [agentic-workflow-bx7k5]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-bx7k5 - A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures
+**Parallel:** no (1 worker — sole ready task; whats-next advisory stale 2026-07-03, its named tasks t4x8p/p3v9k already resolved, no weighting)
+
+---
+
 ## 2026-07-04 17:06 -- Modeling / Promoted: agentic-workflow-bx7k5 - A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures
 
 **Type:** Modeling / Promote
