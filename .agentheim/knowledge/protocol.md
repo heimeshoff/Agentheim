@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 12:21 -- Modeling / Captured: infrastructure-m3q7k - deriveContext can't parse a leading-digit token id — mechanized lifecycle verbs fail on an out-of-spec ADR-0028 token
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** backlog
+**Summary:** `deriveContext` (`lib/task-lifecycle.mjs:254`) can't parse a `<bc>-<token>` id whose token leads with a digit (e.g. `5w5gs`) — it matches neither the legacy all-digit tail nor the ADR-0028 leading-letter token, so it returns the whole id as the BC and the mechanized promote/claim/complete verbs fail with "not found in todo/" until a caller hand-passes a `context`/`contexts` override. Surfaced live 2026-07-04 while running `work` on `infrastructure-5w5gs`. Filed as a backlog bug with an embedded decision (harden the resolver vs. add a mint-time validation gate vs. both; resolve the legacy-digit-tail-vs-leading-digit-token ambiguity). related_adrs 0028/0038, prior_art infrastructure-5w5gs.
+
+---
+
 ## 2026-07-04 12:18 -- Modeling / Refined: agentic-workflow-bx7k5 - A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures
 
 **Type:** Modeling / Refine
