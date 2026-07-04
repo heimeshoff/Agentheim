@@ -5,6 +5,18 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 18:33 -- Release shipped: v0.8.9
+
+**Type:** Release
+**Version:** 0.8.8 → 0.8.9 (patch — live in-flight lane, dependency-aware board, per-worker worktree isolation, lifecycle-bookkeeping mechanization + CRLF/BOM hardening)
+**Manifest:** `.claude-plugin/plugin.json` bumped, committed `2e07f8a`
+**Changelog:** `CHANGELOG.md` `[Unreleased]` → `[0.8.9]` section rolled (same commit)
+**Pushed to main:** yes (`7f6411d..2e07f8a` on `origin/main`)
+**Tag:** `v0.8.9` (annotated) → `2e07f8a`, pushed to origin
+**GitHub Release:** created via `gh` (from CHANGELOG)
+
+---
+
 ## 2026-07-04 18:25 -- Work session ended
 
 **Type:** Work / Session end
