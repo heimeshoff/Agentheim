@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 0
+- **Todo:** 1
 - **Doing:** 1
 - **Done:** 121
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-vmk1z** — Dismissing the What's next panel deletes its advisory artifact (feature) — `todo/agentic-workflow-vmk1z-dismiss-deletes-whats-next-artifact.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -152,7 +153,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-vmk1z** — Dismissing the What's next panel deletes its advisory artifact (feature; refined — settled by ADR-0046, `DELETE /api/whats-next`) — `backlog/agentic-workflow-vmk1z-dismiss-deletes-whats-next-artifact.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

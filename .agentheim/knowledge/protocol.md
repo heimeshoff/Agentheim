@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 21:39 -- Modeling / Promoted: agentic-workflow-vmk1z - Dismissing the What's next panel deletes its advisory artifact
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-04 21:38 -- Batch started: [agentic-workflow-d4q7f]
 
 **Type:** Work / Batch start

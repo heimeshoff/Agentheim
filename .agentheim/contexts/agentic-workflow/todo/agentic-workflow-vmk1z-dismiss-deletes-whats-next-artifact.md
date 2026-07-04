@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-vmk1z
 title: Dismissing the What's next panel deletes its advisory artifact
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-07-04
