@@ -7,7 +7,7 @@ context: agentic-workflow
 created: 2026-07-03
 completed:
 depends_on: []
-blocks: []
+blocks: [agentic-workflow-bx7k5]
 tags: [harness-audit, verifier, evals]
 related_adrs: []
 related_research: []

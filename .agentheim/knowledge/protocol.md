@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 12:18 -- Modeling / Refined: agentic-workflow-bx7k5 - A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Cornered three seams. (1) Signal: the opus baseline measured only the 6 mechanical fixtures (100%, at ceiling) — the discriminating judgment checks 5/6/6b sit in the unmeasured 3, so the A/B is only meaningful over the full 9-fixture surface. Added `depends_on: [agentic-workflow-fq2j8]` (+ reciprocal `blocks` on fq2j8) so the opus arm is completed to all 9 first. (2) Method: pin sonnet via a per-spawn `Agent(model: "sonnet")` override instead of editing `agents/verifier.md` — byte-identical prompt, zero revert risk, no hazard to a concurrent work session. (3) Falsification: fixed an explicit decision rule (ties→superseding ADR / worse→opus vindicated / ceiling→inconclusive) before the run. Rewrote Why/What/AC/Notes to match.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 12:18 -- Modeling / Promoted: agentic-workflow-hz9m3 - Add a check-8 (runtime drive, ADR-0036) fixture to the verifier-catch-rate eval
 
 **Type:** Modeling / Promote
