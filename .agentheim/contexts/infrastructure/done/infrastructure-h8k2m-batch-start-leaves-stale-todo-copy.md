@@ -1,11 +1,11 @@
 ---
 id: infrastructure-h8k2m
 title: Mechanized batch-start leaves a stale duplicate file in todo/ after moving a task into doing/
-status: doing
+status: done
 type: bug
 context: infrastructure
 created: 2026-07-04
-completed:
+completed: 2026-07-04
 depends_on: []
 blocks: []
 tags: [task-lifecycle, cli, claimBatch, batch-start, duplicate-id-check]
@@ -71,3 +71,35 @@ no longer exists after a mechanized move.
   single source of what a verb touched). Note `completeTask`/`promoteTask` may share the same
   omission — check whether their manifests enumerate the source path, since they were not exercised
   through a fresh todo→doing move this session.
+
+## Outcome
+
+Root cause confirmed exactly as the conductor's live reproduction described: `applyTaskMove`
+(`lib/task-lifecycle.mjs`) always performed the rename correctly on disk (source removed,
+destination written) — the bug was that its returned `state` never reported the *pre-move*
+path, so every layer-2 manifest builder (`promoteTask`, `claimBatch`, `completeTask`) could only
+report the new-location file in `changed`, leaving the vacated source path unstaged by the
+caller's scoped `git add` (ADR-0026/ADR-0038).
+
+Fix: `applyTaskMove`'s success `state` now carries `fromPath` (the resolved pre-move path)
+alongside the existing `path` (destination). All three layer-2 verbs were audited and all
+three had the omission, not just `claimBatch`:
+- `promoteTask` — `changed` now includes the vacated `backlog/` path.
+- `claimBatch` — `changed` now includes every moved task's vacated `todo/` path (`moved.flatMap`
+  over `[fromPath, path]` per task), fixing the exact batch-start bug reported.
+- `completeTask` — `changed` now includes the vacated `doing/` path on the normal (non-idempotent)
+  branch. The idempotent branch (worker's worktree already squash-merged the `doing→done` move)
+  correctly omits `fromPath` — there is nothing to vacate in that working tree.
+
+Verified empirically that `git add <deleted-tracked-path>` stages the deletion (not a no-op),
+so a scoped `git add` over the corrected `changed` array stages a rename atomically.
+
+Tests: added a direct `applyTaskMove` regression test asserting `state.fromPath` is reported and
+absent from disk post-move, a `claimBatch` multi-id regression test asserting every task's source
+path is both gone from disk and named in `changed`, and updated the existing `promoteTask` /
+`claimBatch` (single-id) / `completeTask` (both branches) / CLI manifest-length assertions to the
+corrected shape. `lib/test/duplicate-id-check.test.mjs`'s live-tree test and the full suite
+(176/176) pass.
+
+Files: `lib/task-lifecycle.mjs`, `lib/test/task-lifecycle.test.mjs`,
+`lib/test/task-lifecycle-cli.test.mjs`.

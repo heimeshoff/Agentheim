@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 15:40 -- Task verified and completed: infrastructure-h8k2m - Mechanized batch-start leaves a stale duplicate file in todo/ after moving a task into doing/
+
+**Type:** Work / Task completion
+**Task:** infrastructure-h8k2m - Mechanized batch-start leaves a stale duplicate file in todo/ after moving a task into doing/
+**Summary:** applyTaskMove reports state.fromPath; promote/claim/complete manifests now enumerate the vacated source path so a scoped git add stages a lifecycle move atomically (no stale duplicate)
+**Duration:** 9m56s
+**Verification:** PASS (iteration 1)
+**Files changed:** 3
+**Tests added:** 2
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 15:30 -- Batch started: [infrastructure-h8k2m]
 
 **Type:** Work / Batch start
