@@ -5,7 +5,7 @@ hooks:
   Stop:
     - hooks:
         - type: command
-          command: "node \"${CLAUDE_PROJECT_DIR}/lib/hook-agent-signal.mjs\" session-heartbeat"
+          command: "node -e \"const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\\d+)\\.(\\d+)\\.(\\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','hook-agent-signal.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','hook-agent-signal.mjs'));const r=cand.find(fs.existsSync);if(r){import(u.pathToFileURL(r).href).then(m=>{try{m.runHook(process.argv[1])}catch{}process.exit(0)}).catch(()=>process.exit(0))}else{process.exit(0)}\" session-heartbeat"
 ---
 
 # Work — Parallel Dependency-Aware Worker Loop

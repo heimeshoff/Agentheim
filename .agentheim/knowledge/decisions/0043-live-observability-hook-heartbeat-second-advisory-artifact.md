@@ -4,7 +4,7 @@ title: Live observability — a Stop/SubagentStop hook heartbeat is a second adv
 scope: agentic-workflow
 status: accepted
 date: 2026-07-03
-related_tasks: [agentic-workflow-m9w5c]
+related_tasks: [agentic-workflow-m9w5c, agentic-workflow-g7p2x]
 related_adrs: [0027, 0017, 0014]
 ---
 
@@ -199,3 +199,91 @@ session's heartbeat currently fresh").
   design-system BC and is a deliberate, already-shipped decision; changing its
   meaning is a cross-BC change outside this task's scope (see §6 above). An
   additive standalone panel achieves the acceptance criteria without touching it.
+
+## Amendment (2026-07-04, agentic-workflow-g7p2x) — hook COMMAND path fixed for consumer plugin installs
+
+This ADR's own "Negative" section flagged the risk this amendment resolves:
+consumer-install packaging was never verified. The specific bug found: all three
+hook registrations (`skills/work/SKILL.md`, `agents/worker.md`,
+`agents/verifier.md`) invoked
+
+```
+node "${CLAUDE_PROJECT_DIR}/lib/hook-agent-signal.mjs" <signal>
+```
+
+`${CLAUDE_PROJECT_DIR}` correctly names the *write target* (the script's
+internal `resolveRoot()`, unchanged by this amendment) but was being reused,
+incorrectly, to also locate the *script itself*. That collapses to the right
+path only when the project **is** the plugin (this repo, dogfood development).
+In any consumer project that installed Agentheim as a plugin, `CLAUDE_PROJECT_DIR`
+is the consumer's root, `lib/hook-agent-signal.mjs` does not exist there, and
+`node` exits non-zero with `in-flight.json` never written — a failure that is
+silent **at the Claude Code hook level** (a command hook's stderr is not surfaced
+to the user), even though the underlying `node` process itself does error. This
+is exactly the "no visible error anywhere" case this ADR's own Negative section
+warned about, and is a sibling risk to (not the same bug as) issue #17688 — that
+issue is about a hook's *declaration* not firing at all; this bug is about a
+firing hook's command *resolving to the wrong path*.
+
+**Investigated: `${CLAUDE_PLUGIN_ROOT}` in a hook command.** The preferred fix
+would have been a one-line `${CLAUDE_PLUGIN_ROOT}` substitution in each hook
+command (Claude Code's documented placeholder for a plugin's own install
+directory). Verified via a `claude-code-guide` consultation against current
+Claude Code docs and issue trackers before adopting it — the exact "verify,
+don't assume" discipline this bug's root cause (an unverified `${CLAUDE_PROJECT_DIR}`
+reuse) should have had the first time:
+
+- **Documented:** yes — the Claude Code hooks reference lists `${CLAUDE_PLUGIN_ROOT}`
+  as a path placeholder substituted into hook command strings and exported to
+  the spawned process.
+- **Reliable in practice: no.** Multiple open, confirmed upstream issues
+  (anthropics/claude-code #43380, #66557, #24529) document `${CLAUDE_PLUGIN_ROOT}`
+  *not* being injected during hook execution across multiple plugins — a
+  documented-but-broken mechanism, unresolved as of this investigation
+  (2026-07-04). This is the same failure shape infrastructure-010 already found
+  for a *different* context (`${CLAUDE_PLUGIN_ROOT}` empty in a slash-command's
+  Bash tool-call context) — the two contexts are documented differently but
+  share the same real-world unreliability.
+- Whether per-agent/per-skill frontmatter `hooks:` blocks (as opposed to a
+  plugin-level `hooks.json`) are even a fully-documented mechanism was also
+  unclear from the guide consultation — one more reason not to lean on a second
+  undocumented-in-this-shape assumption stacked on top of the first.
+
+**Decision: use the env-free bootstrap fallback, not `${CLAUDE_PLUGIN_ROOT}`.**
+Each hook command is now a self-contained `node -e` bootstrap — homedir ->
+`~/.claude/plugins/cache/agentheim/agentheim/<version>/` (semver-max) ->
+`lib/hook-agent-signal.mjs`, with a repo-local (`process.cwd()`) short-circuit
+for dogfood development — reusing verbatim the pattern
+`lib/resolve-plugin-file.mjs` (infrastructure-010, generalized by
+agentic-workflow-k5n8f) already established, and mirroring the exact bootstrap
+shape `skills/work/SKILL.md`'s claim/complete verbs already ship (Phase 4 step 1
+of the `work` skill). This keeps the fix consistent with a pattern already
+proven in this codebase rather than introducing a third resolution strategy.
+Unlike `resolve-plugin-file.mjs`'s CLI-facing "fail loudly" philosophy, the
+bootstrap here silently `process.exit(0)`s when no candidate resolves — matching
+this ADR's own governing rule that a hook must never surface an error the
+session can't act on.
+
+**Why this failure mode surfaces nowhere (the Negative-section warning, made
+concrete).** The staleness self-suppression this ADR designed (§3) means a
+broken hook and a healthy-but-idle session are visually indistinguishable on the
+dashboard — both render "no in-flight lane." A future regression that breaks the
+hook COMMAND path again (e.g. a careless edit to one of the three `node -e`
+bootstraps) will not throw, will not appear in any log a normal session ever
+reads, and will not fail any test that doesn't specifically simulate a foreign
+cwd — exactly the gap this amendment's new regression test
+(`lib/test/hook-command-path.test.mjs`) closes for this specific command shape.
+
+**Verification performed:** unit/static guards over the three registration
+sites (asserting the env-independent bootstrap shape and rejecting the legacy
+form), plus a real-subprocess reproduction — the fixed `worker-stop` command,
+run via `bash -c` from a temp foreign project (not this repo) with
+`CLAUDE_PROJECT_DIR` pointed at that foreign project and `HOME`/`USERPROFILE`
+pointed at a fake plugin-cache home (repo `lib/`/`dashboard/` linked in as the
+"installed version"), writes `.agentheim/state/in-flight.json` under the
+foreign project. A parallel run of the literal OLD command string against the
+same foreign project confirms it does **not** write the file (the bug,
+reproduced). A third run confirms the fixed command still works from this repo
+itself (dogfood), and that the write target is `CLAUDE_PROJECT_DIR`, not
+wherever the script was resolved from — proving the two roles stayed decoupled.
+See `lib/test/hook-command-path.test.mjs` for the full reproduction.

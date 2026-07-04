@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 21:03 -- Task verified and completed: agentic-workflow-g7p2x - Observability hook command path breaks in consumer plugin installs
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-g7p2x - Observability hook command path breaks in consumer plugin installs
+**Summary:** Fixed all three ADR-0043 hook registrations (worker/verifier Stop hooks, work session heartbeat) to locate lib/hook-agent-signal.mjs via the env-free homedir-cache-semver bootstrap instead of the CLAUDE_PROJECT_DIR path that only resolved in the source repo; PLUGIN_ROOT rejected after investigation of open upstream bugs, ADR-0043 amended, 7 tests added.
+**Duration:** 15m
+**Verification:** PASS (iteration 1)
+**Files changed:** 6
+**Tests added:** 7
+**ADRs written:** 0043-live-observability-hook-heartbeat-second-advisory-artifact.md (amendment)
+
+---
+
 ## 2026-07-04 20:57 -- Task verified and completed: agentic-workflow-v8n3t - Wire a trigger for protocol rotation — rotateProtocol is never invoked
 
 **Type:** Work / Task completion

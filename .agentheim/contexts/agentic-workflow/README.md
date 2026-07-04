@@ -565,6 +565,23 @@ separate BC, but today the whole tool lives in this one.
   Every failure path (unreadable stdin, unresolvable root, an unwritable `state/` dir) is
   swallowed and the script exits 0 — a hook must never crash the session it observes. See
   ADR-0043, ADR-0027.
+- **Hook COMMAND path is env-independent (agentic-workflow-g7p2x, ADR-0043 amendment).**
+  The three `Stop` hook registrations above (`skills/work/SKILL.md`, `agents/worker.md`,
+  `agents/verifier.md`) do **not** locate `lib/hook-agent-signal.mjs` via
+  `${CLAUDE_PROJECT_DIR}` — that reuse was the bug (`${CLAUDE_PROJECT_DIR}` is the
+  *write target* the script resolves internally, correct only for that role; using it
+  to find the *script itself* only works when the project **is** the plugin). Each
+  hook command is instead a self-contained `node -e` bootstrap — homedir -> plugin
+  cache -> semver-max version dir -> `lib/hook-agent-signal.mjs`, with a repo-local
+  `process.cwd()` short-circuit for dogfood development — the same pattern
+  `lib/resolve-plugin-file.mjs` (infrastructure-010) and the `work` skill's
+  claim/complete verbs already use. `${CLAUDE_PLUGIN_ROOT}` was investigated and
+  rejected as the fix: documented for hook contexts, but confirmed to have open,
+  unresolved non-injection bugs upstream (anthropics/claude-code #43380, #66557,
+  #24529) as of the investigation. See `lib/test/hook-command-path.test.mjs` for the
+  real-subprocess reproduction (foreign-project write succeeds; the old literal
+  command string reproducibly does not) and the ADR-0043 amendment for the full
+  writeup.
 
 ## Aggregates
 

@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 120
+- **Doing:** 0
+- **Done:** 121
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-g7p2x** — Observability hook command path breaks in consumer plugin installs (bug) — `doing/agentic-workflow-g7p2x-fix-observability-hook-path-consumer-installs.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **agentic-workflow-g7p2x** — Observability hook command path breaks in consumer plugin installs (bug) — `done/agentic-workflow-g7p2x-fix-observability-hook-path-consumer-installs.md`
 - **agentic-workflow-v8n3t** — Wire a trigger for protocol rotation — rotateProtocol is never invoked (bug) — `done/agentic-workflow-v8n3t-wire-protocol-rotation-trigger.md`
 - **agentic-workflow-q7x2k** — Verifier check 6 gate gap — decisions narrated only in task-file prose are not flagged for an ADR (bug) — `done/agentic-workflow-q7x2k-verifier-check6-task-prose-gate-gap.md`
 - **agentic-workflow-bx7k5** — A/B the verifier's model routing (opus vs sonnet) using the verifier-catch-rate fixtures (spike) — `done/agentic-workflow-bx7k5-ab-verifier-model-routing-opus-vs-sonnet.md`
