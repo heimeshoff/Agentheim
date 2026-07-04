@@ -8,6 +8,14 @@ its **plugin contract** (skills, commands, `.agentheim/` layout) with
 
 ## [Unreleased]
 
+## [0.8.10] - 2026-07-04
+
+### Changed
+- **What's Next dismiss deletes its artifact** — dismissing the panel now issues `DELETE /api/whats-next`, which unlinks the advisory `state/whats-next.md` via an exact-equality allowlist that provably cannot touch the sibling `state/in-flight.json`; the localStorage dismiss store is retired (ADR-0046).
+
+### Fixed
+- INDEX done-list rotation is now wired into the work session-end flow (ADR-0047, closing the ADR-0045 sibling non-decision) — the first real rotation ran on this repo, rolling the agentic-workflow 2026-06 entries to `done-archive/2026-06.md`.
+
 ## [0.8.9] - 2026-07-04
 
 ### Added
@@ -172,7 +180,8 @@ its **plugin contract** (skills, commands, `.agentheim/` layout) with
 ### Added
 - Initial plugin design.
 
-[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.8.9...HEAD
+[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.8.10...HEAD
+[0.8.10]: https://github.com/heimeshoff/Agentheim/compare/v0.8.9...v0.8.10
 [0.8.9]: https://github.com/heimeshoff/Agentheim/compare/v0.8.8...v0.8.9
 [0.8.8]: https://github.com/heimeshoff/Agentheim/compare/v0.8.7...v0.8.8
 [0.8.7]: https://github.com/heimeshoff/Agentheim/compare/v0.8.6...v0.8.7
