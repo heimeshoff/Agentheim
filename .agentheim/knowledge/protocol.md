@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 14:30 -- Modeling / Captured: agentic-workflow-vmk1z - Dismissing the What's next panel deletes its advisory artifact
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Builder wants the dashboard's What's next dismiss to delete the stale advisory artifact (`state/whats-next.md`), not just hide it client-side (aw-073's current localStorage behavior). Captured decision-gated: delete-on-dismiss reopens ADR-0027 §4.5 ("dashboard never deletes it") and ADR-0017 (no dashboard write path), so REFINE must route through the architect to settle direction A (narrow advisory-delete endpoint + ADR amendment) vs B (kill staleness with no dashboard write).
+
+---
+
 ## 2026-07-04 21:12 -- Modeling / Promoted: agentic-workflow-d4q7f - Wire a trigger for INDEX done-list rotation — rotateIndexDoneList is never invoked
 
 **Type:** Modeling / Promote
