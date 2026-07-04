@@ -539,12 +539,15 @@ separate BC, but today the whole tool lives in this one.
   prior-art matcher, which reads the done-list's rendered text, needed pointing at
   `done-archive/` as an additional input. `rotateAllIndexDoneLists(rootDir, opts)` rotates every
   BC found under `contexts/`; returns `{ok:true, rotated, changed, contexts}`; invocable directly
-  (`node lib/index-rotation.mjs`, no verb/id argv, no context argv — **unlike `rotateProtocol`,
-  whose trigger ADR-0045/agentic-workflow-v8n3t wired into `work`'s session-end flow**, this
-  script's invocation point/schedule remains a non-decision deferred to a future wiring task; the
-  extra done-list reachability wrinkle — `modeling`'s prior-art matcher reads the done-list — means
-  it needs its own trigger design, not a copy of ADR-0045's mechanics). See ADR-0039, ADR-0041,
-  ADR-0023, ADR-0038, ADR-0026, ADR-0045.
+  (`node lib/index-rotation.mjs`, no verb/id argv, no context argv). **Trigger wired (ADR-0047,
+  agentic-workflow-d4q7f):** `work`'s end-of-run flow invokes `rotateAllIndexDoneLists` once per
+  session, immediately after the ADR-0045 protocol-rotation check, via the same standard env-free
+  plugin bootstrap; a `rotated: true` manifest gets its own scoped commit of the top-level
+  `changed` paths, closing ADR-0045's previously-deferred sibling-surface scope boundary. First
+  real run against this repo (2026-07-04) rolled `agentic-workflow`'s 2026-06 done-list entries to
+  `contexts/agentic-workflow/done-archive/2026-06.md`; `design-system` and `infrastructure` were
+  already under cap and did not rotate. See ADR-0039, ADR-0041, ADR-0023, ADR-0038, ADR-0026,
+  ADR-0045, ADR-0047.
 - **`findDuplicateTaskIds`** — the duplicate-id guard (`lib/duplicate-id-check.mjs`, BC-owned,
   node stdlib only), the ADR-0028 **insurance** against the residual token-collision tail and
   the legacy-vs-token clash a bug could produce. A pure, loss-tolerant whole-tree walk collects

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 21:51 -- Task verified and completed: agentic-workflow-d4q7f - Wire a trigger for INDEX done-list rotation — rotateIndexDoneList is never invoked
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-d4q7f - Wire a trigger for INDEX done-list rotation — rotateIndexDoneList is never invoked
+**Summary:** Wired rotateAllIndexDoneLists into work session-end (ADR-0047, closing ADR-0045 sibling non-decision) and ran the first real INDEX done-list rotation on this repo — agentic-workflow 2026-06 entries rolled to done-archive/2026-06.md
+**Duration:** 11m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 0
+**ADRs written:** 0047-index-done-list-rotation-trigger-work-session-end-check.md
+
+---
+
 ## 2026-07-04 21:39 -- Modeling / Promoted: agentic-workflow-vmk1z - Dismissing the What's next panel deletes its advisory artifact
 
 **Type:** Modeling / Promote

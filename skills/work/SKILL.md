@@ -480,6 +480,7 @@ When `todo/` is empty and all `doing/` is resolved (or the user interrupts):
    ```
    This is the one `work` protocol line written *after* a commit (it summarizes the session). To honor the "clean working tree" rule (`references/commit-doctrine.md`, ADR-0026), **commit it** with a scoped add of only `protocol.md`: `git add .agentheim/knowledge/protocol.md` then `chore(<bc>): work session end bookkeeping [<last-task-id>]` (reuse the last completed task's id as the trailer, or `chore: work session end bookkeeping` if the session committed nothing). This is the *only* bookkeeping-after-commit `work` performs, and it is a single line — every per-task INDEX/protocol edit already rode in its own task commit (the old trailing "record SHAs + INDEX/protocol" commit is gone). (Any *deliberately-committed* stranded file from step 6 rode in its own scoped reconciliation commit *before* this entry — see below.)
 8. **Protocol rotation check (session-end)** (see the dedicated section below). Run this immediately after step 7's session-end protocol entry has been committed — the file has just grown, making this the natural, self-firing checkpoint that closes ADR-0039's deferred "who invokes it" non-decision (ADR-0045, ADR-0041's cap-and-roll doctrine).
+9. **INDEX done-list rotation check (session-end)** (see the dedicated section below). Run this immediately after step 8's protocol rotation check. Every task this session completed grew some BC's `INDEX.md` done-list via `completeTask`, so this is the same self-firing seam step 8 uses, applied to the sibling cap-and-roll surface ADR-0045's "Scope boundary" section deferred (ADR-0047 closes it).
 
 ## Vision-conformance check (session-end)
 
@@ -550,6 +551,45 @@ the live file has just grown from the entry step 7 just committed.
    project event worth a diary line — logging it would just add another entry pushing the file
    closer to needing rotation again. The commit message and the archive files themselves are the
    audit trail.
+
+## INDEX done-list rotation check (session-end)
+
+Run this once per session, immediately after the protocol rotation check above (step 9, ADR-0047,
+closing ADR-0045's deferred "sibling surface" scope boundary). Same self-firing cap-and-roll
+posture as the protocol check, applied to every bounded context's `INDEX.md` `done-list` instead of
+`protocol.md` — cheap, deterministic, and it runs exactly when the session's `completeTask` calls
+have just grown one or more BCs' done-lists.
+
+1. **Invoke `rotateAllIndexDoneLists` via the standard env-free plugin bootstrap** — the same
+   homedir→cache→semver-max resolution the protocol-rotation check and the `claim`/`complete` CLI
+   invocations already use (ADR-0038), pointed at `lib/index-rotation.mjs` instead of
+   `lib/protocol-rotation.mjs`:
+   ```
+   node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','index-rotation.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','index-rotation.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no index-rotation script found under '+c+' (is the plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>m.main(process.argv.slice(1))).catch(e=>{console.error(e.message);process.exit(1)});"
+   ```
+   This prints one manifest `{ok:true, rotated, changed:[paths], contexts:{<bc>:{ok, rotated,
+   changed, rolledMonths, liveEntries}, ...}}` on stdout and exits 0 (or a structured `{ok:false,
+   ...}` on some unexpected error — treat a non-zero exit / `ok:false` as a soft failure: change
+   nothing, mention it in the end-of-run summary, and never let it block or fail the session). Note
+   the shape differs from the protocol check's manifest: the top-level `rotated`/`changed` are
+   aggregated across every BC, and each BC's own `rolledMonths` lives under `contexts[<bc>]`, not at
+   the top level.
+2. **`rotated: false`** (the common case — every BC's live done-list is still under the ~30-entry
+   cap) → nothing to do: no commit, no protocol entry. Silent no-op is correct — this check is meant
+   to be invisible on every session that doesn't need it.
+3. **`rotated: true`** → `git add` exactly the top-level manifest's `changed` paths (every rewritten
+   `INDEX.md` plus every new/appended `contexts/<bc>/done-archive/YYYY-MM.md` file it lists) — never
+   `git add -A` / `git add .` (`references/commit-doctrine.md`) — and commit as its **own scoped
+   commit**, separate from both step 7's session-end-entry commit and step 8's protocol-rotation
+   commit: `chore(agentic-workflow): rotate INDEX done-list — <bc>:<rolledMonths joined with ", ">[, <bc2>:<rolledMonths2>...] [<last-task-id>]`
+   — one `<bc>:<rolledMonths>` segment per BC that actually rotated (read each rotated BC's own
+   `rolledMonths` from `contexts[<bc>].rolledMonths`, comma-joined when a BC rolled more than one
+   month), the segments themselves comma-joined when more than one BC rotated (or `chore: rotate
+   INDEX done-list — ...` if the session completed no task, mirroring step 7's and step 8's fallback
+   trailer convention).
+4. **No protocol log entry for the rotation itself.** Same reasoning as the protocol check: this is
+   infrastructure housekeeping, not a project event worth a diary line. The commit message and the
+   archive files themselves are the audit trail.
 
 ## Do not model in work
 
