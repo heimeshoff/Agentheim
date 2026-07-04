@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 11:14 -- Batch started: [infrastructure-5w5gs]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-5w5gs - task-lifecycle bookkeeping breaks on CRLF .agentheim files — promote/claim/complete strand the board mid-operation
+**Parallel:** no (1 worker — sole ready task; board otherwise drained)
+
+---
+
 ## 2026-07-04 11:09 -- Modeling / Promoted: infrastructure-5w5gs - task-lifecycle bookkeeping breaks on CRLF .agentheim files — promote/claim/complete strand the board mid-operation
 
 **Type:** Modeling / Promote

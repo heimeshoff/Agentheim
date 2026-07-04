@@ -1,7 +1,7 @@
 ---
 id: infrastructure-5w5gs
 title: task-lifecycle bookkeeping breaks on CRLF .agentheim files — promote/claim/complete strand the board mid-operation
-status: todo
+status: doing
 type: bug
 context: infrastructure
 created: 2026-07-03
