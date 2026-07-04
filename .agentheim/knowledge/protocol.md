@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 01:07 -- Batch started: [design-system-a31e0]
+
+**Type:** Work / Batch start
+**Tasks:** design-system-a31e0 - Retokenize the palette — Command-deck dark + derived light, across both token files
+**Parallel:** no (1 worker — sole ready task; the redesign keystone, all other redesign tasks blocked on it)
+**Planning advisory:** whats-next (current, generated 01:10 > 00:52 session-end): recommends design-system-a31e0 as the keystone unblocking five downstream wiring tasks
+
+---
+
 ## 2026-07-05 01:03 -- Modeling / Promoted: design-system-a31e0 - Retokenize the palette — Command-deck dark + derived light, across both token files
 
 **Type:** Modeling / Promote

@@ -1,7 +1,7 @@
 ---
 id: design-system-a31e0
 title: Retokenize the palette — Command-deck dark + derived light, across both token files
-status: todo
+status: doing
 type: feature
 context: design-system
 created: 2026-07-05

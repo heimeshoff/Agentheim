@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 27
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **design-system-a31e0** — Retokenize the palette — Command-deck dark + derived light, across both token files (feature) — `todo/design-system-a31e0-retokenize-palette-dark-derived-light.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **design-system-a31e0** — Retokenize the palette — Command-deck dark + derived light, across both token files (feature) — `doing/design-system-a31e0-retokenize-palette-dark-derived-light.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
