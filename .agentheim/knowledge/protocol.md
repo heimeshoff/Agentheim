@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 00:34 -- Modeling / Refined: dashboard nav active-item — ochre rail confirmed
+
+**Type:** Modeling / Refine
+**BC:** design-system, agentic-workflow
+**Status after:** backlog (both)
+**Summary:** Builder resolved the flagged nav-active-item conflict in favour of **1a's ochre inset rail** (over the architect's ADR-0016 de-emphasis default). Restated the accent carve-out `design-system-vw12e` (ADR-0048): ochre is now permitted for (a) primed primary actions and (b) the single primary-navigation active item, as a bounded wayfinding exception that does NOT reopen ADR-0016 for arbitrary peer selection. Flipped `agentic-workflow-wsfsk`'s acceptance criteria from de-emphasis to the ochre inset rail (`inset 2px 0 0 var(--accent-ochre)`, token-drawn). No status/title change; no split.
+
+---
+
 ## 2026-07-05 00:19 -- Modeling / Captured: dashboard redesign — 10-task set across design-system + agentic-workflow
 
 **Type:** Modeling / Capture
