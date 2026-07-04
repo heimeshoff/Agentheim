@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 01:44 -- Task completed (verification skipped): agentic-workflow-s7gev - Prompt bar gains a keyboard-committed single-selection highlight model
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-s7gev - Prompt bar gains a keyboard-committed single-selection highlight model
+**Summary:** Recorded ADR-0050 fixing the prompt bar keyboard-committed selection model (single 0-based highlightedMode index, four invariants, disjoint key-intent classification, hover/selection as orthogonal channels); supersedes PromptLaunchCard's no-selection-model stance and names dashboard/app/prompt-mode.js for the downstream build
+**Duration:** 4m
+**Verification:** SKIPPED — decision-only task
+**Files changed:** 1
+
+---
+
 ## 2026-07-05 01:38 -- Batch started: [agentic-workflow-s7gev, design-system-t896s, agentic-workflow-vk6mc]
 
 **Type:** Work / Batch start
