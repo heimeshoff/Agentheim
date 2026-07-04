@@ -39,71 +39,150 @@ drive the batch through was to hand-pass an explicit `contexts` / `context` BC
 override in the CLI's JSON opts on every verb. The lifecycle is meant to be
 hands-free (ADR-0038); an out-of-spec id silently disables that.
 
+The current "return the id unchanged on a leading-digit token" behavior is **not
+an oversight — it is a deliberate, tested decision** shipped by
+`agentic-workflow-078` (the dual-shape-regex task) and pinned by a test asserting
+`deriveContext('agentic-workflow-3f9qx') === 'agentic-workflow-3f9qx'`
+(`lib/test/task-lifecycle.test.mjs:352`). 078's stance was *"an out-of-spec id is
+malformed — refuse to parse it, fail visibly."* The flaw is that nothing
+**enforces** the letter-lead invariant at mint time (ids are minted by agent prose
+per `references/id-grammar.md`; there is no code generator), so a malformed id
+reaches disk anyway and then strands the lifecycle. Fixing this therefore means
+knowingly **overturning** 078's refuse-to-parse choice, and adding the enforcement
+078 assumed was already there.
+
 ## What
 
-Make the id→BC resolution **robust to (or protective against) a leading-digit
-token**, so the mechanized lifecycle never strands on an out-of-spec id and never
-needs a hand-passed BC override to recover.
+Make id→BC resolution robust to an already-shipped leading-digit token, **and**
+pin the grammar going forward. Two coordinated fixes — a **Postel split**: a
+forgiving reader (the resolver tolerates what's on disk) plus a strict writer (a
+mint-time lint stops new bad ids). They address different halves — the resolver
+fixes the already-shipped `infrastructure-5w5gs`; the lint prevents recurrence.
 
-There are two candidate root-cause fixes, not mutually exclusive — the refinement
-should decide which (or both):
+1. **Loosen the resolver.** `deriveContext` (`lib/task-lifecycle.mjs:255`) — the
+   **sole** dual-shape id parser in the codebase — loosens **only** its token
+   branch, dropping the leading-letter constraint but keeping length = 5 and the
+   Crockford-minus-`ilou` charset:
 
-1. **Harden `deriveContext` (and its sibling parser in
-   `lib/duplicate-id-check.mjs`, which the code comments call the "dual-shape
-   regex").** Recognize a `<bc>-<token>` id even when the token leads with a digit,
-   so resolution degrades gracefully instead of returning the whole id. The catch:
-   a leading-digit tail is genuinely **ambiguous** with the legacy all-digit form
-   (`references/id-grammar.md` disambiguates purely on "is the first char after the
-   last `-` a letter?"). Any loosening must not misparse a real legacy `-077` id or
-   a BC name that itself contains digits. This needs care, which is why it's a
-   decision to refine, not an obvious patch.
+   ```
+   before: /^(.*)-(?:\d+|[a-hjkmnp-tv-z][0-9a-hjkmnp-tv-z]{4})$/
+   after:  /^(.*)-(?:\d+|[0-9a-hjkmnp-tv-z]{5})$/
+   ```
 
-2. **Reject out-of-spec ids at the point of capture / minting** (a lint or
-   validation gate), so a leading-digit token can never reach disk in the first
-   place. There is currently **no code generator** — task ids are minted by the
-   capturing agent's prose (per `references/id-grammar.md`, "generate the token
-   randomly"), so nothing structurally enforces the grammar. A validation seam
-   (e.g. in `duplicate-id-check.mjs` or a capture-time check) would catch a bad
-   token before it becomes a baked-in, git-historied id.
+   A 5-char in-charset tail now resolves whether it leads with a letter or a
+   digit. This stays **shape-validating, not shape-agnostic**: `uuuuu` (out of
+   charset) and `3f9qxz` (6 chars) still fall through to the `m ? m[1] : id`
+   fallback and return the id unchanged. This deliberately reverses the
+   `agentic-workflow-078` property that "a digit-leading tail is never a new
+   token" — the 078 test and the `deriveContext` doc comment
+   (`lib/task-lifecycle.mjs:239-252`) are rewritten, not worked around.
 
-Note the go-forward constraint: `infrastructure-5w5gs` is already shipped with its
-out-of-spec id (in `done/`, in git history, in commit trailers). ADR-0028 §5 and
-the id-grammar reference both say ids are **never renumbered** — so fix #1 (make
-the resolver tolerate what's already on disk) has standing value even if fix #2
-prevents future occurrences. A resolver that can't parse an id already in the tree
-is the more urgent gap.
+2. **Add a mint-time lint.** A new pure `lib/id-grammar.mjs` (stdlib-only,
+   side-effect-free) becomes the grammar's single source of truth, shaped like the
+   `agentic-workflow-080` duplicate-id guard (pure predicate + a `node --test`
+   live-tree scan). It rejects an out-of-spec token at capture time and flags any
+   stray on the tree — **except** an explicit grandfather allowlist for
+   `infrastructure-5w5gs`, which ADR-0028 §5 forbids renumbering.
+
+The lint lives in its **own** module, deliberately **not** folded into
+`lib/duplicate-id-check.mjs`: that module is charter-bound to compare ids as whole
+strings and never parse the tail (its header, lines 24-27), and is therefore the
+wrong home for well-formedness logic.
 
 ## Acceptance criteria
 
-- [ ] `deriveContext` resolves a `<bc>-<token>` id whose token starts with a digit
-      (e.g. `infrastructure-5w5gs`) to its correct BC — OR an equivalent mechanism
-      ensures the mechanized `promote` / `claim` / `complete` verbs no longer fail
-      on such an id without a hand-passed BC override.
-- [ ] No regression: legacy all-digit tails (`infrastructure-020`), well-formed new
-      tokens (`infrastructure-q8m4t`), and BC names containing digits or hyphens
-      still resolve exactly as today. A test covers each shape.
-- [ ] The sibling "dual-shape regex" in `lib/duplicate-id-check.mjs` stays
-      consistent with whatever `deriveContext` decides — the two must not diverge
-      on a leading-digit token.
-- [ ] (If fix #2 is chosen or added) a capture/mint-time validation rejects or
-      flags an out-of-spec token before it lands on disk, with a test asserting a
-      leading-digit token is caught.
-- [ ] The already-shipped `infrastructure-5w5gs` id is left as-is (never
-      renumbered, ADR-0028 §5) — the fix accommodates it rather than rewriting it.
+**Resolver + the 078 reversal**
+
+- [ ] `deriveContext` loosens only its token branch to
+      `/^(.*)-(?:\d+|[0-9a-hjkmnp-tv-z]{5})$/`; the `m ? m[1] : id` fallback is
+      unchanged. `deriveContext('infrastructure-5w5gs') === 'infrastructure'`.
+- [ ] The `agentic-workflow-078` test at `lib/test/task-lifecycle.test.mjs:352` is
+      **rewritten** (not deleted) to assert the leading-digit 5-char token now
+      resolves: `deriveContext('agentic-workflow-3f9qx') === 'agentic-workflow'`,
+      with its comment updated. The `deriveContext` doc comment
+      (`lib/task-lifecycle.mjs:239-252`) is corrected — the "malformed
+      leading-digit token falls through" narrative is no longer true for a 5-char
+      in-charset tail.
+
+**No regression (a test covers each shape)**
+
+- [ ] Legacy all-digit tails still resolve: `infrastructure-020`, and reserved
+      foundation ids `design-system-001` / `infrastructure-001` (all-digit tails,
+      caught by the legacy branch).
+- [ ] Well-formed leading-letter tokens still resolve: `agentic-workflow-k3f9q`.
+- [ ] BC names containing hyphens (and any digits) still resolve exactly as today
+      (greedy `.*` unaffected).
+- [ ] **`uuuuu` look-alike rejection preserved** — `u` is out of charset, so
+      `deriveContext('agentic-workflow-uuuuu')` still returns the id unchanged
+      (`lib/test/task-lifecycle.test.mjs:364` stays green, untouched).
+- [ ] A **6-char** digit-leading tail still falls through (`…-3f9qxz` → unchanged),
+      proving the loosening stays length-validating.
+
+**Mint-time validator (fix #2)**
+
+- [ ] New `lib/id-grammar.mjs`, stdlib-only, side-effect-free, exporting:
+      `classifyTaskId(id) → 'token' | 'legacy' | 'malformed'` (token = the
+      **strict** ADR-0028 §1 grammar, leading-letter `[a-hjkmnp-tv-z][0-9a-hjkmnp-tv-z]{4}`
+      — deliberately stricter than the resolver); `isWellFormedTaskId(id)`; a
+      frozen `GRANDFATHERED_IDS` = `['infrastructure-5w5gs']` (comment citing
+      ADR-0028 §5); and `findMalformedTaskIds(root)` that walks the live tree
+      (reusing the `LIFECYCLE_FOLDERS` + frontmatter-`id`-first pattern from
+      `duplicate-id-check.mjs`) and returns ids that are `malformed` **and not**
+      grandfathered.
+- [ ] `lib/test/id-grammar.test.mjs` (`node --test`) covers: `5w5gs` →
+      malformed-but-grandfathered → not flagged; a well-formed token → `token`;
+      `-077` / `-001` → `legacy`; `uuuuu` / 6-char → `malformed`; and a
+      **live-tree scan asserting zero non-grandfathered malformed ids** (the
+      recurring gate, mirroring aw-080's final live-tree test).
+- [ ] Capture-time enforcement is documented: the token-minting skills
+      (`skills/modeling` CAPTURE and `skills/quick-capture`, per ADR-0028 §6) gain
+      a step — after minting, verify `classifyTaskId(newId) === 'token'` and
+      **auto-re-mint** on failure (a fresh random token is free and
+      non-interactive). Since there is no code generator, the enforceable
+      always-on backstop is the live-tree test.
+
+**Grandfathering**
+
+- [ ] `infrastructure-5w5gs` is left **un-renumbered** (ADR-0028 §5) — it appears
+      only in `GRANDFATHERED_IDS`, never in a move or rewrite.
+- [ ] Reserved foundation ids (`design-system-001`, `infrastructure-001`) need
+      **no** allowlist entry — their on-disk frontmatter `id` is all-digit-tailed
+      and passes the `legacy` branch.
+
+**ADR (write first, at work time)**
+
+- [ ] The first work commit is a short ADR **amending ADR-0028 §3–§4** (scope
+      global, in the pattern of how 0028 amends 0022 §5): records that the resolver
+      is now digit-lead-tolerant (`§3`'s "leading-letter is the disambiguation
+      tell" is downgraded from a *parser precondition* to a *minting rule*), that
+      minters are now stricter than the parser, and that the grammar is enforced by
+      `lib/id-grammar.mjs` + the grandfather allowlist. Add its id to this task's
+      `related_adrs` when written.
 
 ## Notes
 
+- **`deriveContext` is the only tail-parsing regex in the codebase.** The captured
+  claim of a "sibling dual-shape regex" in `lib/duplicate-id-check.mjs` was
+  **wrong** — that module is charter-bound shape-agnostic (whole-string id
+  comparison, header lines 24-27). `resolveTaskFile` (`lib/task-lifecycle.mjs`,
+  ADR-0012 trailing-`-` anchoring) also never parses the tail. So there is no
+  second parser to keep in sync; the old AC #3 was dropped.
 - Discovered 2026-07-04 while running `work` on `infrastructure-5w5gs` (the CRLF
   lifecycle bug). The irony is exact: fixing one class of lifecycle-tooling
   fragility surfaced a second, independent one in the same module.
-- Root-cause ambiguity (generator vs. resolver) is the reason this is a **backlog
-  bug with a decision embedded**, not a ready-to-work patch. Refinement should
-  settle: harden the resolver, add a mint-time gate, or both — and resolve the
-  legacy-tail-vs-leading-digit-token disambiguation cleanly.
-- `deriveContext`'s callers are enumerated at `lib/task-lifecycle.mjs:147, 481,
-  595, 756` (applyTaskMove, promoteTask, claimBatch, completeTask) — all four
-  inherit the same fragility, and all four already accept a `context`/`contexts`
-  override that a caller can hand-pass as the current workaround.
-- Related grammar of record: `references/id-grammar.md` (ADR-0028 §1). The
-  disambiguation rule there ("first char after the last `-` a letter?") is the
-  exact seam a leading-digit token falls through.
+- The resolver loosening **overturns a tested, intentional aw-078 decision** —
+  that is expected and is the point. Reverse the 078 test and fix the doc comment;
+  never work around them.
+- Parsers end up **more forgiving than minters** by design — the reader tolerates
+  a legacy stray, the writer refuses to emit one. That asymmetry is the reason both
+  halves ship together (and is the ADR's headline consequence).
+- `deriveContext`'s callers — `applyTaskMove` (`:147`), `promoteTask` (`:481`),
+  `claimBatch` (`:595`), `completeTask` (`:756`) — all inherit the fix for free
+  when no `context`/`contexts` override is passed; the `5w5gs` hand-passed-override
+  workaround is then no longer needed.
+- Grammar / decision of record: `references/id-grammar.md` (ADR-0028 §1) and
+  `.agentheim/knowledge/decisions/0028-collision-resistant-task-ids-short-random-token.md`
+  (§3 disambiguation, §4 resolver, §5 never-renumber, §7 reserved foundation ids).
+- Refined 2026-07-04 with the `architect` specialist; builder chose the Postel
+  split + the 5-char-any-lead resolver style. Design fully settled — no open
+  questions block work.

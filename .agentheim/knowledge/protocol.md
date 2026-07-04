@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 14:40 -- Modeling / Refined: infrastructure-m3q7k - deriveContext can't parse a leading-digit token id
+
+**Type:** Modeling / Refine
+**BC:** infrastructure
+**Status after:** backlog (promotion-ready — offered to builder)
+**Summary:** Cornered the embedded decision with the `architect`. Builder chose the **Postel split** (forgiving resolver + strict mint-time lint) with the **5-char-any-lead** resolver style — loosen only deriveContext's token branch to `[0-9a-hjkmnp-tv-z]{5}` (still rejects `uuuuu` / 6-char). Surfaced two findings that reshaped the task: (1) the current "return id unchanged on a leading-digit token" is a **deliberate, tested** aw-078 choice (test at task-lifecycle.test.mjs:352) — hardening reverses it, so the AC now calls to rewrite that test + the doc comment, not patch around them; (2) the old AC #3 was **factually wrong** — `duplicate-id-check.mjs` is charter-bound shape-agnostic (no tail parse), so `deriveContext` is the sole dual-shape regex and there is no sibling to keep in sync; AC #3 dropped. Fix #2 lands as a new pure `lib/id-grammar.mjs` (`classifyTaskId`/`isWellFormedTaskId`/`findMalformedTaskIds` + `node --test` live-tree scan, aw-080 shape) with a `GRANDFATHERED_IDS` allowlist for the un-renumberable `5w5gs`; reserved all-digit foundation ids need no entry. Rewrote Why/What/AC/Notes accordingly.
+**Split into:** none
+**ADRs written:** none yet — AC calls for a short ADR amending ADR-0028 §3–§4 as the first work commit (resolver now digit-lead-tolerant; minters stricter than the parser; grammar enforced by the lint).
+
+---
+
 ## 2026-07-04 14:25 -- Work session ended
 
 **Type:** Work / Session end
