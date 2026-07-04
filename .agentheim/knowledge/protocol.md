@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 00:52 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 12m (batch start 00:40 → 00:52)
+**Completed:** 2 (first-try PASS: 2, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** design-system-vw12e: 1, design-system-e9apx: 1
+**Commits:** 4 (batch-start [d809783] + vw12e integration [5703f63] + e9apx integration [2801c24] + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (both tasks are `type: decision` ADRs recording dashboard-redesign foundation decisions, serving "knowledge is durable — ADRs survive the conversation"; neither pulls toward a non-goal — builder-driven decisions, local `.agentheim/` state only, DDD-methodical).
+**Carry-over:** inspiration/: left behind (owner: builder WIP, untracked directory present since before this session)
+**Notes:** Two `type: decision` tasks shipped as a parallel batch, each in its own worktree (ADR-0032), both first-try PASS iteration 1 — the two dashboard-redesign foundation ADRs. **design-system-vw12e** wrote ADR-0048 (accent carve-out): a discriminating fires/commits-vs-passive-equivalent-state test refining (not superseding) ADR-0016, applied to all five tension surfaces; the single left-nav active item keeps 1a's ochre inset rail as a bounded wayfinding exception (explicitly non-precedential); a named `--emphasis-border` token specified by intent for the hero-border allowance (its CSS value deferred to design-system-a31e0). **design-system-e9apx** wrote ADR-0049 (Command-deck palette identity): a values-only shift (token names/roles frozen) superseding the Ledger warm-paper heritage, with explicit rulings that the light theme is *derived* from the 1b dark stack anchored at `--swatch-light` #FAF8F4, and that ADR-0016's frozen preview swatches re-pin to the new `--surface-0` values (the freeze was relative to `[data-theme]`, not to a palette generation); the design-system README's identity framing updated. No file overlap between the two (vw12e: ADR-0048 + ADR-0016 pointer; e9apx: ADR-0049 + README), so both squash-merged clean, no conflicts. Both verifiers ran the design-system regression suite green. Both foundation decisions now unblock the downstream backlog tasks (design-system-a31e0 retokenize, design-system-t896s radius, and the agentic-workflow wiring set) — none in todo yet; they await `modeling` promotion. **Windows friction (recurring):** autocrlf re-CRLF'd INDEX.md/protocol.md after each squash-merge — LF-normalized before each mechanized `complete`; and the stale `doing/` pathspec in vw12e's enumerated `git add` aborted the whole add (known `git mv` gotcha), captured only the squash-staged content in the first commit — caught it from `git status` and amended the bookkeeping in. No bounces, failures, escalations, or concept candidates.
+
+---
+
 ## 2026-07-05 00:51 -- Task verified and completed: design-system-e9apx - Command-deck palette identity — cool neutrals supersede the warm-Ledger heritage
 
 **Type:** Work / Task completion
