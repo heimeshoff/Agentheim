@@ -96,6 +96,25 @@ test('hover applies no transform / translateY — content does not move upward',
   assert.doesNotMatch(transitionLine, /\btransform\b/, 'the transition must drop the transform segment');
 });
 
+// Corner radius (design-system-t896s): 1b's condensed card calls for a 10px
+// radius, larger than the shared --radius-md (8px, used by Menu/Modal/Drawer).
+// A dedicated --radius-card token isolates the bump to TicketCard alone.
+test('the base style uses a dedicated --radius-card token, not the shared --radius-md', () => {
+  const radiusLine = baseStyleSrc
+    .split('\n')
+    .find((line) => /borderRadius:/.test(line));
+  assert.ok(radiusLine, 'the base style must set borderRadius');
+  assert.match(radiusLine, /var\(--radius-card\)/, 'TicketCard must use the dedicated --radius-card token');
+  assert.doesNotMatch(radiusLine, /--radius-md/, 'TicketCard must no longer share --radius-md with Menu/Modal/Drawer');
+});
+
+test('--radius-card resolves to 10px, larger than the shared --radius-md (8px)', () => {
+  const cssPath = join(HERE, '..', 'styles', 'colors_and_type.css');
+  const css = readFileSync(cssPath, 'utf8');
+  assert.match(css, /--radius-card:\s*10px;/, '--radius-card must be defined as 10px');
+  assert.match(css, /--radius-md:\s*8px;/, '--radius-md must remain 8px for Menu/Modal/Drawer');
+});
+
 test('the selected state carries no ochre / accent ring (selected looks identical to unselected)', () => {
   // ADR-0016: ordinary selection is never signalled by the reserved accent.
   // design-system-010 removed the TicketCard's ochre border + 1px accent ring;

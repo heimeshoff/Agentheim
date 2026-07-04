@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 28
+- **Doing:** 0
+- **Done:** 29
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **design-system-t896s** — TicketCard — bump corner radius toward 1b's 10px (refactor) — `doing/design-system-t896s-ticketcard-radius-10px.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **design-system-t896s** — TicketCard — bump corner radius toward 1b's 10px (refactor) — `done/design-system-t896s-ticketcard-radius-10px.md`
 - **design-system-a31e0** — Retokenize the palette — Command-deck dark + derived light, across both token files (feature) — `done/design-system-a31e0-retokenize-palette-dark-derived-light.md`
 - **design-system-e9apx** — Command-deck palette identity — cool neutrals supersede the warm-Ledger heritage (decision) — `done/design-system-e9apx-command-deck-palette-identity.md`
 - **design-system-vw12e** — Accent carve-out — ochre marks the primed primary action, not passive selection (decision) — `done/design-system-vw12e-accent-carveout-ochre-primary-action.md`

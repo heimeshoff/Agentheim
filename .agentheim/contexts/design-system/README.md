@@ -824,6 +824,35 @@ swatches re-pinned (ADR-0049 §3), and `styles/agentheim.css` gained the
 > reproducible (a second run produced no further diff) — so the live dashboard picks
 > up the new hexes immediately, ahead of any downstream agentic-workflow consumer.
 
+### TicketCard corner radius — dedicated `--radius-card` token (design-system-t896s)
+
+1b's condensed ticket card calls for a 10px corner radius, larger than the system's
+8px `--radius-md`. `--radius-md` is a heavily shared token — grepping its consumers
+found `Menu` (`menu.js`), `Modal` (`modal.js`), the `Drawer` (`app.js`), `SearchField`
+(`search.js`), `EmptyColumn` (`empty.js`), the live-activity list (`live.js`), and
+several `app.js` chrome panels, all rounding at 8px. Bumping `--radius-md` itself
+would have re-rounded every one of those unrelated surfaces as a side effect of a
+ticket-card-only aesthetic call from 1b.
+
+Decision: introduce a dedicated `--radius-card: 10px` token (`styles/colors_and_type.css`,
+in the shared `:root` radii block — radius is not a per-theme value, so it lives
+alongside `--radius-sm` / `--radius-md`, not duplicated per `[data-theme]` block).
+`TicketCard`'s base style (`app/kanban.js`) now reads `var(--radius-card)` instead of
+`var(--radius-md)`; `Menu`/`Modal`/`Drawer`/everything else keeps `--radius-md` at 8px,
+untouched. The Foundations "Radii" doc card (`app/foundations2.js`) was updated to
+list the new token (role: "Ticket card") and to relabel `--radius-md`'s role as
+"Menu, modal, drawer" now that it no longer covers cards.
+
+> **Gate re-review reopened by the TicketCard radius bump (`design-system-t896s`).**
+> A small, isolated visual change to a single, already-reviewed primitive — the
+> `design-system-008` / `design-system-010` precedent applies (lightweight
+> re-review of the Kanban section of the canvas, not a full pass). **Builder
+> confirmation PENDING.**
+
+> Live-board note: the served dashboard `dist/` is a derived artifact (ADR-0003) and
+> **was rebuilt** (`node build.mjs`, from `dashboard/`) in this task — verified
+> reproducible (a second run produced no further diff).
+
 ## Relationships with other contexts
 
 - **agentic-workflow** — depends on this BC's styleguide for its `dashboard` feature.

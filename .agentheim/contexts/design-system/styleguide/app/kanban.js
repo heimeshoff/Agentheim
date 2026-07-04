@@ -76,7 +76,10 @@ export function TicketCard({ ticket, variant = "rail", selected = false, onClick
     position: "relative",
     background: "var(--surface-1)",
     border: "1px solid var(--hairline)",
-    borderRadius: "var(--radius-md)",
+    // Dedicated --radius-card token (design-system-t896s), not the shared
+    // --radius-md — 1b's condensed card calls for 10px, distinct from the 8px
+    // Menu/Modal/Drawer share.
+    borderRadius: "var(--radius-card)",
     padding: variant === "rail" ? "13px 14px 13px 16px" : "12px 14px 13px",
     cursor: "pointer",
     overflow: "hidden",

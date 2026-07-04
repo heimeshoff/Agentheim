@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 01:50 -- Task verified and completed: design-system-t896s - TicketCard — bump corner radius toward 1b's 10px
+
+**Type:** Work / Task completion
+**Task:** design-system-t896s - TicketCard — bump corner radius toward 1b's 10px
+**Summary:** Introduced a dedicated --radius-card: 10px token so TicketCard bumps toward 1b's corner spec without re-rounding Menu/Modal/Drawer's shared --radius-md (8px); rebuilt dashboard/dist and reopened the styleguide gate for lightweight re-review
+**Duration:** 12m
+**Verification:** PASS (iteration 1)
+**Files changed:** 8
+**Tests added:** 2
+**ADRs written:** none
+
+---
+
 ## 2026-07-05 01:44 -- Task completed (verification skipped): agentic-workflow-s7gev - Prompt bar gains a keyboard-committed single-selection highlight model
 
 **Type:** Work / Task completion

@@ -102,7 +102,7 @@ export function SpacingSection() {
         <${DocCard}>
           <${SubHead}>Radii</${SubHead}>
           <div style=${{ display: "flex", gap: 18, flexWrap: "wrap" }}>
-            ${[["--radius-sm", "4px", "Chips, inputs"], ["--radius-md", "8px", "Cards, drawer"], ["--radius-none", "0", "Tables, hairlines"]].map(([v, px, role]) => html`
+            ${[["--radius-sm", "4px", "Chips, inputs"], ["--radius-md", "8px", "Menu, modal, drawer"], ["--radius-card", "10px", "Ticket card"], ["--radius-none", "0", "Tables, hairlines"]].map(([v, px, role]) => html`
               <div key=${v} style=${{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
                 <div style=${{ width: 70, height: 56, background: "var(--surface-2)", border: "1px solid var(--hairline-strong)", borderRadius: `var(${v})` }} />
                 <div style=${{ textAlign: "center" }}>

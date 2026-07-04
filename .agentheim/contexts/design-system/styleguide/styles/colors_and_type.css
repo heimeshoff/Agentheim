@@ -125,6 +125,12 @@
   /* ---------- Radii ---------- */
   --radius-sm: 4px;
   --radius-md: 8px;
+  /* Dedicated to TicketCard only (design-system-t896s) — 1b's condensed card
+     calls for a slightly larger, more pronounced radius than the shared
+     --radius-md used by Menu/Modal/Drawer. A dedicated token avoids re-rounding
+     those unrelated surfaces as a side effect of a ticket-card-only aesthetic
+     tweak. See kanban.js TicketCard base style. */
+  --radius-card: 10px;
   --radius-none: 0;
 
   /* ---------- Borders ---------- */

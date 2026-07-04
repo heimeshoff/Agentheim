@@ -91,7 +91,7 @@ Please report this to https://github.com/markedjs/marked.`,t){let o="<p>An error
           onMouseLeave=${o=>{o.currentTarget.style.background="transparent",o.currentTarget.style.color="var(--fg-3)"}}>
           <${O} name="plus" size=${15} />
         </button>`}
-    </div>`}function Pp({ticket:e,variant:t="rail",selected:n=!1,onClick:r,forceHover:o=!1,cornerAction:i,dependencyRelation:l=null}){let[a,s]=(0,zp.useState)(!1),u=cn[e.status],d=a||o,m={position:"relative",background:"var(--surface-1)",border:"1px solid var(--hairline)",borderRadius:"var(--radius-md)",padding:t==="rail"?"13px 14px 13px 16px":"12px 14px 13px",cursor:"pointer",overflow:"hidden",transition:"border-color var(--duration-fast) var(--ease-base), box-shadow var(--duration-fast) var(--ease-base)",boxShadow:d?"var(--shadow-md)":"none",borderColor:d?"var(--hairline-strong)":"var(--hairline)"};return v`
+    </div>`}function Pp({ticket:e,variant:t="rail",selected:n=!1,onClick:r,forceHover:o=!1,cornerAction:i,dependencyRelation:l=null}){let[a,s]=(0,zp.useState)(!1),u=cn[e.status],d=a||o,m={position:"relative",background:"var(--surface-1)",border:"1px solid var(--hairline)",borderRadius:"var(--radius-card)",padding:t==="rail"?"13px 14px 13px 16px":"12px 14px 13px",cursor:"pointer",overflow:"hidden",transition:"border-color var(--duration-fast) var(--ease-base), box-shadow var(--duration-fast) var(--ease-base)",boxShadow:d?"var(--shadow-md)":"none",borderColor:d?"var(--hairline-strong)":"var(--hairline)"};return v`
     <div className=${["focusable",Mp(l)].filter(Boolean).join(" ")} tabIndex=${0} role="button" aria-pressed=${n}
       onClick=${r}
       onKeyDown=${f=>{(f.key==="Enter"||f.key===" ")&&(f.preventDefault(),r&&r())}}
