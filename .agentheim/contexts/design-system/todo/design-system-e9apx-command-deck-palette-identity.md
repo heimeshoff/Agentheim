@@ -1,7 +1,7 @@
 ---
 id: design-system-e9apx
 title: Command-deck palette identity — cool neutrals supersede the warm-Ledger heritage
-status: backlog
+status: todo
 type: decision
 context: design-system
 created: 2026-07-05

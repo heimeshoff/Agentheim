@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 00:37 -- Modeling / Promoted: design-system-e9apx - Command-deck palette identity — cool neutrals supersede the warm-Ledger heritage
+
+**Type:** Modeling / Promote
+**BC:** design-system
+**From → To:** backlog → todo
+
+---
+
+## 2026-07-05 00:37 -- Modeling / Promoted: design-system-vw12e - Accent carve-out — ochre marks the primed primary action, not passive selection
+
+**Type:** Modeling / Promote
+**BC:** design-system
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-05 00:34 -- Modeling / Refined: dashboard nav active-item — ochre rail confirmed
 
 **Type:** Modeling / Refine
