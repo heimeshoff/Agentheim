@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 16:11 -- Modeling / Refined: agentic-workflow-bx7k5 - A/B the verifier's model routing (opus vs sonnet)
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Cornered a conflation in the falsification contract: ADR-0031 pins verifier→opus on TWO independent pillars — judgment-density (catch-rate, measurable) and decorrelation (gate ≠ producer tier, load-bearing, and structurally unmeasurable by a catch-rate eval). The spike measures pillar 1 only, but its old branch-1 remedy ("sonnet ties → propose verifier→sonnet") would re-correlate the worker→verifier pair — exactly what ADR-0031 rejects outright. Rescoped the spike to pillar 1: a sonnet-tie retires the judgment-density claim but never licenses verifier→sonnet (decorrelation independently holds the pin; given worker=sonnet + never-weaken-the-judge, opus is essentially forced). Rewrote Why + What + all AC + decision-rule branch 1 accordingly; added an explicit "no result here moves the verifier to sonnet" AC and a PROMOTE-time readiness gate (bx7k5 needs n7q4d to actually yield ≥1 opus-straining fixture, else inconclusive-by-construction). Backlinks: added ADR-0036 (runtime check-8 now in scope) and prior_art fq2j8/hz9m3.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 16:05 -- Modeling / Refined: agentic-workflow-bx7k5 - A/B the verifier's model routing (opus vs sonnet)
 
 **Type:** Modeling / Refine
