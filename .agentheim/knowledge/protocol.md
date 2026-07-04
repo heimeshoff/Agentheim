@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 18:12 -- Batch started: [agentic-workflow-q7x2k]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-q7x2k - Verifier check 6 gate gap — decisions narrated only in task-file prose are not flagged for an ADR
+**Parallel:** no (1 worker — sole ready task; whats-next advisory stale 2026-07-03, its named tasks t4x8p/p3v9k already resolved, no weighting)
+
+---
+
 ## 2026-07-04 18:10 -- Modeling / Promoted: agentic-workflow-q7x2k - Verifier check 6 gate gap — decisions narrated only in task-file prose are not flagged for an ADR
 
 **Type:** Modeling / Promote

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-q7x2k
 title: Verifier check 6 gate gap — decisions narrated only in task-file prose are not flagged for an ADR
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-04
