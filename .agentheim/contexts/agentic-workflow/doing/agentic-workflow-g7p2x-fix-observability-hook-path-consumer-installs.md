@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-g7p2x
 title: Observability hook command path breaks in consumer plugin installs
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-04

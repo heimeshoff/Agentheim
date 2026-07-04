@@ -11,19 +11,19 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 2
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 2
 - **Done:** 119
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-v8n3t** — Wire a trigger for protocol rotation — rotateProtocol is never invoked (bug) — `todo/agentic-workflow-v8n3t-wire-protocol-rotation-trigger.md`
-- **agentic-workflow-g7p2x** — Observability hook command path breaks in consumer plugin installs (bug) — `todo/agentic-workflow-g7p2x-fix-observability-hook-path-consumer-installs.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-g7p2x** — Observability hook command path breaks in consumer plugin installs (bug) — `doing/agentic-workflow-g7p2x-fix-observability-hook-path-consumer-installs.md`
+- **agentic-workflow-v8n3t** — Wire a trigger for protocol rotation — rotateProtocol is never invoked (bug) — `doing/agentic-workflow-v8n3t-wire-protocol-rotation-trigger.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)

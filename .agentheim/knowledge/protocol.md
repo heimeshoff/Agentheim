@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 20:45 -- Batch started: [agentic-workflow-v8n3t, agentic-workflow-g7p2x]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-v8n3t - Wire a trigger for protocol rotation — rotateProtocol is never invoked, agentic-workflow-g7p2x - Observability hook command path breaks in consumer plugin installs
+**Parallel:** yes (2 workers — both ready in agentic-workflow; both touch skills/work/SKILL.md in different regions [g7p2x frontmatter hook path, v8n3t session-end rotation prose], annotated for sequential merge-back per ADR-0032; whats-next advisory stale 2026-07-03, no weighting)
+
+---
+
 ## 2026-07-04 20:30 -- Modeling / Captured: agentic-workflow-g7p2x - Observability hook command path breaks in consumer plugin installs
 
 **Type:** Modeling / Capture

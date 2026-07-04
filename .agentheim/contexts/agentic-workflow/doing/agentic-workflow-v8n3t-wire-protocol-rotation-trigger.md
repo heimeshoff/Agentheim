@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-v8n3t
 title: Wire a trigger for protocol rotation — rotateProtocol is never invoked
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-04
