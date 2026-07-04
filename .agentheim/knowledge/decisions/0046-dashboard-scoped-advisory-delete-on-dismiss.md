@@ -2,7 +2,7 @@
 id: ADR-0046
 title: The dashboard may perform one scoped advisory write — deleting the whats-next recommendation on explicit dismiss
 scope: agentic-workflow
-status: proposed
+status: accepted
 date: 2026-07-04
 related_tasks: [agentic-workflow-vmk1z]
 related_adrs: [0017, 0027, 0006, 0043, 0021]

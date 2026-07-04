@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-vmk1z
 title: Dismissing the What's next panel deletes its advisory artifact
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-04
-completed:
+completed: 2026-07-04
 depends_on: []
 blocks: []
 tags: [dashboard, whats-next, advisory-write, advisory-delete, frontend]
@@ -124,3 +124,48 @@ retired. This feature task proceeds straight to `todo/` once refined.
   file **removal** (not just create/overwrite) — if it doesn't, the optimistic local hide still
   covers the single-browser outcome and cross-browser convergence falls to the next natural
   re-fetch. Resolve inline during implementation.
+
+## Outcome
+
+Implemented exactly per ADR-0046. `dashboard/whats-next-delete.mjs` (new) exports the constant
+`WHATS_NEXT_RELATIVE_PATH`, the pure guard `assertWhatsNextTarget(root, relativePath = WHATS_NEXT_RELATIVE_PATH)`
+(resolves through `resolveInRoot`, then asserts **exact string equality** against the
+precomputed allowed absolute path — the `relativePath` parameter exists only so the guard is
+adversarially unit-testable, since production callers never supply one), and the HTTP handler
+`handleWhatsNextDelete` (`204` on delete, `204` on already-absent/ENOENT, `500` on any other
+fs failure, deleting nothing in that case). `dashboard/server.mjs` dispatches `DELETE
+/api/whats-next` beside the existing `GET /api/events` block, above the `405` gate, so the
+gate still rejects every other non-GET method (including other methods on the same route)
+unchanged.
+
+`dashboard/app/board.js`'s `WhatsNextPanel.onDismiss` now does `setBody(null)` (optimistic
+hide) then `fetch("/api/whats-next", { method: "DELETE" })`; the `isDismissed`/`saveDismissed`
+gate and the `force` re-render plumbing are gone. `dashboard/app/whats-next-state.js` had
+`loadDismissed`/`saveDismissed`/`isDismissed`/`WHATS_NEXT_KEY`/`WHATS_NEXT_VERSION` removed
+entirely; `WHATS_NEXT_DOC_PATH`, `splitWhatsNextSections`, and `formatStaleness` are unchanged.
+
+Also flipped ADR-0046's frontmatter `status` from `proposed` to `accepted` (the refine round
+had already ratified it; implementing it is the natural trigger).
+
+Tests: new `dashboard/test/whats-next-delete.test.mjs` (12 tests) covers the exact-equality
+allowlist (explicitly proving an attempt aimed at `.agentheim/state/in-flight.json` is
+rejected and the file stays untouched, plus a `contexts/`-lifecycle path and the traversal
+guard), the `204`/idempotency/`500` contract, dispatch-before-405-gate, the 405 gate's
+continued rejection of other methods, and that a supplied `?path=`/body changes nothing.
+`whats-next-state.test.mjs` was trimmed to the two remaining pure helpers plus a guard test
+asserting the retired exports are gone. `whats-next-panel.test.mjs` was updated to assert the
+new dismiss wiring and the absence of the retired store calls. Full dashboard suite: 729/729
+passing (`cd dashboard && node --test`). Root lib suite: 183/183 passing (`node --test
+lib/test/*.test.mjs`). `dashboard/dist/` rebuilt via `node build.mjs`.
+
+Key files:
+- `dashboard/whats-next-delete.mjs` (new)
+- `dashboard/server.mjs`
+- `dashboard/app/board.js`
+- `dashboard/app/whats-next-state.js`
+- `dashboard/test/whats-next-delete.test.mjs` (new)
+- `dashboard/test/whats-next-state.test.mjs`
+- `dashboard/test/whats-next-panel.test.mjs`
+- `dashboard/dist/` (rebuilt)
+- `.agentheim/knowledge/decisions/0046-dashboard-scoped-advisory-delete-on-dismiss.md` (status → accepted)
+- `.agentheim/contexts/agentic-workflow/README.md` (WhatsNextPanel + no-write-path sections)

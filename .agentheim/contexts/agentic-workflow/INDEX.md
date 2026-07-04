@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 122
+- **Doing:** 0
+- **Done:** 123
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-vmk1z** — Dismissing the What's next panel deletes its advisory artifact (feature) — `doing/agentic-workflow-vmk1z-dismiss-deletes-whats-next-artifact.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-vmk1z** — Dismissing the What's next panel deletes its advisory artifact (feature) — `done/agentic-workflow-vmk1z-dismiss-deletes-whats-next-artifact.md`
 - **agentic-workflow-d4q7f** — Wire a trigger for INDEX done-list rotation — rotateIndexDoneList is never invoked (bug) — `done/agentic-workflow-d4q7f-wire-index-done-list-rotation-trigger.md`
 - **agentic-workflow-g7p2x** — Observability hook command path breaks in consumer plugin installs (bug) — `done/agentic-workflow-g7p2x-fix-observability-hook-path-consumer-installs.md`
 - **agentic-workflow-v8n3t** — Wire a trigger for protocol rotation — rotateProtocol is never invoked (bug) — `done/agentic-workflow-v8n3t-wire-protocol-rotation-trigger.md`
@@ -75,7 +75,7 @@ research touching this BC, and concept synthesis pages.
 
 <!-- adr-local:start -->
 - **ADR-0047** — INDEX done-list rotation trigger: `work`'s session-end check invokes `rotateAllIndexDoneLists` immediately after the ADR-0045 protocol-rotation check (via the env-free homedir→cache→semver-max plugin bootstrap, `lib/index-rotation.mjs` stays git-free, skill owns the scoped `git add` + commit — the ADR-0038 three-layer boundary), closing ADR-0045's deferred sibling-surface scope boundary; manifest shape differs from the protocol check (`rolledMonths` lives per-BC under `contexts`, since rotation spans every BC in one call); the read-side reachability contract (archive-header naming + `modeling` Backlink matcher reading `done-archive/`) was confirmed, not re-engineered; the first real rotation on this repo rolled `agentic-workflow`'s 2026-06 done-list out to `contexts/agentic-workflow/done-archive/2026-06.md`; accepted — `../../knowledge/decisions/0047-index-done-list-rotation-trigger-work-session-end-check.md`
-- **ADR-0046** — The dashboard may perform one scoped advisory write — a delete-only, advisory-only `DELETE /api/whats-next` endpoint that removes `.agentheim/state/whats-next.md` (and only that literal file, exact-equality allowlist) on explicit panel dismiss; the first dashboard write since ADR-0017 (bounded exception — read-only stance is over *lifecycle*, untouched here) and a narrowing amendment to ADR-0027 §4.5; idempotent `204`, no client-supplied path, no lifecycle side-effects, `localStorage` dismiss store retired (proposed) — `../../knowledge/decisions/0046-dashboard-scoped-advisory-delete-on-dismiss.md`
+- **ADR-0046** — The dashboard may perform one scoped advisory write — a delete-only, advisory-only `DELETE /api/whats-next` endpoint that removes `.agentheim/state/whats-next.md` (and only that literal file, exact-equality allowlist) on explicit panel dismiss; the first dashboard write since ADR-0017 (bounded exception — read-only stance is over *lifecycle*, untouched here) and a narrowing amendment to ADR-0027 §4.5; idempotent `204`, no client-supplied path, no lifecycle side-effects, `localStorage` dismiss store retired (accepted) — `../../knowledge/decisions/0046-dashboard-scoped-advisory-delete-on-dismiss.md`
 - **ADR-0045** — Protocol rotation trigger: `work`'s session-end check invokes `rotateProtocol` (via the env-free homedir→cache→semver-max plugin bootstrap, script stays git-free, skill owns the scoped `git add` + commit — the ADR-0038 three-layer boundary), closing ADR-0039's deferred "who invokes it" non-decision; the first real rotation on this repo rolled 2026-06 out to `knowledge/protocol/2026-06.md` (live `protocol.md` back near the ~1,000-line cap); accepted — `../../knowledge/decisions/0045-protocol-rotation-trigger-work-session-end-check.md`
 - **ADR-0043** — Live observability: a `Stop`/`SubagentStop` hook heartbeat is a second advisory artifact — the hooks write `.agentheim/state/in-flight.json` (an advisory write extending ADR-0027, git-ignored, machine-written) and the dashboard's read-only `InFlightLane` (ADR-0017) renders live worker/verifier activity for the current `work` session, self-suppressing via a staleness window so a crashed/killed session draws no zombie lane; accepted — `../../knowledge/decisions/0043-live-observability-hook-heartbeat-second-advisory-artifact.md`
 - **ADR-0041** — Artifact-growth doctrine: two disciplines for the three growth surfaces — **cap-and-roll** (verbatim, scripted, rolled to a dated archive: protocol ADR-0039 / INDEX done-list c8j3w) vs **flag-and-consolidate** (judgment, human-in-the-loop, rewritten *in place*, nothing archived: BC READMEs). Adds the `modeling` **CONSOLIDATE** verb (5th beside CAPTURE/REFINE/PROMOTE/DISMISS) with a frozen contract mirroring DISMISS/ADR-0022: a ~600-line README trigger `whats-next` surfaces as a recommended move (no skill auto-rewrites prose unattended), builder-in-the-loop consolidation that merges/rewrites but **never silently drops a term, invariant, or backlink**, committing its own scoped markdown (ADR-0026); accepted — `../../knowledge/decisions/0041-artifact-growth-two-disciplines-consolidate-verb.md`

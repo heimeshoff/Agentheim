@@ -299,20 +299,28 @@ separate BC, but today the whole tool lives in this one.
   command strings sourced from `dashboard/app/modeling-command.js`. Launching a session is an
   **external side-effect**, not a lifecycle write (ADR-0001). See ADR-0018, ADR-0003, ADR-0001,
   ADR-0009.
-- **`WhatsNextPanel`** (aw-073 / ADR-0027) — sits **above** the `Prompt` title: the dashboard
-  half of the What's next feature, reading the single-latest advisory artifact
-  (`.agentheim/state/whats-next.md`) through the existing `/api/doc` body carrier. It is a
-  **glanceable advisory card, not a document**: the leading YAML is stripped, and the three
-  named body sections (*where things stand* / *recommended move* / *next*) lay out as **three
-  side-by-side, height-capped CARD columns** (each scrolling its own overflow) so the strip
-  never pushes the board down. Split by the pure, loss-tolerant `splitWhatsNextSections`
-  (`dashboard/app/whats-next-state.js`); each column renders through the unforked styleguide
-  `Markdown` primitive. Re-fetches on every SSE `tree-changed` frame, shows a staleness cue
-  from the `generated` timestamp (render-only), and is **dismissible** — the dismissed state
-  persists in a versioned `localStorage` store keyed by `generated` (so a newer recommendation
-  re-shows). Read-only over the artifact (ADR-0017): dismiss touches `localStorage` only. Every
-  degraded path (absent/malformed artifact, stale store) resolves to "render nothing" / "not
-  dismissed", never a throw.
+- **`WhatsNextPanel`** (aw-073 / ADR-0027; dismiss rewired to a bounded on-disk delete by
+  aw-vmk1z / ADR-0046) — sits **above** the `Prompt` title: the dashboard half of the What's
+  next feature, reading the single-latest advisory artifact (`.agentheim/state/whats-next.md`)
+  through the existing `/api/doc` body carrier. It is a **glanceable advisory card, not a
+  document**: the leading YAML is stripped, and the three named body sections (*where things
+  stand* / *recommended move* / *next*) lay out as **three side-by-side, height-capped CARD
+  columns** (each scrolling its own overflow) so the strip never pushes the board down. Split
+  by the pure, loss-tolerant `splitWhatsNextSections` (`dashboard/app/whats-next-state.js`);
+  each column renders through the unforked styleguide `Markdown` primitive. Re-fetches on every
+  SSE `tree-changed` frame, shows a staleness cue from the `generated` timestamp (render-only),
+  and is **dismissible** — dismiss now issues `DELETE /api/whats-next`
+  (`dashboard/whats-next-delete.mjs`), the dashboard's one bounded write exception to ADR-0017
+  (ADR-0046, amending ADR-0027 §4.5): no request body, no client-supplied path, the target
+  derived server-side and asserted against the one allowed absolute path by **exact string
+  equality** (never a prefix match — a `state/` prefix would also match the sibling
+  `state/in-flight.json`) before any `unlink`; idempotent (`204`, already-absent is success,
+  never `404`). The click optimistically clears the local body (`setBody(null)`) and disk
+  convergence (unlink → SSE `tree-changed` → re-fetch `404`s → renders nothing) is the durable
+  truth behind it. The former `localStorage` dismiss store (`loadDismissed`/`saveDismissed`/
+  `isDismissed`) is **retired entirely** — disk presence/absence is now the sole source of
+  dismiss truth. Every degraded path (absent/malformed artifact) resolves to "render nothing",
+  never a throw.
 - **`InFlightLane`** (agentic-workflow-m9w5c / ADR-0043) — sits below the board header, above
   the columns: renders **live observability** for a running `work` batch — how many
   workers/verifiers have run this session, and since when. Reads a SECOND advisory artifact
@@ -382,13 +390,16 @@ separate BC, but today the whole tool lives in this one.
   changes never double-applies. EventSource auto-reconnects and the board re-syncs, no
   missed-event bookkeeping. This is the **only** way state reaches the board (ADR-0017). See
   ADR-0012, ADR-0006, ADR-0017.
-- **No write path (read-only dashboard)** — the dashboard never writes lifecycle state
-  (ADR-0017). The former drag-to-Promote endpoint (`POST /api/task/move`, agentic-workflow-009)
-  and its client were **removed**: cards are not drag sources, columns are not drop targets;
-  the HTTP server exposes only reads + the SSE stream + static assets. Task-lifecycle
-  transitions are owned entirely by the skills, which move files on disk together with the
-  readiness check, gate guard, INDEX update, and protocol entry; the board reflects those moves
-  via live-update. See ADR-0017, ADR-0007.
+- **No lifecycle write path (read-only-over-lifecycle dashboard)** — the dashboard never
+  writes lifecycle state (ADR-0017). The former drag-to-Promote endpoint (`POST
+  /api/task/move`, agentic-workflow-009) and its client were **removed**: cards are not drag
+  sources, columns are not drop targets. Task-lifecycle transitions are owned entirely by the
+  skills, which move files on disk together with the readiness check, gate guard, INDEX
+  update, and protocol entry; the board reflects those moves via live-update. As of **aw-vmk1z
+  / ADR-0046** the HTTP server carries exactly **one** bounded, non-lifecycle exception on top
+  of reads + the SSE stream + static assets: `DELETE /api/whats-next`, which deletes ONLY the
+  advisory `whats-next` artifact (see `WhatsNextPanel` above) — no task, no `INDEX.md`, no
+  `protocol.md` entry is ever touched by it. See ADR-0017, ADR-0007, ADR-0046.
 - **Slide-over** — the dashboard's right-hand detail panel (agentic-workflow-007): a
   Notion-style drawer for a board **task**. As of **aw-027** it is **task-only** — the
   open-intent SPLITS on artifact kind (see *Open-intent routing*), so non-task documents render

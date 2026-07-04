@@ -70,8 +70,6 @@ import { docUrl } from "./slide-over-data.js";
 import { parseFrontmatter } from "./frontmatter.js";
 import {
   WHATS_NEXT_DOC_PATH,
-  isDismissed,
-  saveDismissed,
   formatStaleness,
   splitWhatsNextSections,
 } from "./whats-next-state.js";
@@ -713,13 +711,16 @@ function generatedStamp(body) {
   return hit ? hit[1] : "";
 }
 
-// The WHAT'S-NEXT advisory recommendation panel (agentic-workflow-073 / ADR-0027).
+// The WHAT'S-NEXT advisory recommendation panel (agentic-workflow-073 / ADR-0027;
+// dismiss rewired to a bounded on-disk delete by agentic-workflow-vmk1z / ADR-0046).
 //
 // The `whats-next` skill writes a single-latest advisory artifact at
 // `.agentheim/state/whats-next.md` (an ADVISORY write, ADR-0027 — distinct from a
-// lifecycle write; the dashboard stays read-only over it). This panel READS it via
-// the existing GET /api/doc body carrier (ADR-0021/0023 — never /api/tree, which is
-// pointers/metadata only). Unlike the slide-over / main-pane reader, this is a
+// lifecycle write). This panel READS it via the existing GET /api/doc body carrier
+// (ADR-0021/0023 — never /api/tree, which is pointers/metadata only), and — since
+// ADR-0046 — may issue exactly one write on explicit dismiss: `DELETE
+// /api/whats-next`, which removes this one file and nothing else. Unlike the
+// slide-over / main-pane reader, this is a
 // GLANCEABLE advisory card, not a document: the leading YAML is STRIPPED (not folded
 // into a "Front matter" <details>, aw-q7m4k) and the three body sections (Where things
 // stand / Recommended move / Next) lay out as three side-by-side COLUMNS instead of one
@@ -735,17 +736,18 @@ function generatedStamp(body) {
 //   - LIVE: it re-fetches on every SSE tree-changed frame (the existing consumer,
 //     ADR-0006) — a new/overwritten artifact triggers a `.agentheim/` mutation frame.
 //   - STALENESS CUE derived from the `generated` stamp (rendering only, ADR-0027 §4).
-//   - DISMISS persists across reload (whats-next-state.js, keyed by `generated`); a
-//     NEWER recommendation re-shows. Read-only over the artifact (ADR-0017): dismiss
-//     touches localStorage only, never the file.
+//   - DISMISS deletes the artifact (agentic-workflow-vmk1z / ADR-0046): clicking
+//     dismiss calls `DELETE /api/whats-next` — the dashboard's one bounded write
+//     exception to ADR-0017 — and optimistically clears the local body so the panel
+//     vanishes immediately. Disk convergence (unlink → SSE tree-changed → re-fetch
+//     404s → renders nothing) is the durable truth behind that optimistic hide; no
+//     client-side dismiss store is kept (the former localStorage dismiss, aw-073,
+//     is retired).
 //
 // fetchDoc is overridable for tests. It sits ABOVE the BoardPromptBar's "Prompt"
 // title on the board view only (composed by BoardPromptBar).
 function WhatsNextPanel({ fetchDoc = defaultFetchWhatsNext }) {
-  const [body, setBody] = useState(null); // null = nothing to show (absent / dismissed-by-fetch)
-  // Bump to force a dismiss re-evaluation after the user dismisses (localStorage is
-  // not reactive). The fetched body is the source of the `generated` stamp.
-  const [, force] = useState(0);
+  const [body, setBody] = useState(null); // null = nothing to show (absent / dismissed)
 
   const reload = useCallback(() => {
     let alive = true;
@@ -757,26 +759,28 @@ function WhatsNextPanel({ fetchDoc = defaultFetchWhatsNext }) {
   }, [fetchDoc]);
 
   useEffect(() => reload(), [reload]);
-  // Re-fetch on every SSE frame (ADR-0006): a newer advisory write surfaces live.
+  // Re-fetch on every SSE frame (ADR-0006): a newer advisory write surfaces live,
+  // and a dismiss-triggered delete surfaces as an absent artifact (404 → nothing).
   useLiveTree(reload);
 
   if (typeof body !== "string" || body.trim() === "") return null;
 
   const generated = generatedStamp(body);
-  const storage = typeof window !== "undefined" ? window.localStorage : null;
-  if (isDismissed(storage, generated)) return null;
-
   const staleness = formatStaleness(generated, Date.now());
 
   // Strip the leading frontmatter and cut the body into its named sections (aw-q7m4k).
   // LOSS-TOLERANT: a degraded body yields fewer/empty columns, a non-matching body still
-  // renders what is parseable, an empty body yields []. The dismiss/staleness reads above
-  // come from the SAME parseFrontmatter, so they are independent of this render split.
+  // renders what is parseable, an empty body yields []. The staleness read above comes
+  // from the SAME parseFrontmatter, so it is independent of this render split.
   const columns = splitWhatsNextSections(body);
 
+  // Dismiss deletes the artifact on disk (ADR-0046) instead of hiding it locally.
+  // Optimistic setBody(null) hides the panel immediately; the DELETE result is not
+  // otherwise awaited — a failed delete still surfaces on the next SSE re-fetch,
+  // which re-shows the (still-present) recommendation rather than losing it silently.
   const onDismiss = () => {
-    saveDismissed(storage, generated);
-    force((n) => n + 1); // re-render so the now-dismissed stamp hides the panel.
+    setBody(null);
+    fetch("/api/whats-next", { method: "DELETE" }).catch(() => {});
   };
 
   return html`

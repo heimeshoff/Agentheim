@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 22:08 -- Task verified and completed: agentic-workflow-vmk1z - Dismissing the What's next panel deletes its advisory artifact
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-vmk1z - Dismissing the What's next panel deletes its advisory artifact
+**Summary:** Dismissing the What's next panel now issues DELETE /api/whats-next, which unlinks the advisory artifact state/whats-next.md via an exact-equality allowlist that provably cannot touch the sibling in-flight.json; the localStorage dismiss store is retired (ADR-0046 flipped proposed→accepted)
+**Duration:** 12m
+**Verification:** PASS (iteration 1)
+**Files changed:** 11
+**Tests added:** 14
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 21:54 -- Batch started: [agentic-workflow-vmk1z]
 
 **Type:** Work / Batch start

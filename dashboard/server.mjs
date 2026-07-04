@@ -1,10 +1,16 @@
 // Dashboard HTTP server (ADR-0002 + ADR-0006): node:http, stdlib-only, no deps.
-// The server is READ-ONLY (ADR-0017): it serves static assets + a health check
-// (agentic-workflow-004), the SSE live-update channel GET /api/events
-// (infrastructure-003, ADR-0006), and the read endpoints GET /api/tree +
-// GET /api/doc (agentic-workflow-005, ADR-0002). It has NO write path — task
-// lifecycle is owned entirely by the skills (`modeling` / `work`); the board
-// reflects their on-disk moves via the live-update stream, it never makes them.
+// The server is READ-ONLY over task LIFECYCLE (ADR-0017): it serves static
+// assets + a health check (agentic-workflow-004), the SSE live-update channel
+// GET /api/events (infrastructure-003, ADR-0006), and the read endpoints
+// GET /api/tree + GET /api/doc (agentic-workflow-005, ADR-0002). Task lifecycle
+// is owned entirely by the skills (`modeling` / `work`); the board reflects
+// their on-disk moves via the live-update stream, it never makes them.
+//
+// ADR-0046 carves ONE bounded, delete-only exception: DELETE /api/whats-next
+// removes the whats-next advisory artifact (ADR-0027 §4.5, as amended) on an
+// explicit builder dismiss — no client-supplied path, an exact-equality
+// allowlist over the one resolved absolute path (whats-next-delete.mjs). This
+// touches no lifecycle truth and is dispatched before the method gate below.
 
 import http from 'node:http';
 import path from 'node:path';
@@ -12,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { serveStatic, serveIndexHtml } from './static.mjs';
 import { handleEvents } from './events.mjs';
 import { handleTree, handleDoc, handleSearch, handleBridge } from './read-api.mjs';
+import { handleWhatsNextDelete } from './whats-next-delete.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -51,6 +58,19 @@ export function createDashboardServer({ root, assetRoot = defaultAssetRoot(root)
     // discovered project; emits tree-changed pointers + heartbeats.
     if (pathname === '/api/events' && req.method === 'GET') {
       handleEvents(req, res, root, sse);
+      return;
+    }
+
+    // The one scoped advisory DELETE (ADR-0046, amending ADR-0027 §4.5):
+    // removes the whats-next advisory artifact — and only that literal file —
+    // on an explicit builder dismiss. No request body, no client-supplied
+    // path; the target is derived server-side and asserted by exact-equality
+    // against the one allowed absolute path before any unlink
+    // (whats-next-delete.mjs). Dispatched before the method gate below, same
+    // as GET /api/events, so the gate still rejects every OTHER non-GET
+    // method (including any other method on this same route) unchanged.
+    if (pathname === '/api/whats-next' && req.method === 'DELETE') {
+      handleWhatsNextDelete(req, res, root);
       return;
     }
 

@@ -78,10 +78,17 @@ test('the panel shows a staleness cue derived from the generated stamp (ADR-0027
   assert.match(panel(), /\$\{staleness\}/);
 });
 
-test('the panel is dismissible and persists the dismiss keyed by generated', () => {
-  assert.match(panel(), /isDismissed\(storage, generated\)/, 'dismissed-by-generated suppresses render');
-  assert.match(panel(), /saveDismissed\(storage, generated\)/, 'dismiss persists the current generated stamp');
-  assert.match(panel(), /Dismiss the What's next recommendation/, 'a dismiss control must exist');
+test('the panel is dismissible and dismiss deletes the artifact via DELETE /api/whats-next (ADR-0046)', () => {
+  const p = panel();
+  assert.match(p, /setBody\(null\)/, 'dismiss optimistically clears the local body');
+  assert.match(p, /fetch\("\/api\/whats-next",\s*\{\s*method:\s*"DELETE"\s*\}\)/, 'dismiss issues the ADR-0046 delete-only endpoint');
+  assert.match(p, /Dismiss the What's next recommendation/, 'a dismiss control must exist');
+});
+
+test('the retired localStorage dismiss store is not referenced by the panel (ADR-0046)', () => {
+  const p = panel();
+  assert.doesNotMatch(p, /isDismissed\(/, 'the localStorage dismiss gate must be removed');
+  assert.doesNotMatch(p, /saveDismissed\(/, 'the localStorage dismiss persist must be removed');
 });
 
 test('the panel is composed ABOVE the "Prompt" title in BoardPromptBar', () => {
