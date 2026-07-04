@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 15:41 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** ~11m (batch start 15:30 → 15:41)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** infrastructure-h8k2m: 1
+**Commits:** 3 (batch-start claim [7fdaea0] + task integration [f80cb2d] + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (the fix hardens the mechanized lifecycle-move bookkeeping so a task move can't strand a duplicate file — strengthening "independent work runs in parallel without two workers colliding on the same file" and "wrong work is caught by structure"; no pull toward any non-goal)
+**Carry-over:** none — working tree clean; no non-main worktrees
+**Notes:** Single ready task, dispatched solo. infrastructure-h8k2m root-caused the batch-start stale-`todo/`-copy bug (filed by the prior m3q7k session) to `applyTaskMove` never reporting its *pre-move* source path in the returned `state` — so all three layer-2 manifest builders (`promoteTask`, `claimBatch`, `completeTask`) omitted the vacated source path from `changed`, leaving the caller's scoped `git add` (ADR-0026/ADR-0038) unable to stage the deletion. Fix adds `state.fromPath` and threads it into all three verbs' `changed` arrays (`claimBatch` via `flatMap([fromPath, path])`); the idempotent `completeTask` branch correctly omits it (no `doing/` source to vacate in a worktree that already squash-merged the move). Worker audited all three verbs, not just the reported `claimBatch`. Verifier PASS iteration 1, 176/176 tests. **Live reproduction this session:** the conductor's own batch-start `claim` reproduced the exact bug — the manifest listed only the `doing/` destination, not the `todo/` source deletion; the conductor worked around it by manually staging the deletion so the batch-start commit ([7fdaea0]) stayed clean (a clean rename), then the fix landed in the integration commit. **Recurring friction (4th session running):** git had pruned the empty `contexts/infrastructure/doing/` before session start — recreated it before the claim, else the mechanized `claim` throws a rename ENOENT. **Verifier harness note:** under Node 25, `node --test lib/test/` needs an explicit `*.test.mjs` glob to discover the suite (`node --test lib/test/*.test.mjs`) — the bare-dir form the batch resolved found nothing; the verifier adapted and ran 176/176. No bounces, failures, escalations, or concept candidates.
+
+---
+
 ## 2026-07-04 15:40 -- Task verified and completed: infrastructure-h8k2m - Mechanized batch-start leaves a stale duplicate file in todo/ after moving a task into doing/
 
 **Type:** Work / Task completion
