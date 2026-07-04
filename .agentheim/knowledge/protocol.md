@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 21:05 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 19m40s (batch start 20:45 → 21:05)
+**Completed:** 2 (first-try PASS: 2, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-v8n3t: 1, agentic-workflow-g7p2x: 1
+**Commits:** 4 (batch-start claim [284ae57] + v8n3t integration [9439efe] + g7p2x integration [0c79882] + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (v8n3t enforces the previously-stated-but-unenforced protocol-rotation doctrine, serving "knowledge is durable: a chronological protocol log"; g7p2x makes ADR-0043's live in-flight observability actually fire in consumer plugin installs, not just dogfood — both pull toward success criteria, neither toward a non-goal).
+**Carry-over:** none — working tree clean; no non-main worktrees.
+**Notes:** Two ready tasks dispatched in parallel, each in its own worktree (ADR-0032); both touched `skills/work/SKILL.md` in disjoint regions (v8n3t session-end body prose, g7p2x frontmatter hook command) and merged back clean with no conflict — the merge-order advisory held. Both first-try PASS iteration 1. v8n3t wired `rotateProtocol` into `work`'s session-end flow (ADR-0045, closing ADR-0039's deferred "who invokes it" non-decision) and ran the first real rotation on this repo: 2026-06 rolled verbatim to `knowledge/protocol/2026-06.md`, live `protocol.md` from 7,161 → 1,468 lines (all current-month July, correctly never rolled); verifier byte-identity spot-checked the archive against pre-rotation git history. v8n3t also spun off backlog item **agentic-workflow-d4q7f** (the sibling INDEX-done-list rotation is likewise trigger-less — surfaced as a follow-up capture, not scope-crept). g7p2x fixed all three ADR-0043 hook registrations to locate `lib/hook-agent-signal.mjs` via the env-free homedir→cache→semver-max bootstrap; `${CLAUDE_PLUGIN_ROOT}` was investigated (claude-code-guide) and rejected for open upstream non-injection bugs (#43380/#66557/#24529), recorded as an ADR-0043 amendment; verifier independently reproduced the end-to-end fix through the real 0.8.9 plugin cache from a non-repo cwd (in-flight.json written to a scratch consumer project). Recurring friction (8th session): git pruned the empty `doing/` before session start (recreated before the claim); autocrlf re-CRLF'd `protocol.md` in the working tree after each squash-merge — LF-normalized before each mechanized `complete`. No bounces, failures, escalations, or concept candidates.
+
+---
+
 ## 2026-07-04 21:03 -- Task verified and completed: agentic-workflow-g7p2x - Observability hook command path breaks in consumer plugin installs
 
 **Type:** Work / Task completion
