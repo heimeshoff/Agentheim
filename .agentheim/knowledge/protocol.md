@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 21:54 -- Batch started: [agentic-workflow-vmk1z]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-vmk1z - Dismissing the What's next panel deletes its advisory artifact
+**Parallel:** no (1 worker — vmk1z promoted mid-run by a concurrent modeling session [commit 9c4b185], now the only ready task; dashboard feature runs solo)
+**Planning advisory:** whats-next 2026-07-03 advisory stale; single ready task, no ordering choice
+
+---
+
 ## 2026-07-04 21:51 -- Task verified and completed: agentic-workflow-d4q7f - Wire a trigger for INDEX done-list rotation — rotateIndexDoneList is never invoked
 
 **Type:** Work / Task completion
