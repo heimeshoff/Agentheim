@@ -355,3 +355,54 @@ it.
 fixture, k = 6 for `missing-adr-borderline` across two independent batches,
 mirroring `n7q4d`'s own reconfirmation methodology for the same fixture).
 Full breakdown: `evals/verifier-catch-rate/results/2026-07-04-sonnet-arm-run.md`.
+
+## Addendum (`agentic-workflow-q7x2k`): the check-6 wording gap, closed
+
+`bx7k5` traced `missing-adr-borderline`'s opus 0/6 floor to a genuine wording
+gap in `agents/verifier.md`'s check 6, not a tier effect: opus consistently
+reasoned that a decision narrated in the task file's own `## Why`/`## What`
+prose didn't need an independent ADR ("the task file already explains it"), a
+reading check 6's prior text left room for even though it contradicted the
+same corpus's own `missing-adr` fixture precedent. `q7x2k` closed that gap by
+editing `agents/verifier.md`'s check 6 section directly (no ADR — this is a
+wording sharpen to an existing check's stated intent, not a new decision; see
+the task's own Notes section for that reasoning):
+
+- An explicit statement that task-file narration is not a substitute for an
+  ADR, however thoroughly the tradeoff is explained in `## Why`/`## What` —
+  narration is evidence the decision exists, not a durable, project-wide
+  record of it.
+- A worked example anchored on `widgets-mab1` (the `missing-adr-borderline`
+  fixture itself) as an explicit precedent the verifier can reason from.
+- An explicit over-flag / no-lowered-bar constraint: the fix removes only the
+  narration carve-out, it does not broaden what counts as ADR-worthy — small
+  implementation choices with no real downstream consequence stay non-ADR-worthy
+  even when the task narrates them clearly.
+
+**Empirical re-run (opus-pinned, real `agentheim:verifier` spawns, no model
+override — `agents/verifier.md`'s own `model: opus` frontmatter governed
+every run):**
+
+- `missing-adr-borderline`: **FAIL 3/3, right-reason 3/3, 0 verdict
+  variance** — closes the prior 0/6 miss. All three runs explicitly cite
+  check 6 and explicitly reject the "task file already explains it"
+  reasoning the fix targets.
+- `clean` (the corpus's only PASS fixture that narrates a real
+  non-ADR-worthy behavioral tradeoff — throw-vs-no-op on a redundant
+  repaint — in its own `## Why`): **PASS 3/3, 0 verdict variance** — no
+  false-FAIL regression on the fixture most at risk of the fix over-correcting.
+
+The remaining 14 fixtures were not individually re-run: their planted defects
+all resolve at a check ordinally before or independent of check 6, and
+`agents/verifier.md` stops at the first failing check, so a check-6-only
+wording edit cannot alter an already-correct FAIL that never depended on
+check 6's reasoning. Full write-up, the structural no-regression argument, and
+the run-by-run detail:
+`evals/verifier-catch-rate/results/2026-07-04-check6-wording-fix-run.md`.
+
+**Combined dataset of record now stands at 60 scored real verifier spawns
+across 16 fixtures** (54 prior + 6 for this fix's targeted re-run).
+`missing-adr-borderline` is no longer an opus floor — both tiers now catch it,
+opus via the sharpened check 6, sonnet as already shown in the `bx7k5`
+addendum above. This closes the eval's last open gap noted in
+`evals/verifier-catch-rate/README.md`.

@@ -109,6 +109,37 @@ Read each ADR file listed in `ADRS_WRITTEN`. For each:
 
 If the diff embeds a decision a future maintainer would ask "why?" about, and no ADR covers it, FAIL.
 
+**Task-file narration is not a substitute for an ADR.** A task's own `## Why` /
+`## What` prose explaining the tradeoff behind a decision does **not** waive
+this requirement, no matter how clearly it's written — it is evidence the
+decision exists, not a durable record of it. A task file is scoped to one
+unit of work and ephemeral (it moves to `done/` and is rarely read again); an
+ADR is the durable, project-wide-discoverable record that a BC README and
+future maintainers actually point at. Do not reason "the task file already
+explains this, so there's nothing independent left to flag" — that reasoning
+is exactly the loophole this check closes. There is no carve-out for
+task-file narration, however thorough.
+
+**Worked example (anchor: `widgets-mab1`, the `missing-adr-borderline`
+fixture).** The task's `## Why` states downstream analytics reads
+`PaintHistory`; its `## What` says the history is capped at 5 entries with
+older ones "silently dropped." Both the tradeoff *and* its downstream
+consequence are narrated in the task's own prose — yet no ADR covers the
+choice of silent-drop over erroring on overflow, unbounded growth, or
+compaction. This still **FAILs** check 6: task-file narration present, ADR
+still required. Do not let the presence of a clear `## Why`/`## What` talk you
+out of flagging this.
+
+**Do not over-correct — the underlying bar is unchanged.** Closing the
+narration loophole does not lower "a decision a future maintainer would ask
+'why?' about" into "any choice the task file happens to mention." A small
+implementation choice with no real, documented downstream consequence (e.g.,
+choosing to throw an error vs. silently no-op on a redundant repaint, with no
+consumer depending on either behavior) stays non-ADR-worthy even when the task
+narrates it clearly. The test is still whether the decision has a real
+downstream consequence (stated in a README, evident in the diff, or otherwise
+substantive) — not merely whether the task file mentions the choice at all.
+
 ### 6b. Honored related ADRs
 
 Read the task file's `related_adrs` frontmatter. For each id, read the ADR's `## Decision` section and verify the worker's diff is consistent with it. The worker was given the pre-loaded ADRs in their spawn prompt and was told reading them is mandatory.

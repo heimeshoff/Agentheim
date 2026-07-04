@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 18:24 -- Task verified and completed: agentic-workflow-q7x2k - Verifier check 6 gate gap — decisions narrated only in task-file prose are not flagged for an ADR
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-q7x2k - Verifier check 6 gate gap — decisions narrated only in task-file prose are not flagged for an ADR
+**Summary:** Sharpen verifier check 6 to close the task-file-prose-narration loophole — a decision narrated only in a task file still requires an ADR; add a widgets-mab1 worked example; empirically confirm missing-adr-borderline now FAILs 3/3 citing check 6 (was 0/6) with no PASS-fixture regression
+**Duration:** 10m33s
+**Verification:** PASS (iteration 1)
+**Files changed:** 4
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-04 18:12 -- Batch started: [agentic-workflow-q7x2k]
 
 **Type:** Work / Batch start

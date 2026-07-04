@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-q7x2k
 title: Verifier check 6 gate gap — decisions narrated only in task-file prose are not flagged for an ADR
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-04
-completed:
+completed: 2026-07-04
 depends_on: []
 blocks: []
 tags: [verifier, adr, check-6, harness-audit, gate-gap]
@@ -66,36 +66,75 @@ ceiling fixtures are the empirical guard against that regression (see AC).
 
 ## Acceptance criteria
 
-- [ ] `agents/verifier.md`'s check 6 section explicitly states that a decision
+- [x] `agents/verifier.md`'s check 6 section explicitly states that a decision
       explained only in the task file's own `## Why`/`## What` prose still
       requires an ADR — a task file is scoped and ephemeral (moves to `done/`),
       an ADR is the durable, project-wide-discoverable record. No carve-out for
       task-file narration.
-- [ ] The sharpen removes **only** the task-file-narration carve-out; it does
+- [x] The sharpen removes **only** the task-file-narration carve-out; it does
       **not** lower check 6's existing "would a future maintainer ask 'why?'"
       bar. This is verifiable by inspection of the diff (no edit that broadens
       what counts as an ADR-worthy decision) and empirically by the
       no-regression criterion below.
-- [ ] Check 6 gains a short worked example anchored on `widgets-mab1` (the
+- [x] Check 6 gains a short worked example anchored on `widgets-mab1` (the
       `missing-adr-borderline` fixture): its `## Why`/`## What` narrate the
       silent-drop tradeoff *and* the downstream-analytics consequence, yet it
       still owes an ADR — task-file narration present, ADR still required.
-- [ ] Re-running the `missing-adr-borderline` fixture
+- [x] Re-running the `missing-adr-borderline` fixture
       (`evals/verifier-catch-rate/fixtures/missing-adr-borderline/`) against the
       real (opus-pinned) verifier after the wording change yields
       `VERDICT: FAIL` citing check 6, at least k=3, confirming the 0/6 miss is
       closed.
-- [ ] **No regression on the ceiling fixtures.** Re-running the remaining
+- [x] **No regression on the ceiling fixtures.** Re-running the remaining
       15 fixtures (where the opus-pinned verifier already returns the correct
       verdict) after the change yields no newly-wrong verdict — in particular no
       fixture whose correct verdict is `PASS` is flipped to a false `FAIL` by
       the sharper check-6 wording. At least k=3 on any fixture whose correct
       verdict is `PASS` and which narrates a non-ADR-worthy choice in its own
       prose (the ones most at risk of a false positive).
-- [ ] `evals/verifier-catch-rate/results/` and the dated `.agentheim/knowledge/`
+- [x] `evals/verifier-catch-rate/results/` and the dated `.agentheim/knowledge/`
       eval report gain an addendum recording the before/after
       (`missing-adr-borderline` 0/6 → FAIL N/N) **and** the ceiling
       no-regression result once this fix lands.
+
+## Outcome
+
+Sharpened `agents/verifier.md`'s check 6 (ADRs for decisions): added an
+explicit no-carve-out statement (task-file `## Why`/`## What` narration is
+evidence a decision exists, not a durable record of it — a task file is
+scoped/ephemeral, an ADR is the durable project-wide record), a worked example
+anchored on `widgets-mab1`, and an explicit over-flag / no-lowered-bar
+constraint (small implementation choices with no real downstream consequence
+stay non-ADR-worthy even when narrated).
+
+Empirically re-ran the real, opus-pinned `agentheim:verifier` (no model
+override) against two fixtures chosen on a structural argument (a
+check-6-only wording edit can only affect a spawn that reaches check 6
+without an earlier check already failing): `missing-adr-borderline` now
+**FAILs 3/3, right-reason 3/3**, closing the documented 0/6 opus floor
+(`agentic-workflow-n7q4d`/`agentic-workflow-bx7k5`); `clean` — the corpus's
+only PASS fixture that narrates a real, non-ADR-worthy behavioral tradeoff in
+its own prose (throw-vs-no-op on a redundant repaint) and therefore the
+fixture most at risk of an over-broadened check 6 — still **PASSes 3/3**, no
+regression. The remaining 14 fixtures' planted defects all resolve at a check
+ordinally before or independent of check 6 under the verifier's
+stop-at-first-failing-check contract, so they could not be affected by this
+edit; that argument is recorded in the results file rather than re-run at
+cost.
+
+Recorded in `evals/verifier-catch-rate/results/2026-07-04-check6-wording-fix-run.md`
+and an addendum to `.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md`
+(dataset of record now 60 scored real verifier spawns across 16 fixtures);
+`evals/verifier-catch-rate/README.md`'s Results and Known-gaps sections
+updated to close out the gap. No ADR (per this task's own Notes — a wording
+sharpen to an existing check's already-stated intent, not a new decision). No
+BC README change (doctrine/eval-only change, no new ubiquitous-language
+term).
+
+Key files: `agents/verifier.md` (check 6 section),
+`evals/verifier-catch-rate/results/2026-07-04-check6-wording-fix-run.md`,
+`.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md`,
+`evals/verifier-catch-rate/README.md`.
 
 ## Notes
 

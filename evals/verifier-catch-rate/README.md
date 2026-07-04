@@ -200,6 +200,21 @@ write-up and the decision-rule application:
 turned out to be a **verifier check-6 wording gap**, not a tier effect —
 tracked as `agentic-workflow-q7x2k`.
 
+### The check-6 wording fix (`agentic-workflow-q7x2k`): opus floor closed
+
+`agentic-workflow-q7x2k` edited `agents/verifier.md`'s check 6 section to
+close the "narrated in the task's own prose" loophole `bx7k5` traced the
+`missing-adr-borderline` divergence to: an explicit no-carve-out statement, a
+worked example anchored on `widgets-mab1`, and an explicit over-flag /
+no-lowered-bar constraint. Re-run against the real opus-pinned verifier (no
+model override): `missing-adr-borderline` now FAILs 3/3, right-reason 3/3
+(closing the prior 0/6 miss), and `clean` (the PASS fixture most at risk of a
+false-FAIL from an over-broadened check 6) still PASSes 3/3 — no regression.
+Full numbers: `evals/verifier-catch-rate/results/2026-07-04-check6-wording-fix-run.md`.
+Write-up: `.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md`'s
+`agentic-workflow-q7x2k` addendum. **Combined dataset of record: 60 scored
+real verifier spawns across 16 fixtures.**
+
 ### Check-8 (runtime drive, ADR-0036) fixtures
 
 Three additive fixtures close the check-8 gap noted below:
@@ -256,7 +271,12 @@ after the boot failure and the probe mismatch.
   the addendum in `.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md`).
   The divergence traced to a verifier check-6 wording gap, not a tier effect
   — tracked separately as `agentic-workflow-q7x2k`.
+- ~~The check-6 wording gap itself~~ — **closed by `agentic-workflow-q7x2k`**:
+  `agents/verifier.md`'s check 6 was sharpened to remove the task-file-narration
+  carve-out (see "The check-6 wording fix" under Results above).
+  `missing-adr-borderline` now FAILs 3/3 (opus-pinned, right-reason 3/3),
+  closing the prior 0/6 floor, with no regression on `clean` (3/3 PASS).
   This eval's designed surface is now fully measured on both tiers; any future
-  work here is either the check-6 fix above or generalizing the harness to
+  work here is generalizing the harness to
   the `research-reviewer` structural twin noted in the sibling-tasks note
   below.
