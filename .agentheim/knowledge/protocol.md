@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 11:09 -- Modeling / Promoted: infrastructure-5w5gs - task-lifecycle bookkeeping breaks on CRLF .agentheim files — promote/claim/complete strand the board mid-operation
+
+**Type:** Modeling / Promote
+**BC:** infrastructure
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-04 11:07 -- Modeling / Refined: infrastructure-5w5gs - task-lifecycle bookkeeping breaks on CRLF .agentheim files
 
 **Type:** Modeling / Refine
