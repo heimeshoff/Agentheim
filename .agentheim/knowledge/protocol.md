@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 15:28 -- Modeling / Promoted: infrastructure-h8k2m - Mechanized batch-start leaves a stale duplicate file in todo/ after moving a task into doing/
+
+**Type:** Modeling / Promote
+**BC:** infrastructure
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-04 15:24 -- Work session ended
 
 **Type:** Work / Session end

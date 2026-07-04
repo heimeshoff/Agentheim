@@ -1,7 +1,7 @@
 ---
 id: infrastructure-h8k2m
 title: Mechanized batch-start leaves a stale duplicate file in todo/ after moving a task into doing/
-status: backlog
+status: todo
 type: bug
 context: infrastructure
 created: 2026-07-04
@@ -56,3 +56,18 @@ no longer exists after a mechanized move.
   `infrastructure-m3q7k`'s own test run (its live-tree duplicate-id test was failing on this
   unrelated pre-existing artifact); this backlog task is the follow-up to root-cause and fix
   the underlying mover/CLI bug, not just the one-off symptom.
+- **Conductor-observed root cause (recorded 2026-07-04, the same batch-start that produced the
+  stray copy).** The `work` conductor captured the literal `claim` manifest for
+  `infrastructure-m3q7k`: `{"ok":true,"changed":["…/doing/…m3q7k….md","…/INDEX.md","…/protocol.md"],…}`.
+  The `changed` array lists only the `doing/` **destination** path — it does **not** enumerate the
+  `todo/` **source-path deletion**. `applyTaskMove` *does* remove the source file from the working
+  tree, but because the SKILL's batch-start step stages exactly `manifest.changed` (a scoped
+  `git add`, ADR-0026 — never `git add -A`), the unlisted source deletion is never staged, so the
+  batch-start commit keeps the stale `todo/` copy while also adding the `doing/` one. So the fix is
+  most likely **not** in the mover's write ordering (which is correct) but in `claimBatch`'s
+  **manifest**: `changed` must include the source path so the caller's scoped add stages the
+  deletion — or, equivalently, the batch-start SKILL prose must be amended to stage the source
+  deletion too. Prefer the manifest fix (keeps the scoped-add contract honest: the manifest is the
+  single source of what a verb touched). Note `completeTask`/`promoteTask` may share the same
+  omission — check whether their manifests enumerate the source path, since they were not exercised
+  through a fresh todo→doing move this session.
