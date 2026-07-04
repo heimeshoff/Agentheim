@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 21:38 -- Batch started: [agentic-workflow-d4q7f]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-d4q7f - Wire a trigger for INDEX done-list rotation — rotateIndexDoneList is never invoked
+**Parallel:** no (1 worker — the only ready task in agentic-workflow; whats-next advisory 2026-07-03 stale, background-weighted)
+**Planning advisory:** whats-next 2026-07-03 stale (older than 07-04 21:05 session-end); recommends t4x8p/p3v9k, neither in ready set — no weighting applied
+
+---
+
 ## 2026-07-04 15:05 -- Modeling / Refined: agentic-workflow-vmk1z - Dismissing the What's next panel deletes its advisory artifact
 
 **Type:** Modeling / Refine
