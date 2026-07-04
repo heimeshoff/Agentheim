@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 18:25 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 13m (batch start 18:12 → 18:25)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-q7x2k: 1
+**Commits:** 3 (batch-start claim [45125c8] + task integration [926a04d] + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (closing the verifier check-6 gate gap directly serves two success criteria: "wrong work is caught by structure, not luck" — the sharpened gate now catches decisions that were slipping through unrecorded — and "knowledge is durable" — a decision narrated only in an ephemeral task file must now be captured in a durable ADR; no pull toward any non-goal).
+**Carry-over:** none — working tree clean; no non-main worktrees.
+**Notes:** Single ready task (q7x2k, a bug), dispatched solo in its own worktree per ADR-0032; whats-next advisory stale (generated 2026-07-03, older than the newest Work entry, its named tasks t4x8p/p3v9k already resolved — no weighting), 7th session running with a stale advisory. Worker sharpened `agents/verifier.md` check 6 to close the task-file-prose-narration loophole surfaced by bx7k5's sonnet-arm A/B (a decision narrated only in a task's own Why/What prose is not a substitute for an ADR — task files are scoped/ephemeral, ADRs are durable), added a `widgets-mab1` worked example, and honored the over-flag constraint (did not lower the "would a maintainer ask why?" bar). **Empirical closure:** real opus-pinned verifier now FAILs `missing-adr-borderline` 3/3 citing check 6 — closing the reproducible 0/6 opus miss n7q4d found and bx7k5 traced to a tier-independent wording gap — with `clean` PASS 3/3 (the correct at-risk PASS fixture, since it narrates a non-ADR-worthy throw-vs-no-op tradeoff in its own prose). Verifier PASS iteration 1; independently confirmed the fixtures' `expected.json` ground truth, validated the stop-at-first-failing-check structural no-regression argument for the other 14 fixtures, and ran 176/176 project tests green. No ADR warranted (wording sharpen bringing check 6 in line with its own already-stated intent, not a new decision). **Recurring friction (7th session):** git pruned the empty `doing/` before session start — recreated before the claim, else the mechanized claim throws ENOENT. No bounces, failures, escalations, or concept candidates.
+
+---
+
 ## 2026-07-04 18:24 -- Task verified and completed: agentic-workflow-q7x2k - Verifier check 6 gate gap — decisions narrated only in task-file prose are not flagged for an ADR
 
 **Type:** Work / Task completion
