@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 2
-- **Todo:** 0
+- **Backlog:** 1
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 27
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **design-system-a31e0** — Retokenize the palette — Command-deck dark + derived light, across both token files (feature) — `todo/design-system-a31e0-retokenize-palette-dark-derived-light.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -57,7 +58,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **design-system-a31e0** — Retokenize the palette — Command-deck dark + derived light, across both token files (feature) — `backlog/design-system-a31e0-retokenize-palette-dark-derived-light.md`
 - **design-system-t896s** — TicketCard — bump corner radius toward 1b's 10px (refactor) — `backlog/design-system-t896s-ticketcard-radius-10px.md`
 <!-- backlog-list:end -->
 

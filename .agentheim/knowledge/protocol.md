@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 01:03 -- Modeling / Promoted: design-system-a31e0 - Retokenize the palette — Command-deck dark + derived light, across both token files
+
+**Type:** Modeling / Promote
+**BC:** design-system
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-05 00:52 -- Work session ended
 
 **Type:** Work / Session end
