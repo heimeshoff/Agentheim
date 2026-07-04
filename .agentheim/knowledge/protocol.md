@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 18:10 -- Modeling / Promoted: agentic-workflow-q7x2k - Verifier check 6 gate gap — decisions narrated only in task-file prose are not flagged for an ADR
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-04 18:05 -- Modeling / Refined: agentic-workflow-q7x2k - Verifier check 6 gate gap
 
 **Type:** Modeling / Refine
