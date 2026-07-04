@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 21:11 -- Modeling / Refined: agentic-workflow-d4q7f - Wire a trigger for INDEX done-list rotation
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Sharpened the sibling of v8n3t/ADR-0045 (INDEX done-list rotation is trigger-less). Settled the call site as `work` session-end (a second self-firing cap-and-roll check after the ADR-0045 protocol check, via `rotateAllIndexDoneLists`); resolved the "different seam for reachability?" open question as a read-side matter (modeling already reads `done-archive/`), not a trigger relocation; assigned ADR-0046; added a "run the first real rotation on this repo" AC (the gap vs v8n3t — the live done-list is ~120 entries against the ~30 cap); reframed AC to reflect a skill-prose call site with no new lib surface. No orchestrator pass — direct application of the ratified ADR-0045 pattern.
+
+---
+
 ## 2026-07-04 21:05 -- Work session ended
 
 **Type:** Work / Session end
