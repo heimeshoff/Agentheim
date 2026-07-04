@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 01:23 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 16m (batch start 01:07 → 01:23)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** design-system-a31e0: 1
+**Commits:** 3 (batch-start [c1bfdf5] + a31e0 integration [c3a93f7] + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (the retokenization is design-system styleguide work serving the dashboard redesign under the builder-gated styleguide re-review; it rode ADR-0048/0049, updated the BC README with the full hex table + a consolidated gate note — durable knowledge — and passed the `verifier` adversarial gate; no pull toward any non-goal — all state stays in `.agentheim/` + `styleguide/`, the human review gate is intact, nothing shipped autonomously).
+**Carry-over:** inspiration/: left behind (owner: builder reference material — the untracked `inspiration/Agentheim UX Explorations.html` dashboard-redesign brief, present since before this session; not project bookkeeping, never `work`'s to commit)
+**Notes:** The redesign keystone shipped. **design-system-a31e0** retokenized both `[data-theme]` blocks of `styleguide/styles/colors_and_type.css` to the Command-deck 1b dark palette (surfaces `#090C12`/`#0D1119`/`#121826`, hairlines `#1C2330`/`#2B3548`, `--fg-1..4` `#F2F5F9`/`#AEB8C4`/`#7D8794`/`#48515C`, `--accent-ochre` `#E5A13C`) with a *derived* light counterpart per ADR-0049 §2 (light `--surface-0` held at the `#FAF8F4` anchor, the rest of the ramp computed by re-applying the dark stack's step sizes on the same cool blue-grey hue, inverted), re-pinned the frozen preview swatches per ADR-0049 §3 (`--swatch-dark` → `#090C12`, `--swatch-light` unchanged), and added the `--emphasis-border` token pair to `styleguide/styles/agentheim.css` per ADR-0048 (`color-mix(in oklab, var(--accent-ochre) 50%/40%, transparent)` light/dark — a border-suited softened alpha, not a bare accent alias; no consumer wired yet). One documented interpretation call: ADR-0049's 1b reference lists a 4-rung neutral stack but the system has 3 surface slots, so the intermediate `#0f141d` "panel-2" rung was dropped and `--surface-2` mapped to the ticket-card `#121826` — the verifier judged this a faithful, mechanical reading of the binding derivation method, durably documented in the README, not a separate ADR-worthy decision. `dashboard/dist/` rebuilt via `node build.mjs` (reproducible — second run byte-identical); `dist/app.js` + `dist/index.html` were byte-identical after the rebuild (CSS-values-only change, JS bundle unaffected — the ds-007 pattern, minus the component edit). First-try PASS iteration 1; 158 tests green (157 baseline + 1 added for the `--emphasis-border` presence, plus the re-pinned `--swatch-dark` lock updated). **The whole downstream redesign is now unblocked** — the five agentic-workflow wiring tasks (`vk6mc`/`wsfsk`/`bz3az`/`a2pm1`/`c2ver`) and the sibling radius task (`t896s`) all await `modeling` promotion out of backlog. **Styleguide gate re-review is builder-PENDING** — the biggest visual change the canvas has taken; the builder should eyeball `styleguide/index.html` before the wiring tasks consume it. No bounces, failures, escalations, or concept candidates.
+
+---
+
 ## 2026-07-05 01:22 -- Task verified and completed: design-system-a31e0 - Retokenize the palette — Command-deck dark + derived light, across both token files
 
 **Type:** Work / Task completion
