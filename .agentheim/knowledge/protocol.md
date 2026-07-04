@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-04 22:10 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 32m (first batch start 21:38 → 22:10)
+**Completed:** 2 (first-try PASS: 2, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-d4q7f: 1, agentic-workflow-vmk1z: 1
+**Commits:** 5 (d4q7f batch-start [37a9c71] + d4q7f integration [4df4da8] + vmk1z batch-start [ef3f5ca] + vmk1z integration [b7fe495] + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (d4q7f enforces the previously-trigger-less INDEX done-list cap-and-roll doctrine, serving "knowledge is durable… per-BC READMEs/INDEXes survive"; vmk1z is a builder-initiated explicit dismiss that removes only an advisory artifact under `.agentheim/state/` — human-in-the-loop [non-goal 3] and local-state-only [non-goal 5] both intact, the dashboard-write concern is an ADR-0046-ratified bounded exception, not a vision-level divergence).
+**Carry-over:** none — working tree clean; no non-main worktrees.
+**Notes:** Two tasks shipped sequentially (single-task batches), each in its own worktree (ADR-0032), both first-try PASS iteration 1. **d4q7f** wired `rotateAllIndexDoneLists` into `work`'s session-end flow (new step, sibling to ADR-0045's protocol-rotation check) and ran the first real INDEX done-list rotation on this repo: `agentic-workflow`'s 2026-06 done entries rolled verbatim to `contexts/agentic-workflow/done-archive/2026-06.md`, live done-list back under the ~30 cap; `design-system`/`infrastructure` were already under cap and correctly did not rotate. **ADR-numbering collision handled:** the task prose said "write ADR-0046", but 0046 had already been minted (vmk1z's What's-next delete decision) during d4q7f's own refinement window — the conductor caught this pre-dispatch and directed the worker to ADR-0047 instead; existing 0046 untouched, verifier confirmed. **vmk1z** (promoted mid-run by a concurrent `modeling` session, commit 9c4b185) shipped the dashboard's first write since ADR-0017: a delete-only `DELETE /api/whats-next` dispatched before the 405 gate, exact-equality allowlist (no client path) that provably can't touch the sibling `state/in-flight.json`, idempotent 204, localStorage dismiss store retired entirely; ADR-0046 flipped proposed→accepted; 14 tests added; verifier's runtime-drive check 8 booted the dashboard (port 41983), confirmed DELETE→204 / POST→405, clean teardown; dashboard suite 729/729, root lib 183/183. **Recurring Windows friction (9th session):** git pruned the empty `doing/` before vmk1z's claim (ENOENT on the todo→doing rename — reverted the half-written status frontmatter, recreated `doing/`, retried clean); autocrlf re-CRLF'd INDEX.md after each squash-merge — LF-normalized before each mechanized `complete`; the mandatory `unlinkDashboardNodeModules`-before-`worktree remove` order held (real shared node_modules verified intact, 10 entries). **Minor note (not a blocker):** ADR-0047's Outcome prose says the 2026-06 archive holds "37 entries" where it actually holds ~84 — a harmless reporting inaccuracy the verifier flagged; no AC hinges on the count. No bounces, failures, escalations, or concept candidates.
+
+---
+
 ## 2026-07-04 22:08 -- Task verified and completed: agentic-workflow-vmk1z - Dismissing the What's next panel deletes its advisory artifact
 
 **Type:** Work / Task completion
