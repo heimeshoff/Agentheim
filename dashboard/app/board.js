@@ -51,7 +51,8 @@ import { COLUMN_ORDER, treeToColumns } from "./board-data.js";
 import { resolveTheme, saveTheme } from "./theme-state.js";
 import { loadSkipPermissions, saveSkipPermissions } from "./skip-permissions-state.js";
 import { SORT_OPTIONS, DEFAULT_SORT, sortTickets } from "./board-sort.js";
-import { refineCommandFor, promoteCommandFor, dismissCommandFor, quickCaptureCommandFor, modelingCommandFor, researchCommandFor, inquireCommandFor, WORK_COMMAND, WHATS_NEXT_COMMAND, STOP_DASHBOARD_COMMAND } from "./modeling-command.js";
+import { refineCommandFor, promoteCommandFor, dismissCommandFor, WORK_COMMAND, WHATS_NEXT_COMMAND, STOP_DASHBOARD_COMMAND } from "./modeling-command.js";
+import { PROMPT_MODES, DEFAULT_PROMPT_MODE_INDEX, clampPromptModeIndex, nextPromptModeIndex, promptBarKeyIntent, PROMPT_KEY_INTENT } from "./prompt-mode.js";
 import { launchOrCopy } from "./bridge-launch.js";
 import { groupTickets } from "./board-group.js";
 import { resolveHoverDependencies } from "./board-dependencies.js";
@@ -584,132 +585,74 @@ function autoGrowField(el, maxPx) {
 const PROMPT_FIELD_MIN_PX = 40;
 const PROMPT_FIELD_MAX_PX = 168;
 
-// A board-local PROMPT-BAR LAUNCH CARD (agentic-workflow-065). A VISUAL restyle of the
-// three flat prompt-bar chips (aw-023/aw-036) into richer icon-tile + title/subtitle
-// cards, so the "type a prompt, then choose how to file it" intent reads at a glance.
-// The INTERACTION is byte-identical to LaunchButton: it runs the same pure
-// `launchOrCopy` (bridge-launch.js) with the silent clipboard fallback, threads the
-// armed `skipPermissions` flag (aw-021), hands the raw result to `onResult` (the bar's
-// clear-textarea + confetti path, aw-023), and shows the same transient launched/copied
-// flash. It deliberately stays a board-LOCAL token-styled composite beside the
-// styleguide primitives (the sort <select>, the prompt textarea precedent) — the
-// styleguide is consumed UNFORKED (ADR-0003), no primitive forked, no new token minted.
+// A board-local PROMPT-MODE TAB (agentic-workflow-bz3az — rebuilds aw-065/aw-068's
+// PromptLaunchCard into the ADR-0050 docked console's top row of four mode tabs).
+// One entry of PROMPT_MODES (dashboard/app/prompt-mode.js): name + one-line meaning
+// (icon + label + subtitle).
 //
-// Layout: a square icon TILE on the left (a registry glyph — `plus` / `compass` /
-// `search`) over a two-line label (bold title + quiet subtitle). The tile is NEUTRAL
-// (token --surface-2 / --fg, never a coloured fill).
-//
-// `emphasis` (the settled aw-065/aw-064 decision): "primary" wears the aw-033 Work
-// chrome — `--surface-2` fill, `--fg-1` text, `--hairline-strong` border (theme-
-// following: light fill+dark text in light mode, the inverse in dark). "default" stays
-// quiet/secondary — `--surface-1` on a plain `--hairline` border. This is EMPHASIS, not
-// a selected state (there is no selection model here), and it deliberately leaves the
-// reserved selection accent `--accent-ochre-soft` UNTOUCHED — NO ochre anywhere
-// (ADR-0016). The armed `skipPermissions` cue reuses LaunchButton's law: the icon hue
-// shifts to `--obligation` while armed (consumed unforked, never the reserved accent).
-function PromptLaunchCard({ label, subtitle, command, icon, skipPermissions = false, onResult }) {
-  const [feedback, setFeedback] = useState("idle");
-  // aw-068: hover + press are React state so the WHOLE card (body, title, subtitle,
-  // and the tile glyph — an Icon prop, not a CSS rule) recolours together. The
-  // earlier emphasis-driven resting variants are gone: every card reads identically.
+// `highlighted` is the SINGLE committed selection channel (ADR-0050's
+// `highlightedMode`) — never a per-tab boolean the board tracks independently.
+// Paint follows the settled contract:
+//   - highlighted -> the bounded ochre wayfinding exception ADR-0051 grants this
+//     ONE additional surface (beside the nav rail, ADR-0048 surface 1): full
+//     strength, --accent-ochre text + an ochre underline, the nav-rail inset idiom
+//     turned into a bottom border for a horizontal tab row.
+//   - the other three -> ADR-0016's unchanged de-emphasis default: dimmed via
+//     opacity, --fg-2 text, no ring, no new hue.
+// `hover` is a SEPARATE, transient, presentation-only pointer-feedback channel
+// (ADR-0050 "two orthogonal channels") — it nudges a NON-highlighted tab's opacity
+// up for affordance, but it NEVER reads or writes `highlighted` and never launches.
+// Clicking the tab does both at once: it commits the highlight to this tab AND
+// launches it (the click-to-launch contract carried over unchanged from
+// PromptLaunchCard, now additionally updating the highlight before it fires).
+function PromptModeTab({ mode, highlighted, feedback, onClick }) {
   const [hover, setHover] = useState(false);
-  const [pressed, setPressed] = useState(false);
-  const timer = useRef(null);
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  const flashed = highlighted && feedback !== "idle";
+  const titleText = flashed ? (feedback === "launched" ? "Launched" : "Copied") : mode.label;
 
-  const onClick = useCallback(() => {
-    const fetchImpl = typeof window !== "undefined" && typeof window.fetch === "function"
-      ? window.fetch.bind(window)
-      : undefined;
-    launchOrCopy({ prompt: command, fetchImpl, copy: copyToClipboard, skipPermissions: skipPermissions === true }).then((res) => {
-      // Same contract as LaunchButton: hand the raw result to onResult first (the bar
-      // clears + celebrates off it), then flash launched/copied; stay silent if the
-      // clipboard was blocked too. Never an error (absence is normal).
-      if (typeof onResult === "function") onResult(res);
-      if (res.via === "bridge") setFeedback("launched");
-      else if (res.copied) setFeedback("copied");
-      else return;
-      if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(() => setFeedback("idle"), 1100);
-    });
-  }, [command, skipPermissions, onResult]);
+  const color = flashed ? "var(--st-done)" : highlighted ? "var(--accent-ochre)" : "var(--fg-2)";
+  const subtitleColor = flashed ? "var(--st-done)" : highlighted ? "var(--fg-2)" : "var(--fg-3)";
+  // De-emphasis by opacity (ADR-0016): a non-highlighted tab rests dimmed and
+  // brightens slightly on hover (pointer feedback only); the highlighted tab (and
+  // a flash) always render at full strength.
+  const opacity = highlighted || flashed ? 1 : hover ? 0.85 : 0.55;
 
-  const flashed = feedback !== "idle";
-  const armed = skipPermissions === true && !flashed;
-
-  // aw-068 (press de-inverted): ONE resting chrome for every card — the quiet look
-  // (--surface-1 fill / --fg-2 text / plain --hairline border). HOVER and PRESS share
-  // ONE bright chrome (--surface-2 / --fg-1 / --hairline-strong) so the card NEVER
-  // swaps text↔fill — the earlier press "inverse fill" (--fg-1 bg + --surface-0 text)
-  // read as a THEME INVERSION (dark-on-press in light mode, light-on-press in dark).
-  // Text always stays an --fg token, fill always a --surface token. Hover RAISES the
-  // card (the bright chrome + a --shadow-md lift); PRESS keeps the same bright chrome
-  // but DROPS the lift, so a click reads as the card pressing IN. Precedence keeps the
-  // launched/copied flash on top. NO ochre (ADR-0016).
-  const active = (hover || pressed) && !flashed;     // bright hover/press chrome (in-theme)
-  const lifted = hover && !pressed && !flashed;      // raised --shadow-md only while hovering, not pressing
-
-  // Body chrome by state precedence: flashed > active(hover/press) > rest.
-  const bodyColor = flashed ? "var(--st-done)" : active ? "var(--fg-1)" : "var(--fg-2)";
-  const bodyBg = flashed ? "var(--surface-1)" : active ? "var(--surface-2)" : "var(--surface-1)";
-  const bodyBorder = `1px solid ${flashed ? "var(--st-done)" : active ? "var(--hairline-strong)" : "var(--hairline)"}`;
-  // The icon tile is NEUTRAL — a quiet --surface-2 square, never a coloured (ochre)
-  // fill. The glyph hue follows the card state, and turns --obligation while armed
-  // (the aw-021/aw-041 per-launch skip-permissions cue).
-  const tileGlyphColor = flashed
-    ? "var(--st-done)"
-    : armed
-      ? "var(--obligation)"
-      : active ? "var(--fg-1)" : "var(--fg-2)";
-  // The subtitle stays quiet (--fg-3) — legible on both the resting --surface-1 and the
-  // hover/press --surface-2 (no inverse fill to contend with anymore).
-  const subtitleColor = flashed ? "var(--st-done)" : "var(--fg-3)";
-
-  const titleText = flashed ? (feedback === "launched" ? "Launched" : "Copied") : label;
   return html`
     <button
       type="button"
+      role="tab"
+      aria-selected=${highlighted}
       className="focusable"
-      title=${armed
-        ? `${label} — launch ${command} with --dangerously-skip-permissions (armed; copies to clipboard if the bridge is unavailable — the clipboard copy does NOT skip permissions)`
-        : `${label} — launch ${command} (copies to clipboard if the bridge is unavailable)`}
-      aria-label=${armed
-        ? `${label} — ${subtitle} — launch ${command} (skips permissions)`
-        : `${label} — ${subtitle} — launch ${command}`}
+      title=${`${mode.label} — ${mode.subtitle}`}
+      aria-label=${`${mode.label} — ${mode.subtitle}`}
       onClick=${onClick}
       onMouseEnter=${() => setHover(true)}
-      onMouseLeave=${() => { setHover(false); setPressed(false); }}
-      onMouseDown=${() => setPressed(true)}
-      onMouseUp=${() => setPressed(false)}
+      onMouseLeave=${() => setHover(false)}
       style=${{
-        display: "inline-flex", alignItems: "center", gap: 10, textAlign: "left",
-        color: bodyColor,
-        background: bodyBg,
-        border: bodyBorder,
-        borderRadius: "var(--radius-md)", padding: "9px 12px", cursor: "pointer",
-        boxShadow: lifted ? "var(--shadow-md)" : "none",
-        transition: "color var(--duration-fast) var(--ease-base), box-shadow var(--duration-fast) var(--ease-base), background var(--duration-fast) var(--ease-base), border-color var(--duration-fast) var(--ease-base)",
-      }}>
-      ${/* Square NEUTRAL icon tile — token --surface-2, never ochre. */ ""}
-      <span aria-hidden="true" style=${{
-        display: "inline-flex", alignItems: "center", justifyContent: "center",
-        width: 30, height: 30, flexShrink: 0,
-        background: "var(--surface-2)", border: "1px solid var(--hairline)",
+        display: "inline-flex", alignItems: "center", gap: 8, textAlign: "left",
+        flex: "1 1 0", minWidth: 0,
+        color,
+        background: "transparent",
+        border: "none",
         borderRadius: "var(--radius-sm)",
+        padding: "6px 10px", cursor: "pointer",
+        opacity,
+        // ADR-0051's ochre wayfinding mark on the highlighted tab only — the
+        // nav-rail inset idiom (inset 2px 0 0), turned into a bottom underline for
+        // this horizontal row. NO ochre on a non-highlighted tab (ADR-0016).
+        boxShadow: highlighted && !flashed ? "inset 0 -2px 0 var(--accent-ochre)" : "none",
+        transition: "color var(--duration-fast) var(--ease-base), opacity var(--duration-fast) var(--ease-base), box-shadow var(--duration-fast) var(--ease-base)",
       }}>
-        <${Icon} name=${icon} size=${15} color=${tileGlyphColor} />
-      </span>
-      ${/* Two-line label: bold title over a quiet subtitle. */ ""}
-      <span style=${{ display: "inline-flex", flexDirection: "column", gap: 1, lineHeight: 1.25 }}>
+      <${Icon} name=${mode.icon} size=${13} color=${color} />
+      <span style=${{ display: "inline-flex", flexDirection: "column", gap: 0, lineHeight: 1.2, minWidth: 0 }}>
         <span style=${{
-          fontFamily: "var(--font-ui)", fontSize: 12.5,
-          fontWeight: 550,
-          color: bodyColor,
+          fontFamily: "var(--font-ui)", fontSize: 12, fontWeight: 600, color,
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
         }}>${titleText}</span>
         <span style=${{
-          fontFamily: "var(--font-ui)", fontSize: 11, fontWeight: 400,
-          color: subtitleColor,
-        }}>${subtitle}</span>
+          fontFamily: "var(--font-ui)", fontSize: 10.5, fontWeight: 400, color: subtitleColor,
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+        }}>${mode.subtitle}</span>
       </span>
     </button>`;
 }
@@ -988,25 +931,87 @@ async function defaultFetchInFlight() {
   return res.text();
 }
 
+// The board prompt bar — REBUILT (agentic-workflow-bz3az) from aw-065/aw-068's
+// "Prompt" title + row of flat launch cards into the 1b DOCKED two-row console:
+// a top row of four mode tabs (PromptModeTab, name + one-line meaning) and a
+// bottom row of a `❯` chevron + the single-line auto-growing prompt field +
+// a `⌘↵` hint + the ochre Enter button. It docks bottom-center over the board
+// (position: fixed, ~780px, a raised surface + --shadow-lg, above the board in
+// z-order) rather than sitting in the normal document flow — so it never pushes
+// the board content, and (being fixed to the VIEWPORT, not the aw-067
+// `scroll-quiet` content region) it stays put while the board scrolls beneath it.
+//
+// The keyboard model is ADR-0050's, carried by the pure `prompt-mode.js`
+// (PROMPT_MODES / clampPromptModeIndex / nextPromptModeIndex / promptBarKeyIntent):
+// a single committed `highlightedMode` index (never four independent booleans),
+// defaulting to Quick Capture (0) on mount and resetting to 0 after every
+// successful launch. Every trigger that can fire a mode's command — clicking its
+// tab, the Enter button, or Ctrl+Enter — routes through the ONE `fire(modeIndex)`
+// function below, so all three are behaviourally identical: the same seeded
+// command, the same `launchOrCopy` bridge-or-clipboard path, the same armed
+// `skipPermissions` thread, the same `onResult` clear-textarea + confetti + reset.
+//
+// Preserved unchanged from aw-023/aw-036/aw-038/aw-h7n2c: `sanitizePromptLine`
+// (single-line input), `autoGrowField` (auto-grow band), the four seeded
+// commands' trimmed-or-bare-fallback contract (now reached via
+// `PROMPT_MODES[i].commandFor`), and the silent clipboard fallback.
 function BoardPromptBar({ skipPermissions = false }) {
   const [prompt, setPrompt] = useState("");
   const [confettiKey, setConfettiKey] = useState(0);
+  // ADR-0050's single committed selection channel — one index into PROMPT_MODES,
+  // never a per-tab boolean set. Defaults to Quick Capture (0) on mount.
+  const [highlightedMode, setHighlightedMode] = useState(DEFAULT_PROMPT_MODE_INDEX);
+  // The launched/copied flash, shared across every trigger (tab click, Enter
+  // button, Ctrl+Enter) — it always paints on the HIGHLIGHTED tab, since a
+  // keyboard-fired launch has no clicked element of its own to flash.
+  const [feedback, setFeedback] = useState("idle");
   // The single-line auto-grow (aw-038) holds a ref to the textarea so the field can
-  // measure its own scrollHeight to grow/shrink to fit. (Before aw-042 this ref ALSO
-  // fed the confetti origin/aim; the celebration now fires from a centered origin
-  // with no textarea geometry, so the ref serves auto-grow only.)
+  // measure its own scrollHeight to grow/shrink to fit.
   const textareaRef = useRef(null);
+  const timer = useRef(null);
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
 
   // Fire only on a successful launch / landed copy (aw-023). A fully-silent action
   // (clipboard blocked too) leaves the textarea and plays no confetti. The field is
-  // re-measured after the clear so it shrinks back to one line (aw-038).
+  // re-measured after the clear so it shrinks back to one line (aw-038). ADR-0050's
+  // default/reset: the highlight also resets to Quick Capture (0) here, mirroring
+  // the existing clear + confetti reset path.
   const onResult = useCallback((res) => {
     const succeeded = res && (res.via === "bridge" || res.copied === true);
     if (!succeeded) return;
     setPrompt("");
     autoGrowField(textareaRef.current, PROMPT_FIELD_MAX_PX);
     setConfettiKey((k) => k + 1);
+    setHighlightedMode(DEFAULT_PROMPT_MODE_INDEX);
   }, []);
+
+  // The ONE launch path every trigger (tab click / Enter button / Ctrl+Enter)
+  // calls — so "identical to clicking the highlighted tab" (ADR-0050) is true by
+  // construction, not by keeping three call sites in sync by hand.
+  const fire = useCallback((modeIndex) => {
+    const idx = clampPromptModeIndex(modeIndex);
+    const command = PROMPT_MODES[idx].commandFor(prompt);
+    const fetchImpl = typeof window !== "undefined" && typeof window.fetch === "function"
+      ? window.fetch.bind(window)
+      : undefined;
+    return launchOrCopy({ prompt: command, fetchImpl, copy: copyToClipboard, skipPermissions: skipPermissions === true }).then((res) => {
+      onResult(res);
+      if (res.via === "bridge") setFeedback("launched");
+      else if (res.copied) setFeedback("copied");
+      else return; // clipboard blocked too — stay silent.
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => setFeedback("idle"), 1100);
+    });
+  }, [prompt, skipPermissions, onResult]);
+
+  // Clicking a tab moves the committed highlight to it AND launches it — the
+  // unchanged click-to-launch contract, now additionally updating the highlight
+  // before it fires (ADR-0050 "two orthogonal channels": click is a deliberate
+  // act on the committed-selection channel, unlike hover).
+  const onTabClick = useCallback((index) => {
+    setHighlightedMode(index);
+    fire(index);
+  }, [fire]);
 
   // Single-line input: sanitize newlines OUT of every change (a multi-line paste
   // collapses to one line), store the result, then re-measure for auto-grow.
@@ -1015,75 +1020,102 @@ function BoardPromptBar({ skipPermissions = false }) {
     autoGrowField(e.currentTarget, PROMPT_FIELD_MAX_PX);
   }, []);
 
-  // Swallow Enter (aw-038): the field authors ONE logical line, so Enter (and
-  // Shift+Enter — no special case) must insert no newline and trigger no launch.
-  // preventDefault stops the newline; the bar has no submit-on-Enter, so nothing
-  // launches.
+  // The prompt field's ONE keydown classifier (ADR-0050 invariant 4 —
+  // `promptBarKeyIntent` returns exactly one of four disjoint labels, so bare
+  // Enter and Ctrl+Enter can never collide or double-handle the same keystroke):
+  //   swallow -> no newline, no launch (aw-038, untouched).
+  //   cycle   -> moves the highlight (nextPromptModeIndex, total wraparound),
+  //              launches nothing.
+  //   launch  -> fires the highlighted mode exactly as a click on that tab would.
+  //   pass    -> ordinary typing / unmodified navigation — no interception.
   const onPromptKeyDown = useCallback((e) => {
-    if (e.key === "Enter") e.preventDefault();
-  }, []);
+    const intent = promptBarKeyIntent(e);
+    if (intent === PROMPT_KEY_INTENT.SWALLOW) {
+      e.preventDefault();
+      return;
+    }
+    if (intent === PROMPT_KEY_INTENT.CYCLE) {
+      e.preventDefault();
+      const direction = e.key === "ArrowRight" ? 1 : -1;
+      setHighlightedMode((current) => nextPromptModeIndex(current, direction));
+      return;
+    }
+    if (intent === PROMPT_KEY_INTENT.LAUNCH) {
+      e.preventDefault();
+      fire(highlightedMode);
+    }
+  }, [fire, highlightedMode]);
+
+  const activeMode = PROMPT_MODES[highlightedMode];
 
   return html`
-    <section aria-label="Author a prompt, then launch a capture or modeling session" style=${{
-      position: "relative",
-      display: "flex", flexDirection: "column", gap: 10,
-      padding: "0 4px 20px",
+    <section aria-label="Author a prompt, then choose a mode to launch" style=${{
+      position: "fixed", left: "50%", bottom: 20, transform: "translateX(-50%)",
+      width: 780, maxWidth: "calc(100vw - 40px)", zIndex: 40,
+      display: "flex", flexDirection: "column", gap: 8,
+      background: "var(--surface-1)", border: "1px solid var(--hairline-strong)",
+      borderRadius: "var(--radius-md)", boxShadow: "var(--shadow-lg)",
+      padding: "10px 14px 12px",
     }}>
-      ${/* aw-073: the What's next advisory recommendation panel sits ABOVE the
-            "Prompt" title (board view only). It self-suppresses when the artifact is
-            absent or the current recommendation was dismissed, so it composes cleanly
-            with the prompt field + the three PromptLaunchCards below. */ ""}
-      <${WhatsNextPanel} />
-      <span style=${{
-        fontFamily: "var(--font-ui)", fontSize: 15, fontWeight: 600,
-        letterSpacing: "-0.01em", color: "var(--fg-1)",
-      }}>Prompt</span>
-      <textarea
-        ref=${textareaRef}
-        className="focusable"
-        aria-label="Prompt for the launched session"
-        placeholder="Type a prompt, then choose how to file it — Quick Capture or Modeling…"
-        rows=${1}
-        value=${prompt}
-        onChange=${onPromptChange}
-        onKeyDown=${onPromptKeyDown}
-        style=${{
-          resize: "none", minHeight: PROMPT_FIELD_MIN_PX, maxHeight: PROMPT_FIELD_MAX_PX,
-          overflowX: "hidden", overflowY: "auto",
-          fontFamily: "var(--font-ui)", fontSize: 13, lineHeight: 1.5,
-          color: "var(--fg-1)", background: "var(--surface-1)",
-          border: "1px solid var(--hairline)", borderRadius: "var(--radius-md)",
-          padding: "10px 12px",
-          transition: "border-color var(--duration-fast) var(--ease-base)",
-        }}
-        onFocus=${(e) => { e.currentTarget.style.borderColor = "var(--hairline-strong)"; }}
-        onBlur=${(e) => { e.currentTarget.style.borderColor = "var(--hairline)"; }} />
-      <div role="group" aria-label="Start a session seeded with the prompt above" style=${{
-        position: "relative",
-        display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap",
+      ${/* Row 1: the four mode tabs — the single committed highlight (ADR-0050),
+            painted per ADR-0051 (highlighted = ochre) / ADR-0016 (the rest dimmed). */ ""}
+      <div role="tablist" aria-label="Choose how to launch the prompt" style=${{
+        display: "flex", alignItems: "stretch", gap: 4,
       }}>
-        ${/* aw-068: all three cards share ONE resting chrome and HIGHLIGHT on hover +
-              flash on press (the interaction lives in PromptLaunchCard). Quick Capture
-              no longer wears a per-button emphasis — the three read identically. */ ""}
-        <${PromptLaunchCard} label="Quick Capture" subtitle="File it fast"
-          command=${quickCaptureCommandFor(prompt)} icon="plus"
-          skipPermissions=${skipPermissions} onResult=${onResult} />
-        <${PromptLaunchCard} label="Modeling" subtitle="Shape into structure"
-          command=${modelingCommandFor(prompt)} icon="compass"
-          skipPermissions=${skipPermissions} onResult=${onResult} />
-        ${/* aw-h7n2c: Inquire sits BETWEEN Modeling and Research — same quiet/secondary
-              card treatment, the new message-circle-question glyph (design-system-r4k8m),
-              no per-card emphasis. Asks the codebase a question via the inquire skill. */ ""}
-        <${PromptLaunchCard} label="Inquire" subtitle="Ask the codebase"
-          command=${inquireCommandFor(prompt)} icon="message-circle-question"
-          skipPermissions=${skipPermissions} onResult=${onResult} />
-        <${PromptLaunchCard} label="Research" subtitle="Dig deeper"
-          command=${researchCommandFor(prompt)} icon="search"
-          skipPermissions=${skipPermissions} onResult=${onResult} />
-        ${/* aw-068: the decorative right-of-row helper + keyboard chip (aw-065) is
-              removed — the textarea placeholder already states the flow. */ ""}
-        <${BoardConfetti} fireKey=${confettiKey} />
+        ${PROMPT_MODES.map((mode, index) => html`
+          <${PromptModeTab} key=${mode.id} mode=${mode}
+            highlighted=${highlightedMode === index}
+            feedback=${feedback}
+            onClick=${() => onTabClick(index)} />`)}
       </div>
+      ${/* Row 2: chevron + single-line auto-growing field + ⌘↵ hint + the ochre
+            Enter button (ADR-0048's already-licensed primed-primary-action carve-out). */ ""}
+      <div style=${{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span aria-hidden="true" style=${{
+          fontFamily: "var(--font-ui)", fontSize: 14, color: "var(--fg-3)", flexShrink: 0,
+        }}>❯</span>
+        <textarea
+          ref=${textareaRef}
+          className="focusable"
+          aria-label="Prompt for the launched session"
+          placeholder="Type a prompt, then choose a mode to launch it…"
+          rows=${1}
+          value=${prompt}
+          onChange=${onPromptChange}
+          onKeyDown=${onPromptKeyDown}
+          style=${{
+            flex: 1, resize: "none", minHeight: PROMPT_FIELD_MIN_PX, maxHeight: PROMPT_FIELD_MAX_PX,
+            overflowX: "hidden", overflowY: "auto",
+            fontFamily: "var(--font-ui)", fontSize: 13, lineHeight: 1.5,
+            color: "var(--fg-1)", background: "var(--surface-0)",
+            border: "1px solid var(--hairline)", borderRadius: "var(--radius-md)",
+            padding: "8px 10px",
+            transition: "border-color var(--duration-fast) var(--ease-base)",
+          }}
+          onFocus=${(e) => { e.currentTarget.style.borderColor = "var(--hairline-strong)"; }}
+          onBlur=${(e) => { e.currentTarget.style.borderColor = "var(--hairline)"; }} />
+        <span aria-hidden="true" title="Ctrl+Enter launches the highlighted mode" style=${{
+          fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--fg-4)",
+          border: "1px solid var(--hairline)", borderRadius: "var(--radius-sm)",
+          padding: "2px 6px", flexShrink: 0,
+        }}>⌘↵</span>
+        <button
+          type="button"
+          className="focusable"
+          title=${`Launch ${activeMode.label} — ${activeMode.commandFor(prompt)}`}
+          aria-label=${`Launch ${activeMode.label}`}
+          onClick=${() => fire(highlightedMode)}
+          style=${{
+            display: "inline-flex", alignItems: "center", gap: 5, flexShrink: 0,
+            fontFamily: "var(--font-ui)", fontSize: 12.5, fontWeight: 600,
+            color: "var(--accent-ochre)", background: "var(--accent-ochre-soft)",
+            border: "1px solid var(--accent-ochre)", borderRadius: "var(--radius-sm)",
+            padding: "8px 14px", cursor: "pointer",
+          }}>
+          Enter
+        </button>
+      </div>
+      <${BoardConfetti} fireKey=${confettiKey} />
     </section>`;
 }
 
@@ -1669,7 +1701,13 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
   // the still-clamped overflow, never auto-expanding.
   return html`
     <div>
-      <${BoardPromptBar} skipPermissions=${skipPermissions} />
+      ${/* agentic-workflow-bz3az: BoardPromptBar is now the 1b DOCKED bottom-center
+            console (position: fixed) — it no longer hosts WhatsNextPanel internally
+            (that would float it inside a fixed overlay). WhatsNextPanel renders here
+            instead, in-flow, above the BoardHeader count strip, exactly where the old
+            "Prompt" title used to sit — unchanged DELETE-dismiss wiring (aw-vmk1z) and
+            SSE re-fetch (aw-073). */ ""}
+      <${WhatsNextPanel} />
       <div style=${{ paddingTop: 18, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <${BoardHeader} count=${total} />
       </div>
@@ -1700,6 +1738,10 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
       <${EdgeBlinkOverlay} scrollContainerRef=${scrollContainerRef}
         top=${Object.values(edgeBlinks).includes("above")}
         bottom=${Object.values(edgeBlinks).includes("below")} />
+      ${/* The 1b docked bottom-center console (position: fixed) — rendered as a
+            sibling anywhere in this tree since its own fixed positioning takes it
+            out of the document flow regardless of DOM order. */ ""}
+      <${BoardPromptBar} skipPermissions=${skipPermissions} />
     </div>`;
 }
 

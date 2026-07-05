@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 128
+- **Doing:** 0
+- **Done:** 129
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-bz3az** — Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab (feature) — `doing/agentic-workflow-bz3az-prompt-bar-modes-keyboard-model.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-bz3az** — Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab (feature) — `done/agentic-workflow-bz3az-prompt-bar-modes-keyboard-model.md`
 - **agentic-workflow-qf945** — Reverse ADR-0015 per-column scope — one board-wide view lens, per-(column,BC) collapse/peek retained (amend in place) (decision) — `done/agentic-workflow-qf945-board-wide-view-lens-amend-adr-0015.md`
 - **agentic-workflow-wsfsk** — Left nav — 1a single-panel shape (width, tree label, footer status line) (feature) — `done/agentic-workflow-wsfsk-left-nav-1a-single-panel-shape.md`
 - **agentic-workflow-a2pm1** — What's Next panel — 3-step flight plan with ochre step-2 hero (feature) — `done/agentic-workflow-a2pm1-whats-next-flight-plan-hero.md`

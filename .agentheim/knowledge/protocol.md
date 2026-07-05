@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 11:44 -- Task verified and completed: agentic-workflow-bz3az - Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-bz3az - Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab
+**Summary:** Rebuilt the board prompt bar into the ADR-0050/0051 docked bottom-center console — four keyboard-committed mode tabs with a new pure prompt-mode.js module (cycle/launch/swallow keyboard model) plus an ochre-licensed highlighted tab and Enter button, replacing the flat PromptLaunchCard row
+**Duration:** 20m
+**Verification:** PASS (iteration 1)
+**Files changed:** 8
+**Tests added:** 20
+**ADRs written:** none
+
+---
+
 ## 2026-07-05 11:24 -- Batch started: [agentic-workflow-bz3az]
 
 **Type:** Work / Batch start

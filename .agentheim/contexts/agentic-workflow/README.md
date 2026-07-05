@@ -275,34 +275,59 @@ separate BC, but today the whole tool lives in this one.
   session runs the full **cascade** dismiss with its own re-confirmation of the dependent
   subtree (ADR-0022). Threads the armed `skipPermissions` signal (agentic-workflow-051) like
   every other launch. See ADR-0022, ADR-0017, ADR-0018, ADR-0019, ADR-0003, ADR-0016.
-- **Board prompt bar (Quick Capture / Modeling / Inquire / Research)** — a prompt **field**
-  rendered on the **board view only**, above the `Board` count strip (agentic-workflow-023),
-  with a board-local `Prompt` title above it (aw-054). The field is a single-logical-line,
-  auto-growing `<textarea>` (aw-038): soft-wraps with no horizontal scrollbar, auto-grows up to
-  a max then scrolls, **Enter is swallowed** (no newline, no launch), and every change runs
-  through the pure `sanitizePromptLine` so the stored value can never hold a newline. Four
-  launch buttons render as icon-tile + title/subtitle `PromptLaunchCard`s (aw-065): **Quick
-  Capture** (emphasised — the primary surface treatment), **Modeling**, **Inquire**
-  (agentic-workflow-h7n2c, seeds the read-only `inquire` skill), and **Research** — all
-  quiet/secondary except Quick Capture, deliberately never using the reserved
-  `--accent-ochre-soft` selection accent (ADR-0016). Each seeds its slash command with the
-  **trimmed** textarea contents appended; an empty/whitespace textarea falls back to the bare
-  command. On a successful launch or clipboard copy the textarea clears and a board-local
-  **confetti** burst plays (canvas-confetti, aw-034/aw-042's "realistic look" preset,
-  `prefers-reduced-motion` aware). Every button opens a real interactive Claude session through
-  the VS Code **bridge** (ADR-0018): the frontend discovers the listener via `GET /api/bridge`
-  (infrastructure-014), confirms with `GET /health`, then `POST /run { prompt }`.
-  **Bridge-absence is a normal mode, never an error** — any failure falls back **silently** to a
-  clipboard copy with the same quiet "Copied" feedback. The launch-vs-copy decision is the pure,
-  framework-free `launchOrCopy` (`dashboard/app/bridge-launch.js`, unit-tested) — every other
-  launch button (Work, What's next, Refine/Promote, Dismiss, Stop) shares this one path, with
-  command strings sourced from `dashboard/app/modeling-command.js`. Launching a session is an
-  **external side-effect**, not a lifecycle write (ADR-0001). See ADR-0018, ADR-0003, ADR-0001,
-  ADR-0009.
+- **Board prompt bar — the docked two-row console (Quick Capture / Modeling / Inquire /
+  Research)** — rebuilt (agentic-workflow-bz3az) from aw-023/aw-065/aw-068's board-flow "Prompt"
+  title + row of flat launch cards into the 1b **docked bottom-center console**:
+  `position: fixed`, ~780px, a raised `--surface-1` panel at the `--shadow-lg` elevation, above
+  the board in z-order — so it never pushes board content and stays put through the aw-067
+  `scroll-quiet` scroll. Two rows: a **top row of four mode tabs** (`PromptModeTab`, one per
+  `PROMPT_MODES` entry — Quick Capture · Modeling · Inquire · Research, each a name + one-line
+  meaning) and a **bottom row** of a `❯` chevron, the single-logical-line auto-growing
+  `<textarea>` (aw-038, unchanged: soft-wraps, grows to a max then scrolls, every change runs
+  through `sanitizePromptLine`), a `⌘↵` keyboard hint, and an **ochre Enter button**.
+  - **Keyboard-committed selection model (ADR-0050, `dashboard/app/prompt-mode.js`)** — the four
+    modes carry a single committed `highlightedMode` **index**, not four independent booleans:
+    `PROMPT_MODES` (fixed order, each `{label, subtitle, icon, commandFor}`),
+    `clampPromptModeIndex` (the one in-range guard every call site uses),
+    `nextPromptModeIndex(current, direction)` (total, wrapping cycle — Ctrl+→ past Research
+    wraps to Quick Capture, Ctrl+← before Quick Capture wraps to Research), and
+    `promptBarKeyIntent(event)` (classifies every keydown into exactly one of **swallow** — bare
+    Enter, aw-038, unchanged — **cycle** — Ctrl+←/→ — **launch** — Ctrl+Enter — or
+    **pass-through**, so bare Enter and Ctrl+Enter can never collide). Defaults to Quick Capture
+    (index 0) on mount and **resets to 0 after every successful launch**. **Two orthogonal
+    channels:** the committed highlight changes only on a deliberate act (a tab click, or
+    Ctrl+←/→); hover is a separate, transient, presentation-only channel that never reads or
+    writes it. Every trigger that can fire a mode's command — clicking its tab, the Enter
+    button, or Ctrl+Enter — routes through the ONE `fire(modeIndex)` function in
+    `BoardPromptBar`, so all three are behaviourally identical: the same seeded command (now
+    reached via `PROMPT_MODES[i].commandFor(prompt)` rather than four loose board.js imports),
+    the same `launchOrCopy` bridge-or-clipboard path, the same armed `skipPermissions` thread,
+    the same `onResult` clear-textarea + confetti + highlight-reset. `prompt-mode.js` is a fifth
+    pure, framework-free, `node --test`-covered module in the `board-sort.js`/`board-group.js`/
+    `search-results.js` family.
+  - **Paint (ADR-0051 amending ADR-0048; ADR-0016 for the rest)** — the highlighted tab alone
+    wears the bounded ochre wayfinding exception (`--accent-ochre` text + an ochre inset
+    underline, the nav-rail idiom turned into a horizontal underline) — the **second** surface
+    ADR-0048's carve-out names, beside the nav-rail active item. The other three tabs
+    de-emphasize by opacity (ADR-0016's unchanged default) — no ring, no new hue. The Enter
+    button wears the already-licensed ADR-0048 "primed primary action" `cta` treatment
+    (`--accent-ochre` text on `--accent-ochre-soft`, an `--accent-ochre` border).
+  - Every launch opens a real interactive Claude session through the VS Code **bridge**
+    (ADR-0018): `GET /api/bridge` (infrastructure-014) discovers the listener, `GET /health`
+    confirms it, `POST /run { prompt }` fires it. **Bridge-absence is a normal mode, never an
+    error** — any failure falls back **silently** to a clipboard copy with the same quiet
+    "Copied" feedback, via the same pure `launchOrCopy` (`dashboard/app/bridge-launch.js`) every
+    other launch button shares. Launching a session is an **external side-effect**, not a
+    lifecycle write (ADR-0001). `WhatsNextPanel` no longer composes inside this bar (it would
+    float inside the fixed overlay) — it renders directly in `DashboardBoard`, in-flow, above the
+    `BoardHeader` count strip, its dismiss/SSE wiring unchanged. See ADR-0050, ADR-0051,
+    ADR-0048, ADR-0018, ADR-0016, ADR-0003, ADR-0001, ADR-0009.
 - **`WhatsNextPanel`** (aw-073 / ADR-0027; dismiss rewired to a bounded on-disk delete by
   aw-vmk1z / ADR-0046; rebuilt into a numbered **flight-plan stepper** by agentic-workflow-a2pm1
-  / ADR-0048) — sits **above** the `Prompt` title: the dashboard half of the What's next
-  feature, reading the single-latest advisory artifact (`.agentheim/state/whats-next.md`)
+  / ADR-0048; hoisted out of the now-fixed `BoardPromptBar` by agentic-workflow-bz3az) — renders
+  directly in `DashboardBoard`, **above** the `BoardHeader` count strip: the dashboard half of
+  the What's next feature, reading the single-latest advisory artifact
+  (`.agentheim/state/whats-next.md`)
   through the existing `/api/doc` body carrier. It is a **glanceable advisory card, not a
   document**: the leading YAML is stripped, and the three named body sections (*where things
   stand* / *recommended move* / *next*) render as **three NUMBERED, CONNECTED steps** — a

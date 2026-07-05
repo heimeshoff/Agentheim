@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-bz3az
 title: Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-05
-completed:
+completed: 2026-07-05
 depends_on: [design-system-vw12e, design-system-rm2yv, agentic-workflow-s7gev, design-system-a31e0, design-system-001-styleguide]
 blocks: []
 tags: [dashboard-redesign, prompt-bar, keyboard]
@@ -94,4 +94,44 @@ and the clear-textarea + confetti reset on a successful launch.
   `depends_on` are in `done/`, including the styleguide gate (design-system-001-styleguide).
 - Sibling caution for the conductor: [[agentic-workflow-c2ver]] also rewrites
   `dashboard/app/board.js` — do not run the two as a parallel wave; sequence bz3az first.
+
+## Outcome
+Rebuilt the board prompt bar into the 1b docked bottom-center console. A new pure module,
+`dashboard/app/prompt-mode.js`, carries ADR-0050's keyboard-committed selection model exactly as
+named: `PROMPT_MODES` (fixed order Quick Capture · Modeling · Inquire · Research, each
+`{label, subtitle, icon, commandFor}`), `clampPromptModeIndex` (in-range guard, defaults invalid
+input to 0), `nextPromptModeIndex(current, direction)` (total, deterministic wraparound both
+directions), and `promptBarKeyIntent(event)` (classifies every keydown into exactly one of
+`swallow`/`cycle`/`launch`/`pass` — bare Enter vs. Ctrl+Enter can never collide). 20 new
+`node --test` cases in `dashboard/test/prompt-mode.test.mjs` cover all four invariants directly.
+
+`board.js`'s `BoardPromptBar` now holds a single `highlightedMode` index (never four per-tab
+booleans), defaulting to Quick Capture and resetting to it after every successful launch. Every
+trigger that can fire a mode — clicking its `PromptModeTab`, the Enter button, or Ctrl+Enter —
+routes through one `fire(modeIndex)` function, so all three share the identical `launchOrCopy`
+bridge-or-clipboard path, armed `skipPermissions` thread, and `onResult` clear+confetti+reset.
+Ctrl+←/→ cycle the highlight without launching; hover is a separate transient channel that never
+touches `highlightedMode`. Paint follows ADR-0051 (highlighted tab: ochre inset underline +
+`--accent-ochre` text) amending ADR-0048, with the other three tabs de-emphasized by opacity
+(ADR-0016) and the Enter button wearing ADR-0048's already-licensed `cta` ochre treatment. The
+console itself is `position: fixed`, ~780px, `--surface-1` at `--shadow-lg`, `zIndex: 40` — docked
+over the board without pushing content or fighting the aw-067 `scroll-quiet` scroll container.
+`WhatsNextPanel` moved out of `BoardPromptBar` (which is now a fixed overlay) into
+`DashboardBoard`, rendering in-flow above `BoardHeader`, with its DELETE-dismiss/SSE wiring
+unchanged.
+
+`board-prompt-bar.test.mjs` was rewritten to guard the new tab/console/keyboard wiring in place of
+the retired flat-card assertions; `whats-next-panel.test.mjs` was updated for the panel's new
+composition site. Full suite green (754 pass / 0 fail); `dashboard/dist/app.js` rebuilt.
+
+Key files:
+- `dashboard/app/prompt-mode.js` — new pure module (ADR-0050's named shape).
+- `dashboard/test/prompt-mode.test.mjs` — new invariant coverage.
+- `dashboard/app/board.js` — `PromptModeTab` (replaces `PromptLaunchCard`), rebuilt
+  `BoardPromptBar`, `WhatsNextPanel` composition moved into `DashboardBoard`.
+- `dashboard/test/board-prompt-bar.test.mjs`, `dashboard/test/whats-next-panel.test.mjs` — updated
+  guards.
+- `dashboard/dist/app.js` — esbuild bundle rebuilt.
+- `.agentheim/contexts/agentic-workflow/README.md` — Board prompt bar / `WhatsNextPanel` bullets
+  rewritten for the docked console + ADR-0050/0051.
 </content>

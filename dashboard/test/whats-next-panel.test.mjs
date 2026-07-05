@@ -91,14 +91,21 @@ test('the retired localStorage dismiss store is not referenced by the panel (ADR
   assert.doesNotMatch(p, /saveDismissed\(/, 'the localStorage dismiss persist must be removed');
 });
 
-test('the panel is composed ABOVE the "Prompt" title in BoardPromptBar', () => {
+// agentic-workflow-bz3az: BoardPromptBar is rebuilt into the ADR-0050 docked
+// bottom-center console (position: fixed) — WhatsNextPanel no longer lives inside
+// it (that would float the advisory panel inside a fixed overlay with no "Prompt"
+// title left to sit above). It renders instead directly in DashboardBoard, in-flow,
+// above the BoardHeader count strip — the same relative position it held before
+// (above the board's own header/content), just hoisted out of the now-fixed bar.
+test('the panel is composed in DashboardBoard, above the BoardHeader count strip', () => {
+  const render = boardSrc.match(/return html`\s*<div>[\s\S]*?<\$\{WhatsNextPanel\}[\s\S]*?<\$\{BoardHeader\}/);
+  assert.ok(render, 'DashboardBoard must render WhatsNextPanel before (above) BoardHeader');
+});
+
+test('WhatsNextPanel is no longer composed inside BoardPromptBar', () => {
   const bar = boardSrc.match(/function BoardPromptBar[\s\S]*?\n}/);
   assert.ok(bar, 'BoardPromptBar must exist');
-  const idxPanel = bar[0].indexOf('<${WhatsNextPanel}');
-  const idxPrompt = bar[0].indexOf('>Prompt<');
-  assert.ok(idxPanel !== -1, 'BoardPromptBar must render the WhatsNextPanel');
-  assert.ok(idxPrompt !== -1, 'BoardPromptBar must render the Prompt title');
-  assert.ok(idxPanel < idxPrompt, 'the panel must sit ABOVE the Prompt title');
+  assert.doesNotMatch(bar[0], /<\$\{WhatsNextPanel\}/, 'BoardPromptBar (now a fixed docked console) must not host WhatsNextPanel');
 });
 
 test('the panel is styleguide-consumed unforked — token-styled, no new design-system child', () => {
