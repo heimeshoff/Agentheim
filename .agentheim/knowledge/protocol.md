@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 02:08 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 30m (first batch start 01:38 → 02:08)
+**Completed:** 5 (first-try PASS: 4, re-dispatched: 0, skipped: 1)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-s7gev: 1, design-system-t896s: 1, agentic-workflow-vk6mc: 1, agentic-workflow-a2pm1: 1, agentic-workflow-wsfsk: 1
+**Commits:** 8 (2 batch-start + s7gev + t896s + vk6mc + a2pm1 + wsfsk + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (all five are dashboard-redesign / styleguide UI-wiring tasks; s7gev's ADR-0050 directly serves the "durable knowledge" success criterion; every human gate stays intact — the styleguide gate re-review remains builder-PENDING for t896s — and all state stays in `.agentheim/` / `dashboard/` / `styleguide/`; no pull toward any non-goal)
+**Carry-over:** inspiration/: left behind (owner: builder reference material — the untracked `inspiration/Agentheim UX Explorations.html` UX-explorations brief, present since before this session; not project bookkeeping, never `work`'s to commit)
+**Notes:** Two waves, five tasks, zero bounces/failures/escalations. **Wave 1** (01:38): s7gev, t896s, vk6mc — a zero-file-overlap batch (ADR-only + design-system/styleguide + one board.js topbar task). s7gev recorded **ADR-0050** fixing the prompt-bar keyboard-committed selection model (single 0-based `highlightedMode` index, four invariants, hover/selection as orthogonal channels; supersedes PromptLaunchCard's "no selection model" stance; names `dashboard/app/prompt-mode.js` for the downstream build [[agentic-workflow-bz3az]]) — verification auto-SKIPPED (decision-only, single ADR). t896s introduced a **dedicated `--radius-card: 10px` token** (grepped every `--radius-md` consumer first; chose isolation over a shared-token bump so Menu/Modal/Drawer keep 8px) and reopened the styleguide gate (builder re-review PENDING). vk6mc recolored the topbar **What's-next button to the ochre `cta`** treatment (`--accent-ochre` on `--accent-ochre-soft`, ADR-0048 carve-out; armed `--obligation` red icon re-verified to win over the ochre, aw-041). **Wave 2** (01:55): a2pm1, wsfsk — both edit `dashboard/app/board.js` but different functions (WhatsNextPanel vs ShellRail), dispatched together with sequential merge-order. a2pm1 rebuilt **WhatsNextPanel into a numbered flight-plan stepper** (position-based circles + connectors, step 2 wearing the licensed `--emphasis-border` hero, dismiss/DELETE + `splitWhatsNextSections` loss-tolerance untouched). wsfsk gave **ShellRail its 1a shape** (236px, WORKSPACE header, a pure loss-tolerant `footerStatusLine` helper, and the active-nav ochre inset rail via a new `RailNavSlot`, ADR-0048 surface-5 wayfinding carve-out cited in-code). All four non-decision tasks first-try PASS; each verifier drove the live dashboard clean (check 8, ADR-0036) on its own bound port. **Shared derived-artifact discipline:** every dashboard task rebuilt `dashboard/dist/app.js`; where two tasks' rebuilds converged on `main` (t896s+vk6mc, then a2pm1+wsfsk) the bundle was **rebuilt from merged `main` source** rather than trusting the 3-way merge of minified output — final suites 734 (wave 1) and 747 (wave 2) green, both wave-2 markers confirmed present in the bundle. **Operational note:** the mechanized `claim` verb threw ENOENT twice because git had pruned the empty `doing/` directories between batches — recreated with `mkdir -p` and the partial frontmatter mutation reverted before re-running (no INDEX/protocol touched on the failed attempts); worth a future guard in `applyTaskMove` to auto-create a missing `doing/`. No concept candidates. The dashboard redesign's topbar, left-nav, and What's-next surfaces are now all landed; the prompt-bar rebuild [[agentic-workflow-bz3az]] and columns/condensed-card wiring [[agentic-workflow-c2ver]] remain in backlog awaiting promotion.
+
+---
+
 ## 2026-07-05 02:07 -- Task verified and completed: agentic-workflow-wsfsk - Left nav — 1a single-panel shape (width, tree label, footer status line)
 
 **Type:** Work / Task completion
