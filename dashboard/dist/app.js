@@ -470,9 +470,13 @@ Failed to fetch \`${e.path}\` from /api/doc.`))}),()=>{u=!1}},[e,r]),v`
         </button>
       </header>
       ${""}
-      <div style=${{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(220px, 1fr))",gap:"14px",alignItems:"start"}}>
+      <div style=${{display:"flex",alignItems:"center",padding:"0 2px"}}>
+        ${l.flatMap((s,u)=>{let d=v`<span key=${`step-circle-${u}`} aria-hidden="true" style=${{display:"inline-flex",alignItems:"center",justifyContent:"center",flexShrink:0,width:22,height:22,borderRadius:"50%",fontFamily:"var(--font-ui)",fontSize:11.5,fontWeight:700,color:"var(--fg-3)",border:"1px solid var(--hairline-strong)",background:"var(--surface-1)"}}>${u+1}</span>`,m=u<l.length-1?v`<span key=${`step-line-${u}`} aria-hidden="true" style=${{flex:1,height:1,minWidth:12,margin:"0 6px",background:"var(--hairline)"}}></span>`:null;return m?[d,m]:[d]})}
+      </div>
+      ${""}
+      <div style=${{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(220px, 1fr))",gap:"14px",alignItems:"start",marginTop:6}}>
         ${l.map((s,u)=>v`
-          <div key=${u} className="scroll-quiet" style=${{display:"flex",flexDirection:"column",gap:4,minWidth:0,maxHeight:196,overflowY:"auto",background:"var(--surface-1)",border:"1px solid var(--hairline)",borderRadius:"var(--radius-md)",padding:"10px 12px"}}>
+          <div key=${u} className="scroll-quiet" style=${{display:"flex",flexDirection:"column",gap:4,minWidth:0,maxHeight:196,overflowY:"auto",background:"var(--surface-1)",border:u===1?"1px solid var(--emphasis-border)":"1px solid var(--hairline)",borderRadius:"var(--radius-md)",padding:"10px 12px",boxShadow:u===1?"0 2px 10px var(--emphasis-border)":"none"}}>
             ${s.heading&&v`<div style=${{fontFamily:"var(--font-ui)",fontSize:11.5,fontWeight:600,letterSpacing:"0.04em",textTransform:"uppercase",color:"var(--fg-4)"}}>${s.heading}</div>`}
             <${vr} source=${s.content} />
           </div>`)}

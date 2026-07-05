@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 02:05 -- Task verified and completed: agentic-workflow-a2pm1 - What's Next panel — 3-step flight plan with ochre step-2 hero
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-a2pm1 - What's Next panel — 3-step flight plan with ochre step-2 hero
+**Summary:** Rebuilt WhatsNextPanel into a numbered, connected flight-plan stepper (three position-numbered circles joined by horizontal connectors above the capped cards), step 2 wearing the licensed --emphasis-border hero; X-dismiss/DELETE wiring and splitWhatsNextSections loss-tolerance unchanged
+**Duration:** 13m
+**Verification:** PASS (iteration 1)
+**Files changed:** 4
+**Tests added:** 5
+**ADRs written:** none
+
+---
+
 ## 2026-07-05 01:53 -- Batch started: [agentic-workflow-a2pm1, agentic-workflow-wsfsk]
 
 **Type:** Work / Batch start

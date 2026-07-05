@@ -300,16 +300,23 @@ separate BC, but today the whole tool lives in this one.
   **external side-effect**, not a lifecycle write (ADR-0001). See ADR-0018, ADR-0003, ADR-0001,
   ADR-0009.
 - **`WhatsNextPanel`** (aw-073 / ADR-0027; dismiss rewired to a bounded on-disk delete by
-  aw-vmk1z / ADR-0046) — sits **above** the `Prompt` title: the dashboard half of the What's
-  next feature, reading the single-latest advisory artifact (`.agentheim/state/whats-next.md`)
+  aw-vmk1z / ADR-0046; rebuilt into a numbered **flight-plan stepper** by agentic-workflow-a2pm1
+  / ADR-0048) — sits **above** the `Prompt` title: the dashboard half of the What's next
+  feature, reading the single-latest advisory artifact (`.agentheim/state/whats-next.md`)
   through the existing `/api/doc` body carrier. It is a **glanceable advisory card, not a
   document**: the leading YAML is stripped, and the three named body sections (*where things
-  stand* / *recommended move* / *next*) lay out as **three side-by-side, height-capped CARD
-  columns** (each scrolling its own overflow) so the strip never pushes the board down. Split
-  by the pure, loss-tolerant `splitWhatsNextSections` (`dashboard/app/whats-next-state.js`);
-  each column renders through the unforked styleguide `Markdown` primitive. Re-fetches on every
-  SSE `tree-changed` frame, shows a staleness cue from the `generated` timestamp (render-only),
-  and is **dismissible** — dismiss now issues `DELETE /api/whats-next`
+  stand* / *recommended move* / *next*) render as **three NUMBERED, CONNECTED steps** — a
+  horizontal connector row of numbered circles above three height-capped CARDs (each scrolling
+  its own overflow), one card per step — so the strip never pushes the board down. Both the
+  circle numbering and the step-2 hero are **position-based, not text-matched**: step 2 (the
+  *second* parsed column, whichever section actually lands there) wears the licensed
+  `--emphasis-border` hero carve-out (a named token border + matching shadow, ADR-0048) — no
+  other surface in the region carries it. Split by the pure, loss-tolerant
+  `splitWhatsNextSections` (`dashboard/app/whats-next-state.js`) — a degraded body just yields
+  fewer circles/cards, never an invented step; each card renders its content through the
+  unforked styleguide `Markdown` primitive. Re-fetches on every SSE `tree-changed` frame, shows
+  a staleness cue from the `generated` timestamp (render-only), and is **dismissible** —
+  dismiss now issues `DELETE /api/whats-next`
   (`dashboard/whats-next-delete.mjs`), the dashboard's one bounded write exception to ADR-0017
   (ADR-0046, amending ADR-0027 §4.5): no request body, no client-supplied path, the target
   derived server-side and asserted against the one allowed absolute path by **exact string

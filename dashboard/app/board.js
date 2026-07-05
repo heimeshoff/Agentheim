@@ -737,12 +737,15 @@ function generatedStamp(body) {
 // slide-over / main-pane reader, this is a
 // GLANCEABLE advisory card, not a document: the leading YAML is STRIPPED (not folded
 // into a "Front matter" <details>, aw-q7m4k) and the three body sections (Where things
-// stand / Recommended move / Next) lay out as three side-by-side COLUMNS instead of one
-// stacked stream. Each column's content still renders through the unforked styleguide
-// Markdown primitive (ADR-0003) — board-local token-matched layout, NO bespoke renderer,
-// no new design-system child. Consumed unforked; light/dark aware for free. The body is
-// split by splitWhatsNextSections (whats-next-state.js) — LOSS-TOLERANT: a degraded body
-// yields whatever columns are parseable, never throws.
+// stand / Recommended move / Next) lay out as three NUMBERED, CONNECTED steps — a
+// flight plan (agentic-workflow-a2pm1) — rather than three plain side-by-side columns
+// (aw-q7m4k's original framing). Step 2 (Recommended move, by position) wears the
+// licensed `--emphasis-border` hero carve-out (ADR-0048). Each step's content still
+// renders through the unforked styleguide Markdown primitive (ADR-0003) — board-local
+// token-matched layout, NO bespoke renderer, no new design-system child. Consumed
+// unforked; light/dark aware for free. The body is split by splitWhatsNextSections
+// (whats-next-state.js) — LOSS-TOLERANT: a degraded body yields whatever steps are
+// parseable, never throws.
 //
 // Behaviour:
 //   - ABSENT artifact (404 / fetch failure) → renders NOTHING (no shell, no error).
@@ -833,37 +836,65 @@ function WhatsNextPanel({ fetchDoc = defaultFetchWhatsNext }) {
           <${Icon} name="x" size=${14} color="currentColor" />
         </button>
       </header>
-      ${/* THREE-COLUMN advisory layout (aw-q7m4k), each column now its own CAPPED CARD
-            (aw-c4t8m): the leading YAML is stripped (no folded "Front matter" section),
-            and each named body section becomes a column with its heading. Each column's
-            content renders through the UNFORKED styleguide Markdown primitive (ADR-0003).
-            Responsive fallback: auto-fit columns with a min track collapse to a single
-            column on a narrow board so the card stays legible.
+      ${/* FLIGHT-PLAN STEPPER (agentic-workflow-a2pm1, ADR-0048 hero carve-out): the
+            advisory's sections now read as CONNECTED, NUMBERED steps instead of three
+            plain columns (superseding aw-q7m4k's plain-column framing). One numbered
+            circle renders per parsed column, joined by a horizontal connector line
+            between consecutive circles. Both the numbering and the step-2 hero below are
+            POSITION-based (the Nth column becomes step N), never keyed to section text —
+            the loss-tolerant splitWhatsNextSections contract (aw-q7m4k / aw-073) still
+            holds: a degraded body just yields fewer circles/lines, never an invented
+            step. */ ""}
+      <div style=${{ display: "flex", alignItems: "center", padding: "0 2px" }}>
+        ${columns.flatMap((col, i) => {
+          const circle = html`<span key=${`step-circle-${i}`} aria-hidden="true" style=${{
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0, width: 22, height: 22, borderRadius: "50%",
+            fontFamily: "var(--font-ui)", fontSize: 11.5, fontWeight: 700,
+            color: "var(--fg-3)", border: "1px solid var(--hairline-strong)",
+            background: "var(--surface-1)",
+          }}>${i + 1}</span>`;
+          const connector = i < columns.length - 1
+            ? html`<span key=${`step-line-${i}`} aria-hidden="true" style=${{
+                flex: 1, height: 1, minWidth: 12, margin: "0 6px",
+                background: "var(--hairline)",
+              }}></span>`
+            : null;
+          return connector ? [circle, connector] : [circle];
+        })}
+      </div>
+      ${/* Each step's own CAPPED CARD (aw-c4t8m unchanged): the leading YAML is
+            stripped (no folded "Front matter" section), and each named body section
+            becomes a card with its heading. Each card's content renders through the
+            UNFORKED styleguide Markdown primitive (ADR-0003). Responsive fallback:
+            auto-fit columns with a min track collapse to a single column on a narrow
+            board so the card stays legible. Card chrome unchanged from aw-c4t8m: a
+            board-local, token-matched --surface-1 fill on a --hairline border, a token
+            radius + padding, height-bounded (maxHeight) and internally scrollable
+            (overflowY: auto, the `scroll-quiet` class) — NO new design-system primitive
+            (ADR-0003).
 
-            aw-c4t8m — CARD CHROME + HEIGHT CAP: each column is wrapped in board-local,
-            token-matched card chrome (a --surface-1 fill on a --hairline border, a token
-            radius + padding) — the board-control precedent, styleguide consumed UNFORKED,
-            NO new design-system primitive (ADR-0003). The card is height-bounded to a
-            compact ~two-ticket-card cap (maxHeight) so the advisory strip never grows to a
-            quarter of the viewport regardless of recommendation length; content past the
-            cap scrolls vertically INSIDE the card (overflowY: auto) wearing the existing
-            quiet styleguide scrollbar (the `scroll-quiet` class, agentheim.css) — the card
-            itself never grows past the cap and never pushes the board down. The cap is a
-            sizing INTENT, not a hard spec: 196px is roughly two compact cards tall. The
-            loss-tolerant contract (aw-q7m4k / aw-073) is untouched — fewer/empty/absent
-            columns still render without throwing. */ ""}
+            STEP 2 HERO (agentic-workflow-a2pm1 / ADR-0048): the SECOND parsed column —
+            positionally, not text-matched, so a degraded body that still yields at least
+            two columns keeps the hero on its second one — wears the licensed emphasis-
+            border carve-out: a NAMED `--emphasis-border` token border + a matching
+            token-driven shadow (never a raw rgba/hex). No other surface in this region
+            references `--emphasis-border` — exactly one hero at a time. */ ""}
       <div style=${{
         display: "grid",
         gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
         gap: "14px",
         alignItems: "start",
+        marginTop: 6,
       }}>
         ${columns.map((col, i) => html`
           <div key=${i} className="scroll-quiet" style=${{
             display: "flex", flexDirection: "column", gap: 4, minWidth: 0,
             maxHeight: 196, overflowY: "auto",
-            background: "var(--surface-1)", border: "1px solid var(--hairline)",
+            background: "var(--surface-1)",
+            border: i === 1 ? "1px solid var(--emphasis-border)" : "1px solid var(--hairline)",
             borderRadius: "var(--radius-md)", padding: "10px 12px",
+            boxShadow: i === 1 ? "0 2px 10px var(--emphasis-border)" : "none",
           }}>
             ${col.heading && html`<div style=${{
               fontFamily: "var(--font-ui)", fontSize: 11.5, fontWeight: 600,

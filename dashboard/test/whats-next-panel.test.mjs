@@ -122,7 +122,9 @@ test('each What\'s Next column is its own card — board-local, token-matched ch
   // Surface fill + --hairline border + radius + padding, all token-referencing
   // (no hardcoded hex; light/dark aware for free; styleguide consumed unforked, ADR-0003).
   assert.match(card, /background:\s*"var\(--surface-1\)"/, 'card carries a token surface fill');
-  assert.match(card, /border:\s*"1px solid var\(--hairline\)"/, 'card carries a --hairline border');
+  // The border is conditional since agentic-workflow-a2pm1 (step 2 wears the
+  // --emphasis-border hero) — every non-hero card still falls back to --hairline.
+  assert.match(card, /:\s*"1px solid var\(--hairline\)"/, 'card carries a --hairline border in the non-hero branch');
   assert.match(card, /borderRadius:\s*"var\(--radius/, 'card carries a token radius');
   assert.match(card, /padding:/, 'card carries padding');
 });
@@ -144,4 +146,44 @@ test('the column card uses the quiet styleguide scrollbar treatment (aw-c4t8m)',
 test('the capped cards keep the responsive auto-fit grid (aw-q7m4k preserved)', () => {
   // The height cap is layered ON the existing responsive grid — it is not replaced.
   assert.match(panel(), /gridTemplateColumns:\s*"repeat\(auto-fit, minmax\(220px, 1fr\)\)"/, 'auto-fit grid preserved');
+});
+
+// The flight-plan stepper (agentic-workflow-a2pm1): three plain columns become three
+// NUMBERED, CONNECTED steps — a numbered circle per parsed column joined by a
+// horizontal connector line, POSITION-based (never text-matched) so the loss-tolerant
+// splitWhatsNextSections contract (aw-q7m4k / aw-073) still holds for a degraded body.
+
+test('the panel renders one numbered stepper circle per parsed column, position-based (agentic-workflow-a2pm1)', () => {
+  const p = panel();
+  assert.match(p, /columns\.flatMap\(\(col, i\) => \{/, 'the stepper walks the parsed columns in document order');
+  assert.match(p, /\$\{i \+ 1\}/, 'each circle is labelled by its 1-based position, not by the section text');
+});
+
+test('consecutive stepper circles are joined by a horizontal connector line, one fewer than the circle count (agentic-workflow-a2pm1)', () => {
+  const p = panel();
+  assert.match(p, /i < columns\.length - 1/, 'a connector only renders BETWEEN two circles — never after the last step');
+  assert.match(p, /height: 1,[\s\S]{0,80}background: "var\(--hairline\)"/, 'the connector is a plain hairline-token horizontal line');
+});
+
+test('step 2 (the second parsed column) wears the --emphasis-border hero treatment, keyed to position not text (agentic-workflow-a2pm1 / ADR-0048)', () => {
+  const p = panel();
+  assert.match(p, /i === 1 \? "1px solid var\(--emphasis-border\)"/, 'the hero border is keyed to the SECOND column position, whichever section actually lands there');
+  assert.match(p, /boxShadow:\s*i === 1 \? "[^"]*var\(--emphasis-border\)[^"]*"/, 'the hero also carries a matching token-driven shadow');
+  assert.doesNotMatch(p, /rgba\(/, 'no raw rgba hero color — the named token only (ADR-0048)');
+});
+
+test('exactly one surface in the region references --emphasis-border — no second hero (agentic-workflow-a2pm1)', () => {
+  const p = panel();
+  const hits = p.match(/var\(--emphasis-border\)/g) || [];
+  // The border reference and its matching shadow both belong to the SAME single step-2
+  // hero card — nowhere else (not the stepper circles, not any other card) uses the token.
+  assert.equal(hits.length, 2, 'the emphasis-border token must appear only on the one step-2 hero card (border + shadow)');
+});
+
+test('the flight-plan stepper does not disturb the existing single X-dismiss control (aw-vmk1z regression) — no reload button', () => {
+  const p = panel();
+  assert.match(p, /Dismiss the What's next recommendation/, 'the dismiss control still renders');
+  assert.match(p, /fetch\("\/api\/whats-next",\s*\{\s*method:\s*"DELETE"\s*\}\)/, 'dismiss still issues the ADR-0046 delete-only endpoint');
+  const buttons = p.match(/<button/g) || [];
+  assert.equal(buttons.length, 1, 'exactly one <button> renders in the panel — the X-dismiss; no reload button introduced');
 });
