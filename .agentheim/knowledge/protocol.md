@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 11:50 -- Modeling / Promoted: agentic-workflow-c2ver - Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-05 11:49 -- Modeling / Refined: agentic-workflow-c2ver - Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label
 
 **Type:** Modeling / Refine

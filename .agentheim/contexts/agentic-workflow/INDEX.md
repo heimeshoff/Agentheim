@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 129
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-c2ver** — Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label (feature) — `todo/agentic-workflow-c2ver-columns-singular-view-chip.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -75,7 +76,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-c2ver** — Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label (feature) — `backlog/agentic-workflow-c2ver-columns-singular-view-chip.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
