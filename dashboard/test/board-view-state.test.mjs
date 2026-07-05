@@ -1,19 +1,28 @@
-// Tests for the dashboard board's persisted view-state store
-// (agentic-workflow-014). This is the single versioned localStorage store that
-// survives a reload: each column's grouped/flat choice, its sort choice, and its
-// per-(column, BC) collapse state. It REVERSES ADR-0009's "no localStorage" clause
-// (and supersedes aw-012's in-session-only sort) — but it is VIEW-STATE ONLY: it
-// never carries lifecycle truth, which stays a projection of disk.
+// Tests for the dashboard board's persisted view-state store — rewritten to the
+// v2 BOARD-WIDE lens shape (agentic-workflow-c2ver, the ADR-0015 amendment landed
+// by agentic-workflow-qf945). The store now carries TWO independent pieces:
+//   - `lens` — ONE `{ grouped, sort }` choice for the WHOLE board (no longer
+//     per-column): the single "View" chip drives all four columns identically.
+//   - `columns` — the per-`(column, BC)` `collapsed[]` section state and the
+//     Done column's `peek` boolean, UNCHANGED in granularity, just re-homed
+//     under `columns` instead of alongside a per-column `grouped`/`sort`.
 //
-// The store is pure over an INJECTED storage backend (no real localStorage needed
-// here), so load/save/merge logic is unit-tested under `node --test` with a tiny
-// in-memory stub. The React wiring in board.js is integration glue around it.
+// `VIEW_STATE_VERSION` bumps to 2. A blob at any OTHER version — including the
+// v1 per-column shape, absent, or malformed JSON — degrades to board-wide
+// defaults (flat + default sort; every column's `collapsed: []`, `peek: false`),
+// never a throw. No field-by-field migration of old per-column sort/grouped
+// values is attempted (a deliberate hard reset, per the ADR).
+//
+// The store is pure over an INJECTED storage backend (no real localStorage
+// needed here), so load/save/merge logic is unit-tested under `node --test`.
+// The React wiring in board.js is integration glue around it.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
   VIEW_STATE_VERSION,
+  defaultLensState,
   defaultColumnState,
   loadViewState,
   saveViewState,
@@ -34,88 +43,144 @@ function memoryStorage(initial) {
   };
 }
 
-test('defaultColumnState is flat + default sort + all-expanded + NOT peeked', () => {
-  const d = defaultColumnState();
-  assert.equal(d.grouped, false);
-  assert.equal(d.sort, DEFAULT_SORT);
-  assert.deepEqual(d.collapsed, []);
-  // aw-m2v8d: the collapse/peek affordance defaults OFF — a column with no stored
-  // preference renders the FULL list. "Expanded by default" is the AC: no stored
-  // state resolves to expanded.
-  assert.equal(d.peek, false);
+test('VIEW_STATE_VERSION is 2 (the board-wide-lens shape)', () => {
+  assert.equal(VIEW_STATE_VERSION, 2);
 });
 
-test('loadViewState on an empty store returns an empty object (every column defaults)', () => {
+test('defaultLensState is flat + default sort — the board-wide default', () => {
+  const l = defaultLensState();
+  assert.equal(l.grouped, false);
+  assert.equal(l.sort, DEFAULT_SORT);
+});
+
+test('defaultColumnState is all-expanded + NOT peeked — no grouped/sort on the leaner per-column shape', () => {
+  const d = defaultColumnState();
+  assert.deepEqual(d.collapsed, []);
+  assert.equal(d.peek, false);
+  assert.equal('grouped' in d, false);
+  assert.equal('sort' in d, false);
+});
+
+test('loadViewState on an empty store returns board-wide defaults and no stored columns', () => {
   const storage = memoryStorage(null);
-  assert.deepEqual(loadViewState(storage), {});
+  const loaded = loadViewState(storage);
+  assert.deepEqual(loaded.lens, defaultLensState());
+  assert.deepEqual(loaded.columns, {});
 });
 
 test('a saved view-state round-trips through load', () => {
   const storage = memoryStorage(null);
   const state = {
-    done: { grouped: true, sort: 'title-asc', collapsed: ['infrastructure'], peek: true },
-    todo: { grouped: false, sort: DEFAULT_SORT, collapsed: [], peek: false },
+    lens: { grouped: true, sort: 'title-asc' },
+    columns: {
+      done: { collapsed: ['infrastructure'], peek: true },
+      todo: { collapsed: [], peek: false },
+    },
   };
   saveViewState(storage, state);
   assert.deepEqual(loadViewState(storage), state);
 });
 
-test('the persisted blob is versioned', () => {
+test('the persisted blob is versioned and nests lens + columns at the top level', () => {
   const storage = memoryStorage(null);
-  saveViewState(storage, { done: defaultColumnState() });
+  saveViewState(storage, { lens: defaultLensState(), columns: { done: defaultColumnState() } });
   const parsed = JSON.parse(storage._raw());
   assert.equal(parsed.version, VIEW_STATE_VERSION);
+  assert.ok(parsed.lens, 'the board-wide lens is nested under the version envelope');
   assert.ok(parsed.columns, 'columns payload is nested under the version envelope');
 });
 
-test('a stored blob from a DIFFERENT version is ignored (returns empty), never throws', () => {
-  const stale = JSON.stringify({ version: VIEW_STATE_VERSION + 999, columns: { done: { grouped: true } } });
-  const storage = memoryStorage(stale);
-  assert.deepEqual(loadViewState(storage), {});
+test('a stored blob from a DIFFERENT version (including the old v1 per-column shape) degrades to board-wide defaults, never throws', () => {
+  const staleV1 = JSON.stringify({
+    version: 1,
+    columns: { done: { grouped: true, sort: 'title-asc', collapsed: ['infrastructure'], peek: true } },
+  });
+  const storage = memoryStorage(staleV1);
+  const loaded = loadViewState(storage);
+  assert.deepEqual(loaded.lens, defaultLensState());
+  assert.deepEqual(loaded.columns, {});
 });
 
-test('malformed JSON in the store degrades to empty, never throws', () => {
+test('malformed JSON in the store degrades to board-wide defaults, never throws', () => {
   const storage = memoryStorage('{not json');
-  assert.deepEqual(loadViewState(storage), {});
+  const loaded = loadViewState(storage);
+  assert.deepEqual(loaded.lens, defaultLensState());
+  assert.deepEqual(loaded.columns, {});
 });
 
-test('a missing/undefined storage backend degrades to empty, never throws', () => {
-  assert.deepEqual(loadViewState(undefined), {});
-  assert.deepEqual(loadViewState(null), {});
+test('a missing/undefined storage backend degrades to board-wide defaults, never throws', () => {
+  assert.deepEqual(loadViewState(undefined).lens, defaultLensState());
+  assert.deepEqual(loadViewState(undefined).columns, {});
+  assert.deepEqual(loadViewState(null).lens, defaultLensState());
   // saving with no backend is a silent no-op, not a throw.
-  assert.doesNotThrow(() => saveViewState(undefined, { done: defaultColumnState() }));
+  assert.doesNotThrow(() => saveViewState(undefined, { lens: defaultLensState(), columns: { done: defaultColumnState() } }));
+});
+
+test('a stored lens with partial/garbage fields is normalized on load (never NaN, never throws)', () => {
+  const blob = JSON.stringify({
+    version: VIEW_STATE_VERSION,
+    lens: { grouped: 'yes', sort: 'bogus-sort' },
+    columns: {},
+  });
+  const storage = memoryStorage(blob);
+  const loaded = loadViewState(storage);
+  assert.equal(loaded.lens.grouped, true);
+  assert.equal(loaded.lens.sort, DEFAULT_SORT);
 });
 
 test('a stored column with partial/garbage fields is normalized on load (never NaN, never throws)', () => {
   const blob = JSON.stringify({
     version: VIEW_STATE_VERSION,
+    lens: defaultLensState(),
     columns: {
-      done: { grouped: 'yes', sort: 'bogus-sort', collapsed: 'not-an-array' },
+      done: { collapsed: 'not-an-array', peek: 'yes' },
       todo: {},
     },
   });
   const storage = memoryStorage(blob);
   const loaded = loadViewState(storage);
-  // grouped coerced to boolean; unknown sort falls back to default; collapsed
-  // forced to an array.
-  assert.equal(loaded.done.grouped, true);
-  assert.equal(loaded.done.sort, DEFAULT_SORT);
-  assert.deepEqual(loaded.done.collapsed, []);
-  assert.equal(loaded.todo.grouped, false);
-  assert.equal(loaded.todo.sort, DEFAULT_SORT);
+  assert.deepEqual(loaded.columns.done.collapsed, []);
+  assert.equal(loaded.columns.done.peek, true);
+  assert.deepEqual(loaded.columns.todo.collapsed, []);
+  assert.equal(loaded.columns.todo.peek, false);
+});
+
+// ---- dormant retention (ADR-0015 amendment): grouping is now board-wide, but
+// per-(column, BC) collapsed[] state must NOT be swept up in the lens — it
+// stays column-scoped and survives the board-wide grouped flag flipping off
+// then back on. ------------------------------------------------------------
+
+test('toggling the board-wide lens does not touch a column collapsed[] — dormant retention', () => {
+  const storage = memoryStorage(null);
+  const withGrouping = {
+    lens: { grouped: true, sort: DEFAULT_SORT },
+    columns: { done: { collapsed: ['infrastructure'], peek: false } },
+  };
+  saveViewState(storage, withGrouping);
+
+  // Flip the board-wide lens to flat, WITHOUT touching the column's collapsed[].
+  const flat = { lens: { grouped: false, sort: DEFAULT_SORT }, columns: withGrouping.columns };
+  saveViewState(storage, flat);
+  assert.deepEqual(loadViewState(storage).columns.done.collapsed, ['infrastructure']);
+
+  // Flip back to grouped — the dormant collapsed[] reappears intact.
+  const regrouped = { lens: { grouped: true, sort: DEFAULT_SORT }, columns: withGrouping.columns };
+  saveViewState(storage, regrouped);
+  assert.deepEqual(loadViewState(storage).columns.done.collapsed, ['infrastructure']);
 });
 
 // ---- aw-m2v8d: the `peek` field (Done column collapse-to-clamped-fade) -------
 
 test('a stored column with peek: true round-trips as peeked', () => {
   const storage = memoryStorage(null);
-  saveViewState(storage, { done: { ...defaultColumnState(), peek: true } });
-  assert.equal(loadViewState(storage).done.peek, true);
+  saveViewState(storage, { lens: defaultLensState(), columns: { done: { ...defaultColumnState(), peek: true } } });
+  assert.equal(loadViewState(storage).columns.done.peek, true);
 });
 
 test('peek is coerced to a boolean (garbage / partial values never throw)', () => {
   const blob = JSON.stringify({
     version: VIEW_STATE_VERSION,
+    lens: defaultLensState(),
     columns: {
       done: { peek: 'yes' },     // truthy non-boolean → true
       todo: { peek: 0 },         // falsy non-boolean → false
@@ -124,63 +189,19 @@ test('peek is coerced to a boolean (garbage / partial values never throw)', () =
   });
   const storage = memoryStorage(blob);
   const loaded = loadViewState(storage);
-  assert.equal(loaded.done.peek, true);
-  assert.equal(loaded.todo.peek, false);
-  assert.equal(loaded.doing.peek, false);
-});
-
-test('an OLD stored blob that predates `peek` loads as peek: false (back-compat, no version bump)', () => {
-  // A blob written before aw-m2v8d carries grouped/sort/collapsed but NO peek
-  // field. It must still load (same VIEW_STATE_VERSION — additive field, no bump)
-  // and every column must resolve to peek: false (expanded — the full list).
-  const oldBlob = JSON.stringify({
-    version: VIEW_STATE_VERSION,
-    columns: {
-      done: { grouped: true, sort: 'title-asc', collapsed: ['infrastructure'] },
-      todo: { grouped: false, sort: DEFAULT_SORT, collapsed: [] },
-    },
-  });
-  const storage = memoryStorage(oldBlob);
-  const loaded = loadViewState(storage);
-  // The pre-existing fields survive untouched...
-  assert.equal(loaded.done.grouped, true);
-  assert.equal(loaded.done.sort, 'title-asc');
-  assert.deepEqual(loaded.done.collapsed, ['infrastructure']);
-  // ...and the missing peek field back-fills to false (expanded).
-  assert.equal(loaded.done.peek, false);
-  assert.equal(loaded.todo.peek, false);
-});
-
-test('an OLD blob carrying aw-072 `hidden: true` migrates to shown + expanded (no blank board, no version bump)', () => {
-  // aw-m2v8d REPLACES aw-072's hide control. A blob that still carries the retired
-  // `hidden: true` flag must NOT blank or break the board: `hidden` is no longer
-  // read, the column loads with peek: false (expanded), and the retired field is
-  // simply dropped on the next save.
-  const oldBlob = JSON.stringify({
-    version: VIEW_STATE_VERSION,
-    columns: {
-      done: { grouped: false, sort: DEFAULT_SORT, collapsed: [], hidden: true },
-    },
-  });
-  const storage = memoryStorage(oldBlob);
-  const loaded = loadViewState(storage);
-  // Degrades to shown + expanded.
-  assert.equal(loaded.done.peek, false);
-  // The retired `hidden` field is not carried forward.
-  assert.equal('hidden' in loaded.done, false);
-  // Re-saving drops `hidden` entirely from the persisted blob.
-  saveViewState(storage, loaded);
-  const reparsed = JSON.parse(storage._raw());
-  assert.equal('hidden' in reparsed.columns.done, false);
+  assert.equal(loaded.columns.done.peek, true);
+  assert.equal(loaded.columns.todo.peek, false);
+  assert.equal(loaded.columns.doing.peek, false);
 });
 
 // ---- aw-m2v8d: peekClampStyle — the pure height-clamp + fade style fragment ---
+// (Unchanged by this rewrite — the clamp is orthogonal to the lens becoming
+// board-wide; still one style fragment derived purely from `peek`.)
 
 test('peekClampStyle(true) clamps height with overflow hidden and a bottom mask fade', () => {
   const style = peekClampStyle(true);
   assert.equal(style.maxHeight, PEEK_MAX_HEIGHT_PX);
   assert.equal(style.overflow, 'hidden');
-  // A bottom-edge fade via mask-image (+ webkit), running over the fade band.
   assert.match(style.maskImage, /linear-gradient\(to bottom/);
   assert.match(style.maskImage, new RegExp(`${PEEK_FADE_PX}px`));
   assert.equal(style.WebkitMaskImage, style.maskImage);
@@ -198,7 +219,6 @@ test('peekClampStyle is defensive — a non-true peek yields the expanded (empty
 });
 
 test('the peek height target is a positive pixel value larger than the fade band', () => {
-  // The clamp is a visual ≈3.5-card height target; the fade band must fit inside it.
   assert.ok(PEEK_MAX_HEIGHT_PX > 0);
   assert.ok(PEEK_FADE_PX > 0);
   assert.ok(PEEK_MAX_HEIGHT_PX > PEEK_FADE_PX);

@@ -125,64 +125,11 @@ function LoadState({ children }) {
     }}>${children}</div>`;
 }
 
-// The per-column sort control. A board-only affordance rendered as a SIBLING of
-// the styleguide ColumnHeader (the board composes the styleguide sub-components and
-// adds its own controls beside them): the styleguide kanban.js is consumed
-// unmodified, never forked (ADR-0003). A plain native <select> styled off the
-// design-system tokens —
-// no new styleguide pattern. Changing it lifts the column's choice into board
-// view-state via onChange; it never reorders anything itself (the pure
-// board-sort.sortTickets does that, board-side, after the projection).
-function ColumnSortControl({ status, value, onChange }) {
-  return html`
-    <label style=${{
-      display: "inline-flex", alignItems: "center", gap: 6,
-    }}>
-      <span style=${{
-        fontFamily: "var(--font-ui)", fontSize: 10.5, color: "var(--fg-4)",
-      }}>Sort</span>
-      <select
-        aria-label=${`Sort ${status} column`}
-        value=${value}
-        onChange=${(e) => onChange(e.target.value)}
-        className="focusable"
-        style=${{
-          fontFamily: "var(--font-ui)", fontSize: 11.5, color: "var(--fg-2)",
-          background: "var(--surface-1)", border: "1px solid var(--hairline)",
-          borderRadius: "var(--radius-sm)", padding: "3px 6px", cursor: "pointer",
-        }}>
-        ${SORT_OPTIONS.map((o) => html`<option key=${o.value} value=${o.value}>${o.label}</option>`)}
-      </select>
-    </label>`;
-}
-
-// The per-column group-by-BC toggle (aw-014). A board-only affordance, SIBLING of
-// the sort control — same precedent: the styleguide kanban.js is consumed
-// unmodified (ADR-0003), the control is native and token-styled, no new styleguide
-// pattern. Flipping it lifts the column's grouped choice into persisted board
-// view-state; the pure board-group.groupTickets does the partitioning at render
-// time, so a live re-projection re-applies the choice rather than resetting it.
-function ColumnGroupToggle({ status, grouped, onToggle }) {
-  return html`
-    <button
-      type="button"
-      className="focusable"
-      aria-pressed=${grouped}
-      aria-label=${`Group ${status} column by bounded context`}
-      onClick=${() => onToggle(!grouped)}
-      style=${{
-        display: "inline-flex", alignItems: "center", gap: 5,
-        fontFamily: "var(--font-ui)", fontSize: 11.5,
-        color: grouped ? "var(--fg-1)" : "var(--fg-2)",
-        background: grouped ? "var(--surface-2)" : "var(--surface-1)",
-        border: `1px solid ${grouped ? "var(--hairline-strong)" : "var(--hairline)"}`,
-        borderRadius: "var(--radius-sm)", padding: "3px 7px", cursor: "pointer",
-        transition: "background var(--duration-fast) var(--ease-base)",
-      }}>
-      <${Icon} name="box" size=${12.5} color=${grouped ? "var(--fg-1)" : "var(--fg-3)"} />
-      <span>Group</span>
-    </button>`;
-}
+// The board-wide "View" chip (agentic-workflow-c2ver) — see its definition
+// below (ViewChip), which replaces the per-column ColumnSortControl +
+// ColumnGroupToggle + ColumnControls strip this comment used to introduce. One
+// chip now drives sort + group identically for all four columns instead of
+// each column carrying its own independent affordance.
 
 // The per-column COLLAPSE / PEEK control (agentic-workflow-m2v8d). REPLACES aw-072's
 // hide control: instead of dropping the column from the layout, it collapses the
@@ -233,23 +180,89 @@ function ColumnCollapseButton({ status, peek, onToggleCollapse, hasHiddenDepende
     </button>`;
 }
 
-// The board-only control strip beneath the styleguide ColumnHeader: sort (left) +
-// group (right). All are board view-state affordances; none forks the styleguide
-// (ADR-0003). The group toggle is pushed to the column's right edge by an auto left
-// margin, mirroring the collapse control above it (refine 2026-06-19). The
-// collapse/peek control is NOT here — it lives up in the header row (BoardColumn),
-// right-aligned beside the column title, so it sits ABOVE the sort + group controls.
-function ColumnControls({ status, sort, onSortChange, grouped, onGroupToggle }) {
+// The single BOARD-WIDE "View" chip (agentic-workflow-c2ver, replacing the
+// per-column ColumnSortControl + ColumnGroupToggle + ColumnControls strip this
+// comment used to sit above). ONE choice — { grouped, sort } — now drives ALL
+// FOUR columns identically (the ADR-0015 amendment's board-wide lens, landed by
+// agentic-workflow-qf945). Composed on the shared Menu primitive (ds-015)
+// UNFORKED — the same trigger-render-prop + floating-panel seam SettingsMenu
+// (below) already uses: the board owns the trigger's look and the panel's
+// contents, the primitive owns the open/close truth, outside-click/Esc
+// dismissal, and the reduced-motion-aware reveal (ADR-0003). The trigger
+// SUMMARIZES the current lens ("Recently modified" or "Recently modified ·
+// grouped by context") so the choice reads at a glance without opening the
+// panel. Neither the sort <select> nor the group toggle button forks the
+// styleguide beyond the unforked Icon glyph already used by the retired
+// per-column controls (aw-012/aw-014 precedent, now board-wide) — same
+// native-control-beside-the-primitives idiom, just one instance instead of four.
+function ViewChip({ sort, onSortChange, grouped, onGroupToggle }) {
+  const sortLabel = (SORT_OPTIONS.find((o) => o.value === sort) || SORT_OPTIONS[0]).label;
+  const summary = grouped ? `${sortLabel} · grouped by context` : sortLabel;
   return html`
-    <div style=${{
-      display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap",
-      padding: "0 4px 12px", marginTop: -4,
-    }}>
-      <${ColumnSortControl} status=${status} value=${sort} onChange=${onSortChange} />
-      <div style=${{ marginLeft: "auto" }}>
-        <${ColumnGroupToggle} status=${status} grouped=${grouped} onToggle=${onGroupToggle} />
-      </div>
-    </div>`;
+    <${Menu}
+      ariaLabel="Board view"
+      align="right"
+      trigger=${({ open, toggle }) => html`
+        <button
+          type="button"
+          className="focusable"
+          aria-haspopup="menu"
+          aria-expanded=${open}
+          aria-label=${`View — ${summary}`}
+          title="View — sort and group the board"
+          onClick=${toggle}
+          style=${{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            fontFamily: "var(--font-ui)", fontSize: 11.5,
+            color: open ? "var(--fg-1)" : "var(--fg-2)",
+            background: open ? "var(--surface-2)" : "var(--surface-1)",
+            border: `1px solid ${open ? "var(--hairline-strong)" : "var(--hairline)"}`,
+            borderRadius: "var(--radius-sm)", padding: "4px 9px", cursor: "pointer",
+            transition: "background var(--duration-fast) var(--ease-base), color var(--duration-fast) var(--ease-base), border-color var(--duration-fast) var(--ease-base)",
+          }}>
+          <${Icon} name="box" size=${12.5} color=${open ? "var(--fg-1)" : "var(--fg-3)"} />
+          <span>${summary}</span>
+          <span aria-hidden="true" style=${{ fontSize: 9, color: "var(--fg-4)" }}>▾</span>
+        </button>`}>
+      <${MenuItem}>
+        <label style=${{ display: "inline-flex", alignItems: "center", gap: 6, width: "100%" }}>
+          <span style=${{ fontFamily: "var(--font-ui)", fontSize: 10.5, color: "var(--fg-4)" }}>Sort</span>
+          <select
+            aria-label="Sort the board"
+            value=${sort}
+            onChange=${(e) => onSortChange(e.target.value)}
+            className="focusable"
+            style=${{
+              fontFamily: "var(--font-ui)", fontSize: 11.5, color: "var(--fg-2)",
+              background: "var(--surface-1)", border: "1px solid var(--hairline)",
+              borderRadius: "var(--radius-sm)", padding: "3px 6px", cursor: "pointer",
+              flex: "1 1 auto",
+            }}>
+            ${SORT_OPTIONS.map((o) => html`<option key=${o.value} value=${o.value}>${o.label}</option>`)}
+          </select>
+        </label>
+      </${MenuItem}>
+      <${MenuItem}>
+        <button
+          type="button"
+          className="focusable"
+          aria-pressed=${grouped}
+          aria-label="Group the board by bounded context"
+          onClick=${() => onGroupToggle(!grouped)}
+          style=${{
+            display: "inline-flex", alignItems: "center", gap: 5, width: "100%",
+            fontFamily: "var(--font-ui)", fontSize: 11.5,
+            color: grouped ? "var(--fg-1)" : "var(--fg-2)",
+            background: grouped ? "var(--surface-2)" : "var(--surface-1)",
+            border: `1px solid ${grouped ? "var(--hairline-strong)" : "var(--hairline)"}`,
+            borderRadius: "var(--radius-sm)", padding: "3px 7px", cursor: "pointer",
+            transition: "background var(--duration-fast) var(--ease-base)",
+          }}>
+          <${Icon} name="box" size=${12.5} color=${grouped ? "var(--fg-1)" : "var(--fg-3)"} />
+          <span>Group by context</span>
+        </button>
+      </${MenuItem}>
+    </${Menu}>`;
 }
 
 // Write `text` to the system clipboard with a graceful, no-throw fallback. The
@@ -1332,7 +1345,7 @@ function BoardCard({ ticket, status, selectedId, onOpen, skipPermissions = false
 }
 
 function BoardColumn({
-  status, tickets, sort, onSortChange, grouped, onGroupToggle,
+  status, tickets, grouped,
   collapsed, onToggleSection, peek = false, onToggleCollapse,
   selectedId, onOpen, skipPermissions = false,
   waitingOn, holdingUp, onCardHover,
@@ -1383,8 +1396,6 @@ function BoardColumn({
               hasHiddenDependency=${doneMarker} />
           </div>`
         : html`<${ColumnHeader} status=${status} count=${tickets.length} />`}
-      <${ColumnControls} status=${status} sort=${sort} onSortChange=${onSortChange}
-        grouped=${grouped} onGroupToggle=${onGroupToggle} />
       ${tickets.length === 0
         ? html`<div style=${{ paddingBottom: 8 }}><${EmptyColumn} status=${status} /></div>`
         : html`
@@ -1482,20 +1493,24 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
   // target is genuinely below the clamp's visible window).
   const [donePeekMarker, setDonePeekMarker] = useState(false);
 
-  // Per-column VIEW LENS — { grouped, sort, collapsed } per column, independent
-  // per column. PERSISTED across reloads via the single versioned localStorage
-  // store (aw-014, reversing ADR-0009's no-localStorage clause; supersedes
-  // aw-012's in-session-only sort). It is VIEW-STATE ONLY: the board's CONTENT
-  // stays a projection of disk, re-fetched on every SSE frame. A column with no
-  // stored state defaults to flat + default sort + all-expanded. The order and
+  // BOARD-WIDE VIEW LENS — { grouped, sort } — ONE choice for the whole board
+  // (agentic-workflow-c2ver, the ADR-0015 amendment landed by
+  // agentic-workflow-qf945), plus the per-`(column, BC)` `collapsed[]` section
+  // state and the Done column's `peek` boolean, RETAINED at their original
+  // column-scoped granularity under `columns`. Both PERSIST across reloads via
+  // the single versioned localStorage store (aw-014, reversing ADR-0009's
+  // no-localStorage clause; supersedes aw-012's in-session-only sort). It is
+  // VIEW-STATE ONLY: the board's CONTENT stays a projection of disk, re-fetched
+  // on every SSE frame. A board with no stored lens defaults to flat + default
+  // sort; a column with no stored state defaults to all-expanded. The order and
   // grouping are DERIVED below at render time, so every loadTree re-projection
   // (SSE tree-changed / reconnect) re-applies the current choice — never resets.
   const [view, setView] = useState(() => {
     const storage = typeof window !== "undefined" ? window.localStorage : null;
     const stored = loadViewState(storage);
-    const v = {};
-    for (const c of COLUMN_ORDER) v[c] = { ...defaultColumnState(), ...(stored[c] || {}) };
-    return v;
+    const columns = {};
+    for (const c of COLUMN_ORDER) columns[c] = { ...defaultColumnState(), ...(stored.columns[c] || {}) };
+    return { lens: stored.lens, columns };
   });
 
   // Persist on every change. A failed preference write is swallowed by the store;
@@ -1505,36 +1520,46 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
     saveViewState(storage, view);
   }, [view]);
 
-  const setColumnSort = useCallback((status, value) => {
-    setView((prev) => (prev[status].sort === value
+  // The ViewChip's board-wide sort choice. Drives sortTickets identically for
+  // all four columns (below) — no column keeps an independent sort.
+  const setLensSort = useCallback((value) => {
+    setView((prev) => (prev.lens.sort === value
       ? prev
-      : { ...prev, [status]: { ...prev[status], sort: value } }));
+      : { ...prev, lens: { ...prev.lens, sort: value } }));
   }, []);
 
-  const setColumnGrouped = useCallback((status, grouped) => {
-    setView((prev) => (prev[status].grouped === grouped
+  // The ViewChip's board-wide group-by-context choice. Drives BoardColumn's
+  // grouped prop identically for all four columns (below) — no column keeps an
+  // independent grouping toggle. Flipping it never clears any column's
+  // persisted `collapsed[]` (dormant retention, ADR-0015 amendment): that state
+  // lives entirely under `view.columns`, untouched by this setter.
+  const setLensGrouped = useCallback((grouped) => {
+    setView((prev) => (prev.lens.grouped === grouped
       ? prev
-      : { ...prev, [status]: { ...prev[status], grouped } }));
+      : { ...prev, lens: { ...prev.lens, grouped } }));
   }, []);
 
   // Collapse / expand one column to a peek (aw-m2v8d, replacing aw-072's hide).
   // Presentation-only: it flips persisted view-state `peek`, which peekClampStyle reads
   // to height-clamp the column body at render time. The column stays in the layout. No
-  // /api write, no lifecycle move (ADR-0017/0001).
+  // /api write, no lifecycle move (ADR-0017/0001). Unaffected by the lens becoming
+  // board-wide — still per-column, just re-homed under view.columns.
   const setColumnPeek = useCallback((status, peek) => {
-    setView((prev) => (prev[status].peek === peek
+    setView((prev) => (prev.columns[status].peek === peek
       ? prev
-      : { ...prev, [status]: { ...prev[status], peek } }));
+      : { ...prev, columns: { ...prev.columns, [status]: { ...prev.columns[status], peek } } }));
   }, []);
 
   // Toggle one (column, BC) section's collapse state. Stored as the list of
   // COLLAPSED BC names per column — absent = expanded (the all-expanded default).
+  // Unaffected by the lens becoming board-wide — still per-column, just
+  // re-homed under view.columns.
   const toggleSection = useCallback((status, bc) => {
     setView((prev) => {
-      const col = prev[status];
+      const col = prev.columns[status];
       const has = col.collapsed.includes(bc);
       const collapsed = has ? col.collapsed.filter((x) => x !== bc) : [...col.collapsed, bc];
-      return { ...prev, [status]: { ...col, collapsed } };
+      return { ...prev, columns: { ...prev.columns, [status]: { ...col, collapsed } } };
     });
   }, []);
 
@@ -1606,7 +1631,7 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
   // The pure narrowing candidate (board-dependency-groups.js): is it even
   // worth running the Done-peek clamp rect check below? False whenever Done
   // isn't peeked or holds no target at all.
-  const donePeekCandidate = donePeekHasHiddenDependency(columns.done, targetIds, view.done.peek);
+  const donePeekCandidate = donePeekHasHiddenDependency(columns.done, targetIds, view.columns.done.peek);
 
   // Ephemeral, hover-scoped DOM/viewport observation (ADR-0033): mounted only
   // while a backlog/todo hover session is active, disconnected on hover-end —
@@ -1716,16 +1741,30 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
             artifact; self-suppresses (renders null) when absent or stale — no zombie
             lane surviving a crashed/killed work session. */ ""}
       <${InFlightLane} />
+      ${/* agentic-workflow-c2ver: the "COLUMNS" section label + the single
+            board-wide ViewChip that replaces the four columns' independent
+            Sort + Group-by-BC controls — driving sort + group identically for
+            every column below (the ADR-0015 amendment's board-wide lens). */ ""}
+      <div style=${{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 4px 10px",
+      }}>
+        <span style=${{
+          fontFamily: "var(--font-ui)", fontSize: 10.5, fontWeight: 600,
+          letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-4)",
+        }}>Columns</span>
+        <${ViewChip} sort=${view.lens.sort} onSortChange=${setLensSort}
+          grouped=${view.lens.grouped} onGroupToggle=${setLensGrouped} />
+      </div>
       <div className="scroll-quiet" style=${{ overflowX: "auto", paddingBottom: 8 }}>
         <div style=${{ minWidth: 880 }}>
           <div style=${{ display: "flex", gap: 20, alignItems: "flex-start" }}>
             ${COLUMN_ORDER.map((status) => html`
               <${BoardColumn} key=${status} status=${status}
-                tickets=${sortTickets(columns[status], view[status].sort)}
-                sort=${view[status].sort} onSortChange=${(v) => setColumnSort(status, v)}
-                grouped=${view[status].grouped} onGroupToggle=${(g) => setColumnGrouped(status, g)}
-                collapsed=${view[status].collapsed} onToggleSection=${(bc) => toggleSection(status, bc)}
-                peek=${view[status].peek}
+                tickets=${sortTickets(columns[status], view.lens.sort)}
+                grouped=${view.lens.grouped}
+                collapsed=${view.columns[status].collapsed} onToggleSection=${(bc) => toggleSection(status, bc)}
+                peek=${view.columns[status].peek}
                 onToggleCollapse=${status === "done" ? (p) => setColumnPeek(status, p) : undefined}
                 selectedId=${selectedId} onOpen=${handleOpen} skipPermissions=${skipPermissions}
                 waitingOn=${waitingOn} holdingUp=${holdingUp} onCardHover=${handleCardHover}

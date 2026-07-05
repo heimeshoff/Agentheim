@@ -156,25 +156,28 @@ separate BC, but today the whole tool lives in this one.
   consumes; the board never writes a lifecycle move. It stays **live** via the SSE stream,
   re-fetching `/api/tree` on any change. Backlog cards carry a *Refine / Promote* launch pair
   (see below) to seed `modeling` commands. See ADR-0009, ADR-0017.
-- **Column sort** — each board column has its own **independent** sort control
-  (agentic-workflow-012), a board-only `<select>` sibling of the styleguide `ColumnHeader`
-  (unmodified, ADR-0003). Orderings: **Name** asc/desc and **Modification-date** desc/asc
-  (per-task `mtimeMs`); default is modification-date descending. `dashboard/app/board-sort.js`
-  (`sortTickets`, unit-tested) is a **pure** function run board-side after `treeToColumns`;
-  ties break by `id` ascending, absent/`null` `mtimeMs` sorts oldest, never a throw. The choice
-  **persists** across reloads in the versioned `localStorage` view-state store (ADR-0015), and
-  re-applies on every live re-projection. See ADR-0015, ADR-0009, ADR-0003.
-- **Column grouping (group by bounded context)** — each board column also has its own
-  **independent** group-by-BC toggle (agentic-workflow-014), a sibling of the sort `<select>`
-  (same board-column precedent, ADR-0003). Toggling **on** partitions cards into per-BC
-  sections (header = BC name + card count; empty BCs render no section; sections sort BC-name
-  ascending). Each section is independently **collapsible**. Pipeline is **project → sort
-  (board-sort.js) → group (board-group.js)** — grouping only partitions, never re-orders, so
-  sort semantics hold inside each section. `groupTickets` (`dashboard/app/board-group.js`,
-  unit-tested) is **pure**; a column with no stored state defaults to flat + default sort +
-  all-expanded. The collapsible header is board-local (the styleguide `TreeGroup` primitive
-  doesn't fit externally-persisted collapse state on `TicketCard`s — flagged as
-  design-system-005 for a shared primitive). See ADR-0015, ADR-0009, ADR-0003.
+- **Board-wide sort + grouping — the "View" chip** (agentic-workflow-012/014, rebuilt
+  **board-wide** by agentic-workflow-c2ver per the ADR-0015 amendment landed by
+  agentic-workflow-qf945): ONE `ViewChip`, composed on the shared `Menu` primitive (ds-015)
+  unforked, drives sort + group-by-bounded-context **identically for all four lifecycle
+  columns** — no column keeps an independent affordance. The chip's trigger summarizes the
+  live choice ("Recently modified" / "Recently modified · grouped by context"). Orderings:
+  **Name** asc/desc and **Modification-date** desc/asc (per-task `mtimeMs`); default is
+  modification-date descending. `dashboard/app/board-sort.js` (`sortTickets`, unit-tested) is
+  a **pure** function run board-side after `treeToColumns`; ties break by `id` ascending,
+  absent/`null` `mtimeMs` sorts oldest, never a throw. Toggling group **on** partitions each
+  column's cards into per-BC sections (header = BC name + card count; empty BCs render no
+  section; sections sort BC-name ascending); each section is independently **collapsible**,
+  **per column** (unchanged granularity — see the next bullet). Pipeline is **project → sort
+  (board-wide, board-sort.js) → group (board-wide, board-group.js) → per-column collapse/peek
+  applied locally** — grouping only partitions, never re-orders, so sort semantics hold inside
+  each section. `groupTickets` (`dashboard/app/board-group.js`, unit-tested) is **pure**. Both
+  the sort and grouped choice **persist** across reloads in the versioned `localStorage`
+  view-state store as ONE board-wide `lens` (ADR-0015 amendment); a board with no stored lens
+  defaults to flat + default sort. The collapsible section header is board-local (the
+  styleguide `TreeGroup` primitive doesn't fit externally-persisted collapse state on
+  `TicketCard`s — flagged as design-system-005 for a shared primitive). See ADR-0015,
+  ADR-0009, ADR-0003.
 - **Collapsible Done column** — the **Done** column (the one column that grows unbounded)
   carries a board-only **collapse/peek** control (agentic-workflow-m2v8d, replacing aw-072's
   hide control), a sibling of the sort/group controls (ADR-0003). A **double-chevron glyph
@@ -214,16 +217,22 @@ separate BC, but today the whole tool lives in this one.
   read is **transient hover-scoped presentation state only** — no disk write (ADR-0033 pt. 4).
   The data layer is fully `node --test`-covered; the observer wiring is untested DOM glue. See
   ADR-0033, ADR-0017, ADR-0014, ADR-0029.
-- **Persisted board view-state** — the per-column **view lens** (grouped/flat, sort choice,
-  per-`(column, BC)` collapse state, the Done `peek` flag) is persisted across reloads in a
+- **Persisted board view-state (v2, board-wide lens)** — persisted across reloads in a
   **single versioned `localStorage` store** (`dashboard/app/board-view-state.js`, key
-  `agentheim.board.viewState`; agentic-workflow-014, ADR-0015). This **reverses** ADR-0009's
+  `agentheim.board.viewState`; agentic-workflow-014/aw-c2ver, ADR-0015). `VIEW_STATE_VERSION`
+  is **2**: the store now carries two independently-scoped pieces — a **board-wide `lens`**
+  (`{ grouped, sort }`, ONE choice for the whole board, driven by the single ViewChip) and
+  **`columns`** (the per-`(column, BC)` `collapsed[]` section state + the Done `peek` flag,
+  retained at their original column-scoped granularity). This **reverses** ADR-0009's
   "in-session only, no `localStorage`" clause, but the reversal is bounded to **presentation
   view-state** — the store never records lifecycle truth, which stays a pure projection of disk.
-  The `peek` field is additive/back-compatible (no version bump); the retired `hidden` flag
-  (aw-072) is ignored on read and drops out on next save. A stale/malformed/absent blob
-  degrades to column defaults, never a throw — a corrupt preference can never blank the board.
-  See ADR-0015, ADR-0001.
+  **Dormant retention**: flipping the board-wide `grouped` flag off then back on does NOT clear
+  a column's stored `collapsed[]` — it goes dormant while flat and reappears intact once
+  grouping is re-enabled, because `collapsed[]` lives entirely under `columns`, untouched by the
+  lens. **Hard reset on version mismatch**: a blob at any version other than `2` — including the
+  retired v1 per-column shape, a stale/malformed/absent blob — degrades WHOLESALE to board-wide
+  defaults (flat + default sort; every column's `collapsed: []`, `peek: false`), never a throw,
+  and never a field-by-field migration attempt (deliberate, per the ADR). See ADR-0015, ADR-0001.
 - **Persisted theme choice (light/dark toggle)** — the dashboard consumes the styleguide's
   "dark-first with a light toggle" `ThemeToggle` **unforked** (ADR-0003), living in the topbar
   **settings menu**, feeding `ThemeCtx.Provider` and a `data-theme` effect animated by the

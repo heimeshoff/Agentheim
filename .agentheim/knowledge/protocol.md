@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 12:18 -- Task verified and completed: agentic-workflow-c2ver - Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-c2ver - Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label
+**Summary:** Replaced the four per-column Sort + Group-by-BC controls with one board-wide ViewChip composed unforked on the shared Menu primitive, added the COLUMNS uppercase label, and rewrote the persisted view-state store to the v2 board-wide-lens shape frozen by ADR-0015's amendment — per-column collapsed/peek retained unchanged
+**Duration:** 14m
+**Verification:** PASS (iteration 1)
+**Files changed:** 8
+**Tests added:** 10
+**ADRs written:** none
+
+---
+
 ## 2026-07-05 12:04 -- Batch started: [agentic-workflow-c2ver]
 
 **Type:** Work / Batch start

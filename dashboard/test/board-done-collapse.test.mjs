@@ -75,7 +75,9 @@ test('AC6/AC7: collapse is presentation-only — it flips persisted view-state p
   // sort/group toggles use; it never posts to /api.
   assert.match(boardSrc, /const setColumnPeek = useCallback\(\(status, peek\)/,
     'board.js must define setColumnPeek to flip persisted view-state peek');
-  assert.match(boardSrc, /prev\[status\]\.peek === peek/,
+  // agentic-workflow-c2ver re-homed per-column state under view.columns (the
+  // board-wide lens rewrite); peek stays per-column at the same granularity.
+  assert.match(boardSrc, /prev\.columns\[status\]\.peek === peek/,
     'setColumnPeek must update the per-column persisted peek boolean');
 });
 

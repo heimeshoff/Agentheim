@@ -1,9 +1,19 @@
 /* ============================================================
-   Agentheim — dashboard board persisted view-state (agentic-workflow-014)
+   Agentheim — dashboard board persisted view-state (agentic-workflow-014,
+   rewritten to a BOARD-WIDE lens by agentic-workflow-c2ver / the ADR-0015
+   amendment landed by agentic-workflow-qf945)
 
-   The single, versioned localStorage store for the board's per-column VIEW
-   LENS — grouped/flat, sort choice, per-(column, BC) collapse state, and the
-   Done-column PEEK/collapse boolean — that now SURVIVES a reload.
+   The single, versioned localStorage store for the board's VIEW-STATE that
+   SURVIVES a reload. It now carries two independently-scoped pieces:
+
+     - `lens` — ONE `{ grouped, sort }` choice for the WHOLE board. The four
+       lifecycle columns no longer choose sort/group independently — a single
+       "View" chip drives all of them identically (the ADR-0015 amendment's
+       "board-wide lens" reversal of the original per-column scope).
+     - `columns` — the per-`(column, BC)` `collapsed[]` section state and the
+       Done column's `peek` boolean, UNCHANGED in granularity from before this
+       rewrite — only re-homed under `columns` instead of sitting alongside a
+       per-column `grouped`/`sort`.
 
    This deliberately REVERSES ADR-0009's "in-session view-state only — no
    localStorage" clause and SUPERSEDES agentic-workflow-012's in-session-only
@@ -15,8 +25,9 @@
 
    The store is pure over an INJECTED storage backend (the real localStorage, or a
    stub in tests), framework-free, and defensive: any malformed / stale / missing
-   blob degrades to "every column defaults" rather than throwing — a blank board
-   must never come from a corrupt preference. Unit-tested under `node --test`.
+   blob degrades to BOARD-WIDE DEFAULTS (flat + default sort; every column's
+   `collapsed: []`, `peek: false`) rather than throwing — a blank board must never
+   come from a corrupt preference. Unit-tested under `node --test`.
    ============================================================ */
 
 import { DEFAULT_SORT, SORT_OPTIONS } from './board-sort.js';
@@ -27,14 +38,41 @@ export const VIEW_STATE_KEY = 'agentheim.board.viewState';
 // Bump this when the persisted shape changes incompatibly: a blob written by a
 // different version is ignored on load (treated as "no stored state"), so an old
 // preference can never feed a new board a shape it does not understand.
-export const VIEW_STATE_VERSION = 1;
+//
+// Bumped 1 -> 2 (agentic-workflow-c2ver): the v1 shape nested `grouped`/`sort`
+// PER COLUMN alongside `collapsed`/`peek`. v2 hoists `grouped`/`sort` out to one
+// board-wide `lens` and leaves `columns` holding only `collapsed`/`peek`. This is
+// a deliberate HARD RESET, not a lossy-but-best-effort migration: a v1 (or any
+// other non-2) blob degrades wholesale to board-wide defaults, per the ADR-0015
+// amendment's "versioned-migration semantics" clause.
+export const VIEW_STATE_VERSION = 2;
 
 const SORT_VALUES = new Set(SORT_OPTIONS.map((o) => o.value));
 
 /**
- * The state a column with NO stored preference falls back to: flat (not grouped),
- * the default sort, every section expanded, and EXPANDED (not peeked). A brand-new
- * bounded context, or a fresh column, lands here.
+ * The BOARD-WIDE lens a board with no stored preference falls back to: flat
+ * (not grouped) and the default sort. Every column renders identically under
+ * this lens — there is exactly one of these for the whole board, never one
+ * per column.
+ */
+export function defaultLensState() {
+  return { grouped: false, sort: DEFAULT_SORT };
+}
+
+// Coerce one stored (untrusted) lens blob into a well-formed lens: grouped ->
+// boolean; sort -> a known sort value or the default. Never NaN, never
+// undefined, never a throw.
+function normalizeLens(raw) {
+  const r = raw && typeof raw === 'object' ? raw : {};
+  const sort = SORT_VALUES.has(r.sort) ? r.sort : DEFAULT_SORT;
+  return { grouped: !!r.grouped, sort };
+}
+
+/**
+ * The state a column with NO stored preference falls back to: every section
+ * expanded, and EXPANDED (not peeked). A brand-new bounded context, or a fresh
+ * column, lands here. Leaner than the pre-c2ver shape: `grouped`/`sort` no
+ * longer live here — they are the board-wide `lens` above.
  *
  * `peek` (agentic-workflow-m2v8d) is the Done-column COLLAPSE affordance — it
  * REPLACES aw-072's `hidden` flag (which dropped the column from the layout). When
@@ -46,69 +84,70 @@ const SORT_VALUES = new Set(SORT_OPTIONS.map((o) => o.value));
  * existing store); the UI wires the affordance for Done alone.
  */
 export function defaultColumnState() {
-  return { grouped: false, sort: DEFAULT_SORT, collapsed: [], peek: false };
+  return { collapsed: [], peek: false };
 }
 
 // Coerce one stored (untrusted) column blob into a well-formed column state.
-// grouped → boolean; sort → a known sort value or the default; collapsed → an
-// array of strings; peek → boolean. Two back-compat paths, neither needing a
-// VIEW_STATE_VERSION bump (additive field + retired field):
-//   - An OLD blob that predates `peek` simply lacks it → coerces to `false`
-//     (expanded), the AC's "no stored preference resolves to the full list".
-//   - An OLD blob carrying aw-072's retired `hidden` flag is IGNORED — `hidden` is
-//     not read or written, so a previously-hidden Done degrades to shown + expanded
-//     rather than blanking the board (the migration AC). The field is simply dropped
-//     on the next save.
-// Never NaN, never undefined, never a throw.
+// collapsed -> an array of strings; peek -> boolean. A v1 blob's `grouped`/`sort`
+// fields (if present) are simply IGNORED here — they belong to the board-wide
+// `lens` now, and a v1 blob never reaches this function anyway (loadViewState
+// rejects any non-VIEW_STATE_VERSION blob wholesale, per the hard-reset
+// semantics). Never NaN, never undefined, never a throw.
 function normalizeColumn(raw) {
   const r = raw && typeof raw === 'object' ? raw : {};
-  const sort = SORT_VALUES.has(r.sort) ? r.sort : DEFAULT_SORT;
   const collapsed = Array.isArray(r.collapsed)
     ? r.collapsed.filter((bc) => typeof bc === 'string')
     : [];
-  return { grouped: !!r.grouped, sort, collapsed, peek: !!r.peek };
+  return { collapsed, peek: !!r.peek };
 }
 
 /**
- * Read the persisted per-column view-state from the injected storage.
+ * Read the persisted view-state from the injected storage.
  * @param {{ getItem: (k: string) => (string|null) }} [storage] — the storage backend.
- * @returns {Object<string, { grouped, sort, collapsed }>} a map of column → state.
+ * @returns {{ lens: { grouped: boolean, sort: string }, columns: Object<string, { collapsed: string[], peek: boolean }> }}
  *
- * Returns `{}` (so every column defaults) when there is no backend, no stored
- * blob, a stale version, or malformed JSON. Each stored column is normalized, so
- * a partially-corrupt blob still yields a safe shape. Never throws.
+ * Returns board-wide defaults (`lens` = flat + default sort; `columns` = `{}`,
+ * so every column defaults) when there is no backend, no stored blob, a
+ * DIFFERENT version (including the retired v1 per-column shape), or malformed
+ * JSON. Each stored column is normalized, so a partially-corrupt blob still
+ * yields a safe shape. Never throws.
  */
 export function loadViewState(storage) {
-  if (!storage || typeof storage.getItem !== 'function') return {};
+  const defaults = { lens: defaultLensState(), columns: {} };
+  if (!storage || typeof storage.getItem !== 'function') return defaults;
   let raw;
   try {
     raw = storage.getItem(VIEW_STATE_KEY);
   } catch {
-    return {}; // storage access can throw (e.g. disabled / private mode).
+    return defaults; // storage access can throw (e.g. disabled / private mode).
   }
-  if (raw == null) return {};
+  if (raw == null) return defaults;
 
   let parsed;
   try {
     parsed = JSON.parse(raw);
   } catch {
-    return {}; // a corrupt blob must never crash the board.
+    return defaults; // a corrupt blob must never crash the board.
   }
-  if (!parsed || typeof parsed !== 'object') return {};
-  if (parsed.version !== VIEW_STATE_VERSION) return {}; // a different shape — ignore.
+  if (!parsed || typeof parsed !== 'object') return defaults;
+  // A blob at any OTHER version — including the retired v1 per-column shape —
+  // is a different shape entirely: ignore it wholesale (hard reset, no
+  // field-by-field migration attempt).
+  if (parsed.version !== VIEW_STATE_VERSION) return defaults;
 
-  const columns = parsed.columns && typeof parsed.columns === 'object' ? parsed.columns : {};
-  const out = {};
-  for (const [col, colRaw] of Object.entries(columns)) {
-    out[col] = normalizeColumn(colRaw);
+  const lens = normalizeLens(parsed.lens);
+  const columnsRaw = parsed.columns && typeof parsed.columns === 'object' ? parsed.columns : {};
+  const columns = {};
+  for (const [col, colRaw] of Object.entries(columnsRaw)) {
+    columns[col] = normalizeColumn(colRaw);
   }
-  return out;
+  return { lens, columns };
 }
 
 /**
- * Persist the per-column view-state under the versioned envelope.
+ * Persist the view-state under the versioned envelope.
  * @param {{ setItem: (k: string, v: string) => void } | null | undefined} storage
- * @param {Object<string, { grouped, sort, collapsed }>} state — column → state map.
+ * @param {{ lens: { grouped, sort }, columns: Object<string, { collapsed, peek }> }} state
  *
  * A no-op when there is no backend (e.g. SSR / no DOM). Storage write failures
  * (quota, disabled) are swallowed — a failed PREFERENCE write must never surface
@@ -116,12 +155,13 @@ export function loadViewState(storage) {
  */
 export function saveViewState(storage, state) {
   if (!storage || typeof storage.setItem !== 'function') return;
+  const lens = normalizeLens(state && state.lens);
   const columns = {};
-  for (const [col, colState] of Object.entries(state || {})) {
+  for (const [col, colState] of Object.entries((state && state.columns) || {})) {
     columns[col] = normalizeColumn(colState);
   }
   try {
-    storage.setItem(VIEW_STATE_KEY, JSON.stringify({ version: VIEW_STATE_VERSION, columns }));
+    storage.setItem(VIEW_STATE_KEY, JSON.stringify({ version: VIEW_STATE_VERSION, lens, columns }));
   } catch {
     /* preference persistence is best-effort; never throw. */
   }
