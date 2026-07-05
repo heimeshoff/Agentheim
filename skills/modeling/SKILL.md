@@ -14,7 +14,7 @@ Decide which action applies based on what the user said and the current state of
 | Action | When | What it does |
 |---|---|---|
 | **CAPTURE** | User is describing something new | Turns the idea into one or more task files. Places them in `backlog/` if under-refined, or `todo/` if the idea is already concrete enough to work on. |
-| **REFINE** | User wants to work through an existing backlog item, OR the user invoked model with no new idea and backlog items exist | Picks a backlog task, deepens it via the orchestrator, splits it if needed, updates acceptance criteria and dependencies. May move to `todo/` if it becomes ready. |
+| **REFINE** | User wants to work through an existing backlog item, OR the user invoked model with no new idea and backlog items exist | Picks a backlog task, deepens it via the orchestrator, splits it if needed, updates acceptance criteria and dependencies. **Auto-promotes to `todo/` the moment the task clears the readiness gate** — no separate ask; readiness *is* the promotion trigger. |
 | **PROMOTE** | User explicitly wants a task ready for work | Moves a task from `backlog/` to `todo/`, verifying it has enough detail to be picked up by a worker. |
 | **DISMISS** | User wants to drop a `backlog/`/`todo/` task that will never be worked — a stray capture, a duplicate, a since-abandoned idea | Hard-deletes the named task **and its entire transitive dependent subtree** under one confirmation, then reconciles all the bookkeeping (INDEX lines + counts, surviving backlinks, one protocol entry). Refuses if any task in the set is in `doing/` or `done/`. |
 | **CONSOLIDATE** | A BC's `README.md` has crossed the ~600-line consolidation threshold — self-named by the builder, or flagged by `whats-next`'s advisory line | Rewrites the README **in place**, builder-in-the-loop: merges redundant ubiquitous-language entries, folds superseded per-feature narration into settled current-state summaries. Never silently drops a term or invariant, never breaks a backlink. No archive — this is the *flag-and-consolidate* discipline (judgment, in-place), the deliberate opposite of the k5n8f family's *cap-and-roll* (verbatim, scripted, archived) used for the protocol (ADR-0039) and, prospectively, an INDEX done-list. See ADR-0041. |
@@ -155,9 +155,16 @@ PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + casca
 
 5. **Update the task file** with refined content. If it splits, create child tasks and update `depends_on`. If a decision was made, write an ADR to `.agentheim/knowledge/decisions/`.
 
-6. **Promote if ready.** If refinement made the task ready, move it to `todo/`.
+6. **Commit the refinement** (after the index + protocol updates below). Scoped `git add` of just the touched files — the refined task file (and any child task files if it split), the BC `INDEX.md`, `protocol.md`, and any ADR written — then `model(<bc>): refine <task-id> — <title> [<task-id>]` (one trailer per task if the refinement split into several). See "Committing" below.
 
-7. **Commit the refinement** (after the index + protocol updates below). Scoped `git add` of just the touched files — the refined task file (and any child task files if it split), the BC `INDEX.md`, `protocol.md`, and any ADR written — then `model(<bc>): refine <task-id> — <title> [<task-id>]` (one trailer per task if the refinement split into several). See "Committing" below.
+7. **Auto-promote the moment it's ready — don't ask, just promote.** When refinement has carried a task over the readiness bar, promoting it is not a separate decision the builder needs to make — it's the natural completion of the refinement, so do it automatically rather than stopping to say "this looks ready, say `promote` to promote it". The builder asked you to refine; a task that is now workable belongs in `todo/`.
+
+   Concretely, run the **PROMOTE flow** on the task (or, if the refinement split it, on each resulting child) as its own step, right after the refinement commit above:
+   - Apply PROMOTE's **readiness check** and the **styleguide gate** unchanged. These are the guardrails that make silent promotion safe: a task missing acceptance criteria, blocked on an unmet dependency, or a frontend task sitting ahead of the styleguide must *not* slip into `todo/`. If a task fails the check, leave it in `backlog/`, say in one line what's still missing, and offer to keep refining — that is the not-ready branch, unchanged.
+   - For a task that passes, run PROMOTE's mechanics wholesale (the `task-lifecycle-cli.mjs promote <id>` CLI, its scoped promotion commit, and the protocol entry it generates). Reuse PROMOTE — don't hand-roll a `backlog → todo` move here.
+   - **Announce it in one line** so the task doesn't silently vanish from the builder's backlog mid-session: `→ promoted <task-id> to todo/`. This is a notification, not a confirmation prompt — you're telling the builder what you did, not asking permission. (Commit stays silent per "Committing"; the one-line notice is the human-facing signal.)
+
+   The only time refinement ends *without* auto-promotion is when the task genuinely isn't ready — it stays in `backlog/` for another pass. "Ready but awaiting the user's go-ahead" is not a state this skill produces anymore.
 
 ## PROMOTE flow
 
