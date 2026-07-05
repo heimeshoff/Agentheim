@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 10:18 -- Modeling / Promoted: design-system-rm2yv - Extend the ochre wayfinding exception to the highlighted prompt-mode tab
+
+**Type:** Modeling / Promote
+**BC:** design-system
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-05 10:10 -- Modeling / Refined: agentic-workflow-c2ver - Board columns — singular "View" chip replacing per-column Sort/Group
 
 **Type:** Modeling / Refine
