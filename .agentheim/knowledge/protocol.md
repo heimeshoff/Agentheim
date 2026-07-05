@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 11:45 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 21m (batch start 11:24 → 11:45)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-bz3az: 1
+**Commits:** 3 (batch-start + bz3az + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (bz3az builds the docked prompt console exactly to the three pre-settled contracts — ADR-0050 interaction, ADR-0051/0048 paint — serving the "wrong work caught by structure" and "knowledge is durable" criteria; dashboard stays read-only per ADR-0017, every human gate intact, all state in `.agentheim/`; no pull toward any non-goal)
+**Carry-over:** inspiration/: left behind (owner: builder reference material — untracked UX-explorations dir, same disposition as the 10:41 session; not project bookkeeping, never `work`'s to commit). No stranded worktrees (bz3az's torn down at integration).
+**Notes:** One wave, one worker, one first-try PASS. bz3az rebuilt `BoardPromptBar` into the 1b docked bottom-center console: new pure module `dashboard/app/prompt-mode.js` (PROMPT_MODES / nextPromptModeIndex / clampPromptModeIndex / promptBarKeyIntent, all four ADR-0050 invariants `node --test`-covered), ochre highlighted tab (ADR-0051) + ochre Enter button (ADR-0048), other tabs de-emphasized (ADR-0016). 20 tests added, suite 754 green; verifier also drove the runtime surface (boot, /healthz + /api/tree 200, teardown). Worker touched `whats-next-panel.test.mjs` alongside — the panel composes inside the rebuilt bar; verifier passed scope. No bounces, no ADRs written, no concept candidates, no new backlog items. Sibling c2ver (same board.js) remains in backlog — promote via `modeling` when ready.
+
+---
+
 ## 2026-07-05 11:44 -- Task verified and completed: agentic-workflow-bz3az - Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab
 
 **Type:** Work / Task completion
