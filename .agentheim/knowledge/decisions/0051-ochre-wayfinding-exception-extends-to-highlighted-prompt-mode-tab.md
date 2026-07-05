@@ -4,7 +4,7 @@ title: Ochre wayfinding exception extends to the highlighted prompt-mode tab
 scope: design-system
 status: proposed
 date: 2026-07-05
-related_tasks: [design-system-rm2yv]
+related_tasks: [design-system-rm2yv, agentic-workflow-bz3az]
 related_adrs: [ADR-0048, ADR-0016, ADR-0050]
 ---
 

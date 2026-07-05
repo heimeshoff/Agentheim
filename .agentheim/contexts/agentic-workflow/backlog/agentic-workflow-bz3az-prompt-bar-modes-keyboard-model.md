@@ -9,7 +9,7 @@ completed:
 depends_on: [design-system-vw12e, design-system-rm2yv, agentic-workflow-s7gev, design-system-a31e0, design-system-001-styleguide]
 blocks: []
 tags: [dashboard-redesign, prompt-bar, keyboard]
-related_adrs: [0016, 0048, 0050]
+related_adrs: [0016, 0048, 0050, 0051]
 related_research: []
 prior_art: [agentic-workflow-038, agentic-workflow-036, agentic-workflow-h7n2c, agentic-workflow-065, agentic-workflow-054]
 ---
@@ -24,11 +24,12 @@ Two decisions already govern this build and were settled after this task was cap
 - **Interaction — ADR-0050 (from [[agentic-workflow-s7gev]]):** a single committed `highlightedMode`
   index with four invariants; names the pure module `dashboard/app/prompt-mode.js`
   (`PROMPT_MODES`, `nextPromptModeIndex`, `clampPromptModeIndex`, `promptBarKeyIntent`).
-- **Paint — ADR-0048 (design-system-vw12e) + its amendment [[design-system-rm2yv]]:** the
-  highlighted tab takes ochre (a *bounded wayfinding surface*, second after the nav rail); the other
-  three tabs de-emphasize; the Enter button takes ochre (primed primary action). **The ochre-tab
-  license comes from design-system-rm2yv, not vw12e** — vw12e originally classified this surface as
-  ochre-*forbidden*; rm2yv reopens exactly that classification.
+- **Paint — ADR-0048 (design-system-vw12e) as amended by ADR-0051 (from [[design-system-rm2yv]],
+  landed 2026-07-05):** the highlighted tab takes ochre (a *bounded wayfinding surface*, second
+  after the nav rail); the other three tabs de-emphasize; the Enter button takes ochre (primed
+  primary action). **The ochre-tab license is ADR-0051, not vw12e** — vw12e/ADR-0048 originally
+  classified this surface as ochre-*forbidden*; ADR-0051 reopens exactly that classification and
+  states the complete four-tabs-plus-Enter paint contract in one place.
 
 ## What
 Rebuild `BoardPromptBar` / `PromptLaunchCard` (`dashboard/app/board.js`) into the **1b two-row
@@ -58,7 +59,7 @@ and the clear-textarea + confetti reset on a successful launch.
 - [ ] **Click moves the highlight; hover never does.** Clicking a tab moves the committed highlight
       to it *and* launches it (ADR-0050 §two orthogonal channels). Hover/press remain transient
       pointer-feedback only — never mutating `highlightedMode`, never launching.
-- [ ] **Paint contract.** The highlighted tab renders in ochre per [[design-system-rm2yv]]
+- [ ] **Paint contract.** The highlighted tab renders in ochre per ADR-0051
       (extending ADR-0048's bounded wayfinding exception); the other three tabs de-emphasize
       (ADR-0016); the Enter button renders ochre (primed primary action, ADR-0048). No ochre on any
       non-highlighted tab. Default highlight is Quick Capture (index 0) on mount and after every
@@ -73,11 +74,14 @@ and the clear-textarea + confetti reset on a successful launch.
       classification (bare Enter → swallow, Ctrl+Enter → launch, Ctrl+←/→ → cycle, else → pass).
 
 ## Notes
-- **Interaction spec is ADR-0050**, paint spec is **ADR-0048 as amended by design-system-rm2yv**.
+- **Interaction spec is ADR-0050**, paint spec is **ADR-0048 as amended by ADR-0051**. Token per
+  ADR-0051: reuse `--accent-ochre` directly (nav-rail inset idiom or an equivalent ochre
+  fill/underline) — no new token; if a value beyond `--accent-ochre` proves necessary, that's a
+  separate design-system follow-up, not this task.
   `prompt-mode.js` joins the pure-module family (`board-sort.js` / `board-group.js` /
   `search-results.js`) — framework-free, no React import, unit-tested.
 - Docked console geometry from 1b: bottom-center, ~780px, raised surface + big shadow, z-above the
-  board; four tabs each with a one-line meaning; ochre active-tab treatment (rm2yv) + ochre Enter
+  board; four tabs each with a one-line meaning; ochre active-tab treatment (ADR-0051) + ochre Enter
   button (ADR-0048).
 - The current bar (four flat `PromptLaunchCard`s in a row below a "Prompt" title, aw-065/aw-068) is
   what this rebuild replaces. `WhatsNextPanel` (aw-073/a2pm1) currently renders inside
@@ -86,7 +90,8 @@ and the clear-textarea + confetti reset on a successful launch.
 - Prior art: aw-038 (single-line autogrow input + Enter-swallow), aw-036 (Research button),
   aw-h7n2c (Inquire button), aw-065 (icon-tile + subtitle redesign), aw-054 (prompt title /
   spacing).
-- **Blocked until [[design-system-rm2yv]] lands** (the ochre-tab ADR). Not promotable to `todo`
-  ahead of it (fail-closed dependency, ADR-0038), and — as a frontend task — never ahead of the
-  styleguide (design-system-001-styleguide).
+- ~~Blocked until [[design-system-rm2yv]] lands~~ — **landed 2026-07-05 as ADR-0051**; all five
+  `depends_on` are in `done/`, including the styleguide gate (design-system-001-styleguide).
+- Sibling caution for the conductor: [[agentic-workflow-c2ver]] also rewrites
+  `dashboard/app/board.js` — do not run the two as a parallel wave; sequence bz3az first.
 </content>

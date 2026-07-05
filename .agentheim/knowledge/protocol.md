@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 11:16 -- Modeling / Refined: agentic-workflow-bz3az - Board prompt bar — 4-mode tabs + keyboard model + ochre active tab
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** Reconciliation pass after design-system-rm2yv landed ADR-0051 (10:39): verified the task's paint criteria against ADR-0051's recorded four-tabs-plus-Enter contract — exact match, no criteria changed. Folded in the ADR-0051 pointer (related_adrs + prose, replacing the pending-rm2yv references), added ADR-0051's token guidance (reuse `--accent-ochre`, no new token), cleared the stale "blocked until rm2yv" note, and noted the board.js file-overlap sequencing caution vs sibling c2ver. All five depends_on now in done/ — passed the readiness gate and auto-promoted.
+**Split into:** none
+**ADRs written:** none (ADR-0051 was rm2yv's worked output; this task gains the backlink)
+
+---
+
 ## 2026-07-05 10:41 -- Work session ended
 
 **Type:** Work / Session end
