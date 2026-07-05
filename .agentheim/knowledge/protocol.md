@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 10:41 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 13m (first batch start 10:28 → 10:41)
+**Completed:** 2 (first-try PASS: 1, re-dispatched: 0, skipped: 1)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-qf945: 1, design-system-rm2yv: 1
+**Commits:** 4 (batch-start + qf945 + rm2yv + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (both completed tasks are `type: decision` ADR authorship serving the "durable knowledge / decisions don't get made-and-lost" success criterion; every human gate intact; all state in `.agentheim/`; no pull toward any non-goal)
+**Carry-over:** inspiration/: left behind (owner: builder reference material — the untracked UX-explorations reference dir, present since before this session; not project bookkeeping, never `work`'s to commit). No stranded worktrees (both torn down at integration).
+**Notes:** One wave, two decision tasks, zero bounces/failures/escalations — both ADR-only, zero file overlap, different BCs. **qf945** amended **ADR-0015** in place (per-column → single board-wide view lens for sort + group-by-BC; per-(column,BC) `collapsed[]` and Done `peek` retained column-scoped; `VIEW_STATE_VERSION` → 2 with a safe-reset degrade path and the dormant-retention rule pinned; reasoned amend-in-place from ADR-0015's `proposed` status per the ADR-0021 / infrastructure-015 precedent) — verification **auto-SKIPPED** (decision task, single ADR file). **rm2yv** wrote provisional **ADR-0051** amending **ADR-0048** (extends the bounded ochre wayfinding exception from one surface to two, adding the highlighted prompt-mode tab; keeps the discriminating test + fence intact — still exactly two enumerated surfaces, non-citable elsewhere; reuses `--accent-ochre`, no new token; records the full four-tabs-plus-Enter paint contract; reconciles ADR-0050's untouched interaction model) — first-try verifier **PASS**. Both freeze contracts that unblock downstream backlog builds: qf945 → agentic-workflow-c2ver (board columns View chip / store rewrite), rm2yv → agentic-workflow-bz3az (prompt-bar rebuild). **Operational note:** the mechanized `claim` verb threw **ENOENT** on the first attempt because git had pruned both empty `doing/` dirs between sessions — reverted the partial frontmatter mutation, `mkdir -p` both `doing/` dirs, retried clean (no INDEX/protocol touched on the failed attempt); the recurring `applyTaskMove` auto-create-missing-`doing/` guard is still worth landing. No concept candidates.
+
+---
+
 ## 2026-07-05 10:39 -- Task verified and completed: design-system-rm2yv - Extend the ochre wayfinding exception to the highlighted prompt-mode tab
 
 **Type:** Work / Task completion
