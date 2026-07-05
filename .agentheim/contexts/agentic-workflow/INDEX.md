@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 129
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-c2ver** — Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label (feature) — `todo/agentic-workflow-c2ver-columns-singular-view-chip.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-c2ver** — Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label (feature) — `doing/agentic-workflow-c2ver-columns-singular-view-chip.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

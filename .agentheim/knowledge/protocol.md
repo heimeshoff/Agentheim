@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 12:04 -- Batch started: [agentic-workflow-c2ver]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-c2ver - Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label
+**Parallel:** no (1 worker — c2ver is the only ready task in todo across all BCs)
+**Planning advisory:** whats-next (2026-07-05T09:02Z — stale, predates the 11:45 session end) named c2ver the natural follow-up after bz3az; consistent with the DAG, which has c2ver as the only ready task
+
+---
+
 ## 2026-07-05 11:50 -- Modeling / Promoted: agentic-workflow-c2ver - Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label
 
 **Type:** Modeling / Promote

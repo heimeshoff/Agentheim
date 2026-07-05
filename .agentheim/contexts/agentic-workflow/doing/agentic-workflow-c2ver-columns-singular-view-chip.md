@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-c2ver
 title: Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-05
