@@ -11,7 +11,7 @@ blocks: []
 tags: [dashboard-redesign, board, columns, view-state]
 related_adrs: [0015]
 related_research: []
-prior_art: [agentic-workflow-072, agentic-workflow-m2v8d, agentic-workflow-061]
+prior_art: [agentic-workflow-072, agentic-workflow-m2v8d, agentic-workflow-061, agentic-workflow-bz3az]
 ---
 
 ## Why
@@ -57,9 +57,19 @@ Consumes the condensed ticket card from [[design-system-t896s]].
 
 ## Notes
 
-- **Styleguide gate already satisfied.** All three design-system dependencies
+- **All dependencies met (reconciled 2026-07-05).** [[agentic-workflow-qf945]] landed its
+  ADR-0015 amendment (completed 2026-07-05 10:38) — the v2 store shape cited in What/criteria
+  matches the amended ADR verbatim, no criteria changed. The three design-system dependencies
   ([[design-system-a31e0]] palette, [[design-system-t896s]] condensed-card radius,
-  design-system-001-styleguide) are in `done/` — this task is not blocked on styleguide
-  review, only on [[agentic-workflow-qf945]] freezing the store shape.
+  design-system-001-styleguide) were already in `done/`. Nothing blocks this task.
+- **board.js sequencing caution cleared.** Sibling [[agentic-workflow-bz3az]] (the prompt-bar
+  rebuild, the other `board.js` rewrite in this redesign) completed 2026-07-05 11:44 — build
+  against current `main`. Its rebuild touched only the prompt-bar region:
+  `ColumnSortControl` / `ColumnGroupToggle` are intact (`board.js:136` / `:165`) and are
+  exactly what this task removes.
+- **Premises re-verified against the tree:** `dashboard/app/board-view-state.js` is still v1
+  (`VIEW_STATE_VERSION = 1`); the shared `Menu` primitive (ds-015) lives at
+  `styleguide/app/menu.js` exporting `Menu` / `MenuItem` / `MenuDivider` — compose the
+  ViewChip on it unforked.
 - Prior art: aw-072 (hideable Done column), aw-m2v8d (clamped-fade collapse), aw-061 (name
-  sort alphabetical).
+  sort alphabetical), aw-bz3az (the sibling board.js rebuild, landed first).

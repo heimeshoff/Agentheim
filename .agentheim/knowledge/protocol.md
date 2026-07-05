@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 11:49 -- Modeling / Refined: agentic-workflow-c2ver - Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** Reconciliation pass after qf945 landed its ADR-0015 amendment (10:38) and sibling bz3az landed the prompt-bar rebuild (11:44): verified the task's frozen v2 store shape against the amended ADR — exact match, no criteria changed. Cleared the stale "blocked on qf945" note and the board.js file-overlap sequencing caution (bz3az done; ColumnSortControl/ColumnGroupToggle untouched at board.js:136/165), re-verified premises against the tree (board-view-state.js still v1; ds-015 Menu primitive exports Menu/MenuItem/MenuDivider at styleguide/app/menu.js), added bz3az to prior_art. All four depends_on in done/ — passed the readiness gate and auto-promoted.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-07-05 11:45 -- Work session ended
 
 **Type:** Work / Session end
