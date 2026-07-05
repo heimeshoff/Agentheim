@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 11:16 -- Modeling / Promoted: agentic-workflow-bz3az - Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-05 11:16 -- Modeling / Refined: agentic-workflow-bz3az - Board prompt bar — 4-mode tabs + keyboard model + ochre active tab
 
 **Type:** Modeling / Refine

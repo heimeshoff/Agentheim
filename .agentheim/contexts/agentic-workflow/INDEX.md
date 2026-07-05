@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 2
-- **Todo:** 0
+- **Backlog:** 1
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 128
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-bz3az** — Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab (feature) — `todo/agentic-workflow-bz3az-prompt-bar-modes-keyboard-model.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -74,7 +75,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-bz3az** — Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab (feature) — `backlog/agentic-workflow-bz3az-prompt-bar-modes-keyboard-model.md`
 - **agentic-workflow-c2ver** — Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label (feature) — `backlog/agentic-workflow-c2ver-columns-singular-view-chip.md`
 <!-- backlog-list:end -->
 

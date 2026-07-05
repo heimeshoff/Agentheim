@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-bz3az
 title: Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-07-05
