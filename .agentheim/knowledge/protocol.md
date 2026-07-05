@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 10:39 -- Task verified and completed: design-system-rm2yv - Extend the ochre wayfinding exception to the highlighted prompt-mode tab
+
+**Type:** Work / Task completion
+**Task:** design-system-rm2yv - Extend the ochre wayfinding exception to the highlighted prompt-mode tab
+**Summary:** Wrote provisional ADR-0051 amending ADR-0048 to extend the bounded ochre wayfinding exception from one surface to two, adding the highlighted prompt-mode tab; reconciled with ADR-0050 (interaction untouched) and recorded the full four-tabs-plus-Enter paint contract for the downstream build
+**Duration:** 3m
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** 0051-ochre-wayfinding-exception-extends-to-highlighted-prompt-mode-tab.md
+
+---
+
 ## 2026-07-05 10:38 -- Task completed (verification skipped): agentic-workflow-qf945 - Reverse ADR-0015 per-column scope — one board-wide view lens, per-(column,BC) collapse/peek retained (amend in place)
 
 **Type:** Work / Task completion

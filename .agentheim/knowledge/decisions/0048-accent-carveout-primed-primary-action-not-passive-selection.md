@@ -140,3 +140,7 @@ existing accent use (inset shadow) rather than a border.
   makes no CSS change.
 - ADR-0016 gets a one-line pointer to this ADR (see below); its own text and
   `status: accepted` are otherwise untouched.
+- See ADR-0051: the highlighted prompt-mode tab's classification (surface 3
+  above) was subsequently amended — it joins the left-nav active item as a
+  second bounded wayfinding exception. This ADR's text and status are
+  otherwise unchanged by that amendment.

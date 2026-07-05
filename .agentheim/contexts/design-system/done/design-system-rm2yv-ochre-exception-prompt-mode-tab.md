@@ -1,15 +1,15 @@
 ---
 id: design-system-rm2yv
 title: Extend the ochre wayfinding exception to the highlighted prompt-mode tab
-status: doing
+status: done
 type: decision
 context: design-system
 created: 2026-07-05
-completed:
+completed: 2026-07-05
 depends_on: [design-system-vw12e]
 blocks: [agentic-workflow-bz3az]
 tags: [dashboard-redesign, accent, adr, color-law]
-related_adrs: [0016, 0048, 0050]
+related_adrs: [0016, 0048, 0050, 0051]
 related_research: []
 prior_art: [design-system-vw12e, design-system-007, design-system-010]
 ---
@@ -71,5 +71,38 @@ general reopening of ADR-0016's "selection among peers is de-emphasis" default.
   de-emphasis), design-system-010 (dropped the ochre selected-ring). Those stay de-emphasis.
 - Output is an ADR only — no CSS/token file change here (a palette token, if the ADR calls for one,
   is a separate design-system follow-up like a31e0 was for `--emphasis-border`).
+
+## Outcome
+
+Wrote provisional **ADR-0051** (`.agentheim/knowledge/decisions/0051-ochre-wayfinding-exception-extends-to-highlighted-prompt-mode-tab.md`),
+amending ADR-0048 (not superseding, not touching ADR-0016 or ADR-0050 directly). The bounded
+wayfinding-exception set grows from one surface (primary-nav active item) to two, adding the
+highlighted prompt-mode tab, on the same "persistent you-are-here wayfinding mark" rationale as
+the nav rail. The exception is stated as exactly these two enumerated surfaces — not a general
+reopening of ADR-0016's de-emphasis default — so it cannot be cited for segmented controls, the
+theme toggle, sort/group chips, or other peer-selection surfaces (design-system-007 and
+design-system-010 stay correctly decided).
+
+Reconciled explicitly with ADR-0050: its interaction model (committed `highlightedMode`, keyboard
+cycling, disjoint key-intent) is untouched; only the paint classification its Out-of-scope note
+deferred to ADR-0048 changes, from "ochre forbidden" to "ochre permitted." No new interaction
+invariant introduced.
+
+Recorded the full downstream paint contract for `agentic-workflow-bz3az`: highlighted tab = ochre
+(via `--accent-ochre`, no new token — the nav rail's direct-reuse idiom, not a tunable
+`--emphasis-border`-style allowance); the other three tabs = de-emphasis (ADR-0016 default,
+unchanged); Enter button = ochre (already licensed by ADR-0048 as a primed primary action).
+
+Added a one-line "see ADR-0051" pointer under ADR-0048's Consequences; ADR-0048's own text and
+`status: proposed` are otherwise untouched. No CSS/token file touched — this is an ADR-only
+decision task, per its own instruction; a token/value follow-up (if the concrete tab styling needs
+one) is left as a separate design-system task, mirroring how a31e0 followed vw12e/ADR-0048. No BC
+README change made — the README does not currently document the nav-rail exception as ubiquitous
+language either, so extending it there would be a "while I'm here" scope addition, not something
+this task's ADR-only output warrants.
+
+Key files:
+- `C:\src\heimeshoff\agentic\agentheim\.worktrees\design-system-rm2yv\.agentheim\knowledge\decisions\0051-ochre-wayfinding-exception-extends-to-highlighted-prompt-mode-tab.md`
+- `C:\src\heimeshoff\agentic\agentheim\.worktrees\design-system-rm2yv\.agentheim\knowledge\decisions\0048-accent-carveout-primed-primary-action-not-passive-selection.md`
 </content>
 </invoke>

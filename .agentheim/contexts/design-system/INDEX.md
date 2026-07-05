@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 29
+- **Doing:** 0
+- **Done:** 30
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **design-system-rm2yv** — Extend the ochre wayfinding exception to the highlighted prompt-mode tab (decision) — `doing/design-system-rm2yv-ochre-exception-prompt-mode-tab.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **design-system-rm2yv** — Extend the ochre wayfinding exception to the highlighted prompt-mode tab (decision) — `done/design-system-rm2yv-ochre-exception-prompt-mode-tab.md`
 - **design-system-t896s** — TicketCard — bump corner radius toward 1b's 10px (refactor) — `done/design-system-t896s-ticketcard-radius-10px.md`
 - **design-system-a31e0** — Retokenize the palette — Command-deck dark + derived light, across both token files (feature) — `done/design-system-a31e0-retokenize-palette-dark-derived-light.md`
 - **design-system-e9apx** — Command-deck palette identity — cool neutrals supersede the warm-Ledger heritage (decision) — `done/design-system-e9apx-command-deck-palette-identity.md`
@@ -65,6 +65,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0051** — Ochre wayfinding exception extends to the highlighted prompt-mode tab — amends ADR-0048, growing its bounded wayfinding-exception set from one surface to two (primary-nav active item + highlighted prompt-mode tab), on the same "persistent you-are-here / fires-on-Ctrl+Enter" rationale; the discriminating test is untouched, the exception stays exactly two enumerated surfaces (non-citable elsewhere), reuses `--accent-ochre` directly (no new token), and records the full four-tabs-plus-Enter paint contract for agentic-workflow-bz3az; ADR-0050's interaction model is untouched (proposed) — `../../knowledge/decisions/0051-ochre-wayfinding-exception-extends-to-highlighted-prompt-mode-tab.md`
 - **ADR-0049** — Command-deck palette identity: cool neutrals supersede the Ledger-derived warm-paper heritage — a values-only shift (token names/roles frozen, only hexes move in both `[data-theme]` blocks); the light theme is *derived* from the 1b dark stack anchored at the existing `--swatch-light` `#FAF8F4`, and ADR-0016's frozen preview swatches re-pin to the new `--surface-0` values; the hex substitution itself is design-system-a31e0 (proposed) — `../../knowledge/decisions/0049-command-deck-palette-identity-supersedes-warm-ledger-heritage.md`
 - **ADR-0048** — Accent carve-out: ochre marks the *primed primary action*, not passive selection — a discriminating test (fires/commits vs. passive equivalent-state) refining ADR-0016, applied to all five dashboard-redesign tension surfaces; the single left-nav active item keeps 1a's ochre inset rail as a bounded wayfinding exception, and a named `--emphasis-border` token (added later by design-system-a31e0) carries the one hero-border allowance (proposed) — `../../knowledge/decisions/0048-accent-carveout-primed-primary-action-not-passive-selection.md`
 - **ADR-0034** — A relational dependency-highlight is a third ambient signal — its own dedicated token (`--rel-dep`), direction coded by line-style (solid=waiting-on / dashed=holding-up) not hue, card-perimeter not rail, static (never vanished) under reduced motion (proposed) — `../../knowledge/decisions/0034-dependency-ring-third-ambient-signal-dedicated-token-direction-by-line-style.md`
