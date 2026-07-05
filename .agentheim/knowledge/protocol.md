@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 12:19 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 16m (batch start 12:03 → 12:19)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-c2ver: 1
+**Commits:** 3 (batch-start + c2ver + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (c2ver is pure UI wiring to the pre-settled ADR-0015 amendment — the frozen v2 board-wide-lens contract — serving the "wrong work caught by structure" criterion via a first-try verified build; the persisted store stays bounded to presentation view-state per the ADR, dashboard stays read-only per ADR-0017, every human gate intact, all state in `.agentheim/`; no pull toward any non-goal)
+**Carry-over:** inspiration/: left behind (owner: builder reference material — the untracked UX-explorations dir, same disposition as the 10:41 and 11:45 sessions; not project bookkeeping, never `work`'s to commit). No stranded worktrees (c2ver's torn down at integration).
+**Notes:** One wave, one worker, one first-try PASS — the last dashboard-redesign build in the pipeline. c2ver replaced `ColumnSortControl`/`ColumnGroupToggle` (all four columns) with one board-wide `ViewChip` composed unforked on the ds-015 `Menu` primitive, added the "COLUMNS" uppercase label, and rewrote `dashboard/app/board-view-state.js` v1→v2 (`{ version: 2, lens: { grouped, sort }, columns: { [col]: { collapsed, peek } } }`; any non-v2 blob degrades to board-wide defaults, never a throw; dormant retention of `collapsed[]` across grouped toggles verified). Done-column peek wiring untouched; pipeline order preserved. 10 tests added; verifier drove the runtime surface (boot, /healthz + /api/tree 200, clean teardown) and attributed the only 2 suite failures to pre-existing port-binding flakes in `vscode-extension/` — a layer this task never touches. Operational note: the empty `doing/` dir had been git-pruned again between sessions — pre-flight `mkdir` avoided the known `claim` ENOENT this time; the `applyTaskMove` auto-create-missing-`doing/` guard remains worth landing. No bounces, no ADRs, no concept candidates, no new backlog items. Todo is now empty across all BCs.
+
+---
+
 ## 2026-07-05 12:18 -- Task verified and completed: agentic-workflow-c2ver - Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label
 
 **Type:** Work / Task completion
