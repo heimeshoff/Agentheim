@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-qf945
 title: Reverse ADR-0015 per-column scope — one board-wide view lens, per-(column,BC) collapse/peek retained (amend in place)
-status: backlog
+status: todo
 type: decision
 context: agentic-workflow
 created: 2026-07-05

@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 3
-- **Todo:** 0
+- **Backlog:** 2
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 127
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-qf945** — Reverse ADR-0015 per-column scope — one board-wide view lens, per-(column,BC) collapse/peek retained (amend in place) (decision) — `todo/agentic-workflow-qf945-board-wide-view-lens-amend-adr-0015.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -75,7 +76,6 @@ research touching this BC, and concept synthesis pages.
 <!-- backlog-list:start -->
 - **agentic-workflow-bz3az** — Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab (feature) — `backlog/agentic-workflow-bz3az-prompt-bar-modes-keyboard-model.md`
 - **agentic-workflow-c2ver** — Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label (feature) — `backlog/agentic-workflow-c2ver-columns-singular-view-chip.md`
-- **agentic-workflow-qf945** — Reverse ADR-0015 per-column scope — one board-wide view lens, per-(column,BC) collapse/peek retained (amend in place) (decision) — `backlog/agentic-workflow-qf945-board-wide-view-lens-amend-adr-0015.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

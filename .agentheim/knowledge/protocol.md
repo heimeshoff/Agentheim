@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 10:18 -- Modeling / Promoted: agentic-workflow-qf945 - Reverse ADR-0015 per-column scope — one board-wide view lens, per-(column,BC) collapse/peek retained (amend in place)
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-05 10:18 -- Modeling / Promoted: design-system-rm2yv - Extend the ochre wayfinding exception to the highlighted prompt-mode tab
 
 **Type:** Modeling / Promote
