@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 11:24 -- Batch started: [agentic-workflow-bz3az]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-bz3az - Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab
+**Parallel:** no (1 worker — bz3az is the only ready task; sibling c2ver still in backlog, sequenced after bz3az per the shared board.js caution)
+**Planning advisory:** whats-next (2026-07-05T09:02Z — stale, predates the 10:41 session end) recommends leading with bz3az; consistent with the DAG, which has bz3az as the only ready task
+
+---
+
 ## 2026-07-05 11:16 -- Modeling / Promoted: agentic-workflow-bz3az - Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab
 
 **Type:** Modeling / Promote
