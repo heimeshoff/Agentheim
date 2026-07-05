@@ -8,7 +8,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { treeToLibrary, libraryCount } from '../app/library-data.js';
+import { treeToLibrary, libraryCount, footerStatusLine } from '../app/library-data.js';
 
 function sampleTree() {
   return {
@@ -164,4 +164,31 @@ test('libraryCount totals every artifact across groups (the rail badge)', () => 
   assert.equal(libraryCount(treeToLibrary(sampleTree())), 8);
   assert.equal(libraryCount([]), 0);
   assert.equal(libraryCount(null), 0);
+});
+
+// footerStatusLine (agentic-workflow-wsfsk, 1a shape): the rail's footer status
+// line, sourced LOSS-TOLERANTLY off the same grouped projection the tree
+// already renders — counting the Decisions group (ADRs are themselves "done"
+// work) rather than wiring a separate board/task read into the rail.
+test('footerStatusLine counts the Decisions group as "N done" when present', () => {
+  const groups = treeToLibrary(sampleTree()); // 2 ADRs in sampleTree()
+  assert.equal(footerStatusLine(groups), 'all clear · 2 done');
+});
+
+test('footerStatusLine degrades to "all clear" (no count) when there is no Decisions group', () => {
+  const tree = sampleTree();
+  tree.locations.adrs = [];
+  const groups = treeToLibrary(tree);
+  assert.equal(footerStatusLine(groups), 'all clear');
+});
+
+test('footerStatusLine never throws on a missing/malformed groups projection (loss-tolerant)', () => {
+  assert.doesNotThrow(() => footerStatusLine(null));
+  assert.doesNotThrow(() => footerStatusLine(undefined));
+  assert.doesNotThrow(() => footerStatusLine([]));
+  assert.doesNotThrow(() => footerStatusLine('oops'));
+  assert.doesNotThrow(() => footerStatusLine([{ group: 'Decisions', items: 'not-an-array' }]));
+  assert.doesNotThrow(() => footerStatusLine([null, undefined, 42]));
+  assert.equal(footerStatusLine(null), 'all clear');
+  assert.equal(footerStatusLine([{ group: 'Decisions', items: 'not-an-array' }]), 'all clear');
 });

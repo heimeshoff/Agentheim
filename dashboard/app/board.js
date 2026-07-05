@@ -59,7 +59,7 @@ import { annotateSectionHiddenDependency, donePeekHasHiddenDependency, unionTarg
 import { loadViewState, saveViewState, defaultColumnState, peekClampStyle, PEEK_MAX_HEIGHT_PX } from "./board-view-state.js";
 import { SlideOver } from "./slide-over.js";
 import { MainPaneReader } from "./main-pane-reader.js";
-import { treeToLibrary } from "./library-data.js";
+import { treeToLibrary, footerStatusLine } from "./library-data.js";
 import { railMtimeIndex, flaggedPaths, annotateGroups } from "./rail-attention.js";
 import { resolveConfettiColors } from "./confetti-palette.js";
 import { confettiFireSequence } from "./confetti-launch.js";
@@ -2413,11 +2413,16 @@ function AboutPage() {
 //   brand (Glyph + "Agentheim" + live projectName)
 //   → a single Board RailItem (the only nav item — the always-visible tree below IS
 //     the library, so there is NO separate Library RailItem; ADR-0011)
-//   → divider → "Workspace" label
+//   → divider → "Workspace" label (uppercased to read WORKSPACE, the 1a tree header)
 //   → the LIVE library tree, fed by treeToLibrary(/api/tree) (never the demo data)
-//   → a footer holding the theme toggle + the skip-permissions armed toggle
-//     (relocated out of the retired horizontal header; the footer gives the
-//     skip-permissions danger treatment a stable home, ADR-0019).
+//   → a FOOTER STATUS LINE (agentic-workflow-wsfsk, 1a shape) — a compact
+//     "all clear · N done" summary below the tree, computed by the pure
+//     library-data.footerStatusLine off the same cuedGroups projection (the
+//     theme + skip-permissions toggles that USED to live in this footer moved
+//     into the topbar settings menu, aw-029 → aw-049; this is a fresh footer).
+//
+// The rail is 236px wide — the 1a single-panel shape (a wider 1b split
+// icon-rail + tree was considered and not chosen).
 //
 // The rail is a discovery surface, so it stays LIVE the same way the board does: it
 // fetches /api/tree on mount and re-fetches on every SSE tree-changed frame /
@@ -2427,6 +2432,25 @@ function AboutPage() {
 // edge follows the selected DOCUMENT (`selectedId`, fed from selectedDoc), and the
 // Board RailItem returns the main pane to the board (onSelectBoard) and is `active`
 // exactly when no document is selected.
+function RailNavSlot({ active, children }) {
+  // ADR-0048 CARVE-OUT (surface 5, "left-nav active item"): primary-nav "you
+  // are here" is, by the fires/commits test, a PASSIVE equivalent-state
+  // selection — exactly the case ADR-0016 forbids ochre on. ADR-0048 grants
+  // this ONE surface a bounded wayfinding exception (the builder's 1a ochre
+  // inset rail, 2026-07-05) specifically because primary nav is scanned far
+  // more often and far more peripherally than any other peer-selection
+  // surface in the app. Do NOT read this as license to "fix" it back to
+  // de-emphasis, and do NOT copy this pattern onto any other selection
+  // surface (tabs, segmented controls, list rows) — each of those stays
+  // governed by ADR-0016's de-emphasis default unless it earns its own
+  // fresh ADR.
+  return html`
+    <div style=${{
+      borderRadius: "var(--radius-sm)",
+      boxShadow: active ? "inset 2px 0 0 var(--accent-ochre)" : "none",
+    }}>${children}</div>`;
+}
+
 function ShellRail({ projectName, selectedId, onOpen, onSelectBoard, mainView, onSelectWorkflow, onSelectAbout }) {
   const [groups, setGroups] = useState([]);
 
@@ -2494,9 +2518,17 @@ function ShellRail({ projectName, selectedId, onOpen, onSelectBoard, mainView, o
     if (onOpen) onOpen(item);
   }, [onOpen, currentIndex]);
 
+  // The footer status line (agentic-workflow-wsfsk): a compact "all clear · N
+  // done" summary rendered below the tree, computed by the pure
+  // library-data.footerStatusLine off the SAME cuedGroups projection the tree
+  // already renders — no separate fetch, and loss-tolerant by construction (a
+  // missing Decisions group / empty groups degrades to "all clear", never a
+  // throw or an empty footer).
+  const footerStatus = footerStatusLine(cuedGroups);
+
   return html`
     <nav style=${{
-      width: 248, flexShrink: 0, alignSelf: "stretch", boxSizing: "border-box",
+      width: 236, flexShrink: 0, alignSelf: "stretch", boxSizing: "border-box",
       background: "var(--surface-0)", borderRight: "1px solid var(--hairline)",
       display: "flex", flexDirection: "column",
     }}>
@@ -2527,15 +2559,21 @@ function ShellRail({ projectName, selectedId, onOpen, onSelectBoard, mainView, o
            construction (each onSelect* handler clears the others; every board/doc handler
            resets mainView to "board"), so at most one rail row highlights at once. -->
       <div style=${{ padding: "4px 10px", display: "flex", flexDirection: "column", gap: 2 }}>
-        <${RailItem} icon="square-kanban" label="Board"
-          active=${mainView === "board" && !selectedId}
-          onClick=${() => onSelectBoard && onSelectBoard()} />
-        <${RailItem} icon="compass" label="Workflow"
-          active=${mainView === "workflow"}
-          onClick=${() => onSelectWorkflow && onSelectWorkflow()} />
-        <${RailItem} icon="bot" label="About"
-          active=${mainView === "about"}
-          onClick=${() => onSelectAbout && onSelectAbout()} />
+        <${RailNavSlot} active=${mainView === "board" && !selectedId}>
+          <${RailItem} icon="square-kanban" label="Board"
+            active=${mainView === "board" && !selectedId}
+            onClick=${() => onSelectBoard && onSelectBoard()} />
+        </${RailNavSlot}>
+        <${RailNavSlot} active=${mainView === "workflow"}>
+          <${RailItem} icon="compass" label="Workflow"
+            active=${mainView === "workflow"}
+            onClick=${() => onSelectWorkflow && onSelectWorkflow()} />
+        </${RailNavSlot}>
+        <${RailNavSlot} active=${mainView === "about"}>
+          <${RailItem} icon="bot" label="About"
+            active=${mainView === "about"}
+            onClick=${() => onSelectAbout && onSelectAbout()} />
+        </${RailNavSlot}>
       </div>
 
       <div style=${{ height: 1, background: "var(--hairline)", margin: "12px 16px" }} />
@@ -2564,6 +2602,14 @@ function ShellRail({ projectName, selectedId, onOpen, onSelectBoard, mainView, o
                 onOpen=${openAndClear} attention=${it.attention} />`)}
           </${Collapsible}>`)}
       </div>
+
+      <!-- Footer status line (1a shape) — see footerStatus above; pinned below the
+           scrollable tree region (a sibling, not part of its overflow: auto), so it
+           never scrolls out of view. -->
+      <div style=${{
+        padding: "9px 16px", borderTop: "1px solid var(--hairline)",
+        fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-3)",
+      }}>${footerStatus}</div>
     </nav>`;
 }
 

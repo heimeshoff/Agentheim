@@ -372,8 +372,16 @@ separate BC, but today the whole tool lives in this one.
   page session **blinks** until clicked or reloaded — a pure, in-memory-only session-baseline
   diff (`rail-attention.js`), no disk/`localStorage` write (ADR-0017). The outer shell frame is
   bounded to the viewport (`height: 100dvh`, `overflow: hidden`; aw-067), so rail + topbar stay
-  fixed and the inner `scroll-quiet` region is the sole vertical scroll container. See ADR-0009,
-  ADR-0003, ADR-0017, ADR-0018, ADR-0027.
+  fixed and the inner `scroll-quiet` region is the sole vertical scroll container. **1a
+  single-panel shape (aw-wsfsk)**: the builder's chosen left-nav shape over 1b's split icon-rail
+  + tree. The rail is **236px** wide; the tree header reads **"WORKSPACE"**; a **footer status
+  line** (`"all clear · N done"`) renders below the tree, computed by the pure, unit-tested
+  `library-data.footerStatusLine` off the same grouped tree projection (N counts the Decisions/ADR
+  group — loss-tolerant: a missing Decisions group degrades to the bare `"all clear"`, never a
+  throw). The **active primary-nav item** (Board/Workflow/About) renders an **ochre inset rail**
+  (`inset 2px 0 0 var(--accent-ochre)`, via the `RailNavSlot` wrapper) — a **bounded ADR-0048
+  wayfinding exception** to ADR-0016's de-emphasis-for-selection default, scoped to this one
+  surface only. See ADR-0009, ADR-0003, ADR-0017, ADR-0018, ADR-0027, ADR-0048, ADR-0016.
 - **Topbar settings menu (aw-049; consumes the shared primitive as of design-system-015)** —
   a **dropdown** (`SettingsMenu`) behind a single **settings gear** (`settings-2` glyph,
   unforked) sitting left of the What's next + Work launches. Collapses three utility controls —

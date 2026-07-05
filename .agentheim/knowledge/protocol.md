@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 02:07 -- Task verified and completed: agentic-workflow-wsfsk - Left nav — 1a single-panel shape (width, tree label, footer status line)
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-wsfsk - Left nav — 1a single-panel shape (width, tree label, footer status line)
+**Summary:** ShellRail now matches the 1a single-panel shape — 236px width, WORKSPACE tree header, a loss-tolerant footer status line (all clear · N done via a pure footerStatusLine helper), and the active primary-nav item ochre inset rail (new RailNavSlot wrapper, ADR-0048 wayfinding carve-out cited in-code); tree-group mono counts unchanged
+**Duration:** 16m
+**Verification:** PASS (iteration 1)
+**Files changed:** 7
+**Tests added:** 8
+**ADRs written:** none
+
+---
+
 ## 2026-07-05 02:05 -- Task verified and completed: agentic-workflow-a2pm1 - What's Next panel — 3-step flight plan with ochre step-2 hero
 
 **Type:** Work / Task completion

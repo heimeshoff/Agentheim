@@ -110,3 +110,26 @@ export function libraryCount(groups) {
   if (!Array.isArray(groups)) return 0;
   return groups.reduce((n, g) => n + (Array.isArray(g.items) ? g.items.length : 0), 0);
 }
+
+/**
+ * The rail FOOTER STATUS LINE (agentic-workflow-wsfsk, 1a shape): a compact
+ * one-line summary rendered below the Workspace tree ("all clear · N done").
+ * N counts the "Decisions" group already present in `groups` — an ADR is
+ * itself completed work, so counting decisions is a natural, always-available
+ * "done" proxy without wiring a separate board/task read into the rail (tasks
+ * are deliberately excluded from this projection; see treeToLibrary above).
+ *
+ * Sourced LOSS-TOLERANTLY straight off the same grouped projection the tree
+ * renders: a missing/malformed `groups` array, a missing Decisions group (no
+ * ADRs yet), or a malformed Decisions.items all degrade to the bare "all
+ * clear" line — never throw, never an empty artifact.
+ *
+ * @param {Array<{group: string, items: Array}>} groups
+ * @returns {string}
+ */
+export function footerStatusLine(groups) {
+  const list = Array.isArray(groups) ? groups : [];
+  const decisions = list.find((g) => g && g.group === 'Decisions');
+  const n = decisions && Array.isArray(decisions.items) ? decisions.items.length : null;
+  return n === null ? 'all clear' : `all clear · ${n} done`;
+}
