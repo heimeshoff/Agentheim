@@ -1,7 +1,7 @@
 ---
 id: design-system-rm2yv
 title: Extend the ochre wayfinding exception to the highlighted prompt-mode tab
-status: todo
+status: doing
 type: decision
 context: design-system
 created: 2026-07-05

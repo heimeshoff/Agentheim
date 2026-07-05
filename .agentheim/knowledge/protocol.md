@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 10:28 -- Batch started: [design-system-rm2yv, agentic-workflow-qf945]
+
+**Type:** Work / Batch start
+**Tasks:** design-system-rm2yv - Extend the ochre wayfinding exception to the highlighted prompt-mode tab, agentic-workflow-qf945 - Reverse ADR-0015 per-column scope — one board-wide view lens, per-(column,BC) collapse/peek retained (amend in place)
+**Parallel:** yes (2 workers — agentic-workflow-qf945 amends ADR-0015 in place; design-system-rm2yv writes provisional ADR-0051 + pointer to ADR-0048; different BCs, zero file overlap)
+
+---
+
 ## 2026-07-05 10:18 -- Modeling / Promoted: agentic-workflow-qf945 - Reverse ADR-0015 per-column scope — one board-wide view lens, per-(column,BC) collapse/peek retained (amend in place)
 
 **Type:** Modeling / Promote

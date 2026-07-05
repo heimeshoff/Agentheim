@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 29
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **design-system-rm2yv** — Extend the ochre wayfinding exception to the highlighted prompt-mode tab (decision) — `todo/design-system-rm2yv-ochre-exception-prompt-mode-tab.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **design-system-rm2yv** — Extend the ochre wayfinding exception to the highlighted prompt-mode tab (decision) — `doing/design-system-rm2yv-ochre-exception-prompt-mode-tab.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)

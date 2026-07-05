@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 2
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 127
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-qf945** — Reverse ADR-0015 per-column scope — one board-wide view lens, per-(column,BC) collapse/peek retained (amend in place) (decision) — `todo/agentic-workflow-qf945-board-wide-view-lens-amend-adr-0015.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-qf945** — Reverse ADR-0015 per-column scope — one board-wide view lens, per-(column,BC) collapse/peek retained (amend in place) (decision) — `doing/agentic-workflow-qf945-board-wide-view-lens-amend-adr-0015.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
