@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 03:10 -- Modeling / Refined: agentic-workflow-bz3az - Board prompt bar — 4-mode tabs + keyboard model + ochre active tab
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Reconciled the task against the two decisions that landed after its capture. Interaction is now pinned to ADR-0050 (`prompt-mode.js` shape + four invariants); acceptance criteria rewritten to that contract, plus an explicit Enter-button-fires-highlighted-mode criterion and a docked-console geometry criterion. Resolved a load-bearing paint defect: the task cited [[design-system-vw12e]] as the authority for an "ochre active tab", but vw12e/ADR-0048/ADR-0050 had classified that exact surface as ochre-*forbidden* (de-emphasis). Builder chose to keep the ochre tab and reopen ADR-0048 → split out a design-system decision task ([[design-system-rm2yv]]) to record the amendment; bz3az now depends on it. Builder also confirmed the full 1b docked two-row console is in scope for this one task. Stays in backlog — now correctly gated behind rm2yv (fail-closed dependency, ADR-0038).
+**Split into:** design-system-rm2yv (decision — extend ADR-0048's ochre wayfinding exception to the highlighted prompt-mode tab)
+**ADRs written:** none (rm2yv authors provisional ADR-0051 when worked)
+
+---
+
 ## 2026-07-05 02:08 -- Work session ended
 
 **Type:** Work / Session end
