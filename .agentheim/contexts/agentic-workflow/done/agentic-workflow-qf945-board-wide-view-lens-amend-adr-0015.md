@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-qf945
 title: Reverse ADR-0015 per-column scope — one board-wide view lens, per-(column,BC) collapse/peek retained (amend in place)
-status: doing
+status: done
 type: decision
 context: agentic-workflow
 created: 2026-07-05
-completed:
+completed: 2026-07-05
 depends_on: []
 blocks: [agentic-workflow-c2ver]
 tags: [dashboard-redesign, board, view-state, adr-amendment, localstorage, decision]
@@ -66,7 +66,7 @@ attempted; this is a deliberate hard reset, not a lossy-but-best-effort carry-fo
 
 ## Acceptance criteria
 
-- [ ] **Amend-in-place, not supersede.** ADR-0015
+- [x] **Amend-in-place, not supersede.** ADR-0015
       (`.agentheim/knowledge/decisions/0015-board-view-state-persisted-localstorage.md`)
       is edited in place: a dated amendment banner is added under the title noting the
       per-column→board-wide scope reversal; the Decision bullet that reads "the board's
@@ -75,33 +75,33 @@ attempted; this is a deliberate hard reset, not a lossy-but-best-effort carry-fo
       `status` stays `proposed`; NO `supersedes`/`diverges_from`/new-ADR-number is added;
       `related_tasks` is extended with `agentic-workflow-qf945` and `agentic-workflow-c2ver`.
       No new ADR file is created.
-- [ ] **The amendment reasons the ruling from precedent** — it names ADR-0015's
+- [x] **The amendment reasons the ruling from precedent** — it names ADR-0015's
       `proposed` status and cites the repo convention (supersession reserved for
       `accepted` ADRs, per ADR-0021; in-place amendment of a `proposed` ADR, per
       infrastructure-015/ADR-0018) as the basis for amending rather than superseding.
-- [ ] **New store shape is spelled out** in the amended Decision: a single board-wide
+- [x] **New store shape is spelled out** in the amended Decision: a single board-wide
       `lens: { grouped, sort }` (no longer per-column), plus a per-column
       `columns: { [col]: { collapsed: string[], peek: boolean } }` map. The lens is ONE
       object for the whole board; `collapsed[]` and `peek` remain column-scoped exactly at
       today's granularity.
-- [ ] **Done collapse/peek explicitly unaffected.** The amendment states in words that the
+- [x] **Done collapse/peek explicitly unaffected.** The amendment states in words that the
       Done column's `peek` collapse/peek affordance (aw-m2v8d) and every column's
       `collapsed[]` section state stay per-column and are NOT swept into the board-wide
       lens — only sort + group-by-BC go board-wide.
-- [ ] **Dormant retention, not clearing.** The amendment states that toggling the
+- [x] **Dormant retention, not clearing.** The amendment states that toggling the
       board-wide `grouped` flag off then back on does NOT clear a column's stored
       `collapsed[]` — a column's per-BC collapse state goes dormant (unused while flat)
       and reappears intact once grouping is re-enabled, board-wide or not. (Confirmed
       sort-invariant by the tactical-modeler: a column's BC-section set depends only on
       which BCs have cards there, never on sort order, since grouping only partitions and
       never re-orders.)
-- [ ] **Versioned-migration semantics recorded.** The amendment states `VIEW_STATE_VERSION`
+- [x] **Versioned-migration semantics recorded.** The amendment states `VIEW_STATE_VERSION`
       bumps to `2`; that a blob with any version other than `2` (or absent/malformed JSON)
       degrades to board-wide defaults (`lens` = flat + default sort; every column = empty
       `collapsed[]`, `peek: false`) and NEVER throws; and that no old-shape→new-shape field
       migration is performed (safe reset, per ADR-0015's existing consequence and the
       `normalizeColumn` defensive-default precedent).
-- [ ] **Bidirectional links.** This task's `related_adrs` names ADR-0015; ADR-0015's
+- [x] **Bidirectional links.** This task's `related_adrs` names ADR-0015; ADR-0015's
       `related_tasks` names this task. The downstream wiring task
       [[agentic-workflow-c2ver]] `depends_on` this task (it builds against the shape
       frozen here).
@@ -126,3 +126,25 @@ attempted; this is a deliberate hard reset, not a lossy-but-best-effort carry-fo
 - Precedent for the amend-vs-supersede call: infrastructure-015 (amended the
   still-`proposed` ADR-0018 in place); contrast ADR-0021 (reshaped the *accepted*
   ADR-0010/0011 via a new ADR).
+
+## Outcome
+
+Amended `.agentheim/knowledge/decisions/0015-board-view-state-persisted-localstorage.md`
+in place (still `status: proposed`, no `supersedes`/`diverges_from`, no new ADR
+number). Added a dated 2026-07-05 banner under the title reasoning the amend-vs-
+supersede call from ADR-0021 (supersession reserved for `accepted` ADRs) and the
+infrastructure-015/ADR-0018 in-place-amendment precedent. Rewrote the Decision's
+lead bullet to "Board-wide lens, column-scoped collapse/peek": the lens
+`{ grouped, sort }` becomes one object for the whole board (`VIEW_STATE_VERSION`
+bumped to 2), while `columns: { [col]: { collapsed, peek } }` retains today's
+per-`(column, BC)` collapse and the Done `peek` boolean verbatim. Recorded the
+dormant-retention rule (toggling `grouped` off/on never clears a column's
+`collapsed[]`, since grouping only partitions the already-sorted list and never
+re-orders) and the version-bump degrade semantics (any non-`2`/missing/malformed
+blob → board-wide defaults, never throws, no field migration). The struck-through
+original bullet is retained for history. `related_tasks` extended with
+`agentic-workflow-qf945` and `agentic-workflow-c2ver`. No code was touched — the
+store rewrite (`dashboard/app/board-view-state.js` v1→v2) and `ViewChip` UI are
+[[agentic-workflow-c2ver]]'s job, building against the shape frozen here. The BC
+README was left unchanged: it still accurately describes the currently-shipped
+per-column implementation, which c2ver will update when the code lands.

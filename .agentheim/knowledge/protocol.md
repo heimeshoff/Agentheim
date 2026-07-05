@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 10:38 -- Task completed (verification skipped): agentic-workflow-qf945 - Reverse ADR-0015 per-column scope — one board-wide view lens, per-(column,BC) collapse/peek retained (amend in place)
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-qf945 - Reverse ADR-0015 per-column scope — one board-wide view lens, per-(column,BC) collapse/peek retained (amend in place)
+**Summary:** Amended ADR-0015 in place: the board view lens (sort + group-by-BC) reverses from per-column to a single board-wide lens; per-(column,BC) collapsed[] and Done peek stay column-scoped; VIEW_STATE_VERSION bumps to 2 with a safe-reset degrade path and dormant-retention pinned
+**Duration:** 1m51s
+**Verification:** SKIPPED — decision-only task
+**Files changed:** 1
+
+---
+
 ## 2026-07-05 10:28 -- Batch started: [design-system-rm2yv, agentic-workflow-qf945]
 
 **Type:** Work / Batch start

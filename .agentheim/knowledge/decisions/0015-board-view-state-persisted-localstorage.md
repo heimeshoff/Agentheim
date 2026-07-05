@@ -4,7 +4,7 @@ title: Board per-column view-state (group + sort + collapse) persists in version
 scope: agentic-workflow
 status: proposed
 date: 2026-06-09
-related_tasks: [agentic-workflow-014, agentic-workflow-012, agentic-workflow-006]
+related_tasks: [agentic-workflow-014, agentic-workflow-012, agentic-workflow-006, agentic-workflow-qf945, agentic-workflow-c2ver]
 related_adrs: [ADR-0009, ADR-0001, ADR-0002]
 ---
 
@@ -16,6 +16,21 @@ related_adrs: [ADR-0009, ADR-0001, ADR-0002]
 > agentic-workflow-012 (column sort). It does NOT reopen aw-012 (done, frozen) and
 > changes no other clause of ADR-0009 (the app still lives in `dashboard/app/`,
 > still consumes the styleguide unmodified, ADR-0003).
+
+> **Amended 2026-07-05 (agentic-workflow-qf945).** REVERSES the *scope* of the view
+> lens from per-column to **board-wide**: sort and group-by-BC are no longer chosen
+> independently per lifecycle column — the board redesign
+> ([[agentic-workflow-c2ver]]) collapses them into a single board-wide "View" chip
+> that drives all four columns identically. This ADR **stays `status: proposed`**
+> and gains **no `supersedes`/`diverges_from` clause and no new ADR number** — the
+> repo convention (ADR-0021) reserves supersession for `accepted` ADRs; a still-
+> `proposed` ADR is amended in place instead, at lower ceremony, per the precedent
+> of infrastructure-015 amending the still-`proposed` ADR-0018 in the same document
+> via a dated banner. The reversal is **scoped to the sort + group-by-BC choice
+> only** — per-`(column, BC)` `collapsed[]` sections and the Done column's `peek`
+> boolean (agentic-workflow-m2v8d) stay column-scoped exactly as before; only the
+> *lens* goes board-wide. See the rewritten Decision bullet below ("Board-wide lens,
+> column-scoped collapse/peek") for the new store shape and migration semantics.
 
 ## Context
 agentic-workflow-014 adds a per-column **group-by-bounded-context** lens to the
@@ -31,12 +46,63 @@ SECOND source of truth about the board's content, competing with disk (ADR-0001:
 disk is the source of truth, the board is a projection rebuilt from it).
 
 ## Decision
-- The board's **per-column view lens** — `{ grouped, sort, collapsed[] }` per
+- **Board-wide lens, column-scoped collapse/peek** (amended 2026-07-05,
+  agentic-workflow-qf945; supersedes the original "per-column view lens" bullet
+  below it). The board's **view lens** — `{ grouped, sort }` — is no longer chosen
+  independently per lifecycle column: it is **one object for the whole board**,
+  persisted alongside a **retained per-column** collapse/peek map, in the same
+  **single versioned `localStorage` store**
+  (`dashboard/app/board-view-state.js`, key `agentheim.board.viewState`,
+  `VIEW_STATE_VERSION` bumped to `2`):
+
+      {
+        version: 2,
+        lens: { grouped: boolean, sort: SortValue },        // board-wide, ONE per board
+        columns: {                                          // one entry per lifecycle column
+          [col]: { collapsed: string[], peek: boolean }     // per-(column, BC) + Done peek, UNCHANGED
+        }
+      }
+
+  Only the sort + group-by-BC **choice** goes board-wide. The per-`(column, BC)`
+  `collapsed[]` section state and the Done column's `peek` collapse/peek boolean
+  (agentic-workflow-m2v8d) are **not** swept into the board-wide lens — they stay
+  exactly as column-scoped as before this amendment, just re-homed under `columns`
+  instead of alongside a per-column `grouped`/`sort`.
+
+  **Dormant retention, not clearing.** Toggling the board-wide `grouped` flag off
+  then back on does **not** clear a column's stored `collapsed[]`: a column's
+  per-BC collapse state goes dormant (unused while the board is flat) and
+  reappears intact once grouping is re-enabled. This holds board-wide or
+  per-column, because a column's BC-section set depends only on which BCs have
+  cards in that column, never on sort order — grouping only partitions the
+  already-sorted list and never re-orders it (confirmed sort-invariant by the
+  tactical-modeler).
+
+  **Versioned-migration semantics.** `VIEW_STATE_VERSION` bumps to `2`. The old v1
+  shape (`{ version: 1, columns: { [col]: { grouped, sort, collapsed, peek } } }`)
+  is retired: a blob with any version other than `2` — including absent or
+  malformed JSON — degrades to **board-wide defaults** (`lens` = flat + default
+  sort; every column = empty `collapsed[]`, `peek: false`) and **never throws**,
+  inheriting this ADR's own "a version bump silently discards old preferences
+  (safe reset)" consequence and the existing `normalizeColumn`-style defensive-
+  default precedent. No field-by-field migration of old per-column sort/grouped
+  values is attempted — this is a deliberate hard reset, not a lossy-but-best-
+  effort carry-forward. The storage key (`agentheim.board.viewState`) is reused
+  unchanged; the version bump alone invalidates old blobs.
+
+  The store rewrite that implements this shape (`dashboard/app/board-view-state.js`
+  v1→v2, splitting `normalizeColumn` into a board-lens normalizer and a leaner
+  per-column normalizer) and the board-wide `ViewChip` UI are built by
+  [[agentic-workflow-c2ver]], which depends on this decision.
+
+- ~~The board's **per-column view lens** — `{ grouped, sort, collapsed[] }` per
   lifecycle column — is persisted in a **single versioned `localStorage` store**
   (`dashboard/app/board-view-state.js`, key `agentheim.board.viewState`,
   `VIEW_STATE_VERSION`). One store covers grouping, sort, AND each `(column, BC)`
   collapse state; the sort flip rides the same store rather than spawning an
-  artificial store-first dependency.
+  artificial store-first dependency.~~ *(superseded by the bullet above — retained
+  struck-through for history; the original per-column scope is what the
+  2026-07-05 amendment reverses.)*
 - The reversal is **bounded to PRESENTATION view-state**. The store records only how
   you LOOK at the board (grouped/flat, ordering, which sections are collapsed). It
   NEVER records lifecycle truth — which task is in which column remains a pure
