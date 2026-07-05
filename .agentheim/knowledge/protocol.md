@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-05 10:10 -- Modeling / Refined: agentic-workflow-c2ver - Board columns — singular "View" chip replacing per-column Sort/Group
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Split the ADR-0015 scope-reversal out of c2ver's acceptance criteria into its own `type: decision` task (mirroring how the sibling prompt-bar rebuild bz3az got s7gev/ADR-0050 first); c2ver becomes pure UI wiring and now depends_on the decision. Architect ruling folded in: **amend ADR-0015 in place** (still `proposed`; supersession here is reserved for `accepted` ADRs) rather than write a superseding ADR. Froze the v2 store shape (board-wide `lens: { grouped, sort }` + retained per-(column,BC) `columns: { collapsed, peek }`, hard version-bump reset) and pinned the tactical-modeler's dormant-retention rule (grouping off→on must not clear `collapsed[]`). Collapse stays per-(column,BC) and Done `peek` stays per-column per the builder's call.
+**Split into:** agentic-workflow-qf945 (decision — reverse ADR-0015 per-column scope, amend in place)
+**ADRs written:** none (the ADR-0015 amendment is qf945's worked output, not written at refine)
+
+---
+
 ## 2026-07-05 03:10 -- Modeling / Refined: agentic-workflow-bz3az - Board prompt bar — 4-mode tabs + keyboard model + ochre active tab
 
 **Type:** Modeling / Refine
