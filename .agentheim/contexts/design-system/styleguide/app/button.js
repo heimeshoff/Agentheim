@@ -24,6 +24,7 @@
    ============================================================ */
 import { useState } from "react";
 import { html } from "./html.js";
+import { Icon } from "./icons.js";
 
 /**
  * The shared labelled button.
@@ -86,5 +87,50 @@ export function Button({
         ...style,
       }}>
       ${children}
+    </button>`;
+}
+
+/**
+ * The solid-ochre icon Enter button (design-system-xr4sb) — the prompt
+ * console's compact submit affordance.
+ *
+ * Sits within ADR-0048's surface-2 "primed primary action" carve-out: the
+ * button FIRES/commits the prompt the instant there is one to send, so a
+ * filled --accent-ochre background is PERMITTED here (not a new accent
+ * exception — ADR-0051 licenses this exact surface). Filled directly with
+ * --accent-ochre (a fill, not a border/outline), the `corner-down-left`
+ * ("↵") return-arrow glyph, a compact square footprint, and --radius-sm
+ * corners — visibly distinct from the neutral/destructive text `Button`
+ * above (padded pill, hairline border, no fill) and from the ghost
+ * `IconButton` (drawer.js — transparent, hover-only, no fill).
+ *
+ * The glyph draws from --accent-ochre-fg, a dedicated fixed on-accent
+ * foreground pair (colors_and_type.css) chosen for contrast against
+ * --accent-ochre specifically — NOT the generic --fg-1/--surface-0 surface
+ * tokens. --accent-ochre inverts lightness across themes (darker in light
+ * theme, lighter in dark theme), the opposite of how --fg-1 flips, so
+ * reusing a generic foreground token here would go illegible in one theme.
+ *
+ * @param {object} props
+ * @param {() => void} [props.onClick] — activation handler.
+ * @param {number} [props.size=34] — the square footprint, in px.
+ * @param {string} [props.ariaLabel="Send"] — accessible label (icon-only, no visible text).
+ */
+export function EnterButton({ onClick, size = 34, ariaLabel = "Send" }) {
+  return html`
+    <button
+      type="button"
+      className="focusable"
+      aria-label=${ariaLabel}
+      onClick=${onClick}
+      style=${{
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        width: size, height: size, padding: 0, cursor: "pointer",
+        border: "none",
+        borderRadius: "var(--radius-sm)",
+        background: "var(--accent-ochre)",
+        color: "var(--accent-ochre-fg)",
+      }}>
+      <${Icon} name="corner-down-left" size=${18} color="var(--accent-ochre-fg)" />
     </button>`;
 }

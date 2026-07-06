@@ -791,6 +791,31 @@ the pattern in **section 11** (`SearchSpecimen` — type *design*, *adr*, or *zz
 > glyph on the board. **Builder confirmation PENDING** — re-review the canvas
 > (`styleguide/index.html` → section 04, Iconography interface set) and re-confirm the
 > gate OPEN.
+>
+> **Gate re-review reopened by the prompt-mode glyphs + icon Enter button
+> (`design-system-xr4sb`).** Aligned to Section 1b: the shared icon set
+> (`styleguide/app/icons.js`, the `LUCIDE` map) gained `diamond` (Modeling, replaces the
+> undeliberate `compass`) and `circle-dot` (Research, replaces the undeliberate
+> `search`), both surfaced in the section-04 interface-set gallery (`foundations2.js`,
+> the curated `ui` array). Inquire keeps `message-circle-question` (r4k8m's deliberate
+> glyph supersedes 1b's bare "?" — no shipped decision reversed, no ADR). A third glyph,
+> `corner-down-left`, backs a new solid-ochre icon-square `EnterButton` variant
+> (`styleguide/app/button.js`) — filled `--accent-ochre` directly, `--radius-sm`
+> corners, a compact square footprint, licensed by ADR-0048's surface-2 "primed
+> primary action" carve-out (it fires/commits the prompt, so ochre is permitted; not a
+> new accent exception). The glyph foreground draws from a new dedicated
+> `--accent-ochre-fg` token pair (`styles/colors_and_type.css`) rather than a generic
+> `--fg-1`/`--surface-0` surface token, because `--accent-ochre` inverts lightness
+> across themes (darker in light theme, lighter in dark theme) — the opposite of how
+> `--fg-1` flips, so a generic foreground token would go illegible in one theme. Both
+> mode glyphs and the Enter-button specimen are a visible styleguide change that
+> reopens the design-system gate per the `design-system-005` / `007` / `009` / `014` /
+> `015` / `017` / `r4k8m` / `c3p9k` precedent. `dist/` deliberately NOT rebuilt — a
+> derived artifact (ADR-0003) that the consuming task (`agentic-workflow-q7r3x`)
+> rebuilds when the tab layout + Enter button actually render on the board.
+> **Builder confirmation PENDING** — re-review the canvas (`styleguide/index.html` →
+> section 04, Iconography interface set; section 12, Button — neutral, destructive &
+> Enter) and re-confirm the gate OPEN.
 
 > Live-board note: the served dashboard `dist/` is a derived artifact (ADR-0003) and
 > was rebuilt here (`node build.mjs`), but the bundle is byte-identical — the
@@ -871,4 +896,5 @@ list the new token (role: "Ticket card") and to relabel `--radius-md`'s role as
 - `concept` content type: `styleguide/app/data.js` (`CONTENT_TYPES.concept`, `lightbulb` glyph, `--ct-concept`/`--ct-concept-tint` magenta tokens in `styles/agentheim.css`); the styleguide capability behind Concepts as a first-class artifact kind in the dashboard rail + search (`agentic-workflow-075`) (design-system-021)
 - Dependency-relation ring: `styleguide/app/motion.js` (`dependencyRingClass`, re-exported from `styleguide/app/kanban.js`), `--rel-dep`/`--rel-dep-tint` tokens + `.rel-ring` keyframes in `styles/agentheim.css`, `--duration-relation` in `styles/colors_and_type.css`; the `TicketCard.dependencyRelation` prop the dashboard's hover-dependency feature will consume (`agentic-workflow-k5p8w`), see ADR-0034 (design-system-w4t9k)
 - Hidden/off-viewport dependency markers: `styleguide/app/motion.js` (`dependencyPresentClass`, `edgeBlinkClass`), `Collapsible.hasHiddenDependency` (`styleguide/app/collapsible.js`), `.rel-present` / `.rel-edge-blink(--top|--bottom)` + keyframes in `styles/agentheim.css` (reusing `--rel-dep` / `--duration-relation`); the styleguide capability the board's collapsed-section marker and scroll-edge indicator will consume (`agentic-workflow-h9v3m`, `agentic-workflow-r9k2p`), see ADR-0034 pt. 6 (design-system-b7n2s)
+- Prompt-mode tab glyphs + solid-ochre icon Enter button: `styleguide/app/icons.js` (`diamond`, `circle-dot`, `corner-down-left` glyphs), `styleguide/app/button.js` (`EnterButton`), `--accent-ochre-fg` dedicated on-accent foreground pair in `styles/colors_and_type.css` (ADR-0048 surface-2 carve-out, ADR-0051); the styleguide primitives the dashboard prompt console will consume (`agentic-workflow-q7r3x`) (design-system-xr4sb)
 - BC index: `INDEX.md`

@@ -55,6 +55,17 @@ export const LUCIDE = {
   // verbatim — two stacked chevrons each. Inner markup only; Icon supplies <svg>.
   "chevrons-up": '<path d="m17 11-5-5-5 5"/><path d="m17 18-5-5-5 5"/>',
   "chevrons-down": '<path d="m7 6 5 5 5-5"/><path d="m7 13 5 5 5-5"/>',
+  // Prompt-mode tab glyphs aligned to Section 1b (design-system-xr4sb). The
+  // Modeling and Research tabs wore undeliberate defaults (`compass` /
+  // `search`, never ADR- or task-backed — see r4k8m's "sibling cards" note),
+  // so they are replaced here. Lucide `diamond` / `circle-dot` geometry
+  // copied verbatim. Inner markup only; Icon supplies the <svg> wrapper.
+  "diamond": '<path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41l-7.59-7.59a2.41 2.41 0 0 0-3.41 0Z"/>',
+  "circle-dot": '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/>',
+  // The return-arrow ("↵") glyph for the solid-ochre icon Enter button
+  // (design-system-xr4sb, button.js EnterButton) — ADR-0048 surface 2 /
+  // ADR-0051. Lucide `corner-down-left` geometry copied verbatim.
+  "corner-down-left": '<path d="M20 4v7a4 4 0 0 1-4 4H4"/><path d="m9 10-5 5 5 5"/>',
 };
 
 export function Icon({ name, size = 16, stroke = 1.5, color = "currentColor", style }) {

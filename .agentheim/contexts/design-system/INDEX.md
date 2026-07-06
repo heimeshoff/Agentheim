@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 30
+- **Doing:** 0
+- **Done:** 31
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **design-system-xr4sb** — Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b (feature) — `doing/design-system-xr4sb-prompt-mode-glyphs-icon-enter-button.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **design-system-xr4sb** — Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b (feature) — `done/design-system-xr4sb-prompt-mode-glyphs-icon-enter-button.md`
 - **design-system-rm2yv** — Extend the ochre wayfinding exception to the highlighted prompt-mode tab (decision) — `done/design-system-rm2yv-ochre-exception-prompt-mode-tab.md`
 - **design-system-t896s** — TicketCard — bump corner radius toward 1b's 10px (refactor) — `done/design-system-t896s-ticketcard-radius-10px.md`
 - **design-system-a31e0** — Retokenize the palette — Command-deck dark + derived light, across both token files (feature) — `done/design-system-a31e0-retokenize-palette-dark-derived-light.md`

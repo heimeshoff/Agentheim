@@ -18,7 +18,7 @@ import { TreeGroup, TreeItem } from "./library.js";
 import { Collapsible } from "./collapsible.js";
 import { Menu, MenuItem, MenuDivider } from "./menu.js";
 import { SearchField } from "./search.js";
-import { Button } from "./button.js";
+import { Button, EnterButton } from "./button.js";
 import { Modal } from "./modal.js";
 import { ConfirmDialog } from "./confirm-dialog.js";
 import { Segmented, ThemeToggle, LiveApp } from "./live.js";
@@ -678,6 +678,10 @@ function ButtonRow() {
         <${StateLabel}>Destructive (--obligation)</${StateLabel}>
         <${Button} variant="destructive" onClick=${() => {}}>Delete<//>
       </div>
+      <div>
+        <${StateLabel}>Enter — icon variant (--accent-ochre)</${StateLabel}>
+        <${EnterButton} onClick=${() => {}} />
+      </div>
     </div>`;
 }
 function ConfirmDialogSpecimen() {
@@ -720,9 +724,9 @@ function ConfirmDialogSpecimen() {
 function ModalSection() {
   return html`
     <${GuideSection} index="12" title="Modal &amp; confirm dialog"
-      desc="A centered, scrim-backed dialog — the Drawer's centered sibling. The Modal pins to the viewport (above the slide-over), dims the page behind it with the Drawer's exact backdrop, and reveals with a fade + slight scale-up that strips to a hard show under prefers-reduced-motion. Focus moves into the panel and stays trapped while open, returning to the trigger on close. The ConfirmDialog composes it with the new Button primitive — a neutral Cancel and a neutral-or-destructive Confirm, danger drawn from --obligation (never the reserved accent).">
+      desc="A centered, scrim-backed dialog — the Drawer's centered sibling. The Modal pins to the viewport (above the slide-over), dims the page behind it with the Drawer's exact backdrop, and reveals with a fade + slight scale-up that strips to a hard show under prefers-reduced-motion. Focus moves into the panel and stays trapped while open, returning to the trigger on close. The ConfirmDialog composes it with the new Button primitive — a neutral Cancel and a neutral-or-destructive Confirm, danger drawn from --obligation (never the reserved accent). The Enter button is a third, icon-only variant: a filled --accent-ochre square with the corner-down-left glyph, licensed by ADR-0048's primed-primary-action carve-out (it fires the prompt, so ochre is permitted).">
       <div style=${{ marginBottom: 24 }}>
-        <${SubHead} style=${{ marginBottom: 10 }}>Button — neutral &amp; destructive</${SubHead}>
+        <${SubHead} style=${{ marginBottom: 10 }}>Button — neutral, destructive &amp; Enter</${SubHead}>
         <${ButtonRow} />
       </div>
       <div style=${{ display: "flex", gap: 28, alignItems: "flex-start", flexWrap: "wrap" }}>

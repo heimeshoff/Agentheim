@@ -121,7 +121,16 @@ test('Button is token-composed (font-ui, radius, hairline) and has neutral + des
 });
 
 test('Button destructive does NOT use the reserved selection accent (ADR-0016)', () => {
-  assert.doesNotMatch(buttonSrc, /--accent-ochre/, 'danger must not borrow the reserved accent');
+  // Scoped to the Button() function itself — button.js also exports EnterButton
+  // (design-system-xr4sb), which DOES use --accent-ochre under ADR-0048's surface-2
+  // "primed primary action" carve-out (it fires/commits, so ochre is permitted
+  // there). That is a separate, licensed exception, not the destructive danger path
+  // this guard protects.
+  const buttonFn = buttonSrc.slice(
+    buttonSrc.indexOf('export function Button('),
+    buttonSrc.indexOf('The solid-ochre icon Enter button'),
+  );
+  assert.doesNotMatch(buttonFn, /--accent-ochre/, 'danger must not borrow the reserved accent');
 });
 
 // ---- 5. ConfirmDialog source-guards: composes Modal + Button, cancel/confirm seam ----
