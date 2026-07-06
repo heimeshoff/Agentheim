@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 13:05 -- Modeling / Promoted: agentic-workflow-p8k4d - Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-06 11:40 -- Modeling / Refined: agentic-workflow-p8k4d - Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects
 
 **Type:** Modeling / Refine

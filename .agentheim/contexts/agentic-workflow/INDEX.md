@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 130
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-p8k4d** — Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects (feature) — `todo/agentic-workflow-p8k4d-prompt-bar-enter-launch-ctrl-space-focus-tab-select.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -76,7 +77,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-p8k4d** — Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects (feature) — `backlog/agentic-workflow-p8k4d-prompt-bar-enter-launch-ctrl-space-focus-tab-select.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
