@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 20:35 -- Modeling / Promoted: agentic-workflow-q7r3x - Prompt area matches Section 1b of the UX explorations reference exactly
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-06 20:34 -- Modeling / Refined: agentic-workflow-q7r3x - Prompt area matches Section 1b of the UX explorations reference exactly
 
 **Type:** Modeling / Refine
