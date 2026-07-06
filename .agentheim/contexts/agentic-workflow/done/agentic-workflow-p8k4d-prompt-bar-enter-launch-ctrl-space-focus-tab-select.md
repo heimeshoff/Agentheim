@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-p8k4d
 title: Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-06
-completed:
+completed: 2026-07-06
 depends_on: []
 blocks: []
 tags: [dashboard, prompt-bar, keyboard]
@@ -158,3 +158,28 @@ Relevant seams: `dashboard/app/prompt-mode.js` (`promptBarKeyIntent`,
 which currently calls `sanitizePromptLine`, the aw-038 doc comment ~544,
 `sanitizePromptLine` def ~576, Enter button `onClick` ~1120, the `⌘↵` hint ~1110,
 `textareaRef` ~983, and a new `useEffect` for the window Ctrl+Space listener).
+
+## Outcome
+
+Shipped all four reversals. `dashboard/app/prompt-mode.js`: `PROMPT_KEY_INTENT.SWALLOW`
+retired, `NEWLINE` added; `promptBarKeyIntent` now returns `launch` for bare Enter and
+Ctrl+Enter, `newline` for Shift+Enter (regardless of Ctrl), `cycle`/`pass` unchanged.
+`dashboard/app/board.js` `BoardPromptBar`: a new window-scoped `document` keydown
+`useEffect` focuses `textareaRef` on Ctrl+Space (preventDefault); `onTabClick` no longer
+calls `fire()` (selects only); `onPromptKeyDown`'s `NEWLINE` branch does not
+`preventDefault` (native line-break insertion); `onPromptChange` stores the raw
+textarea value; `sanitizePromptLine` deleted; the aw-038 single-logical-line doc
+comment rewritten to describe the genuinely multi-line field; the `⌘↵` hint became `↵`
+with title "Enter launches · Shift+Enter for a new line". ADR-0050 amended in place
+with a dated `## Amendment` section (mirroring the ADR-0015/qf945 and ADR-0019/
+aw-030/aw-041 precedents) recording all four reversals and stating explicitly that
+aw-038's swallow + single-line rules are intentionally superseded. BC README updated.
+`dashboard/dist/app.js` rebuilt via `node build.mjs`. Full suite: 767/767 passing
+(764 baseline + 3 net new test blocks in `dashboard/test/board-prompt-bar.test.mjs`;
+`dashboard/test/prompt-mode.test.mjs` kept 20 tests but rewrote the invariant-4
+assertions for the new launch/newline split).
+
+Key files: `dashboard/app/prompt-mode.js`, `dashboard/app/board.js`,
+`dashboard/test/prompt-mode.test.mjs`, `dashboard/test/board-prompt-bar.test.mjs`,
+`dashboard/dist/app.js`, `.agentheim/knowledge/decisions/0050-prompt-bar-keyboard-committed-selection-model.md`,
+`.agentheim/contexts/agentic-workflow/README.md`.

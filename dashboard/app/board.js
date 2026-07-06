@@ -541,15 +541,21 @@ function BoardConfetti({ fireKey }) {
 // burst plays; a fully-silent action (clipboard blocked too) clears nothing and
 // fires no confetti.
 //
-// THE FIELD IS A SINGLE-LOGICAL-LINE, AUTO-GROWING CONTROL (aw-038). It is a
-// <textarea> constrained to author ONE line of text: it soft-wraps with NO horizontal
-// scrollbar (overflowX hidden), AUTO-GROWS in height to fit the wrapped content
-// (autoGrowField measures scrollHeight) up to PROMPT_FIELD_MAX_PX then scrolls
-// vertically (overflowY auto). Enter is SWALLOWED (onKeyDown preventDefault — no
-// newline, no launch; Shift+Enter is no special case), and every change is run
-// through sanitizePromptLine so the stored value can NEVER hold a newline — a
-// multi-line PASTE collapses to one line. The builders read this sanitized value, so
-// the seeded-command contract and the empty/whitespace bare fallback are unchanged.
+// THE FIELD IS A GENUINELY MULTI-LINE, AUTO-GROWING CONTROL (aw-038's original
+// single-logical-line framing is RETIRED by agentic-workflow-p8k4d — see ADR-0050's
+// "## Amendment" section). It is a <textarea> that soft-wraps with NO horizontal
+// scrollbar (overflowX hidden) and AUTO-GROWS in height to fit its content
+// (autoGrowField measures scrollHeight) up to PROMPT_FIELD_MAX_PX, after which it
+// scrolls vertically (overflowY auto) — the aw-038 growth band is unchanged, only
+// what it grows to fit has changed. Bare Enter now LAUNCHES the highlighted mode
+// (promptBarKeyIntent's LAUNCH branch — p8k4d reverses aw-038's swallow rule), and
+// Shift+Enter inserts a real line break (the NEWLINE branch does not preventDefault,
+// so the textarea's native newline insertion runs) — so the field authentically
+// holds multi-line text. `sanitizePromptLine` is RETIRED: onChange stores the raw
+// textarea value verbatim, no collapsing of interior newlines. Multi-line prompts are
+// safe end-to-end: the bridge passes the seeded command as a raw argv element with no
+// shell wrap (ADR-0018 / infrastructure-020), the clipboard fallback copies verbatim,
+// and `safePrompt` (modeling-command.js) trims only the leading/trailing ends.
 //
 // The field is a board-local, token-matched control: the styleguide has no
 // text-input primitive, and the board-control precedent (the sort <select>, the
@@ -564,19 +570,12 @@ function BoardConfetti({ fireKey }) {
 // aw-026: the right-side Work button (aw-024) was REMOVED from the prompt bar and
 // relocated to the main-column topbar (BoardTopbar) — one Work entry point. The
 // aw-024 two-thirds/one-third split collapses back: the prompt bar is now just a
-// full-width auto-growing single-line field above the Quick Capture / Modeling pair.
-// Collapse a prompt string to a SINGLE LOGICAL LINE (agentic-workflow-038). Any
-// run of newline characters (\r\n / \n / \r, in any mix) becomes a single space,
-// so the prompt-bar value can NEVER hold a newline regardless of how it arrived —
-// a multi-line PASTE collapses to one line, the same as an Enter keystroke being
-// swallowed. Pure + total: a non-string degrades to "" (mirrors the builders'
-// trim-then-bare contract; an empty value still yields the bare command). It does
-// NOT trim — the builders own trimming (aw-023/aw-036) — it only kills newlines, so
-// the visible text keeps its spaces while the value stays single-line.
-function sanitizePromptLine(value) {
-  if (typeof value !== "string") return "";
-  return value.replace(/[\r\n]+/g, " ");
-}
+// full-width auto-growing field above the Quick Capture / Modeling pair.
+//
+// `sanitizePromptLine` (aw-038's single-logical-line collapse) is RETIRED by
+// agentic-workflow-p8k4d — see the doc comment above BoardPromptBar and ADR-0050's
+// "## Amendment" section. The field now stores the textarea's raw value verbatim, so
+// an authored Shift+Enter line break (or a multi-line paste) survives intact.
 
 // Grow a <textarea> to fit its wrapped content up to a max, then let it scroll
 // (agentic-workflow-038). Reset height to "auto" first so it can SHRINK back as
@@ -947,27 +946,33 @@ async function defaultFetchInFlight() {
 // The board prompt bar — REBUILT (agentic-workflow-bz3az) from aw-065/aw-068's
 // "Prompt" title + row of flat launch cards into the 1b DOCKED two-row console:
 // a top row of four mode tabs (PromptModeTab, name + one-line meaning) and a
-// bottom row of a `❯` chevron + the single-line auto-growing prompt field +
-// a `⌘↵` hint + the ochre Enter button. It docks bottom-center over the board
+// bottom row of a `❯` chevron + a genuinely multi-line auto-growing prompt field +
+// a `↵` hint + the ochre Enter button. It docks bottom-center over the board
 // (position: fixed, ~780px, a raised surface + --shadow-lg, above the board in
 // z-order) rather than sitting in the normal document flow — so it never pushes
 // the board content, and (being fixed to the VIEWPORT, not the aw-067
 // `scroll-quiet` content region) it stays put while the board scrolls beneath it.
 //
-// The keyboard model is ADR-0050's, carried by the pure `prompt-mode.js`
+// The keyboard model is ADR-0050's, AMENDED by agentic-workflow-p8k4d (see
+// ADR-0050's "## Amendment" section) — carried by the pure `prompt-mode.js`
 // (PROMPT_MODES / clampPromptModeIndex / nextPromptModeIndex / promptBarKeyIntent):
 // a single committed `highlightedMode` index (never four independent booleans),
 // defaulting to Quick Capture (0) on mount and resetting to 0 after every
-// successful launch. Every trigger that can fire a mode's command — clicking its
-// tab, the Enter button, or Ctrl+Enter — routes through the ONE `fire(modeIndex)`
+// successful launch. Every trigger that can fire a mode's command — bare Enter,
+// Ctrl+Enter, or the Enter button — routes through the ONE `fire(modeIndex)`
 // function below, so all three are behaviourally identical: the same seeded
 // command, the same `launchOrCopy` bridge-or-clipboard path, the same armed
 // `skipPermissions` thread, the same `onResult` clear-textarea + confetti + reset.
+// Clicking a mode tab ONLY moves the committed highlight — it no longer launches
+// (p8k4d reverses bz3az's click-to-launch). Ctrl+Space focuses the field from
+// anywhere on the board (a window-scoped `document` listener below). Shift+Enter
+// inserts a real line break instead of launching.
 //
-// Preserved unchanged from aw-023/aw-036/aw-038/aw-h7n2c: `sanitizePromptLine`
-// (single-line input), `autoGrowField` (auto-grow band), the four seeded
-// commands' trimmed-or-bare-fallback contract (now reached via
+// Preserved unchanged from aw-023/aw-036/aw-h7n2c: `autoGrowField` (auto-grow
+// band), the four seeded commands' trimmed-or-bare-fallback contract (reached via
 // `PROMPT_MODES[i].commandFor`), and the silent clipboard fallback.
+// `sanitizePromptLine` (aw-038) is RETIRED (p8k4d) — the field now holds raw,
+// genuinely multi-line text.
 function BoardPromptBar({ skipPermissions = false }) {
   const [prompt, setPrompt] = useState("");
   const [confettiKey, setConfettiKey] = useState(0);
@@ -983,6 +988,23 @@ function BoardPromptBar({ skipPermissions = false }) {
   const textareaRef = useRef(null);
   const timer = useRef(null);
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+
+  // Ctrl+Space focuses the prompt field from ANYWHERE on the board (p8k4d, settled
+  // during refinement) — a window-scoped `document` keydown listener, registered and
+  // torn down here. It preventDefault()s the browser default and focuses the
+  // textarea via `textareaRef`; the only editable field on the board IS this
+  // textarea, so "don't steal an in-progress edit elsewhere" reduces to "just focus
+  // it" (there is nowhere else an edit could already be in progress).
+  useEffect(() => {
+    function onWindowKeyDown(e) {
+      if (e.ctrlKey === true && e.key === " ") {
+        e.preventDefault();
+        if (textareaRef.current) textareaRef.current.focus();
+      }
+    }
+    document.addEventListener("keydown", onWindowKeyDown);
+    return () => document.removeEventListener("keydown", onWindowKeyDown);
+  }, []);
 
   // Fire only on a successful launch / landed copy (aw-023). A fully-silent action
   // (clipboard blocked too) leaves the textarea and plays no confetti. The field is
@@ -1017,34 +1039,35 @@ function BoardPromptBar({ skipPermissions = false }) {
     });
   }, [prompt, skipPermissions, onResult]);
 
-  // Clicking a tab moves the committed highlight to it AND launches it — the
-  // unchanged click-to-launch contract, now additionally updating the highlight
-  // before it fires (ADR-0050 "two orthogonal channels": click is a deliberate
-  // act on the committed-selection channel, unlike hover).
+  // Clicking a tab ONLY moves the committed highlight (p8k4d reverses bz3az/
+  // ADR-0050's click-to-launch contract — see ADR-0050's "## Amendment" section).
+  // The launch is deliberately deferred to a real commit act: Enter, Ctrl+Enter, or
+  // the Enter button (all three share the ONE `fire()` below).
   const onTabClick = useCallback((index) => {
     setHighlightedMode(index);
-    fire(index);
-  }, [fire]);
+  }, []);
 
-  // Single-line input: sanitize newlines OUT of every change (a multi-line paste
-  // collapses to one line), store the result, then re-measure for auto-grow.
+  // Store the textarea's value RAW (p8k4d retires aw-038's `sanitizePromptLine`
+  // collapse) so an authored Shift+Enter line break (or a multi-line paste) survives,
+  // then re-measure for auto-grow.
   const onPromptChange = useCallback((e) => {
-    setPrompt(sanitizePromptLine(e.target.value));
+    setPrompt(e.target.value);
     autoGrowField(e.currentTarget, PROMPT_FIELD_MAX_PX);
   }, []);
 
-  // The prompt field's ONE keydown classifier (ADR-0050 invariant 4 —
-  // `promptBarKeyIntent` returns exactly one of four disjoint labels, so bare
-  // Enter and Ctrl+Enter can never collide or double-handle the same keystroke):
-  //   swallow -> no newline, no launch (aw-038, untouched).
+  // The prompt field's ONE keydown classifier (ADR-0050 invariant 4, amended by
+  // p8k4d — `promptBarKeyIntent` returns exactly one of four disjoint labels, so
+  // no keystroke can ever be double-handled):
+  //   newline -> Shift+Enter. No preventDefault — the textarea inserts its own line
+  //              break natively (p8k4d, retires aw-038's swallow + single-line rule).
   //   cycle   -> moves the highlight (nextPromptModeIndex, total wraparound),
   //              launches nothing.
-  //   launch  -> fires the highlighted mode exactly as a click on that tab would.
+  //   launch  -> bare Enter OR Ctrl+Enter — fires the highlighted mode exactly as a
+  //              click on the Enter button would (p8k4d: bare Enter now launches).
   //   pass    -> ordinary typing / unmodified navigation — no interception.
   const onPromptKeyDown = useCallback((e) => {
     const intent = promptBarKeyIntent(e);
-    if (intent === PROMPT_KEY_INTENT.SWALLOW) {
-      e.preventDefault();
+    if (intent === PROMPT_KEY_INTENT.NEWLINE) {
       return;
     }
     if (intent === PROMPT_KEY_INTENT.CYCLE) {
@@ -1107,11 +1130,11 @@ function BoardPromptBar({ skipPermissions = false }) {
           }}
           onFocus=${(e) => { e.currentTarget.style.borderColor = "var(--hairline-strong)"; }}
           onBlur=${(e) => { e.currentTarget.style.borderColor = "var(--hairline)"; }} />
-        <span aria-hidden="true" title="Ctrl+Enter launches the highlighted mode" style=${{
+        <span aria-hidden="true" title="Enter launches · Shift+Enter for a new line" style=${{
           fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--fg-4)",
           border: "1px solid var(--hairline)", borderRadius: "var(--radius-sm)",
           padding: "2px 6px", flexShrink: 0,
-        }}>⌘↵</span>
+        }}>↵</span>
         <button
           type="button"
           className="focusable"

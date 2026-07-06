@@ -22,9 +22,15 @@
         every current index and either direction, never throws, never returns
         out-of-range.
      4. Disjoint key-intent classification — `promptBarKeyIntent` classifies
-        every keydown into exactly one of 'swallow' | 'cycle' | 'launch' |
-        'pass', so bare Enter (aw-038's swallow) and Ctrl+Enter (launch) can
+        every keydown into exactly one of 'newline' | 'cycle' | 'launch' |
+        'pass', so Shift+Enter (a newline) and bare/Ctrl+Enter (launch) can
         never collide or double-handle the same keystroke.
+
+   AMENDED by agentic-workflow-p8k4d (see ADR-0050's "## Amendment" section):
+   bare Enter now LAUNCHES (reversing the original 'swallow' rule inherited
+   from aw-038), and Shift+Enter is a new 'newline' intent — the textarea is
+   allowed to insert the line break natively, retiring aw-038's single-line
+   collapse. The 'swallow' label no longer exists.
 
    Color/paint is explicitly out of scope here (ADR-0050 "Out of scope") — this
    module carries only the interaction judgment; ADR-0048/ADR-0051 govern how
@@ -97,8 +103,12 @@ export function nextPromptModeIndex(current, direction) {
 // The four disjoint key-intent labels `promptBarKeyIntent` classifies every
 // keydown into (invariant 4). Exported so call sites compare against these
 // rather than repeating the string literals.
+//
+// AMENDED by agentic-workflow-p8k4d: 'swallow' is retired and replaced by
+// 'newline' (Shift+Enter, letting the textarea insert its line break
+// natively). Bare Enter moves from 'swallow' to 'launch'.
 export const PROMPT_KEY_INTENT = {
-  SWALLOW: 'swallow',
+  NEWLINE: 'newline',
   CYCLE: 'cycle',
   LAUNCH: 'launch',
   PASS: 'pass',
@@ -107,28 +117,33 @@ export const PROMPT_KEY_INTENT = {
 /**
  * Invariant 4 (disjoint key-intent classification): classify a single keydown
  * event-like object into exactly one of four mutually exclusive intents:
- *   - 'swallow' — bare Enter (no Ctrl). No newline, no launch (aw-038,
- *     untouched by ADR-0050).
- *   - 'launch'  — Ctrl+Enter. Fires the highlighted mode's command exactly as
- *     a click on that tab would.
+ *   - 'launch'  — bare Enter OR Ctrl+Enter (no Shift). Fires the highlighted
+ *     mode's command exactly as a click on the Enter button would (p8k4d:
+ *     bare Enter now launches, reversing aw-038/ADR-0050's original swallow
+ *     rule; Ctrl+Enter is kept as a harmless alias).
+ *   - 'newline' — Shift+Enter, regardless of Ctrl. No launch; the caller lets
+ *     the textarea insert its own line break natively (p8k4d — retires
+ *     aw-038's single-line collapse).
  *   - 'cycle'   — Ctrl+ArrowLeft / Ctrl+ArrowRight. Moves `highlightedMode`
  *     (via `nextPromptModeIndex`); the caller reads `event.key` itself to pick
  *     the direction (ArrowRight → forward, ArrowLeft → backward).
  *   - 'pass'    — everything else (ordinary typing, unmodified navigation,
  *     any other modified/unmodified key).
- * Because this is the ONE function every call site consults, bare Enter and
- * Ctrl+Enter can never collide or be double-handled — there is no code path
- * where both 'swallow' and 'launch' logic run for the same keystroke.
- * @param {{key?: string, ctrlKey?: boolean}} event — a keydown event (or a
- *   plain object shaped like one, for tests).
- * @returns {'swallow'|'cycle'|'launch'|'pass'} one of `PROMPT_KEY_INTENT`'s
+ * Because this is the ONE function every call site consults, 'launch' and
+ * 'newline' can never collide or be double-handled — there is no code path
+ * where both run for the same keystroke (Enter vs Shift+Enter is a single
+ * disjoint branch on `shiftKey`).
+ * @param {{key?: string, ctrlKey?: boolean, shiftKey?: boolean}} event — a
+ *   keydown event (or a plain object shaped like one, for tests).
+ * @returns {'newline'|'cycle'|'launch'|'pass'} one of `PROMPT_KEY_INTENT`'s
  *   four labels. A malformed/absent event (no string `key`) degrades to
  *   'pass' — never a throw.
  */
 export function promptBarKeyIntent(event) {
   if (!event || typeof event.key !== 'string') return PROMPT_KEY_INTENT.PASS;
   const ctrl = event.ctrlKey === true;
-  if (event.key === 'Enter') return ctrl ? PROMPT_KEY_INTENT.LAUNCH : PROMPT_KEY_INTENT.SWALLOW;
+  const shift = event.shiftKey === true;
+  if (event.key === 'Enter') return shift ? PROMPT_KEY_INTENT.NEWLINE : PROMPT_KEY_INTENT.LAUNCH;
   if (ctrl && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) return PROMPT_KEY_INTENT.CYCLE;
   return PROMPT_KEY_INTENT.PASS;
 }

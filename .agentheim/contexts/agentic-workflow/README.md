@@ -291,29 +291,35 @@ separate BC, but today the whole tool lives in this one.
   the board in z-order — so it never pushes board content and stays put through the aw-067
   `scroll-quiet` scroll. Two rows: a **top row of four mode tabs** (`PromptModeTab`, one per
   `PROMPT_MODES` entry — Quick Capture · Modeling · Inquire · Research, each a name + one-line
-  meaning) and a **bottom row** of a `❯` chevron, the single-logical-line auto-growing
-  `<textarea>` (aw-038, unchanged: soft-wraps, grows to a max then scrolls, every change runs
-  through `sanitizePromptLine`), a `⌘↵` keyboard hint, and an **ochre Enter button**.
-  - **Keyboard-committed selection model (ADR-0050, `dashboard/app/prompt-mode.js`)** — the four
-    modes carry a single committed `highlightedMode` **index**, not four independent booleans:
-    `PROMPT_MODES` (fixed order, each `{label, subtitle, icon, commandFor}`),
-    `clampPromptModeIndex` (the one in-range guard every call site uses),
-    `nextPromptModeIndex(current, direction)` (total, wrapping cycle — Ctrl+→ past Research
-    wraps to Quick Capture, Ctrl+← before Quick Capture wraps to Research), and
-    `promptBarKeyIntent(event)` (classifies every keydown into exactly one of **swallow** — bare
-    Enter, aw-038, unchanged — **cycle** — Ctrl+←/→ — **launch** — Ctrl+Enter — or
-    **pass-through**, so bare Enter and Ctrl+Enter can never collide). Defaults to Quick Capture
-    (index 0) on mount and **resets to 0 after every successful launch**. **Two orthogonal
-    channels:** the committed highlight changes only on a deliberate act (a tab click, or
-    Ctrl+←/→); hover is a separate, transient, presentation-only channel that never reads or
-    writes it. Every trigger that can fire a mode's command — clicking its tab, the Enter
-    button, or Ctrl+Enter — routes through the ONE `fire(modeIndex)` function in
-    `BoardPromptBar`, so all three are behaviourally identical: the same seeded command (now
-    reached via `PROMPT_MODES[i].commandFor(prompt)` rather than four loose board.js imports),
-    the same `launchOrCopy` bridge-or-clipboard path, the same armed `skipPermissions` thread,
-    the same `onResult` clear-textarea + confetti + highlight-reset. `prompt-mode.js` is a fifth
-    pure, framework-free, `node --test`-covered module in the `board-sort.js`/`board-group.js`/
-    `search-results.js` family.
+  meaning) and a **bottom row** of a `❯` chevron, a genuinely **multi-line auto-growing**
+  `<textarea>` (soft-wraps, grows to a max then scrolls — aw-038's growth band, unchanged), a
+  `↵` keyboard hint, and an **ochre Enter button**.
+  - **Keyboard-committed selection model (ADR-0050, amended by agentic-workflow-p8k4d,
+    `dashboard/app/prompt-mode.js`)** — the four modes carry a single committed
+    `highlightedMode` **index**, not four independent booleans: `PROMPT_MODES` (fixed order,
+    each `{label, subtitle, icon, commandFor}`), `clampPromptModeIndex` (the one in-range guard
+    every call site uses), `nextPromptModeIndex(current, direction)` (total, wrapping cycle —
+    Ctrl+→ past Research wraps to Quick Capture, Ctrl+← before Quick Capture wraps to Research),
+    and `promptBarKeyIntent(event)` (classifies every keydown into exactly one of **launch** —
+    bare Enter OR Ctrl+Enter (p8k4d: bare Enter now launches, reversing aw-038's original
+    swallow rule; Ctrl+Enter is kept as a harmless alias) — **newline** — Shift+Enter,
+    regardless of Ctrl (p8k4d, new: lets the textarea insert its own line break natively,
+    retiring aw-038's single-logical-line collapse — `sanitizePromptLine` is deleted, the field
+    stores its raw value) — **cycle** — Ctrl+←/→ — or **pass-through**, so no keystroke is ever
+    double-handled). Defaults to Quick Capture (index 0) on mount and **resets to 0 after every
+    successful launch**. **Two orthogonal channels:** the committed highlight changes only on a
+    deliberate act — a tab click, or Ctrl+←/→ — hover is a separate, transient,
+    presentation-only channel that never reads or writes it. **p8k4d reverses click-to-launch:**
+    clicking a tab now **only** moves the committed highlight; it no longer fires anything. The
+    ONE `fire(modeIndex)` function in `BoardPromptBar` is now reached only by bare Enter,
+    Ctrl+Enter, or the Enter button — all three behaviourally identical: the same seeded command
+    (reached via `PROMPT_MODES[i].commandFor(prompt)`), the same `launchOrCopy`
+    bridge-or-clipboard path, the same armed `skipPermissions` thread, the same `onResult`
+    clear-textarea + confetti + highlight-reset. **Ctrl+Space** (p8k4d, new) focuses the prompt
+    `<textarea>` from anywhere on the board via a window-scoped `document` keydown listener
+    (registered/torn down in a `useEffect`). `prompt-mode.js` is a fifth pure, framework-free,
+    `node --test`-covered module in the `board-sort.js`/`board-group.js`/`search-results.js`
+    family.
   - **Paint (ADR-0051 amending ADR-0048; ADR-0016 for the rest)** — the highlighted tab alone
     wears the bounded ochre wayfinding exception (`--accent-ochre` text + an ochre inset
     underline, the nav-rail idiom turned into a horizontal underline) — the **second** surface

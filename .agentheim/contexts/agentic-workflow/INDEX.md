@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 130
+- **Doing:** 0
+- **Done:** 131
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-p8k4d** — Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects (feature) — `doing/agentic-workflow-p8k4d-prompt-bar-enter-launch-ctrl-space-focus-tab-select.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-p8k4d** — Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects (feature) — `done/agentic-workflow-p8k4d-prompt-bar-enter-launch-ctrl-space-focus-tab-select.md`
 - **agentic-workflow-c2ver** — Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label (feature) — `done/agentic-workflow-c2ver-columns-singular-view-chip.md`
 - **agentic-workflow-bz3az** — Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab (feature) — `done/agentic-workflow-bz3az-prompt-bar-modes-keyboard-model.md`
 - **agentic-workflow-qf945** — Reverse ADR-0015 per-column scope — one board-wide view lens, per-(column,BC) collapse/peek retained (amend in place) (decision) — `done/agentic-workflow-qf945-board-wide-view-lens-amend-adr-0015.md`

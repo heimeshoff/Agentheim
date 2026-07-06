@@ -106,17 +106,18 @@ test('nextPromptModeIndex clamps an out-of-range current before stepping, never 
 
 // --- invariant 4: disjoint key-intent classification (promptBarKeyIntent) -
 
-test('bare Enter (no Ctrl) classifies as swallow', () => {
-  assert.equal(promptBarKeyIntent({ key: 'Enter', ctrlKey: false }), PROMPT_KEY_INTENT.SWALLOW);
-  assert.equal(promptBarKeyIntent({ key: 'Enter' }), PROMPT_KEY_INTENT.SWALLOW);
+test('bare Enter (no Ctrl, no Shift) classifies as launch (p8k4d reverses aw-038/ADR-0050s swallow)', () => {
+  assert.equal(promptBarKeyIntent({ key: 'Enter', ctrlKey: false }), PROMPT_KEY_INTENT.LAUNCH);
+  assert.equal(promptBarKeyIntent({ key: 'Enter' }), PROMPT_KEY_INTENT.LAUNCH);
 });
 
-test('Shift+Enter (no Ctrl) still classifies as swallow — no special-casing shiftKey', () => {
-  assert.equal(promptBarKeyIntent({ key: 'Enter', shiftKey: true, ctrlKey: false }), PROMPT_KEY_INTENT.SWALLOW);
-});
-
-test('Ctrl+Enter classifies as launch', () => {
+test('Ctrl+Enter also classifies as launch (kept as a harmless alias, p8k4d Notes)', () => {
   assert.equal(promptBarKeyIntent({ key: 'Enter', ctrlKey: true }), PROMPT_KEY_INTENT.LAUNCH);
+});
+
+test('Shift+Enter classifies as newline regardless of Ctrl (p8k4d new intent, retires aw-038 collapse)', () => {
+  assert.equal(promptBarKeyIntent({ key: 'Enter', shiftKey: true, ctrlKey: false }), PROMPT_KEY_INTENT.NEWLINE);
+  assert.equal(promptBarKeyIntent({ key: 'Enter', shiftKey: true, ctrlKey: true }), PROMPT_KEY_INTENT.NEWLINE);
 });
 
 test('Ctrl+ArrowRight and Ctrl+ArrowLeft classify as cycle', () => {
@@ -142,20 +143,23 @@ test('a malformed/absent event degrades to pass-through, never throws', () => {
   assert.equal(promptBarKeyIntent({ key: 123 }), PROMPT_KEY_INTENT.PASS);
 });
 
-test('bare Enter and Ctrl+Enter can never collide: exactly one of swallow/launch fires for each, never both', () => {
+test('bare Enter and Shift+Enter can never collide: exactly one of launch/newline fires for each, never both', () => {
   const bare = promptBarKeyIntent({ key: 'Enter', ctrlKey: false });
-  const ctrl = promptBarKeyIntent({ key: 'Enter', ctrlKey: true });
-  assert.notEqual(bare, ctrl);
-  assert.equal(bare, PROMPT_KEY_INTENT.SWALLOW);
-  assert.equal(ctrl, PROMPT_KEY_INTENT.LAUNCH);
+  const shift = promptBarKeyIntent({ key: 'Enter', shiftKey: true, ctrlKey: false });
+  assert.notEqual(bare, shift);
+  assert.equal(bare, PROMPT_KEY_INTENT.LAUNCH);
+  assert.equal(shift, PROMPT_KEY_INTENT.NEWLINE);
 });
 
 test('every classification returns exactly one of the four disjoint labels', () => {
   const labels = new Set(Object.values(PROMPT_KEY_INTENT));
   assert.equal(labels.size, 4);
+  assert.ok(!('SWALLOW' in PROMPT_KEY_INTENT), 'the swallow label must be retired (p8k4d)');
+  assert.equal(PROMPT_KEY_INTENT.NEWLINE, 'newline');
   const samples = [
     { key: 'Enter', ctrlKey: false },
     { key: 'Enter', ctrlKey: true },
+    { key: 'Enter', shiftKey: true, ctrlKey: false },
     { key: 'ArrowLeft', ctrlKey: true },
     { key: 'ArrowRight', ctrlKey: true },
     { key: 'a', ctrlKey: false },

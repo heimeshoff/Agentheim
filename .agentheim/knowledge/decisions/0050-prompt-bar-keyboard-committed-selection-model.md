@@ -4,7 +4,7 @@ title: Prompt bar gains a keyboard-committed single-selection model, superseding
 scope: agentic-workflow
 status: proposed
 date: 2026-07-05
-related_tasks: [agentic-workflow-s7gev, agentic-workflow-bz3az]
+related_tasks: [agentic-workflow-s7gev, agentic-workflow-bz3az, agentic-workflow-p8k4d]
 related_adrs: [ADR-0048]
 ---
 
@@ -66,6 +66,9 @@ The prompt bar's four modes carry a single committed **`highlightedMode`** index
    classification is one function returning one of four disjoint labels, bare Enter and
    Ctrl+Enter cannot collide or be double-handled — there is no code path where both
    "swallow" and "launch" logic run for the same keystroke.
+   **(Reversed by agentic-workflow-p8k4d — see Amendment below: `swallow` is retired;
+   bare Enter now classifies as `launch`, and a new `newline` intent — Shift+Enter —
+   takes its place as the fourth disjoint label.)**
 
 **Two orthogonal channels: committed selection vs. transient hover.** The highlight
 (`highlightedMode`) is the **committed selection channel** — it changes only on a
@@ -76,9 +79,12 @@ highlighted and hovered) but neither implies or overwrites the other. Concretely
 
 - **Clicking a card** moves the committed highlight to that card *and* launches it
   (unchanged click-to-launch behavior, now additionally updating the highlight before it
-  fires).
+  fires). **(Reversed by agentic-workflow-p8k4d — see Amendment below: a click now only
+  moves the committed highlight; it no longer launches.)**
 - **Ctrl+←/→** moves the committed highlight without launching anything.
 - **Ctrl+Enter** launches the currently committed highlight without requiring a click.
+  **(agentic-workflow-p8k4d additionally makes bare Enter an equivalent launch trigger —
+  see Amendment below — Ctrl+Enter is kept only as a harmless alias.)**
 - **Hover** (mouseenter/mouseleave, or an equivalent focus-visible affordance) never moves
   `highlightedMode` and never launches anything — it is presentation-only pointer
   feedback, the same kind of transient, non-persisted signal the board's existing hover
@@ -118,6 +124,75 @@ classifies a highlighted peer-mode tab as passive equivalent-state selection (AD
 de-emphasis rule applies; ochre is forbidden there). This ADR does not restate, depend on,
 or reopen that classification.
 
+## Amendment — 2026-07-06 (agentic-workflow-p8k4d): Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click selects only
+
+The builder found the console's interaction model surprising in four ways once they
+tried to use it like an ordinary chat console. This amendment **reverses four clauses**
+of the Decision above — three from this ADR, one inherited from aw-038 — while leaving
+every other clause (the single `highlightedMode` index, invariants 1–3, the two
+orthogonal committed-selection/hover channels, the default/reset target, the
+supersession of `PromptLaunchCard`'s "no selection model" stance) unchanged. **This is
+stated explicitly so the aw-038 record — "Enter is SWALLOWED... Shift+Enter is no
+special case" — is not left silently contradicting the shipped behavior**: aw-038's
+swallow rule and its single-logical-line collapse are both **intentionally reversed**
+by this amendment, the same way this ADR itself already reversed aw-065/aw-h7n2c's "no
+selection model" stance.
+
+The four reversed points:
+
+1. **Bare Enter now launches** (invariant 4's `swallow` → `launch`). Pressing Enter with
+   no modifiers fires the highlighted mode's command — identical to clicking the Enter
+   button. `swallow` is retired as a label entirely; `promptBarKeyIntent` no longer
+   returns it. Ctrl+Enter stays classified `launch` too (a harmless alias, kept rather
+   than freed, per the builder's deprioritization) — bare Enter and Ctrl+Enter are now
+   deliberately equivalent, not deliberately distinct as invariant 4 originally read.
+2. **A new `newline` intent — Shift+Enter.** `promptBarKeyIntent` gains a fourth label,
+   `newline`, returned for Shift+Enter regardless of Ctrl. The handler does **not**
+   `preventDefault` on this branch, so the `<textarea>` inserts its line break natively.
+   This **retires aw-038's single-logical-line collapse**: `sanitizePromptLine` (the
+   function that ran every newline in the stored value down to a single space) is
+   deleted outright, and the field's `onChange` now stores the textarea's raw value.
+   The field is genuinely multi-line going forward; aw-038's auto-grow band
+   (`autoGrowField`/`PROMPT_FIELD_MAX_PX`) is unchanged — only what it grows to fit has
+   changed. Multi-line prompts are safe end-to-end without further change: the bridge
+   carries the seeded command as a single raw argv element with no shell wrap
+   (ADR-0018, amended by infrastructure-020), the clipboard fallback copies verbatim,
+   and `safePrompt` (`modeling-command.js`) trims only the leading/trailing ends —
+   interior newlines pass through untouched at every layer.
+3. **Tab click only selects, never launches.** The "Clicking a card... *and* launches
+   it" clause above is reversed: `onTabClick` now only moves `highlightedMode`; the
+   `fire(index)` call is removed from the click handler. The launch is reachable only
+   via Enter, Ctrl+Enter, or the Enter button — never on contact with a tab. This
+   restores a cleaner reading of "two orthogonal channels": click becomes purely a
+   *selection* act (like Ctrl+←/→), and launch becomes purely a *commit* act (Enter /
+   Ctrl+Enter / the Enter button) — selecting a mode and committing to it are no longer
+   conflated into a single click.
+4. **Ctrl+Space focuses the prompt field, window-scoped.** New, additive — no prior
+   clause to reverse. A `document`-level `keydown` listener (registered and torn down
+   in a `useEffect`) moves keyboard focus into the prompt `<textarea>` from anywhere on
+   the board, `preventDefault`-ing the browser default. Because the prompt textarea is
+   the only editable field on the board, "never steal an in-progress edit elsewhere"
+   reduces to "just focus it" — there is no other editable surface an edit could be in
+   progress in.
+
+**Invariant framing preserved.** Invariants 1 (exactly-one-highlighted), 2
+(index-always-in-range), and 3 (total deterministic wraparound) are **untouched** by
+this amendment. Invariant 4 (disjoint key-intent classification) **still holds as a
+shape** — every keydown still classifies into exactly one of four mutually exclusive
+labels, so no keystroke is ever double-handled — but the four labels themselves change:
+`swallow` is replaced by `newline`, and what used to select `swallow` (bare Enter) now
+selects `launch`. `cycle` and `pass` are unchanged.
+
+**Naming, unchanged.** The pure module stays `dashboard/app/prompt-mode.js`, still
+exporting `PROMPT_MODES`, `nextPromptModeIndex`, `clampPromptModeIndex`, and
+`promptBarKeyIntent` — only the fourth intent label and the Enter/Shift-Enter branching
+inside `promptBarKeyIntent` change; the module's shape and its `node --test` coverage
+family membership are unaffected.
+
+**Paint untouched.** ADR-0048 / ADR-0051 (the ochre highlighted-tab and Enter-button
+carve-outs) and ADR-0016 are unaffected — this amendment, like the ADR it amends, is
+interaction-only.
+
 ## Consequences
 
 - `dashboard/app/prompt-mode.js` (not yet written) has a named contract before
@@ -135,3 +210,13 @@ or reopen that classification.
   orthogonal channels rather than "the only signal there ever was."
 - No color/token/CSS decision is made or implied here; that stays entirely within
   ADR-0048 / design-system's ownership.
+- **(Amended by agentic-workflow-p8k4d)** aw-038's swallow + single-logical-line record
+  is superseded going forward the same way aw-065/aw-h7n2c's "no selection model" record
+  was superseded by this ADR's original Decision — aw-038's own Outcome section is left
+  untouched as historical record (frozen `done/` task), but its swallow/single-line
+  behavior no longer describes the shipped console.
+- **(Amended by agentic-workflow-p8k4d)** `sanitizePromptLine` is deleted from
+  `dashboard/app/board.js`; the prompt field is genuinely multi-line going forward.
+- **(Amended by agentic-workflow-p8k4d)** click and commit are now cleanly separated:
+  clicking a tab is purely selection, launching is purely Enter/Ctrl+Enter/the Enter
+  button — no trigger both selects and launches in the same gesture any more.

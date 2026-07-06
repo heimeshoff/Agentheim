@@ -74,18 +74,20 @@ test('the highlight resets to Quick Capture (0) after a successful launch (ADR-0
   assert.match(onResultFn[0], /setHighlightedMode\(DEFAULT_PROMPT_MODE_INDEX\)/, 'a successful launch must reset the highlight to Quick Capture');
 });
 
-test('every launch trigger (tab click, Enter button, Ctrl+Enter) routes through the SAME fire() function', () => {
+test('every launch trigger (bare Enter, Ctrl+Enter, Enter button) routes through the SAME fire() function — tab click does NOT (p8k4d)', () => {
   const bar = barSrc();
   assert.match(bar, /const fire = useCallback\(/, 'a single fire(modeIndex) function must exist');
   assert.match(bar, /launchOrCopy\(/, 'fire must call the shared launchOrCopy bridge-or-clipboard path');
-  // Tab click routes through fire via onTabClick.
-  assert.match(bar, /const onTabClick = useCallback\(\(index\) => \{[\s\S]*?fire\(index\)/, 'clicking a tab must call fire(index)');
-  assert.match(bar, /setHighlightedMode\(index\)/, 'clicking a tab must also move the committed highlight to it');
+  // Tab click only moves the committed highlight — it must NOT call fire (p8k4d reverses bz3az/ADR-0050).
+  const onTabClick = bar.match(/const onTabClick = useCallback\(\(index\) => \{[\s\S]*?\}, \[[^\]]*\]\);/);
+  assert.ok(onTabClick, 'onTabClick must exist');
+  assert.match(onTabClick[0], /setHighlightedMode\(index\)/, 'clicking a tab must move the committed highlight to it');
+  assert.doesNotMatch(onTabClick[0], /fire\(/, 'clicking a tab must NOT launch anything (p8k4d)');
   // Enter button.
   const enterButton = bar.match(/<button[\s\S]*?Enter\s*<\/button>/);
   assert.ok(enterButton, 'an Enter button must exist');
   assert.match(enterButton[0], /onClick=\$\{\(\)\s*=>\s*fire\(highlightedMode\)\}/, 'the Enter button must call fire(highlightedMode)');
-  // Ctrl+Enter (via promptBarKeyIntent LAUNCH) must also call fire.
+  // Bare Enter and Ctrl+Enter (both classify LAUNCH) must also call fire.
   const keyDownFn = bar.match(/const onPromptKeyDown = useCallback\(\(e\) => \{[\s\S]*?\}, \[fire, highlightedMode\]\);/);
   assert.ok(keyDownFn, 'onPromptKeyDown must exist and depend on [fire, highlightedMode]');
   assert.match(keyDownFn[0], /PROMPT_KEY_INTENT\.LAUNCH/, 'onPromptKeyDown must branch on the LAUNCH intent');
@@ -104,23 +106,24 @@ test('Ctrl+ arrow keys cycle the highlight via nextPromptModeIndex, without laun
   assert.doesNotMatch(cycleBlock[0], /fire\(/, 'cycling must never call fire (no launch on Ctrl+arrow)');
 });
 
-test('bare Enter still swallows via the same promptBarKeyIntent classifier (no collision with Ctrl+Enter)', () => {
+test('Shift+Enter classifies as NEWLINE via the same promptBarKeyIntent classifier and launches nothing (p8k4d)', () => {
   const bar = barSrc();
   const keyDownFn = bar.match(/const onPromptKeyDown = useCallback\(\(e\) => \{[\s\S]*?\}, \[fire, highlightedMode\]\);/)[0];
   assert.match(keyDownFn, /const intent = promptBarKeyIntent\(e\)/, 'the classifier must be the single source of the intent');
-  assert.match(keyDownFn, /PROMPT_KEY_INTENT\.SWALLOW/, 'the SWALLOW branch must exist');
-  const swallowBlock = keyDownFn.match(/PROMPT_KEY_INTENT\.SWALLOW\)\s*\{[\s\S]*?\n\s*\}/);
-  assert.ok(swallowBlock, 'a SWALLOW branch block must exist');
-  assert.match(swallowBlock[0], /preventDefault\(\)/, 'SWALLOW must preventDefault (no newline, no launch)');
-  assert.doesNotMatch(swallowBlock[0], /fire\(/, 'SWALLOW must never call fire — no collision with LAUNCH');
+  assert.doesNotMatch(keyDownFn, /PROMPT_KEY_INTENT\.SWALLOW/, 'the retired SWALLOW label must not appear (p8k4d)');
+  assert.match(keyDownFn, /PROMPT_KEY_INTENT\.NEWLINE/, 'the NEWLINE branch must exist');
+  const newlineBlock = keyDownFn.match(/PROMPT_KEY_INTENT\.NEWLINE\)\s*\{[\s\S]*?\n\s*\}/);
+  assert.ok(newlineBlock, 'a NEWLINE branch block must exist');
+  assert.doesNotMatch(newlineBlock[0], /preventDefault\(\)/, 'NEWLINE must NOT preventDefault — the textarea inserts its own line break natively');
+  assert.doesNotMatch(newlineBlock[0], /fire\(/, 'NEWLINE must never call fire — no collision with LAUNCH');
 });
 
-test('clicking a tab both moves the highlight AND launches — reusing the same fire() as Ctrl+Enter/the Enter button', () => {
+test('clicking a tab ONLY moves the committed highlight — it never launches (p8k4d reverses bz3az/ADR-0050 click-to-launch)', () => {
   const bar = barSrc();
-  const onTabClick = bar.match(/const onTabClick = useCallback\(\(index\) => \{[\s\S]*?\}, \[fire\]\);/);
+  const onTabClick = bar.match(/const onTabClick = useCallback\(\(index\) => \{[\s\S]*?\}, \[[^\]]*\]\);/);
   assert.ok(onTabClick, 'onTabClick must exist');
   assert.match(onTabClick[0], /setHighlightedMode\(index\)/);
-  assert.match(onTabClick[0], /fire\(index\)/);
+  assert.doesNotMatch(onTabClick[0], /fire\(/, 'clicking a tab must never call fire (p8k4d)');
 });
 
 test('PromptModeTab never mutates highlightedMode on hover — hover is a separate transient channel (ADR-0050)', () => {
@@ -172,10 +175,26 @@ test('the console renders TWO rows: the tablist above, and the chevron + field +
   assert.ok(tablistIdx < textareaIdx, 'the tab row must render ABOVE the input row');
   assert.ok(textareaIdx < enterIdx, 'the Enter button must render after (beside) the textarea');
   assert.match(bar, />❯</, 'the input row must render the ❯ chevron');
-  assert.match(bar, />⌘↵</, 'the input row must render the ⌘↵ keyboard hint');
+  assert.match(bar, />↵</, 'the input row must render the ↵ keyboard hint (Enter is now the primary trigger, p8k4d)');
 });
 
-test('the field keeps the aw-038 single-line auto-grow contract (no wrap="off", hidden horizontal overflow, scrollHeight-driven growth)', () => {
+test('the keyboard hint and its title reconcile with Enter-as-primary-trigger (p8k4d reverses the ⌘↵/Ctrl+Enter framing)', () => {
+  const bar = barSrc();
+  assert.doesNotMatch(bar, />⌘↵</, 'the old ⌘↵-first hint glyph must be gone');
+  assert.doesNotMatch(bar, /title="Ctrl\+Enter launches the highlighted mode"/, 'the old Ctrl+Enter-first title must be gone');
+  assert.match(bar, /Enter launches/i, 'the hint title must say Enter launches');
+  assert.match(bar, /Shift\+Enter/i, 'the hint title must mention Shift+Enter for a new line');
+});
+
+test('a window-scoped Ctrl+Space keydown listener focuses the prompt textarea, registered/torn down via useEffect (p8k4d)', () => {
+  const bar = barSrc();
+  assert.match(bar, /document\.addEventListener\(\s*["']keydown["']/, 'a document-level keydown listener must be registered');
+  assert.match(bar, /document\.removeEventListener\(\s*["']keydown["']/, 'the listener must be torn down');
+  assert.match(bar, /ctrlKey[\s\S]{0,60}["'] ["']/, 'the listener must check for Ctrl+Space (ctrlKey && key === " ")');
+  assert.match(bar, /textareaRef\.current\.focus\(\)/, 'the listener must focus the textarea via textareaRef');
+});
+
+test('the field keeps its auto-grow contract (no wrap="off", hidden horizontal overflow, scrollHeight-driven growth) — now genuinely multi-line (p8k4d)', () => {
   const bar = barSrc();
   assert.doesNotMatch(bar, /wrap="off"/, 'the field must keep soft-wrap');
   assert.match(bar, /overflowX:\s*"hidden"/);
@@ -184,19 +203,21 @@ test('the field keeps the aw-038 single-line auto-grow contract (no wrap="off", 
   assert.match(bar, /maxHeight/);
 });
 
-test("bare Enter (no Ctrl) still inserts no newline: SWALLOW preventDefault()s, exercised via the field's onKeyDown", () => {
+test("the field's onKeyDown routes every keystroke through the ONE promptBarKeyIntent classifier", () => {
   const bar = barSrc();
   assert.match(bar, /onKeyDown=\$\{onPromptKeyDown\}/, 'the field must wire onPromptKeyDown');
 });
 
-test('the field value is sanitized single-line before storage (sanitizePromptLine unchanged, aw-038)', () => {
+test('the field value is stored RAW — sanitizePromptLine is retired, newlines survive (p8k4d retires aw-038)', () => {
   const bar = barSrc();
-  assert.match(bar, /setPrompt\(sanitizePromptLine\(/, 'onChange must feed setPrompt the sanitized value');
-  assert.match(
-    boardSrc,
-    /function sanitizePromptLine[\s\S]*?replace\([^)]*\\[rn][\s\S]*?\)/,
-    'sanitizePromptLine must replace newline characters with a space',
-  );
+  assert.doesNotMatch(boardSrc, /function sanitizePromptLine/, 'the sanitizePromptLine function definition must be removed from board.js');
+  assert.doesNotMatch(bar, /setPrompt\(sanitizePromptLine\(/, 'onChange must no longer call the retired sanitizePromptLine');
+  assert.match(bar, /const onPromptChange = useCallback\(\(e\) => \{[\s\S]*?setPrompt\(e\.target\.value\)/, 'onChange must feed setPrompt the raw, unsanitized value');
+});
+
+test('the aw-038 single-logical-line doc comment is rewritten to describe a genuinely multi-line field (p8k4d)', () => {
+  assert.doesNotMatch(boardSrc, /SINGLE-LOGICAL-LINE/, 'the retired single-line framing must not remain in the doc comment');
+  assert.match(boardSrc, /multi-line/i, 'the doc comment must describe the field as multi-line');
 });
 
 test('every mode reads the same live prompt value through PROMPT_MODES[i].commandFor(prompt) (fire + the Enter button title)', () => {

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 13:27 -- Task verified and completed: agentic-workflow-p8k4d - Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-p8k4d - Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects
+**Summary:** Prompt bar — bare/Ctrl+Enter launches, Shift+Enter newlines, Ctrl+Space focuses the field, tab-click only selects; ADR-0050 amended in place
+**Duration:** 14m07s
+**Verification:** PASS (iteration 1)
+**Files changed:** 9
+**Tests added:** 3
+**ADRs written:** 0050-prompt-bar-keyboard-committed-selection-model.md (amendment)
+
+---
+
 ## 2026-07-06 13:10 -- Batch started: [agentic-workflow-p8k4d]
 
 **Type:** Work / Batch start
