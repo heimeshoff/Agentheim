@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 18:40 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 17m (batch start 18:23 → 18:40)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** infrastructure-nz6k4: 1
+**Commits:** 3 (batch-start + nz6k4 completion + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (infrastructure-nz6k4 restores deterministic agent-spawn resolution under the installed `agentheim` plugin — it serves the "independent work runs in parallel" and "wrong work caught by structure (adversarial gates)" success criteria that the bare-name defect had broken at dispatch, and pulls toward no non-goal; human gates intact, all state in `.agentheim/`).
+**Carry-over:** 1b.png / inspiration/ / yours.png: left behind (owner: builder reference material — the untracked UX-exploration pngs + dir, same disposition as every prior session; not project bookkeeping, never `work`'s to commit). No stranded worktrees (nz6k4's torn down at integration).
+**Notes:** One wave, one worker, one first-try verified PASS. infrastructure-nz6k4 qualified every internal agent-spawn identifier across `skills/` (work, research, modeling, brainstorm) and `agents/` (worker + orchestrator Signal→Specialist routing tables) with the `agentheim:` namespace, ending reliance on undocumented harness auto-qualification of bare names (the `Agent type 'worker' not found` failure class). Added a live-tree lint (`lib/agent-spawn-namespace.mjs` + 6 tests) that fails if a bare spawn identifier reappears; full suite 189/189 green. Recorded the convention in ADR-0052 (scope: global, cross-refs ADR-0035 / ADR-0031; bidirectional backlinks written). One recovery hiccup at batch-start: the mechanized `claim` threw ENOENT on the git-pruned empty `doing/` dir (known infrastructure issue) — reverted the partial `status:` frontmatter mutation, recreated `doing/`, retried cleanly. No bounces, no failures, no new backlog items, no concept candidates. Todo now empty across all BCs.
+
+---
+
 ## 2026-07-06 18:38 -- Task verified and completed: infrastructure-nz6k4 - Skills spawn subagents by bare name — fails as installed plugin ("Agent type 'worker' not found")
 
 **Type:** Work / Task completion
