@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 11:40 -- Modeling / Refined: agentic-workflow-p8k4d - Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo (auto-promoted — cleared the readiness gate)
+**Summary:** Settled the three open questions and added a fourth requirement the builder raised. ADR-0050 → in-place amendment (builder-confirmed). Ctrl+Space → window-scoped document listener (builder-confirmed). NEW: Shift+Enter inserts a line break, turning the field genuinely multi-line and retiring aw-038's `sanitizePromptLine` single-line collapse; verified multi-line prompts survive launch end-to-end (bridge = raw argv no shell wrap, clipboard verbatim, `safePrompt` trims ends only). Ctrl+Enter kept as a harmless launch alias. `promptBarKeyIntent` gains a `newline` intent and drops `swallow`. No split; still one feature task producing code + the ADR-0050 amendment.
+**Split into:** none
+**ADRs written:** none (the ADR-0050 amendment is authored by the worker at execution)
+
+---
+
 ## 2026-07-06 11:22 -- Modeling / Captured: agentic-workflow-p8k4d - Prompt bar — bare Enter launches, Ctrl+Space focuses the field, tab click only selects
 
 **Type:** Modeling / Capture
