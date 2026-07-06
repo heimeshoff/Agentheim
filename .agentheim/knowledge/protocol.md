@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 13:29 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 19m (batch start 13:10 → 13:29)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-p8k4d: 1
+**Commits:** 3 (batch-start + p8k4d + this session-end entry)
+**Vision-conformance:** none — batch aligns with vision (p8k4d is pure dashboard interaction wiring reshaping the prompt bar's keyboard model to a chat-console idiom, plus an in-place ADR-0050 amendment; it serves the "durable knowledge" criterion by amending the ADR in place and explicitly recording that aw-038's swallow + single-line rules are intentionally reversed — the done record no longer silently contradicts shipped behavior — and the "wrong work caught by structure" criterion via a first-try verified build that drove the read-only runtime surface clean. Every human gate intact, dashboard stays read-only, all state in `.agentheim/`; no pull toward any non-goal.)
+**Carry-over:** inspiration/: left behind (owner: builder reference material — the untracked UX-explorations dir, same disposition as the 12:19, 11:45, and 10:41 sessions; not project bookkeeping, never `work`'s to commit). No stranded worktrees (p8k4d's torn down at integration).
+**Notes:** One wave, one worker, one first-try PASS. p8k4d reshaped the board prompt console into a chat-input idiom: bare Enter and Ctrl+Enter both launch the highlighted mode through the same `fire(highlightedMode)` path, Shift+Enter inserts a native line break (retiring aw-038's `sanitizePromptLine` single-line collapse so the field is genuinely multi-line), a window-scoped Ctrl+Space `document` keydown listener focuses the textarea, and a mode-tab click only moves the committed highlight without launching. `promptBarKeyIntent` gained a `NEWLINE` intent and dropped `SWALLOW`; the classification stays disjoint. ADR-0050 amended in place (`## Amendment`, mirroring the qf945/ADR-0015 precedent) recording all four reversals. 3 tests added; full dashboard suite green (767 pass / 0 fail); verifier drove the runtime surface (booted port 41157 from the runfile, `/healthz` + `/api/tree` both 200, clean teardown via `stop`). Operational note: the empty `doing/` dir had been git-pruned again between sessions — pre-flight `mkdir` avoided the known `claim` ENOENT; a phantom CRLF-only dirty `dashboard/dist/app.js` on the main tree was restored (`git checkout --`) before the squash-merge could proceed. No bounces, no failures, no new backlog items, no concept candidates. Todo is now empty across all BCs.
+
+---
+
 ## 2026-07-06 13:27 -- Task verified and completed: agentic-workflow-p8k4d - Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects
 
 **Type:** Work / Task completion
