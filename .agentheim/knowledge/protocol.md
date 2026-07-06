@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 14:15 -- Modeling / Refined: agentic-workflow-q7r3x - Prompt area matches Section 1b of the UX explorations reference exactly
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog (not promoted — blocked on the new design-system child)
+**Summary:** Diffed the live prompt console (`yours.png`) against Section 1b (`1b.png`) and enumerated the concrete visual deltas as acceptance criteria: edge-to-edge tab cells + vertical dividers, a tab/input horizontal divider, active-tab filled-cell + full-width ochre underline (replacing the current 4-sided box — a bug fix toward ADR-0051's intent, no new ADR), a bright-ochre bold chevron, lowercased/fuller subtitle copy, and consuming a new glyph set + solid-ochre icon Enter button. Builder decisions (2026-07-06): match 1b's *look* but keep p8k4d's affordances (hint chip stays `↵`, not 1b's stale `⌘↵`); placeholder unchanged. Split the styleguide-owned primitives (mode glyphs + icon Enter-button variant) into a new design-system child, which q7r3x now depends on alongside the styleguide gate.
+**Split into:** design-system-xr4sb (Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b — filed to design-system/backlog)
+**ADRs written:** none (active-tab box→underline is a fix toward the existing ADR-0051 contract; the glyph-supersession vs design-system-r4k8m call is carried by design-system-xr4sb)
+
+---
+
 ## 2026-07-06 12:00 -- Capture / Captured: agentic-workflow-q7r3x - Prompt area matches Section 1b of the UX explorations reference exactly
 
 **Type:** Capture
