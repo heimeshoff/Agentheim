@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 130
@@ -76,6 +76,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-p8k4d** — Prompt bar — bare Enter launches, Ctrl+Space focuses the field, tab click only selects (feature) — `backlog/agentic-workflow-p8k4d-prompt-bar-enter-launch-ctrl-space-focus-tab-select.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

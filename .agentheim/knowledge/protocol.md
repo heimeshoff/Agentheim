@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 11:22 -- Modeling / Captured: agentic-workflow-p8k4d - Prompt bar — bare Enter launches, Ctrl+Space focuses the field, tab click only selects
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Reshape the board prompt bar's interaction model (ADR-0050): Ctrl+Space focuses the prompt field, bare Enter launches the highlighted mode (like the Enter button, reversing the aw-038 swallow rule), and a mode-tab click only selects instead of launching a session on contact. Backlog pending a refinement pass to settle the ADR-0050 amendment (Ctrl+Enter's fate, Ctrl+Space scope).
+
+---
+
 ## 2026-07-05 12:19 -- Work session ended
 
 **Type:** Work / Session end
