@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 20:34 -- Modeling / Refined: agentic-workflow-q7r3x - Prompt area matches Section 1b of the UX explorations reference exactly
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo (auto-promoted — cleared the readiness gate)
+**Summary:** Both dependencies (`design-system-001-styleguide`, `design-system-xr4sb`) are now in `done/` — xr4sb shipped today, so the task is fully unblocked. Concretized the two hand-wavy criteria against the actual shipped primitives: the glyph AC now names the exact registry keys per tab (Quick Capture→`plus`, Modeling→`diamond`, Inquire→`message-circle-question`, Research→`circle-dot`), and the Enter AC names the `EnterButton` primitive (`styleguide/app/button.js`, `corner-down-left` glyph, `--accent-ochre-fg` token) consumed unforked. Added an explicit `dashboard/dist/` rebuild AC (q7r3x is the consumer that rebuilds dist for the xr4sb primitives — the hazard the 17:15 work session flagged). Backlinked ADR-0003. No new ADR (box→underline stays a bug-fix toward existing ADR-0051). No split.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-07-06 18:40 -- Work session ended
 
 **Type:** Work / Session end

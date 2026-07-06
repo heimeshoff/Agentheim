@@ -9,7 +9,7 @@ completed:
 depends_on: [design-system-001-styleguide, design-system-xr4sb]
 blocks: []
 tags: [dashboard-redesign, prompt-bar]
-related_adrs: [0051, 0048, 0016, 0050]
+related_adrs: [0051, 0048, 0016, 0050, 0003]
 related_research: []
 prior_art: [agentic-workflow-bz3az, agentic-workflow-p8k4d, agentic-workflow-s7gev]
 ---
@@ -43,16 +43,25 @@ change (p8k4d stands); the placeholder is unchanged.
 - [ ] The leading chevron is a **bright ochre bold `❯`** (was a thin grey `›`).
 - [ ] The tab subtitles read, lowercased and fuller, exactly: `file it fast, no ceremony`
       / `shape into structure` / `ask the codebase` / `dig deeper`.
-- [ ] The Enter affordance is the **`design-system-xr4sb` solid-ochre icon-square button**
-      (`↵` glyph), replacing the soft-ochre "Enter" text button. Clicking it still routes
-      through the one `fire(highlightedMode)` path (p8k4d) — behavior identical.
-- [ ] The mode-tab glyphs are the **`design-system-xr4sb` 1b-aligned set** (plus /
-      diamond / question / ring).
+- [ ] The Enter affordance consumes the **`EnterButton`** primitive from
+      `styleguide/app/button.js` **unforked** (ADR-0003) — the solid-ochre icon-square with
+      the `corner-down-left` (`↵`) glyph and the `--accent-ochre-fg` on-accent legibility
+      token — replacing the soft-ochre "Enter" text button. Clicking it still routes through
+      the one `fire(highlightedMode)` path (p8k4d) — behavior identical.
+- [ ] The four mode-tab glyphs are the concrete `design-system-xr4sb` set, consumed
+      unforked from the shared icon set (`styleguide/app/icons.js`, ADR-0003):
+      **Quick Capture → `plus`** · **Modeling → `diamond`** ·
+      **Inquire → `message-circle-question`** · **Research → `circle-dot`**. (Inquire keeps
+      its deliberate `design-system-r4k8m` glyph — 1b's bare "?" is superseded, xr4sb's
+      settled call; `diamond`/`circle-dot` replace the undeliberate `compass`/`search`.)
 - [ ] The keyboard hint chip stays behavior-accurate to p8k4d's model — it shows `↵`
       (bare Enter launches), **not** 1b's stale `⌘↵`. Its chip *styling* may match 1b's
       bordered pill.
 - [ ] The placeholder copy is unchanged (`Type a prompt, then choose a mode to launch
       it…`).
+- [ ] `dashboard/dist/` is **rebuilt** so the wired glyphs + `EnterButton` actually render
+      on the served board — q7r3x is the consumer that rebuilds `dist/` for the xr4sb
+      primitives, which xr4sb deliberately left underived (ADR-0003).
 - [ ] Dashboard suite green; the verifier drives the runtime surface clean.
 
 ## Notes
@@ -62,8 +71,13 @@ change (p8k4d stands); the placeholder is unchanged.
   model; the builder chose "match 1b's look, keep current affordances." So the visual
   language conforms while the affordances p8k4d settled are preserved (hint-chip content,
   no placeholder change).
-- **Depends on `design-system-xr4sb`** for the glyphs + icon button (styleguide gate +
-  primitive availability). Do not start q7r3x until xr4sb is done.
+- **Dependencies satisfied (2026-07-06):** both `design-system-001-styleguide` and
+  `design-system-xr4sb` are in `done/` — nothing blocks q7r3x now. xr4sb shipped the exact
+  primitives this task wires unforked (ADR-0003): the `EnterButton` icon-square
+  (`styleguide/app/button.js`), the `diamond` / `circle-dot` / `corner-down-left` glyphs
+  (`styleguide/app/icons.js`), and the fixed `--accent-ochre-fg` on-accent token
+  (`styleguide/styles/colors_and_type.css`). xr4sb intentionally did **not** rebuild
+  `dashboard/dist/` — that derived-artifact rebuild is q7r3x's (see the dist AC above).
 - `PromptModeTab` is a `board.js` consumer component (not a styleguide primitive), so the
   tab-cell layout and active-tab underline paint are this task's, consumed unforked
   (ADR-0003). Governing ADRs: ADR-0051 (tab paint), ADR-0048 (ochre carve-out),
