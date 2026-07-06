@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 18:23 -- Batch started: [infrastructure-nz6k4]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-nz6k4 - Skills spawn subagents by bare name — fails as installed plugin ("Agent type 'worker' not found")
+**Parallel:** no (1 worker — infrastructure-nz6k4 is the only ready task in todo across all BCs)
+
+---
+
 ## 2026-07-06 18:20 -- Modeling / Promoted: infrastructure-nz6k4 - Skills spawn subagents by bare name — fails as installed plugin ("Agent type 'worker' not found")
 
 **Type:** Modeling / Promote
