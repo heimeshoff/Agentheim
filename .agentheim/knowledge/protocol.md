@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 16:43 -- Modeling / Promoted: design-system-xr4sb - Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b
+
+**Type:** Modeling / Promote
+**BC:** design-system
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-06 16:43 -- Modeling / Refined: design-system-xr4sb - Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b
 
 **Type:** Modeling / Refine

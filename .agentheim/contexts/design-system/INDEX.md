@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 30
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **design-system-xr4sb** — Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b (feature) — `todo/design-system-xr4sb-prompt-mode-glyphs-icon-enter-button.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -60,7 +61,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **design-system-xr4sb** — Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b — `backlog/design-system-xr4sb-prompt-mode-glyphs-icon-enter-button.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
