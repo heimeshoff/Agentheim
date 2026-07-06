@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 13:10 -- Batch started: [agentic-workflow-p8k4d]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-p8k4d - Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects
+**Parallel:** no (1 worker — p8k4d is the only ready task in todo across all BCs)
+
+---
+
 ## 2026-07-06 13:05 -- Modeling / Promoted: agentic-workflow-p8k4d - Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects
 
 **Type:** Modeling / Promote

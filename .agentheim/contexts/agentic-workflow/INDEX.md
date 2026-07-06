@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 130
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-p8k4d** — Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects (feature) — `todo/agentic-workflow-p8k4d-prompt-bar-enter-launch-ctrl-space-focus-tab-select.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-p8k4d** — Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects (feature) — `doing/agentic-workflow-p8k4d-prompt-bar-enter-launch-ctrl-space-focus-tab-select.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

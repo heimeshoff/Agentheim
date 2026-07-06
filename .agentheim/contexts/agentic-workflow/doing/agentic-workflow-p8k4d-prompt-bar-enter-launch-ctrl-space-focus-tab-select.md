@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-p8k4d
 title: Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-06
