@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 17:20 -- Modeling / Captured: infrastructure-nz6k4 - Skills spawn subagents by bare name — fails as installed plugin ("Agent type 'worker' not found")
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** backlog
+**Summary:** Skills spawn subagents by bare name (`subagent_type: "worker"`, verifier, research-reviewer, orchestrator, and the worker/orchestrator specialist routing tables), but as the installed `agentheim` plugin the agents are registered namespaced (`agentheim:worker`, …) — bare names fail to resolve and killed the 16:56 design-system-xr4sb work run at worker dispatch. Fix is to qualify every internal spawn identifier with `agentheim:` across skills/work, skills/research, skills/modeling, agents/worker.md, agents/orchestrator.md; evals already use the qualified form. Held in backlog on one open decision: qualify unconditionally vs. bare-name fallback for source-runs.
+
+---
+
 ## 2026-07-06 17:15 -- Work session ended
 
 **Type:** Work / Session end
