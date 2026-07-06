@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 16:43 -- Modeling / Refined: design-system-xr4sb - Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b
+
+**Type:** Modeling / Refine
+**BC:** design-system
+**Status after:** todo (auto-promoted — cleared the readiness gate)
+**Summary:** Pinned the four prompt-mode glyphs to exact keys against a 1b/live side-by-side and settled the task's carried open call. Net icon-set work collapses to THREE additions — `diamond` (Modeling, replaces the undeliberate `compass` default), `circle-dot` (Research, replaces `search`; builder-chosen over `target`/`circle`), and `corner-down-left` for the solid-ochre icon Enter button (`↵` shape, filled `--accent-ochre`, ~square, ADR-0048 primed-primary-action carve-out). **Inquire keeps `message-circle-question`** — builder ruled r4k8m's deliberate "ask the codebase" glyph the intended post-1b evolution, so 1b's bare "?" is superseded: no shipped decision reversed, no ADR written. Tightened ACs to name each glyph + a `node --test` guard per new glyph (r4k8m/017 shape); `dist/` stays a derived artifact rebuilt by the consumer (agentic-workflow-q7r3x). No split.
+**Split into:** none
+**ADRs written:** none (the Inquire supersession call resolved toward keeping the shipped glyph, so nothing to record beyond the task/README note)
+
+---
+
 ## 2026-07-06 14:15 -- Modeling / Refined: agentic-workflow-q7r3x - Prompt area matches Section 1b of the UX explorations reference exactly
 
 **Type:** Modeling / Refine
