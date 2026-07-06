@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 12:00 -- Capture / Captured: agentic-workflow-q7r3x - Prompt area matches Section 1b of the UX explorations reference exactly
+
+**Type:** Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Make the bottom-of-page prompt area (BoardPromptBar) look exactly like Section 1b in `inspiration/Agentheim UX Explorations.html`.
+
+---
+
 ## 2026-07-06 13:29 -- Work session ended
 
 **Type:** Work / Session end

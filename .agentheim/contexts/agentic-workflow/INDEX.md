@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 131
@@ -77,6 +77,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-q7r3x** — Prompt area matches Section 1b of the UX explorations reference exactly — `backlog/agentic-workflow-q7r3x-prompt-bar-match-section-1b.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
