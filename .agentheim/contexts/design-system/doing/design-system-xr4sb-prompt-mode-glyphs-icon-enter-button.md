@@ -1,7 +1,7 @@
 ---
 id: design-system-xr4sb
 title: Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b
-status: todo
+status: doing
 type: feature
 context: design-system
 created: 2026-07-06

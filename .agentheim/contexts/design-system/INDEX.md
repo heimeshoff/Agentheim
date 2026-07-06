@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 30
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **design-system-xr4sb** — Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b (feature) — `todo/design-system-xr4sb-prompt-mode-glyphs-icon-enter-button.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **design-system-xr4sb** — Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b (feature) — `doing/design-system-xr4sb-prompt-mode-glyphs-icon-enter-button.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)

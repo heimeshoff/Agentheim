@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 16:56 -- Batch started: [design-system-xr4sb]
+
+**Type:** Work / Batch start
+**Tasks:** design-system-xr4sb - Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b
+**Parallel:** no (1 worker — design-system-xr4sb is the only ready task in todo across all BCs)
+
+---
+
 ## 2026-07-06 16:43 -- Modeling / Promoted: design-system-xr4sb - Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b
 
 **Type:** Modeling / Promote
