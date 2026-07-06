@@ -24,7 +24,7 @@ research touching this BC, and concept synthesis pages.
 <!-- doing-list:start -->
 <!-- doing-list:end -->
 
-### Done (most recent first; older entries kept for prior-art search)
+### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
 - **design-system-xr4sb** — Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b (feature) — `done/design-system-xr4sb-prompt-mode-glyphs-icon-enter-button.md`
 - **design-system-rm2yv** — Extend the ochre wayfinding exception to the highlighted prompt-mode tab (decision) — `done/design-system-rm2yv-ochre-exception-prompt-mode-tab.md`
@@ -34,29 +34,6 @@ research touching this BC, and concept synthesis pages.
 - **design-system-vw12e** — Accent carve-out — ochre marks the primed primary action, not passive selection (decision) — `done/design-system-vw12e-accent-carveout-ochre-primary-action.md`
 - **design-system-b7n2s** — Hidden and off-viewport dependency presence markers (feature) — `done/design-system-b7n2s-hidden-offviewport-dependency-markers.md`
 - **design-system-w4t9k** — Dependency-highlight ring — a third ambient-motion signal on TicketCard (feature) — `done/design-system-w4t9k-dependency-highlight-ring-ticket-card.md`
-- **design-system-c3p9k** — Add a double-chevron glyph pair (chevrons-up / chevrons-down) to the shared icon set (feature) — `done/design-system-c3p9k-chevrons-up-down-glyph.md`
-- **design-system-v8k2p** — Rail "new item" attention blink — an ambient cue on a TreeItem / TreeGroup until acknowledged (feature) — `done/design-system-v8k2p-rail-new-item-attention-blink-cue.md`
-- **design-system-r4k8m** — Add an inquiry/question glyph to the shared icon set (feature) — `done/design-system-r4k8m-inquire-glyph.md`
-- **design-system-021** — Concept content-type — registry entry + glyph + --ct-concept tokens for the library/search type (feature) — `done/design-system-021-concept-content-type.md`
-- **design-system-020** — Drawer gains in-place expandable width — controlled expand seam + body-top chevron + panel glyph pair (feature) — `done/design-system-020-drawer-expandable-width-chevron.md`
-- **design-system-019** — Search results — category headers need more contrast (refactor) — `done/design-system-019-search-category-headers-more-contrast.md`
-- **design-system-016** — Search field + grouped-results popover/listbox styleguide pattern (feature) — `done/design-system-016-search-field-grouped-results-pattern.md`
-- **design-system-018** — Shared Button + Modal + ConfirmDialog primitives (centered, scrim, Esc-to-cancel) (feature) — `done/design-system-018-confirm-dialog-modal.md`
-- **design-system-017** — Add the trash-2 glyph to the shared icon set (feature) — `done/design-system-017-trash-glyph.md`
-- **design-system-015** — Shared Menu / Popover primitive for dropdown menus (feature) — `done/design-system-015-shared-menu-popover-primitive.md`
-- **design-system-014** — Drawer contextual header leads with the item title, path demoted to a sub-line (feature) — `done/design-system-014-drawer-header-leads-with-title.md`
-- **design-system-013** — Drawer "Open in full screen" uses a maximize glyph, not the external-link icon (chore) — `done/design-system-013-drawer-fullscreen-icon-maximize.md`
-- **design-system-011** — Stale add-affordance test — styleguide suite asserts against dashboard board.js that has dropped onAdd (bug) — `done/design-system-011-stale-add-affordance-test-vs-board-source.md`
-- **design-system-010** — TicketCard — drop the ochre selected-state ring (no replacement cue) (refactor) — `done/design-system-010-ticket-card-drop-ochre-selected-ring.md`
-- **design-system-009** — Drawer header — drop the Copy button, rename "Open in editor" → "Open in full screen", expose a callback (feature) — `done/design-system-009-drawer-header-open-in-full-screen.md`
-- **design-system-008** — TicketCard hover — stronger shadow, no upward content lift (refactor) — `done/design-system-008-ticket-card-hover-no-lift.md`
-- **design-system-007** — Theme toggle buttons swatch their own theme (Dark = dark bg, Light = light bg) — `done/design-system-007-theme-toggle-swatch-buttons.md`
-- **design-system-005** — Shared collapsible-section primitive (decoupled from TreeItem) for board + library — `done/design-system-005-shared-collapsible-section.md`
-- **design-system-006** — TicketCard: optional corner action; hide the empty estimate chip — `done/design-system-006-ticket-card-corner-action.md`
-- **design-system-004** — Animated "actively working" treatment for doing-column tickets — `done/design-system-004-doing-column-active-animation.md`
-- **design-system-003** — Vendor the dashboard's webfonts offline (local @font-face, drop the Google Fonts CDN @import) (chore) — `done/design-system-003-offline-webfonts.md`
-- **design-system-002** — Migrate the styleguide to ES modules (buildless htm + import-map canvas, single source) — _re-approved 2026-06-06; gate OPEN_ — `done/design-system-002-styleguide-esm-migration.md`
-- **design-system-001** — Dashboard styleguide (visual language for Agentheim's UI) — _approved 2026-06-05_ — `done/design-system-001-styleguide.md`
 <!-- done-list:end -->
 
 ### Backlog
