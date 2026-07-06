@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 18:20 -- Modeling / Promoted: infrastructure-nz6k4 - Skills spawn subagents by bare name — fails as installed plugin ("Agent type 'worker' not found")
+
+**Type:** Modeling / Promote
+**BC:** infrastructure
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-06 18:19 -- Modeling / Refined: infrastructure-nz6k4 - Skills spawn subagents by bare name — fails as installed plugin
 
 **Type:** Modeling / Refine

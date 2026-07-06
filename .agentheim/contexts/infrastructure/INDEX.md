@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 25
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **infrastructure-nz6k4** — Skills spawn subagents by bare name — fails as installed plugin ("Agent type 'worker' not found") (bug) — `todo/infrastructure-nz6k4-agent-spawn-plugin-namespace.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -55,7 +56,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **infrastructure-nz6k4** — Skills spawn subagents by bare name — fails as installed plugin ("Agent type 'worker' not found") (bug) — `backlog/infrastructure-nz6k4-agent-spawn-plugin-namespace.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

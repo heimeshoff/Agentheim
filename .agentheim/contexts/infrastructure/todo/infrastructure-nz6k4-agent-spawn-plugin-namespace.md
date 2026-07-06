@@ -1,7 +1,7 @@
 ---
 id: infrastructure-nz6k4
 title: Skills spawn subagents by bare name — fails as installed plugin ("Agent type 'worker' not found")
-status: backlog
+status: todo
 type: bug
 context: infrastructure
 created: 2026-07-06
