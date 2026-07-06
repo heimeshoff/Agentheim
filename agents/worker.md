@@ -63,10 +63,10 @@ Signal → Specialist (compact form of the orchestrator's routing table):
 
 | Question | Specialist |
 |---|---|
-| Aggregates, entities, value objects, domain events/commands, invariants, workflow within this BC | `tactical-modeler` |
-| Cross-cutting tech: persistence, messaging, transport, deployment, external integration, library choice | `architect` |
-| Does this belong in a different BC / crosses context boundaries | `strategic-modeler` |
-| Outside/external knowledge not in the repo | `researcher` (via the gated research flow, not a bare spawn) |
+| Aggregates, entities, value objects, domain events/commands, invariants, workflow within this BC | `agentheim:tactical-modeler` |
+| Cross-cutting tech: persistence, messaging, transport, deployment, external integration, library choice | `agentheim:architect` |
+| Does this belong in a different BC / crosses context boundaries | `agentheim:strategic-modeler` |
+| Outside/external knowledge not in the repo | `agentheim:researcher` (via the gated research flow, not a bare spawn) |
 
 **Boundary rule:** route direct-to-specialist only when *exactly one* row of the routing table matches and no aggregation / conflict-surfacing is needed; route through the orchestrator when the question spans more than one specialist's domain, when answers must be aggregated, or when the worker cannot rule out that a second specialist's concern applies (conservative default — when in doubt, escalate to the orchestrator rather than guess).
 

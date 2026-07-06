@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 18:38 -- Task verified and completed: infrastructure-nz6k4 - Skills spawn subagents by bare name — fails as installed plugin ("Agent type 'worker' not found")
+
+**Type:** Work / Task completion
+**Task:** infrastructure-nz6k4 - Skills spawn subagents by bare name — fails as installed plugin ("Agent type 'worker' not found")
+**Summary:** Namespace every internal agent-spawn identifier with agentheim: across skills/ and agents/; add a live-tree lint guard; ADR-0052
+**Duration:** 14m
+**Verification:** PASS (iteration 1)
+**Files changed:** 9
+**Tests added:** 6
+**ADRs written:** 0052-namespace-agent-spawn-identifiers-with-agentheim-prefix.md
+
+---
+
 ## 2026-07-06 18:23 -- Batch started: [infrastructure-nz6k4]
 
 **Type:** Work / Batch start

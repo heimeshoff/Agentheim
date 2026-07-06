@@ -24,15 +24,15 @@ The same task may need multiple specialists. Start from the question being asked
 
 | Signal | Specialist |
 |---|---|
-| New or changed bounded contexts, context-map changes, classification (core/supporting/generic), upstream/downstream relationships | `strategic-modeler` |
-| Aggregates, entities, value objects, domain events/commands, invariants, workflow within a single BC | `tactical-modeler` |
-| Cross-cutting tech: persistence, messaging, transport, deployment, integration with external systems, library choice | `architect` |
-| "We don't know enough about X from outside" | `researcher` |
-| Concrete implementation of a refined task | `worker` |
+| New or changed bounded contexts, context-map changes, classification (core/supporting/generic), upstream/downstream relationships | `agentheim:strategic-modeler` |
+| Aggregates, entities, value objects, domain events/commands, invariants, workflow within a single BC | `agentheim:tactical-modeler` |
+| Cross-cutting tech: persistence, messaging, transport, deployment, integration with external systems, library choice | `agentheim:architect` |
+| "We don't know enough about X from outside" | `agentheim:researcher` |
+| Concrete implementation of a refined task | `agentheim:worker` |
 
 A feature often needs: strategic-modeler (does it fit current contexts?) → tactical-modeler (what aggregates change?) → architect (any integration impact?) → possibly researcher. Don't mechanically run all four; pick based on what's actually uncertain.
 
-When you route to `researcher`, route through the **gated research flow**, not a bare researcher spawn: every report passes a fresh-context `research-reviewer` gate that re-verifies its checkable claims against primary sources before it's citable (`skills/research/SKILL.md` owns the loop; `skills/research-review/SKILL.md` is the doctrine). Don't re-implement the gate here — let the research skill own it.
+When you route to `agentheim:researcher`, route through the **gated research flow**, not a bare researcher spawn: every report passes a fresh-context `research-reviewer` gate that re-verifies its checkable claims against primary sources before it's citable (`skills/research/SKILL.md` owns the loop; `skills/research-review/SKILL.md` is the doctrine). Don't re-implement the gate here — let the research skill own it.
 
 ## When a worker bypasses me (single-specialist consultation)
 

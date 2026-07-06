@@ -127,7 +127,7 @@ If you create a context-map, also scaffold the `contexts/<name>/` directories wi
 
 ## Delegating heavy lifting
 
-If strategic context modeling becomes dense (many candidate contexts, unclear relationships), delegate to the **strategic-modeler** agent via the **orchestrator**. Give the orchestrator the vision-so-far and ask for a bounded context analysis. Don't try to do tactical modeling (aggregates, entities) in brainstorm — that's the job of `modeling` once tasks land in a specific BC.
+If strategic context modeling becomes dense (many candidate contexts, unclear relationships), delegate to the **strategic-modeler** agent via the **`agentheim:orchestrator`**. Give the orchestrator the vision-so-far and ask for a bounded context analysis. Don't try to do tactical modeling (aggregates, entities) in brainstorm — that's the job of `modeling` once tasks land in a specific BC.
 
 If a specific question requires outside knowledge (e.g., "how do other people solve X?", "what's the state of the art for Y?"), delegate to the **research** skill. Brainstorming can pause while research runs and resume with the findings.
 
@@ -147,7 +147,7 @@ Skip BC creation only when the user explicitly skips the entire foundation step.
 
 ### Run the architect
 
-Delegate to the **architect** specialist via the **orchestrator**. Hand it the vision, the context-map, and any BC READMEs. Ask for a foundation pass covering:
+Delegate to the **architect** specialist via the **`agentheim:orchestrator`**. Hand it the vision, the context-map, and any BC READMEs. Ask for a foundation pass covering:
 
 - Stack / language / framework
 - Persistence (per BC if they diverge)

@@ -132,7 +132,7 @@ PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + casca
    - **Under-refined → backlog/**: The idea needs more thought, research, or breaking down before anyone could work on it.
    - **Ready → todo/**: The idea is small, well-understood, or already deeply discussed. A worker could pick it up and execute without ambiguity.
 
-5. **Delegate deep modeling if needed.** For complex ideas (new feature, domain change, architectural impact), spawn the **orchestrator** agent with the idea and current state. It will route to `tactical-modeler`, `strategic-modeler`, `architect`, or `researcher` as appropriate, and come back with a refined task (or task set) plus any ADRs. For infrastructure-flavored captures, the orchestrator will typically route to `architect` first.
+5. **Delegate deep modeling if needed.** For complex ideas (new feature, domain change, architectural impact), spawn the **`agentheim:orchestrator`** agent with the idea and current state. It will route to `tactical-modeler`, `strategic-modeler`, `architect`, or `researcher` as appropriate, and come back with a refined task (or task set) plus any ADRs. For infrastructure-flavored captures, the orchestrator will typically route to `architect` first.
 
 6. **Write the task file(s).** Include the user-confirmed `related_adrs`, `related_research`, `prior_art` from step 3 in the frontmatter. See task format below.
 
@@ -151,7 +151,7 @@ PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + casca
    - Does this split into smaller tasks?
    - Does this reveal a decision that should become an ADR?
 
-4. **Delegate to the orchestrator** for depth. Give it the task and the BC context. It will route to specialists.
+4. **Delegate to the `agentheim:orchestrator`** for depth. Give it the task and the BC context. It will route to specialists.
 
 5. **Update the task file** with refined content. If it splits, create child tasks and update `depends_on`. If a decision was made, write an ADR to `.agentheim/knowledge/decisions/`.
 
@@ -373,7 +373,7 @@ Never promote a frontend task to `todo/` ahead of the styleguide. The styleguide
 
 ## Delegating to the orchestrator
 
-The `modeling` skill itself does not do deep modeling — it routes. For anything non-trivial, hand off to the `orchestrator` agent with:
+The `modeling` skill itself does not do deep modeling — it routes. For anything non-trivial, hand off to the `agentheim:orchestrator` agent with:
 - The idea or task being refined
 - The target BC's README (ubiquitous language)
 - The vision.md

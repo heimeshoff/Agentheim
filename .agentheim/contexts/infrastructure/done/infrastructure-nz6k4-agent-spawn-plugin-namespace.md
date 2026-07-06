@@ -1,15 +1,15 @@
 ---
 id: infrastructure-nz6k4
 title: Skills spawn subagents by bare name — fails as installed plugin ("Agent type 'worker' not found")
-status: doing
+status: done
 type: bug
 context: infrastructure
 created: 2026-07-06
-completed:
+completed: 2026-07-06
 depends_on: []
 blocks: []
 tags: [harness-bug, agent-spawn, plugin, namespace, work-skill]
-related_adrs: [0031, 0035]
+related_adrs: [0031, 0035, 0052]
 related_research: []
 prior_art: []
 ---
@@ -114,3 +114,38 @@ source-run caveat is recorded there as the accepted residual.
 2026-07-06 that traced the 16:56 `design-system-xr4sb` failure. The plugin
 namespace is `agentheim` per `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json`.
+
+## Outcome
+
+Every internal agent-spawn identifier in `skills/` and `agents/` is now
+qualified with the `agentheim:` namespace: the literal `subagent_type: "..."`
+spawns in `skills/work/SKILL.md` (worker, verifier) and `skills/research/SKILL.md`
+(research-reviewer); the dispatch-directing prose in `skills/modeling/SKILL.md`
+and `skills/brainstorm/SKILL.md` (orchestrator) and `skills/research/SKILL.md`
+(researcher, including its re-dispatch-on-FAIL paths); and the Signal→Specialist
+routing tables in `agents/worker.md` and `agents/orchestrator.md` (tactical-modeler,
+strategic-modeler, architect, researcher, worker). Conceptual/narrative mentions
+of an agent's role were deliberately left bare (scope discipline — see ADR-0052).
+
+A permanent live-tree lint, `lib/agent-spawn-namespace.mjs` (`findBareAgentSpawns`),
+guards the convention going forward: it scans `skills/` and `agents/` for a bare
+`subagent_type: "<name>"` or a standalone bare backtick name on a routing-table
+row, and fails if either names one of the eight Agentheim agents unprefixed.
+Exercised by `lib/test/agent-spawn-namespace.test.mjs` (6 new tests, including a
+live-tree assertion mirroring `lib/id-grammar.mjs`'s pattern). Full suite: 189/189
+green.
+
+**ADR-0052** (`.agentheim/knowledge/decisions/0052-namespace-agent-spawn-identifiers-with-agentheim-prefix.md`)
+records the unconditional-qualification convention, cross-referencing ADR-0035
+(the routing table this namespaces) and ADR-0031 (per-agent model routing keyed
+on the same agent names). Bidirectional link: this task is in ADR-0052's
+`related_tasks`; ADR-0052 is in this task's `related_adrs`.
+
+Files touched: `skills/work/SKILL.md`, `skills/research/SKILL.md`,
+`skills/modeling/SKILL.md`, `skills/brainstorm/SKILL.md`, `agents/worker.md`,
+`agents/orchestrator.md`, `lib/agent-spawn-namespace.mjs` (new),
+`lib/test/agent-spawn-namespace.test.mjs` (new),
+`.agentheim/knowledge/decisions/0052-namespace-agent-spawn-identifiers-with-agentheim-prefix.md` (new).
+
+No BC README changes — this is a harness/workflow-tooling fix, not a change to
+the infrastructure BC's own domain language, aggregates, or invariants.

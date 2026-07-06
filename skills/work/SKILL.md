@@ -66,7 +66,7 @@ Every dispatch wave now runs each worker in its own **git worktree** on a privat
 
 4. **Set `git config core.longpaths true`** once per session (harness setup, not per-worktree) if not already set — worktrees nest `.agentheim/` and `dashboard/` trees deep enough to approach Windows `MAX_PATH`.
 
-5. **Spawn one subagent per task** using the Agent tool with `subagent_type: "worker"`. Launch all subagents in **one message** (parallel tool calls). Use the Subagent Prompt Template below — its `## Your task` block now carries a `Workspace` field pointing at the task's worktree; every other absolute path you pass (task file, BC README, BC index) is the copy **inside that worktree**, not the main tree.
+5. **Spawn one subagent per task** using the Agent tool with `subagent_type: "agentheim:worker"`. Launch all subagents in **one message** (parallel tool calls). Use the Subagent Prompt Template below — its `## Your task` block now carries a `Workspace` field pointing at the task's worktree; every other absolute path you pass (task file, BC README, BC index) is the copy **inside that worktree**, not the main tree.
 
 6. **Wait for all subagents to complete.** As each returns:
    - Parse its strict return format (see template).
@@ -114,7 +114,7 @@ For each SUCCESS that requires verification, in parallel where the workers ran i
 
 1. Capture the diff **from the worktree, not the main tree**: `git -C .worktrees/<task-id> show HEAD` (the wip-commit's full diff) and `git -C .worktrees/<task-id> show HEAD --stat`. This is the isolation payoff — the diff (and the verifier's later test run) can never contain a sibling worker's uncommitted changes, because each worktree only ever holds its own task's work atop the shared batch-start commit.
 2. Track the iteration count for this task (start at 1; increments on each FAIL re-dispatch).
-3. Spawn one `verifier` subagent via Agent with `subagent_type: "verifier"` using the **Verifier Prompt Template** below — it now carries a `## Worktree` absolute-path field. Launch verifiers for a batch's successes in the same message (parallel tool calls).
+3. Spawn one `verifier` subagent via Agent with `subagent_type: "agentheim:verifier"` using the **Verifier Prompt Template** below — it now carries a `## Worktree` absolute-path field. Launch verifiers for a batch's successes in the same message (parallel tool calls).
 4. Wait for each verifier's verdict.
 
 ### Handling the verdict
@@ -156,7 +156,7 @@ This resolution is recorded in **ADR-0037** — ADR-0032 covered PASS/FAIL/SKIP 
 
 ### Verifier Prompt Template
 
-Spawn each verifier with `Agent(subagent_type: "verifier", prompt: <the-below>)`. Fill the placeholders.
+Spawn each verifier with `Agent(subagent_type: "agentheim:verifier", prompt: <the-below>)`. Fill the placeholders.
 
 ```
 You are a verifier agent auditing one worker's completed task with fresh context. You have no exposure to the worker's reasoning — only the task spec, the BC README, and the diff in front of you.
@@ -388,7 +388,7 @@ Entry formats — the "Batch started", "Task verified and completed", and "Task 
 
 ## Subagent Prompt Template
 
-Spawn each worker with `Agent(subagent_type: "worker", prompt: <the-below>)`. Fill the placeholders — **every absolute path you fill in points inside the task's worktree** (ADR-0032), not the main tree. The `## Rules — CRITICAL` list below is **unchanged**: the worker still never runs git and still owns only its own `doing → done` move — only *which* tree it operates in has changed.
+Spawn each worker with `Agent(subagent_type: "agentheim:worker", prompt: <the-below>)`. Fill the placeholders — **every absolute path you fill in points inside the task's worktree** (ADR-0032), not the main tree. The `## Rules — CRITICAL` list below is **unchanged**: the worker still never runs git and still owns only its own `doing → done` move — only *which* tree it operates in has changed.
 
 ```
 You are a worker agent executing one refined task. Stay strictly within its scope.

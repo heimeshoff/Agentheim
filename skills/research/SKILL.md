@@ -22,7 +22,7 @@ If the request is vague ("research auth"), narrow it once with the user before r
 
 ## Running
 
-Delegate to the `researcher` agent. The researcher will:
+Delegate to the `agentheim:researcher` agent. The researcher will:
 1. Start with WebSearch for a breadth pass
 2. Follow up with WebFetch on the most promising 3–7 sources
 3. If multiple independent angles exist, run them in parallel (multiple WebSearch/WebFetch tool calls in the same message)
@@ -87,20 +87,20 @@ Otherwise, gate.
 ### Gate dispatch and the loop
 
 1. Track the iteration count for this report (start at 1).
-2. Spawn a `research-reviewer` subagent via Agent with `subagent_type: "research-reviewer"` using the **Research-Reviewer Prompt Template** below. Hand it only the report path, the original question, and the iteration number — never the researcher's reasoning trail. (agentheim pins no model, to stay provider-agnostic; if your setup lets you route the reviewer to a different or more skeptical model than the researcher, prefer that — it decorrelates shared blind spots. See `skills/research-review/SKILL.md`.)
+2. Spawn a `research-reviewer` subagent via Agent with `subagent_type: "agentheim:research-reviewer"` using the **Research-Reviewer Prompt Template** below. Hand it only the report path, the original question, and the iteration number — never the researcher's reasoning trail. (agentheim pins no model, to stay provider-agnostic; if your setup lets you route the reviewer to a different or more skeptical model than the researcher, prefer that — it decorrelates shared blind spots. See `skills/research-review/SKILL.md`.)
 3. Wait for the verdict and handle it:
 
 **`VERDICT: PASS`** → the report is citable. Proceed to indexing and protocol logging below.
 
 **`VERDICT: SKIP`** → ship as on PASS; note "review skipped: no checkable claims" in the protocol entry.
 
-**`VERDICT: FAIL`, iteration 1 or 2, `ITERATION_HINT: likely-fixable`** → re-dispatch the **researcher** (not the reviewer) with the reviewer's `CHALLENGED_CLAIMS` block verbatim. Instruct it to re-verify each challenged claim against the named `PRIMARY_SOURCE`, correct what's wrong, and re-run the gate (`iteration = N + 1`). Cap at **3 iterations** — mirror `work`'s verifier cap.
+**`VERDICT: FAIL`, iteration 1 or 2, `ITERATION_HINT: likely-fixable`** → re-dispatch the **`agentheim:researcher`** (not the reviewer) with the reviewer's `CHALLENGED_CLAIMS` block verbatim. Instruct it to re-verify each challenged claim against the named `PRIMARY_SOURCE`, correct what's wrong, and re-run the gate (`iteration = N + 1`). Cap at **3 iterations** — mirror `work`'s verifier cap.
 
-**`VERDICT: FAIL`, iteration 3 (or any iteration with `ITERATION_HINT: genuinely-unverifiable`)** → stop looping. Re-dispatch the researcher one final time to **label, not block**: for each surviving challenged claim, mark it inline `⚠️ UNVERIFIED` (with a one-line reason) and add it to the report's `## Unverified claims` subsection. Then ship. Surviving unverified claims are never silently passed and never infinitely looped.
+**`VERDICT: FAIL`, iteration 3 (or any iteration with `ITERATION_HINT: genuinely-unverifiable`)** → stop looping. Re-dispatch the `agentheim:researcher` one final time to **label, not block**: for each surviving challenged claim, mark it inline `⚠️ UNVERIFIED` (with a one-line reason) and add it to the report's `## Unverified claims` subsection. Then ship. Surviving unverified claims are never silently passed and never infinitely looped.
 
 ### Research-Reviewer Prompt Template
 
-Spawn each reviewer with `Agent(subagent_type: "research-reviewer", prompt: <the-below>)`. Fill the placeholders.
+Spawn each reviewer with `Agent(subagent_type: "agentheim:research-reviewer", prompt: <the-below>)`. Fill the placeholders.
 
 ```
 You are a research-reviewer agent auditing one report with fresh context and your own web access. You have no exposure to the researcher's reasoning — only the report and the original question. Re-verify; do not proofread.
@@ -157,7 +157,7 @@ After the report clears the review gate, prepend an entry to `.agentheim/knowled
 
 ## Parallelism
 
-Research is naturally parallelizable. If the user asks for research on multiple distinct topics, spawn multiple researcher agents rather than serializing. Each writes its own report.
+Research is naturally parallelizable. If the user asks for research on multiple distinct topics, spawn multiple `agentheim:researcher` agents rather than serializing. Each writes its own report.
 
 **Default cap: 3 concurrent researchers**, matching `work`'s `MAX_PARALLEL` default and for the same reason — review load. Each researcher's report goes through its own `research-reviewer` gate before it ships (see "Review gate" above), so the binding constraint isn't the research itself (which parallelizes cleanly) but how many independent review verdicts the dispatching session can absorb and act on at once. If more than 3 distinct topics are requested, run the first 3 concurrently and queue the rest for the next wave rather than fanning out further. This is a default, not a hard ceiling: if the user explicitly asks for more topics in parallel ("research all 5 of these at once"), honor that — the cap only applies absent an explicit ask, exactly like `MAX_PARALLEL` in `skills/work/SKILL.md`. If the cap holds a topic back to a later wave, say so to the user when you report the wave's results — silent truncation of the requested topic list is not acceptable, matching `work`'s "never truncate silently" rule for its own batch cap.
 
