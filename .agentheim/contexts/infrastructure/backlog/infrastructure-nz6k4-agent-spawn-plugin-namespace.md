@@ -9,15 +9,15 @@ completed:
 depends_on: []
 blocks: []
 tags: [harness-bug, agent-spawn, plugin, namespace, work-skill]
-related_adrs: []
+related_adrs: [0031, 0035]
 related_research: []
 prior_art: []
 ---
 
 ## Why
 
-The `work` run at 2026-07-06 16:56 (`design-system-xr4sb`) died at worker
-dispatch with **`Agent type 'worker' not found`**. Root cause: the skills spawn
+An **`Agent type 'worker' not found`** error surfaced on 2026-07-06 during agent
+dispatch. Root cause: the skills spawn
 subagents by their **bare** name (`subagent_type: "worker"`), but Agentheim is
 installed as the `agentheim` plugin (`~/.claude/plugins/installed_plugins.json`
 → `agentheim@agentheim`, from a directory marketplace pointing at this repo).
@@ -33,12 +33,21 @@ The evals already spawn the qualified form —
 `.agentheim/knowledge/verifier-catch-rate-eval-2026-07-04.md:265`) — which is
 proof the namespaced form resolves and the bare form is the defect.
 
-An earlier run the same day (`agentic-workflow-p8k4d`, 13:27) *did* spawn a
-worker + verifier successfully, so bare names resolved then; a plugin/marketplace
-reload around 15:12 (other plugins show `lastUpdated: 2026-07-06T15:12`, and
-`agentheim` is `autoUpdate: true`) is the leading hypothesis for what flipped a
-previously-working bare `"worker"` into "not found." Not established fact — but
-the fix stands regardless of the trigger.
+**REFINE correction (2026-07-06):** the capture originally read this as having
+*killed* the 16:56 `design-system-xr4sb` work run at dispatch — but the protocol
+records that run as a clean first-try verified PASS (completed 17:13, now in
+`done/`, worktree torn down at integration), so that run did **not** strand. Bare
+names also resolved on an earlier run the same day (`agentic-workflow-p8k4d`,
+13:27 — worker + verifier spawned fine). So the harness *was* auto-qualifying the
+bare name at those moments; the `not found` error is real but its exact triggering
+dispatch is **unconfirmed** (a plugin/marketplace reload around 15:12 — other
+plugins show `lastUpdated: 2026-07-06T15:12`, `agentheim` is `autoUpdate: true` —
+is a hypothesis, not established fact). What this task fixes is therefore the
+**latent fragility**: the bare spawns depend on undocumented harness
+auto-qualification, whereas the namespaced form is deterministic — it is the form
+the evals already use and the form under which *this very repo* resolves its agents
+(`agentheim:worker`/`agentheim:orchestrator`/…, no bare `worker`). The fix stands
+regardless of the trigger.
 
 ## What
 
@@ -68,35 +77,38 @@ consult a specialist, so fixing only the top-level `work` spawn is a partial fix
       `agentheim:` namespace (worker, verifier, research-reviewer, orchestrator,
       tactical-modeler, strategic-modeler, architect, researcher).
 - [ ] A grep across `skills/` and `agents/` finds no remaining **bare** spawn of
-      an Agentheim agent name (guard against a missed routing-table row).
+      an Agentheim agent name (guard against a missed routing-table row — the
+      Signal→Specialist tables in `agents/worker.md` and `agents/orchestrator.md`
+      are the easy misses; `researcher` is dispatched via the gated research flow,
+      not a bare `subagent_type`, so confirm that path is qualified too).
 - [ ] A `work` run spawns a worker without `Agent type '…' not found`, and a
       worker's specialist consultation resolves the specialist by its qualified
       name (end-to-end: dispatch → specialist consult → verifier).
-- [ ] The stranded `design-system-xr4sb` (still in `doing/`, worktree
-      `aw/design-system-xr4sb` alive) resumes cleanly via `work` Phase 1 recovery
-      once the fix lands — reusing the existing worktree, not spawning a second.
+- [ ] A `type: decision` ADR records the namespacing convention (qualify with
+      `agentheim:` **unconditionally**; a bare source-run that loads `agents/*.md`
+      as project-local agents outside the plugin is unsupported), cross-referencing
+      **ADR-0035** (the direct-to-specialist routing tables being namespaced) and
+      **ADR-0031** (per-agent config keyed on the same agent names). On completion
+      the ADR id is added to this task's `related_adrs` and this task id to the
+      ADR's `related_tasks` (bidirectional link).
 
 ## Notes
 
-**Open decision to resolve in REFINE (why this is backlog, not todo):**
-hardcoding `agentheim:` couples the skill prose to the installed-plugin
-namespace. That is correct for how Agentheim is actually run (and matches the
-evals), but it would *break* a raw source checkout where these same agents are
-loaded as **bare project/local agents** (no namespace). Pick one before a worker
-executes:
-
-1. **Qualify unconditionally** — `agentheim:worker` everywhere. Simplest;
-   matches reality + the evals; accepts that a bare source-run is unsupported.
-2. **Qualify with a documented bare fallback** — instruct the conductor to try
-   `agentheim:worker`, fall back to bare `worker`. Honest for both run modes,
-   but clunkier prose and relies on the model to do the fallback.
-3. **Treat as a harness resolution bug** — the harness *should* auto-qualify an
-   unambiguous bare name; file upstream. Not actionable in this repo and doesn't
-   unblock the immediate breakage.
-
-Recommendation: option 1, and note the source-run caveat — but this is the call
-to confirm with the builder. If a decision with real rationale is reached, it may
-warrant a `type: decision` ADR on the agent-spawn naming convention.
+**Decision (resolved in REFINE, 2026-07-06):** Qualify **unconditionally** —
+`agentheim:` on every internal spawn identifier (option 1). Rationale: it matches
+how Agentheim is actually run *and developed*. The source repo loads its own agents
+under the plugin namespace (a directory marketplace pointing at this repo,
+`autoUpdate: true`), so even Agentheim's own dev and eval runs see
+`agentheim:worker`/`agentheim:orchestrator`/… and **no bare `worker`** — the "a
+bare source-run would break" downside of option 1 is therefore hypothetical (it
+would only bite a checkout that loaded `agents/*.md` as `.claude/agents/`
+project-local agents outside the plugin, which is neither how the project is run
+nor how it is eval'd). Options 2 (bare fallback) and 3 (upstream harness fix) were
+considered and rejected: (2) adds model-dependent fallback prose for a run mode
+that isn't supported; (3) isn't actionable in this repo and doesn't unblock the
+breakage. The convention gets a `type: decision` ADR authored **when this task is
+worked**, alongside the code fix (see the ADR acceptance criterion above) — the
+source-run caveat is recorded there as the accepted residual.
 
 **Diagnosis session:** captured from an `inquire` → `modeling` session on
 2026-07-06 that traced the 16:56 `design-system-xr4sb` failure. The plugin

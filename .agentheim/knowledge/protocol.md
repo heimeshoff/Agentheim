@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-06 18:19 -- Modeling / Refined: infrastructure-nz6k4 - Skills spawn subagents by bare name — fails as installed plugin
+
+**Type:** Modeling / Refine
+**BC:** infrastructure
+**Status after:** todo (auto-promoted — cleared the readiness gate)
+**Summary:** Resolved the parked open decision → **qualify agent-spawn identifiers with `agentheim:` unconditionally** (builder call; the source repo itself resolves agents namespaced, so option 1's "bare source-run breaks" downside is hypothetical). Corrected the Why: the capture claimed the bug killed the 16:56 `design-system-xr4sb` run, but the protocol records that run as a clean first-try PASS (now in `done/`, no stranded worktree) — reframed as a *latent* fragility (bare spawns depend on undocumented harness auto-qualification). Dropped the void "resume stranded xr4sb" AC; added an AC to author a `type: decision` ADR on the namespacing convention (x-ref ADR-0035 / ADR-0031) when worked; backlinked related_adrs [0031, 0035]. No split.
+**Split into:** none
+**ADRs written:** none (the convention ADR is authored when the task is worked, not during REFINE)
+
+---
+
 ## 2026-07-06 17:20 -- Modeling / Captured: infrastructure-nz6k4 - Skills spawn subagents by bare name — fails as installed plugin ("Agent type 'worker' not found")
 
 **Type:** Modeling / Capture
