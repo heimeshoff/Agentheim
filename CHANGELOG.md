@@ -8,6 +8,19 @@ its **plugin contract** (skills, commands, `.agentheim/` layout) with
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-07-10
+
+Two field defects in the mechanized task-lifecycle scripts — both now fail closed
+rather than reporting success on a corrupt board — plus a rebuilt Workflow guide page.
+
+### Fixed
+- **INDEX done-list rotation fails closed on an unparseable done-list** — a bounded context whose done-list parses to zero entries, or whose rewrite would silently drop unmatched lines, now refuses and writes nothing instead of reporting `{ok:true, liveEntries:0}`. A refusal is scoped to its own BC: a missing-markers throw in one context no longer strands an already-rotated healthy one, because per-BC refusals never flip the top-level `ok` or the exit code.
+- **Lifecycle bookkeeping computes before it moves** (ADR-0054) — `promoteTask`, `claimBatch`, and `completeTask` replace the hand-maintained dry-run marker mirror with compute-then-write atomicity, closing the gap where the fail-closed pre-check missed the INDEX task-count lines. `adjustIndexCount` no longer admits negative counts or leaks across block scopes, and the source-resolution predicate the three verbs shared is extracted into one place.
+
+### Docs
+- The dashboard's built-in **Workflow guide page** is rebuilt for first-time comprehension: an at-a-glance loop map (`01 Prepare` once, then the standing `02 ↔ 03` loop with a labelled return edge) and a legend for the two-voice grammar (ochre = your moves, neutral = the harness's).
+- `skills/work/SKILL.md` documents the three per-BC shapes the rotation manifest can carry, and when the session-end check must commit, refuse, or stay silent.
+
 ## [0.9.0] - 2026-07-09
 
 The **Command-deck redesign** — the dashboard is retokenized to a cool-neutral
@@ -205,7 +218,8 @@ palette and the board grows a docked prompt console you drive from the keyboard.
 ### Added
 - Initial plugin design.
 
-[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/heimeshoff/Agentheim/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/heimeshoff/Agentheim/compare/v0.8.10...v0.9.0
 [0.8.10]: https://github.com/heimeshoff/Agentheim/compare/v0.8.9...v0.8.10
 [0.8.9]: https://github.com/heimeshoff/Agentheim/compare/v0.8.8...v0.8.9
