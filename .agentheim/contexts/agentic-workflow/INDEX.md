@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 133
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-m3vhq** — Prompt bar — add a "Plain" mode that runs the prompt directly on Claude (feature) — `todo/agentic-workflow-m3vhq-prompt-bar-plain-mode.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-m3vhq** — Prompt bar — add a "Plain" mode that runs the prompt directly on Claude (feature) — `doing/agentic-workflow-m3vhq-prompt-bar-plain-mode.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

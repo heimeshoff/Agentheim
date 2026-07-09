@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 15:41 -- Batch started: [agentic-workflow-m3vhq]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-m3vhq - Prompt bar — add a "Plain" mode that runs the prompt directly on Claude
+**Parallel:** no (1 worker — the full ready set; agentic-workflow-m3vhq is the only task in todo/ across all three BCs, all three depends_on satisfied. MAX_PARALLEL=3 not reached, nothing held back.)
+
+---
+
 ## 2026-07-09 15:39 -- Modeling / Promoted: agentic-workflow-m3vhq - Prompt bar — add a "Plain" mode that runs the prompt directly on Claude
 
 **Type:** Modeling / Promote

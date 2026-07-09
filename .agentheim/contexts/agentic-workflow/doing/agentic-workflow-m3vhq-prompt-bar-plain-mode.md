@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-m3vhq
 title: Prompt bar — add a "Plain" mode that runs the prompt directly on Claude
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-09
