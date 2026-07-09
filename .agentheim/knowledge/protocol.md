@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 -- Modeling / Refined: agentic-workflow-m3vhq - Prompt bar — add a "Plain" mode that runs the prompt directly on Claude
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog — auto-promotion attempted and correctly refused. The task is fully refined, but `promote` rejected it `blocked-dependency`: `agentic-workflow-q7r3x` is in `todo/`, not `done/`. Worth recording that the CLI is **stricter than the skill's prose** — `modeling`'s readiness bullet reads "dependencies known and either met **or tracked**", while `applyTaskMove` requires every `depends_on` id to sit in a `done/` folder. Re-promote once q7r3x ships; no re-refinement needed.
+**Summary:** Cornered four builder decisions the capture left open: label confirmed as **Plain** (over the voice transcript's "Plane"); position is a **fifth peer appended last**, leaving Quick Capture as index 0 / the mount default / the post-launch reset target; an **empty prompt is a no-op** (Plain is the first mode that can decline to launch — the other four degrade to a meaningful bare command, Plain would fire the empty string); glyph reuses the existing `bot` key, so no `design-system` dependency. Wrote 12 concrete ACs naming the exact call sites: `plainCommandFor` (verbatim passthrough, no command prefix, no bare-command constant), a new pure `canFirePromptMode(index, prompt)` predicate consulted by both the `fire()` guard and the Enter button's disabled state, `promptBarKeyIntent` explicitly untouched (the decline lives in `fire()`, not the classifier), a 5-cycle `clampPromptModeIndex`/`nextPromptModeIndex` bound, and the `dashboard/dist/` rebuild. Added `depends_on: agentic-workflow-q7r3x` (it hard-codes "four edge-to-edge equal-width cells" and rewrites the same `BoardPromptBar`/`PromptModeTab` pair — sequencing avoids a two-worker collision in one file) plus the styleguide-gate dep; set the reciprocal `blocks` edge on q7r3x. Backlinked ADR-0050/0003/0018/0016 and the two "add a tab" precedents (h7n2c, aw-036). Recorded the armed-launch inheritance as an explicit non-change: Plain is the one mode with no skill guardrail behind `--dangerously-skip-permissions`.
+**Split into:** none
+**ADRs written:** none — ADR-0050 gains an `## Amendment` section at implementation time (four → five modes; a mode may decline to launch), mirroring the precedent `agentic-workflow-p8k4d` set.
+
+---
+
 ## 2026-07-09 -- Capture / Captured: agentic-workflow-m3vhq - Prompt bar — add a "Plain" mode that runs the prompt directly on Claude
 
 **Type:** Capture

@@ -78,7 +78,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-m3vhq** — Prompt bar — add a "Plain" mode that runs the prompt directly on Claude — `backlog/agentic-workflow-m3vhq-prompt-bar-plain-mode.md`
+- **agentic-workflow-m3vhq** — Prompt bar — add a "Plain" mode that runs the prompt directly on Claude (feature) — `backlog/agentic-workflow-m3vhq-prompt-bar-plain-mode.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

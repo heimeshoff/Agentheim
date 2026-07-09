@@ -7,7 +7,7 @@ context: agentic-workflow
 created: 2026-07-06
 completed:
 depends_on: [design-system-001-styleguide, design-system-xr4sb]
-blocks: []
+blocks: [agentic-workflow-m3vhq]
 tags: [dashboard-redesign, prompt-bar]
 related_adrs: [0051, 0048, 0016, 0050, 0003]
 related_research: []
