@@ -11,13 +11,14 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 32
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **design-system-v08qq** — TicketCard — condense to 1b: no context chip, no estimate, no timestamp, smaller type (refactor) — `todo/design-system-v08qq-ticketcard-condense-to-1b.md`
 <!-- todo-list:end -->
 
 ### Doing

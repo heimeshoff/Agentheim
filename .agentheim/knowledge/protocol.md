@@ -5,6 +5,16 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 17:08 -- Modeling / Captured: design-system-v08qq - TicketCard — condense to 1b: no context chip, no estimate, no timestamp, smaller type
+
+**Type:** Modeling / Capture
+**BC:** design-system
+**Filed to:** todo
+**Summary:** The builder wants the board card to read as 1b's "Command deck" card does — status dot, mono id, title, nothing else. Today's `TicketCard` carries a bottom meta row (folder-glyph context chip, estimate chip, `updated` timestamp) and sets its type two steps larger than 1b. Three things were settled at capture. (1) **Scope of the removal grew from the opening ask.** The builder opened with "no symbol for their bounded context" — literally, drop the folder glyph — but on being shown 1b's actual card (which has no meta row at all) took the estimate chip and the timestamp with it, leaving the row as a bare carrier for the `cornerAction` slot. That slot is load-bearing (aw-022's Refine/Promote pair) and stays; the row now renders only when a corner action exists. (2) **The flat-column objection was raised and dismissed on the builder's reasoning.** Grouping is an optional per-column lens (`board-group.js`, `FLAT_BC`), so an ungrouped column has no BC section header and dropping the chip would seem to erase the bounded context from the board. The builder's answer: the mono id *already* leads with it — ids are `<bc>-<token>` (ADR-0028), so `infrastructure-h8k2m` names its context at the top of the card. The chip was restating at the bottom what the id says at the top; it is redundant in grouped and flat columns alike. Recorded as knowingly accepted, not overlooked. (3) **Two of the three removed elements were already invisible.** `board-data.js:75-76` projects `est: '—'` and `updated: ''`, so `showEstimate('—')` is false and the timestamp is falsy — the estimate chip and timestamp render **only** in the styleguide canvas specimen, never on the real dashboard board. The sole board-visible change is the context chip. Filed straight to `todo/`: every open question was settled with the builder, leaving two named implementation decisions carried as justification ACs in the t896s mould — `MonoId`'s sizing strategy (global bump vs a `size` prop; note that `app.js` *imports* it but appears never to render it, so the `--radius-md` trap t896s hit may not apply here — re-verify at work time) and `showEstimate`'s disposition (retire the helper + its two pure tests, or keep it as an unreferenced export). Flagged for the worker: `ticket-card.test.mjs`'s "the card renders the estimate chip behind the showEstimate decision" encodes the OLD contract in its title and will go red; an AC forbids satisfying the suite by deleting it — it must be re-pinned to the reversed contract, per the aw-aqyqd precedent. Prior art surfaced and confirmed related: t896s (10px radius, same "reflect 1b" family, same component), ds-006 (introduced both the estimate-chip guard and the cornerAction slot — partially superseded here), ds-008, ds-010, xr4sb.
+**ADRs written:** none — no shipped decision is superseded by a new record; ds-006's estimate-visibility rule is superseded in the BC README when the task is worked.
+
+---
+
 ## 2026-07-09 16:44 -- Work session ended
 
 **Type:** Work / Session end
