@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 14:07 -- Batch started: [agentic-workflow-q7r3x]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-q7r3x - Prompt area matches Section 1b of the UX explorations reference exactly
+**Parallel:** no (1 worker — agentic-workflow-q7r3x is the only ready task in todo across all BCs; agentic-workflow-m3vhq is blocked on it and stays in backlog)
+
+---
+
 ## 2026-07-09 -- Modeling / Refined: agentic-workflow-m3vhq - Prompt bar — add a "Plain" mode that runs the prompt directly on Claude
 
 **Type:** Modeling / Refine

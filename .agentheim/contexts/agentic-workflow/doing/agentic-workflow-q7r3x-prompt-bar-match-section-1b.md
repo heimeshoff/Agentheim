@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-q7r3x
 title: Prompt area matches Section 1b of the UX explorations reference exactly
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-06

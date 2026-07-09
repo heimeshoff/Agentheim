@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 131
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-q7r3x** — Prompt area matches Section 1b of the UX explorations reference exactly (feature) — `todo/agentic-workflow-q7r3x-prompt-bar-match-section-1b.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-q7r3x** — Prompt area matches Section 1b of the UX explorations reference exactly (feature) — `doing/agentic-workflow-q7r3x-prompt-bar-match-section-1b.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
