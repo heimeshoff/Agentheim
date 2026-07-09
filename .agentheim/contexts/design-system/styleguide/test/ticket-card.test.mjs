@@ -1,53 +1,68 @@
-// Tests for the TicketCard estimate-chip visibility + corner-action slot
-// (design-system-006).
+// Tests for the TicketCard condensed ("1b") anatomy + corner-action slot
+// (design-system-006, design-system-v08qq).
 //
 // TicketCard renders via htm/React with no DOM under `node --test`, so —
 // mirroring the doing-pulse suite — the load-bearing, framework-free contracts
-// are tested directly against the pure decision the card delegates to:
-//   1. `showEstimate(est)` — the empty "— pt" chip is dead space on every
-//      dashboard card (the /api/tree projection carries no estimate, ADR-0002,
-//      so board-data feeds the '—' placeholder). The chip must render ONLY for a
-//      real estimate, never for absent / empty / the em-dash placeholder.
-//   2. the card source wires that decision (no chip when showEstimate is false)
-//      and exposes an optional `cornerAction` render-prop occupying the
+// are tested directly by reading the source:
+//   1. design-system-v08qq condensed the card toward 1b's "Command deck" anatomy:
+//      the meta row's context chip, estimate chip, and updated timestamp are all
+//      gone. `showEstimate` (design-system-006, `app/card.js`) is retired along
+//      with it — the estimate chip it gated no longer exists.
+//   2. the card exposes an optional `cornerAction` render-prop occupying the
 //      bottom-right meta slot, whose activation stops propagation so it never
-//      opens the card.
+//      opens the card. The meta row now renders ONLY when `cornerAction` is
+//      supplied — an ordinary card ends at its title, exactly as 1b's does.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-
-import { showEstimate } from '../app/card.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const APP = join(HERE, '..', 'app');
 const kanbanSrc = readFileSync(join(APP, 'kanban.js'), 'utf8');
 
-test('showEstimate is true only for a real estimate value', () => {
-  assert.equal(showEstimate('3'), true);
-  assert.equal(showEstimate('1'), true);
-  assert.equal(showEstimate('?'), true, 'an explicit unknown-marker is still a value the author chose to show');
+test('showEstimate (design-system-006) is retired: app/card.js no longer exists', () => {
+  // design-system-v08qq removes the estimate chip entirely, so the pure decision
+  // that gated it has no remaining caller. Retired rather than left as dead code
+  // (design-system-v08qq AC 8's "retire" disposition).
+  assert.equal(existsSync(join(APP, 'card.js')), false, 'app/card.js (showEstimate) must be retired, not left unreferenced');
 });
 
-test('showEstimate is false for absent / empty / em-dash placeholder', () => {
-  for (const est of ['—', '', '  ', undefined, null]) {
-    assert.equal(showEstimate(est), false, `est ${JSON.stringify(est)} must hide the chip`);
-  }
+test('the card renders no context chip, no estimate chip, and no updated timestamp', () => {
+  // 1b's condensed card carries a status dot + mono id + title and nothing else
+  // (design-system-v08qq). Catches a regression to any of the three dropped
+  // meta-row elements.
+  assert.doesNotMatch(kanbanSrc, /MetaChip/, 'TicketCard must no longer render any MetaChip (context or estimate)');
+  assert.doesNotMatch(kanbanSrc, /ticket\.context/, 'TicketCard must no longer render the bounded-context chip');
+  assert.doesNotMatch(kanbanSrc, /ticket\.est\b/, 'TicketCard must no longer render the estimate chip');
+  assert.doesNotMatch(kanbanSrc, /ticket\.updated/, 'TicketCard must no longer render the updated timestamp');
+  assert.doesNotMatch(kanbanSrc, /showEstimate/, 'TicketCard must no longer import or reference the retired showEstimate');
 });
 
-test('the card renders the estimate chip behind the showEstimate decision', () => {
-  // The chip must be conditional on showEstimate — never unconditional. Catches a
-  // regression to the old `${ticket.est} pt` that always rendered.
-  // The "… pt" chip must appear ONLY guarded by showEstimate(...) on the same
-  // line — never as a bare unconditional render. This catches a regression to the
-  // old `<${MetaChip} mono>${ticket.est} pt` that always rendered.
-  const estChipLines = kanbanSrc
-    .split('\n')
-    .filter((line) => /\$\{ticket\.est\}\s*pt/.test(line));
-  assert.equal(estChipLines.length, 1, 'exactly one estimate-chip render line expected');
-  assert.match(estChipLines[0], /showEstimate\(ticket\.est\)\s*&&/, 'the estimate chip must be guarded by showEstimate(ticket.est)');
+test('the meta row renders only when cornerAction is supplied, with no dangling title margin', () => {
+  // A rowless card must end at its title exactly as 1b's does — no trailing
+  // whitespace from a fixed title marginBottom.
+  assert.match(kanbanSrc, /\$\{cornerAction\s*&&\s*html`/, 'the meta row must be gated on cornerAction, mirroring the pattern used elsewhere for optional slots');
+  assert.match(kanbanSrc, /marginBottom:\s*cornerAction\s*\?\s*12\s*:\s*0/, 'the title marginBottom must collapse to 0 when there is no meta row to separate from');
+});
+
+test('mono id renders at 10px and the title at 12px / line-height 1.5', () => {
+  // MonoId's size lives in the shared primitive (primitives.js), not kanban.js —
+  // read it there.
+  const primitivesSrc = readFileSync(join(APP, 'primitives.js'), 'utf8');
+  const monoIdStart = primitivesSrc.indexOf('export function MonoId(');
+  assert.notEqual(monoIdStart, -1, 'MonoId must be defined in primitives.js');
+  const monoIdBody = primitivesSrc.slice(monoIdStart, primitivesSrc.indexOf('}', primitivesSrc.indexOf('}', monoIdStart) + 1));
+  assert.match(monoIdBody, /fontSize:\s*10\b/, 'MonoId must render at 10px (bumped from 11.5px)');
+
+  const titleStart = kanbanSrc.indexOf('<!-- Title -->');
+  assert.notEqual(titleStart, -1, 'TicketCard must have a Title block');
+  const titleEnd = kanbanSrc.indexOf('</div>', titleStart);
+  const titleBlock = kanbanSrc.slice(titleStart, titleEnd);
+  assert.match(titleBlock, /fontSize:\s*12\b/, 'the title must render at 12px (condensed from 14px)');
+  assert.match(titleBlock, /lineHeight:\s*1\.5\b/, 'the title lineHeight must be 1.5 (condensed from 1.4)');
 });
 
 test('the card exposes an optional cornerAction slot in the bottom-right meta position', () => {

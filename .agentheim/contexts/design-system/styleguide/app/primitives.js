@@ -86,10 +86,15 @@ export function MetaChip({ icon, children, mono = false }) {
 }
 
 // ---- Mono identifier (ticket id / ADR id) ----
+// fontSize 10px (design-system-v08qq, condensing TicketCard toward 1b's "Command
+// deck" anatomy). Safe as a global bump: MonoId's only RENDER sites are
+// TicketCard's two variants (app/kanban.js) — grepped every consumer at work
+// time, not just imports (the design-system-t896s --radius-md trap). app/app.js
+// imports MonoId but never renders it.
 export function MonoId({ children, color = "var(--fg-3)" }) {
   return html`
     <span style=${{
-      fontFamily: "var(--font-mono)", fontSize: 11.5, fontWeight: 500,
+      fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 500,
       letterSpacing: "0.01em", color, fontFeatureSettings: '"tnum","zero"',
     }}>${children}</span>`;
 }

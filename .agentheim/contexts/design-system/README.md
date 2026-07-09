@@ -293,16 +293,24 @@ which names these as sibling mechanisms to the on-card ring, not variants of it.
 
 ### TicketCard — estimate chip is conditional; an optional corner-action slot (design-system-006)
 
+> **Estimate-visibility rule superseded (`design-system-v08qq`).** The
+> "estimate chip is conditional" contract below is retired, not merely
+> re-tuned: `TicketCard` no longer renders an estimate chip **at all**, ever.
+> `app/card.js` (`showEstimate`) is deleted along with its two pure-function
+> tests — a global bump rather than an unreferenced export, since grepping
+> every consumer (not just every import — the design-system-t896s
+> `--radius-md` trap) found `showEstimate` had exactly one caller, the render
+> line this task removed. See "TicketCard condensed to 1b" below for the
+> full new anatomy. The `cornerAction` contract (second bullet below) is
+> **unchanged** and remains load-bearing.
+
 The `TicketCard` (`app/kanban.js`) is consumed by the dashboard **unforked**
 (ADR-0003), so consumer-shaped affordances live here, not board-side. Two
 contracts:
 
-- **Estimate chip is conditional.** The `… pt` meta chip renders **only when
-  there is a real estimate**. An absent / empty / whitespace value, or the
-  em-dash `—` placeholder the dashboard feeds (the `/api/tree` read projection
-  carries no estimate, ADR-0002), hides the chip — no dead `— pt` space. The
-  decision is the pure, React-free `showEstimate(est)` in `app/card.js` (testable
-  under `node --test` without the canvas import map, mirroring `doingPulseClass`).
+- ~~**Estimate chip is conditional.** The `… pt` meta chip renders only when
+  there is a real estimate…~~ **Superseded above** — the chip no longer
+  exists in any form.
 - **Optional `cornerAction` render-prop.** The card accepts an optional
   `cornerAction` function rendering a single quiet control in the **bottom-right
   of the meta row** (the former estimate-chip position). The **styleguide owns the
@@ -310,10 +318,69 @@ contracts:
   behavior**. The card wraps the slot in a `stopPropagation` container so
   activating the action never bubbles to the card's own `onClick` (the card is a
   button that opens the slide-over). Absent → the card is unchanged. The downstream
-  consumer (a backlog card's copy-command button) is `agentic-workflow-016`.
+  consumer (a backlog card's copy-command button) is `agentic-workflow-016`. As of
+  `design-system-v08qq`, `cornerAction` is the **only** thing that can occupy a meta
+  row — the row itself renders only when one is supplied.
 
 > Live-board note: same as Motion — the served dashboard `dist/` is a derived
 > artifact (ADR-0003) and must be **rebuilt** to pick up this styleguide change.
+
+### TicketCard condensed to 1b — no context chip, no estimate, no timestamp, smaller type (design-system-v08qq)
+
+`TicketCard` (`app/kanban.js`) is condensed toward 1b's "Command deck" card
+anatomy (`inspiration/Agentheim UX Explorations.html`, §1b): a status cue, a
+mono ticket ID, and a two-line title — nothing else, unless `cornerAction` is
+supplied.
+
+- **Meta row emptied of content.** The bounded-context `MetaChip` (folder
+  glyph), the estimate `MetaChip`, and the `updated` timestamp are all gone.
+  The context chip was the only one of the three that ever rendered on the
+  real dashboard board; it was judged **redundant**, not merely condensed —
+  task ids are `<bc>-<token>` (ADR-0028), so a card's mono id already names
+  its bounded context at the top of the card. The estimate chip and the
+  timestamp were **already invisible on the real board** before this task
+  (`dashboard/app/board-data.js` feeds the `'—'` placeholder / an empty
+  string, both falsy against `showEstimate` / `ticket.updated`); they were
+  visible only in the styleguide canvas specimen. The flat-column objection
+  (an ungrouped column loses its only BC cue) was raised and dismissed on
+  the same ADR-0028 mono-id reasoning — the chip is redundant in grouped
+  **and** flat columns alike.
+- **The meta row renders only when `cornerAction` is supplied.** `cornerAction`
+  is unchanged and load-bearing (backlog's Refine/Promote pair,
+  `agentic-workflow-022`) — see the supersession note above. The row wraps
+  `cornerAction` alone now (no spacer, no sibling elements). The title's
+  `marginBottom` is `cornerAction ? 12 : 0` so a rowless card ends flush at
+  its title, matching 1b, with no dangling trailing whitespace.
+- **Type scale condensed to 1b's.** The mono id (`MonoId`, `app/primitives.js`)
+  drops from 11.5px to **10px** — bumped **globally** in the shared primitive
+  rather than given a `size` prop, because grepping every RENDER site (not
+  just every import — the design-system-t896s `--radius-md` trap this task
+  was warned against) found `MonoId` has exactly two render sites, both
+  inside `TicketCard` itself (`app/kanban.js`, the `rail` and `badge`
+  variants); `app/app.js` imports `MonoId` on line 13 but never renders it.
+  With no other consumer, a global bump is safe where a global `--radius-md`
+  bump (t896s) was not. The title drops from 14px/`line-height: 1.4` to
+  **12px/1.5**, inline in `TicketCard`'s own style object (not a shared
+  primitive, no equivalent trap).
+- **Out of scope, deliberately unchanged.** Card padding, `--radius-card`,
+  the status rail, the `bot` agent icon, the two-line title clamp, the hover
+  shadow, and the dependency ring.
+- **Follow-up, not this task.** Once `TicketCard` ignores them,
+  `board-data.js`'s `est` / `updated` placeholder fields are dead in the
+  `agentic-workflow` BC — out of a design-system task's scope, flagged for a
+  separate task if worth the churn.
+
+> **Gate re-review reopened by the TicketCard condensation
+> (`design-system-v08qq`).** A visible styleguide change (smaller type,
+> the meta row gone except for `cornerAction`) — the `design-system-008` /
+> `design-system-010` / `design-system-t896s` precedent (lightweight
+> re-review of the Kanban section of the canvas, not a full pass).
+> **Builder confirmation PENDING.**
+
+> Live-board note: the served dashboard `dist/` is a derived artifact
+> (ADR-0003) and **was rebuilt** (`node build.mjs`, from `dashboard/`) in
+> this task — the live board's context chip disappears immediately; the
+> estimate chip and timestamp were already invisible there (see above).
 
 ### Collapsible — the shared section primitive (design-system-005)
 
@@ -920,4 +987,5 @@ list the new token (role: "Ticket card") and to relabel `--radius-md`'s role as
 - Hidden/off-viewport dependency markers: `styleguide/app/motion.js` (`dependencyPresentClass`, `edgeBlinkClass`), `Collapsible.hasHiddenDependency` (`styleguide/app/collapsible.js`), `.rel-present` / `.rel-edge-blink(--top|--bottom)` + keyframes in `styles/agentheim.css` (reusing `--rel-dep` / `--duration-relation`); the styleguide capability the board's collapsed-section marker and scroll-edge indicator will consume (`agentic-workflow-h9v3m`, `agentic-workflow-r9k2p`), see ADR-0034 pt. 6 (design-system-b7n2s)
 - Prompt-mode tab glyphs + solid-ochre icon Enter button: `styleguide/app/icons.js` (`diamond`, `circle-dot`, `corner-down-left` glyphs), `styleguide/app/button.js` (`EnterButton`), `--accent-ochre-fg` dedicated on-accent foreground pair in `styles/colors_and_type.css` (ADR-0048 surface-2 carve-out, ADR-0051); the styleguide primitives the dashboard prompt console will consume (`agentic-workflow-q7r3x`) (design-system-xr4sb)
 - `EnterButton` disabled state: `styleguide/app/button.js` (`disabled = false` prop, real `<button disabled>` attribute, ADR-0016 opacity-only de-emphasis — `--accent-ochre` fill / `--accent-ochre-fg` glyph stay untouched), second "Enter — disabled" specimen in `ButtonRow` (`styleguide/app/app.js`, section 12); the styleguide's first disabled state on any primitive, the shape a later `Button`/`IconButton` disabled state should follow; consumed by the dashboard's Plain prompt-bar mode (`agentic-workflow-m3vhq`) (design-system-tfhn6)
+- TicketCard condensed to 1b: `styleguide/app/kanban.js` (meta row gated on `cornerAction`, title `marginBottom: cornerAction ? 12 : 0`, title 12px/1.5), `styleguide/app/primitives.js` (`MonoId` 10px, only two render sites, both in `kanban.js`); `app/card.js` (`showEstimate`, design-system-006) retired entirely — no remaining caller (design-system-v08qq)
 - BC index: `INDEX.md`

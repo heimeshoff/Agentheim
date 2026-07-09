@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 18:01 -- Task verified and completed: design-system-v08qq - TicketCard — condense to 1b: no context chip, no estimate, no timestamp, smaller type
+
+**Type:** Work / Task completion
+**Task:** design-system-v08qq - TicketCard — condense to 1b: no context chip, no estimate, no timestamp, smaller type
+**Summary:** TicketCard condensed to 1b - no context chip, no estimate chip, no timestamp, meta row only for cornerAction, 10px/12px type
+**Duration:** 14m39s
+**Verification:** PASS (iteration 1)
+**Files changed:** 7
+**Tests added:** 3
+**ADRs written:** none
+
+---
+
 ## 2026-07-09 17:44 -- Batch started: [design-system-v08qq]
 
 **Type:** Work / Batch start

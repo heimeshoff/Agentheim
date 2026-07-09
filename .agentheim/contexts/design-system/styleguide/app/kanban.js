@@ -5,17 +5,17 @@
 import { useState } from "react";
 import { html } from "./html.js";
 import { Icon } from "./icons.js";
-import { StatusDot, StatusChip, MonoId, MetaChip } from "./primitives.js";
+import { StatusDot, StatusChip, MonoId } from "./primitives.js";
 import { EmptyColumn } from "./empty.js";
 import { doingPulseClass, dependencyRingClass } from "./motion.js";
-import { showEstimate } from "./card.js";
 import { STATUSES, COLUMN_ORDER, TICKETS } from "./data.js";
 
 // Re-export so the doing-pulse decision (design-system-004 / ADR-0014) is
 // reachable from the kanban surface as well as ./motion.js. Same for the
-// estimate-visibility decision (design-system-006) and the dependency-ring
-// decision (design-system-w4t9k / ADR-0034).
-export { doingPulseClass, showEstimate, dependencyRingClass };
+// dependency-ring decision (design-system-w4t9k / ADR-0034). The estimate-chip
+// visibility decision (design-system-006, formerly `app/card.js`) is retired
+// as of design-system-v08qq — the estimate chip it gated no longer exists.
+export { doingPulseClass, dependencyRingClass };
 
 // ---- Column header ----
 // onAdd: optional add-ticket affordance (agentic-workflow-018). Like EmptyColumn's
@@ -60,7 +60,10 @@ export function ColumnHeader({ status, count, onAdd }) {
 //   slot's placement + isolation; the CONSUMER owns the control's look/behavior.
 //   The card wraps whatever the prop returns in a propagation-stopping container
 //   so activating it never bubbles to the card's own onClick (the card is a
-//   button that opens the slide-over). Absent -> the card is unchanged.
+//   button that opens the slide-over). Absent -> the card is unchanged. As of
+//   design-system-v08qq, cornerAction is the ONLY thing that can occupy the meta
+//   row — the row itself renders only when cornerAction is supplied, so an
+//   ordinary card ends at its title (1b's "Command deck" anatomy).
 // dependencyRelation: optional "waiting-on" | "holding-up" (design-system-w4t9k /
 //   ADR-0034) — renders a quiet breathing ring around the card's perimeter when
 //   this card is a dependency of whatever card the builder is hovering. The
@@ -124,28 +127,24 @@ export function TicketCard({ ticket, variant = "rail", selected = false, onClick
 
       <!-- Title -->
       <div style=${{
-        fontFamily: "var(--font-ui)", fontSize: 14, fontWeight: 500,
-        lineHeight: 1.4, color: "var(--fg-1)", marginBottom: 12,
+        fontFamily: "var(--font-ui)", fontSize: 12, fontWeight: 500,
+        lineHeight: 1.5, color: "var(--fg-1)", marginBottom: cornerAction ? 12 : 0,
         display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
         overflow: "hidden", textWrap: "pretty",
       }}>${ticket.title}</div>
 
-      <!-- Meta row -->
-      <div style=${{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-        <${MetaChip} icon="folder">${ticket.context}</${MetaChip}>
-        ${showEstimate(ticket.est) && html`<${MetaChip} mono>${ticket.est} pt</${MetaChip}>`}
-        <div style=${{ flex: 1 }} />
-        ${ticket.updated && html`<span style=${{
-          fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--fg-4)",
-        }}>${ticket.updated}</span>`}
-        ${cornerAction && html`
+      <!-- Meta row — 1b's condensed anatomy (design-system-v08qq) carries no
+           context chip, estimate chip, or timestamp; the row exists only to
+           host cornerAction, so it renders only when one is supplied. -->
+      ${cornerAction && html`
+        <div style=${{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
           <span
             onClick=${(e) => e.stopPropagation()}
             onKeyDown=${(e) => e.stopPropagation()}
-            style=${{ display: "inline-flex", alignItems: "center", marginLeft: 2 }}>
+            style=${{ display: "inline-flex", alignItems: "center" }}>
             ${cornerAction()}
-          </span>`}
-      </div>
+          </span>
+        </div>`}
     </div>`;
 }
 

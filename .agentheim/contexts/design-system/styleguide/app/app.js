@@ -36,9 +36,10 @@ const SAMPLE_TICKET_STATIC = TICKETS.find((t) => t.status !== "doing"); // contr
 // ring specimens don't reuse the exact same card.
 const SAMPLE_TICKET_WAITING = TICKETS.filter((t) => t.status !== "doing")[1] || SAMPLE_TICKET_STATIC;
 const SAMPLE_TICKET_HOLDING = TICKETS.filter((t) => t.status !== "doing")[2] || SAMPLE_TICKET_STATIC;
-// design-system-006: a card whose estimate is the dashboard's em-dash placeholder
-// — the "… pt" chip must NOT render (a real est would still show).
-const SAMPLE_TICKET_NO_EST = { ...SAMPLE_TICKET_STATIC, est: "—" };
+// A non-doing ticket for the corner-action specimen (design-system-006 /
+// design-system-v08qq) — no meaning attaches to its fields beyond "not the
+// doing-pulse sample above."
+const SAMPLE_TICKET_FOR_CORNER_ACTION = SAMPLE_TICKET_STATIC;
 
 // A quiet, token-styled icon button — the kind of control a consumer drops into
 // the TicketCard corner-action slot (design-system-006). Look/placement is the
@@ -145,18 +146,11 @@ function CardStates({ variant, title, note }) {
         <div><${StateLabel}>Hover</${StateLabel}><${TicketCard} ticket=${SAMPLE_TICKET} variant=${variant} forceHover /></div>
         <div><${StateLabel}>Selected</${StateLabel}><${TicketCard} ticket=${SAMPLE_TICKET} variant=${variant} selected /></div>
         <div>
-          <${StateLabel}>No estimate — chip hidden</${StateLabel}>
+          <${StateLabel}>Corner action — the only way the meta row appears</${StateLabel}>
           <p style=${{ margin: "0 0 10px", fontFamily: "var(--font-ui)", fontSize: 11.5, lineHeight: 1.5, color: "var(--fg-3)", maxWidth: 280 }}>
-            When a ticket carries no real estimate (the dashboard read projection has none, ADR-0002), the <code>… pt</code> chip does not render — no dead space, no <code>— pt</code>. A real estimate still shows (above).
+            1b's condensed card (design-system-v08qq) carries no context chip, estimate chip, or timestamp — a card ends at its title (above). The optional <code>cornerAction</code> render-prop is the ONLY thing that can occupy a meta row; the row itself renders only when one is supplied. The card owns its look + placement and isolates its click (it never opens the card); the consumer owns the behavior — here a copy-command button.
           </p>
-          <${TicketCard} ticket=${SAMPLE_TICKET_NO_EST} variant=${variant} />
-        </div>
-        <div>
-          <${StateLabel}>Corner action</${StateLabel}>
-          <p style=${{ margin: "0 0 10px", fontFamily: "var(--font-ui)", fontSize: 11.5, lineHeight: 1.5, color: "var(--fg-3)", maxWidth: 280 }}>
-            An optional quiet affordance in the bottom-right meta slot. The card owns its look + placement and isolates its click (it never opens the card); the consumer owns the behavior — here a copy-command button.
-          </p>
-          <${TicketCard} ticket=${SAMPLE_TICKET_NO_EST} variant=${variant} cornerAction=${() => html`<${DemoCornerButton} />`} />
+          <${TicketCard} ticket=${SAMPLE_TICKET_FOR_CORNER_ACTION} variant=${variant} cornerAction=${() => html`<${DemoCornerButton} />`} />
         </div>
         ${variant === "rail" && html`
           <div>
@@ -187,7 +181,7 @@ function CardStates({ variant, title, note }) {
 function CardSection() {
   return html`
     <${GuideSection} index="06" title="Ticket card"
-      desc="Comfortable density: a ticket ID, a two-line title, and two meta chips with room to breathe. Two directions for signalling status — a quiet colored rail down the left edge, or an explicit status badge on top. Both share hover (a 1px lift) and a selected state (ochre ring).">
+      desc="1b's condensed anatomy: a status cue, a mono ticket ID, and a two-line title — nothing else, unless an optional corner action occupies a meta row. Two directions for signalling status — a quiet colored rail down the left edge, or an explicit status badge on top. Both share hover (a shadow raise) and a purely semantic selected state (no visual cue).">
       <div style=${{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
         <${CardStates} variant="rail" title="Direction A — Status rail"
           note="Status reads from a 3px colored edge. Quietest option; lets the title lead. Ticket ID sits top-left in mono." />
