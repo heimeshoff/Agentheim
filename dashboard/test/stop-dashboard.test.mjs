@@ -1,25 +1,26 @@
-// Static guard for the dashboard's "Stop dashboard" topbar control (agentic-workflow-028).
+// Static guard for the dashboard's "Stop dashboard" topbar control
+// (agentic-workflow-028, reversed by agentic-workflow-h4n2v / ADR-0053).
 //
 // Once the dashboard is open in the browser, the builder wants to stop the running
-// server from the UI rather than returning to a session. The main-column topbar gains
-// a quiet Stop dashboard button, set APART from the aw-029 [theme][skip-perms][Work]
-// cluster so it never reads or fat-fingers as the Work primary. Clicking it REUSES the
-// existing bridge launch path (launchOrCopy) to run `/agentheim:dashboard stop` — NOT a
-// new server endpoint (ADR-0017 keeps server.mjs read-only). The seam decision (option
-// B, builder 2026-06-15) is exactly this bridge-reuse.
+// server from the UI rather than returning to a session. The settings menu's Stop
+// dashboard control now POSTs the scoped runtime self-lifecycle endpoint
+// `POST /api/stop` DIRECTLY (ADR-0053, amending ADR-0017/ADR-0046) — no bridge, no
+// spawned session, no STOP_DASHBOARD_COMMAND. This reverses aw-028's explicit seam
+// ("the server is never asked to stop itself") and removes the bridge-present/absent
+// asymmetry aw-028 accepted: Stop now works identically in any browser tab.
 //
-// Post-stop UX is driven off launchOrCopy's discriminated return:
-//   - res.via === 'bridge'   → the shell shows a full-pane "Dashboard stopped — safe to
-//     close this tab" overlay over the main content area (optimistic on dispatch).
-//   - res.via === 'clipboard' → NO overlay (nothing was actually stopped); the button
-//     flashes the existing quiet "Copied" feedback only.
-// The Stop button does NOT wear the armed/danger --obligation per-launch cue (aw-021 /
-// ADR-0019) — that cue is for risky work launches, not a stop.
+// Post-stop UX is driven off the fetch resolution, TRUTHFUL on a 2xx (not
+// optimistic on dispatch, since there is no longer a spawned session in the loop):
+//   - res.ok  → the shell shows a full-pane "Dashboard stopped — safe to close this
+//     tab" overlay over the main content area.
+//   - !res.ok / network error → NO overlay (nothing was actually stopped); the menu
+//     just closes quietly.
+// The Stop control does NOT wear the armed/danger --obligation per-launch cue
+// (aw-021 / ADR-0019) — that cue is for risky work launches, not a stop.
 //
 // The board's React glue has no DOM render harness in this project — the established
 // idiom (aw-016/020/022/023/024/026) is source-reading static guards plus pure-module
-// unit tests (the STOP_DASHBOARD_COMMAND constant is unit-tested in
-// modeling-command.test.mjs). This suite locks the aw-028 wiring criteria.
+// unit tests. This suite locks the aw-h4n2v / ADR-0053 wiring criteria.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -37,52 +38,63 @@ function fn(name) {
   return m[0];
 }
 
-test('the topbar imports and seeds the bare STOP_DASHBOARD_COMMAND (reusing launchOrCopy, no new endpoint)', () => {
-  assert.match(boardSrc, /STOP_DASHBOARD_COMMAND/, 'board.js must consume STOP_DASHBOARD_COMMAND');
-  assert.match(
-    boardSrc,
-    /import\s*\{[^}]*STOP_DASHBOARD_COMMAND[^}]*\}\s*from\s*"\.\/modeling-command\.js"/,
-    'STOP_DASHBOARD_COMMAND must be imported from the pure modeling-command module',
-  );
+test('the board no longer references STOP_DASHBOARD_COMMAND or imports it (ADR-0053 — Stop posts /api/stop directly)', () => {
+  assert.doesNotMatch(boardSrc, /STOP_DASHBOARD_COMMAND/, 'board.js must not reference the retired command constant');
 });
 
-test('the settings menu renders a Stop dashboard launch button seeded with STOP_DASHBOARD_COMMAND (aw-049 relocation)', () => {
-  // aw-049 moved the Stop dashboard launch out of the inline topbar and into the gear's
-  // SettingsMenu. It keeps the same launchOrCopy bridge wiring — relocation, not rewrite.
+test('a StopDashboardButton component exists and does NOT render a LaunchButton (no command, no bridge)', () => {
+  assert.match(boardSrc, /function StopDashboardButton\b/, 'board.js must define a StopDashboardButton component');
+  const stopBtn = fn('StopDashboardButton');
+  assert.doesNotMatch(stopBtn, /<\$\{LaunchButton\}/, 'StopDashboardButton must not render the bridge-launch LaunchButton');
+  assert.doesNotMatch(stopBtn, /command=/, 'StopDashboardButton must not take a command prop — there is no slash command any more');
+});
+
+test('the settings menu renders the StopDashboardButton wired to onStopClick (aw-049 relocation preserved)', () => {
   const top = fn('BoardTopbar');
-  assert.doesNotMatch(top, /label="Stop dashboard"/, 'the Stop launch moved into the settings menu — not inline in the topbar');
+  assert.doesNotMatch(top, /Stop dashboard/, 'the Stop control lives in the settings menu — not inline in the topbar');
   const menu = fn('SettingsMenu');
-  assert.match(menu, /label="Stop dashboard"/, 'the settings menu must render the Stop dashboard launch');
-  const stop = menu.match(/label="Stop dashboard"[\s\S]{0,400}?\/>/);
-  assert.ok(stop, 'the Stop dashboard button must be present in the settings menu');
-  assert.match(stop[0], /command=\$\{STOP_DASHBOARD_COMMAND\}/, 'Stop must seed the bare STOP_DASHBOARD_COMMAND');
+  assert.match(menu, /<\$\{StopDashboardButton\}/, 'the settings menu must mount the StopDashboardButton');
+  assert.match(menu, /<\$\{StopDashboardButton\}\s+onClick=\$\{onStopClick\}/, 'the Stop control must be wired to onStopClick');
 });
 
-test('selecting Stop dashboard closes the menu and the Work launch is NOT inside the menu (aw-049)', () => {
+test('selecting Stop dashboard POSTs /api/stop directly — no bridge, no command string', () => {
   const menu = fn('SettingsMenu');
-  // Work is the only standing topbar action — it never lives inside the gear's menu.
-  assert.doesNotMatch(menu, /label="Work"/, 'the Work launch must NOT sit inside the settings menu');
-  // The Stop control's onResult closes the popover (setOpen(false)) before flipping the overlay.
-  assert.match(menu, /setOpen\(false\)/, 'selecting Stop dashboard must close the menu');
+  assert.match(menu, /onStopClick\s*=\s*useCallback/, 'SettingsMenu must own an onStopClick handler');
+  const handler = menu.match(/const onStopClick[\s\S]*?\}, \[onStopped\]\);/);
+  assert.ok(handler, 'the onStopClick handler must be present');
+  assert.match(handler[0], /fetchImpl\("\/api\/stop",\s*\{\s*method:\s*"POST"\s*\}\)/, 'Stop must POST /api/stop directly');
+  assert.doesNotMatch(handler[0], /launchOrCopy/, 'Stop must NOT go through the bridge launch path any more');
 });
 
-test('the Stop button does NOT wear the armed/danger per-launch cue (it never threads skipPermissions)', () => {
+test('selecting Stop dashboard closes the menu (setOpen(false)) as part of the onStopClick flow', () => {
   const menu = fn('SettingsMenu');
-  const stop = menu.match(/label="Stop dashboard"[\s\S]{0,400}?\/>/);
-  assert.ok(stop, 'the Stop dashboard button must be present');
-  assert.doesNotMatch(stop[0], /skipPermissions/, 'Stop must NOT thread skipPermissions (no armed/danger cue — aw-021/ADR-0019 is a non-goal here)');
+  const handler = menu.match(/const onStopClick[\s\S]*?\}, \[onStopped\]\);/);
+  assert.ok(handler, 'the onStopClick handler must be present');
+  assert.match(handler[0], /setOpen\(false\)/, 'selecting Stop dashboard must close the menu');
 });
 
-test('the Stop button fires with NO confirmation step (a single click launches)', () => {
+test('the overlay flips ONLY on a truthful 2xx (res.ok), not merely on dispatch', () => {
+  const menu = fn('SettingsMenu');
+  const handler = menu.match(/const onStopClick[\s\S]*?\}, \[onStopped\]\);/);
+  assert.ok(handler, 'the onStopClick handler must be present');
+  assert.match(handler[0], /res\s*&&\s*res\.ok\s*&&\s*typeof onStopped === "function"/, 'onStopped must fire only when the fetch resolved with res.ok');
+});
+
+test('the Stop control does NOT wear the armed/danger per-launch cue (it never threads skipPermissions)', () => {
+  const stopBtn = fn('StopDashboardButton');
+  assert.doesNotMatch(stopBtn, /skipPermissions/, 'Stop must NOT thread skipPermissions (no armed/danger cue — aw-021/ADR-0019 is a non-goal here)');
+});
+
+test('the Stop button fires with NO confirmation step (a single click posts /api/stop)', () => {
   const top = fn('BoardTopbar');
-  // No confirm()/window.confirm guard anywhere in the topbar — the click goes straight
-  // through LaunchButton's onClick → launchOrCopy.
-  assert.doesNotMatch(top, /confirm\s*\(/, 'the Stop launch must not be gated behind a confirmation prompt');
+  const menu = fn('SettingsMenu');
+  assert.doesNotMatch(top, /confirm\s*\(/, 'the Stop control must not be gated behind a confirmation prompt (topbar)');
+  assert.doesNotMatch(menu, /confirm\s*\(/, 'the Stop control must not be gated behind a confirmation prompt (settings menu)');
 });
 
-test('the onStopped callback threads shell → topbar → settings menu, wired to the Stop onResult, flipping shell state only on bridge', () => {
+test('the onStopped callback threads shell → topbar → settings menu, flipping shell state only on a truthful 2xx', () => {
   // The shell hands onStopped to BoardTopbar, which threads it into SettingsMenu (aw-049);
-  // the menu's Stop control fires it only on a bridge dispatch.
+  // the menu's onStopClick handler fires it only when the POST resolved res.ok.
   const topSig = boardSrc.match(/function BoardTopbar\(\{[^}]*\}\)/);
   assert.ok(topSig, 'BoardTopbar must take a props object');
   assert.match(topSig[0], /onStopped/, 'BoardTopbar must accept an onStopped prop from the shell');
@@ -91,12 +103,6 @@ test('the onStopped callback threads shell → topbar → settings menu, wired t
   const menuSig = boardSrc.match(/function SettingsMenu\(\{[^}]*\}\)/);
   assert.ok(menuSig, 'SettingsMenu must take a props object');
   assert.match(menuSig[0], /onStopped/, 'SettingsMenu must accept onStopped');
-  const menu = fn('SettingsMenu');
-  const stop = menu.match(/label="Stop dashboard"[\s\S]{0,400}?\/>/);
-  assert.ok(stop, 'the Stop dashboard button must be present in the menu');
-  assert.match(stop[0], /onResult=/, 'Stop must pass an onResult to LaunchButton');
-  // The onResult passed to Stop keys the shell-stopped flip off res.via === "bridge".
-  assert.match(menu, /res\.via === "bridge"/, 'the Stop onResult must flip the shell state only on a bridge dispatch');
 });
 
 test('DashboardApp owns a "stopped" shell state, flips it via onStopped, and mounts the overlay over the main content', () => {

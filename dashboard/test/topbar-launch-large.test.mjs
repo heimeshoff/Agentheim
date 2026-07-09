@@ -67,13 +67,19 @@ test('both topbar standing launches (What\'s next + Work) opt into the large siz
   assert.match(work[0], /large=\$\{true\}/, 'the Work launch must be large');
 });
 
-test('the compact card/menu launches do NOT opt into large (Refine / Promote / Stop)', () => {
+test('the compact card/menu launches do NOT opt into large (Refine / Promote)', () => {
   // These call sites must not carry large=${true} — they stay the compact size.
   const refine = boardSrc.match(/label="Refine"[\s\S]{0,200}?\/>/);
   const promote = boardSrc.match(/label="Promote"[\s\S]{0,200}?\/>/);
-  const stop = boardSrc.match(/label="Stop dashboard"[\s\S]{0,200}?\/>/);
-  assert.ok(refine && promote && stop, 'Refine, Promote and Stop launches must all exist');
+  assert.ok(refine && promote, 'Refine and Promote launches must both exist');
   assert.doesNotMatch(refine[0], /large=\$\{true\}/, 'Refine must stay compact');
   assert.doesNotMatch(promote[0], /large=\$\{true\}/, 'Promote must stay compact');
-  assert.doesNotMatch(stop[0], /large=\$\{true\}/, 'Stop dashboard must stay compact');
+});
+
+test('Stop dashboard (ADR-0053) is not a LaunchButton at all, so it has no `large` opt-in to guard', () => {
+  // Stop no longer renders LaunchButton — it POSTs /api/stop directly via
+  // StopDashboardButton, a small dedicated component with no `large` prop.
+  const stopBtn = boardSrc.match(/function StopDashboardButton[\s\S]*?\n}/);
+  assert.ok(stopBtn, 'StopDashboardButton must exist');
+  assert.doesNotMatch(stopBtn[0], /large/, 'StopDashboardButton must not carry a large/compact size prop');
 });

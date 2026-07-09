@@ -22,7 +22,6 @@ import {
   QUICK_CAPTURE_COMMAND,
   WORK_COMMAND,
   WHATS_NEXT_COMMAND,
-  STOP_DASHBOARD_COMMAND,
   RESEARCH_COMMAND,
   INQUIRE_COMMAND,
   refineCommandFor,
@@ -85,21 +84,14 @@ test('WHATS_NEXT_COMMAND is distinct from the other launch commands and fully-qu
   assert.notEqual(WHATS_NEXT_COMMAND, QUICK_CAPTURE_COMMAND);
 });
 
-// agentic-workflow-028: the main-column topbar gains a quiet Stop dashboard button
-// (set apart from the [theme][skip-perms][Work] cluster). Clicking it reuses the
-// existing bridge launch path to run `/agentheim:dashboard stop` — the spawned
-// session invokes `/dashboard stop` → stopDashboard(root) (no new server endpoint,
-// ADR-0017 read-only preserved). Stop ignores the prompt-bar textarea, so this is a
-// bare CONSTANT (no `*CommandFor(prompt)` builder), mirroring WORK_COMMAND (aw-024).
-test('STOP_DASHBOARD_COMMAND is the fully-qualified bare dashboard-stop command', () => {
-  assert.equal(STOP_DASHBOARD_COMMAND, '/agentheim:dashboard stop');
-});
-
-test('STOP_DASHBOARD_COMMAND is distinct from the other launch commands and fully-qualified', () => {
-  assert.notEqual(STOP_DASHBOARD_COMMAND, WORK_COMMAND);
-  assert.notEqual(STOP_DASHBOARD_COMMAND, MODELING_COMMAND);
-  assert.notEqual(STOP_DASHBOARD_COMMAND, QUICK_CAPTURE_COMMAND);
-  assert.match(STOP_DASHBOARD_COMMAND, /^\/agentheim:/);
+// agentic-workflow-h4n2v / ADR-0053: the Stop dashboard control no longer launches
+// a session at all — it POSTs the scoped runtime self-lifecycle endpoint
+// POST /api/stop directly, superseding aw-028's bridge-reuse seam. There is
+// therefore no STOP_DASHBOARD_COMMAND left to build or export; this guards that
+// it stays gone rather than silently reappearing.
+test('STOP_DASHBOARD_COMMAND no longer exists (ADR-0053 — Stop posts /api/stop directly, no command string)', async () => {
+  const mod = await import('../app/modeling-command.js');
+  assert.equal(Object.prototype.hasOwnProperty.call(mod, 'STOP_DASHBOARD_COMMAND'), false);
 });
 
 // agentic-workflow-022: the per-card Refine / Promote launch buttons. The verbs are

@@ -1,15 +1,15 @@
 ---
 id: agentic-workflow-h4n2v
 title: Stop dashboard menu item calls the stop script, not the slash command
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-09
-completed:
+completed: 2026-07-09
 depends_on: [design-system-001-styleguide]
 blocks: []
 tags: [dashboard, topbar, settings-menu, stop, runfile, endpoint]
-related_adrs: [0017, 0046, 0027, 0018, 0002]
+related_adrs: [0017, 0046, 0027, 0018, 0002, 0053]
 related_research: [vscode-dashboard-terminal-bridge-2026-06-09]
 prior_art: [agentic-workflow-028, agentic-workflow-vmk1z, agentic-workflow-011, agentic-workflow-049, agentic-workflow-032]
 ---
@@ -117,3 +117,77 @@ don't leave them asymmetric.
 
 **Advisory.** The BC README is 791 lines, past ADR-0041's ~600-line consolidation trigger.
 Not this task's job — worth a `/agentheim:modeling consolidate agentic-workflow README` pass.
+
+## Outcome
+
+Implemented exactly per the task's shape and ADR-0046's precedent. The Stop dashboard
+control POSTs a new scoped `POST /api/stop` endpoint directly — no bridge, no spawned
+session, no `STOP_DASHBOARD_COMMAND` (retired, no surviving consumer). This reverses
+aw-028's "the server is never asked to stop itself" and removes the bridge-present/absent
+asymmetry aw-028 accepted for Stop specifically: the control now works identically in any
+browser tab.
+
+**Server (`dashboard/stop-api.mjs`, new):** `handleStop(req, res, root, { exit })` responds
+`204` immediately, then — only once Node's `res` emits `'finish'` (fully flushed to the
+socket) — removes the runfile (`deleteRunfile`, `runfile.mjs`) and calls `exit(0)`
+(`process.exit` by default; injectable purely for tests). This ordering is load-bearing:
+the handler kills the very process serving the request, so a kill-first implementation
+would drop the connection before the browser's `fetch` resolves and the "Dashboard
+stopped" overlay would never render. `dashboard/server.mjs` dispatches
+`POST /api/stop` before the `405` method gate, mirroring `DELETE /api/whats-next`'s
+placement exactly; `createDashboardServer` gained a `stop` options passthrough so tests
+can inject a non-exiting `exit` spy. Chose the **dedicated in-process path**
+(`deleteRunfile` + `process.exit(0)`) over reusing `stopDashboard(root)` wholesale — see
+ADR-0053 §3 for the full reasoning (sidesteps `terminate()`'s cross-platform pid-kill /
+`taskkill` branches, which exist for killing an *external* process, not this one).
+`stopDashboard(root)` / `terminate()` / the CLI (`node launch.mjs stop`) / the
+`/agentheim:dashboard stop` skill path are **completely unchanged**.
+
+**Client (`dashboard/app/board.js`):** new `StopDashboardButton` (purely presentational,
+no `command`, no `LaunchButton`) replaces the old bridge-launch element inside
+`SettingsMenu`. `SettingsMenu`'s new `onStopClick` handler POSTs `/api/stop`, closes the
+menu (`setOpen(false)`), then flips the shell `stopped` state **only on a truthful
+`res.ok`** (not merely on dispatch) — the overlay is now truthful-on-2xx rather than
+optimistic-on-bridge-dispatch. `STOP_DASHBOARD_COMMAND` removed from
+`dashboard/app/modeling-command.js` (grep confirmed no surviving consumer).
+
+**Security:** no `Origin`/`Sec-Fetch-Site` check added to either `POST /api/stop` or
+`DELETE /api/whats-next` — kept symmetric per the task's explicit instruction (ADR-0053
+§4). Same guards as `DELETE /api/whats-next`: no request body, no client-supplied path,
+server-derived target.
+
+**ADR-0053** (new, global scope) names the third write category — **runtime
+self-lifecycle** — amends ADR-0017's read-only framing and ADR-0046's "exactly one write"
+claim, and marks aw-028's "never asked to stop itself" as superseded.
+
+**Runtime-verified against a real launched dashboard** (not a mock): launched via
+`node dashboard/launch.mjs`, read the actual bound port from `runtime.json` (41354),
+`POST /api/stop` → `204`, confirmed the runfile was removed and the pid (45000) was
+dead (`tasklist` showed no matching task). Re-verified the CLI stop path
+(`node dashboard/launch.mjs stop`) still works unchanged on a fresh launch.
+
+Tests: dashboard suite 784/784 passing (`cd dashboard && node --test test/*.test.mjs`,
+baseline 775 + new/restructured coverage), lib suite 189/189 passing (baseline 189,
+unchanged). New `dashboard/test/stop-api.test.mjs` (6 tests) pins the
+respond→finish→remove-runfile→exit ordering (verified red against a deliberately
+kill-first variant, then green after restoring the correct implementation) plus the
+dispatch-before-405-gate / 405-gate / no-body-no-query contract. Updated
+`dashboard/test/stop-dashboard.test.mjs`, `dashboard/test/settings-menu.test.mjs`,
+`dashboard/test/modeling-command.test.mjs`, `dashboard/test/topbar-launch-large.test.mjs`
+to match the new wiring (StopDashboardButton, no STOP_DASHBOARD_COMMAND). `dashboard/dist/`
+rebuilt via `node build.mjs` from inside the worktree.
+
+Key files:
+- `dashboard/stop-api.mjs` (new)
+- `dashboard/server.mjs`
+- `dashboard/app/board.js`
+- `dashboard/app/modeling-command.js`
+- `dashboard/test/stop-api.test.mjs` (new)
+- `dashboard/test/stop-dashboard.test.mjs`
+- `dashboard/test/settings-menu.test.mjs`
+- `dashboard/test/modeling-command.test.mjs`
+- `dashboard/test/topbar-launch-large.test.mjs`
+- `dashboard/dist/` (rebuilt)
+- `.agentheim/knowledge/decisions/0053-runtime-self-lifecycle-dashboard-stop-endpoint.md` (new)
+- `.agentheim/contexts/agentic-workflow/README.md` (Stop-dashboard + no-lifecycle-write-path
+  sections)

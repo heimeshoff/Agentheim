@@ -452,17 +452,23 @@ separate BC, but today the whole tool lives in this one.
   — the danger hue lives only on the toggle inside the open menu. Keyboard-operable
   (focusable, Enter/Space opens, `aria-haspopup`/`aria-expanded`, Esc closes), honors
   `prefers-reduced-motion`. See ADR-0003, ADR-0017, ADR-0019.
-- **Stop dashboard from the UI (aw-028; relocated aw-049)** — a quiet `LaunchButton` living
-  inside the topbar settings menu; selecting it closes the menu before flipping the stopped
-  overlay. Reuses the existing bridge launch path unchanged to run the bare
-  `STOP_DASHBOARD_COMMAND` (`/agentheim:dashboard stop`), so the spawned session runs `/dashboard
-  stop` → `stopDashboard(root)` — the server is **never asked to stop itself**; `server.mjs`
-  stays purely read-only (ADR-0017). **No confirmation step.** Does **not** thread
-  `skipPermissions` (a stop carries no danger hue). `launchOrCopy`'s discriminated return drives
-  the outcome: a bridge launch flips a shell-level "stopped" state, rendering a board-local
-  full-pane **"Dashboard stopped — safe to close this tab"** overlay (composed from tokens, not
-  the `Drawer` primitive); a clipboard fallback shows only the existing "Copied" flash. See
-  ADR-0017, ADR-0018, ADR-0001, ADR-0003.
+- **Stop dashboard from the UI (aw-028; relocated aw-049; reversed to a direct server call by
+  aw-h4n2v / ADR-0053)** — a quiet `StopDashboardButton` living inside the topbar settings menu;
+  selecting it POSTs the scoped **runtime self-lifecycle** endpoint `POST /api/stop` directly —
+  no bridge, no spawned session, no `STOP_DASHBOARD_COMMAND` (retired). The server ends its
+  **own** process and removes its **own** runfile
+  (`.agentheim/.dashboard/runtime.json`) on this explicit builder command; the response is fully
+  flushed before the process exits (`res.on('finish')` gates the cleanup) so the browser's fetch
+  always resolves. This **reverses aw-028's original seam** ("the server is never asked to stop
+  itself") and, because there is no bridge in the path, **removes the bridge-present/absent
+  asymmetry** aw-028 accepted — Stop now works identically in any browser tab. **No confirmation
+  step.** Does **not** thread `skipPermissions` (a stop carries no danger hue). Selecting Stop
+  closes the menu first, then — only on a **truthful 2xx** (not merely on dispatch) — flips a
+  shell-level "stopped" state, rendering a board-local full-pane **"Dashboard stopped — safe to
+  close this tab"** overlay (composed from tokens, not the `Drawer` primitive); a failed/
+  unreachable POST closes the menu quietly with no overlay. `stopDashboard(root)` /
+  `terminate()` and the `/dashboard stop` CLI/skill are **unchanged** — they still own the
+  out-of-process kill path. See ADR-0053, ADR-0017, ADR-0046, ADR-0018, ADR-0001, ADR-0003.
 - **Live-update (SSE consumer)** — the board keeps itself current (agentic-workflow-009) by
   subscribing to `GET /api/events` (infrastructure-003/ADR-0006) via the framework-free
   `createLiveUpdate` (`dashboard/app/live-update.js`). On every `tree-changed` frame or
@@ -476,11 +482,16 @@ separate BC, but today the whole tool lives in this one.
   /api/task/move`, agentic-workflow-009) and its client were **removed**: cards are not drag
   sources, columns are not drop targets. Task-lifecycle transitions are owned entirely by the
   skills, which move files on disk together with the readiness check, gate guard, INDEX
-  update, and protocol entry; the board reflects those moves via live-update. As of **aw-vmk1z
-  / ADR-0046** the HTTP server carries exactly **one** bounded, non-lifecycle exception on top
-  of reads + the SSE stream + static assets: `DELETE /api/whats-next`, which deletes ONLY the
-  advisory `whats-next` artifact (see `WhatsNextPanel` above) — no task, no `INDEX.md`, no
-  `protocol.md` entry is ever touched by it. See ADR-0017, ADR-0007, ADR-0046.
+  update, and protocol entry; the board reflects those moves via live-update. On top of reads +
+  the SSE stream + static assets, the HTTP server carries **two** narrow, non-lifecycle
+  exceptions, each its own named write category (ADR-0053 amends ADR-0017's read-only framing
+  and ADR-0046's earlier "exactly one write" claim to make room for the second): as of
+  **aw-vmk1z / ADR-0046**, `DELETE /api/whats-next` deletes ONLY the advisory `whats-next`
+  artifact (see `WhatsNextPanel` above); as of **aw-h4n2v / ADR-0053**, `POST /api/stop` — a
+  **runtime self-lifecycle** write, sibling to the forbidden lifecycle category and the advisory
+  category — ends the server's own process and removes its own runfile (see *Stop dashboard from
+  the UI* above). Neither touches a task, `INDEX.md`, or `protocol.md`. See ADR-0017, ADR-0007,
+  ADR-0046, ADR-0053.
 - **Slide-over** — the dashboard's right-hand detail panel (agentic-workflow-007): a
   Notion-style drawer for a board **task**. As of **aw-027** it is **task-only** — the
   open-intent SPLITS on artifact kind (see *Open-intent routing*), so non-task documents render

@@ -11,6 +11,12 @@
 // explicit builder dismiss — no client-supplied path, an exact-equality
 // allowlist over the one resolved absolute path (whats-next-delete.mjs). This
 // touches no lifecycle truth and is dispatched before the method gate below.
+//
+// ADR-0053 carves a SECOND, distinct exception — a third write category,
+// RUNTIME SELF-LIFECYCLE — for POST /api/stop: the server ends its own
+// process and removes its own runfile on an explicit builder command from
+// the UI (stop-api.mjs). No client-supplied path (there is none to supply);
+// also dispatched before the method gate below.
 
 import http from 'node:http';
 import path from 'node:path';
@@ -19,6 +25,7 @@ import { serveStatic, serveIndexHtml } from './static.mjs';
 import { handleEvents } from './events.mjs';
 import { handleTree, handleDoc, handleSearch, handleBridge } from './read-api.mjs';
 import { handleWhatsNextDelete } from './whats-next-delete.mjs';
+import { handleStop } from './stop-api.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -44,7 +51,7 @@ export function defaultAssetRoot(_root) {
  *   sse       — options forwarded to the SSE handler (heartbeatMs, debounceMs,
  *               pollMs); see events.mjs / watcher.mjs.
  */
-export function createDashboardServer({ root, assetRoot = defaultAssetRoot(root), sse = {} }) {
+export function createDashboardServer({ root, assetRoot = defaultAssetRoot(root), sse = {}, stop = {} }) {
   return http.createServer((req, res) => {
     const pathname = (req.url || '/').split('?')[0];
 
@@ -71,6 +78,17 @@ export function createDashboardServer({ root, assetRoot = defaultAssetRoot(root)
     // method (including any other method on this same route) unchanged.
     if (pathname === '/api/whats-next' && req.method === 'DELETE') {
       handleWhatsNextDelete(req, res, root);
+      return;
+    }
+
+    // The one scoped RUNTIME SELF-LIFECYCLE write (ADR-0053): ends this
+    // server process and removes its own runfile on an explicit builder
+    // command. No request body, no client-supplied path (stop-api.mjs).
+    // Dispatched before the method gate below, same as the two routes
+    // above, so the gate still rejects every OTHER non-GET method
+    // (including any other method on this same route) unchanged.
+    if (pathname === '/api/stop' && req.method === 'POST') {
+      handleStop(req, res, root, stop);
       return;
     }
 

@@ -85,18 +85,6 @@ export const WORK_COMMAND = '/agentheim:work';
 // fallback; the extension wraps a slash command the same way it wraps any prompt).
 export const WHATS_NEXT_COMMAND = '/agentheim:whats-next';
 
-// The fully-qualified, bare DASHBOARD-STOP command (agentic-workflow-028) — what the
-// main-column topbar's quiet "Stop dashboard" button launches to stop the running
-// dashboard server FROM the UI it is already looking at. It REUSES the existing bridge
-// launch path (launchOrCopy): the spawned session runs `/dashboard stop` →
-// stopDashboard(root) (kill pid + remove runfile, aw-011), so the dashboard server is
-// never asked to stop itself — server.mjs stays purely read-only (ADR-0017; the seam
-// decision is bridge-reuse, not a new self-stop endpoint). Like WORK_COMMAND it IGNORES
-// the prompt-bar textarea, so it is a plain constant rather than a `*CommandFor(prompt)`
-// builder. Bare and fully-qualified for the same reason the others are — it resolves
-// regardless of the builder's alias setup (ADR-0018 launch / clipboard fallback).
-export const STOP_DASHBOARD_COMMAND = '/agentheim:dashboard stop';
-
 /**
  * Trim an id-like value to a safe suffix, or '' for anything that is not a real
  * id. Shared by the explicit-verb card builders so each degrades identically: a

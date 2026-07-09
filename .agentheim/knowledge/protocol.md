@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 15:24 -- Task verified and completed: agentic-workflow-h4n2v - Stop dashboard menu item calls the stop script, not the slash command
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-h4n2v - Stop dashboard menu item calls the stop script, not the slash command
+**Summary:** Stop dashboard menu item POSTs a scoped /api/stop endpoint directly instead of spawning a bridge session
+**Duration:** 19m
+**Verification:** PASS (iteration 1)
+**Files changed:** 13
+**Tests added:** 6
+**ADRs written:** 0053-runtime-self-lifecycle-dashboard-stop-endpoint.md
+
+---
+
 ## 2026-07-09 15:01 -- Batch started: [agentic-workflow-h4n2v, design-system-tfhn6]
 
 **Type:** Work / Batch start

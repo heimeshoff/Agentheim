@@ -23,8 +23,10 @@
 //
 // The three relocated controls keep their existing implementations + persistence AS-IS
 // (relocation, not rewrite): ThemeToggle (theme-state.js), SkipPermissionsToggle
-// (--obligation armed treatment, skip-permissions-state.js), the Stop dashboard launch
-// (STOP_DASHBOARD_COMMAND via launchOrCopy) + the post-stop StoppedOverlay.
+// (--obligation armed treatment, skip-permissions-state.js). Stop dashboard is the one
+// exception — agentic-workflow-h4n2v / ADR-0053 reverses aw-028's bridge-reuse seam to a
+// direct `POST /api/stop` call, retiring STOP_DASHBOARD_COMMAND — but the RELOCATION
+// (living inside the settings menu) and the post-stop StoppedOverlay stay as-is.
 //
 // The board's React glue has no DOM render harness in this project — the established
 // idiom (aw-016/020/022/023/024/026/028) is source-reading static guards. This suite
@@ -86,18 +88,18 @@ test('the three utility controls live ONLY inside the menu — not inline in the
   // The menu hosts exactly the three relocated controls.
   assert.match(menu, /<\$\{ThemeToggle\}/, 'the menu must host the theme toggle');
   assert.match(menu, /<\$\{SkipPermissionsToggle\}/, 'the menu must host the skip-permissions toggle');
-  assert.match(menu, /label="Stop dashboard"/, 'the menu must host the Stop dashboard launch');
+  assert.match(menu, /<\$\{StopDashboardButton\}/, 'the menu must host the Stop dashboard control');
   // None of the three is rendered directly by the topbar any more (they moved into the menu).
   assert.doesNotMatch(top, /<\$\{ThemeToggle\}/, 'the theme toggle must NOT render inline in the topbar');
   assert.doesNotMatch(top, /<\$\{SkipPermissionsToggle\}/, 'the skip-permissions toggle must NOT render inline in the topbar');
-  assert.doesNotMatch(top, /label="Stop dashboard"/, 'the Stop dashboard control must NOT render inline in the topbar');
+  assert.doesNotMatch(top, /<\$\{StopDashboardButton\}/, 'the Stop dashboard control must NOT render inline in the topbar');
 });
 
 test('the menu contains EXACTLY the three relocated controls (no more, no less)', () => {
   const menu = fn('SettingsMenu');
   assert.equal((menu.match(/<\$\{ThemeToggle\}/g) || []).length, 1, 'exactly one theme toggle in the menu');
   assert.equal((menu.match(/<\$\{SkipPermissionsToggle\}/g) || []).length, 1, 'exactly one skip-permissions toggle in the menu');
-  assert.equal((menu.match(/label="Stop dashboard"/g) || []).length, 1, 'exactly one Stop dashboard control in the menu');
+  assert.equal((menu.match(/<\$\{StopDashboardButton\}/g) || []).length, 1, 'exactly one Stop dashboard control in the menu');
 });
 
 test('the relocated controls keep their behavior + persistence (relocation, not rewrite)', () => {
@@ -106,11 +108,11 @@ test('the relocated controls keep their behavior + persistence (relocation, not 
   assert.match(menu, /<\$\{ThemeToggle\}[\s\S]*?value=\$\{theme\}/, 'the theme toggle keeps its value/onChange threading');
   // Skip-permissions toggle keeps its armed/onToggle threading (skip-permissions-state.js persistence).
   assert.match(menu, /<\$\{SkipPermissionsToggle\}[\s\S]*?armed=\$\{skipPermissions\}/, 'the skip-permissions toggle keeps its armed threading');
-  // Stop dashboard keeps the launchOrCopy bridge path (STOP_DASHBOARD_COMMAND) + onResult wiring.
-  const stop = menu.match(/label="Stop dashboard"[\s\S]{0,400}?\/>/);
-  assert.ok(stop, 'the Stop dashboard launch must be present in the menu');
-  assert.match(stop[0], /command=\$\{STOP_DASHBOARD_COMMAND\}/, 'Stop must seed STOP_DASHBOARD_COMMAND');
-  assert.match(stop[0], /onResult=/, 'Stop must pass onResult (drives the post-stop overlay)');
+  // Stop dashboard is the ONE exception (aw-h4n2v / ADR-0053): no more command/onResult —
+  // it POSTs /api/stop directly via onStopClick.
+  const stop = menu.match(/<\$\{StopDashboardButton\}[\s\S]{0,80}?\/>/);
+  assert.ok(stop, 'the Stop dashboard control must be present in the menu');
+  assert.match(stop[0], /onClick=\$\{onStopClick\}/, 'Stop must be wired to the onStopClick handler (POST /api/stop)');
 });
 
 test('the skip-permissions toggle still wears its --obligation armed treatment inside the menu', () => {
@@ -155,7 +157,7 @@ test('the menu dismisses on Esc and on outside click; toggles keep it open (deci
   assert.doesNotMatch(menu, /addEventListener\("mousedown"/, 'the board must NOT wire its own outside-click listener (the primitive owns it)');
   assert.doesNotMatch(menu, /"Escape"/, 'the board must NOT match the Escape key itself (the primitive owns Esc dismissal)');
   // Selecting Stop dashboard closes the menu (the board drives it controlled).
-  const stop = menu.match(/label="Stop dashboard"[\s\S]{0,400}?\/>/);
+  const stop = menu.match(/<\$\{StopDashboardButton\}[\s\S]{0,80}?\/>/);
   assert.ok(stop, 'the Stop control must be present');
 });
 

@@ -52,7 +52,7 @@ import { COLUMN_ORDER, treeToColumns } from "./board-data.js";
 import { resolveTheme, saveTheme } from "./theme-state.js";
 import { loadSkipPermissions, saveSkipPermissions } from "./skip-permissions-state.js";
 import { SORT_OPTIONS, DEFAULT_SORT, sortTickets } from "./board-sort.js";
-import { refineCommandFor, promoteCommandFor, dismissCommandFor, WORK_COMMAND, WHATS_NEXT_COMMAND, STOP_DASHBOARD_COMMAND } from "./modeling-command.js";
+import { refineCommandFor, promoteCommandFor, dismissCommandFor, WORK_COMMAND, WHATS_NEXT_COMMAND } from "./modeling-command.js";
 import { PROMPT_MODES, DEFAULT_PROMPT_MODE_INDEX, clampPromptModeIndex, nextPromptModeIndex, promptBarKeyIntent, PROMPT_KEY_INTENT } from "./prompt-mode.js";
 import { launchOrCopy } from "./bridge-launch.js";
 import { groupTickets } from "./board-group.js";
@@ -1863,6 +1863,38 @@ function SkipPermissionsToggle({ armed, onToggle }) {
     </button>`;
 }
 
+// The settings-menu STOP DASHBOARD control (agentic-workflow-h4n2v, ADR-0053 —
+// superseding aw-028's bridge-reuse seam). Purely presentational: it renders the
+// quiet button chrome (mirroring LaunchButton's `emphasis="quiet"` idle look) and
+// fires `onClick` — SettingsMenu owns the POST /api/stop call + the close-menu/
+// flip-overlay sequencing (see SettingsMenu below). Unlike the old bridge-launch
+// button this has no `command`, no launchOrCopy, no bridge/clipboard branching —
+// POST /api/stop works identically in any browser tab, bridge present or not,
+// which is the whole point of the reversal: the bridge-present/absent asymmetry
+// aw-028 accepted for Stop is gone. No armed/danger cue (a stop carries no
+// skip-permissions risk, unchanged from aw-028).
+function StopDashboardButton({ onClick }) {
+  return html`
+    <button
+      type="button"
+      className="focusable"
+      title="Stop dashboard — ends this server; safe to close the tab afterward"
+      aria-label="Stop dashboard"
+      onClick=${onClick}
+      style=${{
+        display: "inline-flex", alignItems: "center", gap: 5,
+        fontFamily: "var(--font-ui)", fontSize: 11.5, fontWeight: 500,
+        color: "var(--fg-3)", background: "transparent", border: "1px solid transparent",
+        borderRadius: "var(--radius-sm)", padding: "4px 9px", cursor: "pointer",
+        transition: "color var(--duration-fast) var(--ease-base), background var(--duration-fast) var(--ease-base)",
+      }}
+      onMouseEnter=${(e) => { e.currentTarget.style.background = "var(--surface-2)"; e.currentTarget.style.color = "var(--fg-1)"; }}
+      onMouseLeave=${(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--fg-3)"; }}>
+      <${Icon} name="x" size=${12.5} color="var(--fg-3)" />
+      <span>Stop dashboard</span>
+    </button>`;
+}
+
 // ── Workflow diagram primitives (agentic-workflow-060) ──────────────────────
 // Board-local helpers (NOT a design-system primitive — single consumer, content-
 // bound shapes; the seam test failed at refinement). The hand-authored flow visuals
@@ -2733,14 +2765,17 @@ function ShellRail({ projectName, selectedId, onOpen, onSelectBoard, mainView, o
     </nav>`;
 }
 
-// The post-stop "Dashboard stopped" overlay (agentic-workflow-028). A board-local,
-// token-matched full-pane cover over the MAIN CONTENT AREA (absolutely filling the
-// relatively-positioned content wrapper) — NOT a styleguide primitive: there is no
-// full-screen modal in the styleguide and the Drawer is a side panel, so this is
-// composed from existing tokens (ADR-0003, consumed unforked). It is the honest end
-// state: the page is now talking to a server that is shutting down, so the board below
-// is covered and the only message is that it is safe to close the tab. Rendered ONLY on
-// a bridge dispatch (the clipboard fallback stopped nothing and never mounts this).
+// The post-stop "Dashboard stopped" overlay (agentic-workflow-028, truthful-on-2xx
+// as of agentic-workflow-h4n2v / ADR-0053). A board-local, token-matched full-pane
+// cover over the MAIN CONTENT AREA (absolutely filling the relatively-positioned
+// content wrapper) — NOT a styleguide primitive: there is no full-screen modal in
+// the styleguide and the Drawer is a side panel, so this is composed from existing
+// tokens (ADR-0003, consumed unforked). It is the honest end state: the page is now
+// talking to a server that is shutting down, so the board below is covered and the
+// only message is that it is safe to close the tab. Rendered on a 2xx from
+// POST /api/stop — no bridge involved any more, so it renders identically in ANY
+// browser tab, with or without the bridge (the aw-028 bridge-present/absent
+// asymmetry for Stop is gone).
 function StoppedOverlay() {
   return html`
     <div
@@ -2765,9 +2800,10 @@ function StoppedOverlay() {
 
 // The topbar SETTINGS MENU (agentic-workflow-049, retired into the shared
 // Menu/Popover primitive by design-system-015). Collapses the three utility
-// controls — Stop dashboard (aw-028), the theme toggle (aw-017) and the
-// skip-permissions armed toggle (aw-021) — behind a single settings GEAR. Only the
-// Work launch stays a standing topbar button; the gear sits immediately to its left.
+// controls — Stop dashboard (aw-028, reversed to a direct server call by
+// aw-h4n2v / ADR-0053), the theme toggle (aw-017) and the skip-permissions armed
+// toggle (aw-021) — behind a single settings GEAR. Only the Work launch stays a
+// standing topbar button; the gear sits immediately to its left.
 //
 // PRIMITIVE (ds-015): the board no longer carries its own popover machinery. The
 // anchored floating panel at --shadow-md, dismissal on Esc / outside-click, the
@@ -2781,9 +2817,13 @@ function StoppedOverlay() {
 //
 // The three relocated controls keep their behavior + persistence AS-IS: ThemeToggle
 // still feeds theme-state.js, SkipPermissionsToggle still wears its --obligation
-// armed/danger treatment + skip-permissions-state.js persistence, and Stop dashboard
-// still runs STOP_DASHBOARD_COMMAND via launchOrCopy with its post-stop
-// StoppedOverlay onResult.
+// armed/danger treatment + skip-permissions-state.js persistence. Stop dashboard is
+// the one EXCEPTION to "as-is" — aw-h4n2v reverses aw-028's bridge-reuse seam
+// (superseded): it now POSTs the scoped runtime self-lifecycle endpoint
+// POST /api/stop (ADR-0053, amending ADR-0017/ADR-0046) directly, no spawned
+// session, no bridge/clipboard branching — a click stops the dashboard in ANY
+// browser tab, and the post-stop StoppedOverlay flips truthfully on the 2xx
+// response rather than optimistically on bridge dispatch.
 //
 // DECISION 3 (preserved) — the CLOSED gear carries NO armed cue: it stays neutral
 // even when skip-permissions is armed. The --obligation danger hue lives ONLY on the
@@ -2799,16 +2839,26 @@ function StoppedOverlay() {
 // the shared primitive, which also honors prefers-reduced-motion on its reveal.
 function SettingsMenu({ theme, setTheme, skipPermissions = false, setSkipPermissions, onStopped }) {
   // The board drives the Menu CONTROLLED (it owns the open truth) so it can close the
-  // popover programmatically when Stop dashboard fires on the bridge. Esc / outside-
-  // click dismissal still come from the primitive via onOpenChange.
+  // popover programmatically when Stop dashboard succeeds. Esc / outside-click
+  // dismissal still come from the primitive via onOpenChange.
   const [open, setOpen] = useState(false);
 
-  // Selecting Stop dashboard closes the menu, THEN flips the shell-stopped overlay on a
-  // bridge dispatch (a clipboard fallback stopped nothing → no overlay). Closing first
-  // keeps the popover from lingering over the overlay that replaces the board.
-  const onStopResult = useCallback((res) => {
-    setOpen(false);
-    if (res && res.via === "bridge" && typeof onStopped === "function") onStopped();
+  // Selecting Stop dashboard POSTs /api/stop directly (ADR-0053 — no bridge, no
+  // spawned session), closes the menu, THEN flips the shell-stopped overlay ONLY on
+  // a truthful 2xx (a failed/unreachable POST stopped nothing → no overlay). Closing
+  // first keeps the popover from lingering over the overlay that replaces the board.
+  const onStopClick = useCallback(() => {
+    const fetchImpl = typeof window !== "undefined" && typeof window.fetch === "function"
+      ? window.fetch.bind(window)
+      : undefined;
+    if (!fetchImpl) { setOpen(false); return; }
+    fetchImpl("/api/stop", { method: "POST" }).then(
+      (res) => {
+        setOpen(false);
+        if (res && res.ok && typeof onStopped === "function") onStopped();
+      },
+      () => { setOpen(false); }, // network error / server already gone: close quietly, no overlay lie.
+    );
   }, [onStopped]);
 
   // The shared Menu panel has symmetric padding, but each MenuItem is a left-aligned
@@ -2860,11 +2910,10 @@ function SettingsMenu({ theme, setTheme, skipPermissions = false, setSkipPermiss
         <${SkipPermissionsToggle} armed=${skipPermissions} onToggle=${setSkipPermissions} />
       </${MenuItem}>
       <${MenuDivider} />
-      <!-- Stop dashboard — selecting it CLOSES the menu (controlled), then shows the
-           stopped overlay on a bridge dispatch. -->
+      <!-- Stop dashboard (ADR-0053) — POSTs /api/stop directly; selecting it CLOSES
+           the menu (controlled), then shows the stopped overlay on a truthful 2xx. -->
       <${MenuItem} style=${centeredItem}>
-        <${LaunchButton} label="Stop dashboard" command=${STOP_DASHBOARD_COMMAND}
-          icon="x" emphasis="quiet" onResult=${onStopResult} />
+        <${StopDashboardButton} onClick=${onStopClick} />
       </${MenuItem}>
     </${Menu}>`;
 }
@@ -3221,16 +3270,18 @@ export function DashboardApp() {
     setOpenIntent(null);         // and close the slide-over
   }, [openIntent]);
 
-  // The shell-level "stopped" state (aw-028). The topbar's quiet Stop dashboard launch
-  // calls onStopped ONLY when launchOrCopy returned `via: "bridge"` — i.e. POST /run
-  // dispatched the `/agentheim:dashboard stop` session, so the server this page talks to
-  // is shutting down. We then render a full-pane "Dashboard stopped — safe to close this
-  // tab" overlay over the main content area. It is OPTIMISTIC on dispatch (the spawned
-  // session still has to run `/dashboard stop`); the SSE stream dropping a moment later
-  // (live-update already tracks connection state) naturally corroborates it. A clipboard
-  // fallback stopped nothing, so it never reaches here — no overlay, just the button's
-  // own quiet "Copied" flash. The overlay is board-local and token-matched (ADR-0003);
-  // there is no full-screen modal primitive and the Drawer is a side panel, not used here.
+  // The shell-level "stopped" state (aw-028, reversed to a direct server call by
+  // aw-h4n2v / ADR-0053). The topbar's quiet Stop dashboard control calls onStopped
+  // ONLY when POST /api/stop resolved 2xx — the server this page talks to has ended
+  // its own process (runtime self-lifecycle write, ADR-0053) and removed its own
+  // runfile. We then render a full-pane "Dashboard stopped — safe to close this tab"
+  // overlay over the main content area. This is TRUTHFUL-ON-2xx, not optimistic: the
+  // request/response round-trip IS the confirmation, no bridge dispatch to trust. A
+  // failed/unreachable POST stopped nothing, so it never reaches here — no overlay,
+  // menu just closes quietly. The overlay is board-local and token-matched
+  // (ADR-0003); there is no full-screen modal primitive and the Drawer is a side
+  // panel, not used here. It also now renders identically with NO bridge present
+  // (the aw-028 bridge-present/absent asymmetry for Stop is gone).
   const [stopped, setStopped] = useState(false);
   const onStopped = useCallback(() => setStopped(true), []);
 
