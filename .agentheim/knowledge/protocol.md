@@ -5,6 +5,18 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 18:16 -- Release shipped: v0.9.0
+
+**Type:** Release
+**Version:** 0.8.10 → 0.9.0 (minor — the Command-deck redesign: retokenized palette, docked keyboard-driven prompt console, board-wide View lens; plus the `agentheim:` agent-spawn namespacing that fixes Agentheim when installed as a plugin)
+**Manifest:** `.claude-plugin/plugin.json` bumped, committed `78d2578`
+**Changelog:** `CHANGELOG.md` `[Unreleased]` → `[0.9.0]` section rolled (same commit)
+**Pushed to main:** yes (`9c6388a..78d2578` on `origin/main`)
+**Tag:** `v0.9.0` (annotated) → `78d2578`, pushed to origin
+**GitHub Release:** created via `gh` (from CHANGELOG) — https://github.com/heimeshoff/Agentheim/releases/tag/v0.9.0
+
+---
+
 ## 2026-07-09 18:02 -- Work session ended
 
 **Type:** Work / Session end
