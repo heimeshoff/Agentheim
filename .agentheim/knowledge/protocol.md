@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 14:56 -- Modeling / Promoted: design-system-tfhn6 - EnterButton gains a disabled state
+
+**Type:** Modeling / Promote
+**BC:** design-system
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-09 -- Modeling / Refined: agentic-workflow-m3vhq - Prompt bar — add a "Plain" mode that runs the prompt directly on Claude
 
 **Type:** Modeling / Refine

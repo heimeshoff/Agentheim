@@ -1,7 +1,7 @@
 ---
 id: design-system-tfhn6
 title: EnterButton gains a disabled state
-status: backlog
+status: todo
 type: feature
 context: design-system
 created: 2026-07-09
