@@ -567,17 +567,38 @@ have just grown one or more BCs' done-lists.
    ```
    node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','index-rotation.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','index-rotation.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no index-rotation script found under '+c+' (is the plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>m.main(process.argv.slice(1))).catch(e=>{console.error(e.message);process.exit(1)});"
    ```
-   This prints one manifest `{ok:true, rotated, changed:[paths], contexts:{<bc>:{ok, rotated,
-   changed, rolledMonths, liveEntries}, ...}}` on stdout and exits 0 (or a structured `{ok:false,
-   ...}` on some unexpected error — treat a non-zero exit / `ok:false` as a soft failure: change
-   nothing, mention it in the end-of-run summary, and never let it block or fail the session). Note
-   the shape differs from the protocol check's manifest: the top-level `rotated`/`changed` are
-   aggregated across every BC, and each BC's own `rolledMonths` lives under `contexts[<bc>]`, not at
-   the top level.
-2. **`rotated: false`** (the common case — every BC's live done-list is still under the ~30-entry
-   cap) → nothing to do: no commit, no protocol entry. Silent no-op is correct — this check is meant
-   to be invisible on every session that doesn't need it.
-3. **`rotated: true`** → `git add` exactly the top-level manifest's `changed` paths (every rewritten
+   This prints one manifest `{ok:true, rotated, changed:[paths], contexts:{<bc>:{...}, ...}}` on
+   stdout and exits 0 (or a structured `{ok:false, ...}` on some unexpected top-level error — e.g. no
+   project root found — treat THAT as a soft failure: change nothing, mention it in the end-of-run
+   summary, and never let it block or fail the session). Note the shape differs from the protocol
+   check's manifest: the top-level `rotated`/`changed` are aggregated across every BC, and each BC's
+   own result lives under `contexts[<bc>]`, not at the top level. A per-BC entry under `contexts` is
+   one of three shapes (agentic-workflow-dk3vz, fail-closed on an unparseable done-list):
+   - `{ok:true, rotated:true, changed, rolledMonths, liveEntries}` — that BC actually rotated.
+   - `{ok:true, rotated:false, changed:[], rolledMonths:[], liveEntries, unmatched?}` — the common
+     case, that BC had nothing to roll; `unmatched` is present and `> 0` only when the BC's done-list
+     has non-blank lines that didn't match the expected entry shape but weren't destructive to skip
+     (under cap, or over cap with no month actually rollable) — reported, not fatal, nothing written.
+   - `{ok:false, code, context, reason}` — that BC REFUSED: either its done-list is unparseable (zero
+     lines matched, or a pending rewrite would have silently dropped unmatched lines) or its
+     `INDEX.md` is missing the done-list markers entirely. That BC writes nothing. **This never flips
+     the top-level `ok` or the exit code** — the top-level manifest stays `{ok:true, ...}` and `runCli`
+     still exits `0` even when one or more BCs refuse, precisely so a refusal can't strand a healthy
+     BC's rotation behind step 1's "treat a non-zero exit as a soft failure: change nothing" branch.
+     Top-level `changed` only ever lists the healthy (actually-rotated) BCs' paths.
+2. **`rotated: false` AND no BC refused AND no BC reported `unmatched > 0`** (the fully-quiet common
+   case) → nothing to do: no commit, no protocol entry. Silent no-op is correct here — this check is
+   meant to be invisible on every session that doesn't need it. (Narrowed from the unqualified
+   `rotated: false` ⇒ no-op rule the protocol check uses: a healthy-looking `rotated:false` can still
+   be hiding a per-BC refusal or an unmatched-line report, both of which step 3 must surface.)
+3. **Surface every refusal and every unmatched-line report, regardless of the `rotated` branch.**
+   Iterate `contexts`: for each BC with `ok === false`, add a line to the end-of-run summary naming
+   the BC, its `code`, and its `reason`; for each BC with `unmatched > 0` (whether or not it rotated),
+   add a line naming the BC and the count. A refusal or a report **never blocks the session and never
+   prevents committing the healthy BCs' `changed` paths** in step 4 below — it is visibility only, so
+   a human learns about a malformed done-list before it either silently stops rotating (a refusal) or
+   quietly loses a line (the destructive case the refusal itself exists to prevent).
+4. **`rotated: true`** → `git add` exactly the top-level manifest's `changed` paths (every rewritten
    `INDEX.md` plus every new/appended `contexts/<bc>/done-archive/YYYY-MM.md` file it lists) — never
    `git add -A` / `git add .` (`references/commit-doctrine.md`) — and commit as its **own scoped
    commit**, separate from both step 7's session-end-entry commit and step 8's protocol-rotation
@@ -586,10 +607,12 @@ have just grown one or more BCs' done-lists.
    `rolledMonths` from `contexts[<bc>].rolledMonths`, comma-joined when a BC rolled more than one
    month), the segments themselves comma-joined when more than one BC rotated (or `chore: rotate
    INDEX done-list — ...` if the session completed no task, mirroring step 7's and step 8's fallback
-   trailer convention).
-4. **No protocol log entry for the rotation itself.** Same reasoning as the protocol check: this is
-   infrastructure housekeeping, not a project event worth a diary line. The commit message and the
-   archive files themselves are the audit trail.
+   trailer convention). This commit fires independently of whether any BC refused in step 3 — a
+   refusal only ever removes that ONE BC's paths from `changed`, never the whole step.
+5. **No protocol log entry for the rotation itself** (refusals/reports included). Same reasoning as
+   the protocol check: this is infrastructure housekeeping, not a project event worth a diary line.
+   The commit message and the archive files themselves are the audit trail; the end-of-run summary
+   (step 3) is where a refusal or report actually surfaces to the human.
 
 ## Do not model in work
 

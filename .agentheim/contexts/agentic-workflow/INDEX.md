@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 2
-- **Done:** 135
+- **Doing:** 1
+- **Done:** 136
 <!-- task-counts:end -->
 
 ### Todo
@@ -23,11 +23,11 @@ research touching this BC, and concept synthesis pages.
 ### Doing
 <!-- doing-list:start -->
 - **agentic-workflow-wq7fn** — Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move (bug) — `doing/agentic-workflow-wq7fn-precheck-misses-count-lines.md`
-- **agentic-workflow-dk3vz** — rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0} (bug) — `doing/agentic-workflow-dk3vz-rotation-unparseable-done-list-silent-zero.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-dk3vz** — rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0} (bug) — `done/agentic-workflow-dk3vz-rotation-unparseable-done-list-silent-zero.md`
 - **agentic-workflow-aqyqd** — Every prompt-bar mode requires a prompt — the decline-to-launch rule generalizes from Plain to all five (feature) — `done/agentic-workflow-aqyqd-prompt-required-for-every-mode.md`
 - **agentic-workflow-m3vhq** — Prompt bar — add a "Plain" mode that runs the prompt directly on Claude (feature) — `done/agentic-workflow-m3vhq-prompt-bar-plain-mode.md`
 - **agentic-workflow-h4n2v** — Stop dashboard menu item calls the stop script, not the slash command (feature) — `done/agentic-workflow-h4n2v-stop-dashboard-calls-stop-script-not-command.md`

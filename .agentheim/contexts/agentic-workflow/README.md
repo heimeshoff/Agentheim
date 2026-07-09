@@ -676,8 +676,20 @@ separate BC, but today the whole tool lives in this one.
   `changed` paths, closing ADR-0045's previously-deferred sibling-surface scope boundary. First
   real run against this repo (2026-07-04) rolled `agentic-workflow`'s 2026-06 done-list entries to
   `contexts/agentic-workflow/done-archive/2026-06.md`; `design-system` and `infrastructure` were
-  already under cap and did not rotate. See ADR-0039, ADR-0041, ADR-0023, ADR-0038, ADR-0026,
-  ADR-0045, ADR-0047.
+  already under cap and did not rotate. **Fail-closed on an unparseable done-list (ADR-0047
+  amendment, agentic-workflow-dk3vz):** a BC's per-BC result is one of three shapes, not two — beside
+  `rotated:true`/`rotated:false`, a BC can REFUSE (`{ok:false, code:'unparseable-done-list' |
+  'missing-done-list-markers', context, reason}`, writing nothing) whenever the cap question is
+  unanswerable (zero done-list lines matched the expected shape) or a pending rewrite would silently
+  drop unmatched lines; a partially-parseable list that isn't destructive to skip instead reports
+  `{ok:true, rotated:false, liveEntries, unmatched:K}` (`K > 0`), visible but not fatal.
+  `rotateAllIndexDoneLists` catches a per-BC throw (missing markers) rather than letting it escape and
+  strand an already-rotated, alphabetically-earlier BC's manifest; the top-level manifest always stays
+  `{ok:true, ...}` with a refusing BC simply absent from top-level `changed`. `work`'s session-end
+  check surfaces every refusal and every unmatched report in its end-of-run summary; its old
+  unqualified "`rotated:false` ⇒ silent no-op" rule is narrowed to apply only when no BC refused and
+  none reported unmatched lines. See ADR-0039, ADR-0041, ADR-0023, ADR-0038, ADR-0026, ADR-0045,
+  ADR-0047.
 - **`findDuplicateTaskIds`** — the duplicate-id guard (`lib/duplicate-id-check.mjs`, BC-owned,
   node stdlib only), the ADR-0028 **insurance** against the residual token-collision tail and
   the legacy-vs-token clash a bug could produce. A pure, loss-tolerant whole-tree walk collects

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 19:14 -- Task verified and completed: agentic-workflow-dk3vz - rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0}
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-dk3vz - rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0}
+**Summary:** Made lib/index-rotation.mjs fail-closed on an unparseable INDEX done-list - a BC now refuses (writes nothing) instead of silently reporting liveEntries:0 or dropping unmatched lines on rewrite, and a missing-markers throw in one BC no longer strands an already-rotated healthy BC
+**Duration:** 7m27s
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 6
+**ADRs written:** 0047 (amended in place)
+
+---
+
 ## 2026-07-09 18:57 -- Batch started: [agentic-workflow-dk3vz, agentic-workflow-wq7fn]
 
 **Type:** Work / Batch start

@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-dk3vz
 title: rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0}
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-09
-completed:
+completed: 2026-07-09
 depends_on: []
 blocks: []
 tags: [index, rotation, cap-and-roll, bookkeeping, silent-failure, fail-closed]
@@ -105,36 +105,74 @@ order. Refusing is the simpler and more honest contract, and matches ADR-0038's 
 
 ## Acceptance criteria
 
-- [ ] A done-list block with non-blank lines and zero `ENTRY_LINE` matches no longer yields a bare
+- [x] A done-list block with non-blank lines and zero `ENTRY_LINE` matches no longer yields a bare
       `{ok:true, rotated:false, liveEntries:0}`. That BC returns `{ok:false,
       code:'unparseable-done-list', context, reason}` naming the BC, and writes nothing.
-- [ ] A partially parseable done-list **over cap** loses no line: that BC refuses with the same
+- [x] A partially parseable done-list **over cap** loses no line: that BC refuses with the same
       `unparseable-done-list` code and writes nothing — no `INDEX.md` rewrite, no archive file. A
       test pins that the unmatched line is still present in `INDEX.md` afterwards.
-- [ ] A partially parseable done-list **under cap** returns `{ok:true, rotated:false, liveEntries:N,
+- [x] A partially parseable done-list **under cap** returns `{ok:true, rotated:false, liveEntries:N,
       unmatched:K}` with `K > 0` — reported, not fatal, nothing written.
-- [ ] `rotateAllIndexDoneLists` no longer propagates a per-BC throw: a BC with missing done-list
+- [x] `rotateAllIndexDoneLists` no longer propagates a per-BC throw: a BC with missing done-list
       markers yields `contexts[<bc>] = {ok:false, code:'missing-done-list-markers', ...}` while every
       other BC still rotates normally. A test pins that a *healthy* BC sorted **before** a
       marker-less one still rotates, still appears in top-level `changed`, and its files are on disk
       — the stranding scenario from face 3.
-- [ ] The top-level manifest stays `{ok:true, ...}` and `runCli` still exits `0` when one or more
+- [x] The top-level manifest stays `{ok:true, ...}` and `runCli` still exits `0` when one or more
       BCs refuse; top-level `changed` contains only the healthy BCs' paths. A test pins the exit
       code, because a non-zero exit is what re-triggers `work`'s "change nothing" branch.
-- [ ] `parseDoneListEntries`' existing signature and its two existing tests are unchanged (it still
+- [x] `parseDoneListEntries`' existing signature and its two existing tests are unchanged (it still
       returns an entry array, and still throws on missing markers). Counting unmatched/non-blank
       lines is additive.
-- [ ] `skills/work/SKILL.md`'s "INDEX done-list rotation check" documents how the new signal is
+- [x] `skills/work/SKILL.md`'s "INDEX done-list rotation check" documents how the new signal is
       handled: after the `rotated` branches, iterate `contexts` and surface, in the end-of-run
       summary, every BC with `ok === false` (naming BC + `code` + `reason`) and every BC with
       `unmatched > 0`. Explicitly: a refusal never blocks the session and never prevents committing
       the healthy BCs' `changed` paths. Step 2's "silent no-op is correct" is narrowed so it applies
       only when no BC refused and no BC reported unmatched lines.
-- [ ] ADR-0047 gains an in-place `## Amendment` recording the third manifest branch (per-BC refusal)
+- [x] ADR-0047 gains an in-place `## Amendment` recording the third manifest branch (per-BC refusal)
       and the narrowed no-op — its "Mechanics" section names the old two-branch shape verbatim. Use
       the in-place-amendment precedent ADR-0050 set (`p8k4d` / `m3vhq`), **not** a new ADR; the
       decision here refines a stated rule rather than establishing a new one.
-- [ ] Existing suite (`node --test lib/test/*.test.mjs`) stays green.
+- [x] Existing suite (`node --test lib/test/*.test.mjs`) stays green.
+
+## Outcome
+
+`lib/index-rotation.mjs` now distinguishes "empty" from "unparseable" and refuses (writes nothing)
+whenever the answer would be wrong or a pending rewrite would be destructive, per the decided
+contract. A new `parseDoneList(content) → {entries, unmatched, nonBlank}` sits underneath the
+unchanged `parseDoneListEntries` (now a thin wrapper — both its pre-existing tests untouched).
+`rotateIndexDoneList` refuses with `{ok:false, code:'unparseable-done-list', context, reason}` when
+zero lines match (face 1) or a firing rotation would drop unmatched lines (face 2, checked via a
+pure dry-run bucket-walk BEFORE any archive file or INDEX.md rewrite is written); a
+partially-parseable list that isn't destructive to skip instead reports
+`{ok:true, rotated:false, liveEntries, unmatched:K}`. `rotateAllIndexDoneLists` now catches a
+per-BC throw (missing done-list markers, face 3) and converts it to
+`{ok:false, code:'missing-done-list-markers', context, reason}` under `contexts[<bc>]`, so a
+marker-less BC sorted after an already-rotated healthy BC no longer strands that healthy BC's
+manifest — the top-level manifest always stays `{ok:true, ...}` and `runCli` always exits `0`;
+`changed` lists only the healthy BCs' paths.
+
+`skills/work/SKILL.md`'s "INDEX done-list rotation check" gained a new step that iterates
+`contexts` and surfaces every refusal (BC + code + reason) and every unmatched report (BC + count)
+in the end-of-run summary, and its old unqualified "`rotated:false` ⇒ silent no-op" rule is narrowed
+to apply only when no BC refused and none reported unmatched lines — a refusal or report never
+blocks the session or prevents committing the healthy BCs' `changed` paths.
+
+ADR-0047 gained an in-place `## Amendment` (the ADR-0050 precedent's shape) recording the third
+manifest branch and the narrowed no-op; no new ADR was written. The BC README's `rotateIndexDoneList`
+entry was updated with a short paragraph describing the fail-closed behavior.
+
+Added 6 new tests to `lib/test/index-rotation.test.mjs` (23 total in that file, up from 17): a
+`parseDoneList` counting test, face 1 (zero matches refuses), face 2 (over-cap partial-parse
+refuses, unmatched line pinned present afterward), the under-cap partial-parse report, face 3 (a
+healthy alphabetically-earlier BC isn't stranded by a marker-less later BC), and the exit-code /
+top-level `changed` pin for a refusing run. Full suite (`node --test lib/test/*.test.mjs`) green at
+195/195.
+
+Key files: `lib/index-rotation.mjs`, `lib/test/index-rotation.test.mjs`, `skills/work/SKILL.md`,
+`.agentheim/knowledge/decisions/0047-index-done-list-rotation-trigger-work-session-end-check.md`,
+`.agentheim/contexts/agentic-workflow/README.md`.
 
 ## Notes
 

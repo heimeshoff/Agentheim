@@ -4,7 +4,7 @@ title: INDEX done-list rotation trigger — work's session-end check, closing AD
 scope: agentic-workflow
 status: accepted
 date: 2026-07-04
-related_tasks: [agentic-workflow-d4q7f]
+related_tasks: [agentic-workflow-d4q7f, agentic-workflow-dk3vz]
 related_adrs: [0039, 0041, 0038, 0045]
 ---
 
@@ -89,3 +89,58 @@ overshoot ADR-0039 established for `protocol.md`'s equivalent case). `design-sys
 `infrastructure` were both already under cap (25 entries each) and correctly did not rotate.
 Negative: a session that never reaches `work`'s end-of-run step still leaves a BC's done-list
 uncapped until a future `work` session completes (same accepted approximation as ADR-0045).
+
+## Amendment — 2026-07-09 (agentic-workflow-dk3vz): a third manifest branch — per-BC refusal — and the narrowed no-op
+
+A field report (WisdomHeim vault, 2026-07-09) found `rotateIndexDoneList` silently reporting
+`{ok:true, rotated:false, liveEntries:0}` for every BC whose done-list is written in a shape
+`parseDoneListEntries`'s `ENTRY_LINE` regex doesn't match — indistinguishable from a genuinely empty
+list, so the cap never fires and this ADR's session-end check surfaces nothing. Two further faces
+surfaced once traced against `main`: a firing rotation on a partially-parseable, over-cap list
+silently dropped every unmatched line on rewrite (landed in no archive), and `rotateAllIndexDoneLists`
+propagated a per-BC missing-markers throw uncaught, discarding the whole run's manifest — including
+any healthy BC that had *already rotated and written files* earlier in the sorted BC walk, stranding
+that BC's rotation uncommitted behind `work`'s own "treat a non-zero exit as a soft failure: change
+nothing" branch (the Mechanics section above, verbatim, before this amendment: *"`rotated: false` (the
+common case) → no-op: no commit, no protocol entry"* — a two-branch shape, `rotated:true` /
+`rotated:false`, with no notion of a BC refusing at all).
+
+This amendment adds a **third branch** to the per-BC manifest, extends `rotateAllIndexDoneLists` to
+catch a per-BC throw rather than let it escape, and narrows `work`'s "silent no-op is correct" rule
+accordingly. Everything else the Decision above established — the trigger's placement (session-end,
+immediately after the protocol-rotation check), the all-BC entry point, the commit shape and message
+template, the top-level `ok:true`/exit-`0` posture, and the confirmed read-side reachability contract
+(archive-header naming + Backlink matcher) — is **unchanged**.
+
+1. **A BC's own result is now one of three shapes, not two.** Beside `{ok:true, rotated:true, ...}`
+   and `{ok:true, rotated:false, ...}`, a BC can now REFUSE: `{ok:false, code, context, reason}`,
+   writing nothing. Two codes: `unparseable-done-list` (zero lines matched at all, or a pending
+   rewrite would have silently dropped unmatched lines) and `missing-done-list-markers` (the done-list
+   markers themselves are absent — the former uncaught-throw case, now caught per BC inside
+   `rotateAllIndexDoneLists` instead of escaping the loop). **The top-level manifest is untouched by
+   a refusal**: `ok` stays `true`, `runCli`'s exit code stays `0`, and top-level `changed` simply omits
+   the refusing BC's paths — preserving ADR-0038's "`ok:false` ⇒ nothing written" invariant at the
+   per-BC grain without letting one BC's refusal strand another's already-written rotation, the exact
+   stranding scenario the field report's third face described.
+2. **A partially parseable done-list that isn't destructive to skip is reported, not refused.** When a
+   BC's done-list has unmatched non-blank lines but is either under cap or over cap with no month
+   actually rollable, it returns `{ok:true, rotated:false, liveEntries:N, unmatched:K}` with `K > 0` —
+   visible, not fatal, nothing written. Refusal is reserved for when the answer would be wrong (zero
+   matches) or the rewrite would be destructive (a firing rotation would drop unmatched lines).
+3. **`work`'s "silent no-op is correct" rule is narrowed.** The Mechanics section's old rule —
+   `rotated: false` ⇒ no commit, no protocol entry, fully silent — now applies only when, in addition,
+   no BC returned `ok === false` and no BC reported `unmatched > 0`. `skills/work/SKILL.md`'s "INDEX
+   done-list rotation check" section gained a step that iterates `contexts` and surfaces every
+   refusal (BC + code + reason) and every unmatched-line report (BC + count) in the end-of-run
+   summary — visibility only, never a session block, and never a reason to skip committing the
+   healthy BCs' `changed` paths.
+4. **Accepted consequence, stated plainly:** a BC whose done-list stays malformed refuses to rotate on
+   every session and its live list grows past cap until a human fixes the offending line. This is the
+   fail-closed trade taken knowingly — loud every session rather than silently wrong once. The
+   rejected alternative (carrying an unmatched line through the rewrite verbatim) cannot preserve the
+   line's *position*: an unmatched line has no `completed:` date and therefore no month, so it can only
+   stay live while the entries around it roll away — verbatim in bytes, not in order.
+
+No change to `lib/index-rotation.mjs`'s exported function names or `parseDoneListEntries`'s signature
+and its two pre-existing tests (still returns an entry array, still throws on missing markers) — the
+new `parseDoneList(content) → {entries, unmatched, nonBlank}` sits underneath it, additive only.
