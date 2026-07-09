@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 -- Capture / Captured: agentic-workflow-m3vhq - Prompt bar — add a "Plain" mode that runs the prompt directly on Claude
+
+**Type:** Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** A fifth prompt-card option, "Plain", that sends the prompt straight to Claude without routing through an Agentheim skill.
+
+---
+
 ## 2026-07-06 20:35 -- Modeling / Promoted: agentic-workflow-q7r3x - Prompt area matches Section 1b of the UX explorations reference exactly
 
 **Type:** Modeling / Promote
