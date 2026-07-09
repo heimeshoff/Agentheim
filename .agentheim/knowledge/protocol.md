@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 18:57 -- Batch started: [agentic-workflow-dk3vz, agentic-workflow-wq7fn]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-dk3vz - rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0}, agentic-workflow-wq7fn - Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move
+**Parallel:** yes (2 workers - the full ready set; both tasks in agentic-workflow/todo/, both depends_on: [], MAX_PARALLEL=3 not reached, nothing held back. Advisory: both may touch the agentic-workflow BC README, so their branches merge back sequentially; neither was demoted to a later wave.)
+
+---
+
 ## 2026-07-09 18:55 -- Modeling / Promoted: agentic-workflow-wq7fn - Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move
 
 **Type:** Modeling / Promote

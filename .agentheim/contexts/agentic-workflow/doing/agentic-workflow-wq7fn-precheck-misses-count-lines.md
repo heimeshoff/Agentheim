@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-wq7fn
 title: Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-09

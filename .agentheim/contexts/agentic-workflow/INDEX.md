@@ -11,19 +11,19 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 2
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 2
 - **Done:** 135
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-wq7fn** — Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move (bug) — `todo/agentic-workflow-wq7fn-precheck-misses-count-lines.md`
-- **agentic-workflow-dk3vz** — rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0} (bug) — `todo/agentic-workflow-dk3vz-rotation-unparseable-done-list-silent-zero.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-wq7fn** — Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move (bug) — `doing/agentic-workflow-wq7fn-precheck-misses-count-lines.md`
+- **agentic-workflow-dk3vz** — rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0} (bug) — `doing/agentic-workflow-dk3vz-rotation-unparseable-done-list-silent-zero.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
