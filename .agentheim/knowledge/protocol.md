@@ -5,6 +5,16 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 16:12 -- Modeling / Captured: agentic-workflow-aqyqd - Every prompt-bar mode requires a prompt — the decline-to-launch rule generalizes from Plain to all five
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** The builder used Plain's disabled-Enter-on-empty-prompt behavior (shipped 10 minutes earlier in `agentic-workflow-m3vhq`) and wants it for all five modes. This **reverses**, deliberately, the clause ADR-0050's second amendment had just written down — *"the four legacy modes always fire, empty prompt or not — their bare commands are meaningful."* Pressed on the consequence before capturing: the four bare-command constants (`QUICK_CAPTURE_COMMAND`, `MODELING_COMMAND`, `INQUIRE_COMMAND`, `RESEARCH_COMMAND`) are reachable from **exactly one** place — a mode's `commandFor('')` on an empty prompt — verified by grep to have no consumer outside `modeling-command.js`. So gating every mode makes the bare-skill launch **unreachable from the board**; bare sessions move to the terminal. Builder accepted that knowingly, over the alternative of preserving a second bare-launch affordance (which would have reopened `agentic-workflow-p8k4d`'s click-selects-only rule). Second decision settled at capture: `requiresPrompt` is **removed entirely**, not set `true` on all five entries — the flag existed only to mark Plain as *the exception*, so with no exception the per-mode axis is a fiction; "a prompt is required" is a property of the **bar**, not of a mode. `canFirePromptMode(index, prompt)` keeps its signature (call-site + test stability, and a cheap door back to a future per-mode exception) with `index` deliberately unread. Filed straight to `todo/` — both open questions were settled with the builder at capture time, leaving a deletion, one inverted predicate, and one ADR amendment. Flagged for the worker: two currently-passing tests encode the OLD rule *in their titles* (`prompt-mode.test.mjs`'s "canFirePromptMode is true for all four legacy modes…" and the module doc comment on Plain's uniqueness) — an AC forbids satisfying the suite by deleting them; they must be re-pinned to the reversed contract so the reversal stays visible.
+**ADRs written:** none — ADR-0050 gains a **third** in-place `## Amendment` when the task is worked (the `p8k4d` / `m3vhq` precedent); no shipped decision is superseded by a new record.
+
+---
+
 ## 2026-07-09 16:03 -- Work session ended
 
 **Type:** Work / Session end
