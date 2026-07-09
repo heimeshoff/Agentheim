@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 18:55 -- Modeling / Promoted: agentic-workflow-wq7fn - Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-09 18:54 -- Modeling / Refined: agentic-workflow-wq7fn - Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move
 
 **Type:** Modeling / Refine

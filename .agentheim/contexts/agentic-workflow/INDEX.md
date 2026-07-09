@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 1
+- **Backlog:** 0
+- **Todo:** 2
 - **Doing:** 0
 - **Done:** 135
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-wq7fn** — Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move (bug) — `todo/agentic-workflow-wq7fn-precheck-misses-count-lines.md`
 - **agentic-workflow-dk3vz** — rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0} (bug) — `todo/agentic-workflow-dk3vz-rotation-unparseable-done-list-silent-zero.md`
 <!-- todo-list:end -->
 
@@ -82,7 +83,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-wq7fn** — Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move (bug) — `backlog/agentic-workflow-wq7fn-precheck-misses-count-lines.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
