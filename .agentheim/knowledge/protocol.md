@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 15:39 -- Modeling / Promoted: agentic-workflow-m3vhq - Prompt bar — add a "Plain" mode that runs the prompt directly on Claude
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-09 15:29 -- Work session ended
 
 **Type:** Work / Session end

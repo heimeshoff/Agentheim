@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 133
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-m3vhq** — Prompt bar — add a "Plain" mode that runs the prompt directly on Claude (feature) — `todo/agentic-workflow-m3vhq-prompt-bar-plain-mode.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -79,7 +80,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-m3vhq** — Prompt bar — add a "Plain" mode that runs the prompt directly on Claude (feature) — `backlog/agentic-workflow-m3vhq-prompt-bar-plain-mode.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
