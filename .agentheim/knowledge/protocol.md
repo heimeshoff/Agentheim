@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 18:35 -- Modeling / Captured: agentic-workflow-wq7fn, agentic-workflow-dk3vz - two lifecycle-script field defects transplanted from the WisdomHeim vault
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Two residual defects from the WisdomHeim vault's 2026-07-09 field report (its `infrastructure-nvrz0`), each re-verified against current `main` before filing. (1) **wq7fn** — the ADR-0038 fail-closed dry-validation checks section markers but not the `**<Label>:** N` count lines; `adjustIndexCount` still throws *after* `applyTaskMove` has moved files, so an index with markers present but a count line missing/malformed strands a half-applied claim/promote/complete. The vault's original incident (marker-less bespoke index) is already covered by the marker check; only this narrower case remains. (2) **dk3vz** — `rotateIndexDoneList` returns `{ok:true, rotated:false, liveEntries:0}` when zero done-list lines match `ENTRY_LINE`, so an unparseable done-list reads as empty and the cap can never fire; sharper second face found at capture: a *partially* parseable list over cap gets rewritten from matched entries only, silently deleting the unmatched lines from the live INDEX with no archive copy.
+
+---
+
 ## 2026-07-09 18:16 -- Release shipped: v0.9.0
 
 **Type:** Release
