@@ -1,7 +1,7 @@
 ---
 id: design-system-v08qq
 title: TicketCard — condense to 1b: no context chip, no estimate, no timestamp, smaller type
-status: todo
+status: doing
 type: refactor
 context: design-system
 created: 2026-07-09

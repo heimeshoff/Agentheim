@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 17:44 -- Batch started: [design-system-v08qq]
+
+**Type:** Work / Batch start
+**Tasks:** design-system-v08qq - TicketCard — condense to 1b: no context chip, no estimate, no timestamp, smaller type
+**Parallel:** no (1 worker — the full ready set; design-system-v08qq is the only task in todo/ across all three BCs, and its one depends_on (design-system-001) resolves in done/. MAX_PARALLEL=3 not reached, nothing held back.)
+
+---
+
 ## 2026-07-09 17:08 -- Modeling / Captured: design-system-v08qq - TicketCard — condense to 1b: no context chip, no estimate, no timestamp, smaller type
 
 **Type:** Modeling / Capture
