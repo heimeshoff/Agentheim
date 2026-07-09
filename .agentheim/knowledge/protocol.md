@@ -5,6 +5,18 @@ Newest entries on top.
 
 ---
 
+## 2026-07-10 09:14 -- Release shipped: v0.9.1
+
+**Type:** Release
+**Version:** 0.9.0 → 0.9.1 (patch — two lifecycle-script field defects made fail-closed, plus a rebuilt Workflow guide page)
+**Manifest:** `.claude-plugin/plugin.json` bumped, committed `8b4a4ba`
+**Changelog:** `CHANGELOG.md` `[Unreleased]` → `[0.9.1]` section rolled (same commit)
+**Pushed to main:** yes (`7be05ba..8b4a4ba` on `origin/main`)
+**Tag:** `v0.9.1` (annotated) → `8b4a4ba`, pushed to origin
+**GitHub Release:** created via `gh` (from CHANGELOG) — https://github.com/heimeshoff/Agentheim/releases/tag/v0.9.1
+
+---
+
 ## 2026-07-09 19:26 -- Work session ended
 
 **Type:** Work / Session end
