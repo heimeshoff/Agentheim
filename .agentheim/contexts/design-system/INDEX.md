@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 31
@@ -38,6 +38,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **design-system-tfhn6** — EnterButton gains a disabled state (feature) — `backlog/design-system-tfhn6-enter-button-disabled-state.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

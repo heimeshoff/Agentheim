@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 -- Modeling / Refined: agentic-workflow-m3vhq - Prompt bar — add a "Plain" mode that runs the prompt directly on Claude
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog — still blocked, but on a *new* dependency this pass created. `design-system-tfhn6` (promoted to `todo/` here) must ship first; `agentic-workflow-q7r3x`, the blocker that refused promotion last pass, is now `done/`.
+**Summary:** A second refinement pass run against the code `agentic-workflow-q7r3x` actually landed — and it falsified one of the first pass's acceptance criteria. AC 6 ("the Enter button renders disabled") was written when board.js still owned a board-local Enter button it could dim freely. q7r3x then replaced that with the styleguide's `EnterButton` primitive, consumed unforked (ADR-0003), whose props are exactly `{ onClick, size, ariaLabel }`. **No styleguide primitive supports a disabled state at all** — the only `disabled` anywhere in the design system is a focus-trap selector in `modal.js`. So AC 6 was unimplementable without either forking the primitive (forbidden) or faking it consumer-side with a `pointer-events: none` wrapper (an a11y lie: the `<button>` stays focusable and announces as enabled). The first pass's note "no new glyph, so no `design-system` dependency" reasoned about the *glyph* and never reached the *button*. Builder chose to close the gap on the primitive, mirroring the `design-system-xr4sb` → `agentic-workflow-q7r3x` precedent verbatim (styleguide ships it, dashboard consumes it unforked) over the wrapper or dropping the affordance. Split off **design-system-tfhn6**; m3vhq gains it as a third `depends_on` and AC 6 now names the prop. Settled tfhn6's paint as **de-emphasis by opacity** (ADR-0016), never a fill swap: `--accent-ochre` and `--accent-ochre-fg` are a contrast-matched pair (xr4sb added the latter precisely because the ochre inverts lightness across themes), so dimming both together preserves legibility in both — and the shipped guard `enter-button.test.mjs` asserts `background: "var(--accent-ochre)"` as a *literal*, so a conditional fill would break a test written to protect ADR-0048's carve-out. Also verified the rest of the task against live code: the `bot` glyph really is in `icons.js` (AC 7 holds), `PromptModeTab`'s `divider` prop is already length-derived so five cells need no change there, and `requiresPrompt` being absent on the four legacy modes makes them falsy-fire by construction (AC 3 holds). Pinned two `prompt-mode.test.mjs` assertions that silently *flip meaning* once `4` becomes a valid index and must be re-pinned rather than merely re-run (`clampPromptModeIndex(4) === 0` → `(5) === 0`; `4` leaves the `invalid` array). Recorded the standing insight that `disabled` blocks only the click path while `fire()`'s guard blocks the keyboard path — two entry points, one `canFirePromptMode` predicate, neither AC redundant.
+**Split into:** design-system-tfhn6
+**ADRs written:** none — tfhn6 adds a prop within ADR-0048/0051's existing carve-out and paints per ADR-0016; no shipped decision is reversed. It does reopen the styleguide gate (visible canvas change), per the standing xr4sb precedent.
+
+---
+
 ## 2026-07-09 15:02 -- Modeling / Captured: agentic-workflow-h4n2v - Stop dashboard menu item calls the stop script, not the slash command
 
 **Type:** Modeling / Capture

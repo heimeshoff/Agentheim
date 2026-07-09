@@ -6,10 +6,10 @@ type: feature
 context: agentic-workflow
 created: 2026-07-09
 completed:
-depends_on: [design-system-001-styleguide, agentic-workflow-q7r3x]
+depends_on: [design-system-001-styleguide, agentic-workflow-q7r3x, design-system-tfhn6]
 blocks: []
 tags: [dashboard, prompt-bar]
-related_adrs: [0050, 0003, 0018, 0016]
+related_adrs: [0050, 0003, 0018, 0016, 0051]
 related_research: []
 prior_art: [agentic-workflow-h7n2c, agentic-workflow-036, agentic-workflow-bz3az, agentic-workflow-p8k4d, agentic-workflow-s7gev]
 ---
@@ -41,7 +41,19 @@ Builder decisions taken during this refinement (2026-07-09):
   mount default and the post-launch reset target. Plain is *not* promoted to the baseline
   the other four are shortcuts from.
 - **Empty prompt:** **no-op.** Nothing fires — no bridge call, no clipboard, no confetti.
-- **Glyph:** reuse the existing `bot` key. No new glyph, so no `design-system` dependency.
+- **Glyph:** reuse the existing `bot` key (verified present in `icons.js`). No new glyph.
+
+Amended in a second refinement pass (2026-07-09), after `agentic-workflow-q7r3x` shipped:
+
+- **Disabled Enter button:** the styleguide's `EnterButton` primitive learns a `disabled`
+  state — `design-system-tfhn6` — which this task then consumes unforked. The first pass
+  concluded "no new glyph, so no `design-system` dependency"; that reasoning was about the
+  *glyph* and never reached the *button*. At the time it was also invisible: board.js still
+  had a board-local Enter button it could dim freely. q7r3x then swapped in the styleguide
+  primitive (ADR-0003, unforked), whose props are exactly `{ onClick, size, ariaLabel }` —
+  no disabled state, and no styleguide primitive has one. So AC 6 became unimplementable
+  without a `design-system` change. Hence the dependency this task previously (wrongly)
+  claimed it didn't need.
 
 ## Acceptance criteria
 - [ ] `PROMPT_MODES` gains a fifth entry, **appended last**:
@@ -65,10 +77,14 @@ Builder decisions taken during this refinement (2026-07-09):
       as `launch` (ADR-0050 invariant 4 stays a disjoint, keyboard-only classification).
       The decline happens in `fire()`, not in the classifier. A test asserts this explicitly
       so a later worker doesn't "fix" the classifier into a fifth intent.
-- [ ] The Enter button renders **disabled** (visually dimmed, no hover affordance) exactly
-      when `canFirePromptMode(highlightedMode, prompt)` is false. Its `title` / `aria-label`
-      never render an empty command string — with Plain highlighted and the prompt blank
-      they read `Type a prompt to launch Plain`, not `Launch Plain — `.
+- [ ] The Enter button renders **disabled** exactly when
+      `canFirePromptMode(highlightedMode, prompt)` is false, via the styleguide primitive's
+      new `disabled` prop (`design-system-tfhn6`) — passed through, **consumed unforked**
+      (ADR-0003), never re-implemented in board.js and never faked with a
+      `pointer-events: none` wrapper. Its `title` / `aria-label` never render an empty
+      command string: with Plain highlighted and the prompt blank they read
+      `Type a prompt to launch Plain`, not `Launch Plain — `. (The `title` sits on the
+      existing wrapper `<span>`, which is not itself disabled, so the tooltip still shows.)
 - [ ] Ctrl+← / Ctrl+→ cycles a total **5-cycle**: forward past Plain (index 4) wraps to
       Quick Capture (0); backward before Quick Capture wraps to Plain (4).
       `clampPromptModeIndex` bounds `0..4`.
@@ -88,8 +104,11 @@ Builder decisions taken during this refinement (2026-07-09):
       (`nextPromptModeIndex(4, 1) === 0`, `nextPromptModeIndex(0, -1) === 4`), and new tests
       cover `plainCommandFor` (verbatim passthrough + empty degrade) and
       `canFirePromptMode` (all four legacy modes fire on an empty prompt; Plain does not).
-      `board-prompt-bar.test.mjs`'s four-tab source assertions move to five and gain the
-      disabled-Enter assertion.
+      Two assertions in that suite flip meaning once `4` is a valid index and must be
+      re-pinned, not merely re-run: `clampPromptModeIndex(4) === 0` becomes
+      `clampPromptModeIndex(5) === 0`, and `4` must leave the `invalid` array (replaced by
+      `5`). `board-prompt-bar.test.mjs`'s four-tab source assertions move to five and gain
+      the disabled-Enter assertion.
 - [ ] `dashboard/dist/` is **rebuilt** (`node build.mjs`) — `board.js`, `prompt-mode.js` and
       `modeling-command.js` are all bundled, so without it the served board keeps rendering
       the four-tab bundle.
@@ -102,6 +121,17 @@ Builder decisions taken during this refinement (2026-07-09):
   `BoardPromptBar` / `PromptModeTab` pair. Sequencing behind it avoids two workers
   colliding in one file. q7r3x's shipped ACs stay historically true — it ships four cells;
   m3vhq then adds the fifth.
+- **Why `depends_on: design-system-tfhn6`.** It teaches `EnterButton` the `disabled` prop
+  AC 6 needs. Same shape as `design-system-xr4sb` → `agentic-workflow-q7r3x`: the
+  styleguide ships the primitive, the dashboard consumes it unforked. tfhn6's own deps are
+  met, so it can be worked immediately; m3vhq queues behind it.
+- **Two paths decline, one predicate decides.** The `disabled` attribute blocks the *click*
+  path — a disabled `<button>` fires no `onClick` and leaves the tab order. It does nothing
+  about the *keyboard* path: bare Enter typed in the textarea still reaches
+  `promptBarKeyIntent` → `launch` → `fire()` (AC 5 pins that the classifier stays
+  untouched). That is why AC 4's `fire()` guard and AC 6's disabled button both exist and
+  neither is redundant — two independent entry points, both consulting the one
+  `canFirePromptMode` predicate from AC 3.
 - **Subtitle copy** (`straight to Claude, no skill`) is a proposal in q7r3x's settled
   lowercase register (`file it fast, no ceremony` / `shape into structure` /
   `ask the codebase` / `dig deeper`). Cheap to overrule at implementation time.
@@ -112,10 +142,14 @@ Builder decisions taken during this refinement (2026-07-09):
   is not a new hazard class (the same flag already reaches `/agentheim:work`), and this
   task deliberately does **not** special-case it. Recorded so the choice is visible rather
   than accidental.
-- **Orchestrator not spawned.** After the four builder decisions above, no open domain or
-  architectural question remained: single BC, consumer-side wiring against primitives
-  already shipped, one ADR amendment whose shape p8k4d fixed by precedent. Delegating
-  would have added latency without new information.
+- **Orchestrator not spawned** (either pass). The first pass reasoned that no open
+  architectural question remained — "consumer-side wiring against primitives already
+  shipped". The second pass found one it had missed (the disabled `EnterButton`), but found
+  it by *reading the code q7r3x had just landed*, which is what actually made it visible;
+  the resolution then followed the xr4sb precedent directly and needed a builder decision,
+  not a specialist. Worth noting as a pattern: a task refined against code that has not
+  landed yet can go stale in exactly this way, and re-reading the dependency's diff at
+  promotion time is what catches it.
 - Prior art is the two "add a tab" precedents — `agentic-workflow-h7n2c` (Inquire, the
   fourth tab) and `agentic-workflow-036` (Research, the third) — plus the console's own
   lineage: `bz3az` (built the tab row + keyboard model), `s7gev` (the selection-model
