@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 19:24 -- Task verified and completed: agentic-workflow-wq7fn - Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-wq7fn - Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move
+**Summary:** Replaced the hand-maintained dry-run marker mirror with compute-then-write atomicity in promoteTask/claimBatch/completeTask, closed the negative-count and block-scoping gaps in adjustIndexCount, extracted a shared source-resolution predicate, and recorded ADR-0054
+**Duration:** 17m22s
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 15
+**ADRs written:** 0054-compute-then-write-atomicity-supersedes-dry-run-mirror.md
+
+---
+
 ## 2026-07-09 19:14 -- Task verified and completed: agentic-workflow-dk3vz - rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0}
 
 **Type:** Work / Task completion

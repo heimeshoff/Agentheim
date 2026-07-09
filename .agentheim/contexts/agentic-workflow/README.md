@@ -612,24 +612,44 @@ separate BC, but today the whole tool lives in this one.
   argv → `discoverRoot(cwd)` → handler → print-manifest wrapper; (4) `modeling`'s PROMOTE flow
   owns the remaining judgment (readiness) and git (scoped add + commit). See ADR-0038, ADR-0007,
   ADR-0026.
+- **Compute-then-write atomicity (ADR-0054, agentic-workflow-wq7fn).** All three mechanized
+  verbs — `promoteTask`, `claimBatch`, `completeTask` — resolve their source read-only, then
+  compute the FULL new `INDEX.md` + `protocol.md` content PURELY (no disk writes) inside a
+  `try`; a throw from `removeIndexLine`/`insertIndexLineAtTop`/`adjustIndexCount`/
+  `prependProtocolEntry` is caught and returned as `{ok:false, code:'bookkeeping-marker-mismatch',
+  reason}` with nothing moved and nothing written. `applyTaskMove` is the only disk mutation,
+  and the last one before the two writes. This supersedes k5n8f's AC #5 dry-run marker mirror
+  (`validateBookkeepingMarkers` — deleted): the computation itself is now the guard, so every
+  future throw site is fail-closed for free, with no second hand-maintained copy of "what could
+  go wrong" to keep in sync. `adjustIndexCount` additionally (a) rejects a decrement that would
+  take a count below zero — naming the label/current value/delta — instead of silently writing
+  e.g. `-1` (which previously made the label's own regex unmatchable for every subsequent
+  mutation in that BC), and (b) scopes its replace to inside the `<!-- task-counts:start/end
+  -->` block, mirroring `removeIndexLine`'s block capture, so a colliding same-labeled line
+  elsewhere in the file is never the one edited. `applyTaskMove`'s own source-resolution
+  precondition is extracted into `resolveSourceOrReject` — one implementation, called by both
+  `applyTaskMove` and every verb's compute phase, so a source-missing rejection is never
+  re-derived by speculatively invoking the mover as an oracle. See ADR-0054, ADR-0038.
 - **`claimBatch` / `completeTask`** — the git-free CLAIM and COMPLETE lifecycle scripts, matched to
   the ADR-0032 worktree/squash-merge model (agentic-workflow-t7m4c), same three-layer boundary as
   `promoteTask`. **`claimBatch(rootDir, ids, opts)` is BATCH-shaped**: it claims a whole ready set
   `todo → doing` and returns ONE manifest — every id's move via `applyTaskMove`, INDEX marker/count
   edits grouped **per BC** (a batch may span contexts), and one `protocol.md` "Batch started" entry;
   fail-loud (all ids pre-checked to resolve in `todo/` before any move, so one bad id aborts the
-  batch with nothing moved), and the commit `message` drops the `<bc>` token when the batch spans
-  contexts. **`completeTask(rootDir, id, opts)` is single-task-shaped** and **idempotent** w.r.t. a
-  file already in `done/` (under ADR-0032 the worker's worktree does the `doing → done` move, so by
-  the time the conductor runs `complete` on `main` after the squash-merge the file is already there):
-  a `stale-precondition` that resolves in `done/` is a no-op move, not an error, and bookkeeping
-  proceeds. **ADR-0042:** `completeTask` has no batch mode — the trivial-squash carve-out is composed
-  by the CALLER (`work` runs `complete` once per task and folds the manifests' `changed` paths +
-  `[<id>]` trailers into one commit), since a batch-complete verb would have to invent a shared
-  summary/`<type>` across tasks, the judgment ADR-0038 reserves for the skill. Both reuse
-  `lib/task-lifecycle-cli.mjs` — `claim <id-1>,<id-2>,…` and `complete <task-id>` (with an optional
-  JSON opts positional for `complete`'s richer bookkeeping fields). See ADR-0038, ADR-0007, ADR-0026,
-  ADR-0032, ADR-0042.
+  batch with nothing moved; a rarer mid-batch vanish race after the pre-check surfaces the split
+  `claimed` manifest with neither file written — ADR-0054 left this residual race unchanged), and
+  the commit `message` drops the `<bc>` token when the batch spans contexts. **`completeTask(rootDir,
+  id, opts)` is single-task-shaped** and **idempotent** w.r.t. a file already in `done/` (under
+  ADR-0032 the worker's worktree does the `doing → done` move, so by the time the conductor runs
+  `complete` on `main` after the squash-merge the file is already there): it resolves its source
+  `doing/`, else `done/`, before any move (ADR-0054) — the `done/` case is the idempotent no-op
+  move, and bookkeeping proceeds against the file already there. **ADR-0042:** `completeTask` has no
+  batch mode — the trivial-squash carve-out is composed by the CALLER (`work` runs `complete` once
+  per task and folds the manifests' `changed` paths + `[<id>]` trailers into one commit), since a
+  batch-complete verb would have to invent a shared summary/`<type>` across tasks, the judgment
+  ADR-0038 reserves for the skill. Both reuse `lib/task-lifecycle-cli.mjs` — `claim <id-1>,<id-2>,…`
+  and `complete <task-id>` (with an optional JSON opts positional for `complete`'s richer
+  bookkeeping fields). See ADR-0038, ADR-0007, ADR-0026, ADR-0032, ADR-0042, ADR-0054.
 - **`lib/resolve-plugin-file.mjs`** — the env-independent in-plugin file resolver
   (generalizes infrastructure-010's `dashboard/resolve-launcher.mjs`, which now delegates to
   it — agentic-workflow-k5n8f). `locatePluginFile(relPath, opts)` resolves a path inside the

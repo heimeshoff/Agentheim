@@ -1,15 +1,15 @@
 ---
 id: agentic-workflow-wq7fn
 title: Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-09
-completed:
+completed: 2026-07-09
 depends_on: []
 blocks: []
 tags: [task-lifecycle, bookkeeping, atomicity, fail-closed]
-related_adrs: [0038, 0042]
+related_adrs: [0038, 0042, 0054]
 related_research: []
 prior_art: [agentic-workflow-k5n8f, agentic-workflow-t7m4c, agentic-workflow-p3v9k]
 ---
@@ -174,3 +174,42 @@ batch up front.
   sibling cross-reference is the correct link).
 - Origin record: `infrastructure-nvrz0` in the WisdomHeim vault's `.agentheim/` (transplanted
   here 2026-07-09 after verifying the residual against `main`).
+
+## Outcome
+
+Replaced the dry-run marker mirror (`validateBookkeepingMarkers` + its three helpers, deleted)
+with **compute-then-write** in all three mechanized verbs (`promoteTask`, `claimBatch`,
+`completeTask`, `lib/task-lifecycle.mjs`): each now resolves its source read-only, computes the
+full new `INDEX.md` + `protocol.md` content purely inside a `try` (a throw from
+`removeIndexLine`/`insertIndexLineAtTop`/`adjustIndexCount`/`prependProtocolEntry` is caught as
+`{ok:false, code:'bookkeeping-marker-mismatch', reason}`, nothing moved, nothing written), then
+runs `applyTaskMove` — the only disk mutation, last before the two writes.
+`adjustIndexCount` now rejects a below-zero decrement (naming label/current/delta) and scopes
+its replace to inside the `<!-- task-counts:start/end -->` block, mirroring `removeIndexLine`'s
+block capture, closing the collision this class of bug produced (a decrement silently writing
+`**Todo:** -1`, which then made every subsequent verb call in that BC throw the same bug after
+moving files). `applyTaskMove`'s own precondition probe was extracted into
+`resolveSourceOrReject`, one implementation called by both `applyTaskMove` and every verb's
+compute phase — no rejection-oracle pattern, no second copy to drift. `completeTask` now
+resolves `doing/`, else `done/` (idempotent), before any move, mirroring the same ordering.
+`claimBatch` computes every BC's full new index content for the whole batch up front and moves
+last; the documented mid-batch vanish race is unchanged (re-pinned by a new deterministic test
+using two ids that alias the same physical file).
+
+Recorded **ADR-0054**, superseding only `agentic-workflow-k5n8f`'s AC #5 dry-run-mirror
+mechanism — ADR-0038's Rulings A/B and ADR-0042 are explicitly untouched.
+
+**Tests** (`node --test`, TDD red→green): 15 new tests in `lib/test/task-lifecycle.test.mjs` —
+3 negative-count-guard tests (one per verb), 1 block-scoping collision test, 3 LF-fixture
+marker-mismatch tests asserting `res.code` (previously only pinned behaviorally on CRLF), 3
+protocol `---`-separator tests (previously unpinned anywhere), 3 count-line
+missing/non-numeric tests, 1 `completeTask` not-found test, and 1 `claimBatch` mid-batch
+vanish-race test. The three pre-existing CRLF anti-deletion tests in
+`task-lifecycle-eol.test.mjs` (`promoteTask`/`claimBatch`/`completeTask` fail-closed on a
+marker-broken CRLF `INDEX.md`) were kept unmodified and stay green — the thrown marker text
+still surfaces in `reason` through the compute-catch. Full `lib/test/*.test.mjs` suite: 204/204
+green (189 before, +15).
+
+Key files: `lib/task-lifecycle.mjs`, `lib/test/task-lifecycle.test.mjs`,
+`.agentheim/contexts/agentic-workflow/README.md`,
+`.agentheim/knowledge/decisions/0054-compute-then-write-atomicity-supersedes-dry-run-mirror.md`.
