@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 15:02 -- Modeling / Captured: agentic-workflow-h4n2v - Stop dashboard menu item calls the stop script, not the slash command
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** The topbar settings menu's Stop dashboard item currently fires `launchOrCopy(STOP_DASHBOARD_COMMAND)`, booting a whole Claude session via the bridge just to kill a pid and delete a runfile — and in a bridge-less browser it can only copy a string, so "Stop" stops nothing. Replace it with a scoped `POST /api/stop` on the dashboard server, dispatched ahead of `server.mjs`'s 405 method gate exactly as ADR-0046's `DELETE /api/whats-next` is. Builder chose the server-self-stop seam over having the bridge shell out to `launch.mjs stop`; that reverses aw-028's "the server is never asked to stop itself" and needs an ADR naming a third write category — **runtime self-lifecycle** — sibling to lifecycle (ADR-0017, forbidden) and advisory (ADR-0027/0043/0046). The carve-out is narrower than ADR-0046's: the only file touched is `.agentheim/.dashboard/runtime.json`, which the dashboard's own launch path already wrote and no skill reads. Pinned the non-obvious constraint that `stopDashboard()` kills by pid and under `/api/stop` that pid is the process serving the request — the response must flush before the process dies or the stopped overlay never renders.
+
+---
+
 ## 2026-07-09 14:25 -- Work session ended
 
 **Type:** Work / Session end
