@@ -8,7 +8,32 @@ its **plugin contract** (skills, commands, `.agentheim/` layout) with
 
 ## [Unreleased]
 
-## [0.8.10] - 2026-07-04
+## [0.9.0] - 2026-07-09
+
+The **Command-deck redesign** — the dashboard is retokenized to a cool-neutral
+palette and the board grows a docked prompt console you drive from the keyboard.
+
+### Added
+- **Docked prompt console** — the flat launch-card row is replaced by a bottom-center console with keyboard-committed mode tabs and its own pure `prompt-mode.js` keyboard model (cycle / launch / swallow), specified by ADR-0050 and ADR-0051.
+  - **Plain mode**, a fifth tab that sends your prompt to Claude verbatim.
+  - Bare `Enter` (and `Ctrl+Enter`) launches, `Shift+Enter` inserts a newline, `Ctrl+Space` focuses the field, and clicking a tab only selects it.
+  - Per-mode glyphs (diamond / circle-dot) and a solid-ochre icon-square Enter button.
+- **Board-wide View chip** — one `View` control replaces the four per-column Sort and Group-by-BC controls, composed unforked on the shared `Menu` primitive under a `COLUMNS` label (ADR-0015 amended: the view lens is board-wide; collapse and Done-peek stay column-scoped).
+- `EnterButton` gains a `disabled` prop, painted opacity-only per ADR-0016.
+- A `--radius-card: 10px` token and an `--emphasis-border` token pair.
+
+### Changed
+- **Command-deck palette** (ADR-0049) — both `[data-theme]` blocks retokenized to the 1b dark stack with a derived light counterpart, superseding the Ledger warm-paper heritage. Names and roles are frozen; only values move.
+- **Accent discipline sharpened** (ADR-0048) — a fires/commits-vs-passive-selection test applied across all five accent tension surfaces, with the left-nav active item keeping its ochre inset rail as a bounded wayfinding exception.
+- `ShellRail` matches the 1a single-panel shape: 236px width, `WORKSPACE` tree header, loss-tolerant footer status line, ochre inset rail on the active primary-nav item.
+- `WhatsNextPanel` is now a numbered, connected flight-plan stepper; its topbar launcher wears an ochre CTA emphasis.
+- `TicketCard` condensed — no context chip, no estimate chip, no timestamp; the meta row survives only for a corner action.
+- Every prompt-bar mode declines to launch without a prompt; `requiresPrompt` is retired.
+- The dashboard `Stop` menu item POSTs a scoped `/api/stop` endpoint directly instead of spawning a bridge session.
+- `modeling` REFINE auto-promotes a task on readiness instead of prompting.
+
+### Fixed
+- **Agentheim works as an installed plugin again** — every internal agent-spawn identifier across `skills/` and `agents/` is namespaced with `agentheim:`, fixing `Agent type 'worker' not found` for anyone who installed Agentheim rather than cloning it. A live-tree lint guards the regression (ADR-0052).
 
 ### Changed
 - **What's Next dismiss deletes its artifact** — dismissing the panel now issues `DELETE /api/whats-next`, which unlinks the advisory `state/whats-next.md` via an exact-equality allowlist that provably cannot touch the sibling `state/in-flight.json`; the localStorage dismiss store is retired (ADR-0046).
@@ -180,7 +205,8 @@ its **plugin contract** (skills, commands, `.agentheim/` layout) with
 ### Added
 - Initial plugin design.
 
-[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.8.10...HEAD
+[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/heimeshoff/Agentheim/compare/v0.8.10...v0.9.0
 [0.8.10]: https://github.com/heimeshoff/Agentheim/compare/v0.8.9...v0.8.10
 [0.8.9]: https://github.com/heimeshoff/Agentheim/compare/v0.8.8...v0.8.9
 [0.8.8]: https://github.com/heimeshoff/Agentheim/compare/v0.8.7...v0.8.8
