@@ -82,7 +82,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-wq7fn** — Fail-closed pre-check misses the task-counts lines — adjustIndexCount can still throw mid-mutation (bug) — `backlog/agentic-workflow-wq7fn-precheck-misses-count-lines.md`
+- **agentic-workflow-wq7fn** — Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move (bug) — `backlog/agentic-workflow-wq7fn-precheck-misses-count-lines.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
