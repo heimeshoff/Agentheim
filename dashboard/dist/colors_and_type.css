@@ -70,6 +70,14 @@
   --accent-ochre: #B87619;       /* zero-money day ONLY */
   --accent-ochre-soft: #E6C28E;  /* accent fill background */
   --accent-ochre-tint: #FBF2DF;  /* accent surface tint */
+  /* Dedicated on-accent-ochre foreground (design-system-xr4sb, ADR-0048/0051
+     icon Enter button). --accent-ochre INVERTS lightness across themes (darker
+     in light theme, lighter in dark theme), the opposite of --fg-1's normal
+     flip — so reusing --fg-1/--surface-0 for the glyph would go illegible in
+     one theme. This fixed pair is dedicated to contrasting against
+     --accent-ochre specifically: light theme's ochre is dark -> light ink;
+     dark theme's ochre is light -> dark ink. */
+  --accent-ochre-fg: #F2F5F9;    /* on the (darker) light-theme ochre — light ink */
 
   /* ---------- Color: semantic (numbers) ---------- */
   --paid: #3F6B4A;               /* paid income, positive deltas */
@@ -175,6 +183,7 @@
   --accent-ochre: #E5A13C;
   --accent-ochre-soft: #5E4015;
   --accent-ochre-tint: #211A0D;
+  --accent-ochre-fg: #0C0E12;    /* on the (lighter) dark-theme ochre — dark ink */
 
   --paid: #6E9E7A;
   --paid-soft: #1F2A23;

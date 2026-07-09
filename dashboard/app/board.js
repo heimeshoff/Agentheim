@@ -38,6 +38,7 @@ import { Markdown } from "../../.agentheim/contexts/design-system/styleguide/app
 import { ColumnHeader, TicketCard } from "../../.agentheim/contexts/design-system/styleguide/app/kanban.js";
 import { EmptyColumn } from "../../.agentheim/contexts/design-system/styleguide/app/empty.js";
 import { Icon } from "../../.agentheim/contexts/design-system/styleguide/app/icons.js";
+import { EnterButton } from "../../.agentheim/contexts/design-system/styleguide/app/button.js";
 import { Glyph, ThemeCtx } from "../../.agentheim/contexts/design-system/styleguide/app/foundations.js";
 import { RailItem, TreeItem } from "../../.agentheim/contexts/design-system/styleguide/app/library.js";
 import { Collapsible } from "../../.agentheim/contexts/design-system/styleguide/app/collapsible.js";
@@ -598,7 +599,8 @@ const PROMPT_FIELD_MIN_PX = 40;
 const PROMPT_FIELD_MAX_PX = 168;
 
 // A board-local PROMPT-MODE TAB (agentic-workflow-bz3az — rebuilds aw-065/aw-068's
-// PromptLaunchCard into the ADR-0050 docked console's top row of four mode tabs).
+// PromptLaunchCard into the ADR-0050 docked console's top row of four mode tabs;
+// conformed to Section 1b's edge-to-edge cell layout by agentic-workflow-q7r3x).
 // One entry of PROMPT_MODES (dashboard/app/prompt-mode.js): name + one-line meaning
 // (icon + label + subtitle).
 //
@@ -606,9 +608,11 @@ const PROMPT_FIELD_MAX_PX = 168;
 // `highlightedMode`) — never a per-tab boolean the board tracks independently.
 // Paint follows the settled contract:
 //   - highlighted -> the bounded ochre wayfinding exception ADR-0051 grants this
-//     ONE additional surface (beside the nav rail, ADR-0048 surface 1): full
-//     strength, --accent-ochre text + an ochre underline, the nav-rail inset idiom
-//     turned into a bottom border for a horizontal tab row.
+//     ONE additional surface (beside the nav rail, ADR-0048 surface 1): a filled
+//     CELL background + a full-width ochre bottom underline (ADR-0051's
+//     inset-underline intent) + --accent-ochre text. This replaces the earlier
+//     rounded-pill-with-gaps look, which read as a four-sided ochre box rather
+//     than a wayfinding underline (agentic-workflow-q7r3x, Section 1b).
 //   - the other three -> ADR-0016's unchanged de-emphasis default: dimmed via
 //     opacity, --fg-2 text, no ring, no new hue.
 // `hover` is a SEPARATE, transient, presentation-only pointer-feedback channel
@@ -617,13 +621,21 @@ const PROMPT_FIELD_MAX_PX = 168;
 // Clicking the tab does both at once: it commits the highlight to this tab AND
 // launches it (the click-to-launch contract carried over unchanged from
 // PromptLaunchCard, now additionally updating the highlight before it fires).
-function PromptModeTab({ mode, highlighted, feedback, onClick }) {
+//
+// Cell layout (agentic-workflow-q7r3x, Section 1b): each tab is one of FOUR
+// edge-to-edge, equal-width cells (`flex: "1 1 0"`, no gap between cells, no
+// rounding of its own — the console shell alone owns the rounded corners at the
+// row's two ends via its `overflow: hidden`). A thin `--hairline` divider sits
+// on the trailing edge of every cell but the last, so the row reads as four
+// bordered cells rather than a gapped row of independent pill buttons.
+function PromptModeTab({ mode, highlighted, feedback, onClick, divider = true }) {
   const [hover, setHover] = useState(false);
   const flashed = highlighted && feedback !== "idle";
   const titleText = flashed ? (feedback === "launched" ? "Launched" : "Copied") : mode.label;
 
   const color = flashed ? "var(--st-done)" : highlighted ? "var(--accent-ochre)" : "var(--fg-2)";
   const subtitleColor = flashed ? "var(--st-done)" : highlighted ? "var(--fg-2)" : "var(--fg-3)";
+  const background = highlighted ? "var(--surface-2)" : "transparent";
   // De-emphasis by opacity (ADR-0016): a non-highlighted tab rests dimmed and
   // brightens slightly on hover (pointer feedback only); the highlighted tab (and
   // a flash) always render at full strength.
@@ -644,16 +656,19 @@ function PromptModeTab({ mode, highlighted, feedback, onClick }) {
         display: "inline-flex", alignItems: "center", gap: 8, textAlign: "left",
         flex: "1 1 0", minWidth: 0,
         color,
-        background: "transparent",
-        border: "none",
-        borderRadius: "var(--radius-sm)",
-        padding: "6px 10px", cursor: "pointer",
+        background,
+        borderTop: "none", borderLeft: "none",
+        borderRight: divider ? "1px solid var(--hairline)" : "none",
+        borderBottom: "none",
+        borderRadius: 0,
+        padding: "10px 12px", cursor: "pointer",
         opacity,
-        // ADR-0051's ochre wayfinding mark on the highlighted tab only — the
-        // nav-rail inset idiom (inset 2px 0 0), turned into a bottom underline for
-        // this horizontal row. NO ochre on a non-highlighted tab (ADR-0016).
+        // ADR-0051's ochre wayfinding mark on the highlighted tab only — a
+        // full-width bottom inset underline (the nav-rail inset idiom, turned
+        // into a bottom border for this horizontal row). NO ochre on a
+        // non-highlighted tab (ADR-0016).
         boxShadow: highlighted && !flashed ? "inset 0 -2px 0 var(--accent-ochre)" : "none",
-        transition: "color var(--duration-fast) var(--ease-base), opacity var(--duration-fast) var(--ease-base), box-shadow var(--duration-fast) var(--ease-base)",
+        transition: "color var(--duration-fast) var(--ease-base), background var(--duration-fast) var(--ease-base), opacity var(--duration-fast) var(--ease-base), box-shadow var(--duration-fast) var(--ease-base)",
       }}>
       <${Icon} name=${mode.icon} size=${13} color=${color} />
       <span style=${{ display: "inline-flex", flexDirection: "column", gap: 0, lineHeight: 1.2, minWidth: 0 }}>
@@ -1088,27 +1103,38 @@ function BoardPromptBar({ skipPermissions = false }) {
     <section aria-label="Author a prompt, then choose a mode to launch" style=${{
       position: "fixed", left: "50%", bottom: 20, transform: "translateX(-50%)",
       width: 780, maxWidth: "calc(100vw - 40px)", zIndex: 40,
-      display: "flex", flexDirection: "column", gap: 8,
+      display: "flex", flexDirection: "column",
       background: "var(--surface-1)", border: "1px solid var(--hairline-strong)",
       borderRadius: "var(--radius-md)", boxShadow: "var(--shadow-lg)",
-      padding: "10px 14px 12px",
+      overflow: "hidden",
     }}>
-      ${/* Row 1: the four mode tabs — the single committed highlight (ADR-0050),
-            painted per ADR-0051 (highlighted = ochre) / ADR-0016 (the rest dimmed). */ ""}
+      ${/* Row 1 (agentic-workflow-q7r3x, Section 1b): the four mode tabs as
+            EDGE-TO-EDGE, equal-width cells filling the panel width — no
+            inter-tab gap, no horizontal panel padding on this row (the cells'
+            own padding carries the breathing room; the console shell's
+            `overflow: hidden` + borderRadius clip the row's two end cells to
+            match the shell's rounded corners). The single committed highlight
+            (ADR-0050) is painted per ADR-0051 (highlighted = filled cell +
+            ochre underline) / ADR-0016 (the rest dimmed). */ ""}
       <div role="tablist" aria-label="Choose how to launch the prompt" style=${{
-        display: "flex", alignItems: "stretch", gap: 4,
+        display: "flex", alignItems: "stretch",
       }}>
         ${PROMPT_MODES.map((mode, index) => html`
           <${PromptModeTab} key=${mode.id} mode=${mode}
             highlighted=${highlightedMode === index}
             feedback=${feedback}
+            divider=${index < PROMPT_MODES.length - 1}
             onClick=${() => onTabClick(index)} />`)}
       </div>
-      ${/* Row 2: chevron + single-line auto-growing field + ⌘↵ hint + the ochre
-            Enter button (ADR-0048's already-licensed primed-primary-action carve-out). */ ""}
-      <div style=${{ display: "flex", alignItems: "center", gap: 8 }}>
+      ${/* A horizontal --hairline divider separates the tab row from the input
+            row (agentic-workflow-q7r3x, Section 1b). */ ""}
+      <div aria-hidden="true" style=${{ height: 1, background: "var(--hairline)", flexShrink: 0 }}></div>
+      ${/* Row 2: chevron + single-line auto-growing field + ↵ hint + the ochre
+            Enter button (ADR-0048's already-licensed primed-primary-action carve-out,
+            ADR-0003's unforked EnterButton primitive). */ ""}
+      <div style=${{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px 12px" }}>
         <span aria-hidden="true" style=${{
-          fontFamily: "var(--font-ui)", fontSize: 14, color: "var(--fg-3)", flexShrink: 0,
+          fontFamily: "var(--font-ui)", fontSize: 15, fontWeight: 700, color: "var(--accent-ochre)", flexShrink: 0,
         }}>❯</span>
         <textarea
           ref=${textareaRef}
@@ -1135,21 +1161,11 @@ function BoardPromptBar({ skipPermissions = false }) {
           border: "1px solid var(--hairline)", borderRadius: "var(--radius-sm)",
           padding: "2px 6px", flexShrink: 0,
         }}>↵</span>
-        <button
-          type="button"
-          className="focusable"
-          title=${`Launch ${activeMode.label} — ${activeMode.commandFor(prompt)}`}
-          aria-label=${`Launch ${activeMode.label}`}
-          onClick=${() => fire(highlightedMode)}
-          style=${{
-            display: "inline-flex", alignItems: "center", gap: 5, flexShrink: 0,
-            fontFamily: "var(--font-ui)", fontSize: 12.5, fontWeight: 600,
-            color: "var(--accent-ochre)", background: "var(--accent-ochre-soft)",
-            border: "1px solid var(--accent-ochre)", borderRadius: "var(--radius-sm)",
-            padding: "8px 14px", cursor: "pointer",
-          }}>
-          Enter
-        </button>
+        <span title=${`Launch ${activeMode.label} — ${activeMode.commandFor(prompt)}`}>
+          <${EnterButton}
+            onClick=${() => fire(highlightedMode)}
+            ariaLabel=${`Launch ${activeMode.label}`} />
+        </span>
       </div>
       <${BoardConfetti} fireKey=${confettiKey} />
     </section>`;

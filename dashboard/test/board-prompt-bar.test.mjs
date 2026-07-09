@@ -83,9 +83,9 @@ test('every launch trigger (bare Enter, Ctrl+Enter, Enter button) routes through
   assert.ok(onTabClick, 'onTabClick must exist');
   assert.match(onTabClick[0], /setHighlightedMode\(index\)/, 'clicking a tab must move the committed highlight to it');
   assert.doesNotMatch(onTabClick[0], /fire\(/, 'clicking a tab must NOT launch anything (p8k4d)');
-  // Enter button.
-  const enterButton = bar.match(/<button[\s\S]*?Enter\s*<\/button>/);
-  assert.ok(enterButton, 'an Enter button must exist');
+  // Enter button (agentic-workflow-q7r3x: the unforked EnterButton primitive).
+  const enterButton = bar.match(/<\$\{EnterButton\}[\s\S]*?\/>/);
+  assert.ok(enterButton, 'an EnterButton must exist');
   assert.match(enterButton[0], /onClick=\$\{\(\)\s*=>\s*fire\(highlightedMode\)\}/, 'the Enter button must call fire(highlightedMode)');
   // Bare Enter and Ctrl+Enter (both classify LAUNCH) must also call fire.
   const keyDownFn = bar.match(/const onPromptKeyDown = useCallback\(\(e\) => \{[\s\S]*?\}, \[fire, highlightedMode\]\);/);
@@ -151,11 +151,31 @@ test('a non-highlighted tab never renders the ochre accent token', () => {
   assert.doesNotMatch(colorLine, /:\s*"var\(--accent-ochre\)"\s*;/, 'ochre must not be the unconditional fallback color');
 });
 
-test('the Enter button renders ochre (ADR-0048 primed-primary-action carve-out)', () => {
+// agentic-workflow-q7r3x: the highlighted tab is a filled CELL + a full-width
+// underline (ADR-0051's inset-underline intent) — replacing the prior
+// four-sided rounded-pill look. No corner rounding on an individual cell any
+// more (rounding now belongs to the console shell alone).
+test('the highlighted tab wears a filled cell background, gated behind `highlighted`; a tab cell has no corner rounding of its own', () => {
+  const tab = tabSrc();
+  assert.match(tab, /const background = [^;]+;/, 'a background expression must exist');
+  const backgroundLine = tab.match(/const background = [^;]+;/)[0];
+  assert.match(backgroundLine, /highlighted/, 'the fill must be gated behind `highlighted`');
+  assert.doesNotMatch(backgroundLine, /^const background = "transparent";$/, 'the fill must no longer be unconditionally transparent');
+  assert.doesNotMatch(tab, /borderRadius:\s*"var\(--radius-sm\)"/, 'an individual tab cell must not round its own corners (edge-to-edge cells)');
+});
+
+test('the Enter affordance is the unforked EnterButton primitive (ADR-0003), imported from the styleguide button.js', () => {
+  assert.match(
+    boardSrc,
+    /import\s*\{[^}]*EnterButton[^}]*\}\s*from\s*"[^"]*styleguide\/app\/button\.js"/,
+    'board.js must import EnterButton from the styleguide button.js, unforked',
+  );
   const bar = barSrc();
-  const enterButton = bar.match(/<button[\s\S]*?Enter\s*<\/button>/)[0];
-  assert.match(enterButton, /var\(--accent-ochre\)/, 'the Enter button must use the ochre accent');
-  assert.match(enterButton, /var\(--accent-ochre-soft\)/, 'the Enter button must use the ochre-soft fill (ADR-0048 cta treatment)');
+  assert.match(bar, /<\$\{EnterButton\}/, 'the input row must render the EnterButton component');
+  // The old soft-ochre text "Enter" button markup must be gone — the primitive
+  // owns its own paint now (ADR-0003: consumed unforked, not re-styled here).
+  assert.doesNotMatch(bar, /var\(--accent-ochre-soft\)/, 'board.js must not re-implement the Enter button\'s ochre-soft fill (unforked primitive)');
+  assert.doesNotMatch(bar, />\s*Enter\s*</, 'the old literal "Enter" text button must be gone');
 });
 
 test('the docked console is a position:fixed, ~780px, raised-surface console with a big shadow, above the board in z-order', () => {
@@ -170,12 +190,49 @@ test('the console renders TWO rows: the tablist above, and the chevron + field +
   const bar = barSrc();
   const tablistIdx = bar.indexOf('role="tablist"');
   const textareaIdx = bar.indexOf('<textarea');
-  const enterIdx = bar.lastIndexOf('<button');
+  const enterIdx = bar.lastIndexOf('<${EnterButton}');
   assert.ok(tablistIdx !== -1 && textareaIdx !== -1 && enterIdx !== -1, 'all three landmarks must be present');
   assert.ok(tablistIdx < textareaIdx, 'the tab row must render ABOVE the input row');
   assert.ok(textareaIdx < enterIdx, 'the Enter button must render after (beside) the textarea');
   assert.match(bar, />❯</, 'the input row must render the ❯ chevron');
   assert.match(bar, />↵</, 'the input row must render the ↵ keyboard hint (Enter is now the primary trigger, p8k4d)');
+});
+
+// agentic-workflow-q7r3x: Section 1b layout deltas.
+
+test('the tab row is four edge-to-edge equal-width cells: no inter-tab gap, no horizontal panel padding on the row', () => {
+  const bar = barSrc();
+  const tablistDiv = bar.match(/<div role="tablist"[\s\S]*?>/)[0];
+  assert.doesNotMatch(tablistDiv, /gap:\s*[1-9]/, 'the tablist row must not add inter-tab gap');
+  assert.doesNotMatch(tablistDiv, /padding:\s*"[^"]*\d/, 'the tablist row must carry no horizontal panel padding');
+  const tab = tabSrc();
+  assert.match(tab, /flex:\s*"1 1 0"/, 'each cell must be an equal-width flex-1 cell filling the row');
+});
+
+test('a thin --hairline divider separates each tab cell from its neighbor', () => {
+  const tab = tabSrc();
+  assert.match(tab, /--hairline/, 'a tab cell must carry a --hairline divider');
+});
+
+test('a horizontal --hairline divider separates the tab row from the input row', () => {
+  const bar = barSrc();
+  const tablistIdx = bar.indexOf('role="tablist"');
+  const textareaIdx = bar.indexOf('<textarea');
+  const between = bar.slice(tablistIdx, textareaIdx);
+  assert.match(between, /var\(--hairline\)/, 'a --hairline divider must sit between the tab row and the input row');
+});
+
+test('the leading chevron is bright ochre and bold', () => {
+  const bar = barSrc();
+  const chevron = bar.match(/<span aria-hidden="true" style=\$\{\{[\s\S]*?\}\}>❯<\/span>/);
+  assert.ok(chevron, 'the ❯ chevron span must exist');
+  assert.match(chevron[0], /color:\s*"var\(--accent-ochre\)"/, 'the chevron must be ochre');
+  assert.match(chevron[0], /fontWeight:\s*(700|"bold")/, 'the chevron must be bold');
+});
+
+test('the placeholder copy is unchanged', () => {
+  const bar = barSrc();
+  assert.match(bar, /placeholder="Type a prompt, then choose a mode to launch it…"/, 'the placeholder copy must be unchanged');
 });
 
 test('the keyboard hint and its title reconcile with Enter-as-primary-trigger (p8k4d reverses the ⌘↵/Ctrl+Enter framing)', () => {

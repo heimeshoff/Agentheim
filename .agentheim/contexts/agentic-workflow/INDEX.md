@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 131
+- **Doing:** 0
+- **Done:** 132
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-q7r3x** — Prompt area matches Section 1b of the UX explorations reference exactly (feature) — `doing/agentic-workflow-q7r3x-prompt-bar-match-section-1b.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-q7r3x** — Prompt area matches Section 1b of the UX explorations reference exactly (feature) — `done/agentic-workflow-q7r3x-prompt-bar-match-section-1b.md`
 - **agentic-workflow-p8k4d** — Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects (feature) — `done/agentic-workflow-p8k4d-prompt-bar-enter-launch-ctrl-space-focus-tab-select.md`
 - **agentic-workflow-c2ver** — Board columns — singular "View" chip replacing per-column Sort/Group; add "COLUMNS" label (feature) — `done/agentic-workflow-c2ver-columns-singular-view-chip.md`
 - **agentic-workflow-bz3az** — Board prompt bar — 4-mode tabs row + Ctrl-arrow / Ctrl-Enter keyboard model + ochre active tab (feature) — `done/agentic-workflow-bz3az-prompt-bar-modes-keyboard-model.md`

@@ -50,11 +50,17 @@ import {
 // fire its launch: a label, a one-line meaning (subtitle), a registry glyph
 // name, and the pure `*CommandFor(prompt)` builder (modeling-command.js) that
 // seeds the launch with the live textarea value.
+// Subtitles and glyphs conform to Section 1b (agentic-workflow-q7r3x):
+// subtitles are lowercased and fuller; the glyphs are the concrete
+// design-system-xr4sb set — Inquire keeps its deliberate
+// design-system-r4k8m glyph (`message-circle-question`, unforked, 1b's bare
+// "?" is superseded), while Modeling and Research move off the undeliberate
+// `compass` / `search` defaults onto xr4sb's settled `diamond` / `circle-dot`.
 export const PROMPT_MODES = [
-  { id: 'quick-capture', label: 'Quick Capture', subtitle: 'File it fast', icon: 'plus', commandFor: quickCaptureCommandFor },
-  { id: 'modeling', label: 'Modeling', subtitle: 'Shape into structure', icon: 'compass', commandFor: modelingCommandFor },
-  { id: 'inquire', label: 'Inquire', subtitle: 'Ask the codebase', icon: 'message-circle-question', commandFor: inquireCommandFor },
-  { id: 'research', label: 'Research', subtitle: 'Dig deeper', icon: 'search', commandFor: researchCommandFor },
+  { id: 'quick-capture', label: 'Quick Capture', subtitle: 'file it fast, no ceremony', icon: 'plus', commandFor: quickCaptureCommandFor },
+  { id: 'modeling', label: 'Modeling', subtitle: 'shape into structure', icon: 'diamond', commandFor: modelingCommandFor },
+  { id: 'inquire', label: 'Inquire', subtitle: 'ask the codebase', icon: 'message-circle-question', commandFor: inquireCommandFor },
+  { id: 'research', label: 'Research', subtitle: 'dig deeper', icon: 'circle-dot', commandFor: researchCommandFor },
 ];
 
 // The default AND reset target (ADR-0050 §default/reset): Quick Capture,

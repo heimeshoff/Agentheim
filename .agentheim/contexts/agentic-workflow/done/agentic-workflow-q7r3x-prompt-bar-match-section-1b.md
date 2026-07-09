@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-q7r3x
 title: Prompt area matches Section 1b of the UX explorations reference exactly
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-06
-completed:
+completed: 2026-07-09
 depends_on: [design-system-001-styleguide, design-system-xr4sb]
 blocks: [agentic-workflow-m3vhq]
 tags: [dashboard-redesign, prompt-bar]
@@ -82,3 +82,34 @@ change (p8k4d stands); the placeholder is unchanged.
   tab-cell layout and active-tab underline paint are this task's, consumed unforked
   (ADR-0003). Governing ADRs: ADR-0051 (tab paint), ADR-0048 (ochre carve-out),
   ADR-0016 (de-emphasis), ADR-0050 (interaction model — unchanged).
+
+## Outcome
+
+Every AC shipped. `PromptModeTab` cells are now four edge-to-edge, equal-width flex cells
+(`flex: "1 1 0"`, no inter-tab gap, no border-radius of their own) with a `--hairline`
+divider on the trailing edge of every cell but the last; a new horizontal `--hairline`
+divider div sits between the tablist row and the input row; the console `<section>` moved
+its padding off the shell and onto the input row alone (`overflow: hidden` clips the tab
+row's end cells to the shell's rounded corners). The highlighted tab now paints a filled
+`--surface-2` cell background plus the existing full-width `inset 0 -2px 0
+var(--accent-ochre)` bottom underline (ADR-0051's inset-underline intent), replacing the
+prior rounded-pill-with-gaps look. The leading `❯` chevron is now `--accent-ochre` +
+`fontWeight: 700`. `dashboard/app/prompt-mode.js`'s `PROMPT_MODES` table carries the exact
+Section 1b subtitle copy (`file it fast, no ceremony` / `shape into structure` / `ask the
+codebase` / `dig deeper`) and the xr4sb glyph set (`plus` / `diamond` /
+`message-circle-question` / `circle-dot`). The soft-ochre text "Enter" button is replaced by
+the unforked `EnterButton` primitive (`styleguide/app/button.js`, ADR-0003), wrapped in a
+plain `<span title=...>` (not a fork) so the live-command tooltip survives. The keyboard hint
+chip, placeholder copy, and the whole p8k4d interaction model (bare-Enter-launch,
+Shift+Enter-newline, tab-click-selects-only, Ctrl+Space-focus) are untouched. `dashboard/dist/`
+was rebuilt (`node build.mjs`), landing the `--accent-ochre-fg` token and the new glyph
+geometry that xr4sb deliberately left undelivered. No new ADR — this was a bug fix toward
+the existing ADR-0051 contract. Full suite: 964/964 passing (956 baseline + 8 new tests: 2 in
+`prompt-mode.test.mjs` for subtitle/glyph exactness, 6 in `board-prompt-bar.test.mjs` for the
+edge-to-edge layout, dividers, filled-cell paint, ochre chevron, the unforked EnterButton, and
+the unchanged placeholder).
+
+Key files: `dashboard/app/board.js` (`PromptModeTab`, `BoardPromptBar`), `dashboard/app/prompt-mode.js`
+(`PROMPT_MODES` subtitle/icon values), `dashboard/test/board-prompt-bar.test.mjs`,
+`dashboard/test/prompt-mode.test.mjs`, `dashboard/dist/app.js`, `dashboard/dist/colors_and_type.css`,
+`.agentheim/contexts/agentic-workflow/README.md`.

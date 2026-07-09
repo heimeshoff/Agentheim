@@ -286,14 +286,29 @@ separate BC, but today the whole tool lives in this one.
   every other launch. See ADR-0022, ADR-0017, ADR-0018, ADR-0019, ADR-0003, ADR-0016.
 - **Board prompt bar — the docked two-row console (Quick Capture / Modeling / Inquire /
   Research)** — rebuilt (agentic-workflow-bz3az) from aw-023/aw-065/aw-068's board-flow "Prompt"
-  title + row of flat launch cards into the 1b **docked bottom-center console**:
+  title + row of flat launch cards into the 1b **docked bottom-center console**, then conformed
+  exactly to Section 1b's layout by agentic-workflow-q7r3x:
   `position: fixed`, ~780px, a raised `--surface-1` panel at the `--shadow-lg` elevation, above
   the board in z-order — so it never pushes board content and stays put through the aw-067
-  `scroll-quiet` scroll. Two rows: a **top row of four mode tabs** (`PromptModeTab`, one per
-  `PROMPT_MODES` entry — Quick Capture · Modeling · Inquire · Research, each a name + one-line
-  meaning) and a **bottom row** of a `❯` chevron, a genuinely **multi-line auto-growing**
-  `<textarea>` (soft-wraps, grows to a max then scrolls — aw-038's growth band, unchanged), a
-  `↵` keyboard hint, and an **ochre Enter button**.
+  `scroll-quiet` scroll. Two rows, separated by a horizontal `--hairline` divider: a **top row of
+  four EDGE-TO-EDGE, equal-width mode-tab cells** (`PromptModeTab`, one per `PROMPT_MODES` entry —
+  Quick Capture · Modeling · Inquire · Research, each a name + one-line meaning), no inter-cell
+  gap, no horizontal panel padding on the row — the panel's own `overflow: hidden` +
+  `border-radius` clip the row's two end cells to the shell's rounded corners instead. A thin
+  `--hairline` divider sits on the trailing edge of every cell but the last. Subtitles read,
+  lowercased and fuller: *file it fast, no ceremony* (Quick Capture) · *shape into structure*
+  (Modeling) · *ask the codebase* (Inquire) · *dig deeper* (Research). Glyphs are the concrete
+  design-system-xr4sb set, consumed unforked (ADR-0003) from `styleguide/app/icons.js`: `plus`
+  (Quick Capture) · `diamond` (Modeling) · `message-circle-question` (Inquire, its deliberate
+  design-system-r4k8m glyph, unchanged) · `circle-dot` (Research) — `diamond`/`circle-dot` replace
+  the undeliberate `compass`/`search` defaults Modeling and Research previously wore. The
+  **bottom row** carries a bright, bold ochre `❯` chevron, a genuinely **multi-line auto-growing**
+  `<textarea>` (soft-wraps, grows to a max then scrolls — aw-038's growth band, unchanged), a `↵`
+  keyboard hint, and the styleguide's **`EnterButton`** primitive (`styleguide/app/button.js`,
+  ADR-0003, consumed unforked) — the solid-`--accent-ochre` icon-square with the
+  `corner-down-left` (`↵`) glyph drawn in the dedicated `--accent-ochre-fg` on-accent legibility
+  token, wrapped in a plain `<span title=...>` (not a fork) so the tooltip can still reflect the
+  live seeded command.
   - **Keyboard-committed selection model (ADR-0050, amended by agentic-workflow-p8k4d,
     `dashboard/app/prompt-mode.js`)** — the four modes carry a single committed
     `highlightedMode` **index**, not four independent booleans: `PROMPT_MODES` (fixed order,
@@ -321,12 +336,16 @@ separate BC, but today the whole tool lives in this one.
     `node --test`-covered module in the `board-sort.js`/`board-group.js`/`search-results.js`
     family.
   - **Paint (ADR-0051 amending ADR-0048; ADR-0016 for the rest)** — the highlighted tab alone
-    wears the bounded ochre wayfinding exception (`--accent-ochre` text + an ochre inset
-    underline, the nav-rail idiom turned into a horizontal underline) — the **second** surface
-    ADR-0048's carve-out names, beside the nav-rail active item. The other three tabs
-    de-emphasize by opacity (ADR-0016's unchanged default) — no ring, no new hue. The Enter
-    button wears the already-licensed ADR-0048 "primed primary action" `cta` treatment
-    (`--accent-ochre` text on `--accent-ochre-soft`, an `--accent-ochre` border).
+    wears the bounded ochre wayfinding exception, now (agentic-workflow-q7r3x) a **filled cell
+    background** (`--surface-2`) **plus a full-width ochre bottom inset underline**
+    (`--accent-ochre` text, the nav-rail idiom turned into a horizontal underline) — replacing
+    the earlier rounded-pill-with-gaps look that read as a four-sided ochre box rather than a
+    wayfinding underline. This is the **second** surface ADR-0048's carve-out names, beside the
+    nav-rail active item. The other three tabs de-emphasize by opacity (ADR-0016's unchanged
+    default) — no ring, no new hue, no cell fill. The Enter button is the styleguide's
+    `EnterButton` primitive (ADR-0003), which owns its own already-licensed ADR-0048 "primed
+    primary action" paint (a solid `--accent-ochre` fill, the `corner-down-left` glyph in
+    `--accent-ochre-fg`) — board.js no longer re-implements it locally.
   - Every launch opens a real interactive Claude session through the VS Code **bridge**
     (ADR-0018): `GET /api/bridge` (infrastructure-014) discovers the listener, `GET /health`
     confirms it, `POST /run { prompt }` fires it. **Bridge-absence is a normal mode, never an

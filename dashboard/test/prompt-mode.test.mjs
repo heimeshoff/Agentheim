@@ -34,6 +34,30 @@ test('each mode carries a commandFor builder that is a function', () => {
   }
 });
 
+// agentic-workflow-q7r3x: subtitles conform to Section 1b, lowercased and
+// fuller, exact strings.
+test('subtitles match Section 1b exactly, lowercased and fuller (agentic-workflow-q7r3x)', () => {
+  assert.deepEqual(PROMPT_MODES.map((m) => m.subtitle), [
+    'file it fast, no ceremony',
+    'shape into structure',
+    'ask the codebase',
+    'dig deeper',
+  ]);
+});
+
+// agentic-workflow-q7r3x: the four mode-tab glyphs are the concrete
+// design-system-xr4sb set — Inquire keeps its deliberate design-system-r4k8m
+// glyph; diamond/circle-dot replace the undeliberate compass/search defaults
+// Modeling and Research previously wore.
+test('glyphs are the concrete design-system-xr4sb set (agentic-workflow-q7r3x)', () => {
+  assert.deepEqual(PROMPT_MODES.map((m) => m.icon), [
+    'plus',
+    'diamond',
+    'message-circle-question',
+    'circle-dot',
+  ]);
+});
+
 // --- invariant 2: index always in range (clampPromptModeIndex) ---------
 
 test('clampPromptModeIndex passes through every valid index unchanged', () => {
