@@ -1915,95 +1915,132 @@ function StopDashboardButton({ onClick }) {
     </button>`;
 }
 
-// ── Workflow diagram primitives (agentic-workflow-060) ──────────────────────
+// ── Workflow guide visual grammar (agentic-workflow-060; reworked for clarity) ──
 // Board-local helpers (NOT a design-system primitive — single consumer, content-
-// bound shapes; the seam test failed at refinement). The hand-authored flow visuals
-// for the three workflow segments are built from these. RULES (from aw-060):
+// bound shapes; the seam test failed at refinement). The page speaks a TWO-VOICE
+// grammar — every OCHRE element is the builder's move (a phrase you say, a call
+// you make); everything NEUTRAL is Agentheim's machinery or its artifacts:
+//   • WNode kind="skill"    → ochre-outlined box: a skill YOU invoke by saying so.
+//   • WNode kind="artifact" → neutral box: a thing Agentheim writes or moves.
+//   • WYou                  → filled ochre pill ON an edge: a decision only you make.
+//   • WGuard                → dashed pill ON an edge: an adversarial check by a
+//                             fresh agent (verifier / research-reviewer) — never
+//                             drawn as an actor box.
+// RULES (from aw-060, unchanged by the rework):
 //   • HTML + CSS boxes laid out with flexbox; connectors are CSS-drawn (token-styled
 //     borders / pseudo-edges) — NO inline SVG, NO diagramming library, NO new bundled
 //     runtime dependency.
 //   • Every color / border / fill is a design-system CSS var (ADR-0003, consumed
 //     UNFORKED) so the diagrams track the active light/dark theme automatically.
-//   • Nodes are SKILLS + ARTIFACTS only. Gates / human-in-the-loop checks render as a
-//     marked CHECKPOINT on an edge (WCheckpoint) — never as separate orchestrator /
-//     specialist / verifier / research-reviewer boxes.
+//   • Gates render ON edges (WYou / WGuard pills mid-connector) — never as separate
+//     orchestrator / specialist / verifier / research-reviewer boxes.
 //   • Static (read-only, ADR-0017): no motion by default; any motion added would be
 //     wrapped behind prefers-reduced-motion. There is none today.
 
-// A diagram NODE: a skill or an artifact. `kind` tints the box from tokens —
-//   skill    → accent-ochre outline on accent-tint fill (the verbs that act),
-//   artifact → hairline outline on surface fill (the things produced/moved).
-// `verb` is an optional small mono sub-label (e.g. CAPTURE / REFINE / PROMOTE).
-function WNode({ kind = "skill", label, verb }) {
+// A diagram NODE. `kind` tints the box from tokens — skill (ochre, the moves you
+// invoke) / artifact (neutral, the things produced). `icon` names a styleguide
+// Icon; `verb` is a small mono operation chip (CAPTURE / REFINE / PROMOTE /
+// DISMISS); `note` is a tiny plain-language strapline under the label — the
+// one-line answer to "what does this box do?".
+function WNode({ kind = "skill", icon, label, verb, note }) {
   const skill = kind === "skill";
+  const ink = skill ? "var(--accent-ochre)" : "var(--fg-2)";
   return html`
     <span style=${{
-      display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 1,
-      padding: "5px 9px", borderRadius: "var(--radius-sm)",
-      fontFamily: "var(--font-mono)", fontSize: 11, lineHeight: 1.25, whiteSpace: "nowrap",
-      color: skill ? "var(--accent-ochre)" : "var(--fg-2)",
-      background: skill ? "var(--accent-ochre-tint)" : "var(--surface-1)",
+      display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 2,
+      padding: "7px 12px", borderRadius: "var(--radius-md)",
+      background: skill ? "var(--accent-ochre-tint)" : "var(--surface-0)",
       border: `1px solid ${skill ? "var(--accent-ochre)" : "var(--hairline-strong)"}`,
+      boxShadow: "var(--shadow-sm)",
     }}>
-      <span>${label}</span>
-      ${verb ? html`<span style=${{
-        fontSize: 9, letterSpacing: "0.04em", color: "var(--fg-3)",
-      }}>${verb}</span>` : ""}
+      <span style=${{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+        ${icon ? html`<${Icon} name=${icon} size=${13} color=${ink} />` : ""}
+        <span style=${{
+          fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 500,
+          lineHeight: 1.3, whiteSpace: "nowrap", color: ink,
+        }}>${label}</span>
+        ${verb ? html`<span style=${{
+          fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.08em",
+          padding: "1px 5px", borderRadius: 99, whiteSpace: "nowrap", color: ink,
+          border: `1px solid ${skill ? "var(--accent-ochre-soft)" : "var(--hairline)"}`,
+        }}>${verb}</span>` : ""}
+      </span>
+      ${note ? html`<span style=${{
+        fontFamily: "var(--font-ui)", fontSize: 10.5, color: "var(--fg-3)",
+        whiteSpace: "nowrap",
+      }}>${note}</span>` : ""}
     </span>`;
 }
 
-// A CHECKPOINT marker pinned on an edge — the adversarial gate / human-in-the-loop
-// review. NOT a node: it is rendered ON a connector, styled distinctly (dashed
-// outline, no fill) so it reads as "a check the flow must pass", not "an actor".
-// `tone` = "human" (builder review) or "guard" (verifier / research-reviewer).
-function WCheckpoint({ label, tone = "guard" }) {
-  const human = tone === "human";
+// The BUILDER's move, pinned ON an edge — a filled ochre pill. The one loud
+// element of the page: everywhere it appears, the flow stops until you speak
+// (an opening phrase) or decide (a review / an approval). There is exactly one
+// human in this system, and the pill is their color.
+function WYou({ children }) {
   return html`
-    <span aria-hidden="true" style=${{
-      display: "inline-flex", alignItems: "center", gap: 4,
-      padding: "2px 7px", borderRadius: 99,
-      fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: "0.03em",
-      color: human ? "var(--accent-ochre)" : "var(--fg-3)",
-      background: "transparent",
-      border: `1px dashed ${human ? "var(--accent-ochre)" : "var(--hairline-strong)"}`,
+    <span style=${{
+      display: "inline-flex", alignItems: "baseline", gap: 6,
+      padding: "4px 11px", borderRadius: 99,
+      background: "var(--accent-ochre)", color: "var(--accent-ochre-fg)",
+      fontFamily: "var(--font-mono)", fontSize: 10.5, lineHeight: 1.4,
+      whiteSpace: "nowrap", boxShadow: "var(--shadow-sm)",
     }}>
-      <span style=${{
-        width: 5, height: 5, borderRadius: 99, flexShrink: 0,
-        background: human ? "var(--accent-ochre)" : "var(--fg-4)",
-      }} />
+      <span style=${{ fontWeight: 700, letterSpacing: "0.1em" }}>YOU</span>
+      <span>${children}</span>
+    </span>`;
+}
+
+// An adversarial CHECK pinned ON an edge — a fresh-context agent (verifier /
+// research-reviewer) judging the work before it may pass. Dashed outline, scale
+// icon, no accent: it reads as "a bar the flow must clear", never as an actor.
+function WGuard({ label }) {
+  return html`
+    <span style=${{
+      display: "inline-flex", alignItems: "center", gap: 5,
+      padding: "3px 9px", borderRadius: 99,
+      border: "1px dashed var(--hairline-strong)", color: "var(--fg-3)",
+      fontFamily: "var(--font-mono)", fontSize: 10, whiteSpace: "nowrap",
+      background: "var(--surface-1)",
+    }}>
+      <${Icon} name="scale" size=${11} color="var(--fg-3)" />
       <span>${label}</span>
     </span>`;
 }
 
-// A CSS-drawn connector. `dir` = "down" | "right". `tone` "default" | "fail"
-// (the verifier FAIL loop) colors the line. `dashed` marks a loop-back edge.
-// The arrowhead is a rotated bordered pseudo-box (no SVG). Optional `mid` slot
-// hosts an edge checkpoint / loop label centered on the line.
+// A CSS-drawn connector. `dir` = "down" | "right"; `tone` "default" | "fail"
+// (the re-dispatch loop) colors the line; `dashed` marks a loop-back edge. When
+// a `mid` slot (a WYou / WGuard pill) or a `label` is given, the line SPLITS
+// around it — the pill sits mid-edge, which is the whole grammar: gates live on
+// edges, not in boxes. The arrowhead is a rotated bordered pseudo-box (no SVG).
 function WArrow({ dir = "down", tone = "default", dashed = false, mid, label }) {
   const color = tone === "fail" ? "var(--obligation)" : "var(--hairline-strong)";
   const down = dir === "down";
-  const line = down
-    ? { width: 0, minHeight: 18, borderLeft: `1.5px ${dashed ? "dashed" : "solid"} ${color}` }
-    : { height: 0, minWidth: 26, borderTop: `1.5px ${dashed ? "dashed" : "solid"} ${color}` };
+  const stroke = `1.5px ${dashed ? "dashed" : "solid"} ${color}`;
+  const seg = (len) => down
+    ? { width: 0, minHeight: len, borderLeft: stroke }
+    : { height: 0, minWidth: len, borderTop: stroke };
   const head = {
-    width: 5, height: 5, borderRight: `1.5px solid ${color}`, borderBottom: `1.5px solid ${color}`,
+    width: 6, height: 6, borderRight: `1.5px solid ${color}`, borderBottom: `1.5px solid ${color}`,
     transform: down ? "rotate(45deg)" : "rotate(-45deg)", flexShrink: 0,
-    marginTop: down ? -3 : 0, marginLeft: down ? 0 : -3,
+    marginTop: down ? -4 : 0, marginLeft: down ? 0 : -4,
   };
+  const midContent = mid || (label ? html`<span style=${{
+    fontFamily: "var(--font-mono)", fontSize: 9.5, whiteSpace: "nowrap",
+    color: tone === "fail" ? "var(--obligation)" : "var(--fg-3)",
+  }}>${label}</span>` : null);
   return html`
     <span aria-hidden="true" style=${{
       display: "inline-flex", alignItems: "center", justifyContent: "center",
-      flexDirection: down ? "column" : "row", gap: mid || label ? 4 : 0,
+      flexDirection: down ? "column" : "row", gap: midContent ? 5 : 0,
     }}>
+      ${midContent ? html`
+        <span style=${seg(down ? 10 : 14)} />
+        ${midContent}
+      ` : ""}
       <span style=${{ display: "inline-flex", alignItems: "center", flexDirection: down ? "column" : "row" }}>
-        <span style=${line} />
+        <span style=${seg(midContent ? (down ? 10 : 14) : (down ? 18 : 26))} />
         <span style=${head} />
       </span>
-      ${mid ? mid : ""}
-      ${label ? html`<span style=${{
-        fontFamily: "var(--font-mono)", fontSize: 9, color:
-          tone === "fail" ? "var(--obligation)" : "var(--fg-3)",
-      }}>${label}</span>` : ""}
     </span>`;
 }
 
@@ -2017,19 +2054,21 @@ function WFanRow({ children }) {
 }
 
 // One numbered WORKFLOW SEGMENT (agentic-workflow-059; diagram filled by aw-060): a
-// labelled section that frames the segment's title + ordinal, hosts the hand-authored
-// flow DIAGRAM (passed as `diagram`, with a faithful `diagramLabel` describing the real
-// flow), and renders the supporting caption beneath. Presentation only — the honest,
+// labelled section that frames the segment's title + ordinal + `when` cadence chip
+// (once per project / any time / when tasks are ready — the newcomer's "when do I
+// do this?" answered in the header), hosts the hand-authored flow DIAGRAM (passed
+// as `diagram`, with a faithful `diagramLabel` describing the real flow), and
+// renders the supporting caption beneath. Presentation only — the honest,
 // skill-accurate copy lives inline in WorkflowPage's children, so the verifier can
-// check the prose there. Composed from styleguide tokens consumed UNFORKED (ADR-0003);
-// honors light/dark by token.
+// check the prose there. Composed from styleguide tokens consumed UNFORKED
+// (ADR-0003); honors light/dark by token.
 //
 // `gate` is the segment's explicit human-in-the-loop marker (ADR-0017 / vision
 // non-goal 3: the human stays in the loop at every gate). The diagram is a static
 // HTML+CSS visual (aw-060) inside a `role="img"` frame — inert and read-only (no
 // fetch, no write). Its `aria-label` summarizes the real flow (the visual is
 // decorative-structural; the prose remains the captions beneath).
-function WorkflowSegment({ ordinal, title, gate, diagram, diagramLabel, children }) {
+function WorkflowSegment({ ordinal, title, when, gate, diagram, diagramLabel, children }) {
   return html`
     <section aria-label=${`${title} segment`} style=${{
       display: "flex", flexDirection: "column", gap: 14,
@@ -2043,6 +2082,12 @@ function WorkflowSegment({ ordinal, title, gate, diagram, diagramLabel, children
           margin: 0, fontFamily: "var(--font-ui)", fontSize: 17, fontWeight: 600,
           letterSpacing: "-0.01em", color: "var(--fg-1)",
         }}>${title}</h2>
+        ${when ? html`<span style=${{
+          marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 9.5,
+          letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-3)",
+          padding: "3px 9px", borderRadius: 99, border: "1px solid var(--hairline)",
+          whiteSpace: "nowrap",
+        }}>${when}</span>` : ""}
       </header>
       <div
         role="img"
@@ -2089,65 +2134,77 @@ function Wcode({ children }) {
   }}>${children}</code>`;
 }
 
-// ── The three hand-authored segment diagrams (agentic-workflow-060) ─────────
+// ── The three hand-authored segment diagrams (agentic-workflow-060; reworked) ──
 // Each takes the HONEST shape of its real flow — the three topologies differ on
-// purpose (not a uniform left-to-right lane). Built from WNode / WCheckpoint /
-// WArrow / WFanRow above: skills + artifacts as nodes, gates as edge checkpoints.
+// purpose (not a uniform left-to-right lane). Built from WNode / WYou / WGuard /
+// WArrow / WFanRow above. Every diagram OPENS with a WYou pill quoting the phrase
+// that starts the phase — a newcomer reads each one as "I say this → this happens".
 
-// Segment 1 — PREPARATION: linear, then fan-out. brainstorm → (vision.md +
-// context-map) → fan-out into the four foundation outputs. The whole segment
-// carries the no-code human checkpoint (the builder reviews before anything is
-// stood up).
+// Segment 1 — PREPARE: linear, then fan-out. You say what you want to build;
+// brainstorm runs the no-code Socratic dialogue and writes vision.md +
+// context-map.md; after you approve the vision, the foundation pass fans out
+// into the four foundation outputs.
 function PreparationDiagram() {
   return html`
     <span style=${{
       display: "flex", flexDirection: "column", alignItems: "center", gap: 0,
       fontFamily: "var(--font-ui)",
     }}>
-      <${WNode} kind="skill" label="brainstorm" />
-      <${WArrow} dir="down" mid=${html`<${WCheckpoint} label="no-code review" tone="human" />`} />
+      <${WYou}>"I want to build …"</${WYou}>
+      <${WArrow} dir="down" />
+      <${WNode} kind="skill" icon="lightbulb" label="brainstorm" note="a Socratic dialogue — no code" />
+      <${WArrow} dir="down" />
       <span style=${{ display: "flex", gap: 10 }}>
-        <${WNode} kind="artifact" label="vision.md" />
-        <${WNode} kind="artifact" label="context-map" />
+        <${WNode} kind="artifact" icon="file-text" label="vision.md" />
+        <${WNode} kind="artifact" icon="file-text" label="context-map.md" />
       </span>
-      <${WArrow} dir="down" label="fan-out" />
+      <${WArrow} dir="down" mid=${html`<${WYou}>approve the vision</${WYou}>`} />
       <${WFanRow}>
         <${WNode} kind="artifact" label="infrastructure BC" />
         <${WNode} kind="artifact" label="foundation tasks" />
         <${WNode} kind="artifact" label="walking skeleton" />
-        <${WNode} kind="skill" label="styleguide gate" />
+        <${WNode} kind="artifact" label="styleguide" />
       </${WFanRow}>
     </span>`;
 }
 
-// Segment 2 — CAPTURING: a backlog HUB with loops, not a line. Two intake doors
-// (quick-capture + modeling CAPTURE) converge on the central backlog node; three
-// operations loop back on it — modeling REFINE, research (carrying the review
-// checkpoint), and modeling DISMISS. The human-in-the-loop checkpoint marks the
-// refine / promote-readiness edge.
+// Segment 2 — CAPTURE & REFINE: two intake doors converge on the backlog; the
+// shaping operations (modeling REFINE, research past the research-reviewer
+// check, modeling DISMISS) live in a dashed "while it waits" panel attached
+// under the backlog node — an in-place loop, not a forward edge.
 function CapturingDiagram() {
   return html`
     <span style=${{
-      display: "flex", alignItems: "center", gap: 14, fontFamily: "var(--font-ui)",
+      display: "flex", flexDirection: "column", alignItems: "center", gap: 0,
+      fontFamily: "var(--font-ui)",
     }}>
-      <span style=${{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <${WNode} kind="skill" label="quick-capture" />
-        <${WNode} kind="skill" label="modeling" verb="CAPTURE" />
+      <${WYou}>"I have an idea" · "there's a bug"</${WYou}>
+      <${WArrow} dir="down" />
+      <span style=${{ display: "flex", gap: 12 }}>
+        <${WNode} kind="skill" icon="inbox" label="quick-capture" note="fast — files it raw" />
+        <${WNode} kind="skill" icon="message-circle-question" label="modeling" verb="CAPTURE" note="asks questions as it writes" />
       </span>
-      <${WArrow} dir="right" label="intake" />
-      <${WNode} kind="artifact" label="backlog" />
-      <span style=${{ display: "flex", flexDirection: "column", gap: 6 }}>
-        <span style=${{ display: "flex", alignItems: "center", gap: 6 }}>
-          <${WArrow} dir="right" dashed=${true} mid=${html`<${WCheckpoint} label="human review" tone="human" />`} />
-          <${WNode} kind="skill" label="modeling" verb="REFINE" />
-        </span>
-        <span style=${{ display: "flex", alignItems: "center", gap: 6 }}>
-          <${WArrow} dir="right" dashed=${true} mid=${html`<${WCheckpoint} label="reviewer" tone="guard" />`} />
-          <${WNode} kind="skill" label="research" />
-        </span>
-        <span style=${{ display: "flex", alignItems: "center", gap: 6 }}>
-          <${WArrow} dir="right" dashed=${true} label="loop" />
-          <${WNode} kind="skill" label="modeling" verb="DISMISS" />
+      <${WArrow} dir="down" />
+      <${WNode} kind="artifact" icon="folder" label="backlog/" />
+      <span style=${{
+        marginTop: 12, display: "flex", flexDirection: "column", gap: 8,
+        padding: "10px 14px", borderRadius: "var(--radius-md)",
+        border: "1px dashed var(--hairline-strong)",
+      }}>
+        <span style=${{
+          fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: "0.08em",
+          textTransform: "uppercase", color: "var(--fg-3)", textAlign: "center",
+        }}>⟲ while it waits — shape it, as often as needed</span>
+        <span style=${{
+          display: "flex", flexWrap: "wrap", justifyContent: "center",
+          alignItems: "flex-start", gap: 10,
+        }}>
+          <${WNode} kind="skill" icon="message-circle-question" label="modeling" verb="REFINE" note="a dialogue with you" />
+          <span style=${{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+            <${WNode} kind="skill" icon="flask-conical" label="research" note="imports outside knowledge" />
+            <${WGuard} label="research-reviewer" />
+          </span>
+          <${WNode} kind="skill" icon="trash-2" label="modeling" verb="DISMISS" note="deletes dead ideas + subtree" />
         </span>
       </span>
     </span>`;
@@ -2156,57 +2213,162 @@ function CapturingDiagram() {
 // Segment 3 — PROMOTE & WORK: a pipeline with a retry loop, opening with the
 // PLANNING moment. whats-next (advisory only — it recommends, never moves a
 // task) sits before modeling PROMOTE, at the where-do-I-pick-up decision point
-// (agentic-workflow-q3n7k). Then modeling PROMOTE (backlog → todo) → work
-// (parallel TDD workers) → verifier checkpoint on the edge → commit. The
-// checkpoint shows the FAIL → re-dispatch (×2) → escalate loop back to work;
-// the user-reviews-before-work checkpoint sits on the entry edge.
+// (agentic-workflow-q3n7k). Then modeling PROMOTE (backlog → todo) → the
+// review-then-launch WYou pill → work (parallel TDD workers) → verifier pill on
+// the edge → commit. The FAIL → re-dispatch (×2) → escalate loop sits beside
+// the verifier edge.
 function PromoteWorkDiagram() {
   return html`
     <span style=${{
       display: "flex", flexDirection: "column", alignItems: "center", gap: 0,
       fontFamily: "var(--font-ui)",
     }}>
-      <${WNode} kind="skill" label="whats-next" verb="advisory" />
-      <${WArrow} dir="down" label="recommends" />
+      <${WYou}>"what's next?"</${WYou}>
+      <${WArrow} dir="down" />
+      <${WNode} kind="skill" icon="compass" label="whats-next" note="recommends — never moves a task" />
+      <${WArrow} dir="down" />
       <span style=${{ display: "flex", alignItems: "center", gap: 8 }}>
-        <${WNode} kind="skill" label="modeling" verb="PROMOTE" />
+        <${WNode} kind="skill" icon="message-circle-question" label="modeling" verb="PROMOTE" note="readiness check" />
         <${WArrow} dir="right" label="backlog → todo" />
-        <${WNode} kind="artifact" label="todo" />
+        <${WNode} kind="artifact" icon="square-kanban" label="todo/" />
       </span>
-      <${WArrow} dir="down" mid=${html`<${WCheckpoint} label="user reviews todo" tone="human" />`} />
-      <${WNode} kind="skill" label="work" verb="parallel TDD" />
-      <span style=${{ display: "flex", alignItems: "center", gap: 8 }}>
-        <${WArrow} dir="down" mid=${html`<${WCheckpoint} label="verifier" tone="guard" />`} />
+      <${WArrow} dir="down" mid=${html`<${WYou}>review todo · "start working"</${WYou}>`} />
+      <${WNode} kind="skill" icon="bot" label="work" note="parallel TDD workers" />
+      <span style=${{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <${WArrow} dir="down" mid=${html`<${WGuard} label="verifier" />`} />
         <span style=${{
-          display: "inline-flex", alignItems: "center", gap: 4,
-          fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--obligation)",
-        }}>
-          <${WArrow} dir="down" tone="fail" dashed=${true} />
-          <span>FAIL → re-dispatch ×2 → escalate</span>
+          position: "absolute", left: "100%", top: "50%", transform: "translateY(-50%)",
+          marginLeft: 10, fontFamily: "var(--font-mono)", fontSize: 9.5,
+          color: "var(--obligation)", whiteSpace: "nowrap",
+        }}>FAIL → re-dispatch ×2 → escalate to you</span>
+      </span>
+      <${WNode} kind="artifact" icon="git-commit-horizontal" label="commit" note="one task = one commit" />
+    </span>`;
+}
+
+// ── The at-a-glance loop map (workflow-page rework) ─────────────────────────
+// The hero of the guide: three equal phase cards — 01 runs once, 02/03 are the
+// standing loop — joined left-to-right, with a CSS-drawn dashed return edge from
+// 03 back under 02 ("ship, then capture the next idea"). Pure orientation: a
+// newcomer reads the whole system here before any detail. Same rules as the
+// segment diagrams (tokens unforked, no SVG, no motion, read-only).
+function WorkflowMapCard({ ordinal, icon, title, when, summary }) {
+  return html`
+    <span style=${{
+      flex: "1 1 0", minWidth: 168, display: "flex", flexDirection: "column", gap: 5,
+      padding: "12px 14px", borderRadius: "var(--radius-md)",
+      background: "var(--surface-0)", border: "1px solid var(--hairline-strong)",
+      boxShadow: "var(--shadow-sm)",
+    }}>
+      <span style=${{ display: "flex", alignItems: "center", gap: 7 }}>
+        <span style=${{
+          fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-4)",
+          fontFeatureSettings: '"tnum"',
+        }}>${ordinal}</span>
+        <${Icon} name=${icon} size=${13} color="var(--accent-ochre)" />
+        <span style=${{
+          fontFamily: "var(--font-ui)", fontSize: 13, fontWeight: 600,
+          color: "var(--fg-1)", whiteSpace: "nowrap",
+        }}>${title}</span>
+      </span>
+      <span style=${{
+        fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.08em",
+        textTransform: "uppercase", color: "var(--fg-3)",
+      }}>${when}</span>
+      <span style=${{
+        fontFamily: "var(--font-ui)", fontSize: 11.5, lineHeight: 1.5, color: "var(--fg-2)",
+      }}>${summary}</span>
+    </span>`;
+}
+
+function WorkflowMap() {
+  return html`
+    <span style=${{ display: "flex", flexDirection: "column", minWidth: 620, width: "100%" }}>
+      <span style=${{ display: "flex", alignItems: "stretch", gap: 8 }}>
+        <${WorkflowMapCard} ordinal="01" icon="lightbulb" title="Prepare"
+          when="once per project"
+          summary="Talk the idea into a vision and bounded contexts — before any code." />
+        <span style=${{ alignSelf: "center" }}><${WArrow} dir="right" /></span>
+        <${WorkflowMapCard} ordinal="02" icon="inbox" title="Capture & refine"
+          when="any time"
+          summary="Drop every idea into the backlog; shape it until it's buildable." />
+        <span style=${{ alignSelf: "center" }}><${WArrow} dir="right" /></span>
+        <${WorkflowMapCard} ordinal="03" icon="bot" title="Promote & work"
+          when="when tasks are ready"
+          summary="Promote to todo, launch parallel workers, ship checked commits." />
+      </span>
+      <span aria-hidden="true" style=${{ display: "flex", height: 30, marginTop: 2 }}>
+        <span style=${{ flex: "1 1 0", minWidth: 168 }} />
+        <span style=${{ flex: "2 1 0", position: "relative", margin: "0 70px 8px 70px" }}>
+          <span style=${{
+            position: "absolute", inset: 0,
+            borderLeft: "1.5px dashed var(--hairline-strong)",
+            borderRight: "1.5px dashed var(--hairline-strong)",
+            borderBottom: "1.5px dashed var(--hairline-strong)",
+            borderBottomLeftRadius: 10, borderBottomRightRadius: 10,
+          }} />
+          <span style=${{
+            position: "absolute", left: -3.5, top: -2, width: 6, height: 6,
+            borderLeft: "1.5px solid var(--hairline-strong)",
+            borderTop: "1.5px solid var(--hairline-strong)",
+            transform: "rotate(45deg)",
+          }} />
+          <span style=${{
+            position: "absolute", left: "50%", bottom: -7, transform: "translateX(-50%)",
+            background: "var(--surface-1)", padding: "0 8px",
+            fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--fg-3)",
+            whiteSpace: "nowrap",
+          }}>ship, then capture the next idea</span>
         </span>
       </span>
-      <${WNode} kind="artifact" label="commit" verb="one task = one commit" />
     </span>`;
+}
+
+// The how-to-read key under the map — one live sample of each grammar element
+// with a plain-language label. This legend is what makes the ochre-vs-neutral
+// two-voice encoding legible without being explained in prose.
+function WorkflowLegend() {
+  const item = (sample, text) => html`
+    <span style=${{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+      ${sample}
+      <span style=${{
+        fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--fg-3)",
+        whiteSpace: "nowrap",
+      }}>${text}</span>
+    </span>`;
+  return html`
+    <div aria-label="How to read the diagrams" style=${{
+      display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center",
+      columnGap: 20, rowGap: 8,
+    }}>
+      ${item(html`<${WNode} kind="skill" label="skill" />`, "you invoke it by saying so")}
+      ${item(html`<${WNode} kind="artifact" label="artifact" />`, "Agentheim writes it")}
+      ${item(html`<${WYou}>decide</${WYou}>`, "a call only you make")}
+      ${item(html`<${WGuard} label="check" />`, "a fresh agent judges the work")}
+    </div>`;
 }
 
 // The built-in WORKFLOW guide page (agentic-workflow-058 routing scaffold; real
 // three-segment layout + caption copy added by agentic-workflow-059; diagrams by
-// aw-060; whats-next + inquire added by agentic-workflow-q3n7k). Governed by
-// ADR-0025.
+// aw-060; whats-next + inquire added by agentic-workflow-q3n7k; reworked for
+// first-time comprehension — at-a-glance loop map + legend + two-voice diagrams
+// + cut-down captions). Governed by ADR-0025.
 //
-// It explains Agentheim's workflow as THREE named segments, in order — Preparation,
-// Capturing, Promote & Work — each a labelled section carried by a hand-authored
-// HTML+CSS flow diagram (aw-060: PreparationDiagram / CapturingDiagram /
-// PromoteWorkDiagram, honest per-segment topology) above HONEST, skill-accurate
-// caption copy: it names the real skills/verbs (brainstorm, quick-capture, modeling,
-// research, work) and the real adversarial gates (verifier, research-reviewer), shows
-// quick-capture AND modeling as two distinct intake doors, includes DISMISS, and
-// marks the human-in-the-loop gates (no-code brainstorm, user review before work,
-// escalation to the builder after repeated verification failure). Promote & Work
-// opens with `whats-next` (advisory-only, agentic-workflow-q3n7k) at the planning
-// moment, before modeling PROMOTE. A fourth, un-numbered "Any time" note below the
-// three segments names `inquire` — a read-only lens that sits outside the flow and
-// is usable at any point, never appended into a segment's skill list.
+// The page answers a newcomer's three questions in order: WHAT IS THE SHAPE
+// (the WorkflowMap hero: 01 Prepare once, then the 02↔03 standing loop), HOW DO
+// I READ THE DETAIL (the WorkflowLegend key), and WHAT HAPPENS IN EACH PHASE
+// (three named segments — Prepare, Capture & refine, Promote & work — each a
+// hand-authored HTML+CSS diagram that OPENS with the phrase you say, above one
+// or two short honest captions and an explicit Gate line). The copy names the
+// real skills/verbs (brainstorm, quick-capture, modeling, research, work) and
+// the real adversarial gates (verifier, research-reviewer), shows quick-capture
+// AND modeling as two distinct intake doors, includes DISMISS, and marks the
+// human-in-the-loop gates (no-code brainstorm, review before work, escalation
+// to the builder after repeated verification failure). Promote & work opens
+// with `whats-next` (advisory-only, agentic-workflow-q3n7k) at the planning
+// moment, before modeling PROMOTE. A fourth, un-numbered "Any time" note below
+// the three segments names `inquire` — a read-only lens that sits outside the
+// flow and is usable at any point, never appended into a segment's skill list.
 //
 // It is a STATIC page built into the bundle: NOT an open-intent (no lifecycle
 // `status`, no on-disk `path`), so it never enters isTaskIntent (ADR-0021,
@@ -2231,77 +2393,82 @@ function WorkflowPage() {
           margin: 0, fontFamily: "var(--font-ui)", fontSize: 13.5, lineHeight: 1.65,
           color: "var(--fg-3)",
         }}>
-          Agentheim turns a raw idea into a vision, a vision into a modeled backlog of
-          bounded contexts, and a backlog into parallel, dependency-aware execution. The
-          workflow has three segments — and the human stays in the loop at every gate.
+          You describe what you want and make every call that matters; Agentheim's
+          agents model, build, and check the work in between. Phase 01 runs once per
+          project — 02 and 03 are the loop you live in.
         </p>
       </header>
 
+      <div style=${{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div
+          role="img"
+          aria-label="The Agentheim loop at a glance: phase 01 Prepare runs once per project; phase 02 Capture and refine, and phase 03 Promote and work, repeat as a standing loop — ship, then capture the next idea."
+          style=${{
+            display: "flex", padding: "20px 16px",
+            borderRadius: "var(--radius-md)",
+            border: "1px solid var(--hairline)",
+            background: "var(--surface-1)",
+            overflowX: "auto",
+          }}>
+          <${WorkflowMap} />
+        </div>
+        <${WorkflowLegend} />
+      </div>
+
       <${WorkflowSegment}
         ordinal=${1}
-        title="Preparation"
+        title="Prepare"
+        when="once per project"
         diagram=${html`<${PreparationDiagram} />`}
-        diagramLabel="Preparation flow: the brainstorm skill — past a no-code human review checkpoint — produces the vision.md and context-map artifacts, which fan out into four foundation outputs: the infrastructure bounded context, the foundation decision tasks, the walking-skeleton spike, and the styleguide gate."
-        gate=${html`No code is written in Preparation. The whole segment is a no-code Socratic dialogue with the builder, who reviews the vision and the bounded contexts before anything is stood up.`}>
+        diagramLabel="Prepare flow: you say what you want to build; the brainstorm skill runs a no-code Socratic dialogue and writes the vision.md and context-map.md artifacts; after you approve the vision, a foundation pass fans out into the infrastructure bounded context, the foundation decision tasks, a walking-skeleton spike, and the styleguide."
+        gate=${html`No code is written here. You approve the vision and the bounded contexts before anything is stood up.`}>
         <${WorkflowCaption}>
-          <${Wcode}>brainstorm</${Wcode}> is a no-code Socratic dialogue — six conversational
-          modes pressing on the idea until it holds — that produces <${Wcode}>vision.md</${Wcode}>
-          and <${Wcode}>context-map.md</${Wcode}>.
-        </${WorkflowCaption}>
-        <${WorkflowCaption}>
-          A foundation pass then stands up the <strong>infrastructure</strong> bounded
-          context, the <strong>foundation decision tasks</strong>, and a
-          <strong>walking-skeleton spike</strong> — plus, if the vision implies a frontend,
-          the <strong>design-system styleguide gate</strong>.
+          <${Wcode}>brainstorm</${Wcode}> questions the idea until it holds, then writes
+          <${Wcode}> vision.md</${Wcode}> and <${Wcode}>context-map.md</${Wcode}>. A
+          foundation pass stands up the <strong>infrastructure</strong> bounded context,
+          the first decision tasks, a <strong>walking-skeleton spike</strong> — and, for
+          frontends, the styleguide.
         </${WorkflowCaption}>
       </${WorkflowSegment}>
 
       <${WorkflowSegment}
         ordinal=${2}
-        title="Capturing"
+        title="Capture & refine"
+        when="any time"
         diagram=${html`<${CapturingDiagram} />`}
-        diagramLabel="Capturing flow: two intake doors — the quick-capture skill and the modeling CAPTURE skill — converge on a central backlog hub. Three operations loop back on the backlog: modeling REFINE past a human-review checkpoint, research past a reviewer checkpoint, and modeling DISMISS."
-        gate=${html`Refinement is human-in-the-loop. The builder drives the Socratic dialogue; nothing is promoted to <${Wcode}>todo</${Wcode}> from here, and research is not citable until the <${Wcode}>research-reviewer</${Wcode}> passes it.`}>
+        diagramLabel="Capture and refine flow: your ideas enter through two doors — quick-capture, which files the raw thought, and modeling CAPTURE, which asks questions as it writes — both landing in the backlog. While a task waits there, modeling REFINE shapes it with you, research imports outside knowledge past the research-reviewer check, and modeling DISMISS deletes dead ideas."
+        gate=${html`Nothing leaves the backlog on its own. You drive refinement, and only you decide what gets promoted.`}>
         <${WorkflowCaption}>
-          Two distinct intake doors land tasks in <${Wcode}>backlog/</${Wcode}>:
-          <${Wcode}>quick-capture</${Wcode}> (fast, no questions, raw) and
-          <${Wcode}>modeling</${Wcode}> CAPTURE (a Socratic dialogue that corners ambiguity
-          as it captures).
+          Two doors into <${Wcode}>backlog/</${Wcode}>: <${Wcode}>quick-capture</${Wcode}> files
+          the raw thought and gets out of your way; <${Wcode}>modeling</${Wcode}> CAPTURE
+          asks questions while it writes.
         </${WorkflowCaption}>
         <${WorkflowCaption}>
-          <${Wcode}>modeling</${Wcode}> REFINE deepens an existing task; <${Wcode}>research</${Wcode}>
-          feeds external knowledge mid-model and is gated by the <${Wcode}>research-reviewer</${Wcode}>
-          (a fresh-context skeptic) before it can be cited.
-        </${WorkflowCaption}>
-        <${WorkflowCaption}>
-          <${Wcode}>modeling</${Wcode}> DISMISS cascade-deletes an abandoned task and its
-          dependent subtree under a single re-confirmation, so the backlog never silently
-          rots.
+          While a task waits, <${Wcode}>modeling</${Wcode}> REFINE shapes it until it is
+          buildable, <${Wcode}>research</${Wcode}> imports outside knowledge — citable only
+          after the <${Wcode}>research-reviewer</${Wcode}> passes it — and
+          <${Wcode}> modeling</${Wcode}> DISMISS deletes dead ideas with their dependent
+          subtree.
         </${WorkflowCaption}>
       </${WorkflowSegment}>
 
       <${WorkflowSegment}
         ordinal=${3}
-        title="Promote & Work"
+        title="Promote & work"
+        when="when tasks are ready"
         diagram=${html`<${PromoteWorkDiagram} />`}
-        diagramLabel="Promote and Work flow: the whats-next skill recommends the next sensible task, advisory only; then modeling PROMOTE moves a task from backlog to todo; past a user-reviews-todo checkpoint the work skill runs parallel TDD workers; a verifier checkpoint on the edge guards the commit, with a FAIL re-dispatch loop (up to twice, then escalate) back to work. Every passing task becomes exactly one commit."
-        gate=${html`The builder reviews the <${Wcode}>todo</${Wcode}> tasks before <${Wcode}>work</${Wcode}> runs; the <${Wcode}>verifier</${Wcode}> guards every commit; a verification that keeps failing escalates to the builder rather than committing plausible-but-wrong work.`}>
+        diagramLabel="Promote and work flow: whats-next recommends the next move, advisory only; modeling PROMOTE moves a task from backlog to todo; you review todo and say start working; the work skill dispatches parallel TDD workers; a verifier judges every result before commit — a FAIL is re-dispatched up to twice, then escalates to you. Every passing task becomes exactly one commit."
+        gate=${html`You review <${Wcode}>todo</${Wcode}> before launching; the <${Wcode}>verifier</${Wcode}> guards every commit — a task that keeps failing escalates to you instead of shipping plausible-but-wrong work.`}>
         <${WorkflowCaption}>
-          <${Wcode}>whats-next</${Wcode}> opens this segment at the planning moment: it reads
-          the boards, the vision, and the recent protocol, then recommends the single next
-          sensible move — advisory only, it never moves a task itself.
+          <${Wcode}>whats-next</${Wcode}> reads the boards and recommends one next move —
+          advisory only. <${Wcode}>modeling</${Wcode}> PROMOTE runs a readiness check and
+          moves the task <${Wcode}>backlog → todo</${Wcode}>.
         </${WorkflowCaption}>
         <${WorkflowCaption}>
-          <${Wcode}>modeling</${Wcode}> PROMOTE runs a readiness check and moves a task
-          <${Wcode}>backlog → todo</${Wcode}>. <${Wcode}>work</${Wcode}> then resolves the
-          dependency DAG and dispatches <strong>parallel TDD workers</strong> — independent
-          work runs at once, without two workers colliding on the same file.
-        </${WorkflowCaption}>
-        <${WorkflowCaption}>
-          Each worker's SUCCESS passes a fresh-context <${Wcode}>verifier</${Wcode}> gate
-          before anything is committed. A FAIL re-dispatches the task (up to twice); if it
-          still fails, it escalates to the builder. Every passing task becomes exactly one
-          commit — <strong>one task = one commit</strong>.
+          <${Wcode}>work</${Wcode}> resolves dependencies and dispatches <strong>parallel
+          TDD workers</strong>. Every SUCCESS faces a fresh-context
+          <${Wcode}> verifier</${Wcode}> before commit — <strong>one task = one
+          commit</strong>.
         </${WorkflowCaption}>
       </${WorkflowSegment}>
 
@@ -2317,11 +2484,10 @@ function WorkflowPage() {
           margin: 0, fontFamily: "var(--font-ui)", fontSize: 13.5, lineHeight: 1.65,
           color: "var(--fg-3)",
         }}>
-          <${Wcode}>inquire</${Wcode}> sits outside these three segments — a read-only,
-          code-grounded lens over the project, usable at any point in the workflow. Ask it
-          how something works or what was decided and it answers from the project's own
-          memory (index, READMEs, ADRs, boards), verified against the source; it never
-          edits code, moves a task, or commits.
+          <${Wcode}>inquire</${Wcode}> works at any point, outside the three phases: ask
+          how something works, what was decided, or whether it's built yet, and it answers
+          from the project's own memory (index, READMEs, ADRs, boards), checked against
+          the source. Read-only — it never edits code, moves a task, or commits.
         </p>
       </section>
     </section>`;
