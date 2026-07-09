@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 2
-- **Todo:** 0
+- **Backlog:** 1
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 135
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-dk3vz** — rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0} (bug) — `todo/agentic-workflow-dk3vz-rotation-unparseable-done-list-silent-zero.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -82,7 +83,6 @@ research touching this BC, and concept synthesis pages.
 ### Backlog
 <!-- backlog-list:start -->
 - **agentic-workflow-wq7fn** — Fail-closed pre-check misses the task-counts lines — adjustIndexCount can still throw mid-mutation (bug) — `backlog/agentic-workflow-wq7fn-precheck-misses-count-lines.md`
-- **agentic-workflow-dk3vz** — rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0} (bug) — `backlog/agentic-workflow-dk3vz-rotation-unparseable-done-list-silent-zero.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

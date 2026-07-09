@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 18:44 -- Modeling / Promoted: agentic-workflow-dk3vz - rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0}
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-09 18:41 -- Modeling / Refined: agentic-workflow-dk3vz - rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0}
 
 **Type:** Modeling / Refine

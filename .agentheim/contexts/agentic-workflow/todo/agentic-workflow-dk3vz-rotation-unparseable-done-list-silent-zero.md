@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-dk3vz
 title: rotateIndexDoneList reads an unparseable done-list as empty — silent {ok:true, liveEntries:0}
-status: backlog
+status: todo
 type: bug
 context: agentic-workflow
 created: 2026-07-09
