@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 134
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-aqyqd** — Every prompt-bar mode requires a prompt — the decline-to-launch rule generalizes from Plain to all five — `todo/agentic-workflow-aqyqd-prompt-required-for-every-mode.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-aqyqd** — Every prompt-bar mode requires a prompt — the decline-to-launch rule generalizes from Plain to all five (feature) — `doing/agentic-workflow-aqyqd-prompt-required-for-every-mode.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

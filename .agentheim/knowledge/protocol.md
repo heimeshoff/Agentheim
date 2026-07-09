@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 16:27 -- Batch started: [agentic-workflow-aqyqd]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-aqyqd - Every prompt-bar mode requires a prompt — the decline-to-launch rule generalizes from Plain to all five
+**Parallel:** no (1 worker — the full ready set; agentic-workflow-aqyqd is the only task in todo/ across all three BCs, both depends_on satisfied. MAX_PARALLEL=3 not reached, nothing held back.)
+
+---
+
 ## 2026-07-09 16:12 -- Modeling / Captured: agentic-workflow-aqyqd - Every prompt-bar mode requires a prompt — the decline-to-launch rule generalizes from Plain to all five
 
 **Type:** Modeling / Capture

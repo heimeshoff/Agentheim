@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-aqyqd
 title: Every prompt-bar mode requires a prompt — the decline-to-launch rule generalizes from Plain to all five
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-09
