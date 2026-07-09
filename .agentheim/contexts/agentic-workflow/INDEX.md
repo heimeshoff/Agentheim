@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 133
+- **Doing:** 0
+- **Done:** 134
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-m3vhq** — Prompt bar — add a "Plain" mode that runs the prompt directly on Claude (feature) — `doing/agentic-workflow-m3vhq-prompt-bar-plain-mode.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-m3vhq** — Prompt bar — add a "Plain" mode that runs the prompt directly on Claude (feature) — `done/agentic-workflow-m3vhq-prompt-bar-plain-mode.md`
 - **agentic-workflow-h4n2v** — Stop dashboard menu item calls the stop script, not the slash command (feature) — `done/agentic-workflow-h4n2v-stop-dashboard-calls-stop-script-not-command.md`
 - **agentic-workflow-q7r3x** — Prompt area matches Section 1b of the UX explorations reference exactly (feature) — `done/agentic-workflow-q7r3x-prompt-bar-match-section-1b.md`
 - **agentic-workflow-p8k4d** — Prompt bar — Enter launches, Shift+Enter newlines, Ctrl+Space focuses, tab-click only selects (feature) — `done/agentic-workflow-p8k4d-prompt-bar-enter-launch-ctrl-space-focus-tab-select.md`

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 16:02 -- Task verified and completed: agentic-workflow-m3vhq - Prompt bar — add a "Plain" mode that runs the prompt directly on Claude
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-m3vhq - Prompt bar — add a "Plain" mode that runs the prompt directly on Claude
+**Summary:** Prompt bar gains a fifth Plain mode that sends the prompt to Claude verbatim, and the first mode that can decline to launch
+**Duration:** 20m
+**Verification:** PASS (iteration 1)
+**Files changed:** 9
+**Tests added:** 14
+**ADRs written:** none
+
+---
+
 ## 2026-07-09 15:41 -- Batch started: [agentic-workflow-m3vhq]
 
 **Type:** Work / Batch start

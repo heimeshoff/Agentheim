@@ -4,16 +4,20 @@
 // aw-020's bare Quick Capture / Modeling column buttons were first relocated into a
 // board-level prompt bar (aw-023), then restyled into launch cards (aw-065/aw-068).
 // bz3az rebuilds that flat row of cards into the 1b DOCKED bottom-center console: a
-// top row of four PromptModeTab tabs (Quick Capture · Modeling · Inquire · Research,
+// top row of PromptModeTab tabs (Quick Capture · Modeling · Inquire · Research,
 // PROMPT_MODES from dashboard/app/prompt-mode.js) carrying a single committed
 // `highlightedMode` (ADR-0050), and a bottom row of a chevron + the single-line
 // auto-growing prompt field + a keyboard hint + an ochre Enter button.
+// agentic-workflow-m3vhq appends a FIFTH tab, Plain — the first mode that can
+// DECLINE to launch (an empty prompt is a true no-op, gated by the shared
+// canFirePromptMode predicate, consulted by both fire() and the Enter button's
+// disabled state).
 //
 // Every trigger that can launch a mode's seeded command — clicking its tab, the
 // Enter button, or Ctrl+Enter — routes through the ONE `fire(modeIndex)` function,
 // so all three share the SAME launchOrCopy bridge-or-clipboard path, the same armed
 // skipPermissions thread, and the same onResult clear-textarea + confetti + reset
-// (mirroring aw-023's contract, now for four modes instead of independent buttons).
+// (mirroring aw-023's contract, now for five modes instead of independent buttons).
 //
 // The board's React glue has no DOM render harness in this project — the idiom
 // (aw-016/020/022/065) is: pure string/interaction logic gets `node --test` coverage
@@ -51,7 +55,7 @@ test('BoardPromptBar imports the ADR-0050 pure keyboard model from prompt-mode.j
   );
 });
 
-test('the prompt bar renders the four mode tabs from PROMPT_MODES, in fixed order', () => {
+test('the prompt bar renders all PROMPT_MODES tabs (five, since agentic-workflow-m3vhq), in fixed order', () => {
   const bar = barSrc();
   assert.match(bar, /role="tablist"/, 'the top row must be a tablist');
   assert.match(bar, /PROMPT_MODES\.map\(/, 'the tabs must be rendered by mapping PROMPT_MODES');
@@ -303,6 +307,46 @@ test('a successful launch/copy clears the textarea and fires confetti; silent (n
   assert.match(bar, /res\.copied/, 'must check whether the clipboard copy landed');
   assert.match(bar, /setConfettiKey/, 'a successful action must fire confetti');
   assert.match(bar, /<\$\{BoardConfetti\}\s+fireKey=\$\{confettiKey\}/, 'BoardConfetti must still be mounted off confettiKey');
+});
+
+// --- agentic-workflow-m3vhq: Plain mode + decline-to-launch -------------
+
+test('BoardPromptBar imports canFirePromptMode from prompt-mode.js (agentic-workflow-m3vhq)', () => {
+  assert.match(
+    boardSrc,
+    /import\s*\{[^}]*canFirePromptMode[^}]*\}\s*from\s*"\.\/prompt-mode\.js"/,
+    'board.js must import canFirePromptMode from prompt-mode.js',
+  );
+});
+
+test('fire() early-returns before launchOrCopy when canFirePromptMode is false — no bridge call, no clipboard, no confetti, no reset (agentic-workflow-m3vhq)', () => {
+  const bar = barSrc();
+  const fireFn = bar.match(/const fire = useCallback\(\(modeIndex\) => \{[\s\S]*?\}, \[[^\]]*\]\);/);
+  assert.ok(fireFn, 'fire must exist');
+  assert.match(fireFn[0], /canFirePromptMode\(/, 'fire must consult the shared canFirePromptMode predicate');
+  const guardIdx = fireFn[0].indexOf('canFirePromptMode(');
+  const launchIdx = fireFn[0].indexOf('launchOrCopy(');
+  assert.ok(guardIdx !== -1 && launchIdx !== -1 && guardIdx < launchIdx,
+    'the canFirePromptMode guard must run BEFORE launchOrCopy, so a decline never bridges, copies, or confettis');
+});
+
+test('the Enter button renders disabled exactly when canFirePromptMode(highlightedMode, prompt) is false, via the unforked disabled prop (agentic-workflow-m3vhq)', () => {
+  const bar = barSrc();
+  assert.match(bar, /canFirePromptMode\(highlightedMode,\s*prompt\)/, 'BoardPromptBar must consult the shared predicate for the button state');
+  const enterButton = bar.match(/<\$\{EnterButton\}[\s\S]*?\/>/);
+  assert.ok(enterButton, 'an EnterButton must exist');
+  assert.match(enterButton[0], /disabled=\$\{[^}]*\}/, 'the disabled prop must be forwarded to EnterButton');
+  assert.doesNotMatch(bar, /pointer-events:\s*["']none["']/, 'a disabled Enter button must never be faked with a pointer-events wrapper');
+});
+
+test('the Enter affordance\'s title/aria-label never render an empty command string — Plain + blank prompt reads "Type a prompt to launch Plain" (agentic-workflow-m3vhq)', () => {
+  const bar = barSrc();
+  assert.match(bar, /Type a prompt to launch \$\{activeMode\.label\}/, 'the decline-hint text must read "Type a prompt to launch <Mode>"');
+  assert.doesNotMatch(
+    bar,
+    /title=\$\{`Launch \$\{activeMode\.label\} — \$\{activeMode\.commandFor\(prompt\)\}`\}/,
+    'the wrapper title must no longer unconditionally render the (possibly empty) command string',
+  );
 });
 
 test('board.js still imports WORK_COMMAND from modeling-command (the topbar Work launch, untouched by this rebuild)', () => {

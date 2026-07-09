@@ -4,7 +4,7 @@ title: Prompt bar gains a keyboard-committed single-selection model, superseding
 scope: agentic-workflow
 status: proposed
 date: 2026-07-05
-related_tasks: [agentic-workflow-s7gev, agentic-workflow-bz3az, agentic-workflow-p8k4d]
+related_tasks: [agentic-workflow-s7gev, agentic-workflow-bz3az, agentic-workflow-p8k4d, agentic-workflow-m3vhq]
 related_adrs: [ADR-0048]
 ---
 
@@ -193,6 +193,54 @@ family membership are unaffected.
 carve-outs) and ADR-0016 are unaffected — this amendment, like the ADR it amends, is
 interaction-only.
 
+## Amendment — 2026-07-09 (agentic-workflow-m3vhq): a fifth mode, Plain, and a mode may now decline to launch
+
+A fifth mode, **Plain**, is appended LAST to `PROMPT_MODES` — the typed prompt goes to
+Claude verbatim, with no skill, no slash command, no routing (`plainCommandFor`,
+`modeling-command.js`). This amendment extends three of this ADR's mechanics from four
+modes to five, and — for the first time — makes a genuinely new property of the model
+explicit: **a mode may decline to launch.** Every other clause of the Decision above and
+of the p8k4d amendment (the single `highlightedMode` index, invariants 1 and 4, the two
+orthogonal committed-selection/hover channels, the default/reset target, the
+click-selects-only / Enter-launches / Ctrl+Space model) is **unchanged**.
+
+1. **Mode count four → five; index bound `0..3` → `0..4`.** `PROMPT_MODES.length` is now
+   5. `clampPromptModeIndex` bounds `0..4`, not `0..3` — `clampPromptModeIndex(5)` (not
+   `4`) is now the first out-of-range input that degrades to the default. Quick Capture
+   stays index `0` — the mount default and post-launch reset target are **unchanged**;
+   Plain is a peer appended at the end, never promoted to the baseline the others are
+   shortcuts from.
+2. **Wrap targets change accordingly (invariant 3, otherwise untouched).** Ctrl+→ past
+   Plain (index 4, was Research/index 3) wraps to Quick Capture (0); Ctrl+← before Quick
+   Capture (0) wraps to Plain (4, was Research/3). The wraparound is still total and
+   deterministic for every index and direction — only the boundary index moved from 3 to
+   4.
+3. **A mode may now DECLINE to launch — the genuinely new property.** Every mode before
+   Plain always fired: an empty prompt still produced a meaningful bare command
+   (`/agentheim:modeling`, etc.), so `fire()` never needed to ask "can this mode launch
+   right now?" — the answer was always yes. Plain's command *is* the prompt
+   (`plainCommandFor`), so an empty/whitespace-only prompt has nothing to send. This
+   introduces `requiresPrompt: true` on a `PROMPT_MODES` entry (false/absent on the four
+   legacy modes) and a new pure predicate, `canFirePromptMode(index, prompt)`
+   (`prompt-mode.js`), consulted by both `fire()`'s guard and the Enter button's
+   `disabled` state — the ONE place "can this mode fire?" is answered, rather than two
+   call sites re-deriving it independently. A decline is a true no-op: no bridge call, no
+   clipboard write, no confetti, no textarea clear, no highlight reset, no feedback chip.
+   **`promptBarKeyIntent` (invariant 4) is untouched by this** — bare Enter on an empty
+   Plain prompt still classifies as `launch`; the decline happens downstream in `fire()`,
+   not in the classifier, so invariant 4 stays a disjoint, keyboard-only classification
+   with no notion of "which mode" or "is the prompt empty."
+
+**Naming, unchanged.** The pure module stays `dashboard/app/prompt-mode.js`; it gains one
+new export, `canFirePromptMode`, alongside the four already named
+(`PROMPT_MODES`, `nextPromptModeIndex`, `clampPromptModeIndex`, `promptBarKeyIntent`).
+
+**Paint untouched.** ADR-0048 / ADR-0051 (the ochre highlighted-tab and Enter-button
+carve-outs) and ADR-0016 govern Plain's tab exactly as they govern the other four — no new
+paint decision. The Enter button's `disabled` prop (`design-system-tfhn6`) is consumed
+unforked, painted as opacity de-emphasis per ADR-0016 (already how `EnterButton` renders
+disabled — no new CSS here).
+
 ## Consequences
 
 - `dashboard/app/prompt-mode.js` (not yet written) has a named contract before
@@ -220,3 +268,8 @@ interaction-only.
 - **(Amended by agentic-workflow-p8k4d)** click and commit are now cleanly separated:
   clicking a tab is purely selection, launching is purely Enter/Ctrl+Enter/the Enter
   button — no trigger both selects and launches in the same gesture any more.
+- **(Amended by agentic-workflow-m3vhq)** `PROMPT_MODES` holds five modes, not four;
+  `clampPromptModeIndex` bounds `0..4`; Ctrl+←/→ wrap against Plain (index 4) instead of
+  Research (index 3). The model gains its first decline-to-launch mode (Plain,
+  `requiresPrompt: true`), governed by the new `canFirePromptMode` predicate — invariant
+  4 (`promptBarKeyIntent`) is untouched by this; the decline is a `fire()`-level concern.

@@ -168,6 +168,24 @@ export function inquireCommandFor(prompt) {
 }
 
 /**
+ * Build the PLAIN command — the fifth prompt-bar mode (agentic-workflow-m3vhq,
+ * ADR-0050 amended). Plain is the escape hatch from every other mode's
+ * ceremony: the typed prompt goes to Claude VERBATIM, with no skill, no slash
+ * command, no routing. It is deliberately the ONE builder with no bare-command
+ * constant — there is no skill to name, so an empty prompt degrades to the
+ * empty string rather than a bare command, letting the caller (BoardPromptBar's
+ * `fire`, gated by `canFirePromptMode` in prompt-mode.js) treat Plain as a
+ * true no-op when nothing has been typed.
+ * @param {string} [prompt] — the live textarea contents.
+ * @returns {string} the trimmed prompt verbatim for a real prompt, else ''
+ *   (missing / whitespace-only / non-string all degrade to ''). Pure: no DOM,
+ *   no I/O, never throws.
+ */
+export function plainCommandFor(prompt) {
+  return safePrompt(prompt);
+}
+
+/**
  * Build the per-card REFINE command — what the backlog card's Refine launch
  * button seeds (aw-022). Refine runs the full Socratic refinement of the ticket.
  * @param {string} [id] — the card's ticket id.

@@ -3,12 +3,14 @@
    agentic-workflow-bz3az)
 
    Pure, framework-free judgment behind the board prompt bar's docked two-row
-   console: which of the four modes (Quick Capture / Modeling / Inquire /
-   Research) is the single COMMITTED highlight, how Ctrl+←/→ cycles it, and how
-   a keydown on the prompt field is classified into exactly one of four
-   disjoint intents. No React, no htm, no DOM, so this is unit-testable under
-   `node --test`, joining the pure-module family (board-sort.js / board-group.js
-   / search-results.js).
+   console: which of the five modes (Quick Capture / Modeling / Inquire /
+   Research / Plain — Plain appended last by agentic-workflow-m3vhq) is the
+   single COMMITTED highlight, how Ctrl+←/→ cycles it, how a keydown on the
+   prompt field is classified into exactly one of four disjoint intents, and
+   (since m3vhq) whether the highlighted mode can fire at all right now. No
+   React, no htm, no DOM, so this is unit-testable under `node --test`,
+   joining the pure-module family (board-sort.js / board-group.js /
+   search-results.js).
 
    ADR-0050 names this module and its exported shape (PROMPT_MODES,
    nextPromptModeIndex, clampPromptModeIndex, promptBarKeyIntent) and states
@@ -32,6 +34,16 @@
    allowed to insert the line break natively, retiring aw-038's single-line
    collapse. The 'swallow' label no longer exists.
 
+   AMENDED by agentic-workflow-m3vhq (see ADR-0050's second "## Amendment"
+   section): a fifth mode, Plain, is appended last, and index bounds/wrap
+   targets move from 0..3 to 0..4 accordingly (invariants 1-3 otherwise
+   unchanged). Plain introduces a genuinely new property this module now also
+   carries: a mode may DECLINE to launch. `canFirePromptMode(index, prompt)`
+   is the one predicate both `fire()`'s guard and the Enter button's disabled
+   state consult; `promptBarKeyIntent` (invariant 4) is UNTOUCHED by this —
+   bare Enter still classifies as 'launch' regardless of mode/prompt content,
+   the decline happens downstream in fire(), not in the classifier.
+
    Color/paint is explicitly out of scope here (ADR-0050 "Out of scope") — this
    module carries only the interaction judgment; ADR-0048/ADR-0051 govern how
    the highlighted tab is painted, in board.js.
@@ -42,11 +54,13 @@ import {
   modelingCommandFor,
   inquireCommandFor,
   researchCommandFor,
+  plainCommandFor,
 } from './modeling-command.js';
 
-// The four modes, in the FIXED order the board renders them (ADR-0050):
-// Quick Capture (index 0, the default/reset target) · Modeling · Inquire ·
-// Research. Each entry carries what BoardPromptBar needs to render a tab and
+// The five modes, in the FIXED order the board renders them (ADR-0050,
+// amended by agentic-workflow-m3vhq): Quick Capture (index 0, the
+// default/reset target) · Modeling · Inquire · Research · Plain (appended
+// last). Each entry carries what BoardPromptBar needs to render a tab and
 // fire its launch: a label, a one-line meaning (subtitle), a registry glyph
 // name, and the pure `*CommandFor(prompt)` builder (modeling-command.js) that
 // seeds the launch with the live textarea value.
@@ -56,11 +70,19 @@ import {
 // design-system-r4k8m glyph (`message-circle-question`, unforked, 1b's bare
 // "?" is superseded), while Modeling and Research move off the undeliberate
 // `compass` / `search` defaults onto xr4sb's settled `diamond` / `circle-dot`.
+// agentic-workflow-m3vhq appends a FIFTH mode, Plain, LAST. Quick Capture
+// stays index 0 (the mount default and post-launch reset target, unchanged) —
+// Plain is a peer, not a promoted baseline. Plain is the first mode carrying
+// `requiresPrompt: true`: unlike the four legacy modes (whose bare commands
+// are meaningful even on an empty prompt), Plain's command IS the prompt —
+// an empty prompt has nothing to send, so Plain is the first mode that can
+// DECLINE to launch (see `canFirePromptMode` below).
 export const PROMPT_MODES = [
   { id: 'quick-capture', label: 'Quick Capture', subtitle: 'file it fast, no ceremony', icon: 'plus', commandFor: quickCaptureCommandFor },
   { id: 'modeling', label: 'Modeling', subtitle: 'shape into structure', icon: 'diamond', commandFor: modelingCommandFor },
   { id: 'inquire', label: 'Inquire', subtitle: 'ask the codebase', icon: 'message-circle-question', commandFor: inquireCommandFor },
   { id: 'research', label: 'Research', subtitle: 'dig deeper', icon: 'circle-dot', commandFor: researchCommandFor },
+  { id: 'plain', label: 'Plain', subtitle: 'straight to Claude, no skill', icon: 'bot', commandFor: plainCommandFor, requiresPrompt: true },
 ];
 
 // The default AND reset target (ADR-0050 §default/reset): Quick Capture,
@@ -104,6 +126,32 @@ export function nextPromptModeIndex(current, direction) {
   const base = clampPromptModeIndex(current);
   const step = direction < 0 ? -1 : 1;
   return (base + step + len) % len;
+}
+
+/**
+ * The ONE predicate that decides whether a mode can fire right now
+ * (agentic-workflow-m3vhq). Both `fire()`'s guard (board.js) and the Enter
+ * button's `disabled` state consult this single function rather than each
+ * re-deriving "can this mode launch?" independently.
+ *
+ * Plain (`requiresPrompt: true`) is the first mode that can DECLINE to
+ * launch: its command IS the prompt, so an empty/whitespace-only prompt has
+ * nothing to send. The four legacy modes always fire, empty prompt or not —
+ * their bare commands (`/agentheim:modeling`, etc.) are meaningful on their
+ * own.
+ * @param {*} index — a candidate PROMPT_MODES index (clamped internally, so
+ *   an out-of-range index never throws).
+ * @param {*} prompt — the live textarea contents (trimmed internally; a
+ *   missing/non-string prompt is treated as empty).
+ * @returns {boolean} `false` exactly when the mode at `index` has
+ *   `requiresPrompt: true` AND the trimmed prompt is empty; `true` otherwise.
+ *   Pure: no DOM, no I/O, never throws.
+ */
+export function canFirePromptMode(index, prompt) {
+  const mode = PROMPT_MODES[clampPromptModeIndex(index)];
+  if (!mode.requiresPrompt) return true;
+  const trimmed = typeof prompt === 'string' ? prompt.trim() : '';
+  return trimmed.length > 0;
 }
 
 // The four disjoint key-intent labels `promptBarKeyIntent` classifies every

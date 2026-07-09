@@ -31,6 +31,7 @@ import {
   modelingCommandFor,
   researchCommandFor,
   inquireCommandFor,
+  plainCommandFor,
 } from '../app/modeling-command.js';
 
 test('MODELING_COMMAND is the fully-qualified bare command (not the /modeling alias)', () => {
@@ -390,4 +391,41 @@ test('inquireCommandFor preserves interior whitespace (only the ends are trimmed
     inquireCommandFor('  what   was   decided  '),
     '/agentheim:inquire what   was   decided',
   );
+});
+
+// --- plainCommandFor (agentic-workflow-m3vhq) ---------------------------
+//
+// Plain is the fifth prompt-bar mode (ADR-0050 amended): the typed prompt goes
+// to Claude VERBATIM, with no skill, no slash command, no routing. Unlike the
+// other four builders, there is deliberately NO bare-command constant — there
+// is no skill to name, so an empty prompt degrades to '' (a true no-op), never
+// a bare command string.
+
+test('plainCommandFor returns the trimmed prompt verbatim, with no command prefix', () => {
+  assert.equal(plainCommandFor('just talk to me'), 'just talk to me');
+});
+
+test('plainCommandFor trims a whitespace-padded prompt (no command prefix to separate)', () => {
+  assert.equal(plainCommandFor('  hello there  '), 'hello there');
+});
+
+test('plainCommandFor preserves interior whitespace (only the ends are trimmed)', () => {
+  assert.equal(plainCommandFor('  what   is   this  '), 'what   is   this');
+});
+
+test('plainCommandFor degrades an empty / missing / whitespace-only / non-string prompt to the empty string', () => {
+  assert.equal(plainCommandFor(), '');
+  assert.equal(plainCommandFor(undefined), '');
+  assert.equal(plainCommandFor(null), '');
+  assert.equal(plainCommandFor(''), '');
+  assert.equal(plainCommandFor('   '), '');
+  assert.equal(plainCommandFor('   \n\t '), '');
+  assert.equal(plainCommandFor(42), '');
+  assert.equal(plainCommandFor({}), '');
+  assert.equal(plainCommandFor([]), '');
+});
+
+test('plainCommandFor never throws', () => {
+  assert.doesNotThrow(() => plainCommandFor());
+  assert.doesNotThrow(() => plainCommandFor(Symbol('x')));
 });

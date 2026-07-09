@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-m3vhq
 title: Prompt bar — add a "Plain" mode that runs the prompt directly on Claude
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-09
-completed:
+completed: 2026-07-09
 depends_on: [design-system-001-styleguide, agentic-workflow-q7r3x, design-system-tfhn6]
 blocks: []
 tags: [dashboard, prompt-bar]
@@ -154,3 +154,60 @@ Amended in a second refinement pass (2026-07-09), after `agentic-workflow-q7r3x`
   fourth tab) and `agentic-workflow-036` (Research, the third) — plus the console's own
   lineage: `bz3az` (built the tab row + keyboard model), `s7gev` (the selection-model
   decision behind ADR-0050), `p8k4d` (amended it).
+
+## Outcome
+
+Shipped the fifth prompt-bar mode, Plain, and — for the first time in this model — a mode
+that can decline to launch.
+
+- `dashboard/app/modeling-command.js` — added `plainCommandFor(prompt)`, the one builder
+  with **no bare-command constant**: it returns `safePrompt(prompt)` verbatim (trimmed
+  ends, interior whitespace preserved), degrading to `''` for a missing/whitespace-only/
+  non-string prompt. Pure, never throws.
+- `dashboard/app/prompt-mode.js` — `PROMPT_MODES` gains a fifth entry, **appended last**
+  (`{ id: 'plain', label: 'Plain', subtitle: 'straight to Claude, no skill', icon: 'bot',
+  commandFor: plainCommandFor, requiresPrompt: true }`); `DEFAULT_PROMPT_MODE_INDEX` stays
+  `0`. `clampPromptModeIndex` now bounds `0..4`; `nextPromptModeIndex`'s wrap targets moved
+  from Research (3) to Plain (4) at both ends. Added the new pure predicate
+  `canFirePromptMode(index, prompt)` — `false` exactly when the mode's `requiresPrompt` is
+  true and the trimmed prompt is empty, `true` otherwise — the ONE function both `fire()`'s
+  guard and the Enter button's `disabled` state consult. `promptBarKeyIntent` is
+  byte-unchanged: bare Enter on an empty Plain prompt still classifies `launch`; a test
+  pins this explicitly (asserts the function's arity stays 1 — no mode/prompt params were
+  added).
+- `dashboard/app/board.js` `BoardPromptBar` — imports `canFirePromptMode`; `fire(modeIndex)`
+  early-returns (before computing the command or calling `launchOrCopy`) when
+  `!canFirePromptMode(idx, prompt)` — a decline is a true no-op: no bridge call, no
+  clipboard write, no confetti, no textarea clear, no highlight reset, no feedback chip.
+  The Enter button now forwards `disabled=${!canFire}` to the styleguide's `EnterButton`
+  primitive (its new prop from `design-system-tfhn6`, consumed unforked — never
+  re-implemented, never a `pointer-events` fake). The wrapper `<span>`'s `title` and the
+  button's `ariaLabel` share one `enterHint` string that reads `Type a prompt to launch
+  Plain` when declining, instead of rendering the (empty) command string. The fifth tab
+  renders automatically through the existing `PROMPT_MODES.map(...)` / `PromptModeTab`
+  loop — no new tab-rendering code — reusing the existing `bot` glyph (no new glyph) and
+  painted exactly like the other four (ADR-0051's ochre highlight / ADR-0016 de-emphasis;
+  no new paint decision).
+- ADR-0050 (`.agentheim/knowledge/decisions/0050-prompt-bar-keyboard-committed-selection-model.md`)
+  gained a second `## Amendment` section (2026-07-09, agentic-workflow-m3vhq) recording: the
+  mode-count/index-bound move (four→five, `0..3`→`0..4`), the changed wrap targets, that the
+  default/reset target is explicitly unchanged, and the new decline-to-launch property —
+  mirroring the `agentic-workflow-p8k4d` amendment precedent. No new ADR was written (AC 9).
+- Tests: `dashboard/test/modeling-command.test.mjs` (+6 `plainCommandFor` cases —
+  verbatim passthrough, padding trim, interior-whitespace preservation, empty/missing/
+  whitespace/non-string degrade, never-throws). `dashboard/test/prompt-mode.test.mjs` —
+  five-mode shape/order/subtitle/glyph assertions (re-pinned from four), the `requiresPrompt`
+  shape test, five-cycle wraparound assertions (re-pinned `clampPromptModeIndex(4)===0` →
+  `clampPromptModeIndex(5)===0`, `4` moved out of the `invalid` array to `5`), the
+  classifier-untouched-by-Plain test, and 4 new `canFirePromptMode` tests.
+  `dashboard/test/board-prompt-bar.test.mjs` — +4 tests (import guard, `fire()`
+  early-return-before-`launchOrCopy` ordering, disabled-Enter-button wiring, decline-hint
+  text). Full dashboard suite: 799/799 passing (was 767 per p8k4d's Outcome baseline).
+- `dashboard/dist/app.js` rebuilt (confirmed via `git diff --numstat`: 228/226 lines
+  changed, a real rebuild, not the recurring EOL phantom) — the served bundle carries the
+  fifth tab, `plainCommandFor`, `canFirePromptMode`, and the disabled Enter button.
+- BC README — the *Board prompt bar* bullet rewritten to describe five modes, Plain's
+  subtitle/glyph, the `requiresPrompt`/`canFirePromptMode` decline-to-launch mechanics, the
+  disabled Enter button (and its de-emphasis paint), and the re-pinned wrap targets.
+
+No new backlog items. No concept candidate noted beyond what's already tracked.

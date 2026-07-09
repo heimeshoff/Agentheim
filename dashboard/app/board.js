@@ -53,7 +53,7 @@ import { resolveTheme, saveTheme } from "./theme-state.js";
 import { loadSkipPermissions, saveSkipPermissions } from "./skip-permissions-state.js";
 import { SORT_OPTIONS, DEFAULT_SORT, sortTickets } from "./board-sort.js";
 import { refineCommandFor, promoteCommandFor, dismissCommandFor, WORK_COMMAND, WHATS_NEXT_COMMAND } from "./modeling-command.js";
-import { PROMPT_MODES, DEFAULT_PROMPT_MODE_INDEX, clampPromptModeIndex, nextPromptModeIndex, promptBarKeyIntent, PROMPT_KEY_INTENT } from "./prompt-mode.js";
+import { PROMPT_MODES, DEFAULT_PROMPT_MODE_INDEX, clampPromptModeIndex, nextPromptModeIndex, promptBarKeyIntent, PROMPT_KEY_INTENT, canFirePromptMode } from "./prompt-mode.js";
 import { launchOrCopy } from "./bridge-launch.js";
 import { groupTickets } from "./board-group.js";
 import { resolveHoverDependencies } from "./board-dependencies.js";
@@ -1038,8 +1038,15 @@ function BoardPromptBar({ skipPermissions = false }) {
   // The ONE launch path every trigger (tab click / Enter button / Ctrl+Enter)
   // calls — so "identical to clicking the highlighted tab" (ADR-0050) is true by
   // construction, not by keeping three call sites in sync by hand.
+  //
+  // agentic-workflow-m3vhq: Plain is the first mode that can DECLINE to launch
+  // (requiresPrompt: true, empty prompt). The shared canFirePromptMode
+  // predicate (prompt-mode.js) is consulted FIRST, before anything else runs —
+  // a decline is a true no-op: no bridge call, no clipboard write, no
+  // confetti, no textarea clear, no highlight reset, no feedback chip.
   const fire = useCallback((modeIndex) => {
     const idx = clampPromptModeIndex(modeIndex);
+    if (!canFirePromptMode(idx, prompt)) return;
     const command = PROMPT_MODES[idx].commandFor(prompt);
     const fetchImpl = typeof window !== "undefined" && typeof window.fetch === "function"
       ? window.fetch.bind(window)
@@ -1098,6 +1105,14 @@ function BoardPromptBar({ skipPermissions = false }) {
   }, [fire, highlightedMode]);
 
   const activeMode = PROMPT_MODES[highlightedMode];
+  // agentic-workflow-m3vhq: the ONE predicate both the Enter button's disabled
+  // state and fire()'s guard consult — never re-derived independently. When
+  // false (Plain highlighted, prompt blank), the hint text names the decline
+  // rather than rendering the (empty) command string.
+  const canFire = canFirePromptMode(highlightedMode, prompt);
+  const enterHint = canFire
+    ? `Launch ${activeMode.label} — ${activeMode.commandFor(prompt)}`
+    : `Type a prompt to launch ${activeMode.label}`;
 
   return html`
     <section aria-label="Author a prompt, then choose a mode to launch" style=${{
@@ -1161,10 +1176,11 @@ function BoardPromptBar({ skipPermissions = false }) {
           border: "1px solid var(--hairline)", borderRadius: "var(--radius-sm)",
           padding: "2px 6px", flexShrink: 0,
         }}>↵</span>
-        <span title=${`Launch ${activeMode.label} — ${activeMode.commandFor(prompt)}`}>
+        <span title=${enterHint}>
           <${EnterButton}
             onClick=${() => fire(highlightedMode)}
-            ariaLabel=${`Launch ${activeMode.label}`} />
+            ariaLabel=${enterHint}
+            disabled=${!canFire} />
         </span>
       </div>
       <${BoardConfetti} fireKey=${confettiKey} />
