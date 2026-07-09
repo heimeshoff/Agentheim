@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 15:25 -- Task verified and completed: design-system-tfhn6 - EnterButton gains a disabled state
+
+**Type:** Work / Task completion
+**Task:** design-system-tfhn6 - EnterButton gains a disabled state
+**Summary:** EnterButton gains a disabled prop forwarded to the real button attribute, painted opacity-only per ADR-0016
+**Duration:** 18m
+**Verification:** PASS (iteration 1)
+**Files changed:** 4
+**Tests added:** 4
+**ADRs written:** none
+
+---
+
 ## 2026-07-09 15:24 -- Task verified and completed: agentic-workflow-h4n2v - Stop dashboard menu item calls the stop script, not the slash command
 
 **Type:** Work / Task completion

@@ -70,3 +70,41 @@ test('the styleguide canvas documents the EnterButton as its own specimen', () =
   assert.match(appSrc, /import\s*\{[^}]*EnterButton[^}]*\}\s*from\s*["']\.\/button\.js["']/, 'app.js must import EnterButton from button.js');
   assert.match(appSrc, /<\$\{EnterButton\}/, 'the canvas must render an EnterButton specimen in context');
 });
+
+// design-system-tfhn6: EnterButton gains a disabled state.
+//
+// ADR-0016's color doctrine calls for de-emphasis by opacity, never a fill
+// swap: the disabled branch must NOT touch the --accent-ochre fill or the
+// --accent-ochre-fg glyph color (the five assertions above stay green
+// unmodified — that IS the proof the fill was not swapped). Instead the
+// disabled branch dims via `opacity` and swaps `cursor` to "default", while
+// the real `disabled` attribute reaches the underlying <button> so the
+// control leaves the tab order and cannot be activated by click or keyboard
+// (ADR-0003: same primitive, no fork, no variant).
+
+test('EnterButton accepts a disabled prop defaulting to false', () => {
+  const sig = buttonSrc.match(/export function EnterButton\(\{([^}]*)\}\)/);
+  assert.ok(sig, 'EnterButton must have a destructured props signature');
+  assert.match(sig[1], /disabled\s*=\s*false/, 'EnterButton must declare `disabled = false` in its props');
+});
+
+test('EnterButton forwards disabled to the underlying <button> as the real disabled attribute', () => {
+  const fn = buttonSrc.match(/export function EnterButton[\s\S]*?\n\}/)[0];
+  assert.match(fn, /<button[\s\S]*?disabled=\$\{disabled\}/, 'the <button> element must receive disabled=${disabled}');
+});
+
+test('EnterButton disabled branch dims via opacity below 1 and sets cursor to default, without touching the ochre fill/glyph', () => {
+  const fn = buttonSrc.match(/export function EnterButton[\s\S]*?\n\}/)[0];
+  assert.match(fn, /opacity:\s*disabled\s*\?\s*0\.55\s*:\s*1/, 'opacity must be conditional on disabled: 0.55 when disabled, 1 when enabled');
+  assert.match(fn, /cursor:\s*disabled\s*\?\s*["']default["']\s*:\s*["']pointer["']/, 'cursor must be conditional on disabled: "default" when disabled, "pointer" when enabled');
+  // The fill and glyph guards above (literal --accent-ochre / --accent-ochre-fg
+  // matches) already prove these are untouched by the disabled branch — a
+  // conditional there would break those literal-string assertions.
+});
+
+test('the canvas documents a second, disabled EnterButton specimen beside the enabled one', () => {
+  const matches = appSrc.match(/<\$\{EnterButton\}[^/]*\/>/g) || [];
+  assert.equal(matches.length, 2, 'the canvas must render exactly two EnterButton specimens (enabled + disabled)');
+  assert.ok(matches.some((m) => !/disabled/.test(m)), 'one specimen must be the enabled EnterButton');
+  assert.ok(matches.some((m) => /disabled/.test(m)), 'one specimen must render the disabled EnterButton');
+});

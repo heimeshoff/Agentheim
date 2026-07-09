@@ -682,6 +682,10 @@ function ButtonRow() {
         <${StateLabel}>Enter — icon variant (--accent-ochre)</${StateLabel}>
         <${EnterButton} onClick=${() => {}} />
       </div>
+      <div>
+        <${StateLabel}>Enter — disabled</${StateLabel}>
+        <${EnterButton} disabled onClick=${() => {}} />
+      </div>
     </div>`;
 }
 function ConfirmDialogSpecimen() {

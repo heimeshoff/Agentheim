@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 31
+- **Doing:** 0
+- **Done:** 32
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **design-system-tfhn6** — EnterButton gains a disabled state (feature) — `doing/design-system-tfhn6-enter-button-disabled-state.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **design-system-tfhn6** — EnterButton gains a disabled state (feature) — `done/design-system-tfhn6-enter-button-disabled-state.md`
 - **design-system-xr4sb** — Prompt-mode tab glyphs + solid-ochre icon Enter-button variant, aligned to 1b (feature) — `done/design-system-xr4sb-prompt-mode-glyphs-icon-enter-button.md`
 - **design-system-rm2yv** — Extend the ochre wayfinding exception to the highlighted prompt-mode tab (decision) — `done/design-system-rm2yv-ochre-exception-prompt-mode-tab.md`
 - **design-system-t896s** — TicketCard — bump corner radius toward 1b's 10px (refactor) — `done/design-system-t896s-ticketcard-radius-10px.md`

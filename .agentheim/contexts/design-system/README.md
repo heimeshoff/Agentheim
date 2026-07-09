@@ -817,6 +817,28 @@ the pattern in **section 11** (`SearchSpecimen` — type *design*, *adr*, or *zz
 > section 04, Iconography interface set; section 12, Button — neutral, destructive &
 > Enter) and re-confirm the gate OPEN.
 
+> **Gate re-review reopened by the EnterButton disabled state
+> (`design-system-tfhn6`).** `EnterButton` (`styleguide/app/button.js`) gains a
+> `disabled = false` prop, forwarded to the underlying `<button>` as the real
+> `disabled` attribute — the control leaves the tab order and cannot be activated by
+> click or keyboard, not a consumer-side `pointer-events` fake that would leave it
+> focusable and announcing as enabled. Painted as de-emphasis by `opacity` only
+> (ADR-0016): `opacity: 0.55` / `cursor: default` when disabled, `opacity: 1` /
+> `cursor: pointer` otherwise — the `--accent-ochre` fill and `--accent-ochre-fg`
+> glyph (ADR-0048's surface-2 carve-out, ADR-0051) stay literal and untouched in both
+> branches, preserving the two-theme contrast pairing xr4sb established rather than
+> stranding the glyph on an unvetted fill swap. This is the styleguide's first
+> disabled state on any primitive — the shape (real attribute + ADR-0016 opacity,
+> never a fill swap) is the one a later `Button` / `IconButton` disabled state should
+> follow. A second "Enter — disabled" specimen sits beside the existing enabled one in
+> `ButtonRow` (section 12), a visible styleguide change that reopens the design-system
+> gate per the `design-system-005` / `007` / `009` / `014` / `015` / `017` / `r4k8m` /
+> `c3p9k` / `xr4sb` precedent. `dist/` deliberately NOT rebuilt — a derived artifact
+> (ADR-0003) that the consuming task (`agentic-workflow-m3vhq`) rebuilds when the
+> disabled Enter button actually renders on the board's Plain prompt-bar mode.
+> **Builder confirmation PENDING** — re-review the canvas (`styleguide/index.html` →
+> section 12, Button — neutral, destructive & Enter) and re-confirm the gate OPEN.
+
 > Live-board note: the served dashboard `dist/` is a derived artifact (ADR-0003) and
 > was rebuilt here (`node build.mjs`), but the bundle is byte-identical — the
 > dashboard entry is the board, and `SearchField` has **no shipped dashboard consumer
@@ -897,4 +919,5 @@ list the new token (role: "Ticket card") and to relabel `--radius-md`'s role as
 - Dependency-relation ring: `styleguide/app/motion.js` (`dependencyRingClass`, re-exported from `styleguide/app/kanban.js`), `--rel-dep`/`--rel-dep-tint` tokens + `.rel-ring` keyframes in `styles/agentheim.css`, `--duration-relation` in `styles/colors_and_type.css`; the `TicketCard.dependencyRelation` prop the dashboard's hover-dependency feature will consume (`agentic-workflow-k5p8w`), see ADR-0034 (design-system-w4t9k)
 - Hidden/off-viewport dependency markers: `styleguide/app/motion.js` (`dependencyPresentClass`, `edgeBlinkClass`), `Collapsible.hasHiddenDependency` (`styleguide/app/collapsible.js`), `.rel-present` / `.rel-edge-blink(--top|--bottom)` + keyframes in `styles/agentheim.css` (reusing `--rel-dep` / `--duration-relation`); the styleguide capability the board's collapsed-section marker and scroll-edge indicator will consume (`agentic-workflow-h9v3m`, `agentic-workflow-r9k2p`), see ADR-0034 pt. 6 (design-system-b7n2s)
 - Prompt-mode tab glyphs + solid-ochre icon Enter button: `styleguide/app/icons.js` (`diamond`, `circle-dot`, `corner-down-left` glyphs), `styleguide/app/button.js` (`EnterButton`), `--accent-ochre-fg` dedicated on-accent foreground pair in `styles/colors_and_type.css` (ADR-0048 surface-2 carve-out, ADR-0051); the styleguide primitives the dashboard prompt console will consume (`agentic-workflow-q7r3x`) (design-system-xr4sb)
+- `EnterButton` disabled state: `styleguide/app/button.js` (`disabled = false` prop, real `<button disabled>` attribute, ADR-0016 opacity-only de-emphasis — `--accent-ochre` fill / `--accent-ochre-fg` glyph stay untouched), second "Enter — disabled" specimen in `ButtonRow` (`styleguide/app/app.js`, section 12); the styleguide's first disabled state on any primitive, the shape a later `Button`/`IconButton` disabled state should follow; consumed by the dashboard's Plain prompt-bar mode (`agentic-workflow-m3vhq`) (design-system-tfhn6)
 - BC index: `INDEX.md`

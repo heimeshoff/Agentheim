@@ -1,11 +1,11 @@
 ---
 id: design-system-tfhn6
 title: EnterButton gains a disabled state
-status: doing
+status: done
 type: feature
 context: design-system
 created: 2026-07-09
-completed:
+completed: 2026-07-09
 depends_on: [design-system-001-styleguide]
 blocks: [agentic-workflow-m3vhq]
 tags: [dashboard, prompt-bar]
@@ -51,31 +51,62 @@ It also keeps the shipped guard green: `styleguide/test/enter-button.test.mjs` a
 test xr4sb wrote to protect ADR-0048's carve-out.
 
 ## Acceptance criteria
-- [ ] `EnterButton` gains a `disabled = false` prop, forwarded to the underlying
+- [x] `EnterButton` gains a `disabled = false` prop, forwarded to the underlying
       `<button>` as the **real `disabled` attribute** — so it leaves the tab order and
       cannot be activated by click *or* keyboard. Same component, no variant, no fork:
       every existing consumer keeps importing `EnterButton` unchanged (ADR-0003).
-- [ ] Disabled paint is opacity-only (ADR-0016): `background` stays the **literal**
+- [x] Disabled paint is opacity-only (ADR-0016): `background` stays the **literal**
       `var(--accent-ochre)` and the glyph stays `--accent-ochre-fg`; when disabled the
       button sets `opacity: 0.55` (the established resting-dim value — `PromptModeTab`'s
       non-highlighted tab uses the same) and `cursor: default`. Enabled, it stays
       `opacity: 1` / `cursor: pointer`.
-- [ ] The five existing assertions in `styleguide/test/enter-button.test.mjs` stay green
+- [x] The five existing assertions in `styleguide/test/enter-button.test.mjs` stay green
       **unmodified** — in particular the literal `background: "var(--accent-ochre)"` match.
       That guard passing *is* the mechanical proof the fill was not swapped.
-- [ ] New assertions in the same suite: the `disabled` prop exists and defaults to
+- [x] New assertions in the same suite: the `disabled` prop exists and defaults to
       `false`; it reaches the `<button>`'s `disabled` attribute; the disabled branch sets
       an `opacity` below 1 and `cursor: default`; the enabled branch leaves both alone.
-- [ ] The canvas documents it as a **second specimen** beside the existing
+- [x] The canvas documents it as a **second specimen** beside the existing
       `Enter — icon variant (--accent-ochre)` one in `ButtonRow`
       (`styleguide/app/app.js`, section 12 "Button — neutral, destructive & Enter"), so a
       reviewer sees enabled and disabled side by side. The canvas guard asserts both render.
-- [ ] `dashboard/dist/` is **not** rebuilt here — it is a derived artifact (ADR-0003), and
+- [x] `dashboard/dist/` is **not** rebuilt here — it is a derived artifact (ADR-0003), and
       the consuming task `agentic-workflow-m3vhq` rebuilds it when the disabled button
       actually renders on the board. Standing ds-021 / r4k8m / xr4sb precedent.
-- [ ] The styleguide gate **reopens** (visible canvas change) — add the gate-reopen note
+- [x] The styleguide gate **reopens** (visible canvas change) — add the gate-reopen note
       to the BC README at execution, per the same standing precedent xr4sb followed.
-- [ ] Styleguide + dashboard suites green.
+- [x] Styleguide + dashboard suites green.
+
+## Outcome
+`EnterButton` (`styleguide/app/button.js`) gains a `disabled = false` prop forwarded to
+the underlying `<button>` as the real `disabled` attribute. Paint is de-emphasis by
+`opacity` only, per ADR-0016: `opacity: disabled ? 0.55 : 1`, `cursor: disabled ?
+"default" : "pointer"` — the `background: "var(--accent-ochre)"` fill and
+`--accent-ochre-fg` glyph color are untouched, literal, in both branches, so the five
+pre-existing guard assertions in `styleguide/test/enter-button.test.mjs` pass unmodified.
+
+Added four new assertions to the same suite (prop default, attribute forwarding,
+opacity/cursor conditionals) plus a canvas guard confirming both an enabled and a
+disabled `EnterButton` specimen render in `ButtonRow` (`styleguide/app/app.js`, section
+12) — 10 tests total in `enter-button.test.mjs` (was 5; xr4sb's canvas-import guard
+already existed as a 6th). Full styleguide suite: 177 passing (was 173). Dashboard
+suite untouched: 775 passing.
+
+An unrelated file-watch process rebuilt `dashboard/dist/app.js` as a side effect of the
+`button.js` edit partway through the task; reverted with `git checkout --
+dashboard/dist/app.js` to honor AC 6 (derived artifact, not this task's to rebuild —
+`agentic-workflow-m3vhq` owns that rebuild). `dashboard/dist/index.html` carries a
+pre-existing zero-line-diff EOL/autocrlf flag unrelated to this task's changes, left
+untouched.
+
+BC README gate-reopen note added (design-system-tfhn6 entry, mirroring the xr4sb
+precedent) plus a Pointers bullet. No ADR needed — a prop landing within ADR-0048/0051's
+existing carve-out, painted per ADR-0016; no shipped decision reversed.
+
+Key files: `.agentheim/contexts/design-system/styleguide/app/button.js`,
+`.agentheim/contexts/design-system/styleguide/app/app.js`,
+`.agentheim/contexts/design-system/styleguide/test/enter-button.test.mjs`,
+`.agentheim/contexts/design-system/README.md`.
 
 ## Notes
 - **Blocks `agentic-workflow-m3vhq`** (the dashboard consumer that wires this in). Scope

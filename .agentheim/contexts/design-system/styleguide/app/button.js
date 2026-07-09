@@ -115,17 +115,28 @@ export function Button({
  * @param {() => void} [props.onClick] — activation handler.
  * @param {number} [props.size=34] — the square footprint, in px.
  * @param {string} [props.ariaLabel="Send"] — accessible label (icon-only, no visible text).
+ * @param {boolean} [props.disabled=false] — when true, forwarded to the underlying
+ *        <button> as the real `disabled` attribute (design-system-tfhn6), so the
+ *        control leaves the tab order and cannot be activated by click or keyboard —
+ *        not a consumer-side `pointer-events` fake, which would leave the button
+ *        focusable and announcing as enabled. Painted as de-emphasis by `opacity`
+ *        (ADR-0016), never a fill swap: the --accent-ochre fill and --accent-ochre-fg
+ *        glyph are a contrast-matched pair (see above) and stay untouched, literal,
+ *        in both branches.
  */
-export function EnterButton({ onClick, size = 34, ariaLabel = "Send" }) {
+export function EnterButton({ onClick, size = 34, ariaLabel = "Send", disabled = false }) {
   return html`
     <button
       type="button"
       className="focusable"
       aria-label=${ariaLabel}
+      disabled=${disabled}
       onClick=${onClick}
       style=${{
         display: "inline-flex", alignItems: "center", justifyContent: "center",
-        width: size, height: size, padding: 0, cursor: "pointer",
+        width: size, height: size, padding: 0,
+        cursor: disabled ? "default" : "pointer",
+        opacity: disabled ? 0.55 : 1,
         border: "none",
         borderRadius: "var(--radius-sm)",
         background: "var(--accent-ochre)",
