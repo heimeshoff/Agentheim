@@ -65,16 +65,16 @@ test('glyphs are the concrete design-system-xr4sb set, +Plain\'s reused `bot` gl
   ]);
 });
 
-// agentic-workflow-m3vhq: Plain is the FIRST mode that can decline to
-// launch — its command builder returns '' for an empty prompt, unlike the
-// four legacy modes' meaningful bare commands. `requiresPrompt` marks that.
-test('Plain is the only mode carrying requiresPrompt: true — the four legacy modes always fire', () => {
-  const [quickCapture, modeling, inquire, research, plain] = PROMPT_MODES;
-  assert.ok(!quickCapture.requiresPrompt);
-  assert.ok(!modeling.requiresPrompt);
-  assert.ok(!inquire.requiresPrompt);
-  assert.ok(!research.requiresPrompt);
-  assert.equal(plain.requiresPrompt, true);
+// agentic-workflow-aqyqd (third ADR-0050 amendment): `requiresPrompt` is
+// RETIRED entirely — it existed only to mark Plain as the exception among
+// four always-firing peers. Once every mode declines on an empty prompt,
+// the per-mode flag is a fiction; "a prompt is required" is a property of
+// the BAR (canFirePromptMode), not of any one mode. The key must appear on
+// no `PROMPT_MODES` entry, Plain included.
+test('no PROMPT_MODES entry carries requiresPrompt — the flag is retired; decline-to-launch is a bar-level property, not a per-mode one (agentic-workflow-aqyqd)', () => {
+  for (const mode of PROMPT_MODES) {
+    assert.equal('requiresPrompt' in mode, false, `${mode.id} must not carry a requiresPrompt key`);
+  }
 });
 
 // --- invariant 2: index always in range (clampPromptModeIndex) ---------
@@ -227,36 +227,49 @@ test('promptBarKeyIntent is UNTOUCHED by Plain: bare Enter still classifies as l
   assert.equal(promptBarKeyIntent.length, 1, 'promptBarKeyIntent must take only the event — no mode/prompt params were added for Plain');
 });
 
-// --- canFirePromptMode (agentic-workflow-m3vhq AC 3) --------------------
+// --- canFirePromptMode (introduced agentic-workflow-m3vhq, generalized to
+// every mode by agentic-workflow-aqyqd) --------------------------------
 //
 // The ONE predicate both the fire() guard (AC 4) and the Enter button's
 // disabled state (AC 6) consult, rather than each re-deriving "can this mode
-// fire right now?" independently.
+// fire right now?" independently. `requiresPrompt` (m3vhq's per-mode flag)
+// is retired by aqyqd — the predicate now answers purely from the trimmed
+// prompt, for every index alike.
 
-test('canFirePromptMode is false only for a requiresPrompt mode with an empty/whitespace-only prompt', () => {
-  const plainIndex = PROMPT_MODES.findIndex((m) => m.id === 'plain');
-  assert.equal(canFirePromptMode(plainIndex, ''), false);
-  assert.equal(canFirePromptMode(plainIndex, '   '), false);
-  assert.equal(canFirePromptMode(plainIndex, undefined), false);
-  assert.equal(canFirePromptMode(plainIndex, null), false);
-});
-
-test('canFirePromptMode is true for Plain once the prompt has real content', () => {
-  const plainIndex = PROMPT_MODES.findIndex((m) => m.id === 'plain');
-  assert.equal(canFirePromptMode(plainIndex, 'talk to me'), true);
-  assert.equal(canFirePromptMode(plainIndex, '  padded  '), true);
-});
-
-test('canFirePromptMode is true for all four legacy modes regardless of an empty prompt — their bare commands are meaningful', () => {
-  for (let i = 0; i < 4; i++) {
-    assert.equal(canFirePromptMode(i, ''), true, `mode index ${i} must fire on an empty prompt`);
-    assert.equal(canFirePromptMode(i, undefined), true, `mode index ${i} must fire on a missing prompt`);
-    assert.equal(canFirePromptMode(i, '   '), true, `mode index ${i} must fire on a whitespace-only prompt`);
+// agentic-workflow-aqyqd (third ADR-0050 amendment, REVERSES the second
+// amendment's "the four legacy modes always fire" clause): NO mode fires on
+// an empty/whitespace-only/missing prompt — the decline-to-launch property
+// generalizes from Plain alone to the bar as a whole. This is the exact
+// assertion `agentic-workflow-m3vhq` wrote down the other way — re-pinned
+// here on purpose, not deleted, so the reversal stays visible.
+test('canFirePromptMode is false for EVERY mode (index 0..4) on an empty/whitespace-only/missing prompt — decline generalizes from Plain to the whole bar (agentic-workflow-aqyqd, reverses m3vhq)', () => {
+  for (let i = 0; i < PROMPT_MODES.length; i++) {
+    assert.equal(canFirePromptMode(i, ''), false, `mode index ${i} must NOT fire on an empty prompt`);
+    assert.equal(canFirePromptMode(i, undefined), false, `mode index ${i} must NOT fire on a missing prompt`);
+    assert.equal(canFirePromptMode(i, null), false, `mode index ${i} must NOT fire on a null prompt`);
+    assert.equal(canFirePromptMode(i, '   '), false, `mode index ${i} must NOT fire on a whitespace-only prompt`);
   }
 });
 
-test('canFirePromptMode clamps an out-of-range index rather than throwing', () => {
+test('canFirePromptMode is true for EVERY mode (index 0..4) once the prompt has real content (agentic-workflow-aqyqd)', () => {
+  for (let i = 0; i < PROMPT_MODES.length; i++) {
+    assert.equal(canFirePromptMode(i, 'talk to me'), true, `mode index ${i} must fire on real content`);
+    assert.equal(canFirePromptMode(i, '  padded  '), true, `mode index ${i} must fire on a padded real prompt`);
+  }
+});
+
+// `index` is retained in the signature (call-site + test stability, and a
+// cheap door back to a future per-mode exception) but deliberately UNREAD —
+// the same prompt must produce the same answer regardless of which index is
+// passed, including out-of-range ones.
+test('canFirePromptMode does not read index — an out-of-range/non-numeric index never throws and never changes the answer for the same prompt (agentic-workflow-aqyqd)', () => {
   assert.doesNotThrow(() => canFirePromptMode(999, ''));
   assert.doesNotThrow(() => canFirePromptMode(-1, 'x'));
   assert.doesNotThrow(() => canFirePromptMode(NaN, 'x'));
+  assert.doesNotThrow(() => canFirePromptMode(undefined, 'x'));
+  assert.equal(canFirePromptMode(999, ''), false);
+  assert.equal(canFirePromptMode(-1, ''), false);
+  assert.equal(canFirePromptMode(999, 'x'), true);
+  assert.equal(canFirePromptMode(-1, 'x'), true);
+  assert.equal(canFirePromptMode(NaN, 'x'), canFirePromptMode(0, 'x'));
 });

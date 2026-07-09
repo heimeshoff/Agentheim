@@ -312,11 +312,12 @@ separate BC, but today the whole tool lives in this one.
   on-accent legibility token, wrapped in a plain `<span title=...>` (not a fork) so the tooltip
   can still reflect the live seeded command, **or** (agentic-workflow-m3vhq) the reason it can't
   fire yet.
-  - **Keyboard-committed selection model (ADR-0050, amended by agentic-workflow-p8k4d and
-    agentic-workflow-m3vhq, `dashboard/app/prompt-mode.js`)** — the five modes carry a single
-    committed `highlightedMode` **index**, not five independent booleans: `PROMPT_MODES` (fixed
-    order, each `{label, subtitle, icon, commandFor}`, Plain additionally carrying
-    `requiresPrompt: true`), `clampPromptModeIndex` (the one in-range guard every call site uses,
+  - **Keyboard-committed selection model (ADR-0050, amended by agentic-workflow-p8k4d,
+    agentic-workflow-m3vhq, and agentic-workflow-aqyqd, `dashboard/app/prompt-mode.js`)** — the
+    five modes carry a single committed `highlightedMode` **index**, not five independent
+    booleans: `PROMPT_MODES` (fixed order, each `{label, subtitle, icon, commandFor}` — no
+    `requiresPrompt` key on any entry; aqyqd retires it, see below), `clampPromptModeIndex` (the
+    one in-range guard every call site uses,
     now bounding `0..4`), `nextPromptModeIndex(current, direction)` (total, wrapping cycle —
     Ctrl+→ past Plain wraps to Quick Capture, Ctrl+← before Quick Capture wraps to Plain), and
     `promptBarKeyIntent(event)` (classifies every keydown into exactly one of **launch** — bare
@@ -337,16 +338,25 @@ separate BC, but today the whole tool lives in this one.
     same armed `skipPermissions` thread, the same `onResult` clear-textarea + confetti +
     highlight-reset. **Ctrl+Space** (p8k4d, new) focuses the prompt `<textarea>` from anywhere on
     the board via a window-scoped `document` keydown listener (registered/torn down in a
-    `useEffect`). **Plain and decline-to-launch (agentic-workflow-m3vhq)** — Plain's command IS
-    the prompt (`plainCommandFor`, no bare-command constant, unlike the other four): an empty
-    prompt has nothing to send, so Plain is the first mode that can **decline to launch**. The one
-    predicate `canFirePromptMode(index, prompt)` decides this — `false` only when the mode's
-    `requiresPrompt` is true and the trimmed prompt is empty — consulted by **both** `fire()`'s
-    guard (a decline is a true no-op: no bridge call, no clipboard, no confetti, no textarea
-    clear, no highlight reset) **and** the Enter button's `disabled` state (the styleguide
-    `EnterButton`'s new `disabled` prop, design-system-tfhn6, consumed unforked — never a
-    `pointer-events` fake). When disabled, the tooltip/`aria-label` read *"Type a prompt to launch
-    Plain"* rather than rendering the empty command string. `prompt-mode.js` is a fifth pure,
+    `useEffect`). **Decline-to-launch, generalized to every mode (introduced Plain-only by
+    agentic-workflow-m3vhq, generalized by agentic-workflow-aqyqd — ADR-0050's third
+    amendment)** — the prompt bar is a prompt console: with no prompt there is nothing to send,
+    in **any** mode, not just Plain. The one predicate `canFirePromptMode(index, prompt)` decides
+    this — `true` exactly when the trimmed prompt is non-empty, for every index alike (`index` is
+    kept in the signature for call-site/test stability but is deliberately **unread** — the
+    `requiresPrompt` per-mode flag m3vhq introduced is **retired entirely**, not set `true` on all
+    five entries: once there is no exception, the per-mode axis is a fiction) — consulted by
+    **both** `fire()`'s guard (a decline is a true no-op: no bridge call, no clipboard, no
+    confetti, no textarea clear, no highlight reset) **and** the Enter button's `disabled` state
+    (the styleguide `EnterButton`'s `disabled` prop, design-system-tfhn6, consumed unforked —
+    never a `pointer-events` fake). When disabled, the tooltip/`aria-label` read *"Type a prompt
+    to launch \<Label\>"* for whichever mode is highlighted, rather than rendering an empty/bare
+    command string. The four legacy modes' bare-command constants
+    (`QUICK_CAPTURE_COMMAND`/`MODELING_COMMAND`/`INQUIRE_COMMAND`/`RESEARCH_COMMAND`,
+    `modeling-command.js`) and their empty-prompt degrade branches are **left in place** —
+    correct, pure, unit-tested — but are now unreachable from the board (bare sessions launch
+    from the terminal instead); each constant carries a comment recording this so a later reader
+    doesn't "restore" the bare launch by accident. `prompt-mode.js` is a fifth pure,
     framework-free, `node --test`-covered module in the `board-sort.js`/`board-group.js`/
     `search-results.js` family.
   - **Paint (ADR-0051 amending ADR-0048; ADR-0016 for the rest)** — the highlighted tab alone

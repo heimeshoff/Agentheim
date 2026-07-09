@@ -44,6 +44,15 @@
    bare Enter still classifies as 'launch' regardless of mode/prompt content,
    the decline happens downstream in fire(), not in the classifier.
 
+   AMENDED by agentic-workflow-aqyqd (see ADR-0050's third "## Amendment"
+   section): the second amendment's "the four legacy modes always fire"
+   clause is REVERSED — decline-to-launch generalizes from Plain alone to
+   EVERY mode. `requiresPrompt` is retired as a concept ("a prompt is
+   required" is now a property of the bar, not of any one mode);
+   `canFirePromptMode` answers purely from the trimmed prompt and keeps
+   `index` in its signature, deliberately unread. `promptBarKeyIntent`
+   (invariant 4) stays untouched, exactly as m3vhq left it.
+
    Color/paint is explicitly out of scope here (ADR-0050 "Out of scope") — this
    module carries only the interaction judgment; ADR-0048/ADR-0051 govern how
    the highlighted tab is painted, in board.js.
@@ -70,19 +79,23 @@ import {
 // design-system-r4k8m glyph (`message-circle-question`, unforked, 1b's bare
 // "?" is superseded), while Modeling and Research move off the undeliberate
 // `compass` / `search` defaults onto xr4sb's settled `diamond` / `circle-dot`.
-// agentic-workflow-m3vhq appends a FIFTH mode, Plain, LAST. Quick Capture
+// agentic-workflow-m3vhq appended a FIFTH mode, Plain, LAST. Quick Capture
 // stays index 0 (the mount default and post-launch reset target, unchanged) —
-// Plain is a peer, not a promoted baseline. Plain is the first mode carrying
-// `requiresPrompt: true`: unlike the four legacy modes (whose bare commands
-// are meaningful even on an empty prompt), Plain's command IS the prompt —
-// an empty prompt has nothing to send, so Plain is the first mode that can
-// DECLINE to launch (see `canFirePromptMode` below).
+// Plain is a peer, not a promoted baseline.
+//
+// agentic-workflow-aqyqd (third ADR-0050 amendment) RETIRES the per-mode
+// `requiresPrompt` flag m3vhq introduced on Plain alone. The flag existed for
+// exactly one reason: to mark Plain as the exception among four peers that
+// always fired. Once every mode declines on an empty prompt (see
+// `canFirePromptMode` below), the per-mode axis is a fiction — "a prompt is
+// required" is a property of the BAR, not of any one mode — so no entry here
+// carries `requiresPrompt` any more.
 export const PROMPT_MODES = [
   { id: 'quick-capture', label: 'Quick Capture', subtitle: 'file it fast, no ceremony', icon: 'plus', commandFor: quickCaptureCommandFor },
   { id: 'modeling', label: 'Modeling', subtitle: 'shape into structure', icon: 'diamond', commandFor: modelingCommandFor },
   { id: 'inquire', label: 'Inquire', subtitle: 'ask the codebase', icon: 'message-circle-question', commandFor: inquireCommandFor },
   { id: 'research', label: 'Research', subtitle: 'dig deeper', icon: 'circle-dot', commandFor: researchCommandFor },
-  { id: 'plain', label: 'Plain', subtitle: 'straight to Claude, no skill', icon: 'bot', commandFor: plainCommandFor, requiresPrompt: true },
+  { id: 'plain', label: 'Plain', subtitle: 'straight to Claude, no skill', icon: 'bot', commandFor: plainCommandFor },
 ];
 
 // The default AND reset target (ADR-0050 §default/reset): Quick Capture,
@@ -130,26 +143,34 @@ export function nextPromptModeIndex(current, direction) {
 
 /**
  * The ONE predicate that decides whether a mode can fire right now
- * (agentic-workflow-m3vhq). Both `fire()`'s guard (board.js) and the Enter
- * button's `disabled` state consult this single function rather than each
- * re-deriving "can this mode launch?" independently.
+ * (introduced agentic-workflow-m3vhq for Plain alone; GENERALIZED to every
+ * mode by agentic-workflow-aqyqd, the third ADR-0050 amendment). Both
+ * `fire()`'s guard (board.js) and the Enter button's `disabled` state consult
+ * this single function rather than each re-deriving "can this mode launch?"
+ * independently.
  *
- * Plain (`requiresPrompt: true`) is the first mode that can DECLINE to
- * launch: its command IS the prompt, so an empty/whitespace-only prompt has
- * nothing to send. The four legacy modes always fire, empty prompt or not —
- * their bare commands (`/agentheim:modeling`, etc.) are meaningful on their
- * own.
- * @param {*} index — a candidate PROMPT_MODES index (clamped internally, so
- *   an out-of-range index never throws).
+ * The prompt bar is a prompt console: with no prompt there is nothing to
+ * send, in any mode. `requiresPrompt` (m3vhq's per-mode flag marking Plain as
+ * the lone exception) is retired — "a prompt is required" is now a property
+ * of THE BAR, not of any one mode, so this predicate answers purely from the
+ * trimmed prompt.
+ *
+ * `index` is kept in the signature deliberately, though UNREAD: it keeps
+ * both call sites (`board.js`'s `fire()` guard and its Enter-button disabled
+ * state) and this module's tests stable across the reversal, and leaves a
+ * cheap door open for a future per-mode exception to return without a
+ * re-plumbing. Because `index` is never read, an out-of-range or
+ * non-numeric `index` cannot throw here — the old `clampPromptModeIndex`
+ * lookup this function used to perform (to find `mode.requiresPrompt`) is
+ * gone along with the mode lookup itself.
+ * @param {*} index — unread; retained only for signature/call-site stability
+ *   and a future per-mode exception.
  * @param {*} prompt — the live textarea contents (trimmed internally; a
- *   missing/non-string prompt is treated as empty).
- * @returns {boolean} `false` exactly when the mode at `index` has
- *   `requiresPrompt: true` AND the trimmed prompt is empty; `true` otherwise.
- *   Pure: no DOM, no I/O, never throws.
+ *   missing/non-string/whitespace-only prompt is treated as empty).
+ * @returns {boolean} `true` exactly when the trimmed prompt is non-empty;
+ *   `false` otherwise. Pure: no DOM, no I/O, never throws.
  */
 export function canFirePromptMode(index, prompt) {
-  const mode = PROMPT_MODES[clampPromptModeIndex(index)];
-  if (!mode.requiresPrompt) return true;
   const trimmed = typeof prompt === 'string' ? prompt.trim() : '';
   return trimmed.length > 0;
 }

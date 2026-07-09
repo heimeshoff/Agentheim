@@ -11,7 +11,9 @@
 // agentic-workflow-m3vhq appends a FIFTH tab, Plain — the first mode that can
 // DECLINE to launch (an empty prompt is a true no-op, gated by the shared
 // canFirePromptMode predicate, consulted by both fire() and the Enter button's
-// disabled state).
+// disabled state). agentic-workflow-aqyqd (third ADR-0050 amendment)
+// GENERALIZES the decline from Plain alone to all five modes — the bar
+// itself now requires a prompt, not any one mode.
 //
 // Every trigger that can launch a mode's seeded command — clicking its tab, the
 // Enter button, or Ctrl+Enter — routes through the ONE `fire(modeIndex)` function,
@@ -309,7 +311,8 @@ test('a successful launch/copy clears the textarea and fires confetti; silent (n
   assert.match(bar, /<\$\{BoardConfetti\}\s+fireKey=\$\{confettiKey\}/, 'BoardConfetti must still be mounted off confettiKey');
 });
 
-// --- agentic-workflow-m3vhq: Plain mode + decline-to-launch -------------
+// --- agentic-workflow-m3vhq: Plain mode + decline-to-launch,
+// generalized to every mode by agentic-workflow-aqyqd -------------------
 
 test('BoardPromptBar imports canFirePromptMode from prompt-mode.js (agentic-workflow-m3vhq)', () => {
   assert.match(
@@ -330,13 +333,27 @@ test('fire() early-returns before launchOrCopy when canFirePromptMode is false �
     'the canFirePromptMode guard must run BEFORE launchOrCopy, so a decline never bridges, copies, or confettis');
 });
 
-test('the Enter button renders disabled exactly when canFirePromptMode(highlightedMode, prompt) is false, via the unforked disabled prop (agentic-workflow-m3vhq)', () => {
+test('the Enter button renders disabled exactly when canFirePromptMode(highlightedMode, prompt) is false, via the unforked disabled prop — for ANY highlighted mode, legacy or Plain (agentic-workflow-m3vhq, widened by agentic-workflow-aqyqd)', () => {
   const bar = barSrc();
   assert.match(bar, /canFirePromptMode\(highlightedMode,\s*prompt\)/, 'BoardPromptBar must consult the shared predicate for the button state');
   const enterButton = bar.match(/<\$\{EnterButton\}[\s\S]*?\/>/);
   assert.ok(enterButton, 'an EnterButton must exist');
   assert.match(enterButton[0], /disabled=\$\{[^}]*\}/, 'the disabled prop must be forwarded to EnterButton');
   assert.doesNotMatch(bar, /pointer-events:\s*["']none["']/, 'a disabled Enter button must never be faked with a pointer-events wrapper');
+});
+
+// agentic-workflow-aqyqd (third ADR-0050 amendment): the decline-to-launch
+// guard generalizes from Plain alone to EVERY mode — a legacy mode
+// (e.g. Modeling) highlighted with a blank prompt must ALSO render the Enter
+// button disabled. Since this suite has no DOM render harness (see file
+// header), the check is structural: `canFirePromptMode(highlightedMode,
+// prompt)` (asserted above) is computed from `highlightedMode` alone — it is
+// never re-derived per mode id/index, so the SAME disabled expression governs
+// every mode, legacy or Plain, by construction rather than by a per-mode
+// branch a reader could miss.
+test('the disabled-Enter guard is NOT scoped to Plain — board.js contains no per-mode requiresPrompt check or mode-id branch, so a legacy mode highlighted with a blank prompt disables the Enter button exactly like Plain did (agentic-workflow-aqyqd)', () => {
+  assert.doesNotMatch(boardSrc, /requiresPrompt/, 'requiresPrompt is retired; board.js must not special-case any one mode for the decline gate');
+  assert.doesNotMatch(boardSrc, /activeMode\.id === ['"]plain['"]/, 'the decline gate must not branch on Plain\'s id — it must be uniform across all five modes');
 });
 
 test('the Enter affordance\'s title/aria-label never render an empty command string — Plain + blank prompt reads "Type a prompt to launch Plain" (agentic-workflow-m3vhq)', () => {

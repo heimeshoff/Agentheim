@@ -30,6 +30,11 @@
 
 // The fully-qualified, bare modeling command — what the backlog add-ticket `+`
 // copies, and the prefix every per-card command shares.
+// agentic-workflow-aqyqd: the board's prompt-bar Modeling tab no longer
+// reaches this bare form — canFirePromptMode (prompt-mode.js) declines to
+// launch ANY mode on an empty prompt, so `modelingCommandFor('')`'s fallback
+// to this constant is unreachable from the board. Left in place (still
+// correct, pure, unit-tested) — do not delete or "restore" the bare launch.
 export const MODELING_COMMAND = '/agentheim:modeling';
 
 // The fully-qualified quick-capture command (agentic-workflow-020) — the fast
@@ -41,6 +46,9 @@ export const MODELING_COMMAND = '/agentheim:modeling';
 // copies to the clipboard on the bridge-absent fallback path. Bare and
 // fully-qualified for the same reason MODELING_COMMAND is — it resolves
 // regardless of the builder's alias setup.
+// agentic-workflow-aqyqd: unreachable from the board for the same reason
+// MODELING_COMMAND is (canFirePromptMode declines every mode on an empty
+// prompt) — left in place, do not delete or "restore" the bare launch.
 export const QUICK_CAPTURE_COMMAND = '/agentheim:quick-capture';
 
 // The fully-qualified research command (agentic-workflow-036) — the board prompt
@@ -51,6 +59,9 @@ export const QUICK_CAPTURE_COMMAND = '/agentheim:quick-capture';
 // authoring buttons it CONSUMES the typed prompt (researchCommandFor), so the bare
 // constant is the empty-prompt fallback only. Bare and fully-qualified for the same
 // reason MODELING_COMMAND is — it resolves regardless of the builder's alias setup.
+// agentic-workflow-aqyqd: unreachable from the board for the same reason
+// MODELING_COMMAND is (canFirePromptMode declines every mode on an empty
+// prompt) — left in place, do not delete or "restore" the bare launch.
 export const RESEARCH_COMMAND = '/agentheim:research';
 
 // The fully-qualified inquire command (agentic-workflow-h7n2c) — the board prompt
@@ -62,6 +73,9 @@ export const RESEARCH_COMMAND = '/agentheim:research';
 // empty-prompt fallback only. The `inquire` skill answers questions toward the codebase
 // (read-only over `.agentheim/` and the source, ADR-0017). Bare and fully-qualified for
 // the same reason MODELING_COMMAND is — it resolves regardless of the builder's alias setup.
+// agentic-workflow-aqyqd: unreachable from the board for the same reason
+// MODELING_COMMAND is (canFirePromptMode declines every mode on an empty
+// prompt) — left in place, do not delete or "restore" the bare launch.
 export const INQUIRE_COMMAND = '/agentheim:inquire';
 
 // The fully-qualified, bare WORK command (agentic-workflow-024) — what the board

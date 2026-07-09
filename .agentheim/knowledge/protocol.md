@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 16:41 -- Task verified and completed: agentic-workflow-aqyqd - Every prompt-bar mode requires a prompt — the decline-to-launch rule generalizes from Plain to all five
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-aqyqd - Every prompt-bar mode requires a prompt — the decline-to-launch rule generalizes from Plain to all five
+**Summary:** Every prompt-bar mode now declines to launch without a prompt; requiresPrompt is retired entirely
+**Duration:** 12m
+**Verification:** PASS (iteration 1)
+**Files changed:** 9
+**Tests added:** 1
+**ADRs written:** none
+
+---
+
 ## 2026-07-09 16:27 -- Batch started: [agentic-workflow-aqyqd]
 
 **Type:** Work / Batch start

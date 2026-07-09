@@ -4,7 +4,7 @@ title: Prompt bar gains a keyboard-committed single-selection model, superseding
 scope: agentic-workflow
 status: proposed
 date: 2026-07-05
-related_tasks: [agentic-workflow-s7gev, agentic-workflow-bz3az, agentic-workflow-p8k4d, agentic-workflow-m3vhq]
+related_tasks: [agentic-workflow-s7gev, agentic-workflow-bz3az, agentic-workflow-p8k4d, agentic-workflow-m3vhq, agentic-workflow-aqyqd]
 related_adrs: [ADR-0048]
 ---
 
@@ -241,6 +241,72 @@ paint decision. The Enter button's `disabled` prop (`design-system-tfhn6`) is co
 unforked, painted as opacity de-emphasis per ADR-0016 (already how `EnterButton` renders
 disabled — no new CSS here).
 
+## Amendment — 2026-07-09 (agentic-workflow-aqyqd): decline-to-launch generalizes from Plain to every mode; `requiresPrompt` is retired
+
+The builder used the second amendment's Plain-only decline-to-launch and wanted the same
+behavior for **all five** modes. This amendment **reverses one clause** of the second
+amendment while leaving everything else it, and the Decision above, established
+unchanged: the single `highlightedMode` index, invariants 1–4, the two orthogonal
+committed-selection/hover channels, the click-selects-only / Enter-launches / Ctrl+Space
+model, and the default/reset target (Quick Capture, index 0) are all **unchanged**.
+
+The reversed clause is the second amendment's own words:
+
+> The four legacy modes always fire, empty prompt or not — their bare commands
+> (`/agentheim:modeling`, etc.) are meaningful on an empty prompt.
+
+That was a correct reading of the shipped code. What it treated as a *feature* —
+clicking Modeling with an empty box opens a bare modeling dialogue — the builder now
+reads as an accident of the launcher's origins, not something worth preserving. The
+prompt bar is a **prompt console**: its purpose is to send a prompt. With no prompt
+there is nothing to send, in **any** mode.
+
+1. **No mode fires on an empty/whitespace-only/missing prompt.** `canFirePromptMode(index,
+   prompt)` now answers purely from the trimmed prompt — `true` exactly when it is
+   non-empty, for every index alike. It keeps its two-parameter signature (call-site and
+   test stability, and a cheap door back to a future per-mode exception), but `index` is
+   now deliberately **unread**.
+2. **`requiresPrompt` is retired as a concept**, not set to `true` on all five
+   `PROMPT_MODES` entries. The flag existed for exactly one reason: to mark Plain as the
+   exception among four peers that always fired. Once there is no exception, the
+   per-mode axis is a fiction — "a prompt is required" is a property of **the bar**, not
+   of any one mode. No `PROMPT_MODES` entry carries the key after this amendment.
+3. **The bare-skill launch is now unreachable from the board, deliberately.** The four
+   bare-command constants (`QUICK_CAPTURE_COMMAND`, `MODELING_COMMAND`,
+   `INQUIRE_COMMAND`, `RESEARCH_COMMAND`, `modeling-command.js`) and their builders'
+   empty-prompt degrade branches are **left in place** — correct, pure, unit-tested — but
+   are reachable from **exactly nowhere** on the board now that every mode declines on an
+   empty prompt. Bare sessions are launched from the terminal instead. This was accepted
+   knowingly (2026-07-09) as the trade for a single, uniform decline rule, rather than
+   reopening `agentic-workflow-p8k4d`'s click-selects-only reversal to invent a second
+   bare-launch affordance.
+4. **`fire(modeIndex)`'s early-return and the Enter button's `disabled` prop are
+   unchanged code**, now reachable from all five modes instead of Plain alone — both
+   already consulted the shared `canFirePromptMode` predicate rather than re-deriving
+   the decline independently, so generalizing the predicate generalizes both call sites
+   for free.
+
+**`promptBarKeyIntent` (invariant 4) is untouched by this amendment**, exactly as it was
+untouched by the second amendment: bare Enter on an empty prompt, in any mode, still
+classifies as `launch`. The decline is, and remains, a `fire()`-level concern — the
+classifier has no notion of "which mode" or "is the prompt empty."
+
+**Naming, unchanged.** The pure module stays `dashboard/app/prompt-mode.js`; its exported
+shape (`PROMPT_MODES`, `DEFAULT_PROMPT_MODE_INDEX`, `clampPromptModeIndex`,
+`nextPromptModeIndex`, `promptBarKeyIntent`, `PROMPT_KEY_INTENT`, `canFirePromptMode`) is
+unchanged — only `canFirePromptMode`'s internal reasoning and `PROMPT_MODES`'s entries
+(minus the `requiresPrompt` key) change.
+
+**Paint untouched.** ADR-0048 / ADR-0051 (the ochre highlighted-tab and Enter-button
+carve-outs) and ADR-0016 govern every mode's tab and the Enter button's disabled state
+exactly as before — `EnterButton`'s `disabled` prop (`design-system-tfhn6`) was already
+consumed unforked and painted opacity-only; nothing about how the disabled state is
+painted changes, only when it applies.
+
+**Armed launches, unchanged.** An armed launch still threads `skipPermissions: true` for
+every mode regardless of this amendment — this amendment narrows *when* a launch can
+fire, not *what* an armed launch carries. Not re-litigated here.
+
 ## Consequences
 
 - `dashboard/app/prompt-mode.js` (not yet written) has a named contract before
@@ -273,3 +339,10 @@ disabled — no new CSS here).
   Research (index 3). The model gains its first decline-to-launch mode (Plain,
   `requiresPrompt: true`), governed by the new `canFirePromptMode` predicate — invariant
   4 (`promptBarKeyIntent`) is untouched by this; the decline is a `fire()`-level concern.
+- **(Amended by agentic-workflow-aqyqd)** m3vhq's "the four legacy modes always fire"
+  clause is reversed: `canFirePromptMode` now declines on an empty/whitespace-only prompt
+  for **every** mode, not Plain alone. `requiresPrompt` is retired — no `PROMPT_MODES`
+  entry carries it — and `canFirePromptMode`'s `index` parameter is kept but deliberately
+  unread. The four legacy modes' bare-command constants and builders are left in place
+  but are now unreachable from the board; bare sessions launch from the terminal.
+  `promptBarKeyIntent` (invariant 4) remains untouched.

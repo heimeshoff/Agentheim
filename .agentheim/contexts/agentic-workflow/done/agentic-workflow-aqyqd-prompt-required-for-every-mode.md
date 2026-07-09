@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-aqyqd
 title: Every prompt-bar mode requires a prompt — the decline-to-launch rule generalizes from Plain to all five
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-09
-completed:
+completed: 2026-07-09
 depends_on: [design-system-001-styleguide, agentic-workflow-m3vhq]
 blocks: []
 tags: [dashboard, prompt-bar]
@@ -60,49 +60,49 @@ untouched: `EnterButton`'s `disabled` prop (`design-system-tfhn6`) is already co
 unforked (ADR-0003) and already painted opacity-only (ADR-0016).
 
 ## Acceptance criteria
-- [ ] `requiresPrompt` is deleted from the `plain` entry in `PROMPT_MODES`
+- [x] `requiresPrompt` is deleted from the `plain` entry in `PROMPT_MODES`
       (`dashboard/app/prompt-mode.js`) and is **not** added to any other entry. The key
       appears nowhere in the module after this task.
-- [ ] `canFirePromptMode(index, prompt)` returns `true` exactly when the trimmed prompt is
+- [x] `canFirePromptMode(index, prompt)` returns `true` exactly when the trimmed prompt is
       non-empty, for **every** index; `false` otherwise. A missing / non-string / whitespace-
       only prompt is treated as empty. It keeps its two-parameter signature, does not read
       `index`, and never throws — including on an out-of-range or non-numeric `index` (the
       old `clampPromptModeIndex` call inside it goes away with the mode lookup, so nothing
       remains that could throw). Its doc comment states why `index` is retained and unread.
-- [ ] `fire(modeIndex)` still early-returns **before** `launchOrCopy` when
+- [x] `fire(modeIndex)` still early-returns **before** `launchOrCopy` when
       `canFirePromptMode` is false — unchanged code, but now reachable from all five modes:
       no bridge call, no clipboard write, no confetti, no textarea clear, no highlight
       reset, no feedback chip.
-- [ ] The Enter button renders **disabled** exactly when the trimmed prompt is empty,
+- [x] The Enter button renders **disabled** exactly when the trimmed prompt is empty,
       whichever mode is highlighted — via `EnterButton`'s `disabled` prop, consumed unforked
       (ADR-0003), never re-implemented in `board.js` and never faked with a
       `pointer-events: none` wrapper. Its `title` / `aria-label` read
       `Type a prompt to launch <Label>` for each of the five labels.
-- [ ] `promptBarKeyIntent` is **untouched**. A test asserts bare Enter on an empty prompt
+- [x] `promptBarKeyIntent` is **untouched**. A test asserts bare Enter on an empty prompt
       still classifies as `launch` for every mode — the decline happens in `fire()`, not in
       the classifier (ADR-0050 invariant 4 stays a disjoint, keyboard-only classification).
-- [ ] **The inverted assertion is re-pinned, not deleted.** `prompt-mode.test.mjs`'s
+- [x] **The inverted assertion is re-pinned, not deleted.** `prompt-mode.test.mjs`'s
       `canFirePromptMode is true for all four legacy modes regardless of an empty prompt —
       their bare commands are meaningful` (line ~250) asserts the exact behavior this task
       reverses. It must be **rewritten to assert the opposite** (no mode fires on an empty
       prompt; every mode fires on a real one), not removed. Likewise the module doc comment
       at ~line 69 that explains Plain's uniqueness.
-- [ ] `board-prompt-bar.test.mjs`'s disabled-Enter assertion is widened from "Plain
+- [x] `board-prompt-bar.test.mjs`'s disabled-Enter assertion is widened from "Plain
       highlighted + blank prompt" to cover a legacy mode highlighted + blank prompt.
-- [ ] The four bare-command constants and their builders' empty-prompt degrade branches are
+- [x] The four bare-command constants and their builders' empty-prompt degrade branches are
       **left in place, not deleted.** They remain correct, pure, and unit-tested; they are
       simply no longer reachable from the board. A comment on each constant records that the
       board no longer reaches it (so a later reader doesn't "restore" the bare launch by
       accident). `plainCommandFor`'s `''`-on-empty degrade likewise stays.
-- [ ] ADR-0050 gains a **third** `## Amendment` section — no new ADR, same precedent as
+- [x] ADR-0050 gains a **third** `## Amendment` section — no new ADR, same precedent as
       `agentic-workflow-p8k4d` and m3vhq. It records: the second amendment's
       "four legacy modes always fire" clause is **reversed**; `requiresPrompt` is retired as
       a concept; "a mode may decline to launch" generalizes to "the bar declines to launch
       without a prompt"; the bare-skill launch is now unreachable from the board, deliberately;
       and invariants 1–4 plus the default/reset target are all **unchanged**.
-- [ ] `dashboard/dist/` is **rebuilt** (`node build.mjs`) — `board.js` and `prompt-mode.js`
+- [x] `dashboard/dist/` is **rebuilt** (`node build.mjs`) — `board.js` and `prompt-mode.js`
       are both bundled.
-- [ ] Dashboard suite green (`node --test dashboard/test/*.test.mjs`); the verifier drives
+- [x] Dashboard suite green (`node --test dashboard/test/*.test.mjs`); the verifier drives
       the runtime surface clean.
 
 ## Notes
@@ -129,3 +129,43 @@ unforked (ADR-0003) and already painted opacity-only (ADR-0016).
 - Prior art: `agentic-workflow-m3vhq` built the predicate and the disabled button this task
   generalizes; `agentic-workflow-p8k4d` is the precedent for amending ADR-0050 in place while
   reversing one of its clauses; `agentic-workflow-bz3az` built the tab row and keyboard model.
+
+## Outcome
+`requiresPrompt` is retired entirely from `dashboard/app/prompt-mode.js` — no `PROMPT_MODES`
+entry carries the key. `canFirePromptMode(index, prompt)` no longer looks up a mode at all;
+it answers purely from the trimmed prompt (`true` iff non-empty), keeps its two-parameter
+signature, and leaves `index` deliberately unread (doc comment states why). `board.js`
+required no functional change — `fire()`'s guard and the Enter button's `disabled` prop
+already consulted the shared predicate generically — only stale comments referencing
+`requiresPrompt`/Plain-only decline were updated for accuracy. The four legacy bare-command
+constants and builders in `modeling-command.js` are unchanged in behavior, each now carrying
+a comment recording that the board can no longer reach their empty-prompt fallback.
+
+Tests: `dashboard/test/prompt-mode.test.mjs` — the `requiresPrompt` shape test replaced with
+a "no entry carries the key" assertion; the inverted "four legacy modes always fire" test
+(AC 6) rewritten to assert every mode (0..4) declines on empty/whitespace/missing/null and
+fires on real content; a new test locks that `index` is unread (same prompt → same answer
+regardless of index, including out-of-range/NaN). `dashboard/test/board-prompt-bar.test.mjs`
+— the disabled-Enter test title widened off "Plain highlighted" and a new structural test
+asserts board.js contains no `requiresPrompt` reference and no `activeMode.id === 'plain'`
+branch gating the decline, confirming the gate is uniform across all five modes. Full
+dashboard suite: 799/799 passing (one `events.test.mjs` fs-watcher-timing flake observed on
+one run, confirmed pre-existing/unrelated by an isolated rerun and a clean full-suite
+rerun). `dashboard/dist/app.js` rebuilt (`git diff --numstat`: 76/76 — a real rebuild, not
+the EOL phantom).
+
+ADR-0050 gained its third `## Amendment` (2026-07-09, agentic-workflow-aqyqd), reversing the
+second amendment's "four legacy modes always fire" clause, recording `requiresPrompt`'s
+retirement, the bare-skill launch's now-deliberate unreachability from the board, and that
+invariants 1–4 plus the default/reset target are unchanged. `related_tasks` frontmatter
+updated to include this task.
+
+BC README's *Board prompt bar* section updated: the `PROMPT_MODES` description no longer
+claims Plain carries `requiresPrompt`, and the decline-to-launch paragraph rewritten to
+describe the generalized, bar-wide rule rather than a Plain-only exception.
+
+Key files: `dashboard/app/prompt-mode.js`, `dashboard/app/board.js` (comments only),
+`dashboard/app/modeling-command.js` (comments only), `dashboard/test/prompt-mode.test.mjs`,
+`dashboard/test/board-prompt-bar.test.mjs`, `dashboard/dist/app.js`,
+`.agentheim/knowledge/decisions/0050-prompt-bar-keyboard-committed-selection-model.md`,
+`.agentheim/contexts/agentic-workflow/README.md`.

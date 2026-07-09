@@ -1039,10 +1039,12 @@ function BoardPromptBar({ skipPermissions = false }) {
   // calls — so "identical to clicking the highlighted tab" (ADR-0050) is true by
   // construction, not by keeping three call sites in sync by hand.
   //
-  // agentic-workflow-m3vhq: Plain is the first mode that can DECLINE to launch
-  // (requiresPrompt: true, empty prompt). The shared canFirePromptMode
-  // predicate (prompt-mode.js) is consulted FIRST, before anything else runs —
-  // a decline is a true no-op: no bridge call, no clipboard write, no
+  // agentic-workflow-m3vhq introduced the decline-to-launch guard for Plain
+  // alone; agentic-workflow-aqyqd (third ADR-0050 amendment) generalizes it
+  // to every mode — an empty/whitespace-only prompt declines regardless of
+  // which mode is highlighted. The shared canFirePromptMode predicate
+  // (prompt-mode.js) is consulted FIRST, before anything else runs — a
+  // decline is a true no-op: no bridge call, no clipboard write, no
   // confetti, no textarea clear, no highlight reset, no feedback chip.
   const fire = useCallback((modeIndex) => {
     const idx = clampPromptModeIndex(modeIndex);
@@ -1105,10 +1107,12 @@ function BoardPromptBar({ skipPermissions = false }) {
   }, [fire, highlightedMode]);
 
   const activeMode = PROMPT_MODES[highlightedMode];
-  // agentic-workflow-m3vhq: the ONE predicate both the Enter button's disabled
-  // state and fire()'s guard consult — never re-derived independently. When
-  // false (Plain highlighted, prompt blank), the hint text names the decline
-  // rather than rendering the (empty) command string.
+  // The ONE predicate both the Enter button's disabled state and fire()'s
+  // guard consult — never re-derived independently. Since
+  // agentic-workflow-aqyqd generalized the decline from Plain alone to every
+  // mode, `canFire` is false whenever the prompt is blank, whichever mode is
+  // highlighted; the hint text then names the decline rather than rendering
+  // an (in the legacy modes' case, bare-command) or empty command string.
   const canFire = canFirePromptMode(highlightedMode, prompt);
   const enterHint = canFire
     ? `Launch ${activeMode.label} — ${activeMode.commandFor(prompt)}`
