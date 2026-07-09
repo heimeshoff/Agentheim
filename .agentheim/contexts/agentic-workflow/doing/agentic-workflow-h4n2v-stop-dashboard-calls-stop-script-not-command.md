@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-h4n2v
 title: Stop dashboard menu item calls the stop script, not the slash command
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-09

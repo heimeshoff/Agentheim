@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 132
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-h4n2v** — Stop dashboard menu item calls the stop script, not the slash command (feature) — `todo/agentic-workflow-h4n2v-stop-dashboard-calls-stop-script-not-command.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-h4n2v** — Stop dashboard menu item calls the stop script, not the slash command (feature) — `doing/agentic-workflow-h4n2v-stop-dashboard-calls-stop-script-not-command.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

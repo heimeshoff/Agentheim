@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-09 15:01 -- Batch started: [agentic-workflow-h4n2v, design-system-tfhn6]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-h4n2v - Stop dashboard menu item calls the stop script, not the slash command, design-system-tfhn6 - EnterButton gains a disabled state
+**Parallel:** yes (2 workers — the full ready set; agentic-workflow-h4n2v touches dashboard/ only, design-system-tfhn6 touches styleguide/ only, zero file overlap, separate BC READMEs, so no merge-order constraint. MAX_PARALLEL=3 not reached. agentic-workflow-m3vhq stays in backlog — it depends on design-system-tfhn6, which ships in this batch.)
+
+---
+
 ## 2026-07-09 14:56 -- Modeling / Promoted: design-system-tfhn6 - EnterButton gains a disabled state
 
 **Type:** Modeling / Promote
