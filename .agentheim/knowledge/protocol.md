@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-10 09:41 -- Modeling / Captured: agentic-workflow-rwxms - applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** `applyTaskMove` does `writeFileSync(fromPath, statusRewritten)` then `renameSync(fromPath, toPath)` with nothing creating the destination lifecycle folder; git tracks no empty dirs and the repo has no `.gitkeep`, so a drained `doing/` makes the next claim ENOENT with the source already rewritten to `status: doing`. Third finding transplanted from the WisdomHeim vault's `infrastructure-nvrz0` pointer, after `agentic-workflow-wq7fn` and `agentic-workflow-dk3vz`; re-confirmed against `main`.
+
+---
+
 ## 2026-07-10 09:14 -- Release shipped: v0.9.1
 
 **Type:** Release

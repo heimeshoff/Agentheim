@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 137
@@ -83,6 +83,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-rwxms** — bug: `applyTaskMove` rewrites frontmatter before a rename that ENOENTs on a missing destination folder — `backlog/agentic-workflow-rwxms-applytaskmove-missing-destination-dir.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
