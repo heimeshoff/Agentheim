@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 28
@@ -58,6 +58,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **infrastructure-d2n8s** — A DOM-render test harness — so a test can mount the board, dispatch a real keydown, and see what a source-regex suite structurally cannot (feature) — `backlog/infrastructure-d2n8s-dom-render-test-harness.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 12:45 -- Modeling / Captured: agentic-workflow-q7v3k, infrastructure-d2n8s - Two guards the work session earned
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow + infrastructure (two seams, one origin)
+**Filed to:** backlog (both — builder wants to review before they're worked)
+**Summary:** Both items fell out of the 2026-07-13 12:30 work session (observations 2 and 4 of its session-end entry) and are captured with that evidence attached rather than as hunches. **`agentic-workflow-q7v3k`** makes the "workers never rebuild `dashboard/dist/`" contract **structural**: prompt-level prohibition has now failed across FOUR sessions — in the last one all three workers rebuilt it on their first pass, including one given an explicit "HARD CONTRACT, not a preference" framing. This is a correctness problem, not tidiness: esbuild tree-shakes unused exports (`probeBridge` was absent from one worker's bundle purely because nothing consumed it yet), so a worker's bundle and a post-merge bundle legitimately differ, and a textual 3-way merge of two workers' bundles yields an artifact built from a source tree that never existed — plausible-looking, silently missing a shipped fix, invisible to a suite that imports `app/` not `dist/`. The enforcement point (suite test vs. conductor-side check vs. git-level guard) is deliberately left open for refinement, since each has a real flaw and the guard must not flag the conductor's own *sanctioned* regeneration. Prior art: `lib/agent-spawn-namespace.mjs` (ADR-0052) and `agentic-workflow-080` are the existing live-tree-lint family. **`infrastructure-d2n8s`** stands up a DOM-render test harness (jsdom/happy-dom) as a test-time devDependency, because the board and styleguide suites are **source-regex** suites — they read code as text — and that is structurally blind to live event-propagation behavior. It shipped a real bug: `m2vkp`'s double-handled Ctrl+M (React 18 `createRoot` delegates keydown at the root container, the event bubbles on to a `document` listener, neither called `stopPropagation()`) cycled the model by +2, making Fable and Sonnet unreachable while typing — with 1279 tests green. The ADR-0002/0003 "no install step" objection was checked at capture and **dissolves**: those ADRs constrain *running* the dashboard, and ADR-0003 already blesses esbuild as a build-time-only dependency; a dev-only test library is the same category. Its load-bearing acceptance criterion is that the harness must be able to **reproduce the m2vkp bug** — a harness that cannot faithfully model React 18's event delegation has failed its one job and should be bounced, not shipped as false confidence.
+
+---
+
 ## 2026-07-13 12:30 -- Work session ended
 
 **Type:** Work / Session end
