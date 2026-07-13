@@ -1,7 +1,7 @@
 ---
 id: infrastructure-d2n8s
 title: A DOM-render test harness — so a test can mount the board, dispatch a real keydown, and see what a source-regex suite structurally cannot
-status: backlog
+status: todo
 type: feature
 context: infrastructure
 created: 2026-07-13

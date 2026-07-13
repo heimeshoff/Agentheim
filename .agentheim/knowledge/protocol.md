@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 13:19 -- Modeling / Promoted: infrastructure-d2n8s - A DOM-render test harness — so a test can mount the board, dispatch a real keydown, and see what a source-regex suite structurally cannot
+
+**Type:** Modeling / Promote
+**BC:** infrastructure
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-13 13:20 -- Modeling / Refined: infrastructure-d2n8s - A DOM-render test harness
 
 **Type:** Modeling / Refine
