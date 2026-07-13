@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-m2vkp
 title: One launch control, not two — the ochre button names the session's model, Ctrl+M cycles it, and both selections survive a launch
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-13

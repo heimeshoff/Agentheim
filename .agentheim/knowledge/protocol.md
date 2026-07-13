@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 11:47 -- Batch started: [agentic-workflow-m2vkp]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-m2vkp - One launch control, not two — the ochre button names the session's model, Ctrl+M cycles it, and both selections survive a launch
+**Parallel:** no (1 worker — sole ready task; it depends_on BOTH wave-1 tasks (design-system-r9dtm, infrastructure-h5wnq) and could not start until they landed)
+
+---
+
 ## 2026-07-13 11:47 -- Task verified and completed: design-system-r9dtm - ModelSplitButton — the ochre Enter button widens into a labelled split button with a caret
 
 **Type:** Work / Task completion
