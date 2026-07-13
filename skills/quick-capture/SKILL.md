@@ -1,6 +1,7 @@
 ---
 name: quick-capture
 description: Use whenever the user wants to dump an idea, bug, or feature into the backlog FAST — no conversation, no questions, no refinement. This is the quick-jot entry point: the user is offloading a thought and wants to keep moving, not think it through. Triggers on phrases like "capture this", "jot this down", "quick capture", "note for later", "dump this in the backlog", "just file it", "add this without discussing", "brain-dump", "stick this in <bc>", "log this idea", "don't ask, just record it", and on rapid-fire multi-idea lists ("three things: A, B, C"). Routes each idea to the best-fit bounded context, writes one backlog task per idea, and reports where each landed in a single line — then gets out of the way. If the user instead wants to think an idea through, refine it, or talk it over, that's `modeling`, not this. Quick-capture never asks clarifying questions and never writes to todo — captured tasks are deliberately raw and always need a later refinement pass.
+model: haiku
 ---
 
 # Quick Capture — Fast idea dump into the backlog
