@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 16:05 -- Modeling / Captured: design-system-me97j - ModelSplitButton's `disabled` deadens the model caret along with Enter
+
+**Type:** Modeling / Capture
+**BC:** design-system
+**Filed to:** todo
+**Summary:** The builder reported that with an empty prompt the greyed-out Enter button also deadens the model combo beside it — but picking a model before typing is exactly when you'd want to. Diagnosis: `ModelSplitButton` has one interactivity gate for two regions — `design-system-r9dtm` carried `EnterButton`'s single-region `disabled` prop (`design-system-tfhn6`) across the whole widget, so `canOpenMenu = !locked && !disabled`, the caret gets the real `disabled` attribute (leaving the tab order too), and the 0.55 opacity sits on the wrapper enclosing both. The consumer exposes it: `board.js` passes `disabled=${!canFire}` where `canFire` is derived purely from prompt-blankness — no in-flight state — so `disabled` only ever means "nothing to launch", which says nothing about the caret. Fix: narrow `disabled` to the primary region; the caret's sole gate becomes `locked` (which removes it entirely anyway). Builder decided at capture to dim **only the Enter half** rather than keep the whole surface dimmed — a control painted dead that still responds to clicks is a lying affordance. No `board.js` change needed; no `dist/` rebuild (ADR-0057, conductor's job). Filed straight to **todo**: cause confirmed in source, the visual decision is made, and the existing DOM harness makes every criterion mutation-provable.
+
+---
+
 ## 2026-07-13 15:42 -- Task verified and completed: design-system-k3f7q - ModelSplitButton's model menu opens upward and escapes the prompt console's clip
 
 **Type:** Work / Task completion

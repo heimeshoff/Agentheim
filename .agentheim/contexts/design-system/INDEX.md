@@ -11,13 +11,14 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 35
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **design-system-me97j** — ModelSplitButton's `disabled` deadens the model caret along with Enter — an empty prompt shouldn't block picking a model (bug) — `todo/design-system-me97j-split-button-disabled-spares-caret.md`
 <!-- todo-list:end -->
 
 ### Doing
