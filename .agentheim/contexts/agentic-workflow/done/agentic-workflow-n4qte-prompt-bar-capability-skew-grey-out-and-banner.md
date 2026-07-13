@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-n4qte
 title: Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-13
-completed:
+completed: 2026-07-13
 depends_on: [infrastructure-v8r3q]
 blocks: []
 tags: [bridge, prompt-bar, model-selector, silent-failure, ux]
@@ -266,3 +266,51 @@ and a `'model'`-only trigger would go silent for exactly that case. See §3.
   the "model axis" bullet, ~L406-437) is the ubiquitous-language home for this control; update
   it to mention the capability-aware lock and the banner rather than leaving it describing only
   the absent-bridge case.
+
+## Outcome
+
+`BoardPromptBar` (`dashboard/app/board.js`) now derives two distinct facts off the one
+mount-time `probeBridge` result — stored whole as `bridge = { present, capabilities }`, not a
+bare boolean:
+
+- **`bridgeSupportsModel`** (`bridge.present && bridge.capabilities.includes('model')`) drives
+  `modelLocked`, `modelLabel` ("Default" against absence OR staleness — never a real model name
+  keyed on presence alone), and a new third `modelHint`/`splitButtonTitle` branch naming the
+  reload remedy for the present-but-too-old case, textually distinct from the absent-bridge
+  wording.
+- **`bridgeSkewed`** (`bridge.present && KNOWN_CAPABILITIES.some(c => !bridge.capabilities.includes(c))`)
+  drives a new dismissible, session-local, board-local banner (`--obligation`/`--obligation-soft`
+  tokens, ADR-0016) rendered inside the docked console when a live bridge is missing any
+  advertised capability — generic copy, fires on ANY gap (not `'model'` specifically), never on
+  plain absence, never on forward-skew.
+
+`KNOWN_CAPABILITIES = ['prompt', 'skipPermissions', 'name', 'model']` is now exported from
+`dashboard/app/bridge-launch.js` — the dashboard's own peer statement of the extension's
+`CAPABILITIES` — and `bridge-launch.test.mjs`'s `FULL_CAPABILITIES` literal now resolves to it.
+A new structural guard test in `bridge-launch.test.mjs` mirrors the extension's
+`bridge.test.mjs` guard: every `caps.includes('<x>')` gate in `bridge-launch.js` names a field
+declared in `KNOWN_CAPABILITIES`, and every declared capability beyond the always-sent baseline
+(`prompt`, `skipPermissions`) is actually gated that way.
+
+Regression coverage lives in a new DOM-harness file, `dashboard/test/board-prompt-bar-capability-dom.test.mjs`
+(ADR-0056 pattern), covering all three probe outcomes (absent / legacy-skewed / full) plus
+forward-skew and a legacy-bridge launch that never surfaces a non-default model in the DOM.
+Three existing DOM fixtures (`board-prompt-bar-dom.test.mjs`, `board-prompt-bar-shrink-dom.test.mjs`,
+`board-prompt-console-clip-dom.test.mjs`) had their stubbed `/health` responses widened to the
+full capability set, since their own subject (Ctrl+M dispatch, shrink-to-fit, menu clipping)
+requires a genuinely unlocked selector and would otherwise be broken by the new skew banner's
+extra DOM element. `board-prompt-bar.test.mjs`'s regex suite was updated in place for the
+renamed `bridge` state and the new derivations.
+
+No session-name control was added anywhere — confirmed by review; the banner is the sole new
+UI surface, exactly as the task's Notes specified.
+
+Full suites green: `node --test dashboard/test/*.test.mjs` (903 pass), `node --test
+.agentheim/contexts/design-system/styleguide/test/*.test.mjs` (201 pass, untouched).
+
+Key files: `dashboard/app/board.js`, `dashboard/app/bridge-launch.js`,
+`dashboard/test/board-prompt-bar-capability-dom.test.mjs` (new),
+`dashboard/test/bridge-launch.test.mjs`, `dashboard/test/board-prompt-bar.test.mjs`,
+`dashboard/test/board-prompt-bar-dom.test.mjs`, `dashboard/test/board-prompt-bar-shrink-dom.test.mjs`,
+`dashboard/test/board-prompt-console-clip-dom.test.mjs`,
+`.agentheim/contexts/agentic-workflow/README.md`.

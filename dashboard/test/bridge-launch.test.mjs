@@ -18,17 +18,25 @@ import assert from 'node:assert/strict';
 import http from 'node:http';
 import crypto from 'node:crypto';
 
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
 import {
   BRIDGE_TOKEN_HEADER,
   LEGACY_CAPABILITIES,
+  KNOWN_CAPABILITIES,
   launchOrCopy,
   probeBridge,
 } from '../app/bridge-launch.js';
 
-// The modern build's full capability set (mirrors vscode-extension/src/bridge.js's
-// own CAPABILITIES — kept as a literal here rather than a cross-package import,
-// since a dashboard test has no build-time dependency on the extension package).
-const FULL_CAPABILITIES = ['prompt', 'skipPermissions', 'name', 'model'];
+// The modern build's full capability set now resolves to bridge-launch.js's
+// OWN exported KNOWN_CAPABILITIES (agentic-workflow-n4qte) — one source of
+// truth on the dashboard side, no longer a third hand-written literal
+// alongside the module's inline allowlist and the extension's own
+// CAPABILITIES (vscode-extension/src/bridge.js). It mirrors that extension
+// constant in VALUE, deliberately NOT as a cross-package import — the two
+// ends of the same handshake stay independent peers.
+const FULL_CAPABILITIES = KNOWN_CAPABILITIES;
 
 // ---- fetch test doubles -----------------------------------------------------
 
@@ -731,4 +739,41 @@ test('against a real 0.2.0-shaped listener: probeBridge resolves LEGACY_CAPABILI
   } finally {
     server.close();
   }
+});
+
+// ---- structural guard (agentic-workflow-n4qte) — mirrors the extension's --
+// ---- guard (vscode-extension/test/bridge.test.mjs L681, ADR-0018/infra-v8r3q)
+//
+// The extension's structural guard scans bridge.js's own source for every
+// `parsed?.<field>` read and asserts that set is EXACTLY CAPABILITIES. The
+// dashboard side had NO such guard — its allowlist was three hand-written
+// `caps.includes('…')` calls a fourth field could silently skip past, which
+// is precisely the drift class infrastructure-v8r3q's whole task existed to
+// close. `KNOWN_CAPABILITIES` gives the mirror an anchor: scan
+// bridge-launch.js's OWN source for every `caps.includes('<x>')` gate and
+// assert every named field is declared in `KNOWN_CAPABILITIES`, AND every
+// declared capability beyond the always-sent baseline (`prompt`,
+// `skipPermissions` — sent unconditionally, never gated on a probed
+// capability) is actually gated that way. A fifth field added to one side
+// and not the other now fails this suite. Deliberately narrow, same caveat
+// as the extension's guard: it trusts the `caps.includes('<x>')` syntax, not
+// a general static-analysis pass — if a future field is read via different
+// syntax, widen the guard then, not now.
+
+test('structural guard: every `caps.includes(\'<x>\')` gate in bridge-launch.js names a field declared in KNOWN_CAPABILITIES, and every declared capability beyond the always-sent baseline is actually gated that way', () => {
+  const srcPath = fileURLToPath(new URL('../app/bridge-launch.js', import.meta.url));
+  const source = readFileSync(srcPath, 'utf8');
+  const found = new Set();
+  const fieldRe = /caps\.includes\(['"](\w+)['"]\)/g;
+  let m;
+  while ((m = fieldRe.exec(source))) {
+    found.add(m[1]);
+  }
+  const ALWAYS_SENT_BASELINE = new Set(['prompt', 'skipPermissions']);
+  const gatedExpected = new Set(KNOWN_CAPABILITIES.filter((c) => !ALWAYS_SENT_BASELINE.has(c)));
+  assert.deepEqual(
+    found,
+    gatedExpected,
+    'a field gated via caps.includes(...) but missing from KNOWN_CAPABILITIES (or a declared, non-baseline capability never gated that way) means a future field could silently skip the capability check this guard exists to enforce',
+  );
 });

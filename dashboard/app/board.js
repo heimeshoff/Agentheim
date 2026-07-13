@@ -55,7 +55,7 @@ import { SORT_OPTIONS, DEFAULT_SORT, sortTickets } from "./board-sort.js";
 import { refineCommandFor, promoteCommandFor, dismissCommandFor, WORK_COMMAND, WHATS_NEXT_COMMAND } from "./modeling-command.js";
 import { PROMPT_MODES, DEFAULT_PROMPT_MODE_INDEX, clampPromptModeIndex, nextPromptModeIndex, promptBarKeyIntent, PROMPT_KEY_INTENT, canFirePromptMode, nameForPromptMode } from "./prompt-mode.js";
 import { PROMPT_MODELS, DEFAULT_PROMPT_MODEL_INDEX, nextPromptModelIndex, isModelLockedForMode, modelForMode, shouldWindowCtrlMHandle } from "./prompt-model.js";
-import { launchOrCopy, probeBridge } from "./bridge-launch.js";
+import { launchOrCopy, probeBridge, KNOWN_CAPABILITIES } from "./bridge-launch.js";
 import { groupTickets } from "./board-group.js";
 import { resolveHoverDependencies } from "./board-dependencies.js";
 import { annotateSectionHiddenDependency, donePeekHasHiddenDependency, unionTargetIds, classifyEdge } from "./board-dependency-groups.js";
@@ -599,6 +599,15 @@ function autoGrowField(el, maxPx) {
 const PROMPT_FIELD_MIN_PX = 40;
 const PROMPT_FIELD_MAX_PX = 168;
 
+// agentic-workflow-n4qte: the capability-skew banner's copy is deliberately
+// GENERIC — it names no specific field, so it stays true the day a fifth
+// capability arrives and a bridge advertises everything today's
+// KNOWN_CAPABILITIES names but still lacks that one (builder's ruling, see
+// the task's Notes: the banner fires on ANY missing capability, not on
+// 'model' specifically).
+const BRIDGE_SKEW_BANNER_TEXT =
+  "Your VS Code bridge is running an older version. Some launch options are unavailable until you reload the window.";
+
 // A board-local PROMPT-MODE TAB (agentic-workflow-bz3az — rebuilds aw-065/aw-068's
 // PromptLaunchCard into the ADR-0050 docked console's top row of four mode tabs;
 // conformed to Section 1b's edge-to-edge cell layout by agentic-workflow-q7r3x).
@@ -1051,10 +1060,23 @@ export function BoardPromptBar({ skipPermissions = false }) {
   // below) — persistence is in-page only (ADR-0017), so a reload is what
   // returns it to Opus, not a successful launch.
   const [selectedModel, setSelectedModel] = useState(DEFAULT_PROMPT_MODEL_INDEX);
-  // Ambient bridge-presence signal (infrastructure-h5wnq's probeBridge) — a
-  // clipboard-copied command can never carry a --model flag, so the split
-  // button locks and names no model when the bridge is unreachable.
-  const [bridgePresent, setBridgePresent] = useState(false);
+  // Ambient bridge-presence + capability signal (infrastructure-h5wnq's
+  // probeBridge, grown by infrastructure-v8r3q). Stores the WHOLE
+  // `{ present, capabilities }` result — not a bare boolean — because
+  // "is a bridge there at all" and "is a bridge there that supports what
+  // I'm about to send it" are two different facts (agentic-workflow-n4qte):
+  // a clipboard-copied command can never carry --model (bridge absent), and
+  // neither can a POST to a listener that never advertised 'model' (bridge
+  // present but too old — the wire-level omission infrastructure-v8r3q
+  // already guarantees; this state is what lets the UI say so honestly
+  // instead of rendering a locked button that still claims a model name).
+  const [bridge, setBridge] = useState({ present: false, capabilities: [] });
+  // Session-local dismiss for the capability-skew banner below (ADR-0017 —
+  // no persistence). A fresh mount always re-probes and re-derives
+  // bridgeSkewed from scratch, so the banner reappears on the next mount if
+  // the skew is still there; it just does not re-appear on every re-render
+  // of an already-mounted board.
+  const [bannerDismissed, setBannerDismissed] = useState(false);
   // The single-line auto-grow (aw-038) holds a ref to the textarea so the field can
   // measure its own scrollHeight to grow/shrink to fit.
   const textareaRef = useRef(null);
@@ -1079,24 +1101,48 @@ export function BoardPromptBar({ skipPermissions = false }) {
     autoGrowField(textareaRef.current, PROMPT_FIELD_MAX_PX);
   }, [prompt]);
 
-  // Probe the bridge once on mount (agentic-workflow-m2vkp). Never throws,
-  // never rejects (probeBridge's own contract) — a probe that never resolves
-  // simply leaves the button locked, which is the safe default.
+  // Probe the bridge once on mount (agentic-workflow-m2vkp, grown to carry
+  // capabilities by agentic-workflow-n4qte). Never throws, never rejects
+  // (probeBridge's own contract) — a probe that never resolves leaves the
+  // initial { present: false, capabilities: [] } in place, which locks the
+  // model selector, the safe default. Mount-only cadence is deliberate
+  // (agentic-workflow-n4qte's Notes): the remedy for a skewed bridge is
+  // reloading the VS Code window, which reloads this Simple Browser tab
+  // along with it, so re-probing on focus would buy nothing.
   useEffect(() => {
     let cancelled = false;
     const fetchImpl = typeof window !== "undefined" && typeof window.fetch === "function"
       ? window.fetch.bind(window)
       : undefined;
     probeBridge(fetchImpl).then((res) => {
-      if (!cancelled) setBridgePresent(!!(res && res.present));
+      if (cancelled) return;
+      setBridge(res && typeof res === "object"
+        ? { present: !!res.present, capabilities: Array.isArray(res.capabilities) ? res.capabilities : [] }
+        : { present: false, capabilities: [] });
     });
     return () => { cancelled = true; };
   }, []);
 
+  // Two distinct facts off the ONE probe (agentic-workflow-n4qte's table in
+  // the task's `What`): `bridgeSupportsModel` gates the ONE control a
+  // grey-out CAN cover (the model selector); `bridgeSkewed` is the GENERAL
+  // "this extension as a whole is stale" signal the banner below announces,
+  // covering launch paths (session naming) that have no control to grey
+  // out. They coincide today — the only bridge in the wild missing 'model'
+  // misses 'name' too — but are derived separately on purpose: a future
+  // bridge that ships 'model' but lacks a not-yet-invented fifth capability
+  // must still raise the banner.
+  const bridgeSupportsModel = bridge.present && bridge.capabilities.includes("model");
+  const bridgeSkewed = bridge.present && KNOWN_CAPABILITIES.some((c) => !bridge.capabilities.includes(c));
+
   // The model selector is locked — no caret, Ctrl+M a no-op — whenever the
-  // bridge is unreachable (a copied command can never carry --model) OR the
-  // highlighted mode is Quick Capture (its model is pinned to Haiku).
-  const modelLocked = !bridgePresent || isModelLockedForMode(highlightedMode);
+  // bridge can't honour a model choice (unreachable, OR present but too old
+  // to have advertised 'model' — infrastructure-v8r3q's exact stale-host
+  // scenario) OR the highlighted mode is Quick Capture (its model is pinned
+  // to Haiku). Absent and present-but-too-old render IDENTICALLY locked —
+  // from the selector's point of view, "can't reach a bridge that supports
+  // this" and "no bridge at all" are the same fact.
+  const modelLocked = !bridgeSupportsModel || isModelLockedForMode(highlightedMode);
 
   // Ctrl+Space focuses the prompt field, and Ctrl+M cycles the selected model,
   // from ANYWHERE on the board (p8k4d settled Ctrl+Space; agentic-workflow-m2vkp
@@ -1284,12 +1330,23 @@ export function BoardPromptBar({ skipPermissions = false }) {
   // never carry --model, so the label names none ("Default") regardless of
   // mode/selection — the button is locked either way (modelLocked, above).
   const resolvedModel = PROMPT_MODELS[modelForMode(highlightedMode, selectedModel)];
-  const modelLabel = bridgePresent ? resolvedModel.label : "Default";
-  const modelHint = !bridgePresent
+  // agentic-workflow-n4qte: BOTH key off bridgeSupportsModel, not merely
+  // bridge.present — this is the subtle half of the fix. Against a stale
+  // bridge, bridge.present is TRUE, so a lock keyed on presence alone would
+  // still render a locked button reading "Opus" and claiming "Running on
+  // Opus — Ctrl+M cycles", naming a model infrastructure-v8r3q's wire
+  // guarantee has already omitted from the request. "Default" is the SAME
+  // word the absent-bridge case already used, deliberately: in both, no
+  // model choice reaches the CLI, so the dashboard genuinely does not know
+  // what the session will run on.
+  const modelLabel = bridgeSupportsModel ? resolvedModel.label : "Default";
+  const modelHint = !bridge.present
     ? "No bridge reachable — the launch will copy to the clipboard, which cannot carry a model choice"
-    : isModelLockedForMode(highlightedMode)
-      ? "Quick Capture always runs on Haiku"
-      : `Running on ${resolvedModel.label} — Ctrl+M cycles`;
+    : !bridgeSupportsModel
+      ? "Your VS Code bridge is running an older version — reload your VS Code window to pick up model selection."
+      : isModelLockedForMode(highlightedMode)
+        ? "Quick Capture always runs on Haiku"
+        : `Running on ${resolvedModel.label} — Ctrl+M cycles`;
   const splitButtonTitle = `${enterHint} · ${modelHint} · Enter launches · Shift+Enter for a new line`;
   const onSelectModel = useCallback((label) => {
     const idx = PROMPT_MODELS.findIndex((m) => m.label === label);
@@ -1373,6 +1430,34 @@ export function BoardPromptBar({ skipPermissions = false }) {
             disabled=${!canFire} />
         </span>
       </div>
+      ${/* agentic-workflow-n4qte: a dismissible, session-local (ADR-0017,
+            no persistence) skew banner — the general "this extension is
+            stale" announcement, distinct from and broader than the model
+            selector's own lock above (see bridgeSkewed's derivation). A
+            builder who never opens the model selector would otherwise never
+            learn his extension is stale at all: the skew silently affects
+            EVERY launch's session naming too, not just the one control a
+            grey-out can cover. Built board-local (no styleguide
+            Banner/Alert primitive exists yet, and this is a first-time
+            consumer — design-system-015's promote-on-second-consumer
+            precedent), token-styled from the --obligation / --obligation-
+            soft advisory-tint family (ADR-0016) rather than a hand-rolled
+            color. */ ""}
+      ${bridgeSkewed && !bannerDismissed ? html`
+        <div role="alert" style=${{
+          display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
+          padding: "8px 14px",
+          background: "var(--obligation-soft)", color: "var(--obligation)",
+          fontFamily: "var(--font-ui)", fontSize: 12,
+          borderTop: "1px solid var(--hairline)",
+        }}>
+          <span>${BRIDGE_SKEW_BANNER_TEXT}</span>
+          <button type="button" aria-label="Dismiss" onClick=${() => setBannerDismissed(true)} style=${{
+            background: "transparent", border: "none", color: "var(--obligation)",
+            cursor: "pointer", fontFamily: "var(--font-ui)", fontSize: 15,
+            lineHeight: 1, padding: 0, flexShrink: 0,
+          }}>×</button>
+        </div>` : ""}
       <${BoardConfetti} fireKey=${confettiKey} />
     </section>`;
 }

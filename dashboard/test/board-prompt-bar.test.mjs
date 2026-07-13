@@ -553,17 +553,32 @@ test('BoardPromptBar owns a selectedModel index, defaulting to DEFAULT_PROMPT_MO
     'selectedModel must default via DEFAULT_PROMPT_MODEL_INDEX, mirroring highlightedMode/DEFAULT_PROMPT_MODE_INDEX');
 });
 
-test('BoardPromptBar probes the bridge on mount via probeBridge and tracks bridgePresent', () => {
+test('BoardPromptBar probes the bridge on mount via probeBridge and stores the whole { present, capabilities } result (agentic-workflow-n4qte)', () => {
   const bar = barSrc();
-  assert.match(bar, /const \[bridgePresent, setBridgePresent\] = useState\(false\)/, 'bridgePresent must default to false');
+  assert.match(bar, /const \[bridge, setBridge\] = useState\(\{ present: false, capabilities: \[\] \}\)/,
+    'bridge must default to { present: false, capabilities: [] } — the whole probeBridge shape, not a bare boolean');
   assert.match(bar, /probeBridge\(fetchImpl\)\.then\(/, 'a mount effect must call probeBridge');
-  assert.match(bar, /setBridgePresent\(/, 'the probe result must update bridgePresent');
+  assert.match(bar, /setBridge\(/, 'the probe result must update bridge');
 });
 
-test('modelLocked is true when the bridge is absent OR the highlighted mode is Quick Capture', () => {
+test('bridgeSupportsModel and bridgeSkewed are derived separately from the one probe (agentic-workflow-n4qte)', () => {
   const bar = barSrc();
-  assert.match(bar, /const modelLocked = !bridgePresent \|\| isModelLockedForMode\(highlightedMode\)/,
-    'modelLocked must OR bridge-absence with the Quick Capture pin, never re-deriving either independently');
+  assert.match(
+    bar,
+    /const bridgeSupportsModel = bridge\.present && bridge\.capabilities\.includes\("model"\)/,
+    'bridgeSupportsModel must require both presence AND model in the advertised capabilities',
+  );
+  assert.match(
+    bar,
+    /const bridgeSkewed = bridge\.present && KNOWN_CAPABILITIES\.some\(\(c\) => !bridge\.capabilities\.includes\(c\)\)/,
+    'bridgeSkewed must fire on ANY missing capability, not "model" specifically, and never for plain absence',
+  );
+});
+
+test('modelLocked is true when the bridge cannot support a model choice (absent OR present-but-too-old) OR the highlighted mode is Quick Capture', () => {
+  const bar = barSrc();
+  assert.match(bar, /const modelLocked = !bridgeSupportsModel \|\| isModelLockedForMode\(highlightedMode\)/,
+    'modelLocked must OR "bridge cannot support model" with the Quick Capture pin, never re-deriving either independently');
 });
 
 test('fire() resolves the model via modelForMode and threads it into launchOrCopy as `model`', () => {
@@ -583,10 +598,20 @@ test('the split button renders locked exactly when modelLocked, and never render
   assert.match(splitButton, /onSelect=\$\{onSelectModel\}/, 'the onSelect prop must be wired');
 });
 
-test('with no bridge reachable, the resolved label names no model ("Default") regardless of mode/selection', () => {
+test('modelLabel keys off bridgeSupportsModel — "Default" both when no bridge is reachable AND when a present bridge is too old to have advertised model (agentic-workflow-n4qte)', () => {
   const bar = barSrc();
-  assert.match(bar, /const modelLabel = bridgePresent \? resolvedModel\.label : "Default"/,
-    'modelLabel must fall back to a name that names no real model when the bridge is absent');
+  assert.match(bar, /const modelLabel = bridgeSupportsModel \? resolvedModel\.label : "Default"/,
+    'modelLabel must key off bridgeSupportsModel, not bridge.present alone — a locked button that still names a real model is the silent lie this task removes');
+});
+
+test('modelHint has three distinct branches keyed off bridgeSupportsModel: no bridge, present-but-too-old (reload), and the Quick Capture pin', () => {
+  const bar = barSrc();
+  assert.match(bar, /const modelHint = !bridge\.present\s*\n\s*\? "No bridge reachable/,
+    'the first branch must name plain absence');
+  assert.match(bar, /: !bridgeSupportsModel\s*\n\s*\? "Your VS Code bridge is running an older version — reload your VS Code window to pick up model selection\."/,
+    'the second branch must name the too-old case with a distinct reload remedy');
+  assert.match(bar, /: isModelLockedForMode\(highlightedMode\)\s*\n\s*\? "Quick Capture always runs on Haiku"/,
+    'the third branch (bridgeSupportsModel true) must still nest the Quick Capture pin');
 });
 
 test('Ctrl+M cycles selectedModel via nextPromptModelIndex, both field-focused (onPromptKeyDown/CYCLE_MODEL) and window-scoped (like Ctrl+Space) — a no-op when modelLocked', () => {

@@ -417,11 +417,31 @@ separate BC, but today the whole tool lives in this one.
     mutation**: selecting Opus on Modeling, switching to Quick Capture (which resolves and shows
     Haiku), then switching back to Modeling restores Opus, because `selectedModel` itself is
     never overwritten by the pin. `modelForMode` is the ONE resolver both the split button's label
-    and `fire()`'s launch payload consult. **No bridge, no model promise:** `probeBridge`
-    (`infrastructure-h5wnq`, `bridge-launch.js`) is called once on mount; its result ORs with the
-    Quick Capture pin into `modelLocked` — with no bridge reachable the split button renders
-    `locked`, names no model (`"Default"`), and Ctrl+M is a no-op, since a clipboard-copied
-    command can never carry `--model`. **Ctrl+M cycles the selected model** (`PROMPT_KEY_INTENT.CYCLE_MODEL`,
+    and `fire()`'s launch payload consult. **No bridge, no model promise — and, since
+    agentic-workflow-n4qte, no STALE bridge either.** `probeBridge` (`infrastructure-h5wnq`, grown
+    by `infrastructure-v8r3q`, `bridge-launch.js`) is called once on mount and stores its WHOLE
+    `{ present, capabilities }` result (`bridge`, `board.js`), not a bare boolean — two distinct
+    facts are derived off that one probe. **`bridgeSupportsModel`** (`present &&
+    capabilities.includes('model')`) gates the ONE control a grey-out CAN cover —
+    `modelLocked = !bridgeSupportsModel || isModelLockedForMode(highlightedMode)` — so a bridge
+    that is present but too old to have advertised `'model'` (0.4.0 on disk, 0.2.0 running in the
+    live extension host — the exact stale-host scenario `infrastructure-v8r3q` exists for) renders
+    **identically locked** to no bridge at all, names no model (`"Default"`, keyed off
+    `bridgeSupportsModel`, not mere presence — a locked button that still read a real model name
+    would be the silent lie this task removed), and Ctrl+M is a no-op. **`bridgeSkewed`**
+    (`present && KNOWN_CAPABILITIES.some(c => !capabilities.includes(c))`, `KNOWN_CAPABILITIES`
+    exported from `bridge-launch.js` as the dashboard's own "fields I know how to send") is the
+    SEPARATE, GENERAL "this extension as a whole is stale" signal — it drives a dismissible,
+    session-local (ADR-0017, no persistence) banner in the docked console ("Your VS Code bridge is
+    running an older version. Some launch options are unavailable until you reload the window."),
+    built board-local from the `--obligation` / `--obligation-soft` advisory-tint family
+    (ADR-0016) since no styleguide Banner/Alert primitive exists yet and this is a first-time
+    consumer. The banner and the lock coincide today (the only bridge in the wild missing
+    `'model'` misses `'name'` too) but are deliberately DERIVED SEPARATELY — the banner fires on
+    ANY missing capability, not `'model'` specifically, so a future bridge shipping `'model'` but
+    lacking a not-yet-invented fifth capability still raises it, and it never fires for plain
+    absence or for forward-skew (a bridge advertising MORE than `KNOWN_CAPABILITIES`). **Ctrl+M
+    cycles the selected model** (`PROMPT_KEY_INTENT.CYCLE_MODEL`,
     a fifth disjoint `promptBarKeyIntent` label, wired both field-focused, via the classifier, and
     window-scoped alongside Ctrl+Space) — a true no-op (no state change, no flash) whenever
     `modelLocked`. **The two handlers are kept mutually exclusive** by

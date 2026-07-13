@@ -22,6 +22,12 @@ import { mount, act, flush } from './dom-harness.mjs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
+// agentic-workflow-n4qte: this test's whole point is the open MENU's clip
+// chain, which only renders at all when the model selector is genuinely
+// UNLOCKED — a health response with no `capabilities` now reads as a
+// legacy/skewed bridge (bridgeSupportsModel: false), which would lock the
+// selector before the menu-clip behavior under test could ever be reached.
+// Advertise the full capability set so this stays a fully-live bridge.
 function stubBridgeFetch(port, token) {
   return async (url) => {
     const href = typeof url === 'string' ? url : String(url);
@@ -29,7 +35,7 @@ function stubBridgeFetch(port, token) {
       return { ok: true, json: async () => ({ present: true, port, token }) };
     }
     if (href === `http://127.0.0.1:${port}/health`) {
-      return { ok: true, json: async () => ({ ok: true }) };
+      return { ok: true, json: async () => ({ ok: true, capabilities: ['prompt', 'skipPermissions', 'name', 'model'] }) };
     }
     throw new Error(`unstubbed fetch in a DOM-harness test: ${href}`);
   };

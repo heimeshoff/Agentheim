@@ -53,6 +53,18 @@ const DEFAULT_HEALTH_TIMEOUT_MS = 800;
 // field means EXACTLY this set, never "unknown" or "assume everything works".
 export const LEGACY_CAPABILITIES = ['prompt', 'skipPermissions'];
 
+// The dashboard's OWN statement of "the set of POST /run fields I know how
+// to send" (agentic-workflow-n4qte) — exactly what `runOnBridge`'s per-field
+// allowlist below already encodes inline (`caps.includes('name')` /
+// `caps.includes('model')`). A PEER of, not an import of, the extension's
+// own `CAPABILITIES` (`vscode-extension/src/bridge.js`) — the two ends of
+// the same handshake, deliberately not coupled across the package boundary.
+// Used by the prompt bar (board.js) to detect capability SKEW: a live
+// listener that is present but advertises fewer than this full set (any
+// missing field, not just 'model' specifically — see the task's Notes) is
+// a stale extension host, distinct from no bridge being reachable at all.
+export const KNOWN_CAPABILITIES = ['prompt', 'skipPermissions', 'name', 'model'];
+
 /**
  * `fetch` with a bounded timeout, via AbortController when available. Returns the
  * Response, or throws (timeout/abort/network) — the caller treats any throw as

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 17:01 -- Task verified and completed: agentic-workflow-n4qte - Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-n4qte - Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it
+**Summary:** The prompt bar greys out the model selector — naming no model — whenever the live bridge is absent OR too old to advertise model, and a dismissible board-local banner announces any capability skew, closing the silent-lie window where a stale-but-present bridge showed a live selector while the wire guarantee dropped the model
+**Duration:** 22m
+**Verification:** PASS (iteration 1)
+**Files changed:** 9
+**Tests added:** 10
+**ADRs written:** none
+
+---
+
 ## 2026-07-13 16:43 -- Batch started: [agentic-workflow-n4qte]
 
 **Type:** Work / Batch start

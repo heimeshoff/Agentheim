@@ -47,6 +47,13 @@ import assert from 'node:assert/strict';
 // `GET http://127.0.0.1:<port>/health`, un-stubbed would make this test's
 // outcome depend on whether the builder's REAL VS Code bridge extension
 // happens to be listening on this box right now. Both calls are stubbed.
+// agentic-workflow-n4qte: this file's whole point is the Ctrl+M double-
+// dispatch fix, which only matters when the model selector is genuinely
+// UNLOCKED — a health response with no `capabilities` now reads as a
+// legacy/skewed bridge (bridgeSupportsModel: false), which would lock the
+// selector (and raise the new skew banner) before Ctrl+M's own behavior
+// under test could ever be reached. Advertise the full capability set so
+// this stays a fully-live bridge, exactly as these tests already intend.
 function stubBridgeFetch(port, token) {
   return async (url) => {
     const href = typeof url === 'string' ? url : String(url);
@@ -54,7 +61,7 @@ function stubBridgeFetch(port, token) {
       return { ok: true, json: async () => ({ present: true, port, token }) };
     }
     if (href === `http://127.0.0.1:${port}/health`) {
-      return { ok: true, json: async () => ({ ok: true }) };
+      return { ok: true, json: async () => ({ ok: true, capabilities: ['prompt', 'skipPermissions', 'name', 'model'] }) };
     }
     throw new Error(`unstubbed fetch in a DOM-harness test: ${href}`);
   };

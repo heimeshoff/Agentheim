@@ -105,6 +105,11 @@ async function typeIntoTextarea(textarea, value) {
 // (168) — comfortably inside the growth band, well above PROMPT_FIELD_MIN_PX.
 const LONG_WRAPPING_PROMPT = 'x'.repeat(150);
 
+// agentic-workflow-n4qte: named "FullSuccess" — advertise the full
+// capability set so this genuinely reads as a fully-live, non-skewed bridge
+// (a health response with no `capabilities` now reads as legacy/skewed and
+// would raise the new dismissible banner, an unrelated extra DOM element
+// this file's shrink-to-fit assertions have no reason to account for).
 function stubBridgeFetchFullSuccess(port, token) {
   return async (url) => {
     const href = typeof url === 'string' ? url : String(url);
@@ -112,7 +117,7 @@ function stubBridgeFetchFullSuccess(port, token) {
       return { ok: true, json: async () => ({ present: true, port, token }) };
     }
     if (href === `http://127.0.0.1:${port}/health`) {
-      return { ok: true, json: async () => ({ ok: true }) };
+      return { ok: true, json: async () => ({ ok: true, capabilities: ['prompt', 'skipPermissions', 'name', 'model'] }) };
     }
     if (href === `http://127.0.0.1:${port}/run`) {
       return { ok: true, json: async () => ({ ok: true }) };
