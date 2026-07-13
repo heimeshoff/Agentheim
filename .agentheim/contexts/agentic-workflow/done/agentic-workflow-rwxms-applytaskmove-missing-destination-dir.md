@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-rwxms
 title: applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-10
-completed:
+completed: 2026-07-13
 depends_on: []
 blocks: []
 tags: [task-lifecycle, atomicity, fail-closed, applyTaskMove, disk-io]
@@ -100,13 +100,13 @@ post-write failure cannot honestly be reported as "nothing moved" (ADR-0055 §3)
 
 ## Acceptance criteria
 
-- [ ] **Missing destination succeeds, doesn't fail.** A missing destination lifecycle folder
+- [x] **Missing destination succeeds, doesn't fail.** A missing destination lifecycle folder
       does not cause `applyTaskMove` to fail: it is created via
       `mkdirSync(dirname(toPath), {recursive:true})` and the move proceeds normally. Test:
       scaffold a BC with the destination folder **absent**, call the mover for a legal move,
       assert `{ok:true}`, the folder now exists, the task file sits at the destination with
       rewritten status, and the origin folder no longer contains it.
-- [ ] **Genuine pre-unlink failure leaves the source untouched — structurally, not by luck.**
+- [x] **Genuine pre-unlink failure leaves the source untouched — structurally, not by luck.**
       Construct a real failure that is *not* folder-absence (e.g. make `toPath`'s parent path
       collide with an existing plain file, so `mkdirSync` itself throws `ENOTDIR`/`EEXIST`
       before any write happens). Assert `applyTaskMove` returns a structured
@@ -114,29 +114,29 @@ post-write failure cannot honestly be reported as "nothing moved" (ADR-0055 §3)
       byte-identical and still in its origin folder. Frame the test's comment around the
       structural guarantee (source is read then unlinked, never rewritten in place), not just
       this one branch.
-- [ ] **Ordering requirement** (drives the two criteria above; not necessarily its own test):
+- [x] **Ordering requirement** (drives the two criteria above; not necessarily its own test):
       the move step writes the rewritten content to `toPath` and only then
       `unlinkSync(fromPath)` — never writes to `fromPath` in place.
-- [ ] **Three verbs succeed against a missing destination.** `promoteTask`, `claimBatch`,
+- [x] **Three verbs succeed against a missing destination.** `promoteTask`, `claimBatch`,
       `completeTask` each *succeed* (not merely survive untouched) when their destination
       folder is absent: folder created, task moved, `INDEX.md`/`protocol.md` bookkeeping
       correct exactly as if the folder had pre-existed. One test per verb.
-- [ ] **`claimBatch` batch-into-empty-`doing/` fully succeeds:** every id ends up in `doing/`
+- [x] **`claimBatch` batch-into-empty-`doing/` fully succeeds:** every id ends up in `doing/`
       with `status: doing`, one manifest, one protocol entry (mkdir is idempotent across the
       per-id move loop). The existing mid-batch-vanish-race test keeps covering the
       genuine-failure path unchanged.
-- [ ] **Both misleading comments corrected** — `lib/task-lifecycle.mjs:229-231` ("no partial
+- [x] **Both misleading comments corrected** — `lib/task-lifecycle.mjs:229-231` ("no partial
       move escapes") *and* `:237-239` ("writing to source first ... keeps a single canonical
       file") — rewritten to describe write-to-destination-then-unlink-source and why: the
       source is read-only accessed until the unlink, so no failure before it can leave the
       source carrying the wrong status; the module deliberately trades momentary
       single-canonical-file-ness for that guarantee.
-- [ ] **Fixture builder retained; new tests build the absent-destination variant.** The
+- [x] **Fixture builder retained; new tests build the absent-destination variant.** The
       unconditional `for (const f of FOLDERS) mkdirSync(...)` stays for existing tests; the new
       missing-destination tests build fixtures that skip the destination folder, and the
       pre-unlink-failure test builds its own file-blocks-mkdir fixture — pinning the gap rather
       than widening the mask.
-- [ ] `node --test lib/test/*.test.mjs` stays green (explicit glob — the bare-directory form
+- [x] `node --test lib/test/*.test.mjs` stays green (explicit glob — the bare-directory form
       finds nothing under Node 25 on this box). Existing tests unmodified — verified at
       refinement that none assert the old write-source-then-rename ordering directly (all
       check before/after end-states, never an intermediate disk state), so the reorder is safe.
@@ -170,3 +170,41 @@ multi-file atomicity (tmp-write + rename journal) is a separate, optional future
   pointer task that transplanted `agentic-workflow-wq7fn` and `agentic-workflow-dk3vz` here on
   2026-07-09. With this capture that pointer holds no unfiled findings and becomes
   dismiss-ready.
+
+## Outcome
+
+Implemented ADR-0055 exactly as pinned. `applyTaskMove`'s move step
+(`lib/task-lifecycle.mjs`) now: (1) `mkdirSync(toDir, {recursive:true})` — backfilling a
+missing destination lifecycle folder rather than rejecting it; (2) `writeFileSync(toPath,
+rewritten)` — the status-rewritten body lands directly at the destination; (3)
+`unlinkSync(fromPath)`. Steps 1-2 are wrapped in one try/catch: any failure there (including a
+plain file blocking the destination folder's own path) returns a structured
+`{ok:false, code:'write-failed', reason}` with the source provably untouched (byte-identical,
+mtime intact), never an uncaught throw. A residual `unlinkSync` failure after a successful
+destination write is left as an uncaught throw (same severity as the old `renameSync` throw) —
+explicitly out of scope per ADR-0055. `renameSync` is no longer imported; `unlinkSync` is.
+The two misleading doc comments (the false "no partial move escapes" claim and the "writing to
+source first keeps a single canonical file" rationale) are replaced by one comment describing
+the new ordering and its guarantees.
+
+Added 6 new tests to `lib/test/task-lifecycle.test.mjs`: `applyTaskMove` succeeds against a
+missing destination folder; a genuine pre-unlink failure (mkdir blocked by a plain file) rejects
+cleanly with the source structurally untouched; `promoteTask`/`claimBatch`/`completeTask` each
+succeed against their respective missing destination folder; and a 3-id `claimBatch` into an
+absent `doing/` fully succeeds with one manifest and one protocol entry. `makeProject`,
+`makePromoteProject`, `makeClaimProject`, and `makeCompleteProject` each gained an optional
+`skipFolders` parameter (default `[]`, so all existing tests are unaffected) to build the
+absent-destination fixture variant. Full suite: 61/61 in `lib/test/task-lifecycle.test.mjs`
+(55 pre-existing + 6 new), 1012/1019 repo-wide — the 7 failures are pre-existing
+`dashboard/test/dist-build.test.mjs` failures caused by a missing `esbuild` dependency in this
+worktree's `node_modules` (confirmed via direct `node dashboard/build.mjs` run,
+`ERR_MODULE_NOT_FOUND: esbuild`), unrelated to this task's scope.
+
+Updated `.agentheim/contexts/agentic-workflow/README.md`'s Compute-then-write-atomicity entry
+with one paragraph noting `applyTaskMove`'s own internal write-destination-then-unlink-source
+ordering, citing ADR-0055. ADR-0055 itself was already written and accepted at refinement time
+(`.agentheim/knowledge/decisions/0055-applytaskmove-write-destination-then-unlink-source.md`) —
+no new ADR was needed; the implementation did not deviate from it.
+
+Key files: `lib/task-lifecycle.mjs`, `lib/test/task-lifecycle.test.mjs`,
+`.agentheim/contexts/agentic-workflow/README.md`.

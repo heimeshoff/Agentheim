@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 10:08 -- Task verified and completed: agentic-workflow-rwxms - applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-rwxms - applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder
+**Summary:** applyTaskMove now writes the status-rewritten body to the destination (backfilling a missing lifecycle folder) and only then unlinks the source, never rewriting the source in place; a genuine pre-unlink failure rejects cleanly instead of throwing
+**Duration:** 8m10s
+**Verification:** PASS (iteration 1)
+**Files changed:** 3
+**Tests added:** 6
+**ADRs written:** none
+
+---
+
 ## 2026-07-13 09:55 -- Batch started: [agentic-workflow-rwxms, agentic-workflow-tkq7v, agentic-workflow-spv0k]
 
 **Type:** Work / Batch start

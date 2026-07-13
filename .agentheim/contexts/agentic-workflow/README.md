@@ -630,6 +630,13 @@ separate BC, but today the whole tool lives in this one.
   precondition is extracted into `resolveSourceOrReject` — one implementation, called by both
   `applyTaskMove` and every verb's compute phase, so a source-missing rejection is never
   re-derived by speculatively invoking the mover as an oracle. See ADR-0054, ADR-0038.
+  **`applyTaskMove` is itself internally two mutations, ordered write-destination-then-
+  unlink-source (ADR-0055, agentic-workflow-rwxms)**: it writes the status-rewritten body
+  directly to the destination path (backfilling a missing destination lifecycle folder via
+  `mkdirSync(..., {recursive:true})` rather than rejecting it — folder disk-absence only ever
+  means "currently empty," never a domain refusal), then unlinks the source — never rewriting
+  the source file in place. This amends, rather than reopens, the "only disk mutation" framing
+  above.
 - **`claimBatch` / `completeTask`** — the git-free CLAIM and COMPLETE lifecycle scripts, matched to
   the ADR-0032 worktree/squash-merge model (agentic-workflow-t7m4c), same three-layer boundary as
   `promoteTask`. **`claimBatch(rootDir, ids, opts)` is BATCH-shaped**: it claims a whole ready set
