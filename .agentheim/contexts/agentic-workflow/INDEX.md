@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 141
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-q7v3k** — Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker (feature) — `todo/agentic-workflow-q7v3k-structural-dist-guard.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -87,7 +88,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-q7v3k** — Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker (feature) — `backlog/agentic-workflow-q7v3k-structural-dist-guard.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

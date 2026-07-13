@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 13:36 -- Modeling / Promoted: agentic-workflow-q7v3k - Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-13 13:52 -- Modeling / Refined: agentic-workflow-q7v3k - Make the "workers never rebuild dist/" contract structural
 
 **Type:** Modeling / Refine
