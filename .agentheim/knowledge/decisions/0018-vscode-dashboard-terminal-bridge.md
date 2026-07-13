@@ -4,7 +4,7 @@ title: VS Code dashboard→terminal bridge — fixed-port localhost extension wi
 scope: infrastructure
 status: proposed
 date: 2026-06-14
-related_tasks: [infrastructure-012, infrastructure-013, infrastructure-014, agentic-workflow-020, infrastructure-015, infrastructure-016, agentic-workflow-021, infrastructure-020, infrastructure-c6fzb, infrastructure-h5wnq]
+related_tasks: [infrastructure-012, infrastructure-013, infrastructure-014, agentic-workflow-020, infrastructure-015, infrastructure-016, agentic-workflow-021, infrastructure-020, infrastructure-c6fzb, infrastructure-h5wnq, infrastructure-v8r3q, agentic-workflow-n4qte]
 related_adrs: [ADR-0002]
 diverges_from: [ADR-0002]
 ---
@@ -100,6 +100,78 @@ diverges_from: [ADR-0002]
 > ADR-0031** — ADR-0031 pins a model *per agent* via agent frontmatter;
 > `--model` sets the main-loop/session model, and the two compose (a session
 > launched `--model haiku` still spawns its `verifier` on opus).
+
+> **Amended 2026-07-13 (infrastructure-v8r3q).** Three separate amendments
+> (infrastructure-016, -c6fzb, -h5wnq) each grew the fields `POST /run`
+> honours — `skipPermissions`, `name`, `model` — and none of them bumped
+> `BRIDGE_V`. The result: a builder running a stale extension host (VS Code
+> defers loading a new extension version until the window reloads) POSTs a
+> `model`/`name` the *installed* bridge supports, the *running* listener
+> silently drops fields it doesn't recognise, returns `202 { ok: true }`
+> anyway, and the dashboard reports success. Nothing told the builder his
+> session launched on the wrong model under the wrong name. `bridge.json`'s
+> `v` cannot fix this: it is written by a **separate process** on its own
+> activation lifecycle and is last-writer-wins across concurrent VS Code
+> windows, so it can lag or race the listener it's meant to describe.
+>
+> **The capability signal now rides `GET /health`, not (only) `bridge.json`.**
+> `bridge.js` exports `CAPABILITIES = ['prompt', 'skipPermissions', 'name',
+> 'model']` — the `POST /run` fields *this build* of `makeHandler` actually
+> reads. `GET /health` (previously `{ ok: true, v: BRIDGE_V }`) now returns
+> `{ ok: true, v: BRIDGE_V, capabilities: CAPABILITIES }`, sourced from the
+> **live listener's own in-memory constant** — structurally incapable of
+> going stale the way `bridge.json` can, because there is no second process
+> and no write-then-read race: the answering process and the process whose
+> capabilities are being asked about are the same process. `bridge.json` (and
+> therefore `GET /api/bridge`) also carries `capabilities` as **belt-and-
+> braces**, but it is **not authoritative** — a caller that wants a
+> trustworthy answer probes the live `/health`, exactly as `probeBridge`
+> already did for liveness.
+>
+> **Absence is the legacy baseline.** A pre-handshake listener (0.2.0-shaped:
+> honours only `prompt` + `skipPermissions`) answers `/health` with no
+> `capabilities` field at all — it predates this amendment and cannot emit
+> one. The dashboard treats that absence as the closed baseline
+> `LEGACY_CAPABILITIES = ['prompt', 'skipPermissions']` (`bridge-launch.js`),
+> never as "unknown" or "assume everything works."
+>
+> **The dashboard becomes capability-aware in two places, not one — defense
+> in depth, not just a UI courtesy.** (1) `bridge-launch.js`'s
+> `probeBridge(fetchImpl)` now resolves `{ present: boolean, capabilities:
+> string[] }` instead of a bare `{ present }`, reusing the same discover
+> (`GET /api/bridge`) + health (`GET /health`) steps. (2) `launchOrCopy`'s
+> internal health probe captures the same `capabilities` list at fire time
+> and `runOnBridge` **omits** `model` / `name` from the `POST /run` body
+> whenever the live-probed capabilities don't include them — even if a UI
+> layer's render-time gate is stale or bypassed, the wire-level request
+> itself cannot silently claim a capability the listener just told it, at
+> that moment, it doesn't have. This mirrors the bridge's own
+> allowlist-degrades-quietly discipline (infrastructure-h5wnq): an
+> unsupported field is never sent, never a rejected request, never a `500`.
+>
+> **A structural guard replaces the prose rule that already failed three
+> times.** `vscode-extension/test/bridge.test.mjs` gains a test that scans
+> `bridge.js`'s own source for every `parsed?.<field>` read inside
+> `makeHandler` (the convention all four honoured fields already follow) and
+> asserts that set is **exactly** `new Set(CAPABILITIES)` — both directions:
+> a field read without being declared fails the build; a field declared but
+> never read fails the build too. Adding a fifth `/run` field without adding
+> it to `CAPABILITIES` (or vice versa) now breaks `npm test`, not merely a
+> comment.
+>
+> **UI consumption (grey-out + a one-time banner) is agentic-workflow's, not
+> this BC's** — the transport/meaning split (BC README) puts "what a builder
+> sees when a capability is missing" on the far side of the seam;
+> `agentic-workflow-n4qte` extends the prompt bar's existing
+> `probeBridge`-driven `modelLocked` grey-out (infrastructure-h5wnq) from
+> *bridge absent* to *bridge present but too old*, and adds a dismissible
+> banner naming the fix ("reload your VS Code window"). This BC's job stops
+> at handing over a trustworthy `{ present, capabilities }` signal.
+>
+> **Nothing else on the HTTP wire changes.** `POST /run`'s body shape,
+> status codes, the token header, and the `OPTIONS` preflight are all
+> unchanged; `capabilities` is a purely additive `GET /health` (and
+> `bridge.json`/`GET /api/bridge`) response field.
 
 > **Diverges from [ADR-0002](0002-dashboard-runtime-transport.md) on one clause.** ADR-0002 fixed
 > the dashboard runtime as an **ephemeral `:0` port** read back into `runtime.json`. That pattern
@@ -221,10 +293,17 @@ absence degrades safely.
     the allowlist — case mismatch, shell metacharacters, whitespace, a leading dash, a full model
     id, a non-string, absent — sanitizes to `''` and adds **no** `--model` element; the session then
     inherits the user's own Claude Code config, exactly as if the field had never been sent.
-- **`GET /health`** (extension listener; token required) → `200`. Used by the frontend to confirm
-  a live listener at the advertised port.
-- **`GET /api/bridge`** lives on the **dashboard server**, not the extension → `{ port, token, v }`
-  or `200 { present: false }`.
+- **`GET /health`** (extension listener; token required) → `200 { ok: true, v: BRIDGE_V,
+  capabilities: CAPABILITIES }` (amended 2026-07-13, infrastructure-v8r3q). `capabilities`
+  is the **authoritative** signal of what `POST /run` fields *this running listener* honours,
+  sourced from the live process's own `CAPABILITIES` constant — it structurally cannot be
+  stale the way `bridge.json` can (see amendment banner). Used by the frontend both to
+  confirm a live listener at the advertised port and to learn what it can safely send it.
+- **`GET /api/bridge`** lives on the **dashboard server**, not the extension → `{ port, token, v,
+  capabilities }` or `200 { present: false }`. `capabilities` here is read from `bridge.json`
+  and is **belt-and-braces only** — `bridge.json` is written by a separate process on its own
+  activation lifecycle and can lag or race the listener it describes; a caller that needs a
+  trustworthy answer probes the live `GET /health` instead (infrastructure-v8r3q).
 - **CORS preflight is load-bearing.** A custom-header (`X-Agentheim-Bridge-Token`) JSON `POST` is
   **preflighted** by the browser, so the extension listener **must** answer the `OPTIONS`
   preflight (echoing the allowed origin/headers/methods) or the real request never fires. This is

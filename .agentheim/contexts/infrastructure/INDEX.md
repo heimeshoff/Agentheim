@@ -59,7 +59,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **infrastructure-v8r3q** — The bridge contract grows but never versions — an old bridge silently swallows fields the dashboard sends (bug) — `backlog/infrastructure-v8r3q-bridge-capability-handshake.md`
+- **infrastructure-v8r3q** — The bridge advertises what it can honour — a live /health capability handshake, plus a structural guard that stops a fourth silent drift (bug) — `backlog/infrastructure-v8r3q-bridge-capability-handshake.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

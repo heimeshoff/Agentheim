@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 16:06 -- Modeling / Refined: infrastructure-v8r3q - The bridge advertises what it can honour — a live /health capability handshake, plus a structural guard that stops a fourth silent drift
+
+**Type:** Modeling / Refine
+**BC:** infrastructure
+**Status after:** todo
+**Summary:** Settled the capture's two open forks, then split the task on the existing transport-vs-meaning seam. (1) The capability signal rides **`GET /health`**, not `bridge.json`: `bridge.js` exports `CAPABILITIES`, and `/health` returns it from the answering process's own in-memory constant, so it structurally cannot go stale — unlike `bridge.json`, which a *separate* process writes last-writer-wins across concurrent VS Code windows. A 0.2.0 bridge omits the field entirely, so **absent ⇒ `LEGACY_CAPABILITIES = ['prompt','skipPermissions']`** — no version arithmetic, no dashboard-side version→feature mapping table to keep in sync. (2) Loudness: grey-out (extending h5wnq's bridge-*absent* lock to bridge-*too-old*) **and** a one-time dismissible banner, since a builder who never opens the model selector would otherwise never learn his extension is stale — and the skew silently affects every launch's session name too, not just the one control. (3) The capture's "same for the session-name field" AC was rewritten rather than kept: there *is* no name control (`nameForPromptMode` always derives it from the mode), so the banner covers it; no phantom affordance invented. Refinement also surfaced a hole the capture missed — a render-time UI gate cannot stop a fire-time bug — so `runOnBridge` now omits `model`/`name` at the **wire level** whenever the live probe says the listener can't honour them: defense in depth, not merely UI courtesy. The structural guard is executable, not a fourth prose rule: a test scans `makeHandler`'s `parsed?.<field>` reads and asserts that set equals `CAPABILITIES` in both directions, so adding a field without declaring it breaks the build.
+**Split into:** agentic-workflow-n4qte (prompt bar grey-out + skew banner + DOM-harness regression coverage; `depends_on: [infrastructure-v8r3q]`)
+**ADRs written:** ADR-0018 (amended in place — its 4th amendment; records the `/health`-is-authoritative rule, the absent-⇒-baseline default, the two-place defense in depth, and the structural guard)
+
+---
+
 ## 2026-07-13 16:05 -- Modeling / Captured: design-system-me97j - ModelSplitButton's `disabled` deadens the model caret along with Enter
 
 **Type:** Modeling / Capture
