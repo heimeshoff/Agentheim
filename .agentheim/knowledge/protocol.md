@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 16:06 -- Modeling / Promoted: infrastructure-v8r3q - The bridge advertises what it can honour — a live /health capability handshake, plus a structural guard that stops a fourth silent drift
+
+**Type:** Modeling / Promote
+**BC:** infrastructure
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-13 16:06 -- Modeling / Refined: infrastructure-v8r3q - The bridge advertises what it can honour — a live /health capability handshake, plus a structural guard that stops a fourth silent drift
 
 **Type:** Modeling / Refine
