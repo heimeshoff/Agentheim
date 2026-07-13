@@ -28,6 +28,21 @@ const TOKEN_HEADER_LC = TOKEN_HEADER.toLowerCase();
 // bridge.json schema version (kept in the file so a future reader can branch).
 const BRIDGE_V = 1;
 
+// The POST /run fields THIS build of makeHandler actually reads (the
+// `parsed?.<field>` convention below) — the authoritative capability
+// handshake (ADR-0018, amended by infrastructure-v8r3q). GET /health sources
+// this straight from the live process's own in-memory constant, so it
+// structurally cannot go stale the way bridge.json's last-writer-wins `v`
+// can: there is no second process and no write-then-read race between the
+// answering process and the process whose capabilities are being described.
+// A vscode-extension/test/bridge.test.mjs structural guard scans this file's
+// source for every `parsed?.<field>` reference inside makeHandler and asserts
+// that set is EXACTLY new Set(CAPABILITIES) — adding a fifth /run field
+// without adding it here (or vice versa) breaks the build, not merely a
+// comment (the prose rule already failed three times: infrastructure-016,
+// -c6fzb, -h5wnq each grew /run without touching any version signal).
+const CAPABILITIES = ['prompt', 'skipPermissions', 'name', 'model'];
+
 const DASHBOARD_DIR = '.dashboard';
 const BRIDGE_NAME = 'bridge.json';
 
@@ -154,7 +169,9 @@ function makeHandler({ token, launchClaude }) {
     }
 
     if (req.method === 'GET' && req.url === '/health') {
-      send(res, 200, { ok: true, v: BRIDGE_V });
+      // capabilities is the authoritative signal (ADR-0018, infrastructure-v8r3q):
+      // sourced from THIS process's own CAPABILITIES constant, never bridge.json's.
+      send(res, 200, { ok: true, v: BRIDGE_V, capabilities: CAPABILITIES });
       return;
     }
 
@@ -342,6 +359,10 @@ async function startBridge({ root, launchClaude, ports = PREFERRED_PORTS }) {
     pid: process.pid,
     startedAt: new Date().toISOString(),
     v: BRIDGE_V,
+    // Belt-and-braces only (ADR-0018, infrastructure-v8r3q) — bridge.json is
+    // written by this process on its own activation lifecycle and can lag or
+    // race a concurrent host's write; GET /health is the authoritative check.
+    capabilities: CAPABILITIES,
   };
   writeBridgeFile(root, meta);
 
@@ -376,4 +397,5 @@ module.exports = {
   NAME_MAX_LEN,
   MODEL_ALLOWLIST,
   sanitizeModel,
+  CAPABILITIES,
 };

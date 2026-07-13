@@ -12,6 +12,8 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import http from 'node:http';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+import { readFileSync as readFileSyncSrc } from 'node:fs';
 
 const require = createRequire(import.meta.url);
 const {
@@ -25,6 +27,7 @@ const {
   NAME_MAX_LEN,
   MODEL_ALLOWLIST,
   sanitizeModel,
+  CAPABILITIES,
 } = require('../src/bridge.js');
 
 function makeProject() {
@@ -87,6 +90,7 @@ test('binds 127.0.0.1 on the preferred fixed port and writes bridge.json', async
     assert.match(meta.token, /^[0-9a-f]{32}$/, 'per-activation 32-hex token');
     assert.equal(typeof meta.startedAt, 'string');
     assert.equal(typeof meta.v, 'number');
+    assert.deepEqual(meta.capabilities, CAPABILITIES, 'bridge.json carries capabilities too (belt-and-braces, not authoritative)');
   } finally {
     cleanup(base, bridge);
   }
@@ -592,12 +596,16 @@ test('POST /run with a malformed/empty body returns 400', async () => {
   }
 });
 
-test('GET /health with a valid token returns 200', async () => {
+test('GET /health with a valid token returns 200 and the authoritative capabilities list (ADR-0018, infrastructure-v8r3q)', async () => {
   const base = makeProject();
   const bridge = await startBridge({ root: base, launchClaude: () => {}, ...EPHEMERAL });
   try {
     const ok = await request(bridge.port, { pathName: '/health', headers: { [TOKEN_HEADER]: bridge.token } });
     assert.equal(ok.status, 200);
+    const body = JSON.parse(ok.body);
+    assert.equal(body.ok, true);
+    assert.equal(typeof body.v, 'number');
+    assert.deepEqual(body.capabilities, CAPABILITIES);
     const bad = await request(bridge.port, { pathName: '/health' });
     assert.equal(bad.status, 401);
   } finally {
@@ -653,4 +661,35 @@ test('a stale bridge.json from a prior host is overwritten on activation', async
   } finally {
     cleanup(base, bridge);
   }
+});
+
+// ---- structural guard (ADR-0018, infrastructure-v8r3q) ----------------------
+//
+// Three prior amendments (infrastructure-016, -c6fzb, -h5wnq) each grew the
+// POST /run fields makeHandler honours WITHOUT bumping any version signal — a
+// prose rule ("remember to update CAPABILITIES") that already failed three
+// times. This is the executable guard that replaces it: it scans bridge.js's
+// OWN source text for every `parsed?.<field>` reference (the convention all
+// four honoured fields already follow) and asserts that discovered set is
+// EXACTLY new Set(CAPABILITIES), in both directions — a field read but not
+// declared fails; a field declared but never read fails too. Deliberately
+// narrow: it trusts the `parsed?.<field>` syntax, not a general static-
+// analysis pass (consistent with other source-guard tests in this repo, e.g.
+// design-system-r9dtm's "no Agentheim-specific model names" guard) — if a
+// future field is read via different syntax, widen the guard then, not now.
+
+test('structural guard: every `parsed?.<field>` read in bridge.js is declared in CAPABILITIES, and every declared capability is actually read that way', () => {
+  const srcPath = fileURLToPath(new URL('../src/bridge.js', import.meta.url));
+  const source = readFileSyncSrc(srcPath, 'utf8');
+  const found = new Set();
+  const fieldRe = /parsed\?\.(\w+)/g;
+  let m;
+  while ((m = fieldRe.exec(source))) {
+    found.add(m[1]);
+  }
+  assert.deepEqual(
+    found,
+    new Set(CAPABILITIES),
+    'a field read via parsed?.<field> but missing from CAPABILITIES (or vice versa) means the /health handshake would silently misdescribe this build — adding a fifth /run field without adding it here must break the build, not merely a comment',
+  );
 });

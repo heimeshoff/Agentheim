@@ -15,11 +15,20 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
+import http from 'node:http';
+import crypto from 'node:crypto';
+
 import {
   BRIDGE_TOKEN_HEADER,
+  LEGACY_CAPABILITIES,
   launchOrCopy,
   probeBridge,
 } from '../app/bridge-launch.js';
+
+// The modern build's full capability set (mirrors vscode-extension/src/bridge.js's
+// own CAPABILITIES — kept as a literal here rather than a cross-package import,
+// since a dashboard test has no build-time dependency on the extension package).
+const FULL_CAPABILITIES = ['prompt', 'skipPermissions', 'name', 'model'];
 
 // ---- fetch test doubles -----------------------------------------------------
 
@@ -222,7 +231,7 @@ test('a real name -> POST /run body includes name', async () => {
   let runCall = null;
   const fetchImpl = makeFetch([
     ['/api/bridge', () => jsonResponse(200, { port: 31450, token: 'n', v: 1 })],
-    ['/health', () => jsonResponse(200, { ok: true })],
+    ['/health', () => jsonResponse(200, { ok: true, capabilities: FULL_CAPABILITIES })],
     ['/run', (url, opts) => { runCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
   ]);
 
@@ -258,7 +267,7 @@ test('name composes with skipPermissions in the same POST /run body', async () =
   let runCall = null;
   const fetchImpl = makeFetch([
     ['/api/bridge', () => jsonResponse(200, { port: 31453, token: 'n', v: 1 })],
-    ['/health', () => jsonResponse(200, { ok: true })],
+    ['/health', () => jsonResponse(200, { ok: true, capabilities: FULL_CAPABILITIES })],
     ['/run', (url, opts) => { runCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
   ]);
 
@@ -290,7 +299,7 @@ test('a real model -> POST /run body includes model', async () => {
   let runCall = null;
   const fetchImpl = makeFetch([
     ['/api/bridge', () => jsonResponse(200, { port: 31460, token: 'm', v: 1 })],
-    ['/health', () => jsonResponse(200, { ok: true })],
+    ['/health', () => jsonResponse(200, { ok: true, capabilities: FULL_CAPABILITIES })],
     ['/run', (url, opts) => { runCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
   ]);
 
@@ -326,7 +335,7 @@ test('model composes with name and skipPermissions in the same POST /run body', 
   let runCall = null;
   const fetchImpl = makeFetch([
     ['/api/bridge', () => jsonResponse(200, { port: 31463, token: 'm', v: 1 })],
-    ['/health', () => jsonResponse(200, { ok: true })],
+    ['/health', () => jsonResponse(200, { ok: true, capabilities: FULL_CAPABILITIES })],
     ['/run', (url, opts) => { runCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
   ]);
 
@@ -355,6 +364,53 @@ test('the clipboard fallback never carries a model — there is no launch to car
   const result = await launchOrCopy({ prompt: PROMPT, fetchImpl, copy, model: 'sonnet' });
   assert.equal(result.via, 'clipboard');
   assert.deepEqual(copy.copied, [PROMPT], 'the clipboard copy is the bare prompt, never the model');
+});
+
+// ---- wire-level omission guarantee (ADR-0018, infrastructure-v8r3q) --------
+//
+// A render-time UI gate cannot stop a fire-time bug: the prompt bar's model
+// selector greying out is a UI courtesy, but if it is ever stale or bypassed,
+// the wire-level request itself must not be able to claim a capability the
+// LIVE listener, at this moment, just said it doesn't have. `runOnBridge`
+// enforces this off the capabilities `probeHealth` reads straight from the
+// fire-time `/health` call — never off what the caller merely believed.
+
+test('a live bridge whose /health omits capabilities (legacy) -> model/name are OMITTED even though the caller passed both', async () => {
+  let runCall = null;
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31480, token: 'legacy', v: 1 })],
+    ['/health', () => jsonResponse(200, { ok: true })], // no capabilities -> LEGACY_CAPABILITIES
+    ['/run', (url, opts) => { runCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
+  ]);
+
+  const result = await launchOrCopy({
+    prompt: PROMPT,
+    fetchImpl,
+    copy: makeCopy(),
+    name: 'Should Be Dropped',
+    model: 'sonnet',
+  });
+
+  assert.equal(result.via, 'bridge', 'prompt-only capabilities are still genuinely honoured, so the launch itself succeeds');
+  const body = JSON.parse(runCall.opts.body);
+  assert.deepEqual(body, { prompt: PROMPT });
+  assert.equal('model' in body, false, 'model must be omitted at the WIRE level for a legacy-capability listener');
+  assert.equal('name' in body, false, 'name must be omitted at the WIRE level for a legacy-capability listener');
+});
+
+test('a live bridge whose /health advertises capabilities explicitly WITHOUT model -> model omitted, name still carried', async () => {
+  let runCall = null;
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31481, token: 'partial', v: 1 })],
+    ['/health', () => jsonResponse(200, { ok: true, capabilities: ['prompt', 'skipPermissions', 'name'] })],
+    ['/run', (url, opts) => { runCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
+  ]);
+
+  await launchOrCopy({ prompt: PROMPT, fetchImpl, copy: makeCopy(), name: 'Kept', model: 'opus' });
+
+  const body = JSON.parse(runCall.opts.body);
+  assert.deepEqual(body, { prompt: PROMPT, name: 'Kept' });
+  assert.equal('model' in body, false, 'model is not in the advertised set, so it must not reach the wire');
 });
 
 test('the health probe carries the token header and targets the advertised port', async () => {
@@ -524,7 +580,7 @@ test('a hanging /health is bounded by the timeout and falls back to clipboard', 
 // discover+health-probe protocol as a standalone, render-time-safe check that
 // reuses this module's existing internals rather than duplicating them.
 
-test('probeBridge resolves {present:true} for a live, token-answering bridge', async () => {
+test('probeBridge resolves {present:true, capabilities: LEGACY_CAPABILITIES} for a live bridge whose /health omits capabilities (infrastructure-v8r3q: absence is the legacy baseline)', async () => {
   const fetchImpl = makeFetch([
     ['/api/bridge', () => jsonResponse(200, { port: 31470, token: 'p', v: 1 })],
     ['/health', () => jsonResponse(200, { ok: true })],
@@ -532,20 +588,31 @@ test('probeBridge resolves {present:true} for a live, token-answering bridge', a
 
   const result = await probeBridge(fetchImpl);
 
-  assert.deepEqual(result, { present: true });
+  assert.deepEqual(result, { present: true, capabilities: LEGACY_CAPABILITIES });
 });
 
-test('probeBridge resolves {present:false} when the discovery endpoint reports present:false', async () => {
+test('probeBridge resolves the live-advertised capabilities when /health carries a capabilities array (infrastructure-v8r3q)', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31472, token: 'p2', v: 1 })],
+    ['/health', () => jsonResponse(200, { ok: true, capabilities: FULL_CAPABILITIES })],
+  ]);
+
+  const result = await probeBridge(fetchImpl);
+
+  assert.deepEqual(result, { present: true, capabilities: FULL_CAPABILITIES });
+});
+
+test('probeBridge resolves {present:false, capabilities:[]} when the discovery endpoint reports present:false', async () => {
   const fetchImpl = makeFetch([
     ['/api/bridge', () => jsonResponse(200, { present: false })],
   ]);
 
   const result = await probeBridge(fetchImpl);
 
-  assert.deepEqual(result, { present: false });
+  assert.deepEqual(result, { present: false, capabilities: [] });
 });
 
-test('probeBridge resolves {present:false} when /health fails (stale bridge.json, connection-refused, 401)', async () => {
+test('probeBridge resolves {present:false, capabilities:[]} when /health fails (stale bridge.json, connection-refused, 401)', async () => {
   const fetchImpl = makeFetch([
     ['/api/bridge', () => jsonResponse(200, { port: 31471, token: 'stale', v: 1 })],
     ['/health', () => { throw new Error('ECONNREFUSED'); }],
@@ -553,22 +620,22 @@ test('probeBridge resolves {present:false} when /health fails (stale bridge.json
 
   const result = await probeBridge(fetchImpl);
 
-  assert.deepEqual(result, { present: false });
+  assert.deepEqual(result, { present: false, capabilities: [] });
 });
 
-test('probeBridge resolves {present:false} when the discovery fetch itself throws (e.g. not in Simple Browser)', async () => {
+test('probeBridge resolves {present:false, capabilities:[]} when the discovery fetch itself throws (e.g. not in Simple Browser)', async () => {
   const fetchImpl = makeFetch([
     ['/api/bridge', () => { throw new Error('Failed to fetch'); }],
   ]);
 
   const result = await probeBridge(fetchImpl);
 
-  assert.deepEqual(result, { present: false });
+  assert.deepEqual(result, { present: false, capabilities: [] });
 });
 
-test('probeBridge resolves {present:false} when given no fetch implementation at all, and never throws', async () => {
+test('probeBridge resolves {present:false, capabilities:[]} when given no fetch implementation at all, and never throws', async () => {
   const result = await probeBridge(undefined);
-  assert.deepEqual(result, { present: false });
+  assert.deepEqual(result, { present: false, capabilities: [] });
 });
 
 test('probeBridge never rejects, even when every step fails', async () => {
@@ -576,4 +643,92 @@ test('probeBridge never rejects, even when every step fails', async () => {
     ['/api/bridge', () => jsonResponse(500, { error: 'boom' })],
   ]);
   await assert.doesNotReject(() => probeBridge(fetchImpl));
+});
+
+// ---- regression: a REAL 0.2.0-shaped listener (ADR-0018, infrastructure-v8r3q) --
+//
+// Every fixture above scripts a fake `fetch`; this one stands up a real,
+// in-test `node:http` listener shaped exactly like the pre-handshake (0.2.0)
+// bridge — token-gated, `/health` carries no `capabilities` field, and
+// `POST /run` (in the real bridge) reads only `prompt` + `skipPermissions`,
+// ignoring every other field. It proves the whole discover -> probe -> run
+// pipeline degrades correctly against a REAL socket, not just scripted JSON.
+
+// Shapes a real listener like the pre-handshake bridge: token-gated, /health
+// omits capabilities, /run just records whatever body arrived (mirroring
+// how a 0.2.0 makeHandler would silently drop unrecognised fields).
+function startLegacyBridgeServer() {
+  const token = crypto.randomBytes(16).toString('hex');
+  const calls = [];
+  const server = http.createServer((req, res) => {
+    const presented = req.headers['x-agentheim-bridge-token'];
+    if (presented !== token) {
+      res.writeHead(401, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: 'unauthorized' }));
+      return;
+    }
+    if (req.method === 'GET' && req.url === '/health') {
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, v: 1 })); // 0.2.0-shaped: no capabilities field
+      return;
+    }
+    if (req.method === 'POST' && req.url === '/run') {
+      let raw = '';
+      req.on('data', (c) => { raw += c; });
+      req.on('end', () => {
+        let parsed = {};
+        try { parsed = JSON.parse(raw); } catch { /* malformed -> empty */ }
+        calls.push(parsed);
+        res.writeHead(202, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+      });
+      return;
+    }
+    res.writeHead(404, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ error: 'not found' }));
+  });
+  return new Promise((resolve) => {
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address();
+      resolve({ server, port: address.port, token, calls });
+    });
+  });
+}
+
+// Routes `/api/bridge` (dashboard-origin discovery) to a scripted response
+// pointing at the real legacy server; every other call (the real `/health`
+// and `/run` requests) goes through Node's global `fetch` to the real socket.
+function makeFetchWithRealLegacyBridge({ port, token }) {
+  return async (url, opts) => {
+    if (String(url).includes('/api/bridge')) {
+      return jsonResponse(200, { port, token, v: 1 });
+    }
+    return fetch(url, opts);
+  };
+}
+
+test('against a real 0.2.0-shaped listener: probeBridge resolves LEGACY_CAPABILITIES, and launchOrCopy omits model+name at the wire level while still launching via the bridge (prompt + skipPermissions are genuinely honoured)', async () => {
+  const { server, port, token, calls } = await startLegacyBridgeServer();
+  try {
+    const fetchImpl = makeFetchWithRealLegacyBridge({ port, token });
+
+    const probed = await probeBridge(fetchImpl);
+    assert.deepEqual(probed, { present: true, capabilities: LEGACY_CAPABILITIES });
+
+    const result = await launchOrCopy({
+      prompt: PROMPT,
+      fetchImpl,
+      copy: makeCopy(),
+      model: 'sonnet',
+      name: 'x',
+    });
+
+    assert.equal(result.via, 'bridge', 'prompt+skipPermissions are genuinely honoured by this legacy listener, so the launch itself succeeds');
+    assert.equal(calls.length, 1, 'exactly one POST /run reached the real listener');
+    assert.deepEqual(calls[0], { prompt: PROMPT });
+    assert.equal('model' in calls[0], false, 'no model field reached the real listener');
+    assert.equal('name' in calls[0], false, 'no name field reached the real listener');
+  } finally {
+    server.close();
+  }
 });

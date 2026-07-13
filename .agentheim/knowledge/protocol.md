@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 16:24 -- Task verified and completed: infrastructure-v8r3q - The bridge advertises what it can honour — a live /health capability handshake, plus a structural guard that stops a fourth silent drift
+
+**Type:** Work / Task completion
+**Task:** infrastructure-v8r3q - The bridge advertises what it can honour — a live /health capability handshake, plus a structural guard that stops a fourth silent drift
+**Summary:** The bridge now advertises its honoured POST /run fields via a live, authoritative GET /health capability handshake (absent => legacy baseline), the dashboard omits model/name at the wire level whenever the fire-time-probed listener lacks them, and a structural guard stops a future field from drifting out of sync with the advertised set
+**Duration:** 12m
+**Verification:** PASS (iteration 1)
+**Files changed:** 8
+**Tests added:** 14
+**ADRs written:** none
+
+---
+
 ## 2026-07-13 16:08 -- Batch started: [infrastructure-v8r3q, design-system-me97j]
 
 **Type:** Work / Batch start

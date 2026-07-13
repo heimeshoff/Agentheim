@@ -47,6 +47,12 @@ const DISCOVERY_URL = '/api/bridge';
 // this window is treated as absent and we fall back to clipboard.
 const DEFAULT_HEALTH_TIMEOUT_MS = 800;
 
+// The closed baseline capability set a pre-handshake (0.2.0-shaped) bridge
+// implicitly honours — it predates the /health `capabilities` field entirely,
+// so it cannot emit one (ADR-0018, infrastructure-v8r3q). Absence of the
+// field means EXACTLY this set, never "unknown" or "assume everything works".
+export const LEGACY_CAPABILITIES = ['prompt', 'skipPermissions'];
+
 /**
  * `fetch` with a bounded timeout, via AbortController when available. Returns the
  * Response, or throws (timeout/abort/network) — the caller treats any throw as
@@ -92,10 +98,15 @@ async function discoverBridge(fetchImpl) {
 }
 
 /**
- * Confirm a live listener with a token-bearing `GET /health` (≈800 ms timeout).
- * A stale bridge.json (dead host) advertises a port whose token no live listener
- * accepts, so a non-200 / refusal / timeout here correctly reads as "no bridge".
- * @returns {Promise<boolean>} Never throws.
+ * Confirm a live listener with a token-bearing `GET /health` (≈800 ms timeout),
+ * and read the authoritative capability signal off its response (ADR-0018,
+ * infrastructure-v8r3q). A stale bridge.json (dead host) advertises a port
+ * whose token no live listener accepts, so a non-200 / refusal / timeout here
+ * correctly reads as "no bridge". A live response whose body omits (or fails
+ * to carry a valid) `capabilities` array is a pre-handshake (0.2.0-shaped)
+ * bridge — treated as the closed `LEGACY_CAPABILITIES` baseline, never as
+ * "unknown" or "assume everything works".
+ * @returns {Promise<{live: boolean, capabilities: string[]}>} Never throws.
  */
 async function probeHealth(fetchImpl, { port, token }, timeoutMs) {
   try {
@@ -105,9 +116,17 @@ async function probeHealth(fetchImpl, { port, token }, timeoutMs) {
       { method: "GET", headers: { [BRIDGE_TOKEN_HEADER]: token } },
       timeoutMs,
     );
-    return !!(res && res.ok);
+    if (!res || !res.ok) return { live: false, capabilities: [] };
+    let body = null;
+    try {
+      body = await res.json();
+    } catch {
+      body = null;
+    }
+    const capabilities = Array.isArray(body?.capabilities) ? body.capabilities : LEGACY_CAPABILITIES;
+    return { live: true, capabilities };
   } catch {
-    return false;
+    return { live: false, capabilities: [] };
   }
 }
 
@@ -123,15 +142,24 @@ async function probeHealth(fetchImpl, { port, token }, timeoutMs) {
  * so the bridge falls back to its own prompt-derived name (infrastructure-c6fzb).
  * The custom header makes this a CORS-preflighted request — the extension answers
  * the preflight (ADR-0018); a CORS rejection here just throws and we fall back.
+ * `capabilities` is the live-probed set `probeHealth` just read off THIS
+ * listener's own `/health` response (ADR-0018, infrastructure-v8r3q) —
+ * `model`/`name` are omitted from the body whenever the listener didn't just
+ * advertise them, even if the caller passed a value for either. This is a
+ * hard wire-level guarantee, not merely a UI-layer courtesy: a stale UI gate
+ * cannot make this module claim a capability the listener, at this moment,
+ * doesn't have. Mirrors the bridge's own allowlist-degrades-quietly
+ * discipline (infrastructure-h5wnq) — omit the field, never reject, never 500.
  * @returns {Promise<boolean>} Never throws.
  */
-async function runOnBridge(fetchImpl, { port, token, prompt, skipPermissions, name, model }) {
+async function runOnBridge(fetchImpl, { port, token, prompt, skipPermissions, name, model, capabilities }) {
   try {
+    const caps = Array.isArray(capabilities) ? capabilities : LEGACY_CAPABILITIES;
     // Strict-`true` only: a truthy-but-not-true value must never arm the bypass,
     // and OFF must OMIT the field rather than serialize `false`.
     const body = skipPermissions === true ? { prompt, skipPermissions: true } : { prompt };
-    if (typeof name === 'string' && name.trim()) body.name = name;
-    if (typeof model === 'string' && model.trim()) body.model = model;
+    if (caps.includes('name') && typeof name === 'string' && name.trim()) body.name = name;
+    if (caps.includes('model') && typeof model === 'string' && model.trim()) body.model = model;
     const res = await fetchImpl(`http://127.0.0.1:${port}/run`, {
       method: "POST",
       headers: {
@@ -196,9 +224,9 @@ export async function launchOrCopy({ prompt, fetchImpl, copy, healthTimeoutMs = 
   if (typeof fetchImpl === "function") {
     const bridge = await discoverBridge(fetchImpl);
     if (bridge) {
-      const live = await probeHealth(fetchImpl, bridge, healthTimeoutMs);
+      const { live, capabilities } = await probeHealth(fetchImpl, bridge, healthTimeoutMs);
       if (live) {
-        const launched = await runOnBridge(fetchImpl, { ...bridge, prompt, skipPermissions, name, model });
+        const launched = await runOnBridge(fetchImpl, { ...bridge, prompt, skipPermissions, name, model, capabilities });
         if (launched) return { via: "bridge" };
       }
     }
@@ -218,38 +246,44 @@ export async function launchOrCopy({ prompt, fetchImpl, copy, healthTimeoutMs = 
 }
 
 /**
- * An ambient, render-time-safe bridge-presence signal (infrastructure-h5wnq).
- * `launchOrCopy` only learns whether the bridge is reachable lazily, at fire
- * time — nothing tells the UI *before* a launch is attempted. The prompt
- * bar's model selector (agentic-workflow-m2vkp) needs exactly that: it greys
- * out when no bridge is reachable, because a clipboard-copied command can
- * never carry a `--model` flag.
+ * An ambient, render-time-safe bridge-presence + capability signal
+ * (infrastructure-h5wnq; grown by infrastructure-v8r3q). `launchOrCopy` only
+ * learns whether the bridge is reachable lazily, at fire time — nothing
+ * tells the UI *before* a launch is attempted. The prompt bar's model
+ * selector (agentic-workflow-m2vkp) needs exactly that: it greys out when no
+ * bridge is reachable, because a clipboard-copied command can never carry a
+ * `--model` flag; agentic-workflow-n4qte extends this to "bridge present but
+ * too old" using the `capabilities` this now resolves.
  *
  * Runs the SAME two-step discover (`GET /api/bridge`) + health
  * (`GET /health`, ~800 ms budget) protocol `launchOrCopy` uses — reusing the
  * module's existing `discoverBridge`/`probeHealth` internals rather than a
- * second implementation of them — and resolves a plain `{ present: boolean }`.
+ * second implementation of them — and resolves `{ present: boolean,
+ * capabilities: string[] }`. `capabilities` is read from the LIVE listener's
+ * own `/health` response (authoritative, ADR-0018) — a listener whose
+ * `/health` omits the field is a pre-handshake (0.2.0-shaped) bridge and
+ * resolves the closed `LEGACY_CAPABILITIES` baseline, never "unknown".
  *
  * As silent as `launchOrCopy`: every failure mode (no `fetchImpl` at all, no
  * `bridge.json`/`present:false`, a dead port, any thrown fetch, not running
- * in Simple Browser) resolves `{ present: false }`. Never throws, never
- * rejects, never logs.
+ * in Simple Browser) resolves `{ present: false, capabilities: [] }`. Never
+ * throws, never rejects, never logs.
  *
  * @param {(url:string, opts?:object)=>Promise<Response>} [fetchImpl] — injected
- *   `fetch`. Absent/not-a-function → straight to `{ present: false }`.
- * @returns {Promise<{present: boolean}>}
+ *   `fetch`. Absent/not-a-function → straight to `{ present: false, capabilities: [] }`.
+ * @returns {Promise<{present: boolean, capabilities: string[]}>}
  */
 export async function probeBridge(fetchImpl) {
-  if (typeof fetchImpl !== "function") return { present: false };
+  if (typeof fetchImpl !== "function") return { present: false, capabilities: [] };
   try {
     const bridge = await discoverBridge(fetchImpl);
-    if (!bridge) return { present: false };
-    const live = await probeHealth(fetchImpl, bridge, DEFAULT_HEALTH_TIMEOUT_MS);
-    return { present: !!live };
+    if (!bridge) return { present: false, capabilities: [] };
+    const { live, capabilities } = await probeHealth(fetchImpl, bridge, DEFAULT_HEALTH_TIMEOUT_MS);
+    return live ? { present: true, capabilities } : { present: false, capabilities: [] };
   } catch {
     // discoverBridge/probeHealth already swallow their own failures; this
     // catch is a belt-and-braces guarantee that probeBridge itself never
     // throws or rejects, matching launchOrCopy's contract.
-    return { present: false };
+    return { present: false, capabilities: [] };
   }
 }

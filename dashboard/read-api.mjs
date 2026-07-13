@@ -96,7 +96,13 @@ export function handleSearch(req, res, root, requestUrl) {
  *
  * Reads `.agentheim/.dashboard/bridge.json` (written by the extension,
  * infrastructure-013) through the same in-root path validator as /api/doc, and
- * returns ONLY the discovery subset `{ port, token, v }` — never pid/startedAt.
+ * returns the discovery subset `{ port, token, v, capabilities }` — never
+ * pid/startedAt. `capabilities` (infrastructure-v8r3q) is belt-and-braces
+ * only: bridge.json is written by a separate process on its own activation
+ * lifecycle and can lag or race the listener it describes, so a caller that
+ * needs a trustworthy answer probes the live `GET /health` instead. A
+ * bridge.json written by a pre-handshake bridge simply has no `capabilities`
+ * field, which is passed through unchanged (JSON.stringify drops it).
  *
  * Pure transport: it carries the published contract, invents no rule, runs no
  * `claude`. When the file is absent, unreadable, or malformed, it returns
@@ -124,7 +130,7 @@ export function handleBridge(req, res, root) {
     return;
   }
 
-  const { port, token, v } = bridge;
+  const { port, token, v, capabilities } = bridge;
   res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-  res.end(JSON.stringify({ port, token, v }));
+  res.end(JSON.stringify({ port, token, v, capabilities }));
 }

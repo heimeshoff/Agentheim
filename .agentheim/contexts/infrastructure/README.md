@@ -91,8 +91,9 @@ for an infrastructure BC.
   shell command line with `sendText('claude "<prompt>"')`, which mangled metacharacters on Windows
   PowerShell/cmd; that escaping is deleted.) Fixed port **31425** with a bounded fallback ladder
   `31425 → 31426 → 31427`. Surface: `POST /run { prompt, skipPermissions?, name?, model? }` (opens a
-  seeded, named terminal → 202), `GET /health` (→ 200), `OPTIONS` preflight (load-bearing — the
-  custom-header JSON POST is preflighted). Every request carries the `X-Agentheim-Bridge-Token`
+  seeded, named terminal → 202), `GET /health` (→ `200 { ok, v, capabilities }`), `OPTIONS`
+  preflight (load-bearing — the custom-header JSON POST is preflighted). Every request carries
+  the `X-Agentheim-Bridge-Token`
   header; missing/mismatched → 401, malformed/empty body → 400. `POST /run` takes an **optional
   `skipPermissions` boolean** (off by default): only literal `true` prepends
   `--dangerously-skip-permissions` to the launch args; absent/false/malformed launches with the
@@ -119,26 +120,46 @@ for an infrastructure BC.
   skip-permissions flag/prompt. The dashboard side (`bridge-launch.js`) only threads the value
   through `launchOrCopy`'s `model` option (omitted when absent/blank) — the allowlist enforcement
   itself lives solely in the bridge. The same module also exports `probeBridge(fetchImpl)`, an
-  ambient, render-time-safe bridge-presence signal: it reuses `launchOrCopy`'s own
-  discover-then-health-probe internals and resolves `{ present: boolean }`, never throwing, so the
-  prompt bar's model selector can grey out *before* any launch is attempted (a clipboard-copied
-  command can never carry `--model`). The trust boundary is loopback-only bind **plus**
-  the shared-secret token — single-user dev box only. The generic launcher carries *whatever*
-  prompt it is handed, so all board affordances share it. The inject-into-running-session path
-  (`POST /inject`) is deferred. (ADR-0018, infrastructure-013, infrastructure-020,
-  infrastructure-c6fzb, infrastructure-h5wnq.)
+  ambient, render-time-safe bridge-presence + capability signal: it reuses `launchOrCopy`'s own
+  discover-then-health-probe internals and resolves `{ present: boolean, capabilities: string[] }`,
+  never throwing, so the prompt bar's model selector can grey out *before* any launch is attempted
+  (a clipboard-copied command can never carry `--model`).
+- **Capability handshake — `GET /health` is authoritative, `bridge.json` is belt-and-braces**
+  (ADR-0018, infrastructure-v8r3q). Three amendments in a row (infrastructure-016, -c6fzb,
+  -h5wnq) grew the `POST /run` fields the bridge honours without bumping any version signal, so a
+  builder running a stale extension host (VS Code defers loading a new version until the window
+  reloads) silently lost fields the *installed* bridge supported but the *running* listener
+  dropped, with a `202 { ok: true }` reported as success regardless. `bridge.js` exports
+  `CAPABILITIES = ['prompt', 'skipPermissions', 'name', 'model']` — the `POST /run` fields *this
+  build* of `makeHandler` actually reads (a source-scan structural guard in
+  `vscode-extension/test/bridge.test.mjs` asserts every `parsed?.<field>` read matches this set
+  exactly, in both directions, so a fifth field breaks the build if the constant isn't updated
+  too). `GET /health` returns `{ ok: true, v: BRIDGE_V, capabilities: CAPABILITIES }` sourced from
+  the **live answering process's own in-memory constant** — structurally incapable of going stale,
+  because there is no second process and no write-then-read race. A pre-handshake (0.2.0-shaped)
+  listener answers `/health` with **no `capabilities` field at all**; the dashboard treats that
+  absence as the closed baseline `LEGACY_CAPABILITIES = ['prompt', 'skipPermissions']`
+  (`bridge-launch.js`), never as "unknown." The dashboard is capability-aware in **two places —
+  defense in depth**: `probeBridge` surfaces `capabilities` for render-time UI (agentic-workflow-
+  n4qte's grey-out/skew banner), and `launchOrCopy`'s own fire-time health probe captures the same
+  list so `runOnBridge` **omits `model`/`name` from the `POST /run` body at the wire level**
+  whenever the live-probed capabilities don't include them — even if a render-time UI gate is
+  stale or bypassed, the request itself cannot claim a capability the listener, at that moment,
+  just said it doesn't have (mirrors the bridge's own allowlist-degrades-quietly discipline,
+  infrastructure-h5wnq: omit, never reject, never `500`).
 - **Bridge discovery file** — `.agentheim/.dashboard/bridge.json` =
-  `{ port, token, pid, startedAt, v }`, a **sibling of `runtime.json`** in the same gitignored
-  dir, written by a **separate process** (the VS Code extension host) on its own
+  `{ port, token, pid, startedAt, v, capabilities }`, a **sibling of `runtime.json`** in the same
+  gitignored dir, written by a **separate process** (the VS Code extension host) on its own
   activation/deactivation lifecycle. The per-activation token (32 hex via `node:crypto`) is
   regenerated each activation and removed on deactivation, so a stale `bridge.json` from a dead
   host carries a token no live listener accepts. The dashboard server *reads* it to find and
   authenticate the live listener via the read endpoint **`GET /api/bridge`** (infrastructure-014):
-  present → `200 { port, token, v }` (the discovery subset only — `pid`/`startedAt` never leak);
-  absent, unreadable, or malformed → `200 { present: false }` (never a 5xx for normal absence), so
-  the sandboxed frontend degrades silently to clipboard. Read through ADR-0002's in-root path
-  validator; pure transport — it runs no `claude`. The extension only *writes* `bridge.json`.
-  (ADR-0018.)
+  present → `200 { port, token, v, capabilities }` (the discovery subset only — `pid`/`startedAt`
+  never leak; `capabilities` here is passed through **unchanged**, belt-and-braces only — see
+  above, it is **not** the authoritative check); absent, unreadable, or malformed → `200 { present:
+  false }` (never a 5xx for normal absence), so the sandboxed frontend degrades silently to
+  clipboard. Read through ADR-0002's in-root path validator; pure transport — it runs no `claude`.
+  The extension only *writes* `bridge.json`. (ADR-0018.)
 - **Live-update transport** — a server→client push channel (`GET /api/events`, Server-Sent
   Events) backed by an `.agentheim/` **file-watcher**. When the project tree changes (a task
   moved by `work`/`modeling` in another terminal, or by the dashboard's own write), the server
@@ -285,10 +306,11 @@ Apply write request.
   ahead of the skip-permissions flag/prompt; anything else (shell metacharacters, whitespace, a
   leading dash, a full model id, a non-string, absent) degrades to no `--model` flag, never a
   rejection. Feeds the prompt bar's model selector (agentic-workflow-m2vkp), which also consumes
-  the new `probeBridge(fetchImpl)` export on `bridge-launch.js` — a render-time-safe
-  `{ present: boolean }` signal reusing the module's own discover/health-probe internals, so the
-  selector can grey out before any launch is attempted. The HTTP wire contract is otherwise
-  unchanged. **Shares ADR-0002's bounded-ladder collision idiom** but on a different port clause
+  the `probeBridge(fetchImpl)` export on `bridge-launch.js` — a render-time-safe
+  `{ present: boolean, capabilities: string[] }` signal (grown by infrastructure-v8r3q below)
+  reusing the module's own discover/health-probe internals, so the selector can grey out before
+  any launch is attempted. The HTTP wire contract is otherwise unchanged. **Shares ADR-0002's
+  bounded-ladder collision idiom** but on a different port clause
   (a *fixed literal* `31425` start + server-mediated discovery, because the bridge's reader is a
   filesystem-blind sandboxed frame; the dashboard derives a *root-based* port + runfile discovery —
   see the ADR-0002 infrastructure-018 addendum); every other ADR-0002 clause stands (stdlib-only,
@@ -297,7 +319,24 @@ Apply write request.
   injected); `extension.js` is the only file touching the `vscode` API. `POST /inject` deferred.
   Installed outside the marketplace via `vsce package` + `code --install-extension`
   (see `vscode-extension/README.md`). (infrastructure-013, building on infrastructure-012;
-  shell-bypass launch reshape infrastructure-020.)
+  shell-bypass launch reshape infrastructure-020.) **Amended 2026-07-13 (infrastructure-v8r3q):**
+  three prior amendments (016, -c6fzb, -h5wnq) each grew the `POST /run` fields the bridge honours
+  without bumping any version signal, so a builder on a stale extension host (VS Code defers a new
+  version until the window reloads) silently lost fields the *installed* build supported —
+  `202 { ok: true }` reported regardless. `bridge.js` now exports `CAPABILITIES = ['prompt',
+  'skipPermissions', 'name', 'model']` and `GET /health` returns `{ ok, v, capabilities }` sourced
+  from the live process's own constant — structurally incapable of staleness, unlike
+  `bridge.json`'s last-writer-wins `v` (which also now carries `capabilities`, belt-and-braces
+  only). A pre-handshake listener's `/health` omits the field entirely; absence resolves the
+  closed `LEGACY_CAPABILITIES = ['prompt', 'skipPermissions']` baseline, never "unknown."
+  `probeBridge` and `launchOrCopy`'s fire-time probe both read this signal; `runOnBridge` omits
+  `model`/`name` from the `POST /run` body at the **wire level** whenever the live-probed
+  capabilities lack them, so a stale/bypassed UI gate can never make a request claim a capability
+  the listener just said it doesn't have. A structural guard
+  (`vscode-extension/test/bridge.test.mjs`) scans `bridge.js`'s source for every `parsed?.<field>`
+  read and asserts that set is exactly `CAPABILITIES`, so a future field added to one but not the
+  other breaks the build. UI consumption of `capabilities` (grey-out + skew banner) is
+  agentic-workflow-n4qte's, not this BC's.
 
 - **ADR-0056 — Node ESM bare-specifier resolve hook for cross-BC DOM tests.** A jsdom
   DOM-render test harness (`dashboard/test/dom-harness.mjs`) lets a `node --test` file mount a

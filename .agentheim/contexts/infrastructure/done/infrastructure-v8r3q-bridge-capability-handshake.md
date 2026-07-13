@@ -1,11 +1,11 @@
 ---
 id: infrastructure-v8r3q
 title: The bridge advertises what it can honour — a live /health capability handshake, plus a structural guard that stops a fourth silent drift
-status: doing
+status: done
 type: bug
 context: infrastructure
 created: 2026-07-13
-completed:
+completed: 2026-07-13
 depends_on: []
 blocks: [agentic-workflow-n4qte]
 tags: [bridge, dashboard, versioning, vscode-extension, silent-failure]
@@ -154,3 +154,46 @@ capabilities }` contract this task ships.
 - This task does not touch `agentic-workflow-n4qte`'s scope (board.js grey-out/banner) at
   all; it only has to ship a trustworthy `{ present, capabilities }` signal and the
   wire-level omission guarantee above.
+
+## Outcome
+
+Shipped the live `/health` capability handshake exactly as ADR-0018's infrastructure-v8r3q
+amendment specified, with no deviation — the ADR text needed no correction.
+
+- `vscode-extension/src/bridge.js`: exports `CAPABILITIES = ['prompt', 'skipPermissions',
+  'name', 'model']`; `GET /health` returns `{ ok: true, v: BRIDGE_V, capabilities:
+  CAPABILITIES }`; `startBridge`'s `bridge.json` meta also carries `capabilities`
+  (belt-and-braces). A new structural-guard test in `vscode-extension/test/bridge.test.mjs`
+  scans the file's own source for every `parsed?.<field>` reference inside `makeHandler` and
+  asserts that set equals `new Set(CAPABILITIES)` exactly.
+- `dashboard/read-api.mjs`'s `handleBridge` (`GET /api/bridge`) now passes `capabilities`
+  through from `bridge.json` unchanged (still belt-and-braces, not authoritative).
+- `dashboard/app/bridge-launch.js`: exports `LEGACY_CAPABILITIES = ['prompt',
+  'skipPermissions']`; `probeHealth` now reads `capabilities` off the live `/health` JSON body
+  (defaulting to `LEGACY_CAPABILITIES` when the field is absent/invalid); `probeBridge`
+  resolves `{ present, capabilities }` (failure modes → `{ present: false, capabilities: [] }`,
+  unchanged silence contract); `runOnBridge` omits `model`/`name` from the `POST /run` body at
+  the wire level whenever the live-probed capabilities lack them, even when the caller passed
+  a value — a hard guarantee, not a UI courtesy. `launchOrCopy` threads the fire-time-probed
+  capabilities from `probeHealth` straight into `runOnBridge`.
+- `vscode-extension/package.json`: version bumped `0.4.0 → 0.5.0` (additive capability, per
+  ADR-0013's convention). The `.vsix` itself was **not** repackaged: `vscode-extension/`
+  has no `node_modules` in this worktree, and `npm run package` fails with `'vsce' is not
+  recognized` — confirmed the same way infrastructure-h5wnq did, stated plainly rather than
+  claiming the package shipped.
+- Tests: `vscode-extension/test/bridge.test.mjs` (structural guard + updated `/health`/
+  bridge.json assertions) and `dashboard/test/bridge-api.test.mjs` /
+  `dashboard/test/bridge-launch.test.mjs` (legacy-capability wire-omission tests, updated
+  `probeBridge` contract assertions, and a real in-process 0.2.0-shaped `node:http` listener
+  regression fixture proving `probeBridge` resolves `LEGACY_CAPABILITIES` and `launchOrCopy`
+  drops `model`/`name` at the socket level against a genuine legacy server, not just scripted
+  JSON). Full suites green: `vscode-extension` 29/31 pass (2 known environmental
+  `EADDRINUSE` failures on the fixed-port ladder, pre-existing per the task notes); `dashboard`
+  891/891 pass; `lib` 229/229 pass.
+- `.agentheim/contexts/infrastructure/README.md` updated: the bridge surface bullet, a new
+  "Capability handshake" bullet, the bridge-discovery-file bullet, and the ADR-0018 changelog
+  entry all now describe `capabilities`/`LEGACY_CAPABILITIES`/the wire-level omission
+  guarantee, and no longer describe `probeBridge` as resolving a bare `{ present: boolean }`.
+- No new ADR was needed — ADR-0018's infrastructure-v8r3q amendment (already drafted in
+  refinement) was the complete, accurate spec for this build; execution surfaced no deviation
+  requiring a correction.

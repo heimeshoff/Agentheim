@@ -1,8 +1,8 @@
 {
   "name": "agentheim-bridge",
   "displayName": "Agentheim Bridge",
-  "description": "Local 127.0.0.1 bridge that lets the Agentheim dashboard open a real, interactive Claude terminal inside VS Code (ADR-0018). Loopback-only + per-activation shared-secret token; opt-in, off-by-default permission-bypass on POST /run via strict-true skipPermissions; sessions carry a derived/explicit display name via -n so the terminal tab and /resume picker entry stop reading \"Claude\"; sessions may also carry an allowlisted --model via POST /run's optional model field.",
-  "version": "0.4.0",
+  "description": "Local 127.0.0.1 bridge that lets the Agentheim dashboard open a real, interactive Claude terminal inside VS Code (ADR-0018). Loopback-only + per-activation shared-secret token; opt-in, off-by-default permission-bypass on POST /run via strict-true skipPermissions; sessions carry a derived/explicit display name via -n so the terminal tab and /resume picker entry stop reading \"Claude\"; sessions may also carry an allowlisted --model via POST /run's optional model field. GET /health now advertises which POST /run fields this build honours via an authoritative capabilities list, so a stale extension host cannot silently drop a field a caller sent.",
+  "version": "0.5.0",
   "publisher": "agentheim",
   "private": true,
   "license": "SEE LICENSE IN ../LICENSE",

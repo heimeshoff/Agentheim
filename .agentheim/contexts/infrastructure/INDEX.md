@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 29
+- **Doing:** 0
+- **Done:** 30
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **infrastructure-v8r3q** — The bridge advertises what it can honour — a live /health capability handshake, plus a structural guard that stops a fourth silent drift (bug) — `doing/infrastructure-v8r3q-bridge-capability-handshake.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **infrastructure-v8r3q** — The bridge advertises what it can honour — a live /health capability handshake, plus a structural guard that stops a fourth silent drift (bug) — `done/infrastructure-v8r3q-bridge-capability-handshake.md`
 - **infrastructure-d2n8s** — A DOM-render test harness — so a test can mount the board, dispatch a real keydown, and see what a source-regex suite structurally cannot (feature) — `done/infrastructure-d2n8s-dom-render-test-harness.md`
 - **infrastructure-h5wnq** — The model rides the launch — POST /run carries a model, the bridge spawns claude --model, and the dashboard learns whether a bridge is even there (feature) — `done/infrastructure-h5wnq-model-rides-the-launch.md`
 - **infrastructure-c6fzb** — Bridge-launched sessions carry a derived name — createTerminal({name}) + claude -n (feature) — `done/infrastructure-c6fzb-bridge-session-name-launch.md`
