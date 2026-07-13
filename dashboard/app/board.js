@@ -1303,18 +1303,23 @@ export function BoardPromptBar({ skipPermissions = false }) {
       display: "flex", flexDirection: "column",
       background: "var(--surface-1)", border: "1px solid var(--hairline-strong)",
       borderRadius: "var(--radius-md)", boxShadow: "var(--shadow-lg)",
-      overflow: "hidden",
     }}>
       ${/* Row 1 (agentic-workflow-q7r3x, Section 1b): the four mode tabs as
             EDGE-TO-EDGE, equal-width cells filling the panel width — no
             inter-tab gap, no horizontal panel padding on this row (the cells'
-            own padding carries the breathing room; the console shell's
-            `overflow: hidden` + borderRadius clip the row's two end cells to
-            match the shell's rounded corners). The single committed highlight
-            (ADR-0050) is painted per ADR-0051 (highlighted = filled cell +
-            ochre underline) / ADR-0016 (the rest dimmed). */ ""}
+            own padding carries the breathing room). design-system-k3f7q: the
+            clip that rounds the row's two end cells to the shell's corners
+            lives HERE, on the tab row itself, not on the console `<section>`
+            — the section used to carry `overflow: hidden` for exactly this
+            reason, but that also sheared off anything absolutely positioned
+            elsewhere in the section (the ModelSplitButton's open menu). The
+            single committed highlight (ADR-0050) is painted per ADR-0051
+            (highlighted = filled cell + ochre underline) / ADR-0016 (the rest
+            dimmed). */ ""}
       <div role="tablist" aria-label="Choose how to launch the prompt" style=${{
         display: "flex", alignItems: "stretch",
+        overflow: "hidden",
+        borderTopLeftRadius: "var(--radius-md)", borderTopRightRadius: "var(--radius-md)",
       }}>
         ${PROMPT_MODES.map((mode, index) => html`
           <${PromptModeTab} key=${mode.id} mode=${mode}

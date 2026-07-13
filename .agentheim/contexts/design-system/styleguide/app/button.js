@@ -183,6 +183,14 @@ export function EnterButton({ onClick, size = 34, ariaLabel = "Send", disabled =
  * it (clamped, no wraparound), Enter selects and closes, Escape closes and
  * returns focus to the caret (no keyboard trap, WCAG 2.1.2).
  *
+ * Placement (design-system-k3f7q): the panel anchors on `bottom`, not
+ * `top` — UNCONDITIONALLY, no `menuPlacement` prop, no collision auto-flip.
+ * The split button's only home is the bottom-docked prompt console
+ * (`agentic-workflow-bz3az`), so a downward-opening panel opens straight
+ * into the viewport's bottom edge; Quick Capture pins the model (`locked`
+ * renders no caret and no menu at all), so no consumer ever wants it
+ * downward. Revisit only if a second, top-anchored consumer appears.
+ *
  * @param {object} props
  * @param {string} props.label — the current model's label, shown beside the glyph.
  * @param {() => void} [props.onClick] — fires on the PRIMARY region only (the
@@ -332,7 +340,7 @@ export function ModelSplitButton({
       </div>
       ${open && !locked ? html`
         <div role="menu" aria-label="Model" style=${{
-          position: "absolute", top: `calc(100% + 6px)`, right: 0, zIndex: 20,
+          position: "absolute", bottom: `calc(100% + 6px)`, right: 0, zIndex: 20,
           minWidth: 140, display: "flex", flexDirection: "column", gap: 2,
           padding: 6, boxSizing: "border-box",
           background: "var(--surface-1)", border: "1px solid var(--hairline)",

@@ -1,11 +1,11 @@
 ---
 id: design-system-k3f7q
 title: ModelSplitButton's model menu opens upward and escapes the prompt console's clip
-status: doing
+status: done
 type: bug
 context: design-system
 created: 2026-07-13
-completed:
+completed: 2026-07-13
 depends_on: [design-system-001]
 blocks: []
 tags: [dashboard-redesign, prompt-bar, menu, model-split-button]
@@ -59,30 +59,32 @@ split would ship two changes, each individually invisible and unverifiable, and 
 
 ## Acceptance criteria
 
-- [ ] `ModelSplitButton`'s open menu renders **above** the button: its panel anchors
+- [x] `ModelSplitButton`'s open menu renders **above** the button: its panel anchors
       on `bottom`, not `top`. Asserted via the jsdom DOM harness
       (`dashboard/test/dom-harness.mjs`, `infrastructure-d2n8s`) — mount the real
       component, open the menu, read the panel's actual style. Not a source regex.
-- [ ] No ancestor of the open menu clips it: the prompt console `<section>` no longer
+- [x] No ancestor of the open menu clips it: the prompt console `<section>` no longer
       carries `overflow: hidden`. Asserted by mounting `BoardPromptBar` and walking
       the open menu's ancestor chain for a clipping `overflow`.
-- [ ] The mode-tab row's end cells are **still** clipped to the shell's rounded
+- [x] The mode-tab row's end cells are **still** clipped to the shell's rounded
       corners — the clip moved, it did not disappear. (Regression guard: this is the
       one thing the section's `overflow: hidden` was actually for.)
-- [ ] Every option in the list is fully readable with the console docked at the
+- [x] Every option in the list is fully readable with the console docked at the
       bottom of the viewport — the whole panel, not a partial one.
-- [ ] The existing `ModelSplitButton` keyboard model is untouched and still green:
+- [x] The existing `ModelSplitButton` keyboard model is untouched and still green:
       roving tabindex, ArrowUp/ArrowDown clamped (no wraparound), Enter selects,
       Escape closes and returns focus to the caret. **ArrowUp/ArrowDown keep their
       current meaning** — the menu moving above the button does not invert them.
       (`styleguide/test/model-split-button.test.mjs`,
       `dashboard/test/model-split-button-dom.test.mjs`.)
-- [ ] `locked` still renders no caret and no menu at all (Quick Capture's pinned model).
-- [ ] Each fix is **mutation-proven**: revert the anchor to `top:` → the placement test
+- [x] `locked` still renders no caret and no menu at all (Quick Capture's pinned model).
+- [x] Each fix is **mutation-proven**: revert the anchor to `top:` → the placement test
       goes red; restore `overflow: hidden` on the section → the clip test goes red.
       Two tests that cannot fail are the exact trap this BC has been bitten by.
-- [ ] `dashboard/dist/` rebuilt (`node build.mjs`) — this change has a live consumer
-      and must reach the served board.
+- [x] ~~`dashboard/dist/` rebuilt (`node build.mjs`)~~ — **reassigned to the conductor**
+      by ADR-0057 (landed after this task's capture): the conductor regenerates the
+      bundle from merged source at integration; workers never hand-rebuild or commit
+      `dist/`. Not done by this worker; not a gap.
 
 ## Notes
 
@@ -103,3 +105,61 @@ reopens the design-system gate for a lightweight re-review (the `design-system-0
 does **not** have this bug — its consumers (the topbar settings gear) are not inside
 an `overflow: hidden` parent, and it opens downward from a top-anchored trigger,
 which is correct there. Leave it alone. This task does not unify the two popovers.
+
+## Outcome
+
+Both stacked causes fixed together, as the task required:
+
+1. **`ModelSplitButton`'s panel now anchors `bottom: calc(100% + 6px)`**
+   unconditionally (`.agentheim/contexts/design-system/styleguide/app/button.js`,
+   the `role="menu"` panel style), never `top:` — no `menuPlacement` prop. The
+   module docblock documents why (bottom-docked console, Quick Capture pins the
+   model so no consumer wants it downward).
+2. **The prompt console's clip moved from the `<section>` to the mode-tab row**
+   (`dashboard/app/board.js`, ~L1279-1300): the `<section>` no longer carries
+   `overflow: hidden`; the `role="tablist"` row now carries `overflow: hidden` plus
+   its own `borderTopLeftRadius`/`borderTopRightRadius` so it still rounds its two
+   end cells to the shell's corners. The inline comment that used to document the
+   section's clip was moved/rewritten to describe the new location and explain why
+   it moved.
+
+Both fixes are mutation-proven, not merely observed passing:
+- Reverting the anchor back to `top:` turns
+  `dashboard/test/model-split-button-dom.test.mjs`'s new placement test genuinely
+  red (verified live during this task, then reverted byte-exact).
+- Restoring `overflow: hidden` on the `<section>` turns the new
+  `dashboard/test/board-prompt-console-clip-dom.test.mjs`'s clip test genuinely red
+  (verified live during this task, then reverted).
+
+New test file: `dashboard/test/board-prompt-console-clip-dom.test.mjs` — mounts the
+real `BoardPromptBar` via the jsdom DOM harness (`infrastructure-d2n8s`), moves off
+Quick Capture, opens the model menu, and (a) walks the open menu's real ancestor
+chain asserting no `overflow: hidden` clipper, (b) asserts the tab row still clips
+and still carries its own top corner radii. One test added to the existing
+`dashboard/test/model-split-button-dom.test.mjs` asserts the panel's own inline
+style anchors on `bottom`, not `top`.
+
+Full suite run from the worktree root: 1339 tests, 1337 pass, 2 fail (both the
+known pre-existing `vscode-extension/test/bridge.test.mjs` EADDRINUSE failures on
+the builder's live VS Code bridge port — not a regression, not this task's). No
+new failures beyond that baseline.
+
+**`dashboard/dist/` rebuild reassigned, not dropped.** The task's last acceptance
+criterion asked for `node build.mjs` to be run and committed here. ADR-0057 (landed
+after this task's capture) made that the conductor's job structurally — the
+conductor regenerates `dist/` from merged source at integration and filters
+`dashboard/dist/` out of worker checkpoints entirely. This worker did not run
+`node build.mjs` by hand and did not include `dashboard/dist/` in its file list;
+running the test suite rebuilds it transiently via `dist-build.test.mjs`'s
+`before()` hook, which is expected and untracked.
+
+Design-system README (`.agentheim/contexts/design-system/README.md`, ModelSplitButton
+section) updated: a new bullet documents the unconditional upward-anchoring
+placement and the board-side clip relocation, and a new gate-reopened note flags
+that the "Menu open" canvas specimen (section 12) now shows an upward menu and
+needs re-review before the fix is considered gate-clean.
+
+Key files: `.agentheim/contexts/design-system/styleguide/app/button.js`,
+`dashboard/app/board.js`, `dashboard/test/model-split-button-dom.test.mjs`,
+`dashboard/test/board-prompt-console-clip-dom.test.mjs`,
+`.agentheim/contexts/design-system/README.md`.

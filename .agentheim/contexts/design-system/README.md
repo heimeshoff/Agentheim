@@ -945,6 +945,19 @@ that same action, not a separate one of different weight.
   `aria-haspopup="menu"` / `aria-expanded`; the panel is `role="menu"` on
   `--surface-1` / `--hairline` / `--shadow-md`, matching every other popover
   by convention.
+- **The panel emits upward, unconditionally** (`design-system-k3f7q`): it
+  anchors `bottom: calc(100% + 6px)`, never `top:` — no `menuPlacement` prop,
+  no collision auto-flip. The split button's only home is the bottom-docked
+  prompt console (`agentic-workflow-bz3az`), so a downward-opening panel
+  would open straight into the viewport's bottom edge; Quick Capture pins the
+  model (`locked` renders no caret or menu at all), so no consumer wants it
+  downward. ArrowUp/ArrowDown keep their existing meaning — the panel moving
+  above the button does not invert them. Revisit only if a second,
+  top-anchored consumer appears. The board-side half of this fix moved the
+  prompt console's `overflow: hidden` off the `<section>` and onto the
+  `role="tablist"` mode-tab row (the only element that actually needed it, to
+  round its own end cells) — the section no longer clips anything absolutely
+  positioned inside it, this menu included.
 - **Body-agnostic model list.** The model list is never the styleguide's to
   know — it arrives as `options` (an array of labels) via props; no
   Agentheim-specific model name appears anywhere in the styleguide source or
@@ -979,6 +992,11 @@ the board must not hand-roll its own ochre split button.
 > the canvas (`styleguide/index.html` → section 12, "ModelSplitButton — Enter
 > widened into a labelled split button") **before** `agentic-workflow-m2vkp`
 > wires it into the live prompt bar and rebuilds `dist/`.
+
+> **Gate re-review reopened again by the menu-placement fix
+> (`design-system-k3f7q`).** The menu-open specimen's panel now emits upward
+> instead of downward (a visible change to the section 12 canvas) — re-review
+> the "Menu open" specimen before the fix is considered gate-clean.
 
 > Live-board note: the served dashboard `dist/` is a derived artifact
 > (ADR-0003) and was **not** rebuilt here — this task ships the primitive with

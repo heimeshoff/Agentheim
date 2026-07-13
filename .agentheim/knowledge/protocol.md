@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 15:42 -- Task verified and completed: design-system-k3f7q - ModelSplitButton's model menu opens upward and escapes the prompt console's clip
+
+**Type:** Work / Task completion
+**Task:** design-system-k3f7q - ModelSplitButton's model menu opens upward and escapes the prompt console's clip
+**Summary:** ModelSplitButton's model menu now emits upward (panel anchors bottom, not top) and the prompt console's overflow:hidden clip moved off the <section> onto the mode-tab row that actually needed it, so the open menu is no longer sheared off
+**Duration:** 49m (dispatch 14:53 -> verdict 15:42, spanning a session interruption)
+**Verification:** PASS (iteration 1)
+**Files changed:** 6
+**Tests added:** 3
+**ADRs written:** none
+
+---
+
 ## 2026-07-13 15:21 -- Task verified and completed: agentic-workflow-vsg9d - Prompt field stays tall after a launch — the post-clear re-measure runs before React re-renders
 
 **Type:** Work / Task completion

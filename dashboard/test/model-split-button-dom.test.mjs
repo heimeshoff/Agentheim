@@ -126,6 +126,18 @@ test('Escape dismisses the menu WITHOUT selecting, and returns focus to the care
   }
 });
 
+test('the open menu panel anchors ABOVE the button (bottom, not top) — design-system-k3f7q: the prompt console is docked bottom-viewport, so a top-anchored panel opens into the screen edge', async () => {
+  const { root, container } = await mountOpenMenu('Opus');
+  try {
+    const panel = container.querySelector('[role="menu"]');
+    assert.ok(panel, 'the menu panel must be open');
+    assert.equal(panel.style.top, '', 'the panel must NOT anchor on top — that opens the menu downward, into the docked console\'s bottom edge');
+    assert.equal(panel.style.bottom, 'calc(100% + 6px)', 'the panel must anchor on bottom, emitting the menu upward from the button');
+  } finally {
+    await act(async () => root.unmount());
+  }
+});
+
 test('locked renders no caret and no menu at all — the keyboard contract above is simply unreachable, matching the Quick Capture pinned-model case', async () => {
   const { ModelSplitButton } = await import(
     '../../.agentheim/contexts/design-system/styleguide/app/button.js'

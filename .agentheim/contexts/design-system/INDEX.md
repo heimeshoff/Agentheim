@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 34
+- **Doing:** 0
+- **Done:** 35
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **design-system-k3f7q** — ModelSplitButton's model menu opens upward and escapes the prompt console's clip (bug) — `doing/design-system-k3f7q-model-menu-opens-upward-unclipped.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **design-system-k3f7q** — ModelSplitButton's model menu opens upward and escapes the prompt console's clip (bug) — `done/design-system-k3f7q-model-menu-opens-upward-unclipped.md`
 - **design-system-r9dtm** — ModelSplitButton — the ochre Enter button widens into a labelled split button with a caret (feature) — `done/design-system-r9dtm-model-split-button.md`
 - **design-system-v08qq** — TicketCard — condense to 1b: no context chip, no estimate, no timestamp, smaller type (refactor) — `done/design-system-v08qq-ticketcard-condense-to-1b.md`
 - **design-system-tfhn6** — EnterButton gains a disabled state (feature) — `done/design-system-tfhn6-enter-button-disabled-state.md`
