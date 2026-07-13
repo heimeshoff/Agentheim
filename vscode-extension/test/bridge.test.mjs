@@ -23,6 +23,8 @@ const {
   sanitizeName,
   deriveNameFromPrompt,
   NAME_MAX_LEN,
+  MODEL_ALLOWLIST,
+  sanitizeModel,
 } = require('../src/bridge.js');
 
 function makeProject() {
@@ -401,6 +403,138 @@ test('descriptor ordering: -n <name> precedes --dangerously-skip-permissions whe
     assert.ok(res.status >= 200 && res.status < 300, `expected 2xx, got ${res.status}`);
     assert.deepEqual(launched, [
       { command: 'claude', args: ['-n', 'Armed Launch', '--dangerously-skip-permissions', prompt] },
+    ]);
+  } finally {
+    cleanup(base, bridge);
+  }
+});
+
+// ---- model selection (infrastructure-h5wnq): --model <id> on POST /run ----
+//
+// The prompt bar (agentic-workflow-m2vkp) grows a model selector; the chosen
+// model has to ride the launch as `--model <id>`. The allowlist is the
+// security boundary: a value outside it (including shell metacharacters,
+// spaces, newlines, a leading dash, or any other string) can NEVER reach the
+// argv — a rejected value just means no `--model` flag, never a 500. `--model`
+// takes the short aliases the installed CLI documents first (`fable`, `opus`,
+// `sonnet`, `haiku`); they track the latest model automatically, so the
+// allowlist holds those rather than pinned full model ids.
+
+test('MODEL_ALLOWLIST is the closed set of short model aliases the CLI documents', () => {
+  assert.deepEqual(new Set(MODEL_ALLOWLIST), new Set(['fable', 'opus', 'sonnet', 'haiku']));
+});
+
+test('sanitizeModel returns the value only when it is an exact allowlist member', () => {
+  assert.equal(sanitizeModel('sonnet'), 'sonnet');
+  assert.equal(sanitizeModel('opus'), 'opus');
+  assert.equal(sanitizeModel('haiku'), 'haiku');
+  assert.equal(sanitizeModel('fable'), 'fable');
+});
+
+test('sanitizeModel rejects everything outside the allowlist, including shell-metacharacter/whitespace payloads and full model ids', () => {
+  const bad = [
+    'Sonnet', // case mismatch — closed set, not case-insensitive
+    ' sonnet', // leading space
+    'sonnet ', // trailing space
+    'sonnet\n', // newline
+    'sonnet; rm -rf', // shell metacharacters
+    '--model', // flag-shaped
+    '-x', // leading dash
+    'claude-sonnet-5', // full model id — allowlist holds aliases only
+    '', // empty
+    '   ',
+    undefined,
+    null,
+    42,
+    { toString: () => 'sonnet' }, // non-string must never coerce
+  ];
+  for (const value of bad) {
+    assert.equal(sanitizeModel(value), '', `expected "${String(value)}" to sanitize to empty`);
+  }
+});
+
+test('POST /run { model: "sonnet" } inserts --model sonnet as its own raw argv pair, after -n <name> and ahead of the prompt', async () => {
+  const base = makeProject();
+  const launched = [];
+  const bridge = await startBridge({ root: base, launchClaude: (d) => launched.push(d), ...EPHEMERAL });
+  try {
+    const prompt = 'do the thing';
+    const expectedName = resolveSessionName({ name: undefined, prompt });
+    const res = await request(bridge.port, {
+      method: 'POST',
+      pathName: '/run',
+      headers: { [TOKEN_HEADER]: bridge.token },
+      body: JSON.stringify({ prompt, model: 'sonnet' }),
+    });
+    assert.ok(res.status >= 200 && res.status < 300, `expected 2xx, got ${res.status}`);
+    assert.deepEqual(launched, [
+      { command: 'claude', args: ['-n', expectedName, '--model', 'sonnet', prompt] },
+    ]);
+  } finally {
+    cleanup(base, bridge);
+  }
+});
+
+test('POST /run with a model outside the allowlist spawns with NO --model flag and no error', async () => {
+  const base = makeProject();
+  const launched = [];
+  const bridge = await startBridge({ root: base, launchClaude: (d) => launched.push(d), ...EPHEMERAL });
+  try {
+    for (const model of ['sonnet; rm -rf', '--model', '-x', 'claude-sonnet-5', ' sonnet', '']) {
+      launched.length = 0;
+      const prompt = 'plain prompt';
+      const expectedName = resolveSessionName({ name: undefined, prompt });
+      const res = await request(bridge.port, {
+        method: 'POST',
+        pathName: '/run',
+        headers: { [TOKEN_HEADER]: bridge.token },
+        body: JSON.stringify({ prompt, model }),
+      });
+      assert.ok(res.status >= 200 && res.status < 300, `model=${JSON.stringify(model)} expected 2xx, got ${res.status}`);
+      assert.deepEqual(launched, [{ command: 'claude', args: ['-n', expectedName, prompt] }],
+        `model=${JSON.stringify(model)} must not reach the argv`);
+      assert.ok(!launched[0].args.includes('--model'), `model=${JSON.stringify(model)} must not add a --model flag`);
+    }
+  } finally {
+    cleanup(base, bridge);
+  }
+});
+
+test('POST /run without a model field behaves byte-identically to before this task (no --model flag)', async () => {
+  const base = makeProject();
+  const launched = [];
+  const bridge = await startBridge({ root: base, launchClaude: (d) => launched.push(d), ...EPHEMERAL });
+  try {
+    const prompt = 'no model here';
+    const expectedName = resolveSessionName({ name: undefined, prompt });
+    const res = await request(bridge.port, {
+      method: 'POST',
+      pathName: '/run',
+      headers: { [TOKEN_HEADER]: bridge.token },
+      body: JSON.stringify({ prompt }),
+    });
+    assert.ok(res.status >= 200 && res.status < 300, `expected 2xx, got ${res.status}`);
+    assert.deepEqual(launched, [{ command: 'claude', args: ['-n', expectedName, prompt] }]);
+  } finally {
+    cleanup(base, bridge);
+  }
+});
+
+test('descriptor ordering: -n <name>, --model <id>, --dangerously-skip-permissions, prompt — all three compose in that order', async () => {
+  const base = makeProject();
+  const launched = [];
+  const bridge = await startBridge({ root: base, launchClaude: (d) => launched.push(d), ...EPHEMERAL });
+  try {
+    const prompt = 'ship it';
+    const res = await request(bridge.port, {
+      method: 'POST',
+      pathName: '/run',
+      headers: { [TOKEN_HEADER]: bridge.token },
+      body: JSON.stringify({ prompt, name: 'Armed Launch', model: 'opus', skipPermissions: true }),
+    });
+    assert.ok(res.status >= 200 && res.status < 300, `expected 2xx, got ${res.status}`);
+    assert.deepEqual(launched, [
+      { command: 'claude', args: ['-n', 'Armed Launch', '--model', 'opus', '--dangerously-skip-permissions', prompt] },
     ]);
   } finally {
     cleanup(base, bridge);

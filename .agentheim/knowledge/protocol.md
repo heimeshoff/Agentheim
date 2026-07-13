@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 11:37 -- Task verified and completed: infrastructure-h5wnq - The model rides the launch — POST /run carries a model, the bridge spawns claude --model, and the dashboard learns whether a bridge is even there
+
+**Type:** Work / Task completion
+**Task:** infrastructure-h5wnq - The model rides the launch — POST /run carries a model, the bridge spawns claude --model, and the dashboard learns whether a bridge is even there
+**Summary:** POST /run now accepts an optional allowlisted model that rides the launch descriptor as its own --model <id> argv pair, and bridge-launch.js gained a probeBridge(fetchImpl) export giving render-time ambient bridge-presence detection
+**Duration:** 9m00s
+**Verification:** PASS (iteration 1)
+**Files changed:** 7
+**Tests added:** 17
+**ADRs written:** none (ADR-0018 amended in place)
+
+---
+
 ## 2026-07-13 11:21 -- Batch started: [design-system-r9dtm, infrastructure-h5wnq]
 
 **Type:** Work / Batch start

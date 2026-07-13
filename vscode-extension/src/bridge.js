@@ -195,7 +195,18 @@ function makeHandler({ token, launchClaude }) {
       // `skipPermissions` flag already prepends by (infrastructure-016). No
       // shell parses it, so (like the prompt) it needs no quoting/escaping.
       const name = resolveSessionName({ name: parsed?.name, prompt });
-      const args = ['-n', name, ...existingArgs];
+      // Model selection (infrastructure-h5wnq): an optional `model` field rides
+      // its own raw argv pair, `--model <id>`, ahead of the skip-permissions
+      // flag and the prompt — after `-n <name>` (same discipline: no shell
+      // parses it). The allowlist is the security boundary: anything outside
+      // it (case mismatch, shell metacharacters, whitespace, a leading dash,
+      // a full model id, a non-string) sanitizes to '' and simply produces NO
+      // `--model` flag — never a 500, never a rejected request. The session
+      // then inherits the user's own Claude Code config, exactly as if no
+      // model field had been sent at all.
+      const model = sanitizeModel(parsed?.model);
+      const modelArgs = model ? ['--model', model] : [];
+      const args = ['-n', name, ...modelArgs, ...existingArgs];
       try {
         launchClaude({ command: 'claude', args });
       } catch (err) {
@@ -263,6 +274,30 @@ function deriveNameFromPrompt(prompt) {
 function resolveSessionName({ name, prompt }) {
   const explicit = sanitizeName(name);
   return explicit || deriveNameFromPrompt(prompt);
+}
+
+// Model selection (infrastructure-h5wnq). `claude --model` accepts both short
+// aliases (`fable`, `opus`, `sonnet`, `haiku` — confirmed via `claude --help`
+// on the installed CLI) and full model ids (`claude-sonnet-5`, …). The
+// allowlist holds only the short aliases: they track "the latest model" of
+// their tier automatically, which is what the CLI's own help text documents
+// first, and a pinned full id would silently go stale the day a new model
+// ships under the same tier name. This is a CLOSED SET, not free text — the
+// value reaches a spawned process (`launchClaude`), so anything outside it
+// (case mismatch, shell metacharacters, whitespace, a leading dash, a full
+// model id, a non-string) must sanitize to '' rather than ever touch argv.
+const MODEL_ALLOWLIST = ['fable', 'opus', 'sonnet', 'haiku'];
+
+/**
+ * Sanitize a candidate `model` value against the closed MODEL_ALLOWLIST.
+ * Returns the value unchanged when it is an EXACT member (case-sensitive,
+ * no trimming — membership is binary, not fuzzy), else ''. A rejected value
+ * never reaches the argv; the caller degrades to "no --model flag at all".
+ * @param {*} raw
+ * @returns {string}
+ */
+function sanitizeModel(raw) {
+  return typeof raw === 'string' && MODEL_ALLOWLIST.includes(raw) ? raw : '';
 }
 
 function tokensMatch(a, b) {
@@ -339,4 +374,6 @@ module.exports = {
   sanitizeName,
   deriveNameFromPrompt,
   NAME_MAX_LEN,
+  MODEL_ALLOWLIST,
+  sanitizeModel,
 };

@@ -125,12 +125,13 @@ async function probeHealth(fetchImpl, { port, token }, timeoutMs) {
  * the preflight (ADR-0018); a CORS rejection here just throws and we fall back.
  * @returns {Promise<boolean>} Never throws.
  */
-async function runOnBridge(fetchImpl, { port, token, prompt, skipPermissions, name }) {
+async function runOnBridge(fetchImpl, { port, token, prompt, skipPermissions, name, model }) {
   try {
     // Strict-`true` only: a truthy-but-not-true value must never arm the bypass,
     // and OFF must OMIT the field rather than serialize `false`.
     const body = skipPermissions === true ? { prompt, skipPermissions: true } : { prompt };
     if (typeof name === 'string' && name.trim()) body.name = name;
+    if (typeof model === 'string' && model.trim()) body.model = model;
     const res = await fetchImpl(`http://127.0.0.1:${port}/run`, {
       method: "POST",
       headers: {
@@ -178,17 +179,26 @@ async function runOnBridge(fetchImpl, { port, token, prompt, skipPermissions, na
  *   stop reading "Claude". Absent/blank OMITS the field (the bridge then
  *   derives its own fallback name from the prompt). Never sent to the
  *   clipboard fallback — there is no launch to name.
+ * @param {string} [args.model] — a chosen model id for the launched session
+ *   (infrastructure-h5wnq, feeding the prompt bar's model selector,
+ *   agentic-workflow-m2vkp). When a real (non-blank) string is supplied, the
+ *   POST /run body carries `model`; the bridge allowlists it and rides an
+ *   accepted value into the launch descriptor as `--model <id>` (a rejected
+ *   value just means no flag — the bridge, not this module, owns the
+ *   allowlist). Absent/blank OMITS the field, so the session inherits the
+ *   user's own Claude Code config. Never sent to the clipboard fallback —
+ *   a pasted slash command cannot carry a startup flag.
  * @returns {Promise<{via:'bridge'}|{via:'clipboard', copied:boolean}>} which path
  *   handled it; for the clipboard path, whether the copy itself landed.
  */
-export async function launchOrCopy({ prompt, fetchImpl, copy, healthTimeoutMs = DEFAULT_HEALTH_TIMEOUT_MS, skipPermissions, name }) {
+export async function launchOrCopy({ prompt, fetchImpl, copy, healthTimeoutMs = DEFAULT_HEALTH_TIMEOUT_MS, skipPermissions, name, model }) {
   // Try the bridge only when we actually have a fetch to reach it with.
   if (typeof fetchImpl === "function") {
     const bridge = await discoverBridge(fetchImpl);
     if (bridge) {
       const live = await probeHealth(fetchImpl, bridge, healthTimeoutMs);
       if (live) {
-        const launched = await runOnBridge(fetchImpl, { ...bridge, prompt, skipPermissions, name });
+        const launched = await runOnBridge(fetchImpl, { ...bridge, prompt, skipPermissions, name, model });
         if (launched) return { via: "bridge" };
       }
     }
@@ -205,4 +215,41 @@ export async function launchOrCopy({ prompt, fetchImpl, copy, healthTimeoutMs = 
     copied = false;
   }
   return { via: "clipboard", copied: !!copied };
+}
+
+/**
+ * An ambient, render-time-safe bridge-presence signal (infrastructure-h5wnq).
+ * `launchOrCopy` only learns whether the bridge is reachable lazily, at fire
+ * time — nothing tells the UI *before* a launch is attempted. The prompt
+ * bar's model selector (agentic-workflow-m2vkp) needs exactly that: it greys
+ * out when no bridge is reachable, because a clipboard-copied command can
+ * never carry a `--model` flag.
+ *
+ * Runs the SAME two-step discover (`GET /api/bridge`) + health
+ * (`GET /health`, ~800 ms budget) protocol `launchOrCopy` uses — reusing the
+ * module's existing `discoverBridge`/`probeHealth` internals rather than a
+ * second implementation of them — and resolves a plain `{ present: boolean }`.
+ *
+ * As silent as `launchOrCopy`: every failure mode (no `fetchImpl` at all, no
+ * `bridge.json`/`present:false`, a dead port, any thrown fetch, not running
+ * in Simple Browser) resolves `{ present: false }`. Never throws, never
+ * rejects, never logs.
+ *
+ * @param {(url:string, opts?:object)=>Promise<Response>} [fetchImpl] — injected
+ *   `fetch`. Absent/not-a-function → straight to `{ present: false }`.
+ * @returns {Promise<{present: boolean}>}
+ */
+export async function probeBridge(fetchImpl) {
+  if (typeof fetchImpl !== "function") return { present: false };
+  try {
+    const bridge = await discoverBridge(fetchImpl);
+    if (!bridge) return { present: false };
+    const live = await probeHealth(fetchImpl, bridge, DEFAULT_HEALTH_TIMEOUT_MS);
+    return { present: !!live };
+  } catch {
+    // discoverBridge/probeHealth already swallow their own failures; this
+    // catch is a belt-and-braces guarantee that probeBridge itself never
+    // throws or rejects, matching launchOrCopy's contract.
+    return { present: false };
+  }
 }

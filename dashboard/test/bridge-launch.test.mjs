@@ -18,6 +18,7 @@ import assert from 'node:assert/strict';
 import {
   BRIDGE_TOKEN_HEADER,
   launchOrCopy,
+  probeBridge,
 } from '../app/bridge-launch.js';
 
 // ---- fetch test doubles -----------------------------------------------------
@@ -276,6 +277,86 @@ test('the clipboard fallback never carries a name — there is no launch to name
   assert.deepEqual(copy.copied, [PROMPT], 'the clipboard copy is the bare prompt, never the name');
 });
 
+// ---- model threading (infrastructure-h5wnq) ---------------------------------
+//
+// The prompt bar's model selector (agentic-workflow-m2vkp) passes its choice
+// through this same seam. When a real (non-blank) string is supplied, the
+// POST /run body carries `model`; absent/blank OMITS the field (never sends
+// an empty/whitespace string), so the bridge falls back to no `--model` flag
+// at all. The allowlist enforcement itself lives in the bridge (bridge.js) —
+// this module only has to thread the value through, exactly like `name`.
+
+test('a real model -> POST /run body includes model', async () => {
+  let runCall = null;
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31460, token: 'm', v: 1 })],
+    ['/health', () => jsonResponse(200, { ok: true })],
+    ['/run', (url, opts) => { runCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
+  ]);
+
+  const result = await launchOrCopy({ prompt: PROMPT, fetchImpl, copy: makeCopy(), model: 'sonnet' });
+
+  assert.equal(result.via, 'bridge');
+  assert.deepEqual(JSON.parse(runCall.opts.body), { prompt: PROMPT, model: 'sonnet' });
+});
+
+test('model absent/blank -> body OMITS the field, never sends an empty/whitespace string', async () => {
+  // absent
+  let absentCall = null;
+  const fAbsent = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31461, token: 'm', v: 1 })],
+    ['/health', () => jsonResponse(200, { ok: true })],
+    ['/run', (url, opts) => { absentCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
+  ]);
+  await launchOrCopy({ prompt: PROMPT, fetchImpl: fAbsent, copy: makeCopy() });
+  assert.equal('model' in JSON.parse(absentCall.opts.body), false, 'field must be OMITTED when no model is supplied');
+
+  // whitespace-only
+  let blankCall = null;
+  const fBlank = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31462, token: 'm', v: 1 })],
+    ['/health', () => jsonResponse(200, { ok: true })],
+    ['/run', (url, opts) => { blankCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
+  ]);
+  await launchOrCopy({ prompt: PROMPT, fetchImpl: fBlank, copy: makeCopy(), model: '   ' });
+  assert.equal('model' in JSON.parse(blankCall.opts.body), false, 'a whitespace-only model must be omitted, not sent verbatim');
+});
+
+test('model composes with name and skipPermissions in the same POST /run body', async () => {
+  let runCall = null;
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31463, token: 'm', v: 1 })],
+    ['/health', () => jsonResponse(200, { ok: true })],
+    ['/run', (url, opts) => { runCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
+  ]);
+
+  await launchOrCopy({
+    prompt: PROMPT,
+    fetchImpl,
+    copy: makeCopy(),
+    name: 'Armed Launch',
+    model: 'opus',
+    skipPermissions: true,
+  });
+
+  assert.deepEqual(JSON.parse(runCall.opts.body), {
+    prompt: PROMPT,
+    skipPermissions: true,
+    name: 'Armed Launch',
+    model: 'opus',
+  });
+});
+
+test('the clipboard fallback never carries a model — there is no launch to carry it to', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { present: false })],
+  ]);
+  const copy = makeCopy();
+  const result = await launchOrCopy({ prompt: PROMPT, fetchImpl, copy, model: 'sonnet' });
+  assert.equal(result.via, 'clipboard');
+  assert.deepEqual(copy.copied, [PROMPT], 'the clipboard copy is the bare prompt, never the model');
+});
+
 test('the health probe carries the token header and targets the advertised port', async () => {
   let healthCall = null;
   const fetchImpl = makeFetch([
@@ -433,4 +514,66 @@ test('a hanging /health is bounded by the timeout and falls back to clipboard', 
 
   assert.equal(result.via, 'clipboard');
   assert.deepEqual(copy.copied, [PROMPT]);
+});
+
+// ---- probeBridge: an ambient bridge-presence signal (infrastructure-h5wnq) --
+//
+// The prompt bar's model selector greys out when no bridge is reachable — a
+// clipboard-copied command cannot carry `--model`. `launchOrCopy` only learns
+// bridge presence lazily, at fire time; `probeBridge` gives the same two-step
+// discover+health-probe protocol as a standalone, render-time-safe check that
+// reuses this module's existing internals rather than duplicating them.
+
+test('probeBridge resolves {present:true} for a live, token-answering bridge', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31470, token: 'p', v: 1 })],
+    ['/health', () => jsonResponse(200, { ok: true })],
+  ]);
+
+  const result = await probeBridge(fetchImpl);
+
+  assert.deepEqual(result, { present: true });
+});
+
+test('probeBridge resolves {present:false} when the discovery endpoint reports present:false', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { present: false })],
+  ]);
+
+  const result = await probeBridge(fetchImpl);
+
+  assert.deepEqual(result, { present: false });
+});
+
+test('probeBridge resolves {present:false} when /health fails (stale bridge.json, connection-refused, 401)', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31471, token: 'stale', v: 1 })],
+    ['/health', () => { throw new Error('ECONNREFUSED'); }],
+  ]);
+
+  const result = await probeBridge(fetchImpl);
+
+  assert.deepEqual(result, { present: false });
+});
+
+test('probeBridge resolves {present:false} when the discovery fetch itself throws (e.g. not in Simple Browser)', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => { throw new Error('Failed to fetch'); }],
+  ]);
+
+  const result = await probeBridge(fetchImpl);
+
+  assert.deepEqual(result, { present: false });
+});
+
+test('probeBridge resolves {present:false} when given no fetch implementation at all, and never throws', async () => {
+  const result = await probeBridge(undefined);
+  assert.deepEqual(result, { present: false });
+});
+
+test('probeBridge never rejects, even when every step fails', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(500, { error: 'boom' })],
+  ]);
+  await assert.doesNotReject(() => probeBridge(fetchImpl));
 });

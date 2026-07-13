@@ -4,7 +4,7 @@ title: VS Code dashboard→terminal bridge — fixed-port localhost extension wi
 scope: infrastructure
 status: proposed
 date: 2026-06-14
-related_tasks: [infrastructure-012, infrastructure-013, infrastructure-014, agentic-workflow-020, infrastructure-015, infrastructure-016, agentic-workflow-021, infrastructure-020, infrastructure-c6fzb]
+related_tasks: [infrastructure-012, infrastructure-013, infrastructure-014, agentic-workflow-020, infrastructure-015, infrastructure-016, agentic-workflow-021, infrastructure-020, infrastructure-c6fzb, infrastructure-h5wnq]
 related_adrs: [ADR-0002]
 diverges_from: [ADR-0002]
 ---
@@ -63,6 +63,43 @@ diverges_from: [ADR-0002]
 > confirmed strictly user-typed (no model/hook/subagent surface), so launch
 > time is the only programmatic naming point; sessions the builder starts
 > manually outside the bridge stay out of scope.
+
+> **Amended 2026-07-13 (infrastructure-h5wnq).** The prompt bar grows a model
+> selector (agentic-workflow-m2vkp); the chosen model has to ride the same
+> launch descriptor. `POST /run` gains a **second, independent, optional,
+> additive** field: `model: string`. The pure core (`bridge.js`) validates it
+> against a **closed allowlist**, `MODEL_ALLOWLIST = ['fable', 'opus',
+> 'sonnet', 'haiku']` — the short aliases the installed CLI's own
+> `--model <model>` help text documents first ("Provide an alias for the
+> latest model … or a model's full name"). The allowlist holds only the
+> aliases, not pinned full ids (`claude-sonnet-5`, …): an alias tracks "the
+> latest model" of its tier automatically, so it does not go stale the way a
+> pinned full id would the day a new model ships under the same tier name.
+> **This is the security boundary, not a convenience filter**: the value
+> reaches a spawned process, so exact, case-sensitive membership is the only
+> path from request body to argv — anything else (case mismatch, shell
+> metacharacters, whitespace, a leading dash, a full model id, a non-string)
+> sanitizes to `''` and produces **no `--model` flag at all**, never a `500`.
+> An accepted value rides its own raw argv pair, `--model <id>`, prepended
+> exactly the way `name`/`skipPermissions` already prepend
+> (infrastructure-c6fzb/016): `args = ['-n', <name>, '--model', <id>,
+> ...(skipPermissions-and-prompt args)]` — so the full order with every field
+> armed is `['-n', <name>, '--model', <id>, '--dangerously-skip-permissions',
+> <prompt>]`. No shell parses it, so (like the prompt and the name) it needs
+> no quoting/escaping. **Nothing else on the HTTP wire changes:** `{ prompt,
+> skipPermissions?, name? }` stay exactly as before; `model` is a fourth,
+> independent, optional field, and its clipboard-fallback path stays
+> deliberately unimplemented — a pasted slash command cannot carry a startup
+> flag, so the model selector greys out when no bridge is reachable (the
+> builder's ruling). This ambient bridge-presence signal is a new export,
+> `probeBridge(fetchImpl)`, on `dashboard/app/bridge-launch.js`: it reuses the
+> module's existing `discoverBridge`/`probeHealth` two-step protocol (no
+> second implementation) and resolves a plain `{ present: boolean }`, never
+> throwing, for exactly the render-time question `launchOrCopy`'s
+> fire-time-only discovery cannot answer. **This amendment does not touch
+> ADR-0031** — ADR-0031 pins a model *per agent* via agent frontmatter;
+> `--model` sets the main-loop/session model, and the two compose (a session
+> launched `--model haiku` still spawns its `verifier` on opus).
 
 > **Diverges from [ADR-0002](0002-dashboard-runtime-transport.md) on one clause.** ADR-0002 fixed
 > the dashboard runtime as an **ephemeral `:0` port** read back into `runtime.json`. That pattern
@@ -157,13 +194,15 @@ absence degrades safely.
 
 ### HTTP shape and status codes
 
-- **`POST /run { prompt: string, skipPermissions?: boolean, name?: string }`** (extension
-  listener; `X-Agentheim-Bridge-Token` required) → opens a terminal and seeds the prompt →
-  `200`/`202`. Missing/bad token → `401`. Malformed/empty body → `400`. The `skipPermissions`
-  field is **optional and additive** — every existing `{ prompt }` caller (infrastructure-013/014,
-  agentic-workflow-020) remains valid unchanged, since omitting it is the off default. The `name`
-  field is likewise **optional and additive** (infrastructure-c6fzb) — a caller that omits it gets
-  a prompt-derived fallback name, never a rejection.
+- **`POST /run { prompt: string, skipPermissions?: boolean, name?: string, model?: string }`**
+  (extension listener; `X-Agentheim-Bridge-Token` required) → opens a terminal and seeds the
+  prompt → `200`/`202`. Missing/bad token → `401`. Malformed/empty body → `400`. The
+  `skipPermissions` field is **optional and additive** — every existing `{ prompt }` caller
+  (infrastructure-013/014, agentic-workflow-020) remains valid unchanged, since omitting it is the
+  off default. The `name` field is likewise **optional and additive** (infrastructure-c6fzb) — a
+  caller that omits it gets a prompt-derived fallback name, never a rejection. The `model` field
+  (infrastructure-h5wnq) is likewise **optional and additive** — a caller that omits it, or sends a
+  value outside the allowlist, gets no `--model` flag at all, never a rejection.
   **Command construction (frozen):**
   - `skipPermissions === true` (the JSON boolean literal `true`, nothing else) → seed
     `claude --dangerously-skip-permissions "<prompt>"`.
@@ -174,7 +213,14 @@ absence degrades safely.
   - **Session name (infrastructure-c6fzb, frozen):** a sanitized explicit `name` when supplied,
     else a fallback derived from the prompt (`/agentheim:<skill> …` → `<skill>: …`; plain text →
     the prompt itself), prepended as its own raw argv pair ahead of everything else:
-    `args = ['-n', <name>, ...(skipPermissions-and-prompt args)]`.
+    `args = ['-n', <name>, ...(model-and-skipPermissions-and-prompt args)]`.
+  - **Model selection (infrastructure-h5wnq, frozen):** an exact, case-sensitive member of
+    `MODEL_ALLOWLIST = ['fable', 'opus', 'sonnet', 'haiku']` when supplied → `--model <id>` rides
+    its own raw argv pair, after `-n <name>` and ahead of the skip-permissions flag/prompt:
+    `args = ['-n', <name>, '--model', <id>, ...(skipPermissions-and-prompt args)]`. Anything outside
+    the allowlist — case mismatch, shell metacharacters, whitespace, a leading dash, a full model
+    id, a non-string, absent — sanitizes to `''` and adds **no** `--model` element; the session then
+    inherits the user's own Claude Code config, exactly as if the field had never been sent.
 - **`GET /health`** (extension listener; token required) → `200`. Used by the frontend to confirm
   a live listener at the advertised port.
 - **`GET /api/bridge`** lives on the **dashboard server**, not the extension → `{ port, token, v }`

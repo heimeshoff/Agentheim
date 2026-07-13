@@ -85,12 +85,12 @@ for an infrastructure BC.
   toolchain) running a `127.0.0.1`-only `node:http` listener *inside the editor*. It is the
   only path by which the dashboard — served into VS Code's sandboxed Simple Browser — can open
   a **real, visible, interactive** Claude terminal. The terminal **is** the `claude` process:
-  the extension spawns it via `createTerminal({ name, shellPath:'claude', shellArgs:[<'-n', name>, <flag?>, prompt] })`
-  (infra-020, named by infrastructure-c6fzb) — the prompt is a **raw argv element**, no shell parses it, so quotes/backticks/`$`/`&`
+  the extension spawns it via `createTerminal({ name, shellPath:'claude', shellArgs:[<'-n', name>, <'--model', id>?, <flag?>, prompt] })`
+  (infra-020, named by infrastructure-c6fzb, given a model by infrastructure-h5wnq) — the prompt is a **raw argv element**, no shell parses it, so quotes/backticks/`$`/`&`
   and every other metacharacter the builder typed survive verbatim. (Earlier the bridge typed a
   shell command line with `sendText('claude "<prompt>"')`, which mangled metacharacters on Windows
   PowerShell/cmd; that escaping is deleted.) Fixed port **31425** with a bounded fallback ladder
-  `31425 → 31426 → 31427`. Surface: `POST /run { prompt, skipPermissions?, name? }` (opens a
+  `31425 → 31426 → 31427`. Surface: `POST /run { prompt, skipPermissions?, name?, model? }` (opens a
   seeded, named terminal → 202), `GET /health` (→ 200), `OPTIONS` preflight (load-bearing — the
   custom-header JSON POST is preflighted). Every request carries the `X-Agentheim-Bridge-Token`
   header; missing/mismatched → 401, malformed/empty body → 400. `POST /run` takes an **optional
@@ -107,10 +107,26 @@ for an infrastructure BC.
   dashboard prompt bar sends an explicit mode-derived name (`"<mode label>: <typed text>"`,
   `prompt-mode.js`'s `nameForPromptMode`); other launch affordances rely on the prompt-derived
   fallback. `/rename` is confirmed strictly user-typed (no model/hook/subagent surface), so launch
-  time is the only programmatic naming point. The trust boundary is loopback-only bind **plus**
+  time is the only programmatic naming point. `POST /run` also takes an **optional, allowlisted
+  `model` string** (infrastructure-h5wnq, feeding the prompt bar's model selector,
+  agentic-workflow-m2vkp): `bridge.js` exports the closed `MODEL_ALLOWLIST = ['fable', 'opus',
+  'sonnet', 'haiku']` (the short aliases `claude --model`'s own help text documents first — they
+  track "the latest model" automatically, unlike a pinned full id) and `sanitizeModel`, an exact
+  case-sensitive membership check. This is the **security boundary**: a value outside the allowlist
+  (case mismatch, shell metacharacters, whitespace, a leading dash, a full model id, a non-string)
+  never reaches the argv — it degrades quietly to no `--model` flag at all, never a `500`. An
+  accepted value rides its own raw argv pair, `--model <id>`, after `-n <name>` and ahead of the
+  skip-permissions flag/prompt. The dashboard side (`bridge-launch.js`) only threads the value
+  through `launchOrCopy`'s `model` option (omitted when absent/blank) — the allowlist enforcement
+  itself lives solely in the bridge. The same module also exports `probeBridge(fetchImpl)`, an
+  ambient, render-time-safe bridge-presence signal: it reuses `launchOrCopy`'s own
+  discover-then-health-probe internals and resolves `{ present: boolean }`, never throwing, so the
+  prompt bar's model selector can grey out *before* any launch is attempted (a clipboard-copied
+  command can never carry `--model`). The trust boundary is loopback-only bind **plus**
   the shared-secret token — single-user dev box only. The generic launcher carries *whatever*
   prompt it is handed, so all board affordances share it. The inject-into-running-session path
-  (`POST /inject`) is deferred. (ADR-0018, infrastructure-013, infrastructure-020, infrastructure-c6fzb.)
+  (`POST /inject`) is deferred. (ADR-0018, infrastructure-013, infrastructure-020,
+  infrastructure-c6fzb, infrastructure-h5wnq.)
 - **Bridge discovery file** — `.agentheim/.dashboard/bridge.json` =
   `{ port, token, pid, startedAt, v }`, a **sibling of `runtime.json`** in the same gitignored
   dir, written by a **separate process** (the VS Code extension host) on its own
@@ -261,8 +277,18 @@ Apply write request.
   pair `-n <name>` prepended ahead of everything else — so every dashboard-launched session's
   terminal tab and `/resume` picker entry stop reading the hard-coded `"Claude"`. This closed the
   gap the June research report (`vscode-dashboard-terminal-bridge-2026-06-09`) had left open (it
-  predates the CLI's `-n`/`--name` flag). The HTTP wire contract is otherwise unchanged.
-  **Shares ADR-0002's bounded-ladder collision idiom** but on a different port clause
+  predates the CLI's `-n`/`--name` flag). `POST /run` also carries an **optional, allowlisted
+  `model` string** (amended 2026-07-13, infrastructure-h5wnq): the closed
+  `MODEL_ALLOWLIST = ['fable', 'opus', 'sonnet', 'haiku']` (the CLI's own short aliases, which
+  auto-track the latest model of their tier) is the security boundary — an exact,
+  case-sensitive member rides `--model <id>` as its own raw argv pair, after `-n <name>` and
+  ahead of the skip-permissions flag/prompt; anything else (shell metacharacters, whitespace, a
+  leading dash, a full model id, a non-string, absent) degrades to no `--model` flag, never a
+  rejection. Feeds the prompt bar's model selector (agentic-workflow-m2vkp), which also consumes
+  the new `probeBridge(fetchImpl)` export on `bridge-launch.js` — a render-time-safe
+  `{ present: boolean }` signal reusing the module's own discover/health-probe internals, so the
+  selector can grey out before any launch is attempted. The HTTP wire contract is otherwise
+  unchanged. **Shares ADR-0002's bounded-ladder collision idiom** but on a different port clause
   (a *fixed literal* `31425` start + server-mediated discovery, because the bridge's reader is a
   filesystem-blind sandboxed frame; the dashboard derives a *root-based* port + runfile discovery —
   see the ADR-0002 infrastructure-018 addendum); every other ADR-0002 clause stands (stdlib-only,
