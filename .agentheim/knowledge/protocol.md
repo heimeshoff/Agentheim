@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 13:23 -- Batch started: [infrastructure-d2n8s]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-d2n8s - A DOM-render test harness — so a test can mount the board, dispatch a real keydown, and see what a source-regex suite structurally cannot
+**Parallel:** no (1 worker — sole ready task in todo across all BCs; nothing held back)
+
+---
+
 ## 2026-07-13 13:19 -- Modeling / Promoted: infrastructure-d2n8s - A DOM-render test harness — so a test can mount the board, dispatch a real keydown, and see what a source-regex suite structurally cannot
 
 **Type:** Modeling / Promote
