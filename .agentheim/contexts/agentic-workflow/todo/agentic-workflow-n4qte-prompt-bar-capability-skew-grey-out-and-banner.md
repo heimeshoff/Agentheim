@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-n4qte
 title: Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it
-status: backlog
+status: todo
 type: bug
 context: agentic-workflow
 created: 2026-07-13

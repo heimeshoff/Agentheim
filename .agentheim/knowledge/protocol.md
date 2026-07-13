@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 16:41 -- Modeling / Promoted: agentic-workflow-n4qte - Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-13 17:05 -- Modeling / Refined: agentic-workflow-n4qte - Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it
 
 **Type:** Modeling / Refine

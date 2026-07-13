@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 143
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-n4qte** — Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it (bug) — `todo/agentic-workflow-n4qte-prompt-bar-capability-skew-grey-out-and-banner.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -89,7 +90,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-n4qte** — Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it (bug) — `backlog/agentic-workflow-n4qte-prompt-bar-capability-skew-grey-out-and-banner.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
