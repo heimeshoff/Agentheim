@@ -14,6 +14,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 -- Modeling / Captured: infrastructure-c6fzb - Bridge-launched sessions carry a derived name — createTerminal({name}) + claude -n
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** Dashboard-launched sessions all show as "Claude" because the bridge extension hard-codes `createTerminal({ name: 'Claude' })`; the installed CLI (2.1.207) now ships `-n/--name` (picker + terminal title), so the bridge names sessions at launch — optional `name` on `POST /run`, prompt-derived fallback, `-n` prepended to the argv like the skipPermissions flag. `/rename` confirmed user-only (no model/hook/subagent path), so launch time is the only programmatic naming point; manually-started sessions are out of scope. Filed straight to todo — mechanism fully de-risked against the installed CLI.
+
+---
+
 ## 2026-07-10 09:41 -- Modeling / Captured: agentic-workflow-rwxms - applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder
 
 **Type:** Modeling / Capture
