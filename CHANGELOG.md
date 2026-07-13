@@ -8,6 +8,30 @@ its **plugin contract** (skills, commands, `.agentheim/` layout) with
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-07-13
+
+**Pick the model you launch with.** The prompt bar's Enter button widens into a split
+button that names the session model and lets you change it — and because an old bridge
+would silently swallow the field, the bridge now says out loud what it can honour.
+
+### Added
+- **Model selector in the prompt bar** — the ochre Enter button becomes a labelled `ModelSplitButton`: a launch region plus a caret opening a roving-tabindex model menu (locked/disabled variants, full keyboard + ARIA). `Ctrl+M` cycles the model from anywhere on the board as its own disjoint key intent, Quick Capture projects to Haiku at read time without overwriting your stored choice, and both mode and model survive a launch.
+- **The bridge advertises what it can honour** — `GET /health` carries a live capability handshake (absent ⇒ legacy baseline), and the dashboard omits `model`/`name` at the wire level whenever the fire-time-probed listener lacks them. A structural guard stops a future `POST /run` field from drifting out of sync with the advertised set.
+- **Capability skew is visible, never silent** — with no live bridge, or one too old to advertise `model`, the prompt bar greys out the selector (naming no model) and a dismissible board-local banner announces the skew. A stale-but-present bridge can no longer show a live selector while the wire quietly drops the model.
+- `POST /run` accepts an optional allowlisted `model` (riding the launch descriptor as its own `--model <id>` argv pair) and an optional sanitized display `name` with a prompt-derived fallback, so bridge-launched sessions arrive named via `claude -n` / `createTerminal({name})`.
+- **A DOM-render test harness** — jsdom plus a `module.register()` resolve hook mirroring esbuild's `nodePaths`, so a test can mount a real component, dispatch a real keydown, and assert what a source-regex suite structurally cannot.
+- **The "workers never rebuild `dist/`" contract is now structural** — the conductor's checkpoint `git add` is filtered against the worker's declared file list (`lib/derived-artifact-guard.mjs` + a `checkpoint` verb on the lifecycle CLI). Workers were never defying the rule: the test suite's own `before()` hook rebuilds `dist/`, so the staging seam is the only place that can hold it.
+
+### Changed
+- **Prompt-bar mode cycling moves to `Tab` / `Shift+Tab`**, freeing `Ctrl+arrows` for native word-jump and word-select in the multi-line prompt field; `Escape` blurs the textarea as the keyboard exit for the hijacked `Tab`.
+- Quick Capture is pinned to Haiku.
+
+### Fixed
+- The prompt field shrinks back to one line after a launch — the re-measure moved to a `useLayoutEffect` keyed on the prompt, so it observes the DOM after React commits the clear.
+- The Launched/Copied flash anchors to the mode that actually fired, instead of painting on Quick Capture after the success-reset snaps the highlight back to index 0.
+- `ModelSplitButton`'s menu opens upward and escapes the prompt console's clip; its `disabled` state gates the launch region only, so the caret stays clickable, keyboard-reachable and full-opacity — a blank prompt no longer blocks picking a model.
+- `applyTaskMove` writes the status-rewritten body to the destination (backfilling a missing lifecycle folder) and only then unlinks the source, never rewriting the source in place (ADR-0055); a genuine pre-unlink failure now rejects cleanly instead of throwing.
+
 ## [0.9.1] - 2026-07-10
 
 Two field defects in the mechanized task-lifecycle scripts — both now fail closed
@@ -218,7 +242,8 @@ palette and the board grows a docked prompt console you drive from the keyboard.
 ### Added
 - Initial plugin design.
 
-[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.2...HEAD
+[0.9.2]: https://github.com/heimeshoff/Agentheim/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/heimeshoff/Agentheim/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/heimeshoff/Agentheim/compare/v0.8.10...v0.9.0
 [0.8.10]: https://github.com/heimeshoff/Agentheim/compare/v0.8.9...v0.8.10
