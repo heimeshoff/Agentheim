@@ -1,7 +1,7 @@
 ---
 id: infrastructure-c6fzb
 title: Bridge-launched sessions carry a derived name — createTerminal({name}) + claude -n
-status: todo
+status: doing
 type: feature
 context: infrastructure
 created: 2026-07-13

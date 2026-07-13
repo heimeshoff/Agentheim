@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 10:25 -- Batch started: [infrastructure-c6fzb]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-c6fzb - Bridge-launched sessions carry a derived name — createTerminal({name}) + claude -n
+**Parallel:** no (1 worker — sole remaining ready task; held back from the first wave because it is a third editor of dashboard/app/board.js prompt-bar region and additionally needs a .vsix repackage + manual Windows verification, so it runs alone)
+
+---
+
 ## 2026-07-13 10:24 -- Task verified and completed: agentic-workflow-spv0k - Launched/Copied flash paints on Quick Capture instead of the fired mode's tab
 
 **Type:** Work / Task completion
