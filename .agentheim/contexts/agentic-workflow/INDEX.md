@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 142
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-vsg9d** — Prompt field stays tall after a launch — the post-clear re-measure runs before React re-renders (bug) — `todo/agentic-workflow-vsg9d-prompt-field-stays-tall-after-launch.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-vsg9d** — Prompt field stays tall after a launch — the post-clear re-measure runs before React re-renders (bug) — `doing/agentic-workflow-vsg9d-prompt-field-stays-tall-after-launch.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

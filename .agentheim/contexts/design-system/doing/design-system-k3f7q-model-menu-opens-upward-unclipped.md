@@ -1,7 +1,7 @@
 ---
 id: design-system-k3f7q
 title: ModelSplitButton's model menu opens upward and escapes the prompt console's clip
-status: todo
+status: doing
 type: bug
 context: design-system
 created: 2026-07-13

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-vsg9d
 title: Prompt field stays tall after a launch — the post-clear re-measure runs before React re-renders
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-13

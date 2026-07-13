@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 14:53 -- Batch started: [agentic-workflow-vsg9d, design-system-k3f7q]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-vsg9d - Prompt field stays tall after a launch — the post-clear re-measure runs before React re-renders, design-system-k3f7q - ModelSplitButton's model menu opens upward and escapes the prompt console's clip
+**Parallel:** yes (2 workers — the entire ready set; nothing held back by MAX_PARALLEL). Both touch dashboard/app/board.js but in disjoint regions (vsg9d: the onResult clear/re-measure path ~L1132; k3f7q: the prompt console <section> overflow ~L1285), so they are annotated for sequential merge-back (Phase 3 step 2 advisory) rather than serialized at dispatch — worktree isolation (ADR-0032) lets git's 3-way merge be the real conflict detector.
+
+---
+
 ## 2026-07-13 14:36 -- Modeling / Captured: infrastructure-v8r3q - The bridge contract grows but never versions — an old bridge silently swallows fields the dashboard sends
 
 **Type:** Modeling / Capture
