@@ -932,9 +932,18 @@ that same action, not a separate one of different weight.
 - **`locked` removes the caret region and the menu entirely** (absent, not
   merely disabled) — the Quick Capture pinned-model case. The primary region
   still launches.
-- **`disabled`** dims both regions to `opacity: 0.55`, matching
-  `EnterButton`'s existing disabled treatment (ADR-0016 opacity-only
-  de-emphasis, never a fill swap).
+- **`disabled` governs the PRIMARY region only** (`design-system-me97j`,
+  fixing `design-system-r9dtm`'s original single-gate wiring): the primary
+  `<button>` alone gets the real `disabled` attribute and dims to
+  `opacity: 0.55`, matching `EnterButton`'s existing disabled treatment
+  (ADR-0016 opacity-only de-emphasis, never a fill swap). The caret region is
+  untouched by `disabled` — full opacity, clickable, keyboard-reachable, menu
+  openable — because the only thing `disabled` ever means at the one real
+  consumer (the dashboard prompt bar) is "there is nothing to launch," which
+  has no bearing on picking a model for the *next* launch. Only `locked`
+  removes the caret region; a control painted dead that still responds to
+  clicks is a lying affordance, so the whole-surface dim was rejected rather
+  than kept and merely made harmless.
 - **A roving-tabindex menu — a third, distinct focus model** from `Menu`
   (ds-015, consumer-supplied focusable items) and `SearchField` (ds-016,
   focus stays in the input via `aria-activedescendant`). Opening the caret
@@ -997,6 +1006,13 @@ the board must not hand-roll its own ochre split button.
 > (`design-system-k3f7q`).** The menu-open specimen's panel now emits upward
 > instead of downward (a visible change to the section 12 canvas) — re-review
 > the "Menu open" specimen before the fix is considered gate-clean.
+
+> **Gate re-review reopened again by the disabled-caret fix
+> (`design-system-me97j`).** The "Disabled" specimen now paints two-tone —
+> the primary region alone dims to 0.55 opacity, the caret region stays at
+> full opacity and clickable — where it previously dimmed the whole ochre
+> group (a visible change to the section 12 canvas). Re-review the
+> "Disabled" specimen before the fix is considered gate-clean.
 
 > Live-board note: the served dashboard `dist/` is a derived artifact
 > (ADR-0003) and was **not** rebuilt here — this task ships the primitive with

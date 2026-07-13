@@ -1,11 +1,11 @@
 ---
 id: design-system-me97j
 title: ModelSplitButton's `disabled` deadens the model caret along with Enter — an empty prompt shouldn't block picking a model
-status: doing
+status: done
 type: bug
 context: design-system
 created: 2026-07-13
-completed:
+completed: 2026-07-13
 depends_on: [design-system-001]
 blocks: []
 tags: [model-split-button, prompt-console, disabled, affordance]
@@ -111,3 +111,101 @@ component.
   previous fix to this same widget (menu placement + the console clip) and established
   that a `ModelSplitButton` bug is provable through the DOM harness rather than by
   regex over source.
+
+## Outcome
+
+`ModelSplitButton` (`styleguide/app/button.js`) now narrows `disabled` to the
+primary (launch) region only:
+
+- `canOpenMenu = !locked` (dropped `&& !disabled`) — the caret opens the menu
+  regardless of `disabled`.
+- The caret `<button>` no longer receives the `disabled` attribute, stays in
+  the tab order, and its cursor is a plain `"pointer"`.
+- `opacity: disabled ? 0.55 : 1` moved off the shared wrapper `<div>` and onto
+  the primary `<button>` alone; the caret renders at full opacity.
+- The `disabled` prop's docblock now states it governs the primary region
+  only (was: "both regions non-interactive at 0.55 opacity").
+- The canvas's "Disabled" `ModelSplitButtonRow` specimen already passed
+  `options`/`value`, so it now shows the two-tone state with no source change
+  needed.
+- `dashboard/app/board.js` required no change — `disabled=${!canFire}` now
+  means what it always should have.
+
+Tests (all through the DOM harness / structural source guards, per
+`design-system-k3f7q`'s established precedent — never regex-inferring
+interactivity):
+- `dashboard/test/model-split-button-dom.test.mjs` — 5 new tests: caret
+  clickable + menu opens while `disabled`; caret carries no `disabled`
+  attribute and Enter/ArrowDown selection still works; primary stays
+  genuinely disabled (attribute present, `onClick` never fires); opacity 0.55
+  on the primary only, caret at full opacity; `locked` still removes the
+  caret regardless of `disabled` (regression guard).
+- `dashboard/test/board-prompt-bar-dom.test.mjs` — 1 new test mounting the
+  real `BoardPromptBar` with a blank prompt: Enter disabled, caret opens the
+  menu, selecting Sonnet sticks and Enter stays disabled.
+- `.agentheim/contexts/design-system/styleguide/test/model-split-button.test.mjs`
+  — updated the stale `disabled` structural guard (previously asserted the
+  bug: both regions dim/disable) to assert the primary-only wiring, plus a
+  new test pinning the corrected docblock wording.
+
+Full suite green: `node --test lib/test/*.test.mjs` (229 pass),
+`.agentheim/contexts/design-system/styleguide/test/*.test.mjs` (201 pass),
+`dashboard` (`npm test`, 892 pass, 0 fail — no EADDRINUSE/EPERM hit this run).
+
+BC README updated: `.agentheim/contexts/design-system/README.md`'s
+`ModelSplitButton` section's `disabled` bullet now documents the primary-only
+gating and the "lying affordance" rationale for rejecting a whole-surface dim.
+A gate re-review blockquote (beside the `k3f7q` note, README:1005-1010) names
+`design-system-me97j` and points the builder at section 12's "Disabled"
+specimen, which now paints two-tone — matching the unbroken gate-note
+convention for every visible styleguide change since `design-system-005`.
+
+No ADR written — the design decision (dim only the Enter half, not the whole
+surface) was already settled and recorded at capture in this task's own "Why"/
+"What" sections; the README update carries it forward into ubiquitous
+documentation.
+
+## Verifier note (iteration 1)
+
+**VERDICT: FAIL** — one narrow gap. The implementation itself is correct and complete;
+do not change code, tests, or `styleguide/app/app.js`.
+
+**REASONS:**
+
+- **Check 5 (BC README sync) — incomplete.** The change is a *visible* styleguide change:
+  the canvas's "Disabled" `ModelSplitButton` specimen
+  (`.agentheim/contexts/design-system/styleguide/app/app.js:710-718`) now paints two-tone
+  (primary at 0.55, caret at full opacity) where it previously dimmed the whole ochre group.
+  The README's unbroken convention for every visible styleguide change since
+  `design-system-005` is a `> **Gate re-review reopened by …**` blockquote naming the task and
+  the canvas section to re-review — including `design-system-k3f7q` (README:1005-1008), the
+  immediately-prior bug fix to this same widget, whose only visible delta was likewise a
+  section-12 specimen's appearance. The README diff adds only the `disabled` bullet
+  (README:935-946) and no gate note, so the design-system gate now reads as standing open
+  against a canvas that has changed and the builder is never prompted to re-review it.
+
+- **Everything else audited clean.** All 8 acceptance criteria are covered by real DOM-harness
+  behavior (not source regex) — `dashboard/test/model-split-button-dom.test.mjs` (caret
+  clickable + menu opens while disabled; caret carries no `disabled` attribute and
+  Enter/ArrowDown still fires `onSelect`; primary genuinely disabled with `onClick` never
+  firing; 0.55 opacity on the primary only; `locked` + `disabled` still removes the caret),
+  `dashboard/test/board-prompt-bar-dom.test.mjs` (blank prompt: Enter inert, menu opens,
+  Sonnet selection sticks), and the styleguide structural guards for the wrapper-opacity move
+  + the corrected docblock. All three suites green from the worktree: lib 229 pass, styleguide
+  201 pass, dashboard 892 pass, 0 fail. Scope, ubiquitous language, ADR honoring
+  (`related_adrs` empty), and no protocol/index/git tampering all check out.
+
+- **The `styleguide/app/app.js` question resolves as GENUINELY FINE, not a gap — do NOT "fix"
+  it.** The "Disabled" specimen already passes `options`/`value` and renders the live
+  `ModelSplitButton`, so it picks the two-tone state up with zero source change; the absent
+  `onSelect` cannot throw because `selectAt` guards it
+  (`if (opt !== undefined) onSelect && onSelect(opt);`, `button.js:269`). The canvas does not
+  contradict the component.
+
+**SUGGESTED_FIX:** Add the missing gate re-review blockquote to
+`.agentheim/contexts/design-system/README.md`'s ModelSplitButton section (beside the k3f7q
+note at README:1005), naming `design-system-me97j` and pointing the builder at section 12's
+"Disabled" specimen — the caret is no longer painted dead alongside Enter. No code, test, or
+`app.js` change is needed; the implementation is correct as it stands.
+
+**ITERATION_HINT:** likely-fixable

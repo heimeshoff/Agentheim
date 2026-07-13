@@ -150,9 +150,39 @@ test('the menu itself is also gated on !locked, so it is unreachable when locked
   assert.match(modelSplitButtonFn, /\$\{open\s*&&\s*!locked\s*\?\s*html`/, 'the menu panel must render only when open AND !locked');
 });
 
-test('disabled renders both regions non-interactive at 0.55 opacity, matching EnterButton', () => {
-  assert.match(modelSplitButtonFn, /opacity:\s*disabled\s*\?\s*0\.55\s*:\s*1/, 'the group wrapper must dim to 0.55 opacity when disabled');
-  assert.match(modelSplitButtonFn, /disabled=\$\{disabled\}[\s\S]*?disabled=\$\{disabled\}/, 'both the primary and caret <button>s must forward the real disabled attribute');
+test('disabled (design-system-me97j) governs the PRIMARY region only — the caret stays fully interactive', () => {
+  // The primary <button> (aria-label=${ariaLabel}) carries the real disabled
+  // attribute and the 0.55-opacity style; the caret <button> (aria-haspopup)
+  // must carry neither. The genuine click/focus/keyboard proof lives in
+  // dashboard/test/model-split-button-dom.test.mjs (mounted DOM harness) —
+  // this is a structural guard only.
+  const primaryBlock = modelSplitButtonFn.match(/aria-label=\$\{ariaLabel\}[\s\S]*?<\/button>/)[0];
+  assert.match(primaryBlock, /disabled=\$\{disabled\}/, 'the primary <button> must forward the real disabled attribute');
+  assert.match(primaryBlock, /opacity:\s*disabled\s*\?\s*0\.55\s*:\s*1/, 'the primary <button> must dim to 0.55 opacity when disabled');
+
+  const caretBlock = modelSplitButtonFn.match(/aria-haspopup="menu"[\s\S]*?<\/button>/)[0];
+  assert.doesNotMatch(caretBlock, /disabled=\$\{disabled\}/, 'the caret <button> must NOT forward the disabled attribute — a blank prompt must not block picking a model');
+  assert.doesNotMatch(caretBlock, /opacity:\s*disabled/, 'the caret <button> must NOT reference `disabled` in its own opacity — it stays fully opaque');
+
+  // The group wrapper (background: --accent-ochre) must no longer carry the
+  // opacity dim itself — that would still paint the caret dead visually even
+  // though it is clickable, "a control painted dead that still responds to
+  // clicks is a lying affordance" (this task's capture decision).
+  const wrapperBlock = modelSplitButtonFn.match(/background:\s*"var\(--accent-ochre\)"[\s\S]*?\}\}>/)[0];
+  assert.doesNotMatch(wrapperBlock, /opacity/, 'the group wrapper must not itself carry an opacity rule — it moved onto the primary button alone');
+});
+
+test('the ModelSplitButton disabled docblock no longer claims both regions go non-interactive', () => {
+  // ModelSplitButton's own docblock is the LAST "/**" immediately before its
+  // function declaration — take just that slice, so this doesn't accidentally
+  // match EnterButton's separate (and still-correct) disabled docblock above it.
+  const fnStart = buttonSrc.indexOf('export function ModelSplitButton');
+  assert.ok(fnStart > 0, 'sanity: ModelSplitButton must be findable in button.js');
+  const docStart = buttonSrc.lastIndexOf('/**', fnStart);
+  const modelSplitButtonDoc = buttonSrc.slice(docStart, fnStart);
+  const disabledDocParam = modelSplitButtonDoc.match(/@param \{boolean\} \[props\.disabled=false\][\s\S]*?(?=\n \* @param|\n \*\/)/)[0];
+  assert.doesNotMatch(disabledDocParam, /both regions non-interactive/i, 'the docblock must not claim both regions go non-interactive when disabled');
+  assert.match(disabledDocParam, /PRIMARY/, 'the docblock must state disabled governs the primary region');
 });
 
 test('the caret carries aria-haspopup="menu" and aria-expanded', () => {

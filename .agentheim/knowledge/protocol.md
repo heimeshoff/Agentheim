@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 16:30 -- Task verified and completed: design-system-me97j - ModelSplitButton's `disabled` deadens the model caret along with Enter — an empty prompt shouldn't block picking a model
+
+**Type:** Work / Task completion
+**Task:** design-system-me97j - ModelSplitButton's `disabled` deadens the model caret along with Enter — an empty prompt shouldn't block picking a model
+**Summary:** ModelSplitButtons disabled now gates the primary (Enter) region only — the caret stays clickable, keyboard-reachable and full-opacity, so a blank prompt no longer blocks picking a model; only locked still removes the caret
+**Duration:** 20m
+**Verification:** PASS (iteration 2)
+**Files changed:** 5
+**Tests added:** 6
+**ADRs written:** none
+
+---
+
+## 2026-07-13 16:27 -- Verification failed: design-system-me97j - ModelSplitButton's `disabled` deadens the model caret along with Enter
+
+**Type:** Work / Verification failure
+**Task:** design-system-me97j - ModelSplitButton's `disabled` deadens the model caret along with Enter
+**Iteration:** 1 of 3
+**Reasons:** BC README sync incomplete — the change is a *visible* styleguide change (the canvas's "Disabled" ModelSplitButton specimen now paints two-tone), and the README carries no `> **Gate re-review reopened by …**` blockquote for it, breaking the unbroken convention held since design-system-005 and followed by design-system-k3f7q — the immediately-prior fix to this same widget. The design-system gate now reads as standing open against a canvas that has changed, so the builder is never prompted to re-review it. Implementation, tests, and `styleguide/app/app.js` all audited clean — the specimen renders the live component and picks up the two-tone state with zero source change.
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-07-13 16:24 -- Task verified and completed: infrastructure-v8r3q - The bridge advertises what it can honour — a live /health capability handshake, plus a structural guard that stops a fourth silent drift
 
 **Type:** Work / Task completion

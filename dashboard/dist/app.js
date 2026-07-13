@@ -134,16 +134,16 @@ Please report this to https://github.com/markedjs/marked.`,t){let o="<p>An error
       onMouseLeave=${()=>s(!1)}
       style=${{display:"inline-flex",alignItems:"center",justifyContent:"center",gap:7,padding:"7px 14px",cursor:"pointer",fontFamily:"var(--font-ui)",fontSize:13,fontWeight:500,lineHeight:1.2,borderRadius:"var(--radius-sm)",border:`1px solid ${c.borderColor}`,background:c.background,color:c.color,transition:"background var(--duration-fast) var(--ease-base), color var(--duration-fast) var(--ease-base), border-color var(--duration-fast) var(--ease-base)",...i}}>
       ${l}
-    </button>`}function Xp({label:e,onClick:t,onOpenMenu:n,options:r=[],value:o,onSelect:i,locked:l=!1,disabled:a=!1,ariaLabel:s="Send",defaultOpen:u=!1,size:c=34}){let[m,f]=(0,Je.useState)(u),[x,$]=(0,Je.useState)(()=>cu(r,o)),k=(0,Je.useRef)(null),T=(0,Je.useRef)(null),h=(0,Je.useRef)([]),d=!l&&!a,p=(0,Je.useCallback)(_=>{f(_),n&&n(_)},[n]),w=(0,Je.useCallback)(()=>{p(!1),T.current&&T.current.focus()},[p]);(0,Je.useEffect)(()=>{if(!m)return;let _=cu(r,o);$(_);let b=h.current[_];b&&b.focus();let K=de=>{!!(k.current&&k.current.contains(de.target))||w()};return document.addEventListener("mousedown",K),()=>document.removeEventListener("mousedown",K)},[m,r,o,w]);let C=()=>{d&&p(!m)},M=_=>{let b=r[_];b!==void 0&&i&&i(b),w()},I=(_,b)=>{let K=Qp(_.key);if(K){_.preventDefault();let de=Kp(b,r.length,K);$(de);let W=h.current[de];W&&W.focus();return}if(Yp(_.key)){_.preventDefault(),M(b);return}qp(_.key)&&(_.preventDefault(),w())},R=Gp(r);return v`
+    </button>`}function Xp({label:e,onClick:t,onOpenMenu:n,options:r=[],value:o,onSelect:i,locked:l=!1,disabled:a=!1,ariaLabel:s="Send",defaultOpen:u=!1,size:c=34}){let[m,f]=(0,Je.useState)(u),[x,$]=(0,Je.useState)(()=>cu(r,o)),k=(0,Je.useRef)(null),T=(0,Je.useRef)(null),h=(0,Je.useRef)([]),d=!l,p=(0,Je.useCallback)(_=>{f(_),n&&n(_)},[n]),w=(0,Je.useCallback)(()=>{p(!1),T.current&&T.current.focus()},[p]);(0,Je.useEffect)(()=>{if(!m)return;let _=cu(r,o);$(_);let b=h.current[_];b&&b.focus();let K=de=>{!!(k.current&&k.current.contains(de.target))||w()};return document.addEventListener("mousedown",K),()=>document.removeEventListener("mousedown",K)},[m,r,o,w]);let C=()=>{d&&p(!m)},M=_=>{let b=r[_];b!==void 0&&i&&i(b),w()},I=(_,b)=>{let K=Qp(_.key);if(K){_.preventDefault();let de=Kp(b,r.length,K);$(de);let W=h.current[de];W&&W.focus();return}if(Yp(_.key)){_.preventDefault(),M(b);return}qp(_.key)&&(_.preventDefault(),w())},R=Gp(r);return v`
     <div ref=${k} style=${{position:"relative",display:"inline-flex"}}>
-      <div style=${{display:"inline-flex",alignItems:"stretch",borderRadius:"var(--radius-sm)",overflow:"hidden",background:"var(--accent-ochre)",opacity:a?.55:1}}>
+      <div style=${{display:"inline-flex",alignItems:"stretch",borderRadius:"var(--radius-sm)",overflow:"hidden",background:"var(--accent-ochre)"}}>
         <button
           type="button"
           className="focusable"
           aria-label=${s}
           disabled=${a}
           onClick=${()=>{a||t&&t()}}
-          style=${{display:"inline-flex",alignItems:"center",gap:7,height:c,padding:"0 12px",boxSizing:"border-box",cursor:a?"default":"pointer",border:"none",background:"transparent",color:"var(--accent-ochre-fg)",fontFamily:"var(--font-ui)",fontSize:13,fontWeight:500}}>
+          style=${{display:"inline-flex",alignItems:"center",gap:7,height:c,padding:"0 12px",boxSizing:"border-box",cursor:a?"default":"pointer",opacity:a?.55:1,border:"none",background:"transparent",color:"var(--accent-ochre-fg)",fontFamily:"var(--font-ui)",fontSize:13,fontWeight:500}}>
           <${L} name="corner-down-left" size=${18} color="var(--accent-ochre-fg)" />
           <span style=${{minWidth:`${R}ch`,textAlign:"left"}}>${e}</span>
         </button>
@@ -156,9 +156,8 @@ Please report this to https://github.com/markedjs/marked.`,t){let o="<p>An error
             aria-label="Change model"
             aria-haspopup="menu"
             aria-expanded=${m}
-            disabled=${a}
             onClick=${C}
-            style=${{display:"inline-flex",alignItems:"center",justifyContent:"center",width:Math.round(c*.7),height:c,padding:0,cursor:a?"default":"pointer",border:"none",background:"transparent",color:"var(--accent-ochre-fg)"}}>
+            style=${{display:"inline-flex",alignItems:"center",justifyContent:"center",width:Math.round(c*.7),height:c,padding:0,cursor:"pointer",border:"none",background:"transparent",color:"var(--accent-ochre-fg)"}}>
             <${L} name="chevron-down" size=${14} color="var(--accent-ochre-fg)" />
           </button>`}
       </div>

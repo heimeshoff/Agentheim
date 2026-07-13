@@ -207,8 +207,12 @@ export function EnterButton({ onClick, size = 34, ariaLabel = "Send", disabled =
  * @param {boolean} [props.locked=false] — renders NO caret region and no menu
  *        at all — absent, not merely disabled (the Quick Capture pinned-model
  *        case). The primary region still launches.
- * @param {boolean} [props.disabled=false] — both regions non-interactive at
- *        0.55 opacity, matching `EnterButton`'s existing disabled treatment.
+ * @param {boolean} [props.disabled=false] — governs the PRIMARY region only:
+ *        real `disabled` attribute and 0.55 opacity there, matching
+ *        `EnterButton`'s existing disabled treatment. The caret region is
+ *        unaffected — a blank prompt doesn't invalidate picking a model for
+ *        the next one — and stays fully opaque, clickable, and keyboard-
+ *        reachable. Only `locked` removes the caret region.
  * @param {string} [props.ariaLabel="Send"] — accessible label for the primary region.
  * @param {boolean} [props.defaultOpen=false] — render with the menu already
  *        open (mirrors `Menu`'s `defaultOpen` idiom, ds-015) — used by the
@@ -226,7 +230,7 @@ export function ModelSplitButton({
   const caretRef = useRef(null);
   const itemRefs = useRef([]);
 
-  const canOpenMenu = !locked && !disabled;
+  const canOpenMenu = !locked;
 
   const setMenuOpen = useCallback((next) => {
     setOpen(next);
@@ -296,7 +300,6 @@ export function ModelSplitButton({
         display: "inline-flex", alignItems: "stretch",
         borderRadius: "var(--radius-sm)", overflow: "hidden",
         background: "var(--accent-ochre)",
-        opacity: disabled ? 0.55 : 1,
       }}>
         <button
           type="button"
@@ -308,6 +311,7 @@ export function ModelSplitButton({
             display: "inline-flex", alignItems: "center", gap: 7,
             height: size, padding: "0 12px", boxSizing: "border-box",
             cursor: disabled ? "default" : "pointer",
+            opacity: disabled ? 0.55 : 1,
             border: "none", background: "transparent",
             color: "var(--accent-ochre-fg)",
             fontFamily: "var(--font-ui)", fontSize: 13, fontWeight: 500,
@@ -327,12 +331,11 @@ export function ModelSplitButton({
             aria-label="Change model"
             aria-haspopup="menu"
             aria-expanded=${open}
-            disabled=${disabled}
             onClick=${onCaretClick}
             style=${{
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               width: Math.round(size * 0.7), height: size, padding: 0,
-              cursor: disabled ? "default" : "pointer",
+              cursor: "pointer",
               border: "none", background: "transparent", color: "var(--accent-ochre-fg)",
             }}>
             <${Icon} name="chevron-down" size=${14} color="var(--accent-ochre-fg)" />

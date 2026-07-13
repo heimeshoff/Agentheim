@@ -32,6 +32,12 @@
 // tokens, the icon registry, the canvas specimens, the no-hardcoded-model-
 // name guard) is untouched — this task's scope is the keyboard CONTRACT,
 // not a big-bang regex migration (see the task's "What", point 3).
+//
+// design-system-me97j adds the `disabled`-narrowing tests below: `disabled`
+// now gates the PRIMARY region only, so the caret stays clickable, keyboard-
+// reachable, and at full opacity regardless of `disabled` — only `locked`
+// removes the caret. Proven here through the same mounted-DOM harness rather
+// than by reading source, per this widget's established precedent.
 
 import { mount, act, dispatchKeyDown } from './dom-harness.mjs';
 import { test } from 'node:test';
@@ -133,6 +139,99 @@ test('the open menu panel anchors ABOVE the button (bottom, not top) — design-
     assert.ok(panel, 'the menu panel must be open');
     assert.equal(panel.style.top, '', 'the panel must NOT anchor on top — that opens the menu downward, into the docked console\'s bottom edge');
     assert.equal(panel.style.bottom, 'calc(100% + 6px)', 'the panel must anchor on bottom, emitting the menu upward from the button');
+  } finally {
+    await act(async () => root.unmount());
+  }
+});
+
+test('disabled (design-system-me97j): the caret is clickable and the menu opens — a blank prompt must not block picking a model', async () => {
+  const { ModelSplitButton } = await import(
+    '../../.agentheim/contexts/design-system/styleguide/app/button.js'
+  );
+  const { root, container } = await mount(ModelSplitButton, {
+    label: 'Opus', options: OPTIONS, value: 'Opus', disabled: true, ariaLabel: 'Send',
+  });
+  try {
+    const caret = container.querySelector('button[aria-haspopup="menu"]');
+    assert.ok(caret, 'a disabled (but unlocked) split button must still render a caret trigger');
+    await act(async () => { caret.click(); });
+    assert.ok(container.querySelector('[role="menu"]'), 'clicking the caret must open the menu even when disabled');
+  } finally {
+    await act(async () => root.unmount());
+  }
+});
+
+test('disabled (design-system-me97j): the caret carries no disabled attribute, stays keyboard-reachable, and Enter/ArrowDown still selects', async () => {
+  const { ModelSplitButton } = await import(
+    '../../.agentheim/contexts/design-system/styleguide/app/button.js'
+  );
+  const selections = [];
+  const { root, container } = await mount(ModelSplitButton, {
+    label: 'Opus', options: OPTIONS, value: 'Opus', disabled: true, ariaLabel: 'Send',
+    onSelect: (opt) => selections.push(opt),
+  });
+  try {
+    const caret = container.querySelector('button[aria-haspopup="menu"]');
+    assert.equal(caret.disabled, false, 'the caret <button> must not carry the disabled property when only `disabled` (not `locked`) is set');
+    assert.equal(caret.hasAttribute('disabled'), false, 'the caret <button> must not carry the disabled attribute either');
+
+    await act(async () => { caret.click(); });
+    assert.equal(document.activeElement.getAttribute('role'), 'menuitemradio', 'opening via click must still move focus onto the highlighted row');
+
+    await dispatchKeyDown(document.activeElement, { key: 'ArrowDown' }); // -> Sonnet
+    await dispatchKeyDown(document.activeElement, { key: 'Enter' });
+    assert.deepEqual(selections, ['Sonnet'], 'Enter must still select the highlighted option while disabled');
+  } finally {
+    await act(async () => root.unmount());
+  }
+});
+
+test('disabled (design-system-me97j): the primary button is still genuinely disabled — attribute present, onClick never fires', async () => {
+  const { ModelSplitButton } = await import(
+    '../../.agentheim/contexts/design-system/styleguide/app/button.js'
+  );
+  let fired = false;
+  const { root, container } = await mount(ModelSplitButton, {
+    label: 'Opus', options: OPTIONS, value: 'Opus', disabled: true, ariaLabel: 'Send',
+    onClick: () => { fired = true; },
+  });
+  try {
+    const primary = container.querySelector('button[aria-label="Send"]');
+    assert.ok(primary, 'the primary <button> must render');
+    assert.equal(primary.disabled, true, 'the primary <button> must carry the real disabled property');
+    await act(async () => { primary.click(); });
+    assert.equal(fired, false, 'a disabled primary button must never fire onClick');
+  } finally {
+    await act(async () => root.unmount());
+  }
+});
+
+test('disabled (design-system-me97j): 0.55 opacity sits on the primary region only — the caret region renders at full opacity', async () => {
+  const { ModelSplitButton } = await import(
+    '../../.agentheim/contexts/design-system/styleguide/app/button.js'
+  );
+  const { root, container } = await mount(ModelSplitButton, {
+    label: 'Opus', options: OPTIONS, value: 'Opus', disabled: true, ariaLabel: 'Send',
+  });
+  try {
+    const primary = container.querySelector('button[aria-label="Send"]');
+    const caret = container.querySelector('button[aria-haspopup="menu"]');
+    assert.equal(primary.style.opacity, '0.55', 'the primary region must dim to 0.55 opacity when disabled');
+    assert.notEqual(caret.style.opacity, '0.55', 'the caret region must NOT dim — it stays fully interactive');
+  } finally {
+    await act(async () => root.unmount());
+  }
+});
+
+test('locked still removes the caret region entirely, regardless of disabled (existing behaviour must not regress)', async () => {
+  const { ModelSplitButton } = await import(
+    '../../.agentheim/contexts/design-system/styleguide/app/button.js'
+  );
+  const { root, container } = await mount(ModelSplitButton, {
+    label: 'Opus', options: OPTIONS, value: 'Opus', locked: true, disabled: true, ariaLabel: 'Send',
+  });
+  try {
+    assert.equal(container.querySelector('button[aria-haspopup="menu"]'), null, 'locked + disabled together must still render no caret at all');
   } finally {
     await act(async () => root.unmount());
   }

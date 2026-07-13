@@ -148,6 +148,36 @@ test('a Ctrl+M keydown NOT targeting the prompt field (dispatched elsewhere in t
   }
 });
 
+test('design-system-me97j: with an empty prompt, Enter is greyed and inert but the model menu still opens and a selection sticks', async () => {
+  globalThis.window.fetch = stubBridgeFetch(39126, 'test-token-4');
+  const { root, container } = await mountReadyBoardPromptBar();
+  try {
+    await moveOffQuickCapture(container); // Modeling — model NOT locked, unlike Quick Capture
+    const primary = primaryLaunchButton(container);
+    assert.equal(primary.textContent.trim(), 'Opus', 'Opus is the default model on mount');
+    assert.equal(primary.disabled, true, 'Enter must be genuinely disabled with a blank prompt');
+
+    const caret = container.querySelector('button[aria-haspopup="menu"]');
+    assert.ok(caret, 'the model caret must render (not locked on the Modeling tab)');
+    assert.equal(caret.disabled, false, 'the caret must NOT be disabled by a blank prompt — picking a model precedes typing');
+
+    await act(async () => { caret.click(); });
+    assert.ok(container.querySelector('[role="menu"]'), 'clicking the caret must open the model menu even with an empty prompt');
+
+    const sonnetRow = Array.from(container.querySelectorAll('[role="menuitemradio"]')).find(
+      (row) => row.textContent.trim() === 'Sonnet',
+    );
+    assert.ok(sonnetRow, 'Sonnet must be a selectable option');
+    await act(async () => { sonnetRow.click(); });
+
+    assert.equal(container.querySelector('[role="menu"]'), null, 'selecting a model must close the menu');
+    assert.equal(primaryLaunchButton(container).textContent.trim(), 'Sonnet', 'the selection must stick — the launch region now reads the newly-picked model');
+    assert.equal(primaryLaunchButton(container).disabled, true, 'Enter must remain disabled — the prompt is still blank');
+  } finally {
+    await act(async () => root.unmount());
+  }
+});
+
 test('Ctrl+M is a true no-op on a freshly-mounted board (Quick Capture pins the model to Haiku) — proving the setup above is actually necessary, not incidental', async () => {
   // Companion to the trap this file exists to avoid: WITHOUT moving off Quick
   // Capture, the model axis is locked regardless of the bridge, so a naive
