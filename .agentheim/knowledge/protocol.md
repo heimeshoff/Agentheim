@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 14:34 -- Modeling / Captured: design-system-k3f7q - ModelSplitButton's model menu opens upward and escapes the prompt console's clip
+
+**Type:** Modeling / Capture
+**BC:** design-system
+**Filed to:** todo
+**Summary:** The prompt console's model-select menu is unreadable — sheared off by the prompt segment. Diagnosis found **two stacked causes, neither individually sufficient**: `ModelSplitButton`'s panel is hard-anchored `top: calc(100% + 6px)` (so it opens *downward*, into the bottom edge of the viewport, since the console is bottom-docked per aw-bz3az), AND the console `<section>` carries an `overflow: hidden` (`board.js` ~1285) that clips every popover inside it — a clip that exists only to round the mode-tab row's end cells. The fix is one indivisible change across the ds/aw seam: anchor the menu on `bottom:` **unconditionally** (builder-decided at capture — no `menuPlacement` prop, no collision auto-flip; the split button's only home is the bottom-docked console, and Quick Capture pins the model via `locked`), and move the clip off the section onto the tab row that actually needs it. Captured as **ONE design-system task** rather than the usual ds→aw pair (the ds-009/ds-014/ds-020 ordering) because a split would ship two individually invisible, unverifiable halves — the `design-system-015` precedent already has a design-system task editing `dashboard/app/board.js` and rebuilding `dist/` when the change is indivisible. Filed straight to **todo**: diagnosis confirmed in source, placement decided, and the `infrastructure-d2n8s` DOM harness makes both halves mutation-provable rather than source-regex-asserted.
+
+---
+
 ## 2026-07-13 14:32 -- Modeling / Captured: agentic-workflow-vsg9d - Prompt field stays tall after a launch
 
 **Type:** Modeling / Capture

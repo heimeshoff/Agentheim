@@ -11,13 +11,14 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 34
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **design-system-k3f7q** — ModelSplitButton's model menu opens upward and escapes the prompt console's clip (bug) — `todo/design-system-k3f7q-model-menu-opens-upward-unclipped.md`
 <!-- todo-list:end -->
 
 ### Doing
