@@ -18,7 +18,7 @@ import { TreeGroup, TreeItem } from "./library.js";
 import { Collapsible } from "./collapsible.js";
 import { Menu, MenuItem, MenuDivider } from "./menu.js";
 import { SearchField } from "./search.js";
-import { Button, EnterButton } from "./button.js";
+import { Button, EnterButton, ModelSplitButton } from "./button.js";
 import { Modal } from "./modal.js";
 import { ConfirmDialog } from "./confirm-dialog.js";
 import { Segmented, ThemeToggle, LiveApp } from "./live.js";
@@ -682,6 +682,52 @@ function ButtonRow() {
       </div>
     </div>`;
 }
+// ModelSplitButton (design-system-r9dtm): the ochre EnterButton widened into
+// a labelled split button — a primary launch region (glyph + model label)
+// plus a caret that opens a menu of model options. Placeholder option names
+// only (the styleguide never learns Agentheim's real model list, ADR-0003).
+const MODEL_OPTIONS = ["Alpha", "Beta", "Gamma"];
+function ModelSplitButtonRow() {
+  const [model, setModel] = useState("Alpha");
+  return html`
+    <div style=${{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+      <div>
+        <${StateLabel}>Normal</${StateLabel}>
+        <${ModelSplitButton}
+          label=${model}
+          options=${MODEL_OPTIONS}
+          value=${model}
+          onSelect=${setModel}
+          onClick=${() => {}} />
+      </div>
+      <div>
+        <${StateLabel}>Locked (no caret)</${StateLabel}>
+        <${ModelSplitButton}
+          label=${model}
+          locked
+          onClick=${() => {}} />
+      </div>
+      <div>
+        <${StateLabel}>Disabled</${StateLabel}>
+        <${ModelSplitButton}
+          label=${model}
+          disabled
+          options=${MODEL_OPTIONS}
+          value=${model}
+          onClick=${() => {}} />
+      </div>
+      <div>
+        <${StateLabel}>Menu open</${StateLabel}>
+        <${ModelSplitButton}
+          label=${model}
+          options=${MODEL_OPTIONS}
+          value=${model}
+          onSelect=${setModel}
+          defaultOpen
+          onClick=${() => {}} />
+      </div>
+    </div>`;
+}
 function ConfirmDialogSpecimen() {
   const [open, setOpen] = useState(false);
   const [destructiveOpen, setDestructiveOpen] = useState(false);
@@ -722,10 +768,14 @@ function ConfirmDialogSpecimen() {
 function ModalSection() {
   return html`
     <${GuideSection} index="12" title="Modal &amp; confirm dialog"
-      desc="A centered, scrim-backed dialog — the Drawer's centered sibling. The Modal pins to the viewport (above the slide-over), dims the page behind it with the Drawer's exact backdrop, and reveals with a fade + slight scale-up that strips to a hard show under prefers-reduced-motion. Focus moves into the panel and stays trapped while open, returning to the trigger on close. The ConfirmDialog composes it with the new Button primitive — a neutral Cancel and a neutral-or-destructive Confirm, danger drawn from --obligation (never the reserved accent). The Enter button is a third, icon-only variant: a filled --accent-ochre square with the corner-down-left glyph, licensed by ADR-0048's primed-primary-action carve-out (it fires the prompt, so ochre is permitted).">
+      desc="A centered, scrim-backed dialog — the Drawer's centered sibling. The Modal pins to the viewport (above the slide-over), dims the page behind it with the Drawer's exact backdrop, and reveals with a fade + slight scale-up that strips to a hard show under prefers-reduced-motion. Focus moves into the panel and stays trapped while open, returning to the trigger on close. The ConfirmDialog composes it with the new Button primitive — a neutral Cancel and a neutral-or-destructive Confirm, danger drawn from --obligation (never the reserved accent). The Enter button is a third, icon-only variant: a filled --accent-ochre square with the corner-down-left glyph, licensed by ADR-0048's primed-primary-action carve-out (it fires the prompt, so ochre is permitted). ModelSplitButton widens that same Enter button into a labelled split button — one ochre surface, one hairline divider, no second neutral button — with a caret that opens a roving-tabindex menu of model options (arrow keys move, Enter selects, Escape closes and returns focus to the caret); locked removes the caret region entirely.">
       <div style=${{ marginBottom: 24 }}>
         <${SubHead} style=${{ marginBottom: 10 }}>Button — neutral, destructive &amp; Enter</${SubHead}>
         <${ButtonRow} />
+      </div>
+      <div style=${{ marginBottom: 24 }}>
+        <${SubHead} style=${{ marginBottom: 10 }}>ModelSplitButton — Enter widened into a labelled split button</${SubHead}>
+        <${ModelSplitButtonRow} />
       </div>
       <div style=${{ display: "flex", gap: 28, alignItems: "flex-start", flexWrap: "wrap" }}>
         <${ConfirmDialogSpecimen} />

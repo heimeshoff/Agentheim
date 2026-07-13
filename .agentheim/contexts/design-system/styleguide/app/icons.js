@@ -66,6 +66,11 @@ export const LUCIDE = {
   // (design-system-xr4sb, button.js EnterButton) — ADR-0048 surface 2 /
   // ADR-0051. Lucide `corner-down-left` geometry copied verbatim.
   "corner-down-left": '<path d="M20 4v7a4 4 0 0 1-4 4H4"/><path d="m9 10-5 5 5 5"/>',
+  // The caret glyph for the ModelSplitButton's menu-opening region
+  // (design-system-r9dtm, button.js). Lucide `chevron-down` geometry copied
+  // verbatim. Distinct from the existing `chevron-right` (used for expand
+  // affordances, not a dropdown caret).
+  "chevron-down": '<path d="m6 9 6 6 6-6"/>',
 };
 
 export function Icon({ name, size = 16, stroke = 1.5, color = "currentColor", style }) {

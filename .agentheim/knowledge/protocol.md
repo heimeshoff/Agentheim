@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 11:47 -- Task verified and completed: design-system-r9dtm - ModelSplitButton — the ochre Enter button widens into a labelled split button with a caret
+
+**Type:** Work / Task completion
+**Task:** design-system-r9dtm - ModelSplitButton — the ochre Enter button widens into a labelled split button with a caret
+**Summary:** ModelSplitButton — the ochre EnterButton widens into a labelled split button: a launch region plus a caret opening a roving-tabindex model menu, body-agnostic on the model list (it arrives as an options prop), with locked/disabled variants and full keyboard+ARIA support
+**Duration:** 22m
+**Verification:** PASS (iteration 2)
+**Files changed:** 6
+**Tests added:** 23
+**ADRs written:** none
+
+---
+
+## 2026-07-13 12:05 -- Verification failed: design-system-r9dtm - ModelSplitButton — the ochre Enter button widens into a labelled split button with a caret
+
+**Type:** Work / Verification failure
+**Task:** design-system-r9dtm - ModelSplitButton — the ochre Enter button widens into a labelled split button with a caret
+**Iteration:** 1 of 3
+**Reasons:** AC #2 violated — real Agentheim model names ("Opus" → "Fable") leaked into shipped styleguide source via a JSDoc comment in the new `button-state.js`, which the styleguide must never learn; the worker's own guard test for that criterion was scoped to `button.js`/`app.js` only (never `button-state.js`, the one file that leaks) and its regex omitted `Fable`, so a test named after the criterion could not fail on the criterion's violation; the real model list was also used as fixture data in the test file
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-07-13 11:37 -- Task verified and completed: infrastructure-h5wnq - The model rides the launch — POST /run carries a model, the bridge spawns claude --model, and the dashboard learns whether a bridge is even there
 
 **Type:** Work / Task completion

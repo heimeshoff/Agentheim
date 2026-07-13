@@ -914,6 +914,78 @@ the pattern in **section 11** (`SearchSpecimen` — type *design*, *adr*, or *zz
 > in sync with source; `dist/` folds `SearchField` in when `agentic-workflow-052`
 > actually renders it on the board.
 
+### ModelSplitButton — the ochre Enter button widens into a labelled split button (design-system-r9dtm, ADR-0048, ADR-0051)
+
+The prompt console's launch affordance widens from an icon-only square into a
+**split button**, `ModelSplitButton` (`app/button.js`, sibling to the unchanged
+`EnterButton`): a primary region (the `corner-down-left` glyph + the current
+model's label) that launches, and a caret region that opens a menu of model
+options. **One ochre surface, one hairline divider — not a second neutral
+button beside the ochre one**: ADR-0048 licenses ochre on the whole primed
+primary action (surface 2, restated by ADR-0051), and the caret is part of
+that same action, not a separate one of different weight.
+
+- **Two `<button>`s, one bordered ochre group.** The primary region fires
+  `onClick` (the launch) and never opens the menu; the caret fires
+  `onOpenMenu`/toggles the menu and never launches — a real click-region
+  split via two elements, not a click-position test on one button.
+- **`locked` removes the caret region and the menu entirely** (absent, not
+  merely disabled) — the Quick Capture pinned-model case. The primary region
+  still launches.
+- **`disabled`** dims both regions to `opacity: 0.55`, matching
+  `EnterButton`'s existing disabled treatment (ADR-0016 opacity-only
+  de-emphasis, never a fill swap).
+- **A roving-tabindex menu — a third, distinct focus model** from `Menu`
+  (ds-015, consumer-supplied focusable items) and `SearchField` (ds-016,
+  focus stays in the input via `aria-activedescendant`). Opening the caret
+  moves focus onto the highlighted `role="menuitemradio"` row (`aria-checked`
+  on the current option); ArrowUp/ArrowDown move the highlight (clamped, no
+  wraparound), Enter selects and closes, Escape closes **and returns focus to
+  the caret** (no keyboard trap, WCAG 2.1.2). The caret carries
+  `aria-haspopup="menu"` / `aria-expanded`; the panel is `role="menu"` on
+  `--surface-1` / `--hairline` / `--shadow-md`, matching every other popover
+  by convention.
+- **Body-agnostic model list.** The model list is never the styleguide's to
+  know — it arrives as `options` (an array of labels) via props; no
+  Agentheim-specific model name appears anywhere in the styleguide source or
+  canvas (canvas specimens use placeholder labels).
+- **No-reflow width.** The label region's `min-width` is sized in `ch` units
+  from the longest of `options` (`widestOptionLength`, `button-state.js`), so
+  switching the selected model never reflows the prompt-bar row — no fixed
+  pixel width.
+- **New glyph** — `chevron-down` joins `app/icons.js` (verbatim Lucide
+  geometry) for the caret.
+
+The keyboard/menu decisions are pure (`app/button-state.js`:
+`initialHighlightIndex`, `nextHighlightIndex`, `arrowDirection`,
+`isSelectKey`, `isDismissKey`, `widestOptionLength`), testable under
+`node --test` without the canvas import map — a dedicated module rather than
+composing `Menu`/`SearchField`'s state, mirroring `search.js`'s own
+"a third distinct focus model earns its own state module" precedent. The
+canvas documents four specimens in section 12 (`ModelSplitButtonRow`):
+normal, locked, disabled, and menu-open (via a `defaultOpen` prop mirroring
+`Menu`'s idiom).
+
+Per ADR-0003 the primitive lives here so `agentic-workflow-m2vkp` (the
+prompt-bar consumer, which `depends_on` this task) consumes it **unforked** —
+the board must not hand-roll its own ochre split button.
+
+> **Gate re-review reopened by ModelSplitButton (`design-system-r9dtm`).** A
+> new split-button primitive joins section 12 of the canvas (normal, locked,
+> disabled, and menu-open specimens) and the shared icon set gains
+> `chevron-down` — a visible styleguide change that reopens the design-system
+> gate per the `design-system-005` / `007` / `009` / `014` / `015` / `017` /
+> `018` / `r4k8m` / `c3p9k` / `xr4sb` / `tfhn6` precedent. Re-review against
+> the canvas (`styleguide/index.html` → section 12, "ModelSplitButton — Enter
+> widened into a labelled split button") **before** `agentic-workflow-m2vkp`
+> wires it into the live prompt bar and rebuilds `dist/`.
+
+> Live-board note: the served dashboard `dist/` is a derived artifact
+> (ADR-0003) and was **not** rebuilt here — this task ships the primitive with
+> **no shipped dashboard consumer yet** (the ds-018/ds-020/ds-021 live-board
+> pattern); `dist/` is rebuilt by the consuming task (`agentic-workflow-m2vkp`)
+> when the split button actually renders on the board's prompt bar.
+
 ### Command-deck retokenization (design-system-a31e0, ADR-0048, ADR-0049)
 
 See the identity-framing note above (under "The styleguide") for the full hex table.
@@ -988,4 +1060,5 @@ list the new token (role: "Ticket card") and to relabel `--radius-md`'s role as
 - Prompt-mode tab glyphs + solid-ochre icon Enter button: `styleguide/app/icons.js` (`diamond`, `circle-dot`, `corner-down-left` glyphs), `styleguide/app/button.js` (`EnterButton`), `--accent-ochre-fg` dedicated on-accent foreground pair in `styles/colors_and_type.css` (ADR-0048 surface-2 carve-out, ADR-0051); the styleguide primitives the dashboard prompt console will consume (`agentic-workflow-q7r3x`) (design-system-xr4sb)
 - `EnterButton` disabled state: `styleguide/app/button.js` (`disabled = false` prop, real `<button disabled>` attribute, ADR-0016 opacity-only de-emphasis — `--accent-ochre` fill / `--accent-ochre-fg` glyph stay untouched), second "Enter — disabled" specimen in `ButtonRow` (`styleguide/app/app.js`, section 12); the styleguide's first disabled state on any primitive, the shape a later `Button`/`IconButton` disabled state should follow; consumed by the dashboard's Plain prompt-bar mode (`agentic-workflow-m3vhq`) (design-system-tfhn6)
 - TicketCard condensed to 1b: `styleguide/app/kanban.js` (meta row gated on `cornerAction`, title `marginBottom: cornerAction ? 12 : 0`, title 12px/1.5), `styleguide/app/primitives.js` (`MonoId` 10px, only two render sites, both in `kanban.js`); `app/card.js` (`showEstimate`, design-system-006) retired entirely — no remaining caller (design-system-v08qq)
+- ModelSplitButton: `styleguide/app/button.js` (+ React-free `button-state.js`: `initialHighlightIndex`, `nextHighlightIndex`, `arrowDirection`, `isSelectKey`, `isDismissKey`, `widestOptionLength`), `chevron-down` glyph in `styleguide/app/icons.js`; the ochre `EnterButton` widened into a labelled split button with a roving-tabindex model menu, consumed unforked by the dashboard prompt bar (`agentic-workflow-m2vkp`) (design-system-r9dtm)
 - BC index: `INDEX.md`
