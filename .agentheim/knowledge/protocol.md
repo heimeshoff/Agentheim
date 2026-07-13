@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 10:24 -- Task verified and completed: agentic-workflow-spv0k - Launched/Copied flash paints on Quick Capture instead of the fired mode's tab
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-spv0k - Launched/Copied flash paints on Quick Capture instead of the fired mode's tab
+**Summary:** The Launched/Copied flash now anchors to the mode that actually fired (a firedMode index set in fire()), so launching a non-default mode no longer paints the flash on Quick Capture after the success-reset snaps the highlight back to index 0
+**Duration:** 14m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 5
+**ADRs written:** none
+
+---
+
 ## 2026-07-13 10:09 -- Task verified and completed: agentic-workflow-tkq7v - Prompt bar — Tab/Shift+Tab cycles the mode tabs; Ctrl+←/→ returns to native word-jump
 
 **Type:** Work / Task completion

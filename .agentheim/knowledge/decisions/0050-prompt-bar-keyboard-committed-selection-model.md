@@ -4,7 +4,7 @@ title: Prompt bar gains a keyboard-committed single-selection model, superseding
 scope: agentic-workflow
 status: proposed
 date: 2026-07-05
-related_tasks: [agentic-workflow-s7gev, agentic-workflow-bz3az, agentic-workflow-p8k4d, agentic-workflow-m3vhq, agentic-workflow-aqyqd, agentic-workflow-tkq7v]
+related_tasks: [agentic-workflow-s7gev, agentic-workflow-bz3az, agentic-workflow-p8k4d, agentic-workflow-m3vhq, agentic-workflow-aqyqd, agentic-workflow-tkq7v, agentic-workflow-spv0k]
 related_adrs: [ADR-0048]
 ---
 
@@ -369,6 +369,32 @@ classifier).
 **Paint untouched.** ADR-0048 / ADR-0051 (the ochre highlighted-tab and Enter-button
 carve-outs) and ADR-0016 are unaffected — this amendment, like every amendment in this
 chain, is interaction-only.
+## Amendment — 2026-07-13 (agentic-workflow-spv0k): the transient flash reads a `firedMode` index, not `highlightedMode` — a rendering-defect fix, not a new decision
+
+The Decision's "two orthogonal channels" clause said the transient flash "never reads or
+writes `highlightedMode`." The shipped code violated its own clause: `PromptModeTab`
+derived `flashed` as `highlighted && feedback !== "idle"` — i.e. it *did* read
+`highlightedMode` (via the `highlighted` prop) to decide which tab paints the flash.
+That derivation happened to look right only because nothing yet moved `highlightedMode`
+between fire and flash. Once a non-default mode fired, `onResult`'s success-reset
+(`setHighlightedMode(DEFAULT_PROMPT_MODE_INDEX)`) and the feedback update batched into
+the same React re-render, so the flash always painted on Quick Capture regardless of
+which mode actually launched — the reset of the committed-selection channel hijacked the
+render of the transient-feedback channel.
+
+**Fix, not a new decision:** `BoardPromptBar` now owns a second, independent piece of
+state, `firedMode` (`useState(null)`), set inside `fire()`'s own success branches
+(alongside `setFeedback("launched"|"copied")`) to the `idx` that actually launched —
+never touched by `onResult`. `PromptModeTab` takes `flashed` as a prop
+(`firedMode === index && feedback !== "idle"`) instead of deriving it from `highlighted`.
+The default/reset target is **unchanged** — `highlightedMode` still resets to Quick
+Capture (index 0) after every successful launch; only the flash's anchor no longer rides
+along with that reset. A decline (`agentic-workflow-aqyqd`'s `canFirePromptMode` guard)
+still runs before `setFiredMode` is ever reached, so a declined launch continues to leave
+every tab unflashed.
+
+This restores the Decision's own invariant rather than changing it — no new module
+export, no new invariant number, no `PROMPT_MODES`/`prompt-mode.js` shape change.
 
 ## Consequences
 
@@ -417,3 +443,11 @@ chain, is interaction-only.
   textarea (checked ahead of `promptBarKeyIntent`, not a fifth intent label) as the
   WCAG 2.1.2 keyboard-trap mitigation for hijacking Tab inside the field, and never
   clears the typed prompt. Enter/Shift+Enter/Ctrl+Enter/Ctrl+Space are untouched.
+- **(Amended by agentic-workflow-spv0k)** the transient flash is anchored to a new
+  `firedMode` index (set in `fire()`'s own success branches, never by `onResult`),
+  not to `highlightedMode` — `PromptModeTab` now takes `flashed` as a prop instead of
+  deriving it from `highlighted && feedback !== "idle"`. This *restores* the Decision's
+  "two orthogonal channels" clause, which the shipped code had violated: the
+  success-reset of the committed-selection channel was hijacking the render of the
+  transient-feedback channel, so every launch flashed on Quick Capture. The
+  success-reset itself is unchanged, and a declined launch still flashes on no tab.

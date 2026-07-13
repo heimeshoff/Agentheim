@@ -337,7 +337,12 @@ separate BC, but today the whole tool lives in this one.
     Defaults to Quick Capture (index 0) on mount and **resets to 0 after every successful
     launch**. **Two orthogonal channels:** the committed highlight changes only on a deliberate
     act — a tab click, or Tab/Shift+Tab — hover is a separate, transient, presentation-only channel
-    that never reads or writes it. **p8k4d reverses click-to-launch:** clicking a tab now **only**
+    that never reads or writes it. The **Launched/Copied flash is a third, independent channel**
+    (agentic-workflow-spv0k, ADR-0050's fifth amendment): `BoardPromptBar` tracks a `firedMode`
+    index, set inside `fire()`'s own success branches to the mode that actually launched, and
+    `PromptModeTab` paints its flash from `firedMode === index`, never from `highlighted` — so
+    the committed-highlight reset to Quick Capture after a successful launch can never relocate
+    the flash onto the wrong tab. **p8k4d reverses click-to-launch:** clicking a tab now **only**
     moves the committed highlight; it no longer fires anything. The ONE `fire(modeIndex)`
     function in `BoardPromptBar` is now reached only by bare Enter, Ctrl+Enter, or the Enter
     button — all three behaviourally identical: the same seeded command (reached via

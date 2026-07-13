@@ -628,9 +628,18 @@ const PROMPT_FIELD_MAX_PX = 168;
 // row's two ends via its `overflow: hidden`). A thin `--hairline` divider sits
 // on the trailing edge of every cell but the last, so the row reads as four
 // bordered cells rather than a gapped row of independent pill buttons.
-function PromptModeTab({ mode, highlighted, feedback, onClick, divider = true }) {
+//
+// `flashed` (agentic-workflow-spv0k) is passed in by the parent, keyed to the
+// mode index that actually FIRED — never derived here from `highlighted`. The
+// two used to be conflated (`flashed = highlighted && feedback !== "idle"`),
+// which broke the moment ADR-0050's success-reset moved `highlightedMode` back
+// to Quick Capture before this component's next render: the flash relocated to
+// tab 0 regardless of which mode launched. `feedback` still carries the
+// launched/copied word choice (a value shared across tabs), but WHICH tab
+// paints it is the parent's `firedMode === index` decision, not this
+// component's.
+function PromptModeTab({ mode, highlighted, flashed, feedback, onClick, divider = true }) {
   const [hover, setHover] = useState(false);
-  const flashed = highlighted && feedback !== "idle";
   const titleText = flashed ? (feedback === "launched" ? "Launched" : "Copied") : mode.label;
 
   const color = flashed ? "var(--st-done)" : highlighted ? "var(--accent-ochre)" : "var(--fg-2)";
@@ -995,9 +1004,17 @@ function BoardPromptBar({ skipPermissions = false }) {
   // never a per-tab boolean set. Defaults to Quick Capture (0) on mount.
   const [highlightedMode, setHighlightedMode] = useState(DEFAULT_PROMPT_MODE_INDEX);
   // The launched/copied flash, shared across every trigger (tab click, Enter
-  // button, Ctrl+Enter) — it always paints on the HIGHLIGHTED tab, since a
-  // keyboard-fired launch has no clicked element of its own to flash.
+  // button, Ctrl+Enter). `feedback` carries the word ("launched"/"copied"/
+  // "idle"); `firedMode` (agentic-workflow-spv0k) records WHICH tab it paints
+  // on — the mode index `fire()` actually launched, captured at fire time so
+  // ADR-0050's success-reset (`onResult`'s `setHighlightedMode(DEFAULT_...)`,
+  // batched into the SAME re-render as the feedback update) can snap the
+  // committed highlight back to Quick Capture without relocating the flash.
+  // The two channels ADR-0050 names — committed selection vs. transient
+  // feedback — are read out independently: `highlightedMode` for the ochre
+  // underline/fill, `firedMode` for the flash.
   const [feedback, setFeedback] = useState("idle");
+  const [firedMode, setFiredMode] = useState(null);
   // The single-line auto-grow (aw-038) holds a ref to the textarea so the field can
   // measure its own scrollHeight to grow/shrink to fit.
   const textareaRef = useRef(null);
@@ -1055,8 +1072,11 @@ function BoardPromptBar({ skipPermissions = false }) {
       : undefined;
     return launchOrCopy({ prompt: command, fetchImpl, copy: copyToClipboard, skipPermissions: skipPermissions === true }).then((res) => {
       onResult(res);
-      if (res.via === "bridge") setFeedback("launched");
-      else if (res.copied) setFeedback("copied");
+      // Record WHICH tab fired before (or alongside) onResult's highlight
+      // reset — the flash must anchor to `idx`, never to wherever
+      // `highlightedMode` lands after the reset (agentic-workflow-spv0k).
+      if (res.via === "bridge") { setFiredMode(idx); setFeedback("launched"); }
+      else if (res.copied) { setFiredMode(idx); setFeedback("copied"); }
       else return; // clipboard blocked too — stay silent.
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => setFeedback("idle"), 1100);
@@ -1153,6 +1173,7 @@ function BoardPromptBar({ skipPermissions = false }) {
         ${PROMPT_MODES.map((mode, index) => html`
           <${PromptModeTab} key=${mode.id} mode=${mode}
             highlighted=${highlightedMode === index}
+            flashed=${firedMode === index && feedback !== "idle"}
             feedback=${feedback}
             divider=${index < PROMPT_MODES.length - 1}
             onClick=${() => onTabClick(index)} />`)}

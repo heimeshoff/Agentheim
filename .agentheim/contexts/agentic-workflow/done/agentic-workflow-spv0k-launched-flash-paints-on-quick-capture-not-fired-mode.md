@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-spv0k
 title: Launched/Copied flash paints on Quick Capture instead of the fired mode's tab
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-13
-completed:
+completed: 2026-07-13
 depends_on: [design-system-001]
 blocks: []
 tags: [dashboard, prompt-bar, feedback, adr-0050]
@@ -75,3 +75,30 @@ flash.
   agentic-workflow-bz3az (mode tabs + keyboard model), agentic-workflow-q7r3x
   (Section 1b cell layout), agentic-workflow-aqyqd (decline-to-launch),
   agentic-workflow-s7gev (keyboard-committed selection decision).
+
+## Outcome
+
+Fixed by introducing a `firedMode` index (`BoardPromptBar`, `useState(null)`),
+set inside `fire()`'s own bridge/clipboard success branches to the `idx` that
+actually launched. `PromptModeTab` now takes `flashed` as a prop
+(`firedMode === index && feedback !== "idle"`) instead of deriving it from
+`highlighted && feedback !== "idle"` — the conflation that let ADR-0050's
+success-reset of `highlightedMode` (still preserved, unchanged) relocate the
+flash onto Quick Capture. A declined launch (`canFirePromptMode` false) still
+runs before any `setFiredMode` call, so no tab flashes on a decline.
+
+Recorded as ADR-0050's fourth amendment (2026-07-13,
+`.agentheim/knowledge/decisions/0050-prompt-bar-keyboard-committed-selection-model.md`)
+— a rendering-defect fix restoring the Decision's own "two orthogonal
+channels" clause, not a new decision.
+
+Files changed:
+- `dashboard/app/board.js` — `firedMode` state, `fire()` sets it in the
+  success branches, `PromptModeTab` takes `flashed` as a prop.
+- `dashboard/test/board-prompt-bar.test.mjs` — 6 new regression tests pinning
+  the fired-index anchor, the preserved success-reset, and the decline no-op.
+- `dashboard/dist/app.js` — rebuilt via `node build.mjs`.
+- `.agentheim/knowledge/decisions/0050-prompt-bar-keyboard-committed-selection-model.md`
+  — fourth amendment appended.
+- `.agentheim/contexts/agentic-workflow/README.md` — one clause added noting
+  the flash is a third, independent channel keyed to `firedMode`.

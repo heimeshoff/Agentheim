@@ -410,3 +410,74 @@ test('confetti honours prefers-reduced-motion and drives via canvas-confetti (un
   assert.match(confettiFn[0], /if\s*\(\s*reduce\s*\|\|\s*!fireKey\s*\)\s*return/, 'the fire path must early-return under reduce (and on a falsy fireKey)');
   assert.match(confettiFn[0], /fireConfetti\(/, 'BoardConfetti must drive the canvas-confetti call once unguarded');
 });
+
+// agentic-workflow-spv0k: the Launched/Copied flash must anchor to the mode
+// that actually FIRED, never to wherever the ADR-0050 success-reset leaves
+// `highlightedMode` (Quick Capture, index 0). Firing Modeling (or any
+// non-default mode) used to paint the flash on Quick Capture, because
+// PromptModeTab derived `flashed` from `highlighted && feedback !== "idle"`
+// and onResult's `setHighlightedMode(DEFAULT_PROMPT_MODE_INDEX)` batched into
+// the same re-render as the feedback update. The fix introduces a
+// `firedMode` index, captured at fire time, that the flash reads instead.
+
+test('BoardPromptBar owns a firedMode index, captured in fire() before/alongside the feedback update, separate from highlightedMode (agentic-workflow-spv0k)', () => {
+  const bar = barSrc();
+  assert.match(bar, /const \[firedMode, setFiredMode\] = useState\(null\);/,
+    'a firedMode state, distinct from highlightedMode, must exist');
+  const fireFn = bar.match(/const fire = useCallback\(\(modeIndex\) => \{[\s\S]*?\}, \[[^\]]*\]\);/);
+  assert.ok(fireFn, 'fire must exist');
+  assert.match(fireFn[0], /setFiredMode\(idx\)/, 'fire() must record the mode index that actually fired');
+  // firedMode must be set alongside (not after) the feedback word, in the SAME
+  // branch that sets "launched"/"copied" — never unconditionally before the
+  // bridge/clipboard outcome is known, so a fully-silent action cannot leak a
+  // stale firedMode into a later flash.
+  const launchedBranch = fireFn[0].match(/if\s*\(res\.via === "bridge"\)\s*\{[^}]*\}/);
+  assert.ok(launchedBranch, 'the bridge-success branch must exist');
+  assert.match(launchedBranch[0], /setFiredMode\(idx\)/, 'the bridge-success branch must set firedMode');
+  assert.match(launchedBranch[0], /setFeedback\("launched"\)/, 'the bridge-success branch must set feedback to "launched"');
+  const copiedBranch = fireFn[0].match(/else if\s*\(res\.copied\)\s*\{[^}]*\}/);
+  assert.ok(copiedBranch, 'the clipboard-success branch must exist');
+  assert.match(copiedBranch[0], /setFiredMode\(idx\)/, 'the clipboard-success branch must set firedMode');
+  assert.match(copiedBranch[0], /setFeedback\("copied"\)/, 'the clipboard-success branch must set feedback to "copied"');
+});
+
+test('each PromptModeTab receives `flashed` keyed to firedMode === index, not to highlightedMode === index (agentic-workflow-spv0k)', () => {
+  const bar = barSrc();
+  assert.match(bar, /flashed=\$\{firedMode === index && feedback !== "idle"\}/,
+    'the flash must be keyed to firedMode, the fired index — never to the highlighted index');
+});
+
+test('PromptModeTab takes `flashed` as a prop and no longer derives it from `highlighted && feedback !== "idle"` (agentic-workflow-spv0k)', () => {
+  const tab = tabSrc();
+  assert.match(tab, /function PromptModeTab\(\{[^}]*\bflashed\b[^}]*\}\)/, 'flashed must be a destructured prop');
+  assert.doesNotMatch(tab, /const flashed = highlighted && feedback !== "idle";/,
+    'PromptModeTab must not re-derive flashed from highlighted — that conflation is the bug this task fixes');
+});
+
+test('firing a non-default mode (index > 0) flashes on THAT tab, not on Quick Capture, even though the success-reset returns highlightedMode to 0 (agentic-workflow-spv0k)', () => {
+  const bar = barSrc();
+  const onResultFn = bar.match(/const onResult = useCallback\(\(res\) => \{[\s\S]*?\}, \[\]\);/)[0];
+  // The reset is still present (ADR-0050 invariant preserved)...
+  assert.match(onResultFn, /setHighlightedMode\(DEFAULT_PROMPT_MODE_INDEX\)/,
+    'the success-reset of the committed highlight to Quick Capture must be preserved');
+  // ...but onResult itself never touches firedMode — only fire()'s own
+  // success branches do, so the reset cannot relocate the flash.
+  assert.doesNotMatch(onResultFn, /setFiredMode/,
+    'onResult must not set firedMode — only fire() may, at the index that actually launched');
+  // Structurally: the tab's flash prop reads firedMode, and firedMode is only
+  // ever assigned the fired `idx`, never DEFAULT_PROMPT_MODE_INDEX — so firing
+  // Modeling (index > 0) paints the flash on Modeling's cell regardless of
+  // where the reset lands the highlight.
+  const fireFn = bar.match(/const fire = useCallback\(\(modeIndex\) => \{[\s\S]*?\}, \[[^\]]*\]\);/)[0];
+  assert.doesNotMatch(fireFn, /setFiredMode\(DEFAULT_PROMPT_MODE_INDEX\)/,
+    'fire() must key firedMode to the actual fired idx, never hardcode it back to Quick Capture');
+});
+
+test('a declined launch (blank prompt) sets neither firedMode nor feedback — no flash on any tab (agentic-workflow-aqyqd invariant, re-pinned for firedMode)', () => {
+  const bar = barSrc();
+  const fireFn = bar.match(/const fire = useCallback\(\(modeIndex\) => \{[\s\S]*?\}, \[[^\]]*\]\);/)[0];
+  const guardIdx = fireFn.indexOf('canFirePromptMode(');
+  const firedModeIdx = fireFn.indexOf('setFiredMode(');
+  assert.ok(guardIdx !== -1 && firedModeIdx !== -1 && guardIdx < firedModeIdx,
+    'the canFirePromptMode decline guard must run before any setFiredMode call, so a decline sets firedMode on no tab');
+});

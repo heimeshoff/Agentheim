@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 139
+- **Doing:** 0
+- **Done:** 140
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-spv0k** — Launched/Copied flash paints on Quick Capture instead of the fired mode's tab (bug) — `doing/agentic-workflow-spv0k-launched-flash-paints-on-quick-capture-not-fired-mode.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-spv0k** — Launched/Copied flash paints on Quick Capture instead of the fired mode's tab (bug) — `done/agentic-workflow-spv0k-launched-flash-paints-on-quick-capture-not-fired-mode.md`
 - **agentic-workflow-tkq7v** — Prompt bar — Tab/Shift+Tab cycles the mode tabs; Ctrl+←/→ returns to native word-jump (feature) — `done/agentic-workflow-tkq7v-prompt-bar-tab-cycles-modes-frees-ctrl-arrows.md`
 - **agentic-workflow-rwxms** — applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder (bug) — `done/agentic-workflow-rwxms-applytaskmove-missing-destination-dir.md`
 - **agentic-workflow-wq7fn** — Fail-closed pre-check misses the task-counts lines — bookkeeping must compute before the move (bug) — `done/agentic-workflow-wq7fn-precheck-misses-count-lines.md`
