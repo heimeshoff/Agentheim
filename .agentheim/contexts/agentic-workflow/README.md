@@ -322,7 +322,12 @@ separate BC, but today the whole tool lives in this one.
   defaults Modeling and Research previously wore — · `bot` (Plain, an existing glyph reused, no
   new icon). The **bottom row** carries a bright, bold ochre `❯` chevron, a genuinely
   **multi-line auto-growing** `<textarea>` (soft-wraps, grows to a max then scrolls — aw-038's
-  growth band, unchanged), and (agentic-workflow-m2vkp) the styleguide's **`ModelSplitButton`**
+  growth band, unchanged; the re-measure that grows/shrinks it is driven by a single
+  `useLayoutEffect` keyed on `prompt`, not a per-call-site `autoGrowField` invocation —
+  agentic-workflow-vsg9d moved it there after a direct call from `onResult` was found to measure
+  the textarea's DOM *before* React had committed the post-launch clear, leaving the field
+  visibly stuck at its grown height until the next keystroke), and (agentic-workflow-m2vkp) the
+  styleguide's **`ModelSplitButton`**
   primitive (`styleguide/app/button.js`, design-system-r9dtm, ADR-0003, consumed unforked) as the
   **one** launch affordance — the old bordered `↵` keyboard hint span is **deleted outright**, its
   "Enter launches · Shift+Enter for a new line" affordance folded into the split button's

@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-vsg9d
 title: Prompt field stays tall after a launch — the post-clear re-measure runs before React re-renders
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-13
-completed:
+completed: 2026-07-13
 depends_on: []
 blocks: []
 tags: [dashboard, prompt-bar, frontend, input, confetti]
@@ -107,3 +107,37 @@ live `getBoundingClientRect()`.
   before it, the field was cleared far less often.
 - Board-local control, consumed unforked per ADR-0003 — the styleguide still has no text-input
   primitive. No design-system child task expected.
+
+## Outcome
+Moved the auto-grow re-measure from a synchronous `autoGrowField` call inside `onResult`
+(which read `textareaRef.current`'s `scrollHeight` BEFORE React committed the `setPrompt("")`
+clear to the DOM, per option (a) in this task's "What" section) into a `useLayoutEffect` keyed
+on `prompt`, declared once near `textareaRef` (`dashboard/app/board.js`). The effect fires
+after every commit of `prompt` — typing, pasting, `onResult`'s clear — so shrink-to-fit is a
+property of the field's value rather than of one call site. `onPromptChange`'s own direct
+`autoGrowField` call is removed (the effect now covers it); `onResult`'s stale-DOM call is
+removed outright. The stale comment claiming the post-clear re-measure already worked is
+corrected in place, matching this task's Notes.
+
+Covered by a new DOM-level test, `dashboard/test/board-prompt-bar-shrink-dom.test.mjs`
+(3 tests), using `dashboard/test/dom-harness.mjs` to mount the real `BoardPromptBar`, type a
+long wrapping prompt via a real native-setter `input` event, launch via a real `Enter`
+keydown against a stubbed bridge, and assert the textarea's inline `style.height` collapses
+to `PROMPT_FIELD_MIN_PX` with no further keystroke. Since jsdom performs no real layout
+(`scrollHeight` is always 0), the test stubs `HTMLTextAreaElement.prototype.scrollHeight` as a
+getter proxied off the textarea's live `.value` length — reproducing the exact stale-DOM
+failure mode the bug lived in, rather than a value that can't distinguish fixed from broken.
+Mutation-tested by hand: temporarily reverting to the synchronous `onResult` call and removing
+the `useLayoutEffect` turns all three tests red (the field never grows/shrinks at all, since
+`onPromptChange`'s direct call was also removed as part of this fix); the mutation was reverted
+byte-exact (verified via `diff`) before finishing. Also covers: repeated launches don't
+accumulate height; a declined launch (no bridge, clipboard blocked) leaves both prompt text and
+grown height untouched; the aw-038 growth band and clamp are unchanged; m2vkp's mode/model
+survival is untouched (untouched code paths, not exercised by this fix).
+
+Full suite run from the worktree: 1339 tests, 1337 pass, 2 fail — both pre-existing
+`vscode-extension/test/bridge.test.mjs` EADDRINUSE failures against the live VS Code bridge on
+port 31425 (documented pre-dispatch baseline, not caused by this task).
+
+Key files: `dashboard/app/board.js` (the fix), `dashboard/test/board-prompt-bar-shrink-dom.test.mjs`
+(new), `.agentheim/contexts/agentic-workflow/README.md` (auto-grow re-measure mechanism note).

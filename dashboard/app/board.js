@@ -26,7 +26,7 @@
      raw event is never interpreted as a transition. As skills move
      files on disk, the board reflects it within a frame.
    ============================================================ */
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from "react";
 
 // Styleguide single source (ADR-0003): import the approved Kanban components
 // across the BC boundary. They are CONSUMED, never copied — the design-system
@@ -1061,6 +1061,24 @@ export function BoardPromptBar({ skipPermissions = false }) {
   const timer = useRef(null);
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
 
+  // Shrink-to-fit is a property of the FIELD'S VALUE, not of any one call site
+  // that happens to change it (agentic-workflow-vsg9d, fixing the sibling
+  // regression aw-038's Notes flagged). A direct `autoGrowField` call made
+  // from `onResult` right after `setPrompt("")` measures the STALE DOM: React
+  // batches the state update, so the textarea's real `value` (and therefore
+  // its `scrollHeight`) has not yet been committed when the synchronous
+  // measurement runs — the inline height stays pinned to the old, tall
+  // reading, and only the next keystroke (which re-measures a now-correct
+  // DOM) snaps it back. `useLayoutEffect` keyed on `prompt` re-measures AFTER
+  // React has committed the DOM for whatever value `prompt` now holds, but
+  // still before the browser paints — so ANY path that changes `prompt`
+  // (typing, pasting, or `onResult`'s clear) shrinks/grows the field
+  // correctly, without a per-call-site `autoGrowField` invocation to keep in
+  // sync by hand.
+  useLayoutEffect(() => {
+    autoGrowField(textareaRef.current, PROMPT_FIELD_MAX_PX);
+  }, [prompt]);
+
   // Probe the bridge once on mount (agentic-workflow-m2vkp). Never throws,
   // never rejects (probeBridge's own contract) — a probe that never resolves
   // simply leaves the button locked, which is the safe default.
@@ -1123,8 +1141,11 @@ export function BoardPromptBar({ skipPermissions = false }) {
   }, [modelLocked]);
 
   // Fire only on a successful launch / landed copy (aw-023). A fully-silent action
-  // (clipboard blocked too) leaves the textarea and plays no confetti. The field is
-  // re-measured after the clear so it shrinks back to one line (aw-038).
+  // (clipboard blocked too) leaves the textarea and plays no confetti. The clear
+  // (setPrompt("")) shrinks the field back to one line via the `useLayoutEffect`
+  // above, keyed on `prompt` — NOT via a direct `autoGrowField` call here, which
+  // used to measure the DOM before React had committed the clear (agentic-workflow-
+  // vsg9d fixed the resulting "field stays tall after a launch" bug).
   // agentic-workflow-m2vkp REVERSES ADR-0050's original default/reset rule: the
   // highlighted mode and the selected model both SURVIVE a successful launch —
   // only the textarea clears (confetti still fires). Firing three Modeling
@@ -1133,7 +1154,6 @@ export function BoardPromptBar({ skipPermissions = false }) {
     const succeeded = res && (res.via === "bridge" || res.copied === true);
     if (!succeeded) return;
     setPrompt("");
-    autoGrowField(textareaRef.current, PROMPT_FIELD_MAX_PX);
     setConfettiKey((k) => k + 1);
   }, []);
 
@@ -1185,11 +1205,12 @@ export function BoardPromptBar({ skipPermissions = false }) {
   }, []);
 
   // Store the textarea's value RAW (p8k4d retires aw-038's `sanitizePromptLine`
-  // collapse) so an authored Shift+Enter line break (or a multi-line paste) survives,
-  // then re-measure for auto-grow.
+  // collapse) so an authored Shift+Enter line break (or a multi-line paste) survives.
+  // Re-measure for auto-grow is no longer done here directly — the
+  // `useLayoutEffect` keyed on `prompt` (declared above, near `textareaRef`)
+  // re-measures after EVERY `prompt` change, this one included (agentic-workflow-vsg9d).
   const onPromptChange = useCallback((e) => {
     setPrompt(e.target.value);
-    autoGrowField(e.currentTarget, PROMPT_FIELD_MAX_PX);
   }, []);
 
   // The prompt field's ONE keydown classifier (ADR-0050 invariant 4, amended by

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 15:21 -- Task verified and completed: agentic-workflow-vsg9d - Prompt field stays tall after a launch — the post-clear re-measure runs before React re-renders
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-vsg9d - Prompt field stays tall after a launch — the post-clear re-measure runs before React re-renders
+**Summary:** Moved the prompt fields auto-grow re-measure into a useLayoutEffect keyed on prompt so it runs after React commits the post-launch clear, fixing the field staying visibly tall after a successful launch until the next keystroke
+**Duration:** 8m
+**Verification:** PASS (iteration 1)
+**Files changed:** 3
+**Tests added:** 3
+**ADRs written:** none
+
+---
+
 ## 2026-07-13 14:53 -- Batch started: [agentic-workflow-vsg9d, design-system-k3f7q]
 
 **Type:** Work / Batch start

@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 142
+- **Doing:** 0
+- **Done:** 143
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-vsg9d** — Prompt field stays tall after a launch — the post-clear re-measure runs before React re-renders (bug) — `doing/agentic-workflow-vsg9d-prompt-field-stays-tall-after-launch.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-vsg9d** — Prompt field stays tall after a launch — the post-clear re-measure runs before React re-renders (bug) — `done/agentic-workflow-vsg9d-prompt-field-stays-tall-after-launch.md`
 - **agentic-workflow-q7v3k** — Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker (feature) — `done/agentic-workflow-q7v3k-structural-dist-guard.md`
 - **agentic-workflow-m2vkp** — One launch control, not two — the ochre button names the session's model, Ctrl+M cycles it, and both selections survive a launch (feature) — `done/agentic-workflow-m2vkp-prompt-bar-model-selector.md`
 - **agentic-workflow-spv0k** — Launched/Copied flash paints on Quick Capture instead of the fired mode's tab (bug) — `done/agentic-workflow-spv0k-launched-flash-paints-on-quick-capture-not-fired-mode.md`
