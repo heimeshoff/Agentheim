@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-spv0k
 title: Launched/Copied flash paints on Quick Capture instead of the fired mode's tab
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-13

@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 09:55 -- Batch started: [agentic-workflow-rwxms, agentic-workflow-tkq7v, agentic-workflow-spv0k]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-rwxms - applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder, agentic-workflow-tkq7v - Prompt bar — Tab/Shift+Tab cycles the mode tabs; Ctrl+←/→ returns to native word-jump, agentic-workflow-spv0k - Launched/Copied flash paints on Quick Capture instead of the fired mode's tab
+**Parallel:** yes (3 workers — MAX_PARALLEL cap; 4 tasks were ready, infrastructure-c6fzb held to the next wave: it is a third editor of dashboard/app/board.js prompt-bar region alongside spv0k and tkq7v, and additionally needs a .vsix repackage + manual Windows verification, so it runs cleaner alone). Merge order planned rwxms (disjoint: lib/task-lifecycle.mjs) then tkq7v then spv0k — the latter two both edit board.js, board-prompt-bar.test.mjs and amend ADR-0050 in place, so they merge sequentially.
+
+---
+
 ## 2026-07-13 09:51 -- Modeling / Promoted: agentic-workflow-rwxms - applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder
 
 **Type:** Modeling / Promote

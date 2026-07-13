@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-tkq7v
 title: Prompt bar — Tab/Shift+Tab cycles the mode tabs; Ctrl+←/→ returns to native word-jump
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-13
