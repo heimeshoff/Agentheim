@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 11:21 -- Batch started: [design-system-r9dtm, infrastructure-h5wnq]
+
+**Type:** Work / Batch start
+**Tasks:** design-system-r9dtm - ModelSplitButton — the ochre Enter button widens into a labelled split button with a caret, infrastructure-h5wnq - The model rides the launch — POST /run carries a model, the bridge spawns claude --model, and the dashboard learns whether a bridge is even there
+**Parallel:** yes (2 workers — the full ready set; agentic-workflow-m2vkp is DAG-blocked on both and runs in wave 2, not held back by MAX_PARALLEL)
+
+---
+
 ## 2026-07-13 11:20 -- Modeling / Captured: agentic-workflow-m2vkp, infrastructure-h5wnq, design-system-r9dtm - Prompt-bar model selector
 
 **Type:** Modeling / Capture

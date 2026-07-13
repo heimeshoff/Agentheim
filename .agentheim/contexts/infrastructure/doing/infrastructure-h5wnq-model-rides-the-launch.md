@@ -1,7 +1,7 @@
 ---
 id: infrastructure-h5wnq
 title: The model rides the launch — POST /run carries a model, the bridge spawns claude --model, and the dashboard learns whether a bridge is even there
-status: todo
+status: doing
 type: feature
 context: infrastructure
 created: 2026-07-13

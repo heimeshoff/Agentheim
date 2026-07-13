@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 33
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **design-system-r9dtm** — ModelSplitButton — the ochre Enter button widens into a labelled split button with a caret (feature) — `todo/design-system-r9dtm-model-split-button.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **design-system-r9dtm** — ModelSplitButton — the ochre Enter button widens into a labelled split button with a caret (feature) — `doing/design-system-r9dtm-model-split-button.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

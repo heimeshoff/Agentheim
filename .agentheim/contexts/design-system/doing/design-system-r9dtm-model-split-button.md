@@ -1,7 +1,7 @@
 ---
 id: design-system-r9dtm
 title: ModelSplitButton — the ochre Enter button widens into a labelled split button with a caret
-status: todo
+status: doing
 type: feature
 context: design-system
 created: 2026-07-13
