@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 14:32 -- Modeling / Captured: agentic-workflow-vsg9d - Prompt field stays tall after a launch
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** After a successful launch the prompt field keeps its grown (2-3 line) height instead of collapsing back to one line — `onResult` calls `autoGrowField` synchronously right after `setPrompt("")`, so it measures the DOM *before* React re-renders with the empty value, pinning the inline height to the stale tall measurement. Root cause identified at capture (`board.js` ~L1132-1138); filed straight to `todo` as a well-understood bug. Notably a render-timing bug no source-regex guard could catch — flagged for the `dom-harness.mjs` (infrastructure-d2n8s) that landed hours earlier, with a mutation-check requirement.
+
+---
+
 ## 2026-07-13 14:05 -- Work session ended
 
 **Type:** Work / Session end
