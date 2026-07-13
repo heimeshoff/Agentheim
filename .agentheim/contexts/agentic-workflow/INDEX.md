@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 141
+- **Doing:** 0
+- **Done:** 142
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-q7v3k** — Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker (feature) — `doing/agentic-workflow-q7v3k-structural-dist-guard.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-q7v3k** — Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker (feature) — `done/agentic-workflow-q7v3k-structural-dist-guard.md`
 - **agentic-workflow-m2vkp** — One launch control, not two — the ochre button names the session's model, Ctrl+M cycles it, and both selections survive a launch (feature) — `done/agentic-workflow-m2vkp-prompt-bar-model-selector.md`
 - **agentic-workflow-spv0k** — Launched/Copied flash paints on Quick Capture instead of the fired mode's tab (bug) — `done/agentic-workflow-spv0k-launched-flash-paints-on-quick-capture-not-fired-mode.md`
 - **agentic-workflow-tkq7v** — Prompt bar — Tab/Shift+Tab cycles the mode tabs; Ctrl+←/→ returns to native word-jump (feature) — `done/agentic-workflow-tkq7v-prompt-bar-tab-cycles-modes-frees-ctrl-arrows.md`
@@ -93,6 +93,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0057** — Derived artifacts are unstageable from a worktree: a rebuilt `dashboard/dist/` has exactly ONE channel to reach `main` — the conductor's enumerated stage at the wip-checkpoint — so the guard filters the worker's **declared `FILE_LIST`** there (`lib/derived-artifact-guard.mjs` + a `checkpoint` verb on the lifecycle CLI), making the rebuild **inert** rather than forbidden. It operates on declared data, never the working tree, so it is structurally immune to the `autocrlf` phantom; and the conductor's own sanctioned rebuild-from-merged-source is out of reach **by construction** (checkpoint only ever runs against a worktree) with no actor/identity check anywhere. Records the corrected diagnosis: workers were never defying the contract — `dist-build.test.mjs`'s `before()` hook rebuilds `dist/` on every suite run, so the rebuild is mechanically unavoidable and no prompt could ever prevent it. Alternatives records the "dist matches a fresh build" suite test as **inverted and actively harmful** (that same hook would make it trivially, permanently green) and a git-hook guard as re-litigating ADR-0013 against the wrong actor (workers never run git). In the ADR-0026/0032/0038/0055 lineage; accepted — `../../knowledge/decisions/0057-derived-artifacts-unstageable-from-worktree-checkpoint-guard.md`
 - **ADR-0055** — `applyTaskMove` never mutates its source in place: the move step becomes `mkdirSync(dirname(toPath), {recursive:true})` → write the status-rewritten body to the **destination** → `unlinkSync` the source, so any failure before the unlink leaves the source structurally untouched (never written, mtime intact — no false `stale-precondition` on retry) and the only residual is a self-healing duplicate, not an undetectable status-matches-folder violation; a missing destination lifecycle folder is **backfilled, never rejected** (disk-absence of a `LIFECYCLE_FOLDERS` member only ever means "currently empty" under git's no-empty-dirs behavior — rejecting would fail-closed a legal move); the `{ok:false}` contract still means "nothing mutated," so a post-write unlink failure stays an uncaught throw (same severity as the old `renameSync` throw). Amends ADR-0054's "only disk mutation" phrasing (the mover is internally two mutations); reopens neither ADR-0007 nor ADR-0038. Pinned at refinement of [[agentic-workflow-rwxms]]; accepted — `../../knowledge/decisions/0055-applytaskmove-write-destination-then-unlink-source.md`
 - **ADR-0054** — Compute-then-write atomicity for the mechanized lifecycle verbs: `promoteTask`/`claimBatch`/`completeTask` compute their full new `INDEX.md` + `protocol.md` content *before* `applyTaskMove`, so a bookkeeping throw is fail-closed for free (`{ok:false, code:'bookkeeping-marker-mismatch'}`, nothing moved, nothing written) and the move is the last mutation before the two writes; the hand-maintained dry-run mirror `validateBookkeepingMarkers` and its three helpers are deleted, since the computation *is* the guard — killing the bug class of a mirror that must chase the mutation phase's throw sites. Folds in two `adjustIndexCount` hardenings: a below-zero decrement rejects (it silently wrote `-1`, which then poisoned every later verb in that BC) and its replace is scoped to the `task-counts` block. Supersedes `agentic-workflow-k5n8f`'s AC #5 dry-run-mirror *mechanism only*; amends neither ADR-0038's Rulings A/B nor ADR-0042; accepted — `../../knowledge/decisions/0054-compute-then-write-atomicity-supersedes-dry-run-mirror.md`
 - **ADR-0050** — Prompt bar gains a keyboard-committed single-selection model, superseding the old "no selection model" stance: a single 0-based `highlightedMode` index (not per-card booleans) with four invariants (exactly-one-highlighted; index always in range; total & deterministic wraparound via Ctrl+←/→; disjoint key-intent classification so bare-Enter and Ctrl+Enter never collide), Ctrl+Enter fires the highlighted mode identically to a click, clicking also moves the highlight, hover never does, default/reset target is Quick Capture (index 0); committed-selection and transient pointer feedback recorded as two orthogonal channels; scopes the color/accent treatment OUT to ADR-0048; names the future pure module `dashboard/app/prompt-mode.js` (mirroring `board-sort.js` / `search-state.js`) for the downstream build [[agentic-workflow-bz3az]] (proposed) — `../../knowledge/decisions/0050-prompt-bar-keyboard-committed-selection-model.md`

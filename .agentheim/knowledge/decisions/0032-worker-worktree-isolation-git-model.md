@@ -204,10 +204,16 @@ smooths merge ordering.
   lazily link `<worktree>/dashboard/node_modules` → `<main>/dashboard/node_modules` (Windows
   directory **junction** `mklink /J` — no admin needed, unlike a symlink; POSIX `ln -s`). Sharing
   one physical `node_modules` across concurrent worktree builds is safe because it is **read-only
-  during a build** — esbuild reads deps and writes each worktree's own tracked `dashboard/dist/`,
-  so there is no concurrent writer to the shared dir. The OS branch lives in one helper, mirroring
-  how `dashboard/launch.mjs` centralizes OS-divergent spawn logic (ADR-0002). Remove the junction
-  before `git worktree remove` (junction removal never touches the real `node_modules`).
+  during a build** — esbuild only ever *reads* deps out of it, never writes to it, so there is no
+  concurrent writer to the shared dir. **Amended (agentic-workflow-q7v3k, ADR-0057):** esbuild does
+  write a `dashboard/dist/` inside the worktree that triggers it — but that is a side effect of
+  running the test suite (`dashboard/test/dist-build.test.mjs`'s `before()` hook rebuilds it on
+  every run), not a worker deliberately building it, and not expected or licensed behaviour. That
+  worktree-local `dist/` is a transient, uncommitted build artifact: it is the *derived* artifact
+  ADR-0057's checkpoint guard structurally drops before it can be staged, so it never reaches the
+  squash-merge or `main`. The OS branch lives in one helper, mirroring how `dashboard/launch.mjs`
+  centralizes OS-divergent spawn logic (ADR-0002). Remove the junction before `git worktree remove`
+  (junction removal never touches the real `node_modules`).
 
 ## Consequences
 

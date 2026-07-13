@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 14:04 -- Task verified and completed: agentic-workflow-q7v3k - Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-q7v3k - Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker
+**Summary:** Made the no-rebuilt-dist contract structural by filtering the conductor's checkpoint git-add against the worker's declared FILE_LIST (lib/derived-artifact-guard.mjs + a checkpoint verb on the lifecycle CLI), and corrected the task's own diagnosis: workers were never defying the rule — dist-build.test.mjs's before() hook rebuilds dist/ on every test run, so the rebuild is mechanically unavoidable and only the staging seam can hold it
+**Duration:** 14m
+**Verification:** PASS (iteration 1)
+**Files changed:** 9
+**Tests added:** 13
+**ADRs written:** ADR-0057
+
+---
+
 ## 2026-07-13 13:50 -- Batch started: [agentic-workflow-q7v3k]
 
 **Type:** Work / Batch start

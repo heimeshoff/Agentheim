@@ -94,6 +94,22 @@ separate BC, but today the whole tool lives in this one.
   worktree remove`** — skipping it silently deletes the shared `node_modules`. Session-end
   reconciliation and recovery both walk `git worktree list --porcelain` alongside `git status
   --porcelain`. See ADR-0032, ADR-0037, ADR-0026, ADR-0007, ADR-0017, ADR-0028.
+- **Derived-artifact checkpoint guard (ADR-0057, agentic-workflow-q7v3k)** — workers never
+  stage or merge a rebuilt `dashboard/dist/` (it is derived, bundled output, ADR-0003; the
+  conductor rebuilds it from **merged** source at integration). Running the test suite
+  rebuilds `dashboard/dist/` inside a worker's worktree unavoidably
+  (`dashboard/test/dist-build.test.mjs`'s `before()` hook does this on every run) — this is
+  expected and harmless *in the worktree*, and no longer relies on any prompt-level
+  prohibition holding. Enforcement lives at the one seam a rebuilt artifact must cross to
+  reach `main`: the conductor's checkpoint stage, before the wip-commit. `lib/task-lifecycle-
+  cli.mjs`'s `checkpoint` verb (wrapping `lib/derived-artifact-guard.mjs`'s
+  `partitionCheckpointFiles`) filters the worker's `FILE_LIST` into `{changed, refused}` —
+  `refused` (today: any `dashboard/dist/` path, segment-boundary matched, plus anything
+  resolving outside the worktree) is silently dropped from `git add` and never fails the
+  task. The conductor's own sanctioned rebuild, on `main` at integration, never routes
+  through `checkpoint` at all — it isn't exempted by an actor check, it is a different code
+  path by construction, since `checkpoint` only ever runs against a worktree. See ADR-0057,
+  ADR-0003, ADR-0032, ADR-0038.
 - **Vision-conformance check (session-end, ADR-0040, agentic-workflow-v6d4n)** — a bounded
   advisory pass folded into `work`'s end-of-run reporting, closing the Why→What loop. It reads
   exactly two named `vision.md` sections ("What success looks like", "Non-goals") plus the
