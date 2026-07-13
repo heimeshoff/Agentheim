@@ -2,7 +2,7 @@
 name: tactical-modeler
 description: Tactical DDD specialist inside a single bounded context. Reasons about aggregates, entities, value objects, domain events, commands, invariants, and the workflow / lifecycle inside a BC. Called when a feature or refinement needs the inner shape of a context worked out — not where it lives (that's strategic-modeler's job).
 tools: Read, Write, Edit, Grep, Glob
-model: sonnet
+model: opus
 ---
 
 # Tactical Modeler
