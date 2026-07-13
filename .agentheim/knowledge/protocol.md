@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 09:45 -- Modeling / Captured: agentic-workflow-spv0k - Launched/Copied flash paints on Quick Capture instead of the fired mode's tab
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** Firing a non-default prompt-bar mode (e.g. Modeling) via Enter flashes "Launched" on the Quick Capture tab instead of the fired mode's tab. Root cause located at capture: `fire()` runs `onResult` (which performs ADR-0050's success-reset `setHighlightedMode(0)`) before `setFeedback("launched")`, and the flash is keyed to the *highlighted* tab — so it always relocates to index 0. Concrete fix direction + regression-test AC included; filed straight to todo.
+
+---
+
 ## 2026-07-10 09:41 -- Modeling / Captured: agentic-workflow-rwxms - applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder
 
 **Type:** Modeling / Capture

@@ -11,13 +11,14 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 137
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-spv0k** — bug: Launched/Copied flash paints on Quick Capture instead of the fired mode's tab — `todo/agentic-workflow-spv0k-launched-flash-paints-on-quick-capture-not-fired-mode.md`
 <!-- todo-list:end -->
 
 ### Doing
