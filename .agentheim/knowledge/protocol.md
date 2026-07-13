@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 16:43 -- Batch started: [agentic-workflow-n4qte]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-n4qte - Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it
+**Parallel:** no (1 worker — the entire ready set; nothing held back by MAX_PARALLEL). Sole ready task: its depends_on infrastructure-v8r3q landed in done/ last session.
+
+---
+
 ## 2026-07-13 16:41 -- Modeling / Promoted: agentic-workflow-n4qte - Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it
 
 **Type:** Modeling / Promote

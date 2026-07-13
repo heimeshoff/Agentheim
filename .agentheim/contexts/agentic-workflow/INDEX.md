@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 143
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-n4qte** — Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it (bug) — `todo/agentic-workflow-n4qte-prompt-bar-capability-skew-grey-out-and-banner.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-n4qte** — Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it (bug) — `doing/agentic-workflow-n4qte-prompt-bar-capability-skew-grey-out-and-banner.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
