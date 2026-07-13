@@ -5,6 +5,21 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 17:02 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 19m (batch start 16:43 → 17:02)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-n4qte: 1
+**Commits:** 3 (batch start, task integration, this entry)
+**Vision-conformance:** none — batch aligns with vision. `agentic-workflow-n4qte` is the vision's own "wrong work is caught by structure, not luck" criterion turned on the dashboard's own UI: it converts a *silent* failure (a stale-but-present bridge rendering a live, unlocked model selector while `infrastructure-v8r3q`'s wire guarantee quietly dropped the model) into a *visible* one — a locked selector that names no model, a hint naming the real remedy, and a banner for the launch paths that have no control to grey out. The mirrored source-scan guard on `KNOWN_CAPABILITIES` is the same criterion applied to the code itself: a fifth POST /run field added on one side and not the other now fails the suite rather than drifting silently. No non-goal is pulled toward — the banner's dismiss is session-local with no persistence (ADR-0017), all state stays under `.agentheim/` (non-goal 5), and the human stayed in the loop at the verification gate (non-goal 3).
+**Carry-over:** `inspiration/`: left behind (owner: builder's own WIP, untracked material predating this session and owned by no skill — same disposition the builder explicitly confirmed at the 2026-07-13 16:36 session end; unchanged since)
+
+---
+
 ## 2026-07-13 17:01 -- Task verified and completed: agentic-workflow-n4qte - Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it
 
 **Type:** Work / Task completion
