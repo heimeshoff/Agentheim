@@ -40,6 +40,22 @@ function resolveExecutable(command) {
   return command;
 }
 
+/**
+ * Recover the session name from the launch descriptor's `args` — the core
+ * always prepends `-n <name>` (ADR-0018, amended by infrastructure-c6fzb), so
+ * `createTerminal`'s own tab title (and the `/resume` picker entry the `-n`
+ * flag itself sets inside the spawned `claude` process) agree. `'Claude'`
+ * survives only as the last-resort fallback should `args` ever arrive without
+ * a `-n` pair — the core is contracted to always derive a name, so this is
+ * defensive, not a customary path.
+ */
+function nameFromArgs(args) {
+  if (!Array.isArray(args)) return null;
+  const i = args.indexOf('-n');
+  const candidate = i !== -1 ? args[i + 1] : undefined;
+  return typeof candidate === 'string' && candidate ? candidate : null;
+}
+
 /** Walk up from a start dir to the nearest `.agentheim/` holder (ADR-0002). */
 function discoverRoot(startDir) {
   let dir = path.resolve(startDir);
@@ -80,10 +96,14 @@ async function activate(context) {
   // verbatim; no character the builder typed can be re-parsed by a shell. The
   // optional `--dangerously-skip-permissions` flag arrives already in `args`
   // when (and only when) the launch armed it — we never hard-wire it here.
+  // The session name (ADR-0018, amended by infrastructure-c6fzb) is recovered
+  // from the `-n <name>` pair the core always prepends, so the terminal tab
+  // and the `/resume` picker entry (which `-n` itself names inside the
+  // spawned process) agree — 'Claude' is only the last-resort fallback.
   const launchClaude = ({ command, args }) => {
     vscode.window
       .createTerminal({
-        name: 'Claude',
+        name: nameFromArgs(args) || 'Claude',
         cwd: root,
         shellPath: resolveExecutable(command),
         shellArgs: args,

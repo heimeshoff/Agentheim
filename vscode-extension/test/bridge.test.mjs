@@ -19,6 +19,10 @@ const {
   bridgePath,
   TOKEN_HEADER,
   PREFERRED_PORTS,
+  resolveSessionName,
+  sanitizeName,
+  deriveNameFromPrompt,
+  NAME_MAX_LEN,
 } = require('../src/bridge.js');
 
 function makeProject() {
@@ -101,39 +105,43 @@ test('falls back along 31425→31426→31427 when the preferred port is taken', 
   }
 });
 
-test('POST /run with a valid token emits { command:"claude", args:[prompt] } and returns 2xx', async () => {
+test('POST /run with a valid token emits { command:"claude", args:["-n", name, prompt] } and returns 2xx (infrastructure-c6fzb: every launch now carries a derived/explicit -n name)', async () => {
   const base = makeProject();
   const launched = [];
   const bridge = await startBridge({ root: base, launchClaude: (d) => launched.push(d), ...EPHEMERAL });
   try {
+    const prompt = 'do the thing';
+    const expectedName = resolveSessionName({ name: undefined, prompt });
     const res = await request(bridge.port, {
       method: 'POST',
       pathName: '/run',
       headers: { [TOKEN_HEADER]: bridge.token },
-      body: JSON.stringify({ prompt: 'do the thing' }),
+      body: JSON.stringify({ prompt }),
     });
     assert.ok(res.status >= 200 && res.status < 300, `expected 2xx, got ${res.status}`);
-    assert.deepEqual(launched, [{ command: 'claude', args: ['do the thing'] }]);
+    assert.deepEqual(launched, [{ command: 'claude', args: ['-n', expectedName, prompt] }]);
     assert.ok(!launched[0].args.includes('--dangerously-skip-permissions'), 'no permission-bypass flag');
   } finally {
     cleanup(base, bridge);
   }
 });
 
-test('POST /run { skipPermissions: true } prepends --dangerously-skip-permissions to args', async () => {
+test('POST /run { skipPermissions: true } prepends --dangerously-skip-permissions to args, AFTER the -n name pair (infrastructure-c6fzb)', async () => {
   const base = makeProject();
   const launched = [];
   const bridge = await startBridge({ root: base, launchClaude: (d) => launched.push(d), ...EPHEMERAL });
   try {
+    const prompt = 'do the thing';
+    const expectedName = resolveSessionName({ name: undefined, prompt });
     const res = await request(bridge.port, {
       method: 'POST',
       pathName: '/run',
       headers: { [TOKEN_HEADER]: bridge.token },
-      body: JSON.stringify({ prompt: 'do the thing', skipPermissions: true }),
+      body: JSON.stringify({ prompt, skipPermissions: true }),
     });
     assert.ok(res.status >= 200 && res.status < 300, `expected 2xx, got ${res.status}`);
     assert.deepEqual(launched, [
-      { command: 'claude', args: ['--dangerously-skip-permissions', 'do the thing'] },
+      { command: 'claude', args: ['-n', expectedName, '--dangerously-skip-permissions', prompt] },
     ]);
   } finally {
     cleanup(base, bridge);
@@ -162,9 +170,10 @@ test('only literal true activates bypass — false/"true"/null/absent all yield 
         body: JSON.stringify(payload),
       });
       assert.ok(res.status >= 200 && res.status < 300, `expected 2xx, got ${res.status}`);
+      const expectedName = resolveSessionName({ name: undefined, prompt: payload.prompt });
       assert.deepEqual(
         launched,
-        [{ command: 'claude', args: [payload.prompt] }],
+        [{ command: 'claude', args: ['-n', expectedName, payload.prompt] }],
         `skipPermissions=${JSON.stringify(payload.skipPermissions)} must not enable bypass`
       );
       assert.ok(
@@ -177,21 +186,24 @@ test('only literal true activates bypass — false/"true"/null/absent all yield 
   }
 });
 
-test('regression guard (infra-020): no skipPermissions → args is exactly [prompt], no flag element', async () => {
+test('regression guard (infra-020, amended by infrastructure-c6fzb): no skipPermissions → args is exactly ["-n", name, prompt], no flag element', async () => {
   const base = makeProject();
   const launched = [];
   const bridge = await startBridge({ root: base, launchClaude: (d) => launched.push(d), ...EPHEMERAL });
   try {
+    const prompt = 'pre-amendment';
+    const expectedName = resolveSessionName({ name: undefined, prompt });
     const res = await request(bridge.port, {
       method: 'POST',
       pathName: '/run',
       headers: { [TOKEN_HEADER]: bridge.token },
-      body: JSON.stringify({ prompt: 'pre-amendment' }),
+      body: JSON.stringify({ prompt }),
     });
     assert.ok(res.status >= 200 && res.status < 300, `expected 2xx, got ${res.status}`);
     assert.equal(launched.length, 1);
-    assert.deepEqual(launched[0], { command: 'claude', args: ['pre-amendment'] });
-    assert.equal(launched[0].args.length, 1, 'exactly one argv element, no flag');
+    assert.deepEqual(launched[0], { command: 'claude', args: ['-n', expectedName, prompt] });
+    assert.equal(launched[0].args.length, 3, 'the -n/name pair plus exactly one prompt element, no flag');
+    assert.ok(!launched[0].args.includes('--dangerously-skip-permissions'), 'no permission-bypass flag');
   } finally {
     cleanup(base, bridge);
   }
@@ -206,6 +218,7 @@ test('metacharacter survival (infra-020 guard): shell metachars reach args[0] ve
   const bridge = await startBridge({ root: base, launchClaude: (d) => launched.push(d), ...EPHEMERAL });
   try {
     const prompt = `say "hi" & echo $x \`whoami\` $(id) 'single' | tail; rm`;
+    const expectedName = resolveSessionName({ name: undefined, prompt });
     const res = await request(bridge.port, {
       method: 'POST',
       pathName: '/run',
@@ -214,10 +227,10 @@ test('metacharacter survival (infra-020 guard): shell metachars reach args[0] ve
     });
     assert.ok(res.status >= 200 && res.status < 300, `expected 2xx, got ${res.status}`);
     assert.equal(launched.length, 1);
-    assert.deepEqual(launched[0], { command: 'claude', args: [prompt] });
+    assert.deepEqual(launched[0], { command: 'claude', args: ['-n', expectedName, prompt] });
     // The whole metacharacter string is ONE element — never split on the shell ops.
-    assert.equal(launched[0].args.length, 1, 'prompt stays a single argv element');
-    assert.equal(launched[0].args[0], prompt, 'every typed character survives verbatim');
+    assert.equal(launched[0].args.length, 3, '-n + name + the prompt as a single argv element');
+    assert.equal(launched[0].args[2], prompt, 'every typed character survives verbatim');
   } finally {
     cleanup(base, bridge);
   }
@@ -237,6 +250,7 @@ test('typographic-quote survival (infrastructure-q8m4t): German Gänsefüsschen/
     const prompts = ['„Titel"', '»Titel«', '"x"'];
     for (const prompt of prompts) {
       launched.length = 0;
+      const expectedName = resolveSessionName({ name: undefined, prompt });
       const res = await request(bridge.port, {
         method: 'POST',
         pathName: '/run',
@@ -245,8 +259,8 @@ test('typographic-quote survival (infrastructure-q8m4t): German Gänsefüsschen/
       });
       assert.ok(res.status >= 200 && res.status < 300, `expected 2xx for ${prompt}, got ${res.status}`);
       assert.equal(launched.length, 1);
-      assert.deepEqual(launched[0], { command: 'claude', args: [prompt] });
-      assert.equal(launched[0].args[0], prompt, `"${prompt}" must survive byte-for-byte`);
+      assert.deepEqual(launched[0], { command: 'claude', args: ['-n', expectedName, prompt] });
+      assert.equal(launched[0].args[2], prompt, `"${prompt}" must survive byte-for-byte`);
     }
   } finally {
     cleanup(base, bridge);
@@ -259,6 +273,7 @@ test('metacharacter survival under skipPermissions: flag prepended, prompt still
   const bridge = await startBridge({ root: base, launchClaude: (d) => launched.push(d), ...EPHEMERAL });
   try {
     const prompt = `say "hi" & $(id)`;
+    const expectedName = resolveSessionName({ name: undefined, prompt });
     const res = await request(bridge.port, {
       method: 'POST',
       pathName: '/run',
@@ -267,7 +282,125 @@ test('metacharacter survival under skipPermissions: flag prepended, prompt still
     });
     assert.ok(res.status >= 200 && res.status < 300, `expected 2xx, got ${res.status}`);
     assert.deepEqual(launched, [
-      { command: 'claude', args: ['--dangerously-skip-permissions', prompt] },
+      { command: 'claude', args: ['-n', expectedName, '--dangerously-skip-permissions', prompt] },
+    ]);
+  } finally {
+    cleanup(base, bridge);
+  }
+});
+
+// ---- session naming (infrastructure-c6fzb): -n <name> on every launch ------
+//
+// Every dashboard-launched session used to show as "Claude" in VS Code because
+// the extension hard-coded createTerminal({ name: 'Claude' }). The installed
+// CLI ships `-n, --name <name>` (verified 2.1.207), so the bridge now names the
+// session AT LAUNCH: an optional `name` field on POST /run, sanitized; when
+// absent or malformed the core derives a fallback from the prompt. The result
+// rides the launch descriptor as its own raw argv pair, `-n <name>`, ahead of
+// everything else — exactly the pattern the `skipPermissions` flag already
+// uses (infrastructure-016), so no shell ever parses it (infra-020/q8m4t).
+
+test('sanitizeName trims, strips control characters/newlines, and caps length', () => {
+  assert.equal(sanitizeName('  hello  '), 'hello');
+  assert.equal(sanitizeName('line one\nline two\ttabbed'), 'line oneline twotabbed');
+  assert.equal(sanitizeName('bell\x07escape\x1Bnull\x00end'), 'bellescapenullend');
+  const long = 'x'.repeat(NAME_MAX_LEN + 40);
+  assert.equal(sanitizeName(long), 'x'.repeat(NAME_MAX_LEN));
+  assert.equal(sanitizeName(''), '', 'an empty string sanitizes to empty (caller falls back)');
+  assert.equal(sanitizeName('   '), '', 'a whitespace-only string sanitizes to empty');
+  assert.equal(sanitizeName(undefined), '', 'a non-string input sanitizes to empty, never throws');
+  assert.equal(sanitizeName(null), '');
+  assert.equal(sanitizeName(42), '');
+});
+
+test('deriveNameFromPrompt strips a leading /agentheim:<skill> prefix to "<skill>: <rest>" (fallback derivation)', () => {
+  assert.equal(deriveNameFromPrompt('/agentheim:modeling dark mode toggle'), 'modeling: dark mode toggle');
+  assert.equal(deriveNameFromPrompt('/agentheim:quick-capture   idea here'), 'quick-capture: idea here');
+  // A bare skill invocation with no trailing text degrades to the skill name alone.
+  assert.equal(deriveNameFromPrompt('/agentheim:work'), 'work');
+});
+
+test('deriveNameFromPrompt falls back to the prompt text itself when there is no /agentheim: prefix (fallback derivation)', () => {
+  assert.equal(deriveNameFromPrompt('do the thing'), 'do the thing');
+  assert.equal(deriveNameFromPrompt('/not-agentheim:modeling x'), '/not-agentheim:modeling x');
+});
+
+test('resolveSessionName prefers a sanitized explicit name over the prompt-derived fallback', () => {
+  assert.equal(
+    resolveSessionName({ name: 'My Session', prompt: '/agentheim:modeling do the thing' }),
+    'My Session',
+  );
+});
+
+test('resolveSessionName derives a fallback when the explicit name is absent, empty, whitespace-only, or non-string (malformed name -> sanitized/derived)', () => {
+  const prompt = '/agentheim:research dig deeper';
+  const expected = 'research: dig deeper';
+  assert.equal(resolveSessionName({ name: undefined, prompt }), expected);
+  assert.equal(resolveSessionName({ name: '', prompt }), expected);
+  assert.equal(resolveSessionName({ name: '   ', prompt }), expected);
+  assert.equal(resolveSessionName({ name: 123, prompt }), expected);
+  assert.equal(resolveSessionName({ name: null, prompt }), expected);
+});
+
+test('POST /run { name } uses the sanitized explicit name in the -n argv pair, ahead of the prompt', async () => {
+  const base = makeProject();
+  const launched = [];
+  const bridge = await startBridge({ root: base, launchClaude: (d) => launched.push(d), ...EPHEMERAL });
+  try {
+    const res = await request(bridge.port, {
+      method: 'POST',
+      pathName: '/run',
+      headers: { [TOKEN_HEADER]: bridge.token },
+      body: JSON.stringify({ prompt: '/agentheim:modeling do the thing', name: '  Custom Name  ' }),
+    });
+    assert.ok(res.status >= 200 && res.status < 300, `expected 2xx, got ${res.status}`);
+    assert.deepEqual(launched, [
+      { command: 'claude', args: ['-n', 'Custom Name', '/agentheim:modeling do the thing'] },
+    ]);
+  } finally {
+    cleanup(base, bridge);
+  }
+});
+
+test('POST /run with a malformed name (newlines/control chars, over-length) sanitizes it end-to-end rather than rejecting the request', async () => {
+  const base = makeProject();
+  const launched = [];
+  const bridge = await startBridge({ root: base, launchClaude: (d) => launched.push(d), ...EPHEMERAL });
+  try {
+    const messyName = '  Line One\nLine Two\x07' + 'z'.repeat(80);
+    const prompt = 'plain prompt';
+    const res = await request(bridge.port, {
+      method: 'POST',
+      pathName: '/run',
+      headers: { [TOKEN_HEADER]: bridge.token },
+      body: JSON.stringify({ prompt, name: messyName }),
+    });
+    assert.ok(res.status >= 200 && res.status < 300, `expected 2xx, got ${res.status}`);
+    assert.equal(launched.length, 1);
+    const sentName = launched[0].args[1];
+    assert.equal(sentName, sanitizeName(messyName));
+    assert.ok(!/[\x00-\x1F\x7F]/.test(sentName), 'no control character/newline survives sanitization');
+    assert.ok(sentName.length <= NAME_MAX_LEN, 'the sanitized name is capped');
+  } finally {
+    cleanup(base, bridge);
+  }
+});
+
+test('descriptor ordering: -n <name> precedes --dangerously-skip-permissions when both an explicit name and skipPermissions are armed', async () => {
+  const base = makeProject();
+  const launched = [];
+  const bridge = await startBridge({ root: base, launchClaude: (d) => launched.push(d), ...EPHEMERAL });
+  try {
+    const prompt = 'ship it';
+    const res = await request(bridge.port, {
+      method: 'POST',
+      pathName: '/run',
+      headers: { [TOKEN_HEADER]: bridge.token },
+      body: JSON.stringify({ prompt, name: 'Armed Launch', skipPermissions: true }),
+    });
+    assert.ok(res.status >= 200 && res.status < 300, `expected 2xx, got ${res.status}`);
+    assert.deepEqual(launched, [
+      { command: 'claude', args: ['-n', 'Armed Launch', '--dangerously-skip-permissions', prompt] },
     ]);
   } finally {
     cleanup(base, bridge);

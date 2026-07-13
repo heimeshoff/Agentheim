@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 10:42 -- Task verified and completed: infrastructure-c6fzb - Bridge-launched sessions carry a derived name — createTerminal({name}) + claude -n
+
+**Type:** Work / Task completion
+**Task:** infrastructure-c6fzb - Bridge-launched sessions carry a derived name — createTerminal({name}) + claude -n
+**Summary:** Bridge-launched sessions now carry a derived or explicit display name via claude -n: POST /run gains an optional sanitized name (prompt-derived fallback), extension.js passes it to createTerminal({name}), and the dashboard prompt bar sends a mode-derived name for every mode
+**Duration:** 14m
+**Verification:** PASS (iteration 1)
+**Files changed:** 13
+**Tests added:** 17
+**ADRs written:** none
+
+---
+
 ## 2026-07-13 10:25 -- Batch started: [infrastructure-c6fzb]
 
 **Type:** Work / Batch start

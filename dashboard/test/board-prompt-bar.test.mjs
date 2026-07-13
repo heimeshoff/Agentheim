@@ -313,6 +313,21 @@ test('skipPermissions is threaded from BoardPromptBar into the shared fire() lau
   assert.match(bar, /skipPermissions:\s*skipPermissions\s*===\s*true/, 'fire() must thread the armed skipPermissions flag into launchOrCopy');
 });
 
+// infrastructure-c6fzb: every prompt-bar launch now carries a mode-derived
+// session `name`, so the terminal tab / `/resume` picker entry stop reading
+// "Claude" for dashboard-launched sessions.
+test('fire() derives a session name via nameForPromptMode and threads it into launchOrCopy (infrastructure-c6fzb)', () => {
+  assert.match(
+    boardSrc,
+    /import\s*\{[^}]*nameForPromptMode[^}]*\}\s*from\s*"\.\/prompt-mode\.js"/,
+    'board.js must import nameForPromptMode from prompt-mode.js',
+  );
+  const bar = barSrc();
+  const fireFn = bar.match(/const fire = useCallback\(\(modeIndex\) => \{[\s\S]*?\}, \[[^\]]*\]\);/)[0];
+  assert.match(fireFn, /const name = nameForPromptMode\(idx,\s*prompt\)/, 'fire() must derive the name from the fired mode + live prompt');
+  assert.match(fireFn, /launchOrCopy\(\{[^}]*name[^}]*\}\)/, 'fire() must pass the derived name into launchOrCopy');
+});
+
 test('DashboardBoard threads skipPermissions into the docked BoardPromptBar', () => {
   assert.match(
     boardSrc,

@@ -118,16 +118,19 @@ async function probeHealth(fetchImpl, { port, token }, timeoutMs) {
  * today and matches the contract's strict-`true` activation (amended ADR-0018;
  * honoured by the bridge in infrastructure-016, which prepends
  * `--dangerously-skip-permissions` as its own raw argv element before the
- * prompt, only on strict-`true`; no shell wrap, per infrastructure-020).
+ * prompt, only on strict-`true`; no shell wrap, per infrastructure-020), and
+ * `name` ONLY when a real (non-blank) string was supplied — omitted otherwise
+ * so the bridge falls back to its own prompt-derived name (infrastructure-c6fzb).
  * The custom header makes this a CORS-preflighted request — the extension answers
  * the preflight (ADR-0018); a CORS rejection here just throws and we fall back.
  * @returns {Promise<boolean>} Never throws.
  */
-async function runOnBridge(fetchImpl, { port, token, prompt, skipPermissions }) {
+async function runOnBridge(fetchImpl, { port, token, prompt, skipPermissions, name }) {
   try {
     // Strict-`true` only: a truthy-but-not-true value must never arm the bypass,
     // and OFF must OMIT the field rather than serialize `false`.
     const body = skipPermissions === true ? { prompt, skipPermissions: true } : { prompt };
+    if (typeof name === 'string' && name.trim()) body.name = name;
     const res = await fetchImpl(`http://127.0.0.1:${port}/run`, {
       method: "POST",
       headers: {
@@ -168,17 +171,24 @@ async function runOnBridge(fetchImpl, { port, token, prompt, skipPermissions }) 
  *   fallback can NEVER carry the bypass (it copies a slash command to paste into a
  *   RUNNING session; `--dangerously-skip-permissions` is startup-only), so the
  *   bridge-present/absent asymmetry is accepted (amended ADR-0018), not a defect.
+ * @param {string} [args.name] — a display name for the launched session
+ *   (infrastructure-c6fzb). When a real (non-blank) string is supplied, the
+ *   POST /run body carries `name` and the bridge rides it into the launch
+ *   descriptor as `-n <name>`, so the terminal tab / `/resume` picker entry
+ *   stop reading "Claude". Absent/blank OMITS the field (the bridge then
+ *   derives its own fallback name from the prompt). Never sent to the
+ *   clipboard fallback — there is no launch to name.
  * @returns {Promise<{via:'bridge'}|{via:'clipboard', copied:boolean}>} which path
  *   handled it; for the clipboard path, whether the copy itself landed.
  */
-export async function launchOrCopy({ prompt, fetchImpl, copy, healthTimeoutMs = DEFAULT_HEALTH_TIMEOUT_MS, skipPermissions }) {
+export async function launchOrCopy({ prompt, fetchImpl, copy, healthTimeoutMs = DEFAULT_HEALTH_TIMEOUT_MS, skipPermissions, name }) {
   // Try the bridge only when we actually have a fetch to reach it with.
   if (typeof fetchImpl === "function") {
     const bridge = await discoverBridge(fetchImpl);
     if (bridge) {
       const live = await probeHealth(fetchImpl, bridge, healthTimeoutMs);
       if (live) {
-        const launched = await runOnBridge(fetchImpl, { ...bridge, prompt, skipPermissions });
+        const launched = await runOnBridge(fetchImpl, { ...bridge, prompt, skipPermissions, name });
         if (launched) return { via: "bridge" };
       }
     }

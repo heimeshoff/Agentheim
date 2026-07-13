@@ -186,7 +186,16 @@ function makeHandler({ token, launchClaude }) {
       // no quoting, no escaping (ADR-0018, amended 2026-06-16). The OS passes it
       // to the spawned `claude` verbatim, so no shell can corrupt it.
       const skip = parsed?.skipPermissions === true;
-      const args = skip ? ['--dangerously-skip-permissions', prompt] : [prompt];
+      const existingArgs = skip ? ['--dangerously-skip-permissions', prompt] : [prompt];
+      // Session name (ADR-0018, amended by infrastructure-c6fzb): an explicit,
+      // sanitized `name` field when supplied, else a fallback derived from the
+      // prompt (`/agentheim:<skill> …` -> `<skill>: …`; plain text -> the
+      // prompt itself). Rides as its own raw argv pair `-n <name>` ahead of
+      // the skip-permissions flag and prompt — exactly the pattern the
+      // `skipPermissions` flag already prepends by (infrastructure-016). No
+      // shell parses it, so (like the prompt) it needs no quoting/escaping.
+      const name = resolveSessionName({ name: parsed?.name, prompt });
+      const args = ['-n', name, ...existingArgs];
       try {
         launchClaude({ command: 'claude', args });
       } catch (err) {
@@ -199,6 +208,61 @@ function makeHandler({ token, launchClaude }) {
 
     send(res, 404, { error: 'not found' });
   };
+}
+
+// Session name construction (infrastructure-c6fzb). The name rides the launch
+// descriptor as a raw argv element ('-n', name), exactly the pattern the
+// `skipPermissions` flag already uses (infrastructure-016) — no shell parses
+// it, so it needs no quoting/escaping either (ADR-0018, amended 2026-06-16).
+// Capped well below any reasonable terminal-tab/picker width; the cap is a
+// courtesy, not a protocol limit.
+const NAME_MAX_LEN = 60;
+
+/**
+ * Sanitize a candidate session name: strip control characters (including
+ * newlines/tabs — a name is a single display label, never multi-line), trim,
+ * and cap at NAME_MAX_LEN. A non-string input yields ''. Idempotent.
+ * @param {*} raw
+ * @returns {string}
+ */
+function sanitizeName(raw) {
+  if (typeof raw !== 'string') return '';
+  const stripped = raw.replace(/[\x00-\x1F\x7F]/g, '');
+  return stripped.trim().slice(0, NAME_MAX_LEN);
+}
+
+/**
+ * Derive a fallback session name from the prompt when no usable explicit
+ * `name` was supplied. `/agentheim:<skill> <rest>` -> `<skill>: <rest>` (the
+ * skill the launch invokes, plus the builder's own text); any other prompt ->
+ * the prompt text itself. Both branches are sanitized/capped identically to
+ * an explicit name. The prompt itself is never mutated — this only reads it
+ * to build a separate display label.
+ * @param {string} prompt — already-trimmed, known non-empty (POST /run
+ *   rejects an empty prompt before this is ever called).
+ * @returns {string}
+ */
+function deriveNameFromPrompt(prompt) {
+  const match = /^\/agentheim:(\S+)\s*([\s\S]*)$/.exec(prompt);
+  if (match) {
+    const skill = match[1];
+    const rest = match[2].trim();
+    return sanitizeName(rest ? `${skill}: ${rest}` : skill);
+  }
+  return sanitizeName(prompt);
+}
+
+/**
+ * Resolve the session name a POST /run will use: a sanitized explicit `name`
+ * when one was supplied and survives sanitization, else a prompt-derived
+ * fallback (infrastructure-c6fzb). Exported so tests can compute the expected
+ * name for a given input without duplicating the derivation rules.
+ * @param {{ name?: *, prompt: string }} args
+ * @returns {string}
+ */
+function resolveSessionName({ name, prompt }) {
+  const explicit = sanitizeName(name);
+  return explicit || deriveNameFromPrompt(prompt);
 }
 
 function tokensMatch(a, b) {
@@ -271,4 +335,8 @@ module.exports = {
   TOKEN_HEADER,
   PREFERRED_PORTS,
   BRIDGE_V,
+  resolveSessionName,
+  sanitizeName,
+  deriveNameFromPrompt,
+  NAME_MAX_LEN,
 };

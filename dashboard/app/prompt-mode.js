@@ -184,6 +184,33 @@ export function canFirePromptMode(index, prompt) {
   return trimmed.length > 0;
 }
 
+// Every launch used to show up in VS Code as "Claude" — the bridge extension
+// hard-coded createTerminal({ name: 'Claude' }). infrastructure-c6fzb threads
+// an explicit session `name` through POST /run instead, and the prompt bar is
+// the best place to build it: it already knows WHICH mode is armed, more
+// cleanly than the bridge's own `/agentheim:<skill>` prefix-parsing fallback
+// can recover it from the seeded command string alone.
+const LAUNCH_NAME_MAX_LEN = 60;
+
+/**
+ * Build the session name for a prompt-bar launch (infrastructure-c6fzb):
+ * `"<mode label>: <typed text>"`, or the bare mode label when nothing was
+ * typed. Capped defensively — the bridge (`vscode-extension/src/bridge.js`)
+ * re-sanitizes/caps whatever it receives regardless, so this is a courtesy
+ * derivation, not the authoritative sanitizer.
+ * @param {*} index — the highlighted mode index (clamped internally).
+ * @param {*} prompt — the live textarea contents.
+ * @returns {string} never throws; a missing/non-string/whitespace-only
+ *   prompt degrades to the bare mode label.
+ */
+export function nameForPromptMode(index, prompt) {
+  const idx = clampPromptModeIndex(index);
+  const label = PROMPT_MODES[idx].label;
+  const trimmed = typeof prompt === 'string' ? prompt.trim() : '';
+  const base = trimmed ? `${label}: ${trimmed}` : label;
+  return base.slice(0, LAUNCH_NAME_MAX_LEN);
+}
+
 // The four disjoint key-intent labels `promptBarKeyIntent` classifies every
 // keydown into (invariant 4). Exported so call sites compare against these
 // rather than repeating the string literals.

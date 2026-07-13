@@ -209,6 +209,73 @@ test('clipboard fallback copies German typographic quotes verbatim (infrastructu
   }
 });
 
+// ---- name threading (infrastructure-c6fzb) ----------------------------------
+//
+// The prompt bar now derives a display name for the launched session
+// (`nameForPromptMode`, prompt-mode.js) and passes it through launchOrCopy so
+// POST /run's optional `name` field carries it. Absent/blank OMITS the field
+// (never sends an empty/whitespace string) so the bridge falls back to its
+// own prompt-derived name.
+
+test('a real name -> POST /run body includes name', async () => {
+  let runCall = null;
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31450, token: 'n', v: 1 })],
+    ['/health', () => jsonResponse(200, { ok: true })],
+    ['/run', (url, opts) => { runCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
+  ]);
+
+  const result = await launchOrCopy({ prompt: PROMPT, fetchImpl, copy: makeCopy(), name: 'Modeling: dark mode toggle' });
+
+  assert.equal(result.via, 'bridge');
+  assert.deepEqual(JSON.parse(runCall.opts.body), { prompt: PROMPT, name: 'Modeling: dark mode toggle' });
+});
+
+test('name absent/blank -> body OMITS the field, never sends an empty/whitespace string', async () => {
+  // absent
+  let absentCall = null;
+  const fAbsent = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31451, token: 'n', v: 1 })],
+    ['/health', () => jsonResponse(200, { ok: true })],
+    ['/run', (url, opts) => { absentCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
+  ]);
+  await launchOrCopy({ prompt: PROMPT, fetchImpl: fAbsent, copy: makeCopy() });
+  assert.equal('name' in JSON.parse(absentCall.opts.body), false, 'field must be OMITTED when no name is supplied');
+
+  // whitespace-only
+  let blankCall = null;
+  const fBlank = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31452, token: 'n', v: 1 })],
+    ['/health', () => jsonResponse(200, { ok: true })],
+    ['/run', (url, opts) => { blankCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
+  ]);
+  await launchOrCopy({ prompt: PROMPT, fetchImpl: fBlank, copy: makeCopy(), name: '   ' });
+  assert.equal('name' in JSON.parse(blankCall.opts.body), false, 'a whitespace-only name must be omitted, not sent verbatim');
+});
+
+test('name composes with skipPermissions in the same POST /run body', async () => {
+  let runCall = null;
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31453, token: 'n', v: 1 })],
+    ['/health', () => jsonResponse(200, { ok: true })],
+    ['/run', (url, opts) => { runCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
+  ]);
+
+  await launchOrCopy({ prompt: PROMPT, fetchImpl, copy: makeCopy(), name: 'Armed Launch', skipPermissions: true });
+
+  assert.deepEqual(JSON.parse(runCall.opts.body), { prompt: PROMPT, skipPermissions: true, name: 'Armed Launch' });
+});
+
+test('the clipboard fallback never carries a name — there is no launch to name', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { present: false })],
+  ]);
+  const copy = makeCopy();
+  const result = await launchOrCopy({ prompt: PROMPT, fetchImpl, copy, name: 'Modeling: dark mode toggle' });
+  assert.equal(result.via, 'clipboard');
+  assert.deepEqual(copy.copied, [PROMPT], 'the clipboard copy is the bare prompt, never the name');
+});
+
 test('the health probe carries the token header and targets the advertised port', async () => {
   let healthCall = null;
   const fetchImpl = makeFetch([

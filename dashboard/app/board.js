@@ -53,7 +53,7 @@ import { resolveTheme, saveTheme } from "./theme-state.js";
 import { loadSkipPermissions, saveSkipPermissions } from "./skip-permissions-state.js";
 import { SORT_OPTIONS, DEFAULT_SORT, sortTickets } from "./board-sort.js";
 import { refineCommandFor, promoteCommandFor, dismissCommandFor, WORK_COMMAND, WHATS_NEXT_COMMAND } from "./modeling-command.js";
-import { PROMPT_MODES, DEFAULT_PROMPT_MODE_INDEX, clampPromptModeIndex, nextPromptModeIndex, promptBarKeyIntent, PROMPT_KEY_INTENT, canFirePromptMode } from "./prompt-mode.js";
+import { PROMPT_MODES, DEFAULT_PROMPT_MODE_INDEX, clampPromptModeIndex, nextPromptModeIndex, promptBarKeyIntent, PROMPT_KEY_INTENT, canFirePromptMode, nameForPromptMode } from "./prompt-mode.js";
 import { launchOrCopy } from "./bridge-launch.js";
 import { groupTickets } from "./board-group.js";
 import { resolveHoverDependencies } from "./board-dependencies.js";
@@ -1067,10 +1067,11 @@ function BoardPromptBar({ skipPermissions = false }) {
     const idx = clampPromptModeIndex(modeIndex);
     if (!canFirePromptMode(idx, prompt)) return;
     const command = PROMPT_MODES[idx].commandFor(prompt);
+    const name = nameForPromptMode(idx, prompt);
     const fetchImpl = typeof window !== "undefined" && typeof window.fetch === "function"
       ? window.fetch.bind(window)
       : undefined;
-    return launchOrCopy({ prompt: command, fetchImpl, copy: copyToClipboard, skipPermissions: skipPermissions === true }).then((res) => {
+    return launchOrCopy({ prompt: command, fetchImpl, copy: copyToClipboard, skipPermissions: skipPermissions === true, name }).then((res) => {
       onResult(res);
       // Record WHICH tab fired before (or alongside) onResult's highlight
       // reset — the flash must anchor to `idx`, never to wherever

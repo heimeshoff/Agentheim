@@ -85,22 +85,32 @@ for an infrastructure BC.
   toolchain) running a `127.0.0.1`-only `node:http` listener *inside the editor*. It is the
   only path by which the dashboard — served into VS Code's sandboxed Simple Browser — can open
   a **real, visible, interactive** Claude terminal. The terminal **is** the `claude` process:
-  the extension spawns it via `createTerminal({ shellPath:'claude', shellArgs:[<flag?>, prompt] })`
-  (infra-020) — the prompt is a **raw argv element**, no shell parses it, so quotes/backticks/`$`/`&`
+  the extension spawns it via `createTerminal({ name, shellPath:'claude', shellArgs:[<'-n', name>, <flag?>, prompt] })`
+  (infra-020, named by infrastructure-c6fzb) — the prompt is a **raw argv element**, no shell parses it, so quotes/backticks/`$`/`&`
   and every other metacharacter the builder typed survive verbatim. (Earlier the bridge typed a
   shell command line with `sendText('claude "<prompt>"')`, which mangled metacharacters on Windows
   PowerShell/cmd; that escaping is deleted.) Fixed port **31425** with a bounded fallback ladder
-  `31425 → 31426 → 31427`. Surface: `POST /run { prompt }` (opens a seeded terminal → 202),
-  `GET /health` (→ 200), `OPTIONS` preflight (load-bearing — the custom-header JSON POST is
-  preflighted). Every request carries the `X-Agentheim-Bridge-Token` header; missing/mismatched
-  → 401, malformed/empty body → 400. `POST /run` takes an **optional `skipPermissions` boolean**
-  (off by default): only literal `true` prepends `--dangerously-skip-permissions` to the launch
-  args; absent/false/malformed launches with the prompt alone. The bypass is **bridge-launch-only**
-  (startup flag — the clipboard fallback cannot carry it) and requires a per-launch at-a-glance
-  indicator. The trust boundary is loopback-only bind **plus** the shared-secret token — single-user
-  dev box only. The generic launcher carries *whatever* prompt
-  it is handed, so all board affordances share it. The inject-into-running-session path
-  (`POST /inject`) is deferred. (ADR-0018, infrastructure-013, infrastructure-020.)
+  `31425 → 31426 → 31427`. Surface: `POST /run { prompt, skipPermissions?, name? }` (opens a
+  seeded, named terminal → 202), `GET /health` (→ 200), `OPTIONS` preflight (load-bearing — the
+  custom-header JSON POST is preflighted). Every request carries the `X-Agentheim-Bridge-Token`
+  header; missing/mismatched → 401, malformed/empty body → 400. `POST /run` takes an **optional
+  `skipPermissions` boolean** (off by default): only literal `true` prepends
+  `--dangerously-skip-permissions` to the launch args; absent/false/malformed launches with the
+  prompt alone. The bypass is **bridge-launch-only** (startup flag — the clipboard fallback cannot
+  carry it) and requires a per-launch at-a-glance indicator. `POST /run` also takes an **optional
+  `name` string** (infrastructure-c6fzb) — every dashboard-launched session used to show as
+  `"Claude"` in the tab and the `/resume` picker; the installed CLI's `-n, --name <name>` flag now
+  names it. The core sanitizes an explicit `name` (trim, strip control chars/newlines, cap ~60
+  chars); absent/malformed derives a fallback from the prompt (`/agentheim:<skill> …` →
+  `<skill>: …`; plain text → the prompt itself). The name rides its own raw argv pair `-n <name>`,
+  prepended exactly the way `skipPermissions` already prepends — no shell parses it either. The
+  dashboard prompt bar sends an explicit mode-derived name (`"<mode label>: <typed text>"`,
+  `prompt-mode.js`'s `nameForPromptMode`); other launch affordances rely on the prompt-derived
+  fallback. `/rename` is confirmed strictly user-typed (no model/hook/subagent surface), so launch
+  time is the only programmatic naming point. The trust boundary is loopback-only bind **plus**
+  the shared-secret token — single-user dev box only. The generic launcher carries *whatever*
+  prompt it is handed, so all board affordances share it. The inject-into-running-session path
+  (`POST /inject`) is deferred. (ADR-0018, infrastructure-013, infrastructure-020, infrastructure-c6fzb.)
 - **Bridge discovery file** — `.agentheim/.dashboard/bridge.json` =
   `{ port, token, pid, startedAt, v }`, a **sibling of `runtime.json`** in the same gitignored
   dir, written by a **separate process** (the VS Code extension host) on its own
@@ -245,6 +255,13 @@ Apply write request.
   `--dangerously-skip-permissions` to the launch args; absent/false/malformed launches with the
   prompt alone, and the bypass is bridge-launch-only (the clipboard fallback cannot carry the startup
   flag) with a required per-launch indicator. The HTTP wire contract is unchanged by infra-020.
+  `POST /run` also carries an **optional `name` string** (amended 2026-07-13,
+  infrastructure-c6fzb): sanitized when supplied, else derived from the prompt
+  (`/agentheim:<skill> …` → `<skill>: …`; plain text → the prompt itself), riding its own raw argv
+  pair `-n <name>` prepended ahead of everything else — so every dashboard-launched session's
+  terminal tab and `/resume` picker entry stop reading the hard-coded `"Claude"`. This closed the
+  gap the June research report (`vscode-dashboard-terminal-bridge-2026-06-09`) had left open (it
+  predates the CLI's `-n`/`--name` flag). The HTTP wire contract is otherwise unchanged.
   **Shares ADR-0002's bounded-ladder collision idiom** but on a different port clause
   (a *fixed literal* `31425` start + server-mediated discovery, because the bridge's reader is a
   filesystem-blind sandboxed frame; the dashboard derives a *root-based* port + runfile discovery —

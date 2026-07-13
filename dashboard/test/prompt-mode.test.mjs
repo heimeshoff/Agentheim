@@ -13,6 +13,7 @@ import {
   promptBarKeyIntent,
   PROMPT_KEY_INTENT,
   canFirePromptMode,
+  nameForPromptMode,
 } from '../app/prompt-mode.js';
 
 // --- fixed order / shape -----------------------------------------------
@@ -294,4 +295,41 @@ test('canFirePromptMode does not read index — an out-of-range/non-numeric inde
   assert.equal(canFirePromptMode(999, 'x'), true);
   assert.equal(canFirePromptMode(-1, 'x'), true);
   assert.equal(canFirePromptMode(NaN, 'x'), canFirePromptMode(0, 'x'));
+});
+
+// --- nameForPromptMode (infrastructure-c6fzb) --------------------------
+//
+// Every dashboard-launched session used to show as "Claude" in VS Code; the
+// bridge now names the session at launch via POST /run's optional `name`
+// field. The prompt bar builds that name from mode + typed text, since it
+// already knows which mode is armed more cleanly than the bridge's own
+// `/agentheim:<skill>` prefix-parsing fallback can recover it.
+
+test('nameForPromptMode builds "<mode label>: <typed text>" for every mode', () => {
+  assert.equal(nameForPromptMode(0, 'dark mode toggle'), 'Quick Capture: dark mode toggle');
+  assert.equal(nameForPromptMode(1, 'dark mode toggle'), 'Modeling: dark mode toggle');
+  assert.equal(nameForPromptMode(2, 'why is this slow'), 'Inquire: why is this slow');
+  assert.equal(nameForPromptMode(3, 'competitor pricing'), 'Research: competitor pricing');
+  assert.equal(nameForPromptMode(4, 'hello there'), 'Plain: hello there');
+});
+
+test('nameForPromptMode trims the prompt and degrades to the bare mode label when there is nothing typed', () => {
+  assert.equal(nameForPromptMode(1, '   '), 'Modeling');
+  assert.equal(nameForPromptMode(1, ''), 'Modeling');
+  assert.equal(nameForPromptMode(1, undefined), 'Modeling');
+  assert.equal(nameForPromptMode(1, null), 'Modeling');
+  assert.equal(nameForPromptMode(1, '  dark mode  '), 'Modeling: dark mode');
+});
+
+test('nameForPromptMode clamps an invalid index the same way clampPromptModeIndex does, never throwing', () => {
+  assert.equal(nameForPromptMode(999, 'x'), nameForPromptMode(DEFAULT_PROMPT_MODE_INDEX, 'x'));
+  assert.doesNotThrow(() => nameForPromptMode(NaN, 'x'));
+  assert.doesNotThrow(() => nameForPromptMode(undefined, 'x'));
+});
+
+test('nameForPromptMode caps the derived name at a defensive length, never throwing on a very long prompt', () => {
+  const long = 'x'.repeat(500);
+  const name = nameForPromptMode(1, long);
+  assert.ok(name.length <= 60, 'the derived name must be capped');
+  assert.ok(name.startsWith('Modeling: '), 'the mode-label prefix must survive the cap');
 });

@@ -4,7 +4,7 @@ title: VS Code dashboard→terminal bridge — fixed-port localhost extension wi
 scope: infrastructure
 status: proposed
 date: 2026-06-14
-related_tasks: [infrastructure-012, infrastructure-013, infrastructure-014, agentic-workflow-020, infrastructure-015, infrastructure-016, agentic-workflow-021, infrastructure-020]
+related_tasks: [infrastructure-012, infrastructure-013, infrastructure-014, agentic-workflow-020, infrastructure-015, infrastructure-016, agentic-workflow-021, infrastructure-020, infrastructure-c6fzb]
 related_adrs: [ADR-0002]
 diverges_from: [ADR-0002]
 ---
@@ -37,6 +37,32 @@ diverges_from: [ADR-0002]
 > preflight, status codes, `bridge.json`/`GET /api/bridge`, and the strict-`true`
 > skip-permissions activation all stand verbatim. The `\"`-escaping step is deleted as
 > the source of the bug.
+
+> **Amended 2026-07-13 (infrastructure-c6fzb).** Every bridge-launched session
+> named its terminal `'Claude'` unconditionally (`extension.js` hard-coded
+> `createTerminal({ name: 'Claude', ... })`), so with several concurrent
+> sessions the tabs and the `/resume` picker entries were indistinguishable.
+> The installed CLI ships `-n, --name <name>` ("Set a display name for this
+> session (picker, and terminal title)", verified 2.1.207) — the June research
+> report predates this flag and is superseded on that one point. `POST /run`
+> gains an **optional, additive** `name: string` field: the pure core
+> (`bridge.js`) sanitizes it (trim, strip control characters/newlines, cap
+> ~60 chars); when absent or it sanitizes to empty, the core derives a
+> fallback from the prompt — `/agentheim:<skill> …` → `<skill>: …`, plain text
+> → the prompt itself. The resolved name rides the launch descriptor as its
+> own raw argv pair, prepended exactly the way the `skipPermissions` flag
+> already prepends (infrastructure-016): `args = ['-n', <name>, ...existing]`,
+> so the ordering with an armed bypass is `['-n', <name>,
+> '--dangerously-skip-permissions', <prompt>]`. No shell parses it, so (like
+> the prompt) it needs no quoting/escaping (infra-020/q8m4t discipline). The
+> seam (`extension.js`) recovers the name from the descriptor's `args` and
+> passes it to `createTerminal({ name })`; `'Claude'` survives only as the
+> last-resort fallback if `args` ever arrives without a `-n` pair. **Nothing
+> else on the HTTP wire changes:** `{ prompt, skipPermissions? }` stay exactly
+> as before; `name` is a third, independent, optional field. `/rename` is
+> confirmed strictly user-typed (no model/hook/subagent surface), so launch
+> time is the only programmatic naming point; sessions the builder starts
+> manually outside the bridge stay out of scope.
 
 > **Diverges from [ADR-0002](0002-dashboard-runtime-transport.md) on one clause.** ADR-0002 fixed
 > the dashboard runtime as an **ephemeral `:0` port** read back into `runtime.json`. That pattern
@@ -131,11 +157,13 @@ absence degrades safely.
 
 ### HTTP shape and status codes
 
-- **`POST /run { prompt: string, skipPermissions?: boolean }`** (extension listener;
-  `X-Agentheim-Bridge-Token` required) → opens a terminal and seeds the prompt → `200`/`202`.
-  Missing/bad token → `401`. Malformed/empty body → `400`. The `skipPermissions` field is
-  **optional and additive** — every existing `{ prompt }` caller (infrastructure-013/014,
-  agentic-workflow-020) remains valid unchanged, since omitting it is the off default.
+- **`POST /run { prompt: string, skipPermissions?: boolean, name?: string }`** (extension
+  listener; `X-Agentheim-Bridge-Token` required) → opens a terminal and seeds the prompt →
+  `200`/`202`. Missing/bad token → `401`. Malformed/empty body → `400`. The `skipPermissions`
+  field is **optional and additive** — every existing `{ prompt }` caller (infrastructure-013/014,
+  agentic-workflow-020) remains valid unchanged, since omitting it is the off default. The `name`
+  field is likewise **optional and additive** (infrastructure-c6fzb) — a caller that omits it gets
+  a prompt-derived fallback name, never a rejection.
   **Command construction (frozen):**
   - `skipPermissions === true` (the JSON boolean literal `true`, nothing else) → seed
     `claude --dangerously-skip-permissions "<prompt>"`.
@@ -143,6 +171,10 @@ absence degrades safely.
     non-`true` value → seed `claude "<prompt>"` **verbatim**, exactly as before this amendment.
     The activation test is a strict identity check (`skipPermissions === true`), so malformed input
     fails toward the prompt-gated default, never toward the bypass.
+  - **Session name (infrastructure-c6fzb, frozen):** a sanitized explicit `name` when supplied,
+    else a fallback derived from the prompt (`/agentheim:<skill> …` → `<skill>: …`; plain text →
+    the prompt itself), prepended as its own raw argv pair ahead of everything else:
+    `args = ['-n', <name>, ...(skipPermissions-and-prompt args)]`.
 - **`GET /health`** (extension listener; token required) → `200`. Used by the frontend to confirm
   a live listener at the advertised port.
 - **`GET /api/bridge`** lives on the **dashboard server**, not the extension → `{ port, token, v }`
