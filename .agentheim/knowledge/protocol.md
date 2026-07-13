@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 09:51 -- Modeling / Promoted: agentic-workflow-rwxms - applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-13 09:49 -- Modeling / Refined: agentic-workflow-rwxms - applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder
 
 **Type:** Modeling / Refine

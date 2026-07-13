@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-rwxms
 title: applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder
-status: backlog
+status: todo
 type: bug
 context: agentic-workflow
 created: 2026-07-10

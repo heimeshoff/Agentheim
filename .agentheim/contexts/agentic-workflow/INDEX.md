@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 1
+- **Backlog:** 0
+- **Todo:** 2
 - **Doing:** 0
 - **Done:** 137
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-rwxms** — applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder (bug) — `todo/agentic-workflow-rwxms-applytaskmove-missing-destination-dir.md`
 - **agentic-workflow-spv0k** — bug: Launched/Copied flash paints on Quick Capture instead of the fired mode's tab — `todo/agentic-workflow-spv0k-launched-flash-paints-on-quick-capture-not-fired-mode.md`
 <!-- todo-list:end -->
 
@@ -84,7 +85,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-rwxms** — bug: `applyTaskMove` rewrites frontmatter before a rename that ENOENTs on a missing destination folder — `backlog/agentic-workflow-rwxms-applytaskmove-missing-destination-dir.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
