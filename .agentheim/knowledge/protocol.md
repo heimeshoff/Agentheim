@@ -5,6 +5,18 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 14:20 -- Release shipped: v0.9.2
+
+**Type:** Release
+**Version:** 0.9.1 → 0.9.2 (patch — the prompt bar gains a model selector, and the bridge now advertises the fields it can actually honour so an old bridge never silently swallows one)
+**Manifest:** `.claude-plugin/plugin.json` bumped, committed `2ac05bc`
+**Changelog:** `CHANGELOG.md` `[Unreleased]` → `[0.9.2]` section rolled (same commit)
+**Pushed to main:** yes (`7738fc0..2ac05bc` on `origin/main`)
+**Tag:** `v0.9.2` (annotated) → `2ac05bc`, pushed to origin
+**GitHub Release:** created via `gh` (from CHANGELOG) — https://github.com/heimeshoff/Agentheim/releases/tag/v0.9.2
+
+---
+
 ## 2026-07-13 17:02 -- Work session ended
 
 **Type:** Work / Session end
