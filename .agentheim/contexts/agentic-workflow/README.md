@@ -306,15 +306,21 @@ separate BC, but today the whole tool lives in this one.
   defaults Modeling and Research previously wore — · `bot` (Plain, an existing glyph reused, no
   new icon). The **bottom row** carries a bright, bold ochre `❯` chevron, a genuinely
   **multi-line auto-growing** `<textarea>` (soft-wraps, grows to a max then scrolls — aw-038's
-  growth band, unchanged), a `↵` keyboard hint, and the styleguide's **`EnterButton`** primitive
-  (`styleguide/app/button.js`, ADR-0003, consumed unforked) — the solid-`--accent-ochre`
-  icon-square with the `corner-down-left` (`↵`) glyph drawn in the dedicated `--accent-ochre-fg`
-  on-accent legibility token, wrapped in a plain `<span title=...>` (not a fork) so the tooltip
-  can still reflect the live seeded command, **or** (agentic-workflow-m3vhq) the reason it can't
-  fire yet.
+  growth band, unchanged), and (agentic-workflow-m2vkp) the styleguide's **`ModelSplitButton`**
+  primitive (`styleguide/app/button.js`, design-system-r9dtm, ADR-0003, consumed unforked) as the
+  **one** launch affordance — the old bordered `↵` keyboard hint span is **deleted outright**, its
+  "Enter launches · Shift+Enter for a new line" affordance folded into the split button's
+  tooltip/`aria-label`. `ModelSplitButton` widens the prior `EnterButton` (now unused by this bar)
+  into a labelled split button: a primary region (the solid-`--accent-ochre` fill, the
+  `corner-down-left` glyph in `--accent-ochre-fg`, plus the current model's name) that launches
+  exactly as `EnterButton` used to, and a caret that opens a model menu — never launching itself.
+  `locked` (Quick Capture, or no bridge reachable) renders **no caret region at all**, not merely
+  a disabled one. Wrapped in a plain `<span title=...>` (not a fork) so the tooltip can still
+  reflect the live seeded command **and** which model will run it, **or** (agentic-workflow-m3vhq)
+  the reason the launch can't fire yet.
   - **Keyboard-committed selection model (ADR-0050, amended by agentic-workflow-p8k4d,
-    agentic-workflow-m3vhq, agentic-workflow-aqyqd, and agentic-workflow-tkq7v,
-    `dashboard/app/prompt-mode.js`)** — the
+    agentic-workflow-m3vhq, agentic-workflow-aqyqd, agentic-workflow-tkq7v, and
+    agentic-workflow-m2vkp, `dashboard/app/prompt-mode.js`)** — the
     five modes carry a single committed `highlightedMode` **index**, not five independent
     booleans: `PROMPT_MODES` (fixed order, each `{label, subtitle, icon, commandFor}` — no
     `requiresPrompt` key on any entry; aqyqd retires it, see below), `clampPromptModeIndex` (the
@@ -329,41 +335,46 @@ separate BC, but today the whole tool lives in this one.
     value) — **cycle** — Tab (no Ctrl/Alt) or Shift+Tab (agentic-workflow-tkq7v reverses the
     original Ctrl+←/→ trigger, freeing native word-jump/word-select inside the now-multi-line
     field; Ctrl+Tab/Alt+Tab stay pass-through so browser tab-switch chords are never shadowed) —
-    or **pass-through**, so no keystroke is ever double-handled;
+    **cycle_model** — Ctrl+M (agentic-workflow-m2vkp, ADR-0050's fifth amendment; see the model
+    axis below) — or **pass-through**, so no keystroke is ever double-handled;
     **untouched by m3vhq** — bare Enter on an empty Plain prompt still classifies as `launch`).
     **Escape blurs the prompt textarea** (agentic-workflow-tkq7v — checked in `onPromptKeyDown`
-    ahead of `promptBarKeyIntent`, not a fifth intent label — the WCAG 2.1.2 keyboard-trap
+    ahead of `promptBarKeyIntent`, not a sixth intent label — the WCAG 2.1.2 keyboard-trap
     mitigation for hijacking Tab while the field has focus; it never clears the typed prompt).
-    Defaults to Quick Capture (index 0) on mount and **resets to 0 after every successful
-    launch**. **Two orthogonal channels:** the committed highlight changes only on a deliberate
-    act — a tab click, or Tab/Shift+Tab — hover is a separate, transient, presentation-only channel
-    that never reads or writes it. The **Launched/Copied flash is a third, independent channel**
-    (agentic-workflow-spv0k, ADR-0050's fifth amendment): `BoardPromptBar` tracks a `firedMode`
-    index, set inside `fire()`'s own success branches to the mode that actually launched, and
-    `PromptModeTab` paints its flash from `firedMode === index`, never from `highlighted` — so
-    the committed-highlight reset to Quick Capture after a successful launch can never relocate
-    the flash onto the wrong tab. **p8k4d reverses click-to-launch:** clicking a tab now **only**
-    moves the committed highlight; it no longer fires anything. The ONE `fire(modeIndex)`
-    function in `BoardPromptBar` is now reached only by bare Enter, Ctrl+Enter, or the Enter
-    button — all three behaviourally identical: the same seeded command (reached via
-    `PROMPT_MODES[i].commandFor(prompt)`), the same `launchOrCopy` bridge-or-clipboard path, the
-    same armed `skipPermissions` thread, the same `onResult` clear-textarea + confetti +
-    highlight-reset. **Ctrl+Space** (p8k4d, new) focuses the prompt `<textarea>` from anywhere on
-    the board via a window-scoped `document` keydown listener (registered/torn down in a
-    `useEffect`). **Decline-to-launch, generalized to every mode (introduced Plain-only by
-    agentic-workflow-m3vhq, generalized by agentic-workflow-aqyqd — ADR-0050's third
-    amendment)** — the prompt bar is a prompt console: with no prompt there is nothing to send,
-    in **any** mode, not just Plain. The one predicate `canFirePromptMode(index, prompt)` decides
-    this — `true` exactly when the trimmed prompt is non-empty, for every index alike (`index` is
-    kept in the signature for call-site/test stability but is deliberately **unread** — the
-    `requiresPrompt` per-mode flag m3vhq introduced is **retired entirely**, not set `true` on all
-    five entries: once there is no exception, the per-mode axis is a fiction) — consulted by
-    **both** `fire()`'s guard (a decline is a true no-op: no bridge call, no clipboard, no
-    confetti, no textarea clear, no highlight reset) **and** the Enter button's `disabled` state
-    (the styleguide `EnterButton`'s `disabled` prop, design-system-tfhn6, consumed unforked —
-    never a `pointer-events` fake). When disabled, the tooltip/`aria-label` read *"Type a prompt
-    to launch \<Label\>"* for whichever mode is highlighted, rather than rendering an empty/bare
-    command string. The four legacy modes' bare-command constants
+    Defaults to Quick Capture (index 0) on mount. **The mode highlight SURVIVES a successful
+    launch** (agentic-workflow-m2vkp reverses the Decision's original "resets to 0" clause —
+    `onResult` no longer calls `setHighlightedMode`; firing three Modeling prompts in a row no
+    longer means re-selecting Modeling three times). **Two orthogonal channels:** the committed
+    highlight changes only on a deliberate act — a tab click, or Tab/Shift+Tab — hover is a
+    separate, transient, presentation-only channel that never reads or writes it. The
+    **Launched/Copied flash is a third, independent channel** (agentic-workflow-spv0k, ADR-0050's
+    fifth [historically-numbered fourth] amendment): `BoardPromptBar` tracks a `firedMode` index,
+    set inside `fire()`'s own success branches to the mode that actually launched, and
+    `PromptModeTab` paints its flash from `firedMode === index`, never from `highlighted` — this
+    independence is now simply how the two pieces of state relate, since m2vkp retired the reset
+    the flash fix was originally written to survive. **p8k4d reverses click-to-launch:** clicking
+    a tab now **only** moves the committed highlight; it no longer fires anything. The ONE
+    `fire(modeIndex)` function in `BoardPromptBar` is now reached only by bare Enter, Ctrl+Enter,
+    or the split button's primary region — all three behaviourally identical: the same seeded
+    command (reached via `PROMPT_MODES[i].commandFor(prompt)`), the same `launchOrCopy`
+    bridge-or-clipboard path, the same armed `skipPermissions` thread, the same `onResult`
+    clear-textarea + confetti (no longer a highlight reset). **Ctrl+Space** (p8k4d, new) focuses
+    the prompt `<textarea>` from anywhere on the board via a window-scoped `document` keydown
+    listener (registered/torn down in a `useEffect`) — the same listener now also handles Ctrl+M
+    (agentic-workflow-m2vkp, see below). **Decline-to-launch, generalized to every mode
+    (introduced Plain-only by agentic-workflow-m3vhq, generalized by agentic-workflow-aqyqd —
+    ADR-0050's third amendment)** — the prompt bar is a prompt console: with no prompt there is
+    nothing to send, in **any** mode, not just Plain. The one predicate `canFirePromptMode(index,
+    prompt)` decides this — `true` exactly when the trimmed prompt is non-empty, for every index
+    alike (`index` is kept in the signature for call-site/test stability but is deliberately
+    **unread** — the `requiresPrompt` per-mode flag m3vhq introduced is **retired entirely**, not
+    set `true` on all five entries: once there is no exception, the per-mode axis is a fiction) —
+    consulted by **both** `fire()`'s guard (a decline is a true no-op: no bridge call, no
+    clipboard, no confetti, no highlight/model change) **and** the split button's `disabled` state
+    (the styleguide `ModelSplitButton`'s `disabled` prop, consumed unforked — never a
+    `pointer-events` fake). When disabled, the tooltip/`aria-label` read *"Type a prompt to launch
+    \<Label\>"* for whichever mode is highlighted, rather than rendering an empty/bare command
+    string. The four legacy modes' bare-command constants
     (`QUICK_CAPTURE_COMMAND`/`MODELING_COMMAND`/`INQUIRE_COMMAND`/`RESEARCH_COMMAND`,
     `modeling-command.js`) and their empty-prompt degrade branches are **left in place** —
     correct, pure, unit-tested — but are now unreachable from the board (bare sessions launch
@@ -371,6 +382,38 @@ separate BC, but today the whole tool lives in this one.
     doesn't "restore" the bare launch by accident. `prompt-mode.js` is a fifth pure,
     framework-free, `node --test`-covered module in the `board-sort.js`/`board-group.js`/
     `search-results.js` family.
+  - **The model axis (ADR-0050's fifth amendment, agentic-workflow-m2vkp,
+    `dashboard/app/prompt-model.js`)** — a **second, orthogonal** committed-selection channel,
+    `selectedModel`, sibling to `highlightedMode` but on a different axis entirely: not WHICH
+    skill fires, but WHAT MODEL the launched session runs on. `PROMPT_MODELS` (Fable · Opus ·
+    Sonnet · Haiku, each `{id, label}` — `id` is the exact short alias the bridge's
+    `MODEL_ALLOWLIST` accepts, `infrastructure-h5wnq`, `vscode-extension/src/bridge.js`; a value
+    outside that allowlist spawns with no `--model` flag at all, quietly), `DEFAULT_PROMPT_MODEL_INDEX`
+    (Opus, the mount default), `clampPromptModelIndex` / `nextPromptModelIndex` (the same
+    in-range-guard / total-wraparound shape `prompt-mode.js` established, mirrored on this axis).
+    **Quick Capture pins the resolved model to Haiku** — `isModelLockedForMode` /
+    `modelForMode(modeIndex, selectedModelIndex)` — as a **read-time projection, never a
+    mutation**: selecting Opus on Modeling, switching to Quick Capture (which resolves and shows
+    Haiku), then switching back to Modeling restores Opus, because `selectedModel` itself is
+    never overwritten by the pin. `modelForMode` is the ONE resolver both the split button's label
+    and `fire()`'s launch payload consult. **No bridge, no model promise:** `probeBridge`
+    (`infrastructure-h5wnq`, `bridge-launch.js`) is called once on mount; its result ORs with the
+    Quick Capture pin into `modelLocked` — with no bridge reachable the split button renders
+    `locked`, names no model (`"Default"`), and Ctrl+M is a no-op, since a clipboard-copied
+    command can never carry `--model`. **Ctrl+M cycles the selected model** (`PROMPT_KEY_INTENT.CYCLE_MODEL`,
+    a fifth disjoint `promptBarKeyIntent` label, wired both field-focused, via the classifier, and
+    window-scoped alongside Ctrl+Space) — a true no-op (no state change, no flash) whenever
+    `modelLocked`. **The two handlers are kept mutually exclusive** by
+    `shouldWindowCtrlMHandle(event, promptFieldEl)` (`prompt-model.js`): the window-scoped listener
+    refuses to act whenever the keydown's `target` IS the prompt field, leaving that case entirely
+    to the field's own `onPromptKeyDown` — without this guard, a keydown dispatched on the focused
+    field still bubbles natively to `document` (React `createRoot`), so both handlers would fire on
+    the same keystroke and `selectedModel` would advance by two instead of one (caught in
+    verification of agentic-workflow-m2vkp's iteration 1; see ADR-0050's fifth amendment's
+    iteration-2 correction). `fire()` threads the resolved model's `id` into `launchOrCopy`'s `model` field,
+    which rides a bridge launch as `--model <id>`. This does **not** touch ADR-0031 (per-agent
+    model routing) — that pins a model per *agent role* inside the workflow engine; this selector
+    picks the *session's* main-loop model; the two compose rather than conflict.
   - **Paint (ADR-0051 amending ADR-0048; ADR-0016 for the rest)** — the highlighted tab alone
     wears the bounded ochre wayfinding exception, now (agentic-workflow-q7r3x) a **filled cell
     background** (`--surface-2`) **plus a full-width ochre bottom inset underline**
@@ -379,11 +422,13 @@ separate BC, but today the whole tool lives in this one.
     wayfinding underline. This is the **second** surface ADR-0048's carve-out names, beside the
     nav-rail active item — Plain's tab (agentic-workflow-m3vhq) follows the identical rule, no
     new paint decision. The other, non-highlighted tabs de-emphasize by opacity (ADR-0016's
-    unchanged default) — no ring, no new hue, no cell fill. The Enter button is the styleguide's
-    `EnterButton` primitive (ADR-0003), which owns its own already-licensed ADR-0048 "primed
+    unchanged default) — no ring, no new hue, no cell fill. The launch affordance is the
+    styleguide's **`ModelSplitButton`** primitive (design-system-r9dtm, ADR-0003, replacing
+    `EnterButton` — agentic-workflow-m2vkp), which owns its own already-licensed ADR-0048 "primed
     primary action" paint (a solid `--accent-ochre` fill, the `corner-down-left` glyph in
-    `--accent-ochre-fg`) plus (design-system-tfhn6) its own `disabled` de-emphasis by opacity
-    (`0.55`, `--accent-ochre` fill kept literal) — board.js no longer re-implements any of it
+    `--accent-ochre-fg`, now plus the resolved model's label) plus its own `disabled` de-emphasis
+    by opacity (`0.55`, `--accent-ochre` fill kept literal) and `locked` treatment (no caret region
+    at all, absent rather than merely disabled) — board.js no longer re-implements any of it
     locally.
   - Every launch opens a real interactive Claude session through the VS Code **bridge**
     (ADR-0018): `GET /api/bridge` (infrastructure-014) discovers the listener, `GET /health`
@@ -394,7 +439,7 @@ separate BC, but today the whole tool lives in this one.
     lifecycle write (ADR-0001). `WhatsNextPanel` no longer composes inside this bar (it would
     float inside the fixed overlay) — it renders directly in `DashboardBoard`, in-flow, above the
     `BoardHeader` count strip, its dismiss/SSE wiring unchanged. See ADR-0050, ADR-0051,
-    ADR-0048, ADR-0018, ADR-0016, ADR-0003, ADR-0001, ADR-0009.
+    ADR-0048, ADR-0018, ADR-0016, ADR-0003, ADR-0001, ADR-0009, ADR-0031, ADR-0017.
 - **`WhatsNextPanel`** (aw-073 / ADR-0027; dismiss rewired to a bounded on-disk delete by
   aw-vmk1z / ADR-0046; rebuilt into a numbered **flight-plan stepper** by agentic-workflow-a2pm1
   / ADR-0048; hoisted out of the now-fixed `BoardPromptBar` by agentic-workflow-bz3az) — renders

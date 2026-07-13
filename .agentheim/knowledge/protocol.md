@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 12:29 -- Task verified and completed: agentic-workflow-m2vkp - One launch control, not two — the ochre button names the session's model, Ctrl+M cycles it, and both selections survive a launch
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-m2vkp - One launch control, not two — the ochre button names the session's model, Ctrl+M cycles it, and both selections survive a launch
+**Summary:** The prompt bar has ONE launch control — the styleguide ModelSplitButton, consumed unforked — naming the session model and letting the builder change it; Ctrl+M cycles it as a fifth disjoint key intent from anywhere on the board, Quick Capture pins to Haiku as a read-time projection that never overwrites the stored selection, and both mode and model now survive a launch
+**Duration:** 41m
+**Verification:** PASS (iteration 2)
+**Files changed:** 9
+**Tests added:** 33
+**ADRs written:** ADR-0050 (fifth amendment, in place)
+
+---
+
+## 2026-07-13 13:05 -- Verification failed: agentic-workflow-m2vkp - One launch control, not two — the ochre button names the session's model, Ctrl+M cycles it
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-m2vkp - One launch control, not two — the ochre button names the session's model, Ctrl+M cycles it, and both selections survive a launch
+**Iteration:** 1 of 3
+**Reasons:** Ctrl+M is DOUBLE-HANDLED when the prompt field has focus — `onPromptKeyDown`'s `CYCLE_MODEL` branch and the window-scoped `document` keydown listener both call `setSelectedModel`, and neither calls `stopPropagation()` (React 18 `createRoot` delegates keydown at the root container, so the event bubbles on to `document`). Net step is `+2`. With four models that is a parity trap: from the Opus default it cycles Opus → Haiku → Opus → Haiku, leaving **Fable and Sonnet unreachable** whenever the field is focused — the normal case. The "total wraparound, both when the field has focus and when it does not" AC fails on the focused half. The pure classifier IS correctly disjoint; the defect is one layer below it, in the board's wiring — the window listener bypasses the classifier and re-derives Ctrl+M itself, exactly the "second handler agreeing not to collide" pattern the task forbade. The worker's own test asserted the BUGGY SHAPE (that both handlers contain `setSelectedModel(`) and so passed *because* the bug was present. Secondary: `TESTS_ADDED: 32` did not reconcile against an observed +25 net.
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-07-13 11:47 -- Batch started: [agentic-workflow-m2vkp]
 
 **Type:** Work / Batch start

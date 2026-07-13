@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 140
+- **Doing:** 0
+- **Done:** 141
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-m2vkp** — One launch control, not two — the ochre button names the session's model, Ctrl+M cycles it, and both selections survive a launch (feature) — `doing/agentic-workflow-m2vkp-prompt-bar-model-selector.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-m2vkp** — One launch control, not two — the ochre button names the session's model, Ctrl+M cycles it, and both selections survive a launch (feature) — `done/agentic-workflow-m2vkp-prompt-bar-model-selector.md`
 - **agentic-workflow-spv0k** — Launched/Copied flash paints on Quick Capture instead of the fired mode's tab (bug) — `done/agentic-workflow-spv0k-launched-flash-paints-on-quick-capture-not-fired-mode.md`
 - **agentic-workflow-tkq7v** — Prompt bar — Tab/Shift+Tab cycles the mode tabs; Ctrl+←/→ returns to native word-jump (feature) — `done/agentic-workflow-tkq7v-prompt-bar-tab-cycles-modes-frees-ctrl-arrows.md`
 - **agentic-workflow-rwxms** — applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder (bug) — `done/agentic-workflow-rwxms-applytaskmove-missing-destination-dir.md`

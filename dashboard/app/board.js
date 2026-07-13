@@ -38,7 +38,7 @@ import { Markdown } from "../../.agentheim/contexts/design-system/styleguide/app
 import { ColumnHeader, TicketCard } from "../../.agentheim/contexts/design-system/styleguide/app/kanban.js";
 import { EmptyColumn } from "../../.agentheim/contexts/design-system/styleguide/app/empty.js";
 import { Icon } from "../../.agentheim/contexts/design-system/styleguide/app/icons.js";
-import { EnterButton } from "../../.agentheim/contexts/design-system/styleguide/app/button.js";
+import { ModelSplitButton } from "../../.agentheim/contexts/design-system/styleguide/app/button.js";
 import { Glyph, ThemeCtx } from "../../.agentheim/contexts/design-system/styleguide/app/foundations.js";
 import { RailItem, TreeItem } from "../../.agentheim/contexts/design-system/styleguide/app/library.js";
 import { Collapsible } from "../../.agentheim/contexts/design-system/styleguide/app/collapsible.js";
@@ -54,7 +54,8 @@ import { loadSkipPermissions, saveSkipPermissions } from "./skip-permissions-sta
 import { SORT_OPTIONS, DEFAULT_SORT, sortTickets } from "./board-sort.js";
 import { refineCommandFor, promoteCommandFor, dismissCommandFor, WORK_COMMAND, WHATS_NEXT_COMMAND } from "./modeling-command.js";
 import { PROMPT_MODES, DEFAULT_PROMPT_MODE_INDEX, clampPromptModeIndex, nextPromptModeIndex, promptBarKeyIntent, PROMPT_KEY_INTENT, canFirePromptMode, nameForPromptMode } from "./prompt-mode.js";
-import { launchOrCopy } from "./bridge-launch.js";
+import { PROMPT_MODELS, DEFAULT_PROMPT_MODEL_INDEX, nextPromptModelIndex, isModelLockedForMode, modelForMode, shouldWindowCtrlMHandle } from "./prompt-model.js";
+import { launchOrCopy, probeBridge } from "./bridge-launch.js";
 import { groupTickets } from "./board-group.js";
 import { resolveHoverDependencies } from "./board-dependencies.js";
 import { annotateSectionHiddenDependency, donePeekHasHiddenDependency, unionTargetIds, classifyEdge } from "./board-dependency-groups.js";
@@ -969,28 +970,55 @@ async function defaultFetchInFlight() {
 
 // The board prompt bar — REBUILT (agentic-workflow-bz3az) from aw-065/aw-068's
 // "Prompt" title + row of flat launch cards into the 1b DOCKED two-row console:
-// a top row of four mode tabs (PromptModeTab, name + one-line meaning) and a
+// a top row of five mode tabs (PromptModeTab, name + one-line meaning) and a
 // bottom row of a `❯` chevron + a genuinely multi-line auto-growing prompt field +
-// a `↵` hint + the ochre Enter button. It docks bottom-center over the board
-// (position: fixed, ~780px, a raised surface + --shadow-lg, above the board in
-// z-order) rather than sitting in the normal document flow — so it never pushes
-// the board content, and (being fixed to the VIEWPORT, not the aw-067
-// `scroll-quiet` content region) it stays put while the board scrolls beneath it.
+// the styleguide's `ModelSplitButton` (design-system-r9dtm), consumed unforked
+// (ADR-0003), as the ONE launch affordance — the old bordered `↵` hint span is
+// GONE (agentic-workflow-m2vkp): its "Enter launches · Shift+Enter for a new
+// line" affordance now lives in the split button's tooltip/aria-label. It docks
+// bottom-center over the board (position: fixed, ~780px, a raised surface +
+// --shadow-lg, above the board in z-order) rather than sitting in the normal
+// document flow — so it never pushes the board content, and (being fixed to the
+// VIEWPORT, not the aw-067 `scroll-quiet` content region) it stays put while the
+// board scrolls beneath it.
 //
-// The keyboard model is ADR-0050's, AMENDED by agentic-workflow-p8k4d (see
-// ADR-0050's "## Amendment" section) — carried by the pure `prompt-mode.js`
+// The keyboard model is ADR-0050's, AMENDED by agentic-workflow-p8k4d, then
+// agentic-workflow-tkq7v, then agentic-workflow-m2vkp (see ADR-0050's
+// "## Amendment" sections) — carried by the pure `prompt-mode.js`
 // (PROMPT_MODES / clampPromptModeIndex / nextPromptModeIndex / promptBarKeyIntent):
-// a single committed `highlightedMode` index (never four independent booleans),
-// defaulting to Quick Capture (0) on mount and resetting to 0 after every
-// successful launch. Every trigger that can fire a mode's command — bare Enter,
-// Ctrl+Enter, or the Enter button — routes through the ONE `fire(modeIndex)`
-// function below, so all three are behaviourally identical: the same seeded
-// command, the same `launchOrCopy` bridge-or-clipboard path, the same armed
-// `skipPermissions` thread, the same `onResult` clear-textarea + confetti + reset.
-// Clicking a mode tab ONLY moves the committed highlight — it no longer launches
-// (p8k4d reverses bz3az's click-to-launch). Ctrl+Space focuses the field from
-// anywhere on the board (a window-scoped `document` listener below). Shift+Enter
-// inserts a real line break instead of launching.
+// a single committed `highlightedMode` index (never five independent booleans),
+// defaulting to Quick Capture (0) on mount. Every trigger that can fire a mode's
+// command — bare Enter, Ctrl+Enter, or the split button's primary region —
+// routes through the ONE `fire(modeIndex)` function below, so all three are
+// behaviourally identical: the same seeded command, the same `launchOrCopy`
+// bridge-or-clipboard path, the same armed `skipPermissions` thread, the same
+// `onResult` clear-textarea + confetti. Clicking a mode tab ONLY moves the
+// committed highlight — it no longer launches (p8k4d reverses bz3az's
+// click-to-launch). Ctrl+Space focuses the field from anywhere on the board (a
+// window-scoped `document` listener below). Shift+Enter inserts a real line
+// break instead of launching.
+//
+// agentic-workflow-m2vkp adds a SECOND, orthogonal axis — which MODEL the
+// launched session runs on (`prompt-model.js`) — carried by its own
+// `selectedModel` index, cycled by Ctrl+M (the FIFTH disjoint
+// `promptBarKeyIntent` label, CYCLE_MODEL) from anywhere on the board: the
+// field's own `onPromptKeyDown` owns it while the field has focus, the
+// window-scoped `document` listener owns it everywhere else, and
+// `shouldWindowCtrlMHandle` (prompt-model.js) keeps the two MUTUALLY
+// EXCLUSIVE — one keystroke, one cycle, never both handlers at once (a
+// double-dispatch bug caught by verification on iteration 1, since a
+// keydown dispatched on the field still bubbles to `document` under React's
+// `createRoot`). Quick Capture PINS the resolved model to Haiku as a
+// read-time projection (`modelForMode`) — the stored `selectedModel` is never
+// overwritten, so switching away from and back to Quick Capture always
+// restores whatever was selected. With no bridge reachable (`probeBridge`,
+// checked on mount), a clipboard-copied command can never carry a `--model`
+// flag, so the button renders `locked`, names no model ("Default"), and Ctrl+M
+// is a no-op — the launch itself still works via the clipboard fallback.
+// BOTH the mode highlight and the model selection now SURVIVE a successful
+// launch (this task reverses ADR-0050's original reset-to-Quick-Capture rule
+// on both axes) — only the textarea clears; a reload (no persistence, ADR-0017)
+// starts fresh at Quick Capture + Opus.
 //
 // Preserved unchanged from aw-023/aw-036/aw-h7n2c: `autoGrowField` (auto-grow
 // band), the four seeded commands' trimmed-or-bare-fallback contract (reached via
@@ -1006,50 +1034,107 @@ function BoardPromptBar({ skipPermissions = false }) {
   // The launched/copied flash, shared across every trigger (tab click, Enter
   // button, Ctrl+Enter). `feedback` carries the word ("launched"/"copied"/
   // "idle"); `firedMode` (agentic-workflow-spv0k) records WHICH tab it paints
-  // on — the mode index `fire()` actually launched, captured at fire time so
-  // ADR-0050's success-reset (`onResult`'s `setHighlightedMode(DEFAULT_...)`,
-  // batched into the SAME re-render as the feedback update) can snap the
-  // committed highlight back to Quick Capture without relocating the flash.
-  // The two channels ADR-0050 names — committed selection vs. transient
-  // feedback — are read out independently: `highlightedMode` for the ochre
-  // underline/fill, `firedMode` for the flash.
+  // on — the mode index `fire()` actually launched, captured at fire time.
+  // agentic-workflow-m2vkp retires the ADR-0050 success-reset this comment
+  // used to describe (`onResult` no longer calls `setHighlightedMode`) —
+  // `firedMode` still anchors the flash independently of `highlightedMode`,
+  // now simply because they are two channels tracking two different things,
+  // not because a reset would otherwise conflate them. The two channels
+  // ADR-0050 names — committed selection vs. transient feedback — are read
+  // out independently: `highlightedMode` for the ochre underline/fill,
+  // `firedMode` for the flash.
   const [feedback, setFeedback] = useState("idle");
   const [firedMode, setFiredMode] = useState(null);
+  // agentic-workflow-m2vkp: the SECOND, orthogonal selection channel — which
+  // model the launched session runs on. Defaults to Opus on mount; unlike the
+  // superseded ADR-0050 rule, this NEVER resets after a launch (see onResult
+  // below) — persistence is in-page only (ADR-0017), so a reload is what
+  // returns it to Opus, not a successful launch.
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_PROMPT_MODEL_INDEX);
+  // Ambient bridge-presence signal (infrastructure-h5wnq's probeBridge) — a
+  // clipboard-copied command can never carry a --model flag, so the split
+  // button locks and names no model when the bridge is unreachable.
+  const [bridgePresent, setBridgePresent] = useState(false);
   // The single-line auto-grow (aw-038) holds a ref to the textarea so the field can
   // measure its own scrollHeight to grow/shrink to fit.
   const textareaRef = useRef(null);
   const timer = useRef(null);
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
 
-  // Ctrl+Space focuses the prompt field from ANYWHERE on the board (p8k4d, settled
-  // during refinement) — a window-scoped `document` keydown listener, registered and
-  // torn down here. It preventDefault()s the browser default and focuses the
-  // textarea via `textareaRef`; the only editable field on the board IS this
-  // textarea, so "don't steal an in-progress edit elsewhere" reduces to "just focus
-  // it" (there is nowhere else an edit could already be in progress).
+  // Probe the bridge once on mount (agentic-workflow-m2vkp). Never throws,
+  // never rejects (probeBridge's own contract) — a probe that never resolves
+  // simply leaves the button locked, which is the safe default.
+  useEffect(() => {
+    let cancelled = false;
+    const fetchImpl = typeof window !== "undefined" && typeof window.fetch === "function"
+      ? window.fetch.bind(window)
+      : undefined;
+    probeBridge(fetchImpl).then((res) => {
+      if (!cancelled) setBridgePresent(!!(res && res.present));
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  // The model selector is locked — no caret, Ctrl+M a no-op — whenever the
+  // bridge is unreachable (a copied command can never carry --model) OR the
+  // highlighted mode is Quick Capture (its model is pinned to Haiku).
+  const modelLocked = !bridgePresent || isModelLockedForMode(highlightedMode);
+
+  // Ctrl+Space focuses the prompt field, and Ctrl+M cycles the selected model,
+  // from ANYWHERE on the board (p8k4d settled Ctrl+Space; agentic-workflow-m2vkp
+  // adds Ctrl+M alongside it, the same window-scoped pattern) — a `document`
+  // keydown listener, registered and torn down here. Ctrl+Space preventDefault()s
+  // the browser default and focuses the textarea via `textareaRef`. Ctrl+M
+  // preventDefault()s too, but only mutates `selectedModel` when the model is
+  // NOT locked — on Quick Capture, or with no bridge reachable, it is a true
+  // no-op: no state change, no visible feedback.
+  //
+  // MUTUAL EXCLUSION (fixed in agentic-workflow-m2vkp iteration 2, after the
+  // verifier caught the double-dispatch on iteration 1): Ctrl+Space is safe to
+  // handle unconditionally here because `promptBarKeyIntent` classifies it
+  // 'pass' — the field's own `onPromptKeyDown` never touches it, so this is
+  // its ONLY handler. Ctrl+M is different: `promptBarKeyIntent` classifies it
+  // CYCLE_MODEL, so `onPromptKeyDown` ALSO owns it whenever the field has
+  // focus. Because React (createRoot) dispatches its own delegated keydown at
+  // the field AND the native event still bubbles on to `document`, a Ctrl+M
+  // pressed while the field is focused would otherwise be handled TWICE —
+  // once here, once in `onPromptKeyDown` — stepping `selectedModel` by two
+  // instead of one. `shouldWindowCtrlMHandle` (prompt-model.js) is the guard:
+  // it refuses whenever the event's `target` is the prompt field itself,
+  // leaving that case entirely to `onPromptKeyDown`. Ctrl+M pressed anywhere
+  // else on the board (nothing focused, or focus elsewhere) still reaches
+  // this listener and is handled here, same as before.
   useEffect(() => {
     function onWindowKeyDown(e) {
       if (e.ctrlKey === true && e.key === " ") {
         e.preventDefault();
         if (textareaRef.current) textareaRef.current.focus();
+        return;
+      }
+      if (e.ctrlKey === true && !e.altKey && (e.key === "m" || e.key === "M")) {
+        if (!shouldWindowCtrlMHandle(e, textareaRef.current)) return;
+        e.preventDefault();
+        if (modelLocked) return;
+        setSelectedModel((current) => nextPromptModelIndex(current, 1));
       }
     }
     document.addEventListener("keydown", onWindowKeyDown);
     return () => document.removeEventListener("keydown", onWindowKeyDown);
-  }, []);
+  }, [modelLocked]);
 
   // Fire only on a successful launch / landed copy (aw-023). A fully-silent action
   // (clipboard blocked too) leaves the textarea and plays no confetti. The field is
-  // re-measured after the clear so it shrinks back to one line (aw-038). ADR-0050's
-  // default/reset: the highlight also resets to Quick Capture (0) here, mirroring
-  // the existing clear + confetti reset path.
+  // re-measured after the clear so it shrinks back to one line (aw-038).
+  // agentic-workflow-m2vkp REVERSES ADR-0050's original default/reset rule: the
+  // highlighted mode and the selected model both SURVIVE a successful launch —
+  // only the textarea clears (confetti still fires). Firing three Modeling
+  // prompts in a row no longer means re-selecting Modeling three times.
   const onResult = useCallback((res) => {
     const succeeded = res && (res.via === "bridge" || res.copied === true);
     if (!succeeded) return;
     setPrompt("");
     autoGrowField(textareaRef.current, PROMPT_FIELD_MAX_PX);
     setConfettiKey((k) => k + 1);
-    setHighlightedMode(DEFAULT_PROMPT_MODE_INDEX);
   }, []);
 
   // The ONE launch path every trigger (tab click / Enter button / Ctrl+Enter)
@@ -1062,16 +1147,23 @@ function BoardPromptBar({ skipPermissions = false }) {
   // which mode is highlighted. The shared canFirePromptMode predicate
   // (prompt-mode.js) is consulted FIRST, before anything else runs — a
   // decline is a true no-op: no bridge call, no clipboard write, no
-  // confetti, no textarea clear, no highlight reset, no feedback chip.
+  // confetti, no highlight/model change, no feedback chip.
+  //
+  // agentic-workflow-m2vkp: the resolved model (modelForMode — Quick
+  // Capture's Haiku pin, or the selected model otherwise) rides the launch
+  // via launchOrCopy's `model` field (infrastructure-h5wnq). The clipboard
+  // fallback never sees a `--model` flag regardless (launchOrCopy's own
+  // contract), so passing it unconditionally here is safe.
   const fire = useCallback((modeIndex) => {
     const idx = clampPromptModeIndex(modeIndex);
     if (!canFirePromptMode(idx, prompt)) return;
     const command = PROMPT_MODES[idx].commandFor(prompt);
     const name = nameForPromptMode(idx, prompt);
+    const model = PROMPT_MODELS[modelForMode(idx, selectedModel)].id;
     const fetchImpl = typeof window !== "undefined" && typeof window.fetch === "function"
       ? window.fetch.bind(window)
       : undefined;
-    return launchOrCopy({ prompt: command, fetchImpl, copy: copyToClipboard, skipPermissions: skipPermissions === true, name }).then((res) => {
+    return launchOrCopy({ prompt: command, fetchImpl, copy: copyToClipboard, skipPermissions: skipPermissions === true, name, model }).then((res) => {
       onResult(res);
       // Record WHICH tab fired before (or alongside) onResult's highlight
       // reset — the flash must anchor to `idx`, never to wherever
@@ -1082,7 +1174,7 @@ function BoardPromptBar({ skipPermissions = false }) {
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => setFeedback("idle"), 1100);
     });
-  }, [prompt, skipPermissions, onResult]);
+  }, [prompt, skipPermissions, onResult, selectedModel]);
 
   // Clicking a tab ONLY moves the committed highlight (p8k4d reverses bz3az/
   // ADR-0050's click-to-launch contract — see ADR-0050's "## Amendment" section).
@@ -1101,20 +1193,28 @@ function BoardPromptBar({ skipPermissions = false }) {
   }, []);
 
   // The prompt field's ONE keydown classifier (ADR-0050 invariant 4, amended by
-  // p8k4d, then by agentic-workflow-tkq7v — `promptBarKeyIntent` returns exactly
-  // one of four disjoint labels, so no keystroke can ever be double-handled):
-  //   newline -> Shift+Enter. No preventDefault — the textarea inserts its own line
-  //              break natively (p8k4d, retires aw-038's swallow + single-line rule).
-  //   cycle   -> Tab / Shift+Tab (agentic-workflow-tkq7v reverses the original
-  //              Ctrl+ArrowLeft/ArrowRight trigger, freeing native word-jump/
-  //              word-select inside the now-multi-line field). Moves the
-  //              highlight (nextPromptModeIndex, total wraparound), launches
-  //              nothing. preventDefault()s so Tab does not move focus out of
-  //              the textarea.
-  //   launch  -> bare Enter OR Ctrl+Enter — fires the highlighted mode exactly as a
-  //              click on the Enter button would (p8k4d: bare Enter now launches).
-  //   pass    -> ordinary typing / unmodified navigation — no interception.
-  // Escape (agentic-workflow-tkq7v) is handled OUTSIDE promptBarKeyIntent's four
+  // p8k4d, then by agentic-workflow-tkq7v, then by agentic-workflow-m2vkp —
+  // `promptBarKeyIntent` returns exactly one of FIVE disjoint labels, so no
+  // keystroke can ever be double-handled):
+  //   newline      -> Shift+Enter. No preventDefault — the textarea inserts its
+  //                   own line break natively (p8k4d, retires aw-038's swallow
+  //                   + single-line rule).
+  //   cycle        -> Tab / Shift+Tab (agentic-workflow-tkq7v reverses the
+  //                   original Ctrl+ArrowLeft/ArrowRight trigger, freeing
+  //                   native word-jump/word-select inside the now-multi-line
+  //                   field). Moves the highlight (nextPromptModeIndex, total
+  //                   wraparound), launches nothing. preventDefault()s so Tab
+  //                   does not move focus out of the textarea.
+  //   cycle_model  -> Ctrl+M (agentic-workflow-m2vkp, ADR-0050's fifth
+  //                   amendment). Moves the SELECTED MODEL, a second axis
+  //                   entirely separate from the mode highlight above — a
+  //                   true no-op when the model is locked (Quick Capture, or
+  //                   no bridge reachable).
+  //   launch       -> bare Enter OR Ctrl+Enter — fires the highlighted mode
+  //                   exactly as a click on the split button's primary region
+  //                   would (p8k4d: bare Enter now launches).
+  //   pass         -> ordinary typing / unmodified navigation — no interception.
+  // Escape (agentic-workflow-tkq7v) is handled OUTSIDE promptBarKeyIntent's five
   // labels — it classifies 'pass' there, same as before — but is checked first
   // here to blur the textarea: the WCAG 2.1.2 keyboard-trap mitigation for
   // hijacking Tab while the field has focus. It never touches the typed prompt.
@@ -1133,11 +1233,17 @@ function BoardPromptBar({ skipPermissions = false }) {
       setHighlightedMode((current) => nextPromptModeIndex(current, direction));
       return;
     }
+    if (intent === PROMPT_KEY_INTENT.CYCLE_MODEL) {
+      e.preventDefault();
+      if (modelLocked) return;
+      setSelectedModel((current) => nextPromptModelIndex(current, 1));
+      return;
+    }
     if (intent === PROMPT_KEY_INTENT.LAUNCH) {
       e.preventDefault();
       fire(highlightedMode);
     }
-  }, [fire, highlightedMode]);
+  }, [fire, highlightedMode, modelLocked]);
 
   const activeMode = PROMPT_MODES[highlightedMode];
   // The ONE predicate both the Enter button's disabled state and fire()'s
@@ -1150,6 +1256,24 @@ function BoardPromptBar({ skipPermissions = false }) {
   const enterHint = canFire
     ? `Launch ${activeMode.label} — ${activeMode.commandFor(prompt)}`
     : `Type a prompt to launch ${activeMode.label}`;
+
+  // agentic-workflow-m2vkp: the resolved model this launch will actually run
+  // on — the ONE resolver (modelForMode) both this label and fire()'s launch
+  // payload consult. With no bridge reachable, a clipboard-copied command can
+  // never carry --model, so the label names none ("Default") regardless of
+  // mode/selection — the button is locked either way (modelLocked, above).
+  const resolvedModel = PROMPT_MODELS[modelForMode(highlightedMode, selectedModel)];
+  const modelLabel = bridgePresent ? resolvedModel.label : "Default";
+  const modelHint = !bridgePresent
+    ? "No bridge reachable — the launch will copy to the clipboard, which cannot carry a model choice"
+    : isModelLockedForMode(highlightedMode)
+      ? "Quick Capture always runs on Haiku"
+      : `Running on ${resolvedModel.label} — Ctrl+M cycles`;
+  const splitButtonTitle = `${enterHint} · ${modelHint} · Enter launches · Shift+Enter for a new line`;
+  const onSelectModel = useCallback((label) => {
+    const idx = PROMPT_MODELS.findIndex((m) => m.label === label);
+    if (idx >= 0) setSelectedModel(idx);
+  }, []);
 
   return html`
     <section aria-label="Author a prompt, then choose a mode to launch" style=${{
@@ -1182,9 +1306,11 @@ function BoardPromptBar({ skipPermissions = false }) {
       ${/* A horizontal --hairline divider separates the tab row from the input
             row (agentic-workflow-q7r3x, Section 1b). */ ""}
       <div aria-hidden="true" style=${{ height: 1, background: "var(--hairline)", flexShrink: 0 }}></div>
-      ${/* Row 2: chevron + single-line auto-growing field + ↵ hint + the ochre
-            Enter button (ADR-0048's already-licensed primed-primary-action carve-out,
-            ADR-0003's unforked EnterButton primitive). */ ""}
+      ${/* Row 2: chevron + genuinely multi-line auto-growing field + the ochre
+            ModelSplitButton (ADR-0048's already-licensed primed-primary-action
+            carve-out, design-system-r9dtm's unforked primitive, ADR-0003). The
+            old bordered ↵ hint span is GONE (agentic-workflow-m2vkp) — its
+            affordance now lives in the split button's tooltip/aria-label. */ ""}
       <div style=${{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px 12px" }}>
         <span aria-hidden="true" style=${{
           fontFamily: "var(--font-ui)", fontSize: 15, fontWeight: 700, color: "var(--accent-ochre)", flexShrink: 0,
@@ -1209,15 +1335,15 @@ function BoardPromptBar({ skipPermissions = false }) {
           }}
           onFocus=${(e) => { e.currentTarget.style.borderColor = "var(--hairline-strong)"; }}
           onBlur=${(e) => { e.currentTarget.style.borderColor = "var(--hairline)"; }} />
-        <span aria-hidden="true" title="Enter launches · Shift+Enter for a new line" style=${{
-          fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--fg-4)",
-          border: "1px solid var(--hairline)", borderRadius: "var(--radius-sm)",
-          padding: "2px 6px", flexShrink: 0,
-        }}>↵</span>
-        <span title=${enterHint}>
-          <${EnterButton}
+        <span title=${splitButtonTitle}>
+          <${ModelSplitButton}
+            label=${modelLabel}
             onClick=${() => fire(highlightedMode)}
             ariaLabel=${enterHint}
+            options=${PROMPT_MODELS.map((m) => m.label)}
+            value=${modelLabel}
+            onSelect=${onSelectModel}
+            locked=${modelLocked}
             disabled=${!canFire} />
         </span>
       </div>

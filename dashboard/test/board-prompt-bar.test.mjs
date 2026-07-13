@@ -73,14 +73,16 @@ test('BoardPromptBar owns a single committed highlightedMode index (ADR-0050) de
     'there must be no per-mode boolean selection state');
 });
 
-test('the highlight resets to Quick Capture (0) after a successful launch (ADR-0050 default/reset)', () => {
+// agentic-workflow-m2vkp reverses ADR-0050's original default/reset rule: the
+// highlight now SURVIVES a successful launch — onResult must never reset it.
+test('the highlight SURVIVES a successful launch — onResult no longer resets it to Quick Capture (agentic-workflow-m2vkp reverses ADR-0050 default/reset)', () => {
   const bar = barSrc();
   const onResultFn = bar.match(/const onResult = useCallback\(\(res\) => \{[\s\S]*?\}, \[\]\);/);
   assert.ok(onResultFn, 'onResult callback must exist');
-  assert.match(onResultFn[0], /setHighlightedMode\(DEFAULT_PROMPT_MODE_INDEX\)/, 'a successful launch must reset the highlight to Quick Capture');
+  assert.doesNotMatch(onResultFn[0], /setHighlightedMode/, 'a successful launch must NOT touch highlightedMode any more (agentic-workflow-m2vkp)');
 });
 
-test('every launch trigger (bare Enter, Ctrl+Enter, Enter button) routes through the SAME fire() function — tab click does NOT (p8k4d)', () => {
+test('every launch trigger (bare Enter, Ctrl+Enter, the split button\'s primary region) routes through the SAME fire() function — tab click does NOT (p8k4d)', () => {
   const bar = barSrc();
   assert.match(bar, /const fire = useCallback\(/, 'a single fire(modeIndex) function must exist');
   assert.match(bar, /launchOrCopy\(/, 'fire must call the shared launchOrCopy bridge-or-clipboard path');
@@ -89,13 +91,13 @@ test('every launch trigger (bare Enter, Ctrl+Enter, Enter button) routes through
   assert.ok(onTabClick, 'onTabClick must exist');
   assert.match(onTabClick[0], /setHighlightedMode\(index\)/, 'clicking a tab must move the committed highlight to it');
   assert.doesNotMatch(onTabClick[0], /fire\(/, 'clicking a tab must NOT launch anything (p8k4d)');
-  // Enter button (agentic-workflow-q7r3x: the unforked EnterButton primitive).
-  const enterButton = bar.match(/<\$\{EnterButton\}[\s\S]*?\/>/);
-  assert.ok(enterButton, 'an EnterButton must exist');
-  assert.match(enterButton[0], /onClick=\$\{\(\)\s*=>\s*fire\(highlightedMode\)\}/, 'the Enter button must call fire(highlightedMode)');
+  // The launch affordance is now ModelSplitButton (design-system-r9dtm), unforked (agentic-workflow-m2vkp).
+  const splitButton = bar.match(/<\$\{ModelSplitButton\}[\s\S]*?\/>/);
+  assert.ok(splitButton, 'a ModelSplitButton must exist');
+  assert.match(splitButton[0], /onClick=\$\{\(\)\s*=>\s*fire\(highlightedMode\)\}/, 'the split button\'s primary region must call fire(highlightedMode)');
   // Bare Enter and Ctrl+Enter (both classify LAUNCH) must also call fire.
-  const keyDownFn = bar.match(/const onPromptKeyDown = useCallback\(\(e\) => \{[\s\S]*?\}, \[fire, highlightedMode\]\);/);
-  assert.ok(keyDownFn, 'onPromptKeyDown must exist and depend on [fire, highlightedMode]');
+  const keyDownFn = bar.match(/const onPromptKeyDown = useCallback\(\(e\) => \{[\s\S]*?\}, \[fire, highlightedMode, modelLocked\]\);/);
+  assert.ok(keyDownFn, 'onPromptKeyDown must exist and depend on [fire, highlightedMode, modelLocked]');
   assert.match(keyDownFn[0], /PROMPT_KEY_INTENT\.LAUNCH/, 'onPromptKeyDown must branch on the LAUNCH intent');
   assert.match(keyDownFn[0], /fire\(highlightedMode\)/, 'the LAUNCH branch must call fire(highlightedMode)');
 });
@@ -105,7 +107,7 @@ test('every launch trigger (bare Enter, Ctrl+Enter, Enter button) routes through
 // direction rather than `e.key` (ArrowLeft/ArrowRight).
 test('Tab/Shift+Tab cycle the highlight via nextPromptModeIndex, direction from shiftKey, without launching (agentic-workflow-tkq7v)', () => {
   const bar = barSrc();
-  const keyDownFn = bar.match(/const onPromptKeyDown = useCallback\(\(e\) => \{[\s\S]*?\}, \[fire, highlightedMode\]\);/)[0];
+  const keyDownFn = bar.match(/const onPromptKeyDown = useCallback\(\(e\) => \{[\s\S]*?\}, \[fire, highlightedMode, modelLocked\]\);/)[0];
   assert.match(keyDownFn, /PROMPT_KEY_INTENT\.CYCLE/, 'onPromptKeyDown must branch on the CYCLE intent');
   assert.match(keyDownFn, /nextPromptModeIndex\(/, 'the CYCLE branch must compute the next index via nextPromptModeIndex');
   assert.match(keyDownFn, /setHighlightedMode\(/, 'the CYCLE branch must move the highlight');
@@ -122,7 +124,7 @@ test('Tab/Shift+Tab cycle the highlight via nextPromptModeIndex, direction from 
 // focus navigation back to native Tab.
 test('Escape blurs the prompt textarea, and does not clear the prompt (agentic-workflow-tkq7v)', () => {
   const bar = barSrc();
-  const keyDownFn = bar.match(/const onPromptKeyDown = useCallback\(\(e\) => \{[\s\S]*?\}, \[fire, highlightedMode\]\);/)[0];
+  const keyDownFn = bar.match(/const onPromptKeyDown = useCallback\(\(e\) => \{[\s\S]*?\}, \[fire, highlightedMode, modelLocked\]\);/)[0];
   assert.match(keyDownFn, /["']Escape["']/, 'onPromptKeyDown must check for the Escape key');
   assert.match(keyDownFn, /\.blur\(\)/, 'Escape must blur the textarea');
   const escapeBlock = keyDownFn.match(/if\s*\(\s*e\.key\s*===\s*["']Escape["']\s*\)\s*\{[\s\S]*?\n\s*\}/);
@@ -132,7 +134,7 @@ test('Escape blurs the prompt textarea, and does not clear the prompt (agentic-w
 
 test('Shift+Enter classifies as NEWLINE via the same promptBarKeyIntent classifier and launches nothing (p8k4d)', () => {
   const bar = barSrc();
-  const keyDownFn = bar.match(/const onPromptKeyDown = useCallback\(\(e\) => \{[\s\S]*?\}, \[fire, highlightedMode\]\);/)[0];
+  const keyDownFn = bar.match(/const onPromptKeyDown = useCallback\(\(e\) => \{[\s\S]*?\}, \[fire, highlightedMode, modelLocked\]\);/)[0];
   assert.match(keyDownFn, /const intent = promptBarKeyIntent\(e\)/, 'the classifier must be the single source of the intent');
   assert.doesNotMatch(keyDownFn, /PROMPT_KEY_INTENT\.SWALLOW/, 'the retired SWALLOW label must not appear (p8k4d)');
   assert.match(keyDownFn, /PROMPT_KEY_INTENT\.NEWLINE/, 'the NEWLINE branch must exist');
@@ -188,18 +190,24 @@ test('the highlighted tab wears a filled cell background, gated behind `highligh
   assert.doesNotMatch(tab, /borderRadius:\s*"var\(--radius-sm\)"/, 'an individual tab cell must not round its own corners (edge-to-edge cells)');
 });
 
-test('the Enter affordance is the unforked EnterButton primitive (ADR-0003), imported from the styleguide button.js', () => {
+// agentic-workflow-m2vkp: the Enter affordance is swapped for ModelSplitButton
+// (design-system-r9dtm), consumed UNFORKED (ADR-0003) — no ochre split button
+// is hand-rolled in board.js.
+test('the launch affordance is the unforked ModelSplitButton primitive (ADR-0003), imported from the styleguide button.js', () => {
   assert.match(
     boardSrc,
-    /import\s*\{[^}]*EnterButton[^}]*\}\s*from\s*"[^"]*styleguide\/app\/button\.js"/,
-    'board.js must import EnterButton from the styleguide button.js, unforked',
+    /import\s*\{[^}]*ModelSplitButton[^}]*\}\s*from\s*"[^"]*styleguide\/app\/button\.js"/,
+    'board.js must import ModelSplitButton from the styleguide button.js, unforked',
   );
   const bar = barSrc();
-  assert.match(bar, /<\$\{EnterButton\}/, 'the input row must render the EnterButton component');
+  assert.match(bar, /<\$\{ModelSplitButton\}/, 'the input row must render the ModelSplitButton component');
   // The old soft-ochre text "Enter" button markup must be gone — the primitive
   // owns its own paint now (ADR-0003: consumed unforked, not re-styled here).
-  assert.doesNotMatch(bar, /var\(--accent-ochre-soft\)/, 'board.js must not re-implement the Enter button\'s ochre-soft fill (unforked primitive)');
+  assert.doesNotMatch(bar, /var\(--accent-ochre-soft\)/, 'board.js must not re-implement the launch button\'s ochre-soft fill (unforked primitive)');
   assert.doesNotMatch(bar, />\s*Enter\s*</, 'the old literal "Enter" text button must be gone');
+  // The old EnterButton import/usage must be gone entirely — ModelSplitButton
+  // replaces it, not sits beside it.
+  assert.doesNotMatch(boardSrc, /\bEnterButton\b/, 'board.js must no longer import or render EnterButton at all (agentic-workflow-m2vkp)');
 });
 
 test('the docked console is a position:fixed, ~780px, raised-surface console with a big shadow, above the board in z-order', () => {
@@ -210,16 +218,18 @@ test('the docked console is a position:fixed, ~780px, raised-surface console wit
   assert.match(bar, /zIndex:\s*\d+/, 'the console must sit above the board in z-order');
 });
 
-test('the console renders TWO rows: the tablist above, and the chevron + field + hint + Enter button below', () => {
+// agentic-workflow-m2vkp: the bordered ↵ hint span is GONE — the split button
+// is the only launch affordance on row 2.
+test('the console renders TWO rows: the tablist above, and the chevron + field + split button below — the old bordered ↵ hint is gone', () => {
   const bar = barSrc();
   const tablistIdx = bar.indexOf('role="tablist"');
   const textareaIdx = bar.indexOf('<textarea');
-  const enterIdx = bar.lastIndexOf('<${EnterButton}');
-  assert.ok(tablistIdx !== -1 && textareaIdx !== -1 && enterIdx !== -1, 'all three landmarks must be present');
+  const splitButtonIdx = bar.lastIndexOf('<${ModelSplitButton}');
+  assert.ok(tablistIdx !== -1 && textareaIdx !== -1 && splitButtonIdx !== -1, 'all three landmarks must be present');
   assert.ok(tablistIdx < textareaIdx, 'the tab row must render ABOVE the input row');
-  assert.ok(textareaIdx < enterIdx, 'the Enter button must render after (beside) the textarea');
+  assert.ok(textareaIdx < splitButtonIdx, 'the split button must render after (beside) the textarea');
   assert.match(bar, />❯</, 'the input row must render the ❯ chevron');
-  assert.match(bar, />↵</, 'the input row must render the ↵ keyboard hint (Enter is now the primary trigger, p8k4d)');
+  assert.doesNotMatch(bar, />↵</, 'the old bordered ↵ keyboard-hint span must be gone (agentic-workflow-m2vkp) — its affordance moves into the split button\'s tooltip/aria-label');
 });
 
 // agentic-workflow-q7r3x: Section 1b layout deltas.
@@ -366,13 +376,13 @@ test('fire() early-returns before launchOrCopy when canFirePromptMode is false �
     'the canFirePromptMode guard must run BEFORE launchOrCopy, so a decline never bridges, copies, or confettis');
 });
 
-test('the Enter button renders disabled exactly when canFirePromptMode(highlightedMode, prompt) is false, via the unforked disabled prop — for ANY highlighted mode, legacy or Plain (agentic-workflow-m3vhq, widened by agentic-workflow-aqyqd)', () => {
+test('the split button renders disabled exactly when canFirePromptMode(highlightedMode, prompt) is false, via the unforked disabled prop — for ANY highlighted mode, legacy or Plain (agentic-workflow-m3vhq, widened by agentic-workflow-aqyqd, ModelSplitButton since agentic-workflow-m2vkp)', () => {
   const bar = barSrc();
   assert.match(bar, /canFirePromptMode\(highlightedMode,\s*prompt\)/, 'BoardPromptBar must consult the shared predicate for the button state');
-  const enterButton = bar.match(/<\$\{EnterButton\}[\s\S]*?\/>/);
-  assert.ok(enterButton, 'an EnterButton must exist');
-  assert.match(enterButton[0], /disabled=\$\{[^}]*\}/, 'the disabled prop must be forwarded to EnterButton');
-  assert.doesNotMatch(bar, /pointer-events:\s*["']none["']/, 'a disabled Enter button must never be faked with a pointer-events wrapper');
+  const splitButton = bar.match(/<\$\{ModelSplitButton\}[\s\S]*?\/>/);
+  assert.ok(splitButton, 'a ModelSplitButton must exist');
+  assert.match(splitButton[0], /disabled=\$\{!canFire\}/, 'the disabled prop must be forwarded to ModelSplitButton');
+  assert.doesNotMatch(bar, /pointer-events:\s*["']none["']/, 'a disabled split button must never be faked with a pointer-events wrapper');
 });
 
 // agentic-workflow-aqyqd (third ADR-0050 amendment): the decline-to-launch
@@ -469,20 +479,25 @@ test('PromptModeTab takes `flashed` as a prop and no longer derives it from `hig
     'PromptModeTab must not re-derive flashed from highlighted — that conflation is the bug this task fixes');
 });
 
-test('firing a non-default mode (index > 0) flashes on THAT tab, not on Quick Capture, even though the success-reset returns highlightedMode to 0 (agentic-workflow-spv0k)', () => {
+// agentic-workflow-m2vkp retires the success-reset spv0k's fix was written
+// against — the highlight now survives a launch entirely (see the earlier
+// "highlight SURVIVES a successful launch" test). The firedMode/flash
+// independence this test locks down still holds, now simply because they are
+// two separate pieces of state, not because a reset would otherwise conflate
+// them.
+test('firing a non-default mode (index > 0) flashes on THAT tab — firedMode is independent of highlightedMode, which no longer resets at all (agentic-workflow-spv0k, reset retired by agentic-workflow-m2vkp)', () => {
   const bar = barSrc();
   const onResultFn = bar.match(/const onResult = useCallback\(\(res\) => \{[\s\S]*?\}, \[\]\);/)[0];
-  // The reset is still present (ADR-0050 invariant preserved)...
-  assert.match(onResultFn, /setHighlightedMode\(DEFAULT_PROMPT_MODE_INDEX\)/,
-    'the success-reset of the committed highlight to Quick Capture must be preserved');
-  // ...but onResult itself never touches firedMode — only fire()'s own
-  // success branches do, so the reset cannot relocate the flash.
+  // onResult itself never touches firedMode OR highlightedMode any more —
+  // only fire()'s own success branches set firedMode, at the index that
+  // actually launched.
   assert.doesNotMatch(onResultFn, /setFiredMode/,
     'onResult must not set firedMode — only fire() may, at the index that actually launched');
+  assert.doesNotMatch(onResultFn, /setHighlightedMode/,
+    'onResult must not touch highlightedMode either — both selection channels survive a launch (agentic-workflow-m2vkp)');
   // Structurally: the tab's flash prop reads firedMode, and firedMode is only
   // ever assigned the fired `idx`, never DEFAULT_PROMPT_MODE_INDEX — so firing
-  // Modeling (index > 0) paints the flash on Modeling's cell regardless of
-  // where the reset lands the highlight.
+  // Modeling (index > 0) paints the flash on Modeling's cell.
   const fireFn = bar.match(/const fire = useCallback\(\(modeIndex\) => \{[\s\S]*?\}, \[[^\]]*\]\);/)[0];
   assert.doesNotMatch(fireFn, /setFiredMode\(DEFAULT_PROMPT_MODE_INDEX\)/,
     'fire() must key firedMode to the actual fired idx, never hardcode it back to Quick Capture');
@@ -495,4 +510,132 @@ test('a declined launch (blank prompt) sets neither firedMode nor feedback — n
   const firedModeIdx = fireFn.indexOf('setFiredMode(');
   assert.ok(guardIdx !== -1 && firedModeIdx !== -1 && guardIdx < firedModeIdx,
     'the canFirePromptMode decline guard must run before any setFiredMode call, so a decline sets firedMode on no tab');
+});
+
+// --- agentic-workflow-m2vkp: the model selector -------------------------
+//
+// One launch control, not two: the ochre split button now also names the
+// session's model. `dashboard/app/prompt-model.js` carries the pure judgment
+// (covered directly in prompt-model.test.mjs); this suite locks the board's
+// WIRING of that module — the parts that are not pure logic.
+
+test('BoardPromptBar imports the model axis from prompt-model.js and probeBridge from bridge-launch.js', () => {
+  assert.match(
+    boardSrc,
+    /import\s*\{[^}]*PROMPT_MODELS[^}]*DEFAULT_PROMPT_MODEL_INDEX[^}]*nextPromptModelIndex[^}]*isModelLockedForMode[^}]*modelForMode[^}]*\}\s*from\s*"\.\/prompt-model\.js"/,
+    'board.js must import PROMPT_MODELS / DEFAULT_PROMPT_MODEL_INDEX / nextPromptModelIndex / isModelLockedForMode / modelForMode from prompt-model.js',
+  );
+  assert.match(
+    boardSrc,
+    /import\s*\{[^}]*launchOrCopy[^}]*probeBridge[^}]*\}\s*from\s*"\.\/bridge-launch\.js"/,
+    'board.js must import probeBridge alongside launchOrCopy from bridge-launch.js',
+  );
+});
+
+test('BoardPromptBar owns a selectedModel index, defaulting to DEFAULT_PROMPT_MODEL_INDEX (Opus)', () => {
+  const bar = barSrc();
+  assert.match(bar, /const \[selectedModel, setSelectedModel\] = useState\(DEFAULT_PROMPT_MODEL_INDEX\)/,
+    'selectedModel must default via DEFAULT_PROMPT_MODEL_INDEX, mirroring highlightedMode/DEFAULT_PROMPT_MODE_INDEX');
+});
+
+test('BoardPromptBar probes the bridge on mount via probeBridge and tracks bridgePresent', () => {
+  const bar = barSrc();
+  assert.match(bar, /const \[bridgePresent, setBridgePresent\] = useState\(false\)/, 'bridgePresent must default to false');
+  assert.match(bar, /probeBridge\(fetchImpl\)\.then\(/, 'a mount effect must call probeBridge');
+  assert.match(bar, /setBridgePresent\(/, 'the probe result must update bridgePresent');
+});
+
+test('modelLocked is true when the bridge is absent OR the highlighted mode is Quick Capture', () => {
+  const bar = barSrc();
+  assert.match(bar, /const modelLocked = !bridgePresent \|\| isModelLockedForMode\(highlightedMode\)/,
+    'modelLocked must OR bridge-absence with the Quick Capture pin, never re-deriving either independently');
+});
+
+test('fire() resolves the model via modelForMode and threads it into launchOrCopy as `model`', () => {
+  const bar = barSrc();
+  const fireFn = bar.match(/const fire = useCallback\(\(modeIndex\) => \{[\s\S]*?\}, \[[^\]]*\]\);/)[0];
+  assert.match(fireFn, /const model = PROMPT_MODELS\[modelForMode\(idx,\s*selectedModel\)\]\.id/,
+    'fire() must resolve the model id via modelForMode(idx, selectedModel) — the ONE resolver');
+  assert.match(fireFn, /launchOrCopy\(\{[^}]*model[^}]*\}\)/, 'fire() must pass the resolved model id into launchOrCopy');
+});
+
+test('the split button renders locked exactly when modelLocked, and never renders both locked and a real model name for Quick Capture unless the bridge is present', () => {
+  const bar = barSrc();
+  const splitButton = bar.match(/<\$\{ModelSplitButton\}[\s\S]*?\/>/)[0];
+  assert.match(splitButton, /locked=\$\{modelLocked\}/, 'the locked prop must be wired to modelLocked');
+  assert.match(splitButton, /label=\$\{modelLabel\}/, 'the label prop must be wired to the resolved modelLabel');
+  assert.match(splitButton, /options=\$\{PROMPT_MODELS\.map\(/, 'the options prop must be derived from PROMPT_MODELS');
+  assert.match(splitButton, /onSelect=\$\{onSelectModel\}/, 'the onSelect prop must be wired');
+});
+
+test('with no bridge reachable, the resolved label names no model ("Default") regardless of mode/selection', () => {
+  const bar = barSrc();
+  assert.match(bar, /const modelLabel = bridgePresent \? resolvedModel\.label : "Default"/,
+    'modelLabel must fall back to a name that names no real model when the bridge is absent');
+});
+
+test('Ctrl+M cycles selectedModel via nextPromptModelIndex, both field-focused (onPromptKeyDown/CYCLE_MODEL) and window-scoped (like Ctrl+Space) — a no-op when modelLocked', () => {
+  const bar = barSrc();
+  // Field-focused: the CYCLE_MODEL branch inside onPromptKeyDown.
+  const keyDownFn = bar.match(/const onPromptKeyDown = useCallback\(\(e\) => \{[\s\S]*?\}, \[fire, highlightedMode, modelLocked\]\);/)[0];
+  assert.match(keyDownFn, /PROMPT_KEY_INTENT\.CYCLE_MODEL/, 'onPromptKeyDown must branch on the CYCLE_MODEL intent');
+  const cycleModelBlock = keyDownFn.match(/PROMPT_KEY_INTENT\.CYCLE_MODEL\)\s*\{[\s\S]*?\n\s*\}/)[0];
+  assert.match(cycleModelBlock, /if\s*\(modelLocked\)\s*return/, 'the CYCLE_MODEL branch must no-op when modelLocked');
+  assert.match(cycleModelBlock, /setSelectedModel\(\(current\)\s*=>\s*nextPromptModelIndex\(current,\s*1\)\)/,
+    'the CYCLE_MODEL branch must cycle selectedModel via nextPromptModelIndex');
+  assert.doesNotMatch(cycleModelBlock, /fire\(/, 'cycling the model must never launch anything');
+  // Window-scoped: the same document keydown listener that handles Ctrl+Space.
+  const windowListenerFn = bar.match(/function onWindowKeyDown\(e\) \{[\s\S]*?\n    \}\s*document\.addEventListener/)[0];
+  assert.match(windowListenerFn, /["'][mM]["']/, 'the window-scoped listener must also check for the m/M key');
+  assert.match(windowListenerFn, /if\s*\(modelLocked\)\s*return/, 'the window-scoped Ctrl+M must also no-op when modelLocked');
+  assert.match(windowListenerFn, /setSelectedModel\(/, 'the window-scoped listener must cycle selectedModel too');
+});
+
+// Iteration 1 verification caught: the window-scoped listener above hand-rolled
+// its own Ctrl+M check with NO guard against the field already owning the same
+// keystroke, so a Ctrl+M pressed while the prompt field was focused was handled
+// TWICE (field's onPromptKeyDown AND this window listener, since the native
+// event still bubbles to `document` under React's createRoot) — stepping
+// selectedModel by two instead of one. This test locks the WIRING of the fix:
+// the window listener must consult `shouldWindowCtrlMHandle` (prompt-model.js's
+// mutual-exclusion guard, behaviorally proven in prompt-model.test.mjs) and
+// bail out before touching selectedModel when the field already owns the
+// keystroke. The actual "advances by exactly one" invariant is NOT
+// approximated by regex here — see prompt-model.test.mjs's
+// 'a single Ctrl+M keydown advances selectedModel by exactly one ...' test,
+// which drives the real exported functions (promptBarKeyIntent,
+// shouldWindowCtrlMHandle, nextPromptModelIndex) through the same two-path
+// scenario and asserts the net step.
+test('the window-scoped Ctrl+M branch consults shouldWindowCtrlMHandle before acting, so a keystroke the field already owns is never double-handled', () => {
+  const bar = barSrc();
+  assert.match(
+    boardSrc,
+    /import\s*\{[^}]*shouldWindowCtrlMHandle[^}]*\}\s*from\s*"\.\/prompt-model\.js"/,
+    'board.js must import shouldWindowCtrlMHandle from prompt-model.js',
+  );
+  const windowListenerFn = bar.match(/function onWindowKeyDown\(e\) \{[\s\S]*?\n    \}\s*document\.addEventListener/)[0];
+  const ctrlMBlock = windowListenerFn.match(/\(e\.key === "m" \|\| e\.key === "M"\)\)\s*\{[\s\S]*?\n      \}/)[0];
+  assert.match(
+    ctrlMBlock,
+    /if\s*\(!shouldWindowCtrlMHandle\(e,\s*textareaRef\.current\)\)\s*return;/,
+    'the window-scoped Ctrl+M branch must bail out via shouldWindowCtrlMHandle BEFORE preventDefault/setSelectedModel, so the field-focused case is left entirely to onPromptKeyDown',
+  );
+  // The guard must run before preventDefault/modelLocked/setSelectedModel, not after.
+  const guardIndex = ctrlMBlock.indexOf('shouldWindowCtrlMHandle');
+  const preventDefaultIndex = ctrlMBlock.indexOf('preventDefault');
+  assert.ok(guardIndex >= 0 && preventDefaultIndex >= 0 && guardIndex < preventDefaultIndex,
+    'the mutual-exclusion guard must be checked before preventDefault/setSelectedModel');
+});
+
+test('the window-scoped keydown effect depends on [modelLocked] so its Ctrl+M branch always reads the current lock state', () => {
+  const bar = barSrc();
+  assert.match(bar, /document\.addEventListener\("keydown", onWindowKeyDown\);\s*return \(\) => document\.removeEventListener\("keydown", onWindowKeyDown\);\s*\}, \[modelLocked\]\);/,
+    'the window-scoped listener effect must depend on [modelLocked]');
+});
+
+test('the split button tooltip/aria-label carries the Enter-launches/Shift+Enter-newline affordance that used to live in the deleted ↵ hint span', () => {
+  const bar = barSrc();
+  assert.match(bar, /const splitButtonTitle = `[^`]*Enter launches[^`]*Shift\+Enter[^`]*`/,
+    'the split button\'s title must fold in the old ↵ hint\'s "Enter launches / Shift+Enter for a new line" copy');
+  assert.match(bar, /<span title=\$\{splitButtonTitle\}>/, 'the split button must be wrapped in a title tooltip span');
 });

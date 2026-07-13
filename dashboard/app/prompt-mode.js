@@ -62,6 +62,17 @@
    the browser's own tab-switch chords. `newline`, `launch`, and `pass`'s
    other triggers (Enter, Shift+Enter, Ctrl+Enter, Ctrl+Space) are untouched.
 
+   AMENDED by agentic-workflow-m2vkp (see ADR-0050's fifth "## Amendment"
+   section): invariant 4 gains a FIFTH disjoint label, `cycle_model` —
+   Ctrl+M — cycling a SECOND, orthogonal axis (which MODEL the launched
+   session runs on, `dashboard/app/prompt-model.js`) rather than which mode is
+   highlighted. `cycle_model` is classified HERE, in the one classifier every
+   keydown routes through, precisely so a fifth intent holds disjoint from the
+   other four BY CONSTRUCTION rather than by a second handler agreeing not to
+   collide with `promptBarKeyIntent`'s existing branches. The model axis's own
+   wraparound/clamp/pin logic lives in `prompt-model.js`, mirroring this
+   module's shape — but the KEYDOWN CLASSIFICATION stays singular, here.
+
    Color/paint is explicitly out of scope here (ADR-0050 "Out of scope") — this
    module carries only the interaction judgment; ADR-0048/ADR-0051 govern how
    the highlighted tab is painted, in board.js.
@@ -211,31 +222,37 @@ export function nameForPromptMode(index, prompt) {
   return base.slice(0, LAUNCH_NAME_MAX_LEN);
 }
 
-// The four disjoint key-intent labels `promptBarKeyIntent` classifies every
+// The five disjoint key-intent labels `promptBarKeyIntent` classifies every
 // keydown into (invariant 4). Exported so call sites compare against these
 // rather than repeating the string literals.
 //
 // AMENDED by agentic-workflow-p8k4d: 'swallow' is retired and replaced by
 // 'newline' (Shift+Enter, letting the textarea insert its line break
 // natively). Bare Enter moves from 'swallow' to 'launch'.
+//
+// AMENDED by agentic-workflow-m2vkp (ADR-0050's fifth amendment): a FIFTH
+// label, 'cycle_model' (Ctrl+M), cycles the SECOND, orthogonal model-
+// selection axis (prompt-model.js) — disjoint from 'cycle', which moves the
+// mode-highlight axis.
 export const PROMPT_KEY_INTENT = {
   NEWLINE: 'newline',
   CYCLE: 'cycle',
+  CYCLE_MODEL: 'cycle_model',
   LAUNCH: 'launch',
   PASS: 'pass',
 };
 
 /**
  * Invariant 4 (disjoint key-intent classification): classify a single keydown
- * event-like object into exactly one of four mutually exclusive intents:
- *   - 'launch'  — bare Enter OR Ctrl+Enter (no Shift). Fires the highlighted
- *     mode's command exactly as a click on the Enter button would (p8k4d:
- *     bare Enter now launches, reversing aw-038/ADR-0050's original swallow
- *     rule; Ctrl+Enter is kept as a harmless alias).
- *   - 'newline' — Shift+Enter, regardless of Ctrl. No launch; the caller lets
- *     the textarea insert its own line break natively (p8k4d — retires
+ * event-like object into exactly one of five mutually exclusive intents:
+ *   - 'launch'      — bare Enter OR Ctrl+Enter (no Shift). Fires the
+ *     highlighted mode's command exactly as a click on the Enter button
+ *     would (p8k4d: bare Enter now launches, reversing aw-038/ADR-0050's
+ *     original swallow rule; Ctrl+Enter is kept as a harmless alias).
+ *   - 'newline'     — Shift+Enter, regardless of Ctrl. No launch; the caller
+ *     lets the textarea insert its own line break natively (p8k4d — retires
  *     aw-038's single-line collapse).
- *   - 'cycle'   — Tab (no Ctrl/Alt) or Shift+Tab (agentic-workflow-tkq7v,
+ *   - 'cycle'       — Tab (no Ctrl/Alt) or Shift+Tab (agentic-workflow-tkq7v,
  *     ADR-0050 amendment — reverses the original Ctrl+ArrowLeft/ArrowRight
  *     trigger). Moves `highlightedMode` (via `nextPromptModeIndex`); the
  *     caller reads `event.shiftKey` itself to pick the direction (Tab →
@@ -243,17 +260,22 @@ export const PROMPT_KEY_INTENT = {
  *     browser tab-switch chords are never shadowed. Ctrl+ArrowLeft /
  *     Ctrl+ArrowRight (with or without Shift) now classify 'pass' too,
  *     restoring native word-jump/word-select inside the textarea.
- *   - 'pass'    — everything else (ordinary typing, unmodified navigation,
- *     any other modified/unmodified key).
- * Because this is the ONE function every call site consults, 'launch' and
- * 'newline' can never collide or be double-handled — there is no code path
- * where both run for the same keystroke (Enter vs Shift+Enter is a single
- * disjoint branch on `shiftKey`).
+ *   - 'cycle_model' — Ctrl+M (agentic-workflow-m2vkp, ADR-0050's fifth
+ *     amendment). Moves the SELECTED MODEL index (`nextPromptModelIndex`,
+ *     `prompt-model.js`) — an axis entirely separate from `highlightedMode`.
+ *     In a browser `keydown`, Ctrl+M reports `key === 'm'` with `ctrlKey` —
+ *     it does NOT masquerade as `Enter` (the ASCII-CR reading is a terminal
+ *     concept; the dashboard runs in VS Code's Simple Browser, not a
+ *     terminal) — so this branch can never collide with 'launch'.
+ *   - 'pass'        — everything else (ordinary typing, unmodified
+ *     navigation, any other modified/unmodified key).
+ * Because this is the ONE function every call site consults, no two of the
+ * five labels can ever collide or be double-handled for the same keystroke.
  * @param {{key?: string, ctrlKey?: boolean, shiftKey?: boolean}} event — a
  *   keydown event (or a plain object shaped like one, for tests).
- * @returns {'newline'|'cycle'|'launch'|'pass'} one of `PROMPT_KEY_INTENT`'s
- *   four labels. A malformed/absent event (no string `key`) degrades to
- *   'pass' — never a throw.
+ * @returns {'newline'|'cycle'|'cycle_model'|'launch'|'pass'} one of
+ *   `PROMPT_KEY_INTENT`'s five labels. A malformed/absent event (no string
+ *   `key`) degrades to 'pass' — never a throw.
  */
 export function promptBarKeyIntent(event) {
   if (!event || typeof event.key !== 'string') return PROMPT_KEY_INTENT.PASS;
@@ -266,6 +288,9 @@ export function promptBarKeyIntent(event) {
   // classified 'pass' so the browser's own tab-switch chords are never
   // shadowed — only a bare Tab (with or without Shift alone) cycles.
   if (event.key === 'Tab' && !ctrl && !alt) return PROMPT_KEY_INTENT.CYCLE;
+  // agentic-workflow-m2vkp (ADR-0050's fifth amendment): Ctrl+M cycles the
+  // SELECTED MODEL, an axis disjoint from the mode highlight above.
+  if (ctrl && !alt && (event.key === 'm' || event.key === 'M')) return PROMPT_KEY_INTENT.CYCLE_MODEL;
   // Ctrl+ArrowLeft / Ctrl+ArrowRight (with or without Shift) are no longer
   // intercepted at all — they fall through to 'pass', restoring the
   // textarea's native word-jump and word-select.

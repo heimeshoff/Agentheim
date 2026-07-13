@@ -219,22 +219,75 @@ test('bare Enter and Shift+Enter can never collide: exactly one of launch/newlin
   assert.equal(shift, PROMPT_KEY_INTENT.NEWLINE);
 });
 
-test('every classification returns exactly one of the four disjoint labels', () => {
+// agentic-workflow-m2vkp (ADR-0050's fifth amendment): a fifth label,
+// CYCLE_MODEL, is added for Ctrl+M — the count moves from four to five.
+test('every classification returns exactly one of the five disjoint labels', () => {
   const labels = new Set(Object.values(PROMPT_KEY_INTENT));
-  assert.equal(labels.size, 4);
+  assert.equal(labels.size, 5);
   assert.ok(!('SWALLOW' in PROMPT_KEY_INTENT), 'the swallow label must be retired (p8k4d)');
   assert.equal(PROMPT_KEY_INTENT.NEWLINE, 'newline');
+  assert.equal(PROMPT_KEY_INTENT.CYCLE_MODEL, 'cycle_model');
   const samples = [
     { key: 'Enter', ctrlKey: false },
     { key: 'Enter', ctrlKey: true },
     { key: 'Enter', shiftKey: true, ctrlKey: false },
     { key: 'Tab' },
     { key: 'Tab', shiftKey: true },
+    { key: 'm', ctrlKey: true },
     { key: 'a', ctrlKey: false },
   ];
   for (const s of samples) {
     assert.ok(labels.has(promptBarKeyIntent(s)));
   }
+});
+
+// --- the fifth intent: cycle_model (Ctrl+M, agentic-workflow-m2vkp) -----
+//
+// The classifier is the ONE place a keystroke becomes an intent (ADR-0050
+// invariant 4). This suite asserts Ctrl+M lands squarely on CYCLE_MODEL and,
+// critically, that it can be shown to NOT also classify as any of the other
+// four labels — a disjointness assertion that would actually go red if a
+// future edit made Ctrl+M ambiguous (e.g. by also matching the Enter branch,
+// or by a stray fallthrough to `cycle` or `pass`).
+
+test('Ctrl+M classifies as cycle_model', () => {
+  assert.equal(promptBarKeyIntent({ key: 'm', ctrlKey: true }), PROMPT_KEY_INTENT.CYCLE_MODEL);
+});
+
+test('Ctrl+Shift+M also classifies as cycle_model (Shift plays no role on the model axis)', () => {
+  assert.equal(promptBarKeyIntent({ key: 'M', ctrlKey: true, shiftKey: true }), PROMPT_KEY_INTENT.CYCLE_MODEL);
+});
+
+test('bare "m" (no Ctrl) classifies as pass-through, not cycle_model — ordinary typing must survive', () => {
+  assert.equal(promptBarKeyIntent({ key: 'm', ctrlKey: false }), PROMPT_KEY_INTENT.PASS);
+  assert.equal(promptBarKeyIntent({ key: 'm' }), PROMPT_KEY_INTENT.PASS);
+});
+
+test('Ctrl+Alt+M classifies as pass-through, not cycle_model', () => {
+  assert.equal(promptBarKeyIntent({ key: 'm', ctrlKey: true, altKey: true }), PROMPT_KEY_INTENT.PASS);
+});
+
+// The load-bearing disjointness proof: Ctrl+M is ASCII CR in a TERMINAL, but
+// this classifier runs against a BROWSER keydown event, where Ctrl+M reports
+// key === 'm' with ctrlKey — never key === 'Enter'. Prove this by construction
+// rather than by assertion alone: run the exact same event object through the
+// classifier and confirm it lands on CYCLE_MODEL, and that changing only the
+// `key` to 'Enter' (holding ctrlKey constant) is what it would take to reach
+// LAUNCH instead — i.e. the two are genuinely different inputs, not two
+// readings of the same one.
+test('Ctrl+M never also classifies as launch, cycle, newline, or pass — the four other labels are all reachable only by a DIFFERENT event', () => {
+  const ctrlM = { key: 'm', ctrlKey: true };
+  const intent = promptBarKeyIntent(ctrlM);
+  assert.equal(intent, PROMPT_KEY_INTENT.CYCLE_MODEL);
+  assert.notEqual(intent, PROMPT_KEY_INTENT.LAUNCH);
+  assert.notEqual(intent, PROMPT_KEY_INTENT.CYCLE);
+  assert.notEqual(intent, PROMPT_KEY_INTENT.NEWLINE);
+  assert.notEqual(intent, PROMPT_KEY_INTENT.PASS);
+  // Sanity: this event's `key` really is 'm', not 'Enter' — the terminal
+  // ASCII-CR reading of Ctrl+M does not apply to this (browser) event shape.
+  assert.equal(ctrlM.key, 'm');
+  assert.notEqual(promptBarKeyIntent({ ...ctrlM, key: 'Enter' }), PROMPT_KEY_INTENT.CYCLE_MODEL);
+  assert.equal(promptBarKeyIntent({ ...ctrlM, key: 'Enter' }), PROMPT_KEY_INTENT.LAUNCH);
 });
 
 // agentic-workflow-m3vhq (AC 5): Plain's decline-to-launch is a `fire()`-level

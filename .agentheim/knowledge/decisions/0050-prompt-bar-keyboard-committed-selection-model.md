@@ -4,8 +4,8 @@ title: Prompt bar gains a keyboard-committed single-selection model, superseding
 scope: agentic-workflow
 status: proposed
 date: 2026-07-05
-related_tasks: [agentic-workflow-s7gev, agentic-workflow-bz3az, agentic-workflow-p8k4d, agentic-workflow-m3vhq, agentic-workflow-aqyqd, agentic-workflow-tkq7v, agentic-workflow-spv0k]
-related_adrs: [ADR-0048]
+related_tasks: [agentic-workflow-s7gev, agentic-workflow-bz3az, agentic-workflow-p8k4d, agentic-workflow-m3vhq, agentic-workflow-aqyqd, agentic-workflow-tkq7v, agentic-workflow-spv0k, agentic-workflow-m2vkp]
+related_adrs: [ADR-0048, ADR-0051, ADR-0031, ADR-0017]
 ---
 
 # ADR-0050: Prompt bar gains a keyboard-committed single-selection model, superseding "no selection"
@@ -396,6 +396,142 @@ every tab unflashed.
 This restores the Decision's own invariant rather than changing it — no new module
 export, no new invariant number, no `PROMPT_MODES`/`prompt-mode.js` shape change.
 
+## Amendment — 2026-07-13 (agentic-workflow-m2vkp): a second, orthogonal selection axis (model), a fifth `promptBarKeyIntent` label (`CYCLE_MODEL`), and the post-launch reset is retired on BOTH axes
+
+The prompt bar's ochre launch button used to be a mute square — the session it
+was about to launch could inherit any model, invisibly, with no way to change
+it short of leaving the board. This amendment adds a **second, orthogonal
+selection channel** — which MODEL the launched session runs on — governed by
+its own pure module, `dashboard/app/prompt-model.js`, sibling to
+`prompt-mode.js` on this new axis. It also **reverses** the Decision's
+original default/reset rule, this time on both axes at once. Every other
+clause of the Decision above and of the four prior amendments (the single
+`highlightedMode` index, invariants 1–3, the two orthogonal
+committed-selection/hover channels, the click-selects-only /
+Enter-launches / Shift+Enter-newlines / Ctrl+Space-focuses model,
+every-mode decline-to-launch, the Tab/Shift+Tab cycle trigger, Escape's
+keyboard-exit, and the `firedMode`-anchored flash) is **unchanged**.
+
+1. **A second axis, orthogonal to `highlightedMode`.** `BoardPromptBar` gains
+   `selectedModel`, a single committed index into `prompt-model.js`'s
+   `PROMPT_MODELS` (Fable · Opus · Sonnet · Haiku — the exact short aliases
+   the bridge's `MODEL_ALLOWLIST` accepts, `infrastructure-h5wnq`), defaulting
+   to Opus (`DEFAULT_PROMPT_MODEL_INDEX = 1`) on mount. It is a peer of
+   `highlightedMode`, not a property of it — the mode axis says WHICH SKILL
+   fires; the model axis says WHAT MODEL runs it. `prompt-model.js` mirrors
+   `prompt-mode.js`'s shape (`clampPromptModelIndex`, `nextPromptModelIndex`)
+   but does NOT duplicate the keydown classifier — that stays singular, in
+   `prompt-mode.js`, per point 2 below.
+2. **`promptBarKeyIntent` gains a FIFTH disjoint label, `CYCLE_MODEL` (Ctrl+M),
+   invariant 4 now covers five labels, not four.** The new intent is
+   classified in the ONE place a keydown becomes an intent — `prompt-mode.js`'s
+   `promptBarKeyIntent`, NOT a second handler in `board.js` that agrees not to
+   collide with the other four. This is deliberate, not incidental: a keystroke
+   double-handled by two branches is exactly the class of bug this bar kept
+   producing (`swallow` vs `newline`; the tkq7v Ctrl+←/→ hijack of native
+   word-jump). Wiring `CYCLE_MODEL` as a fifth label, rather than a second
+   `if (ctrlKey && key === 'm')` check bolted onto the existing branches, keeps
+   "exactly one intent per keystroke" true **by construction**. In a browser
+   `keydown`, Ctrl+M reports `key === 'm'` with `ctrlKey` — it does **not**
+   masquerade as `Enter` (the ASCII-CR reading is a terminal concept; the
+   dashboard runs in VS Code's Simple Browser, not a terminal) — so `launch`
+   is never at risk of colliding with the new branch. Ctrl+M is wired in BOTH
+   places the bar already listens for keys: the field-focused
+   `onPromptKeyDown` (via the classifier) AND the window-scoped `document`
+   keydown effect that already handles Ctrl+Space — so cycling the model
+   works from anywhere on the board, exactly like focusing the field does.
+
+   **Iteration-1 correction (caught by verification, fixed in iteration 2):**
+   wiring Ctrl+M into BOTH places is necessary but not, on its own,
+   sufficient — the first cut left the two handlers able to fire on the
+   SAME keystroke. React (`createRoot`) delegates keydown to the field's own
+   `onPromptKeyDown`, but the native event still bubbles on to `document`
+   afterward, where the window-scoped listener ALSO fired, re-deriving its
+   own `ctrlKey && key === 'm'` check independently of the classifier. With
+   four models, a double-handled Ctrl+M steps by two, not one — a parity
+   trap that made Fable and Sonnet unreachable from a focused field. The
+   fix is a small, explicit mutual-exclusion guard,
+   `shouldWindowCtrlMHandle(event, promptFieldEl)` (`prompt-model.js`): the
+   window-scoped listener consults it and refuses to act whenever the
+   keydown's `target` IS the prompt field, leaving that case entirely to
+   `onPromptKeyDown`. This does not reopen point 2's "singular classifier"
+   rule — `promptBarKeyIntent` is still the ONE place a keystroke becomes an
+   *intent* (CYCLE_MODEL vs. the other four). What the guard adds is a
+   *dispatch*-level rule, one layer below classification: of the two
+   handlers wired to act on that intent (field-focused vs. window-scoped),
+   exactly one may actually run for any given physical keystroke. The lesson
+   generalizes beyond Ctrl+M: whenever a key is wired into both the field's
+   classifier-driven handler and the window-scoped fallback (as opposed to
+   Ctrl+Space, which the classifier deliberately classifies `pass` and which
+   therefore has only ONE handler to begin with), the window-scoped side
+   needs an explicit "does the field already own this?" guard, not an
+   independent re-derivation of the same key check.
+3. **The pin is a projection at READ time, never a mutation.**
+   `isModelLockedForMode` / `modelForMode` (`prompt-model.js`) pin Quick
+   Capture's resolved model to Haiku, but `selectedModel` itself is never
+   overwritten to do it. Selecting Opus on Modeling, switching to Quick
+   Capture (which resolves and shows Haiku), then switching back to Modeling
+   restores Opus — because the stored selection was never touched. This is the
+   load-bearing shape: storing the pin instead would silently eat the
+   builder's choice every time they filed a quick idea. `modelForMode(modeIndex,
+   selectedModelIndex)` is the ONE resolver both the split button's label and
+   `fire()`'s launch payload consult — never re-derived at either call site.
+4. **No bridge, no model promise.** `probeBridge` (`infrastructure-h5wnq`,
+   `bridge-launch.js`) is called once on mount; its result (`bridgePresent`)
+   ORs with the Quick Capture pin to produce `modelLocked`. A clipboard-copied
+   command can never carry a `--model` flag, so with no bridge reachable the
+   split button renders `locked`, names no model (`"Default"`), and Ctrl+M is
+   a true no-op — exactly as it is on Quick Capture. The launch itself is
+   unaffected either way: it still fires via the clipboard fallback.
+5. **The post-launch reset is retired on BOTH axes.** The original Decision's
+   "resets to `0` after every successful launch" clause — already carried
+   forward unchanged by all four prior amendments — is now **reversed**:
+   `onResult` no longer calls `setHighlightedMode`, and the model axis was
+   never reset to begin with (there was nothing to reverse there; this
+   amendment simply never introduces a reset for it). Firing three Modeling
+   prompts back to back, on Sonnet, no longer means re-selecting Modeling and
+   re-picking Sonnet three times. `agentic-workflow-spv0k`'s `firedMode`/flash
+   fix — which existed specifically to survive the old reset without
+   relocating the flash — continues to work unchanged: with no reset left to
+   race against, `firedMode` and `highlightedMode` simply track two
+   independent things, exactly as spv0k's fix already made them do.
+   Persistence remains **in-page only** (ADR-0017's read-only dashboard is
+   untouched) — no `localStorage`, no server write. A reload starts fresh at
+   Quick Capture + Opus, same as mount always has.
+6. **This does not touch ADR-0031.** ADR-0031 pins a model **per agent**
+   (`worker` → sonnet, `verifier` → opus) inside the Agentheim workflow engine.
+   `--model` (what this selector controls) sets the **main-loop / session**
+   model for a dashboard-launched Claude Code session. The two **compose**,
+   they do not conflict: a session launched on Haiku from this selector still
+   spawns its `worker`/`verifier` subagents on whatever ADR-0031 pins them to,
+   because those are a different axis entirely (which agent role runs, not
+   which top-level session was started). Nothing here amends ADR-0031, and no
+   future reader should read this amendment as reconciling the two — there
+   was nothing to reconcile.
+
+**Naming.** `dashboard/app/prompt-model.js` is a new pure, framework-free,
+`node --test`-covered module — a sibling to `prompt-mode.js` in the
+`board-sort.js`/`board-group.js`/`search-results.js` family — exporting
+`PROMPT_MODELS`, `DEFAULT_PROMPT_MODEL_INDEX`, `clampPromptModelIndex`,
+`nextPromptModelIndex`, `isModelLockedForMode`, `modelForMode`, and (added in
+the iteration-2 correction above) `shouldWindowCtrlMHandle` — the pure
+mutual-exclusion guard between the field-focused and window-scoped Ctrl+M
+handlers.
+`prompt-mode.js`'s exported shape gains one new `PROMPT_KEY_INTENT` member,
+`CYCLE_MODEL` (`'cycle_model'`) — `PROMPT_MODES`, `DEFAULT_PROMPT_MODE_INDEX`,
+`clampPromptModeIndex`, `nextPromptModeIndex`, `canFirePromptMode`, and
+`nameForPromptMode` are otherwise unchanged.
+
+**Paint.** The `↵` hint span (row 2 of the console) is deleted outright — its
+"Enter launches · Shift+Enter for a new line" affordance moves into the new
+`ModelSplitButton` primitive's (`design-system-r9dtm`) tooltip/`aria-label`.
+`ModelSplitButton` replaces `EnterButton` as the console's one launch
+affordance, consumed **unforked** (ADR-0003) — it is already licensed to wear
+ochre by ADR-0048's primed-primary-action carve-out (restated by ADR-0051);
+no new paint decision is made here. `locked` renders no caret region at all,
+matching the same "absent, not merely disabled" treatment `EnterButton`'s
+`disabled` prop used for a different state.
+
 ## Consequences
 
 - `dashboard/app/prompt-mode.js` (not yet written) has a named contract before
@@ -451,3 +587,20 @@ export, no new invariant number, no `PROMPT_MODES`/`prompt-mode.js` shape change
   success-reset of the committed-selection channel was hijacking the render of the
   transient-feedback channel, so every launch flashed on Quick Capture. The
   success-reset itself is unchanged, and a declined launch still flashes on no tab.
+- **(Amended by agentic-workflow-m2vkp)** a second, orthogonal selection axis —
+  `selectedModel`, governed by the new sibling module `prompt-model.js`
+  (`PROMPT_MODELS`, `DEFAULT_PROMPT_MODEL_INDEX`, `clampPromptModelIndex`,
+  `nextPromptModelIndex`, `isModelLockedForMode`, `modelForMode`) — sits alongside
+  `highlightedMode`. Invariant 4 (`promptBarKeyIntent`) gains a fifth disjoint label,
+  `CYCLE_MODEL` (Ctrl+M), classified in the ONE classifier rather than a second
+  handler. `modelForMode` pins Quick Capture to Haiku as a read-time projection,
+  never mutating the stored selection. `probeBridge` gates the selector: no bridge
+  reachable locks it and names no model, since a clipboard-copied command can never
+  carry `--model`. The Decision's original "resets to 0 after every successful
+  launch" clause is **reversed on both axes** — `onResult` no longer resets
+  `highlightedMode`, and the model axis was never reset — so both selections survive
+  a launch; a reload (not a launch) is what returns the bar to Quick Capture + Opus.
+  ADR-0031 (per-agent model routing) is untouched — the two compose, they do not
+  conflict. `EnterButton` is replaced by the styleguide's `ModelSplitButton`
+  (design-system-r9dtm), consumed unforked; the `↵` hint span is deleted, its
+  affordance folded into the split button's tooltip/aria-label.
