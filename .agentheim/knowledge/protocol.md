@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 09:49 -- Modeling / Refined: agentic-workflow-rwxms - applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** The capture's claims all re-verified against `main` (write-then-rename at task-lifecycle.mjs:240-241, no destination mkdir anywhere, the L229-231 comment contradicting the code, `doing/` absent on disk in all three BCs right now). Refinement settled the design call the capture deliberately deferred: the fix shape is **pinned to write-to-destination-then-unlink-source** (the capture's shape 2), on the tactical-modeler's invariant-driven argument — judged by residual failure, the mkdir-only patch leaves an *undetectable* status-matches-folder violation (source in `from/` carrying `to`'s status, invisible to `resolveSourceOrReject`, which probes location but never frontmatter) and corrupts the mover's own optimistic-concurrency signal (in-place rewrite bumps mtime before the fallible step, so a legitimate retry falsely rejects `stale-precondition`), while the adopted shape's only residual is a self-healing duplicate, both copies individually valid. Second ruling: a missing destination lifecycle folder is **backfilled (`mkdirSync` recursive), never rejected** — `LIFECYCLE_FOLDERS` is fixed aggregate vocabulary, disk-absence only ever means "currently empty" under git's no-empty-dirs behavior, and a structured rejection would fail-closed a legal move. The ADR question the capture left to work-time was settled at refine time: **ADR-0055 written (accepted)**, amending ADR-0054's "only disk mutation" phrasing (the mover is internally two mutations) without reopening ADR-0054's verb rulings, ADR-0007, or ADR-0038. ACs rewritten from "survive the missing folder" to "succeed against the missing folder" (verbs now create it), plus a genuine pre-unlink-failure test (file-blocks-mkdir fixture), both misleading comments (L229-231 *and* L237-239) corrected, and the residual unlink-throw window explicitly scoped out so its absence reads as decided, not overlooked. Verified no existing test asserts the old ordering (all assert end-states), so the reorder is safe. `depends_on` stays empty — prior-art siblings wq7fn/dk3vz are done, todo/ is empty everywhere.
+**Split into:** none
+**ADRs written:** ADR-0055 (applyTaskMove write-destination-then-unlink-source; missing destination folders backfilled, never rejected)
+
+---
+
 ## 2026-07-13 09:45 -- Modeling / Captured: agentic-workflow-spv0k - Launched/Copied flash paints on Quick Capture instead of the fired mode's tab
 
 **Type:** Modeling / Capture
