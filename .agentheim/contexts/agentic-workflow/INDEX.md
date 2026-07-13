@@ -11,13 +11,14 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 2
+- **Todo:** 3
 - **Doing:** 0
 - **Done:** 137
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-tkq7v** — Prompt bar — Tab/Shift+Tab cycles the mode tabs; Ctrl+←/→ returns to native word-jump (feature) — `todo/agentic-workflow-tkq7v-prompt-bar-tab-cycles-modes-frees-ctrl-arrows.md`
 - **agentic-workflow-rwxms** — applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder (bug) — `todo/agentic-workflow-rwxms-applytaskmove-missing-destination-dir.md`
 - **agentic-workflow-spv0k** — bug: Launched/Copied flash paints on Quick Capture instead of the fired mode's tab — `todo/agentic-workflow-spv0k-launched-flash-paints-on-quick-capture-not-fired-mode.md`
 <!-- todo-list:end -->

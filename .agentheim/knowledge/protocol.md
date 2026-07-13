@@ -42,6 +42,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 09:53 -- Modeling / Captured: agentic-workflow-tkq7v - Prompt bar — Tab/Shift+Tab cycles the mode tabs; Ctrl+←/→ returns to native word-jump
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** The Ctrl+←/→ cycle binding (ADR-0050) steals native word-jump in the now-multi-line prompt field — and the shipped classifier never checks `shiftKey`, so Ctrl+Shift+←/→ word-select is hijacked too. Builder chose Tab/Shift+Tab as the new cycle binding (Escape blurs the field as the keyboard exit) and explicitly kept Ctrl+Space focus-from-anywhere, rejecting `/` and Ctrl+K.
+
+---
+
 ## 2026-07-10 09:41 -- Modeling / Captured: agentic-workflow-rwxms - applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder
 
 **Type:** Modeling / Capture
