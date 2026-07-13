@@ -53,6 +53,15 @@
    `index` in its signature, deliberately unread. `promptBarKeyIntent`
    (invariant 4) stays untouched, exactly as m3vhq left it.
 
+   AMENDED by agentic-workflow-tkq7v (see ADR-0050's fourth "## Amendment"
+   section): invariant 4's `cycle` trigger moves from Ctrl+←/→ to Tab /
+   Shift+Tab — the prompt field is genuinely multi-line since p8k4d, and
+   Ctrl+←/→ was shadowing native word-jump/word-select inside it. Ctrl+←/→
+   (with or without Shift) now classify 'pass', restoring native caret
+   behavior. Ctrl+Tab / Alt+Tab stay 'pass' too, so this module never shadows
+   the browser's own tab-switch chords. `newline`, `launch`, and `pass`'s
+   other triggers (Enter, Shift+Enter, Ctrl+Enter, Ctrl+Space) are untouched.
+
    Color/paint is explicitly out of scope here (ADR-0050 "Out of scope") — this
    module carries only the interaction judgment; ADR-0048/ADR-0051 govern how
    the highlighted tab is painted, in board.js.
@@ -199,9 +208,14 @@ export const PROMPT_KEY_INTENT = {
  *   - 'newline' — Shift+Enter, regardless of Ctrl. No launch; the caller lets
  *     the textarea insert its own line break natively (p8k4d — retires
  *     aw-038's single-line collapse).
- *   - 'cycle'   — Ctrl+ArrowLeft / Ctrl+ArrowRight. Moves `highlightedMode`
- *     (via `nextPromptModeIndex`); the caller reads `event.key` itself to pick
- *     the direction (ArrowRight → forward, ArrowLeft → backward).
+ *   - 'cycle'   — Tab (no Ctrl/Alt) or Shift+Tab (agentic-workflow-tkq7v,
+ *     ADR-0050 amendment — reverses the original Ctrl+ArrowLeft/ArrowRight
+ *     trigger). Moves `highlightedMode` (via `nextPromptModeIndex`); the
+ *     caller reads `event.shiftKey` itself to pick the direction (Tab →
+ *     forward, Shift+Tab → backward). Ctrl+Tab / Alt+Tab classify 'pass' so
+ *     browser tab-switch chords are never shadowed. Ctrl+ArrowLeft /
+ *     Ctrl+ArrowRight (with or without Shift) now classify 'pass' too,
+ *     restoring native word-jump/word-select inside the textarea.
  *   - 'pass'    — everything else (ordinary typing, unmodified navigation,
  *     any other modified/unmodified key).
  * Because this is the ONE function every call site consults, 'launch' and
@@ -217,8 +231,16 @@ export const PROMPT_KEY_INTENT = {
 export function promptBarKeyIntent(event) {
   if (!event || typeof event.key !== 'string') return PROMPT_KEY_INTENT.PASS;
   const ctrl = event.ctrlKey === true;
+  const alt = event.altKey === true;
   const shift = event.shiftKey === true;
   if (event.key === 'Enter') return shift ? PROMPT_KEY_INTENT.NEWLINE : PROMPT_KEY_INTENT.LAUNCH;
-  if (ctrl && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) return PROMPT_KEY_INTENT.CYCLE;
+  // agentic-workflow-tkq7v (ADR-0050 amendment): the cycle trigger moves from
+  // Ctrl+←/→ to Tab / Shift+Tab. Ctrl+Tab and Alt+Tab are deliberately left
+  // classified 'pass' so the browser's own tab-switch chords are never
+  // shadowed — only a bare Tab (with or without Shift alone) cycles.
+  if (event.key === 'Tab' && !ctrl && !alt) return PROMPT_KEY_INTENT.CYCLE;
+  // Ctrl+ArrowLeft / Ctrl+ArrowRight (with or without Shift) are no longer
+  // intercepted at all — they fall through to 'pass', restoring the
+  // textarea's native word-jump and word-select.
   return PROMPT_KEY_INTENT.PASS;
 }

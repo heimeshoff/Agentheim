@@ -313,23 +313,30 @@ separate BC, but today the whole tool lives in this one.
   can still reflect the live seeded command, **or** (agentic-workflow-m3vhq) the reason it can't
   fire yet.
   - **Keyboard-committed selection model (ADR-0050, amended by agentic-workflow-p8k4d,
-    agentic-workflow-m3vhq, and agentic-workflow-aqyqd, `dashboard/app/prompt-mode.js`)** — the
+    agentic-workflow-m3vhq, agentic-workflow-aqyqd, and agentic-workflow-tkq7v,
+    `dashboard/app/prompt-mode.js`)** — the
     five modes carry a single committed `highlightedMode` **index**, not five independent
     booleans: `PROMPT_MODES` (fixed order, each `{label, subtitle, icon, commandFor}` — no
     `requiresPrompt` key on any entry; aqyqd retires it, see below), `clampPromptModeIndex` (the
     one in-range guard every call site uses,
     now bounding `0..4`), `nextPromptModeIndex(current, direction)` (total, wrapping cycle —
-    Ctrl+→ past Plain wraps to Quick Capture, Ctrl+← before Quick Capture wraps to Plain), and
+    forward past Plain wraps to Quick Capture, backward before Quick Capture wraps to Plain), and
     `promptBarKeyIntent(event)` (classifies every keydown into exactly one of **launch** — bare
     Enter OR Ctrl+Enter (p8k4d: bare Enter now launches, reversing aw-038's original swallow
     rule; Ctrl+Enter is kept as a harmless alias) — **newline** — Shift+Enter, regardless of Ctrl
     (p8k4d, new: lets the textarea insert its own line break natively, retiring aw-038's
     single-logical-line collapse — `sanitizePromptLine` is deleted, the field stores its raw
-    value) — **cycle** — Ctrl+←/→ — or **pass-through**, so no keystroke is ever double-handled;
+    value) — **cycle** — Tab (no Ctrl/Alt) or Shift+Tab (agentic-workflow-tkq7v reverses the
+    original Ctrl+←/→ trigger, freeing native word-jump/word-select inside the now-multi-line
+    field; Ctrl+Tab/Alt+Tab stay pass-through so browser tab-switch chords are never shadowed) —
+    or **pass-through**, so no keystroke is ever double-handled;
     **untouched by m3vhq** — bare Enter on an empty Plain prompt still classifies as `launch`).
+    **Escape blurs the prompt textarea** (agentic-workflow-tkq7v — checked in `onPromptKeyDown`
+    ahead of `promptBarKeyIntent`, not a fifth intent label — the WCAG 2.1.2 keyboard-trap
+    mitigation for hijacking Tab while the field has focus; it never clears the typed prompt).
     Defaults to Quick Capture (index 0) on mount and **resets to 0 after every successful
     launch**. **Two orthogonal channels:** the committed highlight changes only on a deliberate
-    act — a tab click, or Ctrl+←/→ — hover is a separate, transient, presentation-only channel
+    act — a tab click, or Tab/Shift+Tab — hover is a separate, transient, presentation-only channel
     that never reads or writes it. **p8k4d reverses click-to-launch:** clicking a tab now **only**
     moves the committed highlight; it no longer fires anything. The ONE `fire(modeIndex)`
     function in `BoardPromptBar` is now reached only by bare Enter, Ctrl+Enter, or the Enter

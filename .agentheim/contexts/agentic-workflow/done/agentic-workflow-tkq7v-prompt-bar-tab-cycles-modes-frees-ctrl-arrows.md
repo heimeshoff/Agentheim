@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-tkq7v
 title: Prompt bar — Tab/Shift+Tab cycles the mode tabs; Ctrl+←/→ returns to native word-jump
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-13
-completed:
+completed: 2026-07-13
 depends_on: []
 blocks: []
 tags: [dashboard, prompt-bar, keyboard]
@@ -74,3 +74,26 @@ In `dashboard/app/prompt-mode.js` and its consumer (`BoardPromptBar`,
   affordance, it may replace Escape-blur, but some keyboard exit must exist.
 - Paint is untouched — ADR-0048/ADR-0051/ADR-0016 govern the tabs exactly as before;
   this is interaction-only, like every amendment in the ADR-0050 chain.
+
+## Outcome
+
+`promptBarKeyIntent` (`dashboard/app/prompt-mode.js`) now classifies a bare Tab (no
+Ctrl/Alt) or Shift+Tab as `cycle` (direction read from `event.shiftKey` by the caller,
+not `event.key`); Ctrl+Tab/Alt+Tab stay `pass` so browser tab-switch chords are never
+shadowed. Ctrl+←/→ (with or without Shift) is freed entirely — it now classifies
+`pass`, restoring native word-jump and word-select inside the prompt textarea.
+`BoardPromptBar`'s `onPromptKeyDown` (`dashboard/app/board.js`) reads `e.shiftKey` for
+cycle direction, still `preventDefault()`s on the cycle branch, and now checks Escape
+first (before `promptBarKeyIntent` runs) to blur the textarea — the WCAG 2.1.2
+keyboard-trap mitigation for hijacking Tab while the field has focus; Escape never
+touches the typed prompt. Enter/Shift+Enter/Ctrl+Enter/Ctrl+Space are unchanged.
+ADR-0050 gained a fourth amendment recording the reversal (see
+`.agentheim/knowledge/decisions/0050-prompt-bar-keyboard-committed-selection-model.md`).
+
+Key files:
+- `dashboard/app/prompt-mode.js` — `promptBarKeyIntent`'s cycle/pass branching
+- `dashboard/app/board.js` — `onPromptKeyDown`'s Escape check + shiftKey-driven cycle direction
+- `dashboard/test/prompt-mode.test.mjs`, `dashboard/test/board-prompt-bar.test.mjs` — inverted Ctrl-arrow cases, new Tab/Shift+Tab/Ctrl+Tab/Escape cases
+- `dashboard/dist/app.js` — rebuilt
+- `.agentheim/knowledge/decisions/0050-prompt-bar-keyboard-committed-selection-model.md` — fourth amendment appended
+- `.agentheim/contexts/agentic-workflow/README.md` — keyboard-model section updated

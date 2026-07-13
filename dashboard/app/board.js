@@ -1080,23 +1080,35 @@ function BoardPromptBar({ skipPermissions = false }) {
   }, []);
 
   // The prompt field's ONE keydown classifier (ADR-0050 invariant 4, amended by
-  // p8k4d — `promptBarKeyIntent` returns exactly one of four disjoint labels, so
-  // no keystroke can ever be double-handled):
+  // p8k4d, then by agentic-workflow-tkq7v — `promptBarKeyIntent` returns exactly
+  // one of four disjoint labels, so no keystroke can ever be double-handled):
   //   newline -> Shift+Enter. No preventDefault — the textarea inserts its own line
   //              break natively (p8k4d, retires aw-038's swallow + single-line rule).
-  //   cycle   -> moves the highlight (nextPromptModeIndex, total wraparound),
-  //              launches nothing.
+  //   cycle   -> Tab / Shift+Tab (agentic-workflow-tkq7v reverses the original
+  //              Ctrl+ArrowLeft/ArrowRight trigger, freeing native word-jump/
+  //              word-select inside the now-multi-line field). Moves the
+  //              highlight (nextPromptModeIndex, total wraparound), launches
+  //              nothing. preventDefault()s so Tab does not move focus out of
+  //              the textarea.
   //   launch  -> bare Enter OR Ctrl+Enter — fires the highlighted mode exactly as a
   //              click on the Enter button would (p8k4d: bare Enter now launches).
   //   pass    -> ordinary typing / unmodified navigation — no interception.
+  // Escape (agentic-workflow-tkq7v) is handled OUTSIDE promptBarKeyIntent's four
+  // labels — it classifies 'pass' there, same as before — but is checked first
+  // here to blur the textarea: the WCAG 2.1.2 keyboard-trap mitigation for
+  // hijacking Tab while the field has focus. It never touches the typed prompt.
   const onPromptKeyDown = useCallback((e) => {
+    if (e.key === "Escape") {
+      e.currentTarget.blur();
+      return;
+    }
     const intent = promptBarKeyIntent(e);
     if (intent === PROMPT_KEY_INTENT.NEWLINE) {
       return;
     }
     if (intent === PROMPT_KEY_INTENT.CYCLE) {
       e.preventDefault();
-      const direction = e.key === "ArrowRight" ? 1 : -1;
+      const direction = e.shiftKey ? -1 : 1;
       setHighlightedMode((current) => nextPromptModeIndex(current, direction));
       return;
     }

@@ -4,7 +4,7 @@ title: Prompt bar gains a keyboard-committed single-selection model, superseding
 scope: agentic-workflow
 status: proposed
 date: 2026-07-05
-related_tasks: [agentic-workflow-s7gev, agentic-workflow-bz3az, agentic-workflow-p8k4d, agentic-workflow-m3vhq, agentic-workflow-aqyqd]
+related_tasks: [agentic-workflow-s7gev, agentic-workflow-bz3az, agentic-workflow-p8k4d, agentic-workflow-m3vhq, agentic-workflow-aqyqd, agentic-workflow-tkq7v]
 related_adrs: [ADR-0048]
 ---
 
@@ -307,6 +307,69 @@ painted changes, only when it applies.
 every mode regardless of this amendment — this amendment narrows *when* a launch can
 fire, not *what* an armed launch carries. Not re-litigated here.
 
+## Amendment — 2026-07-13 (agentic-workflow-tkq7v): cycle trigger moves from Ctrl+←/→ to Tab/Shift+Tab; Escape blurs the field
+
+The builder tried to use Ctrl+←/→ for what it means in every text field — jump the
+caret a word at a time — and the prompt bar ate it to cycle mode tabs instead. Since
+[[agentic-workflow-p8k4d]] made the field genuinely multi-line, word navigation inside
+the prompt matters; stealing it was a real editing cost. Worse, the shipped classifier
+never checked `shiftKey` on the cycle branch, so Ctrl+Shift+←/→ (word-select) was
+hijacked too — there was no way to select by word in the prompt field at all. This
+amendment **reverses one clause** of invariant 4 (disjoint key-intent classification)
+while leaving every other clause of the Decision above and of the three prior
+amendments (the single `highlightedMode` index, invariants 1–3, the two orthogonal
+committed-selection/hover channels, the default/reset target, the click-selects-only /
+Enter-launches / Shift+Enter-newlines / Ctrl+Space-focuses model, and every-mode
+decline-to-launch) **unchanged**.
+
+The reversed clause is the original Decision's own words (invariant 4, and carried
+forward unchanged by all three prior amendments):
+
+> **cycle** (Ctrl+← / Ctrl+→ — moves `highlightedMode`, wraps per invariant 3)
+
+1. **The cycle trigger moves from Ctrl+←/→ to Tab / Shift+Tab.** `promptBarKeyIntent`
+   classifies a bare Tab (no Ctrl, no Alt) or Shift+Tab as `cycle`; the caller reads
+   `event.shiftKey` to pick direction (Tab → forward, Shift+Tab → backward) instead of
+   reading `event.key` for ArrowLeft/ArrowRight. Ctrl+Tab and Alt+Tab are deliberately
+   left classified `pass` — the browser's own tab-switch chords are never shadowed.
+   The handler `preventDefault()`s on the `cycle` branch so Tab does not move focus out
+   of the textarea while cycling — matching the previous Ctrl+←/→ branch's
+   `preventDefault()` behavior exactly, just retargeted to the new trigger key.
+2. **Ctrl+←/→ (with or without Shift) is freed entirely — it now classifies `pass`.**
+   Native word-jump (Ctrl+←/→) and word-select (Ctrl+Shift+←/→) work in the prompt
+   field again, restoring ordinary text-field behavior the builder expects everywhere
+   else.
+3. **Escape blurs the prompt textarea — the keyboard exit.** Because Tab is hijacked
+   while the field has focus, an unmitigated Tab-hijack would be a WCAG 2.1.2 keyboard
+   trap: a keyboard-only user could enter the field via Tab (or Ctrl+Space) but never
+   leave it via Tab again. Escape is checked in the handler *before*
+   `promptBarKeyIntent` classification runs (Escape itself still classifies `pass`
+   under the classifier — this is a separate check layered outside invariant 4, not a
+   fifth intent label) and blurs the textarea, handing focus navigation back to native
+   Tab. Escape never mutates the typed prompt — a decline-to-clear guarantee, not just
+   an omission.
+
+**Invariant framing preserved.** Invariants 1 (exactly-one-highlighted), 2
+(index-always-in-range), and 3 (total deterministic wraparound) are **untouched** by
+this amendment. Invariant 4 (disjoint key-intent classification) **still holds as a
+shape** — every keydown still classifies into exactly one of four mutually exclusive
+labels (`newline` | `cycle` | `launch` | `pass`), so no keystroke is ever
+double-handled — only the trigger keys `cycle` responds to have changed. Enter,
+Shift+Enter, Ctrl+Enter, and the window-scoped Ctrl+Space focus listener are all
+**untouched**.
+
+**Naming, unchanged.** The pure module stays `dashboard/app/prompt-mode.js`; its
+exported shape (`PROMPT_MODES`, `DEFAULT_PROMPT_MODE_INDEX`, `clampPromptModeIndex`,
+`nextPromptModeIndex`, `promptBarKeyIntent`, `PROMPT_KEY_INTENT`, `canFirePromptMode`)
+is unchanged — only `promptBarKeyIntent`'s internal branching (which keys trigger
+`cycle` vs `pass`) changes, and `dashboard/app/board.js`'s `onPromptKeyDown` (the
+CYCLE branch's direction read, plus the new Escape-blur check ahead of the
+classifier).
+
+**Paint untouched.** ADR-0048 / ADR-0051 (the ochre highlighted-tab and Enter-button
+carve-outs) and ADR-0016 are unaffected — this amendment, like every amendment in this
+chain, is interaction-only.
+
 ## Consequences
 
 - `dashboard/app/prompt-mode.js` (not yet written) has a named contract before
@@ -346,3 +409,11 @@ fire, not *what* an armed launch carries. Not re-litigated here.
   unread. The four legacy modes' bare-command constants and builders are left in place
   but are now unreachable from the board; bare sessions launch from the terminal.
   `promptBarKeyIntent` (invariant 4) remains untouched.
+- **(Amended by agentic-workflow-tkq7v)** invariant 4's `cycle` trigger moves from
+  Ctrl+←/→ to Tab/Shift+Tab (direction now read from `e.shiftKey`, not `e.key`);
+  Ctrl+←/→ (with or without Shift) is freed and now classifies `pass`, restoring
+  native word-jump/word-select in the multi-line field. Ctrl+Tab/Alt+Tab stay
+  `pass` so browser tab-switch chords are never shadowed. Escape blurs the prompt
+  textarea (checked ahead of `promptBarKeyIntent`, not a fifth intent label) as the
+  WCAG 2.1.2 keyboard-trap mitigation for hijacking Tab inside the field, and never
+  clears the typed prompt. Enter/Shift+Enter/Ctrl+Enter/Ctrl+Space are untouched.

@@ -100,16 +100,34 @@ test('every launch trigger (bare Enter, Ctrl+Enter, Enter button) routes through
   assert.match(keyDownFn[0], /fire\(highlightedMode\)/, 'the LAUNCH branch must call fire(highlightedMode)');
 });
 
-test('Ctrl+ arrow keys cycle the highlight via nextPromptModeIndex, without launching', () => {
+// agentic-workflow-tkq7v (ADR-0050 amendment): the cycle trigger moves from
+// Ctrl+arrow to Tab/Shift+Tab — the CYCLE branch now reads `e.shiftKey` for
+// direction rather than `e.key` (ArrowLeft/ArrowRight).
+test('Tab/Shift+Tab cycle the highlight via nextPromptModeIndex, direction from shiftKey, without launching (agentic-workflow-tkq7v)', () => {
   const bar = barSrc();
   const keyDownFn = bar.match(/const onPromptKeyDown = useCallback\(\(e\) => \{[\s\S]*?\}, \[fire, highlightedMode\]\);/)[0];
   assert.match(keyDownFn, /PROMPT_KEY_INTENT\.CYCLE/, 'onPromptKeyDown must branch on the CYCLE intent');
   assert.match(keyDownFn, /nextPromptModeIndex\(/, 'the CYCLE branch must compute the next index via nextPromptModeIndex');
   assert.match(keyDownFn, /setHighlightedMode\(/, 'the CYCLE branch must move the highlight');
-  // The cycle branch must not itself call fire (no launch on cycle).
   const cycleBlock = keyDownFn.match(/PROMPT_KEY_INTENT\.CYCLE\)\s*\{[\s\S]*?\n\s*\}/);
   assert.ok(cycleBlock, 'a CYCLE branch block must exist');
-  assert.doesNotMatch(cycleBlock[0], /fire\(/, 'cycling must never call fire (no launch on Ctrl+arrow)');
+  assert.doesNotMatch(cycleBlock[0], /fire\(/, 'cycling must never call fire (no launch on Tab/Shift+Tab)');
+  assert.match(cycleBlock[0], /e\.shiftKey/, 'the CYCLE branch must read e.shiftKey to pick direction, not e.key');
+  assert.doesNotMatch(cycleBlock[0], /ArrowRight|ArrowLeft/, 'the CYCLE branch must no longer branch on arrow keys');
+  assert.match(cycleBlock[0], /preventDefault\(\)/, 'the CYCLE branch must preventDefault so Tab does not move focus out of the textarea');
+});
+
+// agentic-workflow-tkq7v: Escape is the WCAG 2.1.2 keyboard-trap mitigation —
+// since Tab is hijacked while the field has focus, Escape blurs it, handing
+// focus navigation back to native Tab.
+test('Escape blurs the prompt textarea, and does not clear the prompt (agentic-workflow-tkq7v)', () => {
+  const bar = barSrc();
+  const keyDownFn = bar.match(/const onPromptKeyDown = useCallback\(\(e\) => \{[\s\S]*?\}, \[fire, highlightedMode\]\);/)[0];
+  assert.match(keyDownFn, /["']Escape["']/, 'onPromptKeyDown must check for the Escape key');
+  assert.match(keyDownFn, /\.blur\(\)/, 'Escape must blur the textarea');
+  const escapeBlock = keyDownFn.match(/if\s*\(\s*e\.key\s*===\s*["']Escape["']\s*\)\s*\{[\s\S]*?\n\s*\}/);
+  assert.ok(escapeBlock, 'an Escape branch block must exist');
+  assert.doesNotMatch(escapeBlock[0], /setPrompt\(/, 'Escape must never clear or mutate the typed prompt');
 });
 
 test('Shift+Enter classifies as NEWLINE via the same promptBarKeyIntent classifier and launches nothing (p8k4d)', () => {

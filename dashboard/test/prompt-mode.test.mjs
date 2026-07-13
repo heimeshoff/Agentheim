@@ -165,9 +165,17 @@ test('Shift+Enter classifies as newline regardless of Ctrl (p8k4d new intent, re
   assert.equal(promptBarKeyIntent({ key: 'Enter', shiftKey: true, ctrlKey: true }), PROMPT_KEY_INTENT.NEWLINE);
 });
 
-test('Ctrl+ArrowRight and Ctrl+ArrowLeft classify as cycle', () => {
-  assert.equal(promptBarKeyIntent({ key: 'ArrowRight', ctrlKey: true }), PROMPT_KEY_INTENT.CYCLE);
-  assert.equal(promptBarKeyIntent({ key: 'ArrowLeft', ctrlKey: true }), PROMPT_KEY_INTENT.CYCLE);
+// agentic-workflow-tkq7v (ADR-0050 amendment): Ctrl+←/→ (with or without
+// Shift) is RESTORED to native word-jump/word-select — it must classify as
+// pass-through, not cycle. This is the exact assertion the original
+// bz3az/ADR-0050 suite made the other way — re-pinned here on purpose so the
+// reversal stays visible, per the task's explicit instruction to invert
+// rather than delete.
+test('Ctrl+ArrowRight and Ctrl+ArrowLeft classify as pass-through, with or without Shift — native word-jump/word-select restored (agentic-workflow-tkq7v)', () => {
+  assert.equal(promptBarKeyIntent({ key: 'ArrowRight', ctrlKey: true }), PROMPT_KEY_INTENT.PASS);
+  assert.equal(promptBarKeyIntent({ key: 'ArrowLeft', ctrlKey: true }), PROMPT_KEY_INTENT.PASS);
+  assert.equal(promptBarKeyIntent({ key: 'ArrowRight', ctrlKey: true, shiftKey: true }), PROMPT_KEY_INTENT.PASS);
+  assert.equal(promptBarKeyIntent({ key: 'ArrowLeft', ctrlKey: true, shiftKey: true }), PROMPT_KEY_INTENT.PASS);
 });
 
 test('unmodified ArrowLeft/ArrowRight (no Ctrl) classify as pass-through, not cycle', () => {
@@ -175,9 +183,23 @@ test('unmodified ArrowLeft/ArrowRight (no Ctrl) classify as pass-through, not cy
   assert.equal(promptBarKeyIntent({ key: 'ArrowLeft' }), PROMPT_KEY_INTENT.PASS);
 });
 
+// agentic-workflow-tkq7v: Tab (no modifiers) and Shift+Tab now classify as
+// cycle — the new trigger invariant 4's cycle label uses, replacing
+// Ctrl+←/→. Ctrl+Tab / Alt+Tab must stay pass-through so the browser's own
+// tab-switch chords are never shadowed.
+test('Tab (no modifiers) and Shift+Tab classify as cycle (agentic-workflow-tkq7v)', () => {
+  assert.equal(promptBarKeyIntent({ key: 'Tab' }), PROMPT_KEY_INTENT.CYCLE);
+  assert.equal(promptBarKeyIntent({ key: 'Tab', shiftKey: true }), PROMPT_KEY_INTENT.CYCLE);
+});
+
+test('Ctrl+Tab and Alt+Tab classify as pass-through, not cycle — never shadow browser tab-switch chords (agentic-workflow-tkq7v)', () => {
+  assert.equal(promptBarKeyIntent({ key: 'Tab', ctrlKey: true }), PROMPT_KEY_INTENT.PASS);
+  assert.equal(promptBarKeyIntent({ key: 'Tab', altKey: true }), PROMPT_KEY_INTENT.PASS);
+  assert.equal(promptBarKeyIntent({ key: 'Tab', ctrlKey: true, shiftKey: true }), PROMPT_KEY_INTENT.PASS);
+});
+
 test('ordinary typing and other modified keys classify as pass-through', () => {
   assert.equal(promptBarKeyIntent({ key: 'a', ctrlKey: false }), PROMPT_KEY_INTENT.PASS);
-  assert.equal(promptBarKeyIntent({ key: 'Tab', ctrlKey: true }), PROMPT_KEY_INTENT.PASS);
   assert.equal(promptBarKeyIntent({ key: ' ', ctrlKey: false }), PROMPT_KEY_INTENT.PASS);
 });
 
@@ -205,8 +227,8 @@ test('every classification returns exactly one of the four disjoint labels', () 
     { key: 'Enter', ctrlKey: false },
     { key: 'Enter', ctrlKey: true },
     { key: 'Enter', shiftKey: true, ctrlKey: false },
-    { key: 'ArrowLeft', ctrlKey: true },
-    { key: 'ArrowRight', ctrlKey: true },
+    { key: 'Tab' },
+    { key: 'Tab', shiftKey: true },
     { key: 'a', ctrlKey: false },
   ];
   for (const s of samples) {

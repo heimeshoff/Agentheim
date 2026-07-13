@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 10:09 -- Task verified and completed: agentic-workflow-tkq7v - Prompt bar — Tab/Shift+Tab cycles the mode tabs; Ctrl+←/→ returns to native word-jump
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-tkq7v - Prompt bar — Tab/Shift+Tab cycles the mode tabs; Ctrl+←/→ returns to native word-jump
+**Summary:** Prompt-bar mode cycling moves from Ctrl+arrows to Tab/Shift+Tab, freeing native word-jump and word-select in the multi-line prompt field; Escape blurs the textarea as the keyboard exit for the hijacked Tab
+**Duration:** 11m
+**Verification:** PASS (iteration 1)
+**Files changed:** 7
+**Tests added:** 3
+**ADRs written:** none
+
+---
+
 ## 2026-07-13 10:08 -- Task verified and completed: agentic-workflow-rwxms - applyTaskMove rewrites frontmatter before a rename that ENOENTs on a missing destination folder
 
 **Type:** Work / Task completion
