@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 17:05 -- Modeling / Refined: agentic-workflow-n4qte - Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** Re-read the task against the now-landed `infrastructure-v8r3q` and closed two gaps. (1) The `What` only rewired `modelLocked`, leaving `modelLabel`/`modelHint` keyed on `bridgePresent` (board.js L1287-1292) — against a stale bridge that renders a *locked button still reading "Opus"*, re-creating the exact silent lie the task exists to kill; both now key off `bridgeSupportsModel`, and an AC pins the "Default" label. (2) **Builder ruling:** the skew banner now fires on *any* missing capability (`present && KNOWN_CAPABILITIES.some(c => !capabilities.includes(c))`), not on `'model'` specifically — a `'model'`-only trigger would go silent for a future bridge that ships `model` but lacks a fourth field, the very drift class `infrastructure-v8r3q`'s structural guard exists to prevent. Cost, knowingly accepted: the banner copy goes generic ("some launch options") instead of naming model/session-name. This introduces an exported `KNOWN_CAPABILITIES` on the dashboard side (peer of, not import of, the extension's `CAPABILITIES`) and a mirrored dashboard-side structural guard — the extension had one, `bridge-launch.js`'s three hand-written `caps.includes()` gates had none. Also settled the two design questions left open at capture (mount-only probe cadence; `--obligation` token family) and verified every contract the task consumes exists on disk.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-07-13 16:36 -- Work session ended
 
 **Type:** Work / Session end
