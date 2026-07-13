@@ -5,6 +5,23 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 16:36 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 27m (batch start 16:09 → 16:36)
+**Completed:** 2 (first-try PASS: 1, re-dispatched: 1, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** infrastructure-v8r3q: 1, design-system-me97j: 2
+**Commits:** 4 (batch start, 2 task integrations, this entry)
+**Vision-conformance:** none — batch aligns with vision. `infrastructure-v8r3q` is the vision's own method applied to itself: it converts a capability that "degrades silently and indistinguishably from success" into one caught by structure (a live `/health` handshake, a wire-level omission guarantee, and an executable source-scan guard that fails the build on a fourth drift) — directly serving *"Wrong work is caught by structure, not luck"*. `design-system-me97j` removes a lying affordance (a control painted dead that still responded to clicks). Neither pulls toward a non-goal; all state stays local under `.agentheim/` (non-goal 5), and the human stayed in the loop at every gate (non-goal 3).
+**Carry-over:** `inspiration/`: left behind (owner: builder's own WIP, untracked material predating this session, owned by no skill — builder confirmed the disposition at session end)
+
+**Note (checkpoint guard, agentic-workflow-q7v3k / ADR-0057):** the `checkpoint` verb refused `dashboard/dist/app.js` for `design-system-me97j` iteration 2 with `derived-artifact` — working exactly as designed. The conductor regenerated `dashboard/dist/` from merged source after each integration instead; the merged tree's `dist-build` test passes, confirming the bundle matches source.
+
+---
+
 ## 2026-07-13 16:30 -- Task verified and completed: design-system-me97j - ModelSplitButton's `disabled` deadens the model caret along with Enter — an empty prompt shouldn't block picking a model
 
 **Type:** Work / Task completion
