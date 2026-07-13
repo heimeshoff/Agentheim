@@ -93,15 +93,19 @@ To enable the launch buttons, package and install the extension (it isn't on the
 ```sh
 cd vscode-extension
 npm install                                    # fetches @vscode/vsce (packaging only — the runtime is stdlib)
-npx vsce package --allow-missing-repository    # → agentheim-bridge-0.1.0.vsix
-code --install-extension agentheim-bridge-0.1.0.vsix
+npx vsce package --allow-missing-repository    # → agentheim-bridge-<version>.vsix
+code --install-extension agentheim-bridge-*.vsix --force
 ```
+
+The version in the filename tracks `vscode-extension/package.json` — always install the `.vsix` you just built rather than a version pinned in these docs. `--force` makes the command an **upgrade** as well as a first install; without it, `code` refuses to replace an already-installed build.
 
 Then **activate** it:
 
 1. Open the Agentheim project (any folder containing `.agentheim/`) as a workspace folder in VS Code.
 2. Reload the window — `Ctrl/Cmd+Shift+P` → **Developer: Reload Window**. On startup the extension walks up to find `.agentheim/`, binds `127.0.0.1:31425` (falling back to `31426`/`31427`), and writes the discovery file `.agentheim/.dashboard/bridge.json`.
 3. Click **Quick Capture** or **Modeling** — a `Claude` terminal opens and runs the seeded command. No dashboard refresh is needed; each click re-probes the bridge, and it works from an external browser too (the bridge echoes your origin in the CORS preflight; both ends are loopback).
+
+**Upgrading (and the "older version" banner).** VS Code runs the *installed* extension, never the source in this repo — editing `vscode-extension/src/` changes nothing until you re-package and re-install. If the dashboard shows *"Your VS Code bridge is running an older version. Some launch options are unavailable…"*, your installed build predates a capability the dashboard now sends (it advertises what it honours via `GET /health`; see [ADR-0018](.agentheim/knowledge/decisions/0018-vscode-dashboard-terminal-bridge.md)). Re-run the two commands above with `--force`, **then** reload the window — a reload alone re-activates the same stale build and the banner will persist.
 
 The terminal keeps Claude's **normal permission prompts intact** — the bridge never hard-wires `--dangerously-skip-permissions`. Trust boundary is loopback-only binding plus a per-activation shared-secret token, fine for a single-user dev box but not for any networked deployment. Uninstall with `code --uninstall-extension agentheim.agentheim-bridge` (it removes `bridge.json` on deactivation). See [`vscode-extension/README.md`](vscode-extension/README.md) for the full HTTP contract and architecture.
 

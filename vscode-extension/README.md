@@ -32,7 +32,7 @@ HTTP surface (every request requires the `X-Agentheim-Bridge-Token` header):
 | Method + path     | Behaviour |
 |-------------------|-----------|
 | `POST /run { prompt, skipPermissions? }` | Opens a `Claude` terminal that **is** the `claude` process — spawned with the prompt as a raw argv element (no shell, no quoting). The optional, off-by-default `skipPermissions` boolean prepends `--dangerously-skip-permissions` to the launch args **only** when set to the literal `true`; absent/`false`/malformed launches with the prompt alone. → `202` |
-| `GET /health`     | Liveness probe for the frontend. → `200` |
+| `GET /health`     | Liveness probe **and** the authoritative capability handshake: returns `{ ok, v, capabilities }`, where `capabilities` is the set of `POST /run` fields *this* build honours (`['prompt', 'skipPermissions', 'name', 'model']`), sourced from the running process — never from `bridge.json`. The dashboard omits any field this list lacks. → `200` |
 | `OPTIONS *`       | CORS preflight (load-bearing — the custom-header JSON POST is preflighted). → `204` |
 
 Rejections: missing/mismatched token → `401`; malformed or empty body → `400`.
@@ -97,12 +97,36 @@ locally.
 ```sh
 cd vscode-extension
 npm install                       # only to get @vscode/vsce (packaging tool)
-npx vsce package                  # produces agentheim-bridge-0.2.1.vsix
-code --install-extension agentheim-bridge-0.2.1.vsix
+npm run package                   # → agentheim-bridge-<version>.vsix
+code --install-extension agentheim-bridge-*.vsix --force
 ```
+
+The version in the filename tracks `package.json` — install the `.vsix` you just
+built, never a version pinned in prose. `--force` is what makes this an
+**upgrade** as well as a first install; without it `code` refuses to replace an
+already-installed build.
 
 Then reload VS Code. On startup, with an Agentheim project open in the
 workspace, the bridge binds and writes `.agentheim/.dashboard/bridge.json`.
+
+### Upgrading, and the "older version" banner
+
+VS Code loads the **installed** extension, not this source tree — working in the
+Agentheim repo does *not* mean you are running the bridge you see in `src/`. The
+two only converge when you re-package and re-install.
+
+If the dashboard raises *"Your VS Code bridge is running an older version. Some
+launch options are unavailable until you reload the window"*, the live listener
+answered `GET /health` with fewer `capabilities` than the dashboard knows how to
+send (`KNOWN_CAPABILITIES` in `dashboard/app/bridge-launch.js`); a `/health` with
+no `capabilities` field at all is a pre-handshake build and reads as the closed
+`LEGACY_CAPABILITIES` baseline (ADR-0018). The dashboard then omits the
+unsupported fields at the wire level and greys out the affected controls, so the
+banner is a truthful report of a stale install — not a bug.
+
+The remedy is to re-package and re-install with `--force` (above), **then** reload
+the window. Reloading alone re-activates the same stale extension and the banner
+will come straight back.
 
 ## Uninstall
 
