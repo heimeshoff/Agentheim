@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 11:20 -- Modeling / Captured: agentic-workflow-m2vkp, infrastructure-h5wnq, design-system-r9dtm - Prompt-bar model selector
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow + infrastructure + design-system (one idea, three seams)
+**Filed to:** todo (all three)
+**Summary:** The prompt bar's second row carries two launch affordances — a bordered `↵` hint glyph and the ochre `EnterButton`. The builder wants one: the ochre button, widened, naming the model the session it launches will run on, with a caret that opens a model menu (Fable / Opus / Sonnet / Haiku). Quick Capture is pinned to Haiku; every other mode is selectable, defaulting to Opus. Ctrl+M cycles. Both the selected mode tab and the selected model now survive a launch — which REVERSES ADR-0050's original post-launch reset-to-Quick-Capture rule (`setHighlightedMode(DEFAULT_PROMPT_MODE_INDEX)` in `onResult`). Split three ways along the existing seams: `design-system-r9dtm` builds the `ModelSplitButton` primitive (ADR-0003 forbids the board forking it); `infrastructure-h5wnq` threads a `model` field through `POST /run` → `claude --model <id>` argv and exports the ambient `probeBridge()` the grey-out needs (bridge presence is only probed lazily at fire time today); `agentic-workflow-m2vkp` consumes both, adds the pure `prompt-model.js` module and a fifth disjoint `CYCLE_MODEL` key intent, and writes ADR-0050's fifth amendment. Builder rulings taken at capture: in-page persistence only (no localStorage — ADR-0017 untouched), Opus as the non-Quick-Capture default, and the selector greys out with no bridge (a clipboard-copied command cannot carry `--model`, so the control must not promise one). Two notes carried into the tasks so no worker has to rediscover them: the Fable CLI alias is unverified (check `claude --help`, don't guess), and this is a SESSION-model selector that composes with — never overrides — ADR-0031's per-agent model pins.
+
+---
+
 ## 2026-07-13 10:45 -- Work session ended
 
 **Type:** Work / Session end

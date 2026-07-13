@@ -11,13 +11,14 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 140
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-m2vkp** — One launch control, not two — the ochre button names the session's model, Ctrl+M cycles it, and both selections survive a launch (feature) — `todo/agentic-workflow-m2vkp-prompt-bar-model-selector.md`
 <!-- todo-list:end -->
 
 ### Doing
