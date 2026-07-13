@@ -48,6 +48,17 @@ test('no in-browser Babel and no React development build in the bundle', () => {
   assert.equal(js.includes('react.development'), false, 'no react.development build');
 });
 
+// infrastructure-d2n8s: jsdom joined dashboard/package.json's devDependencies
+// as a TEST-time-only DOM-render harness dependency (mirroring esbuild's own
+// build-time-only carve-out, ADR-0002/ADR-0003). board.js never imports it —
+// no test file is part of the esbuild entry graph — but this is verified
+// here rather than merely asserted, exactly as infrastructure-002 verified
+// esbuild's own equivalent claim by grepping the committed bundle.
+test('jsdom (a test-time-only devDependency, ADR-0002/ADR-0003) never reaches the committed dist/ bundle', () => {
+  const js = readFileSync(BUNDLE, 'utf8');
+  assert.equal(js.includes('jsdom'), false, 'the string "jsdom" must not appear anywhere in the committed bundle');
+});
+
 test('React PRODUCTION build is bundled in (process.env.NODE_ENV resolved to production)', () => {
   const js = readFileSync(BUNDLE, 'utf8');
   // esbuild --define replaces process.env.NODE_ENV at build time, so the dev-only

@@ -1,15 +1,15 @@
 ---
 id: infrastructure-d2n8s
 title: A DOM-render test harness — so a test can mount the board, dispatch a real keydown, and see what a source-regex suite structurally cannot
-status: doing
+status: done
 type: feature
 context: infrastructure
 created: 2026-07-13
-completed:
+completed: 2026-07-13
 depends_on: []
 blocks: []
 tags: [testing, test-infrastructure, dom, jsdom, dashboard, styleguide, dev-dependency]
-related_adrs: [0002, 0003, 0032, 0050]
+related_adrs: [0002, 0003, 0032, 0050, 0056]
 related_research: []
 prior_art: [infrastructure-009, infrastructure-002]
 ---
@@ -228,5 +228,92 @@ it is read from source, and the two genuinely unverified claims are flagged as s
   named for — one asserted the buggy shape and passed *because* the bug was present. A DOM
   harness makes it **easier** to write a test that genuinely fails; that is the entire point of
   it. **Do not let it become a more elaborate way to write a test that always passes.**
-</content>
-</invoke>
+
+## Outcome
+
+Stood up a jsdom DOM-render test harness (`dashboard/test/dom-harness.mjs` +
+`resolve-hook.mjs`) as a `dashboard/package.json` **devDependency-only** dependency, collapsed
+the m2vkp Ctrl+M double-dispatch fix's two-file half-proof into one genuine end-to-end DOM
+test, and proved the harness's cross-BC reach by driving `ModelSplitButton`'s menu keyboard
+contract from real, mounted styleguide source.
+
+**The blocker and its fix.** Mounting a styleguide component (`html.js` imports `react`/`htm`
+as bare specifiers) threw `ERR_MODULE_NOT_FOUND` under a plain `node --test`, because the
+styleguide has no `node_modules` anywhere up its own tree — the same problem `build.mjs`'s
+esbuild `nodePaths` already solves at build time, with no Node-ESM equivalent (`NODE_PATH` is
+ignored for ESM). `dashboard/test/resolve-hook.mjs` is the Node analogue: a `module.register()`
+resolve hook that redirects a fixed set of bare specifiers (`react`/`react-dom`/
+`react-dom/client`/`htm`/`marked`) to `dashboard/node_modules` via a synthetic parent path, zero
+source changes. `dashboard/test/dom-harness.mjs` self-registers this hook as its own first
+statement — every `node --test` file runs in its own child process, so the hook has zero effect
+on any test file that doesn't import it; the project's actual full-suite command (no `--import`
+flag) was run repeatedly to confirm this. Documented and reasoned about in
+**ADR-0056** — written after proving the hook empirically, not on paper.
+
+**The bug reproduction, mutation-tested for real.** `dashboard/test/board-prompt-bar-dom.test.mjs`
+mounts the real, now-exported `BoardPromptBar`, stubs BOTH bridge calls (`discoverBridge` +
+`probeHealth` — a half-stub would have made the outcome depend on whether the builder's real VS
+Code bridge is listening), moves off Quick Capture (whose model is pinned, making Ctrl+M a
+no-op otherwise — a third test locks that this setup is load-bearing, not incidental), then
+dispatches a real `Ctrl+M` `KeyboardEvent` on the focused textarea through jsdom's spec-accurate
+capture/bubble algorithm and reads the rendered model label. With the guard in place: Opus →
+Sonnet (+1), correct. **Performed the mutation**, not merely reasoned about it: temporarily
+removed the `shouldWindowCtrlMHandle` guard call from `board.js`'s window-scoped listener, reran
+the test, confirmed it turned genuinely RED — the rendered label read **Haiku** (+2, the exact
+m2vkp regression) — then reverted byte-exact (`git diff` empty on `board.js` beyond the one
+sanctioned `export` addition). A companion test drives the non-field-focused path (the window
+listener as sole handler) and a third proves Ctrl+M is a true no-op on a fresh mount.
+
+**Retirement of the superseded half-proofs.** `prompt-model.test.mjs`'s two "replay" tests (which
+re-implemented board.js's two dispatch paths inline rather than driving board.js) are retired,
+with a note pointing to the new DOM test; the pure `shouldWindowCtrlMHandle` unit tests are kept
+(they test the guard's own contract, not a re-implementation of the wiring — complementary, not
+superseded). `board-prompt-bar.test.mjs` keeps its one regex test pinning that the window-scoped
+listener calls the guard *before* `preventDefault`/`setSelectedModel` — a call-site-ordering
+proof a behavioral test genuinely does not make — with its header comment updated to explain why.
+
+**Cross-BC reach, proven not asserted.** `dashboard/test/model-split-button-dom.test.mjs` mounts
+the styleguide's `ModelSplitButton` directly (relative import, consumed unforked) and drives its
+roving-tabindex menu with real `KeyboardEvent`s: opening moves real DOM focus onto the current
+value; ArrowDown/ArrowUp move focus and clamp at both ends (no wraparound); Enter selects, fires
+`onSelect` exactly once, closes the menu, and returns focus to the caret; Escape dismisses
+without selecting and also returns focus (WCAG 2.1.2, no keyboard trap); `locked` renders neither
+caret nor menu. Mutation-tested: flipping `arrowDirection`'s ArrowUp/ArrowDown mapping in
+`button-state.js` turned two of these tests genuinely RED; reverted byte-exact (empty diff
+confirmed). `model-split-button.test.mjs`'s one superseded regex assertion (`arrowDirection`/
+`isSelectKey`/`isDismissKey` appearing somewhere in source — provable "wired correctly" no better
+than "wired backwards") is retired with a pointer to the replacement; every other guard in that
+file (structure, ARIA attributes, tokens, icon registry, canvas specimens, no-hardcoded-model-name
+guard) is untouched.
+
+**Verification.** `node dashboard/launch.mjs` boots (port from `runtime.json`), `GET /healthz` →
+200, `node dashboard/launch.mjs stop` tears down cleanly — no install step broken. Added a new
+`dist-build.test.mjs` assertion that the string "jsdom" never appears in the committed bundle
+(verified against a fresh `node build.mjs` run, not merely asserted). Full suite
+(`node --test lib/test/*.test.mjs dashboard/test/*.test.mjs
+.agentheim/contexts/design-system/styleguide/test/*.test.mjs vscode-extension/test/*.test.mjs`,
+run three times for stability): **1323 tests, 1321 pass, 2 fail** — both pre-existing
+`vscode-extension/test/bridge.test.mjs` EADDRINUSE-on-31425 failures (the builder's real VS Code
+bridge listening on this box), not a regression; net +6 tests over the 1317 baseline (9 added
+across the two new DOM files + the dist assertion, 3 retired).
+
+**jsdom install, safely.** Edited `dashboard/package.json` (`jsdom": "^29.1.1"`, devDependency) in
+the worktree. Since `npm install --prefix <mainRoot>/dashboard` reads the MAIN tree's own
+manifest, not the worktree's, the manifest was copied into the main tree's working directory
+(uncommitted), the install run once against the main tree's real `dashboard/node_modules`
+(reached directly, not through the worktree's junction — avoiding the described concurrent-writer
+hazard entirely), the resulting `package-lock.json` copied back into the worktree, and the main
+tree's `package.json`/`package-lock.json` reverted via `git checkout --` to leave main's git
+state exactly as found. The worktree's `dashboard/node_modules` junction was left untouched
+(confirmed still a junction, not replaced) and physically now carries jsdom via the shared
+directory.
+
+**Key files:**
+`dashboard/test/dom-harness.mjs`, `dashboard/test/resolve-hook.mjs`,
+`dashboard/test/board-prompt-bar-dom.test.mjs`, `dashboard/test/model-split-button-dom.test.mjs`,
+`dashboard/app/board.js` (the one `export` addition), `dashboard/test/prompt-model.test.mjs`,
+`dashboard/test/board-prompt-bar.test.mjs`,
+`.agentheim/contexts/design-system/styleguide/test/model-split-button.test.mjs`,
+`dashboard/test/dist-build.test.mjs`, `dashboard/package.json`, `dashboard/package-lock.json`,
+`.agentheim/knowledge/decisions/0056-node-esm-bare-specifier-resolve-hook-for-cross-bc-dom-tests.md`,
+`.agentheim/contexts/infrastructure/README.md`.

@@ -15,7 +15,7 @@ import {
   modelForMode,
   shouldWindowCtrlMHandle,
 } from '../app/prompt-model.js';
-import { DEFAULT_PROMPT_MODE_INDEX, promptBarKeyIntent, PROMPT_KEY_INTENT } from '../app/prompt-mode.js';
+import { DEFAULT_PROMPT_MODE_INDEX } from '../app/prompt-mode.js';
 
 // --- shape / ids ---------------------------------------------------------
 
@@ -207,13 +207,11 @@ test('modelForMode never throws on a missing/NaN/out-of-range modeIndex or selec
 // whenever the keydown's target IS the prompt field, leaving that case
 // entirely to the field's own handler.
 //
-// These tests drive the REAL exported functions (promptBarKeyIntent,
-// shouldWindowCtrlMHandle, nextPromptModelIndex) through the same two-path
-// scenario board.js's two handlers implement, so a reintroduction of the
-// double-dispatch bug (e.g. dropping the guard, or reversing its sense) turns
-// this genuinely red — unlike a regex asserting both handlers merely contain
-// `setSelectedModel(`, which cannot distinguish "handled once" from "handled
-// twice".
+// The three tests below drive `shouldWindowCtrlMHandle` directly, against its
+// own documented in/out contract — never board.js's dispatch wiring, which is
+// now proven end-to-end by a real mounted `BoardPromptBar` and a real Ctrl+M
+// keydown (dashboard/test/board-prompt-bar-dom.test.mjs, infrastructure-d2n8s;
+// see the retirement note further down this file for what used to live here).
 
 test('shouldWindowCtrlMHandle refuses when the keydown\'s target IS the prompt field — the field\'s own handler already owns it', () => {
   const promptFieldEl = { tag: 'the-real-textarea-node' };
@@ -237,67 +235,23 @@ test('shouldWindowCtrlMHandle never throws and degrades to "act" when the event 
   assert.equal(shouldWindowCtrlMHandle({ target: {} }, null), true);
 });
 
-// The regression test: replays board.js's ACTUAL two dispatch paths for a
-// single physical Ctrl+M keydown (field-focused case) against the real
-// exported functions, and asserts the net step is exactly one.
-test('a single Ctrl+M keydown, dispatched while the prompt field is focused, advances selectedModel by exactly one — not two — across both dispatch paths', () => {
-  const promptFieldEl = { tag: 'the-real-textarea-node' };
-  // The one physical keydown: React delegates it to the field first (target
-  // is the field), then the SAME native event bubbles on to `document`.
-  const keydown = { ctrlKey: true, altKey: false, key: 'm', target: promptFieldEl };
-
-  const opusIndex = PROMPT_MODELS.findIndex((m) => m.id === 'opus');
-  const sonnetIndex = PROMPT_MODELS.findIndex((m) => m.id === 'sonnet');
-  let selectedModel = opusIndex; // DEFAULT_PROMPT_MODEL_INDEX
-  let handledCount = 0;
-
-  // Path 1: mirrors board.js's onPromptKeyDown — the field's ONE keydown
-  // classifier decides this is CYCLE_MODEL, and (with the model unlocked)
-  // cycles selectedModel.
-  if (promptBarKeyIntent(keydown) === PROMPT_KEY_INTENT.CYCLE_MODEL) {
-    selectedModel = nextPromptModelIndex(selectedModel, 1);
-    handledCount += 1;
-  }
-
-  // Path 2: mirrors board.js's onWindowKeyDown — the window-scoped fallback,
-  // now gated by shouldWindowCtrlMHandle, must refuse because `keydown.target`
-  // is the prompt field (path 1 already owns this keystroke).
-  if (keydown.ctrlKey && !keydown.altKey && (keydown.key === 'm' || keydown.key === 'M')) {
-    if (shouldWindowCtrlMHandle(keydown, promptFieldEl)) {
-      selectedModel = nextPromptModelIndex(selectedModel, 1);
-      handledCount += 1;
-    }
-  }
-
-  assert.equal(handledCount, 1, 'exactly one of the two dispatch paths may act on a single field-focused Ctrl+M keydown');
-  assert.equal(selectedModel, sonnetIndex, 'Opus (1) -> Sonnet (2): one keystroke must advance by exactly one step, not two');
-});
-
-// The companion case: the SAME keydown shape but NOT targeting the prompt
-// field (nothing is focused, or focus is elsewhere on the board) — here the
-// field's own onPromptKeyDown never even runs (it is only ever invoked for
-// events targeting the field), so path 2 is the keystroke's ONLY handler and
-// must act.
-test('a Ctrl+M keydown NOT targeting the prompt field is handled by the window-scoped fallback alone, still advancing selectedModel by exactly one', () => {
-  const promptFieldEl = { tag: 'the-real-textarea-node' };
-  const somewhereElse = { tag: 'document-body' };
-  const keydown = { ctrlKey: true, altKey: false, key: 'M', target: somewhereElse };
-
-  const opusIndex = PROMPT_MODELS.findIndex((m) => m.id === 'opus');
-  const sonnetIndex = PROMPT_MODELS.findIndex((m) => m.id === 'sonnet');
-  let selectedModel = opusIndex;
-  let handledCount = 0;
-
-  // onPromptKeyDown is never invoked here (its own registration only fires for
-  // events on the field) — nothing to replay for path 1.
-
-  if (keydown.ctrlKey && !keydown.altKey && (keydown.key === 'm' || keydown.key === 'M')) {
-    if (shouldWindowCtrlMHandle(keydown, promptFieldEl)) {
-      selectedModel = nextPromptModelIndex(selectedModel, 1);
-      handledCount += 1;
-    }
-  }
-
-  assert.equal(handledCount, 1, 'the window-scoped fallback must be the sole handler when Ctrl+M does not target the prompt field');
-  assert.equal(selectedModel, sonnetIndex, 'still exactly one step: Opus (1) -> Sonnet (2)');
-});
+// RETIRED (infrastructure-d2n8s): this file used to carry a "regression
+// test" pair that REPLAYED board.js's two dispatch paths (onPromptKeyDown /
+// onWindowKeyDown) by hand, re-implementing the field-focused and
+// not-field-focused branching logic inline rather than driving board.js
+// itself — proving the guard's semantics and the net +1 step, but proving
+// nothing about whether board.js actually WIRES the guard that way. That was
+// exactly the split the task's Why called out: "it re-implements board.js's
+// two dispatch paths in its own body rather than driving board.js." A DOM
+// harness now exists (dom-harness.mjs) that MOUNTS the real BoardPromptBar
+// and dispatches a REAL Ctrl+M keydown through jsdom's spec-accurate
+// capture/bubble algorithm — see dashboard/test/board-prompt-bar-dom.test.mjs
+// ('a single Ctrl+M keydown, dispatched on the focused prompt field, advances
+// the rendered model by exactly one...' and its NOT-field-focused companion),
+// which collapses this file's former replay pair AND
+// board-prompt-bar.test.mjs's call-site regex assertion into one genuine
+// end-to-end proof, mutation-tested against board.js's actual guard (see that
+// file's header and this task's Outcome). The pure unit tests directly above
+// this comment (shouldWindowCtrlMHandle's own in/out contract) are KEPT —
+// they test the guard function itself, not a re-implementation of board.js's
+// dispatch wiring, so they remain complementary rather than superseded.

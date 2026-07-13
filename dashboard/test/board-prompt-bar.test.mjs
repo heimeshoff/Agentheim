@@ -21,11 +21,26 @@
 // skipPermissions thread, and the same onResult clear-textarea + confetti + reset
 // (mirroring aw-023's contract, now for five modes instead of independent buttons).
 //
-// The board's React glue has no DOM render harness in this project — the idiom
-// (aw-016/020/022/065) is: pure string/interaction logic gets `node --test` coverage
-// (modeling-command.test.mjs, prompt-mode.test.mjs), and the board's wiring is
-// guarded by reading its source. This suite locks the bz3az acceptance criteria that
-// are not pure logic already covered by prompt-mode.test.mjs.
+// The board's React glue historically had no DOM render harness in this
+// project — the idiom (aw-016/020/022/065) was: pure string/interaction logic
+// gets `node --test` coverage (modeling-command.test.mjs, prompt-mode.test.mjs),
+// and the board's wiring is guarded by reading its source. This suite locks
+// the bz3az acceptance criteria that are not pure logic already covered by
+// prompt-mode.test.mjs.
+//
+// infrastructure-d2n8s adds a jsdom DOM-render harness (dom-harness.mjs) that
+// can mount a real component and dispatch real DOM events — but migrating
+// this entire file to it was explicitly OUT of that task's scope ("Not a
+// big-bang regex migration"). Only the Ctrl+M double-dispatch proof moved:
+// see board-prompt-bar-dom.test.mjs, which mounts the REAL BoardPromptBar and
+// collapses what used to be a two-file half-proof (a behavioral replay in
+// prompt-model.test.mjs + this file's call-site regex) into one genuine
+// end-to-end assertion. This file KEEPS its one Ctrl+M regex test below (the
+// one pinning that the window-scoped listener calls shouldWindowCtrlMHandle
+// BEFORE preventDefault/setSelectedModel) deliberately — a source-regex
+// suite can pin a call site's ORDERING in a way a behavioral test genuinely
+// does not, so the two are complementary, not duplicative. Every other test
+// in this file remains a source-regex guard, unchanged by that task.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

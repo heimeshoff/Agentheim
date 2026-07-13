@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 28
+- **Doing:** 0
+- **Done:** 29
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **infrastructure-d2n8s** — A DOM-render test harness — so a test can mount the board, dispatch a real keydown, and see what a source-regex suite structurally cannot (feature) — `doing/infrastructure-d2n8s-dom-render-test-harness.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **infrastructure-d2n8s** — A DOM-render test harness — so a test can mount the board, dispatch a real keydown, and see what a source-regex suite structurally cannot (feature) — `done/infrastructure-d2n8s-dom-render-test-harness.md`
 - **infrastructure-h5wnq** — The model rides the launch — POST /run carries a model, the bridge spawns claude --model, and the dashboard learns whether a bridge is even there (feature) — `done/infrastructure-h5wnq-model-rides-the-launch.md`
 - **infrastructure-c6fzb** — Bridge-launched sessions carry a derived name — createTerminal({name}) + claude -n (feature) — `done/infrastructure-c6fzb-bridge-session-name-launch.md`
 - **infrastructure-nz6k4** — Skills spawn subagents by bare name — fails as installed plugin ("Agent type 'worker' not found") (bug) — `done/infrastructure-nz6k4-agent-spawn-plugin-namespace.md`
@@ -64,6 +64,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0056** — A self-registered `module.register()` resolve hook — not a second `node_modules` — re-resolves the styleguide's bare specifiers against `dashboard/node_modules`, the Node-ESM analogue of esbuild's `nodePaths` (accepted) — `../../knowledge/decisions/0056-node-esm-bare-specifier-resolve-hook-for-cross-bc-dom-tests.md`
 - **ADR-0018** — VS Code dashboard→terminal bridge — fixed-port localhost-listener extension + server-mediated `bridge.json` / `GET /api/bridge` discovery (proposed; diverges-in-part from ADR-0002's ephemeral port) — `../../knowledge/decisions/0018-vscode-dashboard-terminal-bridge.md`
 - **ADR-0013** — Plugin release discipline — manifest bump bound to a `vX.Y.Z` git tag, by checklist (accepted) — `../../knowledge/decisions/0013-plugin-release-discipline.md`
 - **ADR-0002** — Dashboard runtime — Node-stdlib localhost transport with detached launch (proposed; superseded-in-part by ADR-0006) — `../../knowledge/decisions/0002-dashboard-runtime-transport.md`

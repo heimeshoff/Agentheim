@@ -1025,7 +1025,7 @@ async function defaultFetchInFlight() {
 // `PROMPT_MODES[i].commandFor`), and the silent clipboard fallback.
 // `sanitizePromptLine` (aw-038) is RETIRED (p8k4d) — the field now holds raw,
 // genuinely multi-line text.
-function BoardPromptBar({ skipPermissions = false }) {
+export function BoardPromptBar({ skipPermissions = false }) {
   const [prompt, setPrompt] = useState("");
   const [confettiKey, setConfettiKey] = useState(0);
   // ADR-0050's single committed selection channel — one index into PROMPT_MODES,

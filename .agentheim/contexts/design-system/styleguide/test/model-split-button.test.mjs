@@ -6,16 +6,30 @@
 // filled --accent-ochre surface; the caret region is part of that SAME
 // primed action (not a second neutral button beside it).
 //
-// button.js renders via htm/React with no DOM under `node --test` (see
-// enter-button.test.mjs / menu.test.mjs), so:
+// button.js renders via htm/React with no DOM under a plain `node --test`
+// run FROM the styleguide's own test/ (see enter-button.test.mjs /
+// menu.test.mjs), so:
 //   1. The load-bearing KEYBOARD/MENU decisions are factored into
 //      button-state.js, framework-free, and tested directly (real unit
-//      tests, mirroring menu-state.js / search-state.js) — this is what
-//      "the menu's keyboard behavior" coverage means here.
+//      tests, mirroring menu-state.js / search-state.js) — the pure
+//      resolution functions' own in/out contract.
 //   2. The click-region split, the locked variant, the disabled treatment,
 //      the ARIA contract, and the token usage are tested as source-reading
 //      static guards against button.js and the canvas (app.js), mirroring
 //      enter-button.test.mjs / menu.test.mjs.
+//   3. infrastructure-d2n8s adds a jsdom DOM-render harness — but it lives in
+//      dashboard/package.json (the ONE tree in the repo with a real
+//      node_modules), not here. `dashboard/test/model-split-button-dom.test.mjs`
+//      mounts THIS component (relative import, consumed unforked, ADR-0003)
+//      and drives its menu keyboard contract with REAL DOM KeyboardEvents —
+//      ArrowUp/ArrowDown roving focus, Enter-selects, Escape-dismisses,
+//      focus-returns-to-caret (WCAG 2.1.2) — replacing the one regex
+//      assertion that used to "prove" delegation here by string-matching
+//      `arrowDirection(e.key)` etc. (which cannot distinguish "wired
+//      correctly" from "wired backwards"). See that file's header for the
+//      full account; every other guard in THIS file (structure, ARIA
+//      attributes, tokens, the icon registry, the canvas specimens, the
+//      no-hardcoded-model-name guard) is untouched.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -152,12 +166,14 @@ test('the open menu has role="menu" with menuitemradio items and aria-checked on
   assert.match(modelSplitButtonFn, /aria-checked=\$\{opt\s*===\s*value\}/, 'the current option must be marked aria-checked');
 });
 
-test('the menu keyboard handler delegates to the pure button-state predicates (arrow move, Enter select, Escape dismiss)', () => {
-  assert.match(modelSplitButtonFn, /arrowDirection\(e\.key\)/, 'arrow navigation must delegate to the pure predicate');
-  assert.match(modelSplitButtonFn, /isSelectKey\(e\.key\)/, 'Enter-select must delegate to the pure predicate');
-  assert.match(modelSplitButtonFn, /isDismissKey\(e\.key\)/, 'Escape-dismiss must delegate to the pure predicate');
-  assert.match(modelSplitButtonFn, /closeAndRefocus/, 'Escape must close the menu AND return focus to the caret');
-});
+// RETIRED (infrastructure-d2n8s): a regex assertion that `arrowDirection(e.key)`
+// / `isSelectKey(e.key)` / `isDismissKey(e.key)` appear somewhere in
+// button.js's source could not distinguish "wired correctly" from "wired
+// backwards", nor prove a real keystroke ever reaches them. See
+// dashboard/test/model-split-button-dom.test.mjs for the genuine, mounted,
+// real-DOM-KeyboardEvent replacement (mutation-tested: flipping
+// arrowDirection's up/down mapping in button-state.js turned two of that
+// file's tests RED; reverted byte-exact — see this task's Outcome).
 
 test('ochre draws from --accent-ochre / --accent-ochre-fg only — no new color token, no hard-coded hex', () => {
   assert.match(modelSplitButtonFn, /var\(--accent-ochre\)/, 'the group surface must fill with --accent-ochre');

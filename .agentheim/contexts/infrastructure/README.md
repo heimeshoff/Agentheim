@@ -299,6 +299,60 @@ Apply write request.
   (see `vscode-extension/README.md`). (infrastructure-013, building on infrastructure-012;
   shell-bypass launch reshape infrastructure-020.)
 
+- **ADR-0056 — Node ESM bare-specifier resolve hook for cross-BC DOM tests.** A jsdom
+  DOM-render test harness (`dashboard/test/dom-harness.mjs`) lets a `node --test` file mount a
+  real component and dispatch a real DOM event — observable behavior a source-regex suite
+  structurally cannot see (see the Testing note below). Mounting a design-system styleguide
+  component (consumed unforked, ADR-0003) throws `ERR_MODULE_NOT_FOUND` under a plain `node
+  --test`, because the styleguide has no `node_modules` anywhere up its own tree — the same
+  problem `build.mjs`'s esbuild `nodePaths` already solves at build time, which has no Node-ESM
+  equivalent (`NODE_PATH` is ignored for ESM). `dashboard/test/resolve-hook.mjs` is the
+  Node-side analogue: a `module.register()` resolve hook, self-registered by each DOM test file
+  (never globally), that redirects a fixed handful of bare specifiers
+  (`react`/`react-dom`/`react-dom/client`/`htm`/`marked`) to `dashboard/node_modules` by
+  reusing Node's own walk-up algorithm against a synthetic parent path — zero source changes,
+  and inert for every test file that does not opt in. Rejected: a second `styleguide/
+  node_modules` junction (ADR-0032's `lib/worktree-node-modules.mjs` spike-confirmed that `git
+  worktree remove --force` recurses through an un-unlinked junction and silently deletes the
+  real target's contents; `unlinkDashboardNodeModules` only knows about `dashboard/
+  node_modules`).
+
+## Testing
+
+- **DOM-render harness (`dashboard/test/dom-harness.mjs` + `resolve-hook.mjs`, jsdom, ADR-0056)
+  — reach for it when a keyboard/focus/ARIA contract's correctness depends on *live event
+  propagation* (capture/bubble, delegation, focus movement), not just on what strings appear in
+  the source.** `agentic-workflow-m2vkp` shipped a double-handled Ctrl+M — React 18
+  `createRoot` delegates keydown at the root container, the event then bubbles on to `document`,
+  where a second listener also fired, stepping a model selector by two instead of one — with
+  1279 tests green, because no source-regex assertion can predict what happens when two live
+  listeners are both attached and one bubbles into the other. The harness mounts a real
+  component (`mount`, wrapping `createRoot`/`act`), dispatches real `KeyboardEvent`s through
+  jsdom's spec-accurate algorithm (`dispatchKeyDown`), and reads real rendered DOM/focus —
+  see `dashboard/test/board-prompt-bar-dom.test.mjs` (the Ctrl+M reproduction, mutation-tested
+  against `shouldWindowCtrlMHandle`) and `dashboard/test/model-split-button-dom.test.mjs` (the
+  `ModelSplitButton` menu's roving-tabindex keyboard contract, mounted from styleguide source
+  across the BC boundary — proof the cross-BC reach genuinely works, not merely asserted).
+  jsdom is a `dashboard/package.json` **devDependency only** — same build/test-time-only carve-
+  out as esbuild (ADR-0002/ADR-0003); `dist-build.test.mjs` asserts it never reaches the
+  committed bundle. Container **must** be `document.body.appendChild`'d BEFORE `createRoot` — a
+  detached container never sees an event bubble to `document`, so the bug this harness exists
+  to catch would silently not reproduce and the harness would give a false green. Always
+  `await act(async () => root.unmount())` in teardown — a leaked mount's `document` listener
+  double-fires the next test's dispatch.
+- **What it still cannot see.** This task deliberately did **not** migrate the rest of
+  `board-prompt-bar.test.mjs` or `model-split-button.test.mjs` to the harness ("not a big-bang
+  regex migration") — most of those files' assertions (layout/token/structure guards, ARIA
+  attribute presence, import-shape pins) are exactly what a source-regex suite is *good* at,
+  and migrating them would trade a cheap, precise assertion for an expensive, less-precise one.
+  The harness also proves nothing about real-browser-only concerns jsdom does not implement
+  (layout/paint, real focus-visible styling, actual screen-reader announcement) — it is a DOM
+  behavior harness, not a visual or assistive-technology regression tool. One `board-prompt-
+  bar.test.mjs` regex test is deliberately KEPT alongside the new DOM test, not superseded by
+  it: pinning that the window-scoped Ctrl+M listener calls `shouldWindowCtrlMHandle` *before*
+  `preventDefault`/`setSelectedModel` proves a call site's ordering, which a behavioral test
+  genuinely does not assert.
+
 ## Open questions
 
 - **Future remit** — whether the eval harness or shared runtime tooling eventually fold into

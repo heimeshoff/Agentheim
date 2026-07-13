@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 13:48 -- Task verified and completed: infrastructure-d2n8s - A DOM-render test harness — so a test can mount the board, dispatch a real keydown, and see what a source-regex suite structurally cannot
+
+**Type:** Work / Task completion
+**Task:** infrastructure-d2n8s - A DOM-render test harness — so a test can mount the board, dispatch a real keydown, and see what a source-regex suite structurally cannot
+**Summary:** Stood up a jsdom DOM-render test harness (dom-harness.mjs + a module.register() bare-specifier resolve hook mirroring esbuild nodePaths) so a test can mount a real component and dispatch a real keydown; collapsed the m2vkp Ctrl+M two-file half-proof into one mutation-tested end-to-end assertion, and proved the cross-BC reach by mounting ModelSplitButton from styleguide source
+**Duration:** 25m
+**Verification:** PASS (iteration 1)
+**Files changed:** 13
+**Tests added:** 9
+**ADRs written:** ADR-0056
+
+---
+
 ## 2026-07-13 13:36 -- Modeling / Promoted: agentic-workflow-q7v3k - Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker
 
 **Type:** Modeling / Promote
