@@ -87,7 +87,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-q7v3k** — Make the "workers never rebuild dist/" contract structural — a lint, not a prompt sentence (feature) — `backlog/agentic-workflow-q7v3k-structural-dist-guard.md`
+- **agentic-workflow-q7v3k** — Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker (feature) — `backlog/agentic-workflow-q7v3k-structural-dist-guard.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

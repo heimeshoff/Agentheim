@@ -1,6 +1,6 @@
 ---
 id: agentic-workflow-q7v3k
-title: Make the "workers never rebuild dist/" contract structural — a lint, not a prompt sentence
+title: Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker
 status: backlog
 type: feature
 context: agentic-workflow
@@ -9,7 +9,7 @@ completed:
 depends_on: []
 blocks: []
 tags: [lint, guard, worker-contract, dist, derived-artifact, worktree, merge-back]
-related_adrs: [0003, 0032, 0026, 0052]
+related_adrs: [0003, 0013, 0026, 0032, 0038, 0052, 0055]
 related_research: []
 prior_art: [agentic-workflow-080, agentic-workflow-t4x8p, agentic-workflow-f6m2q]
 ---
@@ -27,6 +27,20 @@ first pass — including one that had been handed an explicit
 caught and reverted by the conductor, by hand, every time. A rule that is violated by
 100% of agents who are explicitly told the rule is not a rule; it is a wish.
 
+**Refinement found the rule is worse off than the capture assumed — on two counts.**
+
+1. **The contract has no durable home.** `rebuild` and `build.mjs` appear in **zero**
+   files under `skills/` and `agents/`. The "HARD CONTRACT" exists only in whatever prose
+   the conductor improvises into each dispatch prompt, re-typed from scratch every session.
+   Workers weren't defying a written rule — they were defying a rule that was never
+   written down.
+2. **ADR-0032 currently *licenses* the behaviour.** Its `### Windows & node_modules`
+   section, justifying the shared `node_modules` junction, says esbuild "reads deps and
+   **writes each worktree's own tracked `dashboard/dist/`**, so there is no concurrent
+   writer to the shared dir." A worker who reads the architecture is told building in its
+   worktree is expected. The guard must land **with** an ADR-0032 amendment, or it enforces
+   a rule the architecture still contradicts.
+
 **Why this is a correctness problem, not tidiness.** The bundle is *not* a pure function
 of one worker's diff:
 
@@ -42,86 +56,152 @@ of one worker's diff:
   imports `app/`, never `dist/`. The 2026-07-09 session hit exactly this and had to
   discard both sides and rebuild from merged source.
 
-So the correct doctrine is already known and already written down — *generated artifacts
-are regenerated at merge-back, never merged*. What's missing is **enforcement**. Today
-the only thing standing between that failure and `main` is the conductor noticing a dirty
-`dist/` in `git status` and reverting it by hand, on every task, forever.
+So the correct doctrine is already known. What's missing is **enforcement**.
 
 ## What
 
-Make the contract **structural**: a worker's diff that touches `dashboard/dist/**` should
-**fail**, mechanically, rather than relying on a sentence in a dispatch prompt that four
-sessions of evidence say agents will ignore.
+**The enforcement point is decided** (this was the capture's open question; refinement
+closed it): filter the **conductor's checkpoint `git add`**, mechanically. Do not lint the
+tree, do not prompt the worker harder.
 
-The precedent for this exact move already exists in the repo — `lib/agent-spawn-namespace.mjs`
-(ADR-0052) is a live-tree lint that fails when a forbidden pattern (a bare, un-namespaced
-`subagent_type`) reappears. `agentic-workflow-080`'s duplicate-task-id guard is the same
-family. This task asks for a third member of that family.
+**The insight that decides it:** a rebuilt `dist/` has exactly **one channel** by which it
+can escape a worktree and reach `main` — the conductor's enumerated stage at the
+wip-checkpoint (`skills/work/SKILL.md` ~line 111), which today stages the worker's
+self-reported `FILE_LIST` **verbatim, on trust, unfiltered**. A worker can dirty its
+worktree all it likes; if the derived artifact is never *staged*, it never reaches the
+squash-merge, and the violation is inert. So the guard replaces **judgment with
+transcription** at the one seam that already exists — the same move ADR-0038 made for the
+lifecycle verbs.
 
-**The open design question — where the guard fires — is the real work here, and is
-deliberately left for refinement.** The candidates are not equivalent:
+**This also answers the task's stated crux — how to tell the sanctioned writer from the
+forbidden one — structurally, with no actor check anywhere.** The guard lives inside a
+verb that only ever runs against a *worktree*. The conductor's sanctioned
+rebuild-from-merged-source happens on `main` at integration and never routes through it.
+It is not *exempted*; it is **out of the guard's reach by construction**. No identity
+test, no "is this the conductor?" flag — the two writers are separated by which code path
+they travel.
 
-- **A test in the suite** (`node --test`) asserting `dist/` matches a fresh build of the
-  current source. Cheap and consistent with the existing lint family — but note it would
-  fail for the *conductor* too, mid-integration, before it rebuilds. It also can't
-  distinguish "a worker rebuilt this" from "the bundle is legitimately stale."
-- **A conductor-side check in `work`** — assert `dashboard/dist/` is clean in the worker's
-  worktree before the wip-checkpoint, and hard-fail (or auto-revert, as today) with a loud
-  protocol line. This is where the knowledge actually lives (only the conductor knows a
-  worktree belongs to a worker), but it is a skill-prose rule again — the very thing that
-  isn't holding.
-- **A git-level guard** (`.gitattributes`, a pre-commit hook, or a merge driver marking
-  `dist/*` binary/ours). Strongest, but git hooks are not installed by the plugin and the
-  repo has no CI (per the BC README), so this may not be reachable.
+### The two rejected alternatives — and why (a) is *inverted*, not merely weak
 
-A worker should pick one **with an argument**, not assemble all three.
+- **(a) A suite test asserting `dist/` matches a fresh build of current source — REJECTED,
+  and it is actively harmful.** The verifier runs the suite **from the worker's worktree**
+  (`skills/work/SKILL.md` lines 168/178). So that assertion is **true exactly when the
+  worker committed the violation** (they rebuilt, so dist matches), and **false whenever a
+  worker correctly left `dist/` untouched while changing source that feeds it**. Such a
+  test would have *coerced every dashboard-touching worker into rebuilding `dist/` to go
+  green* — it enforces the precise opposite of the contract. This is not a close call and
+  must be argued explicitly in the ADR, so nobody re-proposes it.
+- **(c) A git-level guard (hook / merge driver / `.gitattributes`) — REJECTED, wrong actor
+  and already-settled ground.** **Workers never run git** (ADR-0032, ADR-0026: the
+  conductor owns all git). A pre-commit hook would fire on the *conductor* — guarding the
+  one actor that isn't violating anything — and never on the violator. Separately, this
+  repo has no CI, no `core.hooksPath`, no installed hooks and no `.gitattributes`
+  (verified), and **ADR-0013 already decided** against CI/git-hooks for this repo
+  deliberately. Re-litigating that here would be a large decision smuggled in as a lint.
 
-Note the guard must not break the **legitimate** writer: the `work` conductor *does*
-rebuild `dist/` on `main` at integration, and `dashboard/build.mjs` must keep working.
-Whatever fires, it must distinguish the sanctioned regeneration from the forbidden one —
-that distinction is the crux of the task.
+### Deliverables
+
+- **New:** `lib/derived-artifact-guard.mjs` — pure, stdlib-only, git-free, side-effect-free
+  (the `lib/agent-spawn-namespace.mjs` / ADR-0052 family: root path in, plain data out,
+  never writes). Exports a frozen `DERIVED_ARTIFACT_PREFIXES` (starting with
+  `['dashboard/dist/']`) and `partitionCheckpointFiles(worktreeRoot, fileList) →
+  { changed, refused }`, each `refused` entry carrying
+  `{ path, reason: 'derived-artifact' | 'outside-worktree' }`.
+- **New:** `lib/test/derived-artifact-guard.test.mjs`.
+- **Edit:** `lib/task-lifecycle-cli.mjs` — add a `checkpoint` verb returning
+  `{ ok, changed, refused, refusalReason, message, verb: 'checkpoint' }`, mirroring
+  `claim`/`complete`'s manifest convention and reusing the conductor's existing bootstrap
+  blob. (If the worker judges `checkpoint` doesn't belong on the *lifecycle* CLI — it moves
+  no task and edits no INDEX — a separate small CLI is an acceptable, argued departure.)
+- **Edit:** `skills/work/SKILL.md` ~line 111 — replace the hand-composed
+  `git -C .worktrees/<id> add <FILE_LIST + ...>` with the `checkpoint` verb; stage
+  `changed` verbatim; surface `refused` entries in the end-of-run summary and prepend them
+  to any FAIL re-dispatch prompt.
+- **Edit:** `skills/work/SKILL.md`'s Subagent Prompt Template `## Rules — CRITICAL` — give
+  the rule its first durable home, stated as the **mechanism**, not a plea: *"a
+  `dashboard/dist/` rebuild in your worktree will be dropped at checkpoint, not merged."*
+- **Edit:** `.agentheim/knowledge/decisions/0032-worker-worktree-isolation-git-model.md` —
+  amend the `### Windows & node_modules` passage so it no longer describes workers writing
+  their worktree's `dist/` as expected behaviour.
+- **New:** ADR-0056 (`scope: agentic-workflow`) — *derived artifacts are unstageable from a
+  worktree; the conductor's manifest is the guard, not a prompt sentence.* In the
+  ADR-0026/0032/0038/0055 lineage. Its **Alternatives** section must record that (a) is
+  inverted and that (c) re-litigates ADR-0013 against the wrong actor.
+- **Edit:** the BC README — record the rule and where it is enforced.
+- **Not touched:** `dashboard/build.mjs`, `.gitattributes`, `.git/hooks/`.
 
 ## Acceptance criteria
 
-- [ ] A worker diff that modifies any path under `dashboard/dist/**` is caught
-      **mechanically** — not by a human or a conductor reading `git status`.
-- [ ] The conductor's own sanctioned rebuild-from-merged-source at integration
-      (`node dashboard/build.mjs` on `main`, then committing `dist/`) still works and is
-      **not** flagged. The guard distinguishes the sanctioned writer from the forbidden one.
-- [ ] The guard states *why* on failure — it names ADR-0003 and the tree-shaking /
-      never-existed-source-tree hazard, so an agent that trips it learns the reason rather
-      than just seeing red.
-- [ ] The chosen enforcement point is **justified in the task's Outcome** against the
-      alternatives above (suite test vs. conductor-side check vs. git-level guard), not
-      merely implemented.
-- [ ] The guard is itself unit-tested — it must go **red** when a `dist/` modification is
-      introduced. (This session produced two tests that were structurally incapable of
-      failing on their own criterion; do not add a third.)
-- [ ] If the enforcement lands conductor-side, `skills/work/SKILL.md`'s worker-dispatch
-      contract is updated to point at the mechanism rather than repeating the prohibition
-      in prose.
-- [ ] The BC README records the rule and where it is enforced.
+- [ ] `lib/derived-artifact-guard.mjs` exists: pure, stdlib-only, git-free, side-effect-free.
+      Exports `DERIVED_ARTIFACT_PREFIXES` and
+      `partitionCheckpointFiles(worktreeRoot, fileList) → { changed, refused }`.
+- [ ] The guard operates on the **declared `FILE_LIST`**, never the working tree. It neither
+      runs nor needs `git status` / `git diff` — so it is structurally immune to the known
+      `autocrlf` phantom-modification of `dashboard/dist/app.js`.
+- [ ] The guard refuses the **real input shape**: an absolute, OS-native-separator path
+      (`references/worker-return-format.md` line 17 — `FILE_LIST` is comma-separated
+      **absolute** paths). The test fixture must be built with
+      `path.join(worktreeRoot, 'dashboard', 'dist', 'app.js')`, **not** a hardcoded
+      POSIX-relative literal — a guard written against `'dashboard/dist/app.js'` will pass
+      its own test and be **inert against every real input**.
+- [ ] The guard refuses nested paths (`dashboard/dist/fonts/x.woff2`) and does **not** refuse
+      `dashboard/dist-notes.md` — segment-boundary matching, never `includes('dist')`.
+- [ ] The guard refuses a path resolving outside the worktree with a distinct
+      `outside-worktree` reason.
+- [ ] `lib/test/derived-artifact-guard.test.mjs` **proves the guard can go red**: the task's
+      Outcome names the mutation (e.g. emptying `DERIVED_ARTIFACT_PREFIXES`, or reverting to
+      a naive relative-string match) and which test flips to failing under it. This session
+      shipped **two** tests that were structurally incapable of failing on their own
+      criterion — do not add a third.
+- [ ] `lib/task-lifecycle-cli.mjs` exposes `checkpoint` with the manifest shape above, and
+      `refusalReason` **states why**: it names ADR-0003 and the tree-shaking /
+      never-existed-source-tree hazard, so an agent that trips it learns the reason.
+- [ ] `skills/work/SKILL.md` invokes `checkpoint` instead of hand-composing the `git add`,
+      stages `changed` verbatim, and a refusal **drops the path and continues** — it never
+      fails the task or the batch. (The worker's actual work is fine; only its derived
+      artifact is dropped.)
+- [ ] The conductor's sanctioned main-tree rebuild is demonstrably **unreachable** by the
+      guard — because `checkpoint` only ever runs against a worktree, **not** because of any
+      actor/identity check. There must be no "is this the conductor?" test in the code.
+- [ ] ADR-0032's `### Windows & node_modules` passage no longer describes a worker writing
+      its worktree's `dashboard/dist/` as expected.
+- [ ] ADR-0056 is written, `scope: agentic-workflow`, with the Alternatives section above.
+- [ ] The BC README records the rule and its enforcement point.
+- [ ] **Do not** add any test or criterion asserting "`dist/` matches a fresh build of
+      source." That criterion is rejected as inverted (see What) and is satisfiable only by
+      the mechanism this task exists to avoid.
 
 ## Notes
 
-- **Read `lib/agent-spawn-namespace.mjs` first** — it is the closest prior art (a live-tree
-  lint over a forbidden pattern, ADR-0052) and the shape to follow or consciously depart from.
-  `agentic-workflow-080` (duplicate-task-id guard) is the second member of that family.
-- **Beware CRLF.** `agentic-workflow-t4x8p` had to fix guard regexes that were
-  CRLF-sensitive on this Windows box. A `dist/`-comparison guard that diffs bytes will walk
-  straight into `autocrlf=true`. Related: `dashboard/dist/app.js` is known to show as
-  modified in `git status` while its bytes match `HEAD` — confirm any "is it dirty" check
-  against `git diff --numstat`, not `git status` alone.
-- **The minified bundle is not diff-stable across rebuilds of *changed* source.** esbuild's
-  identifier mangling shifts (observed: 56 changed lines that were pure `jl`↔`Hl` renames
-  with zero semantic delta). A guard that asserts "dist matches a fresh build" must be robust
-  to that, or it will produce false positives. Rebuilding *unchanged* source **does** reproduce
-  the committed bundle byte-for-byte — that was verified in the 2026-07-13 session — so the
-  property is "reproducible given the same source", not "stable across source changes".
-- **Routing note (challengeable at refinement).** Filed to `agentic-workflow` rather than
-  `infrastructure` because the thing being protected is the **worker/conductor contract** and
-  the integrity of ADR-0032's parallel merge-back — i.e. the workflow itself. ADR-0003 does
-  assign the *build pipeline and committed dist* to `infrastructure`, so an argument exists for
-  filing it there instead; if the chosen enforcement point turns out to be the build pipeline
-  (a `build.mjs` change) rather than the work loop, moving this task to `infrastructure` is the
-  right call.
+- **Highest-priority trap: `FILE_LIST` is absolute, OS-native-separator paths.** A guard or
+  test written against a POSIX-relative literal will look correct, pass, and be structurally
+  inert on every real input. Verified at `references/worker-return-format.md` line 17.
+- **Read `lib/agent-spawn-namespace.mjs` first** — closest prior art (a live-tree lint over a
+  forbidden pattern, ADR-0052) and the module shape to follow. `agentic-workflow-080`
+  (duplicate-task-id guard) is the family's second member. This guard is the third, but note
+  it is a *filter over declared data*, not a tree walk — follow the purity doctrine, not the
+  scanning shape.
+- **The minified bundle is not diff-stable across rebuilds of *changed* source** — esbuild's
+  identifier mangling shifts (observed: 56 changed lines that were pure `jl`↔`Hl` renames,
+  zero semantic delta). Rebuilding *unchanged* source **does** reproduce the committed bundle
+  byte-for-byte. This is background for why the merge hazard is real; the chosen guard never
+  compares bundles, so it sidesteps the instability entirely.
+- **Open thread to resolve before implementing (may spawn a sibling task).** The capture says
+  rebuilds were "caught by the conductor noticing a dirty `dist/` in `git status`" — but under
+  ADR-0032 a *worktree-only* rebuild would not appear in `main`'s `git status` at all. Either
+  the conductor was inspecting worktrees, or **some workers ran the build from the main tree
+  directly**, escaping their assigned `Workspace`. That second possibility is a distinct
+  defect: this guard's `outside-worktree` refusal catches the *staging* half of it, but
+  nothing here stops a worker from dirtying `main` in the first place. Check the evidence
+  before starting; if workers escaped the worktree, file that separately.
+- **Spin-out, deliberately out of scope:** a `.gitattributes` entry
+  (`dashboard/dist/** -text -merge`) is a genuine fix for two adjacent problems — the
+  `autocrlf` phantom-modification, and forcing a *loud* conflict instead of a silent bad
+  merge. Worth doing as its own `infrastructure` task. Beware: adding `-text` to an
+  already-committed file under `autocrlf=true` triggers a one-time whole-file renormalization
+  diff.
+- **Routing confirmed: stays in `agentic-workflow`.** The capture's own test was "if the
+  enforcement point turns out to be the build pipeline, move it to `infrastructure`." It
+  isn't — `dashboard/build.mjs` is untouched entirely, and every deliverable lands in the
+  work loop (`skills/work/SKILL.md`, the lifecycle CLI, the worker contract). That is this
+  BC's territory.
