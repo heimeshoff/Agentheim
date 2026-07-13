@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 141
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-q7v3k** — Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker (feature) — `todo/agentic-workflow-q7v3k-structural-dist-guard.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-q7v3k** — Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker (feature) — `doing/agentic-workflow-q7v3k-structural-dist-guard.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

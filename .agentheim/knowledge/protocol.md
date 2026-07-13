@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 13:50 -- Batch started: [agentic-workflow-q7v3k]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-q7v3k - Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker
+**Parallel:** no (1 worker — sole ready task; promoted to todo mid-session while infrastructure-d2n8s was in flight, picked up on the Phase-2 re-scan)
+
+---
+
 ## 2026-07-13 13:48 -- Task verified and completed: infrastructure-d2n8s - A DOM-render test harness — so a test can mount the board, dispatch a real keydown, and see what a source-regex suite structurally cannot
 
 **Type:** Work / Task completion

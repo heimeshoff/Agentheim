@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-q7v3k
 title: Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-13
