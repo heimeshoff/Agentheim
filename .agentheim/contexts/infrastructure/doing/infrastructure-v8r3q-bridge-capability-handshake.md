@@ -1,7 +1,7 @@
 ---
 id: infrastructure-v8r3q
 title: The bridge advertises what it can honour — a live /health capability handshake, plus a structural guard that stops a fourth silent drift
-status: todo
+status: doing
 type: bug
 context: infrastructure
 created: 2026-07-13

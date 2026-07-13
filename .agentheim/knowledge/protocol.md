@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 16:08 -- Batch started: [infrastructure-v8r3q, design-system-me97j]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-v8r3q - The bridge advertises what it can honour — a live /health capability handshake, plus a structural guard that stops a fourth silent drift, design-system-me97j - ModelSplitButton's `disabled` deadens the model caret along with Enter — an empty prompt shouldn't block picking a model
+**Parallel:** yes (2 workers — the entire ready set; nothing held back by MAX_PARALLEL). File sets are disjoint (v8r3q: vscode-extension/ + dashboard/app/bridge-launch.js + read-api.mjs; me97j: styleguide/app/button.js + app.js), different BCs, different READMEs — no merge-order annotation needed. agentic-workflow-n4qte stays in backlog: it depends_on v8r3q.
+
+---
+
 ## 2026-07-13 16:06 -- Modeling / Promoted: infrastructure-v8r3q - The bridge advertises what it can honour — a live /health capability handshake, plus a structural guard that stops a fourth silent drift
 
 **Type:** Modeling / Promote

@@ -1,7 +1,7 @@
 ---
 id: design-system-me97j
 title: ModelSplitButton's `disabled` deadens the model caret along with Enter — an empty prompt shouldn't block picking a model
-status: todo
+status: doing
 type: bug
 context: design-system
 created: 2026-07-13
