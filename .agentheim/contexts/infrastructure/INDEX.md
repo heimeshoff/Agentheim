@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 29
@@ -59,6 +59,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **infrastructure-v8r3q** — The bridge contract grows but never versions — an old bridge silently swallows fields the dashboard sends (bug) — `backlog/infrastructure-v8r3q-bridge-capability-handshake.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

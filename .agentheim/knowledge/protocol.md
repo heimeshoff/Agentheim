@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-13 14:36 -- Modeling / Captured: infrastructure-v8r3q - The bridge contract grows but never versions — an old bridge silently swallows fields the dashboard sends
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** backlog
+**Summary:** The builder reported that the dashboard's model selector and session-rename had no effect — choosing Sonnet launched an Opus session, and named sessions still read "Claude". Investigation found no code defect: bridge 0.4.0 (carrying both features) was installed at 14:09, but both live VS Code extension hosts had started at 09:08/09:36 and were still executing 0.2.0 from memory, which honours only `prompt` + `skipPermissions` and hard-codes `createTerminal({name:'Claude'})`. A window reload fixes the instance. The captured defect is the class beneath it: `BRIDGE_V` has stayed at `1` through three growths of the `/run` contract (`skipPermissions` infrastructure-016, `name` c6fzb, `model` h5wnq), so an old bridge silently drops unknown fields, returns `202 {ok:true}`, and the dashboard reports success — version skew degrades indistinguishably from working.
+
+---
+
 ## 2026-07-13 14:34 -- Modeling / Captured: design-system-k3f7q - ModelSplitButton's model menu opens upward and escapes the prompt console's clip
 
 **Type:** Modeling / Capture
