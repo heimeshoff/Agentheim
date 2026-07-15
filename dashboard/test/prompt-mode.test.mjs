@@ -358,12 +358,25 @@ test('canFirePromptMode does not read index — an out-of-range/non-numeric inde
 // already knows which mode is armed more cleanly than the bridge's own
 // `/agentheim:<skill>` prefix-parsing fallback can recover it.
 
-test('nameForPromptMode builds "<mode label>: <typed text>" for every mode', () => {
+// agentic-workflow-p5k9m (builder-scoped, 2026-07-15): the Modeling tab drops
+// its "Modeling: " prefix — the sibling assertion for modeling lives in its
+// own test below, distinct from the other four modes' unchanged "<label>: "
+// naming.
+test('nameForPromptMode builds "<mode label>: <typed text>" for every mode except modeling', () => {
   assert.equal(nameForPromptMode(0, 'dark mode toggle'), 'Quick Capture: dark mode toggle');
-  assert.equal(nameForPromptMode(1, 'dark mode toggle'), 'Modeling: dark mode toggle');
   assert.equal(nameForPromptMode(2, 'why is this slow'), 'Inquire: why is this slow');
   assert.equal(nameForPromptMode(3, 'competitor pricing'), 'Research: competitor pricing');
   assert.equal(nameForPromptMode(4, 'hello there'), 'Plain: hello there');
+});
+
+// agentic-workflow-p5k9m: the modeling carve-out. A Modeling-tab launch with
+// real typed text names the session from the typed text ALONE — no
+// "Modeling: " prefix — while every other mode keeps its "<label>: " form
+// (asserted above). Identified by the mode's stable `id: 'modeling'`, not by
+// matching the `'Modeling'` label string.
+test('nameForPromptMode drops the "Modeling: " prefix for the modeling mode when text is typed (agentic-workflow-p5k9m)', () => {
+  assert.equal(nameForPromptMode(1, 'dark mode toggle'), 'dark mode toggle');
+  assert.equal(nameForPromptMode(1, '  dark mode  '), 'dark mode');
 });
 
 test('nameForPromptMode trims the prompt and degrades to the bare mode label when there is nothing typed', () => {
@@ -371,7 +384,6 @@ test('nameForPromptMode trims the prompt and degrades to the bare mode label whe
   assert.equal(nameForPromptMode(1, ''), 'Modeling');
   assert.equal(nameForPromptMode(1, undefined), 'Modeling');
   assert.equal(nameForPromptMode(1, null), 'Modeling');
-  assert.equal(nameForPromptMode(1, '  dark mode  '), 'Modeling: dark mode');
 });
 
 test('nameForPromptMode clamps an invalid index the same way clampPromptModeIndex does, never throwing', () => {
@@ -382,7 +394,17 @@ test('nameForPromptMode clamps an invalid index the same way clampPromptModeInde
 
 test('nameForPromptMode caps the derived name at a defensive length, never throwing on a very long prompt', () => {
   const long = 'x'.repeat(500);
+  const name = nameForPromptMode(3, long);
+  assert.ok(name.length <= 60, 'the derived name must be capped');
+  assert.ok(name.startsWith('Research: '), 'the mode-label prefix must survive the cap');
+});
+
+// agentic-workflow-p5k9m: the modeling carve-out has no prefix to survive the
+// cap, but the cap itself (LAUNCH_NAME_MAX_LEN) still applies and the
+// function must not throw.
+test('nameForPromptMode caps the modeling carve-out too, even with no prefix to survive', () => {
+  const long = 'x'.repeat(500);
   const name = nameForPromptMode(1, long);
   assert.ok(name.length <= 60, 'the derived name must be capped');
-  assert.ok(name.startsWith('Modeling: '), 'the mode-label prefix must survive the cap');
+  assert.equal(name, 'x'.repeat(60));
 });

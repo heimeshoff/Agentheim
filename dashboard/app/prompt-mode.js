@@ -209,6 +209,19 @@ const LAUNCH_NAME_MAX_LEN = 60;
  * typed. Capped defensively — the bridge (`vscode-extension/src/bridge.js`)
  * re-sanitizes/caps whatever it receives regardless, so this is a courtesy
  * derivation, not the authoritative sanitizer.
+ *
+ * Builder-scoped carve-out (agentic-workflow-p5k9m, 2026-07-15): the
+ * `modeling` mode drops the `"<label>: "` prefix once there is typed text —
+ * a Modeling-tab launch is named from the typed text alone. This is the
+ * dashboard-side sibling of infrastructure-w6p4k, which drops the lowercase
+ * `modeling:` prefix from the *bridge's* own prompt-derived fallback; that
+ * path never runs here because this function always sends an explicit name
+ * (ADR-0018's explicit-name-wins rule). Every other mode is unchanged. The
+ * carve-out is keyed on the mode's stable `id: 'modeling'`, not the
+ * `'Modeling'` label string, since the label is display copy. An
+ * empty/whitespace-only prompt still degrades to the bare mode label (here,
+ * `'Modeling'`), same as every other mode — the non-empty/non-throwing
+ * contract is unchanged.
  * @param {*} index — the highlighted mode index (clamped internally).
  * @param {*} prompt — the live textarea contents.
  * @returns {string} never throws; a missing/non-string/whitespace-only
@@ -216,9 +229,17 @@ const LAUNCH_NAME_MAX_LEN = 60;
  */
 export function nameForPromptMode(index, prompt) {
   const idx = clampPromptModeIndex(index);
-  const label = PROMPT_MODES[idx].label;
+  const mode = PROMPT_MODES[idx];
+  const label = mode.label;
   const trimmed = typeof prompt === 'string' ? prompt.trim() : '';
-  const base = trimmed ? `${label}: ${trimmed}` : label;
+  let base;
+  if (!trimmed) {
+    base = label;
+  } else if (mode.id === 'modeling') {
+    base = trimmed;
+  } else {
+    base = `${label}: ${trimmed}`;
+  }
   return base.slice(0, LAUNCH_NAME_MAX_LEN);
 }
 

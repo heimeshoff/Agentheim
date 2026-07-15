@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 144
+- **Doing:** 0
+- **Done:** 145
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-p5k9m** — Drop the "Modeling:" prefix from dashboard prompt-bar launch names (chore) — `doing/agentic-workflow-p5k9m-drop-modeling-prefix-prompt-bar-launch-name.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-p5k9m** — Drop the "Modeling:" prefix from dashboard prompt-bar launch names (chore) — `done/agentic-workflow-p5k9m-drop-modeling-prefix-prompt-bar-launch-name.md`
 - **agentic-workflow-n4qte** — Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it (bug) — `done/agentic-workflow-n4qte-prompt-bar-capability-skew-grey-out-and-banner.md`
 - **agentic-workflow-vsg9d** — Prompt field stays tall after a launch — the post-clear re-measure runs before React re-renders (bug) — `done/agentic-workflow-vsg9d-prompt-field-stays-tall-after-launch.md`
 - **agentic-workflow-q7v3k** — Make the "workers never rebuild dist/" contract structural — filter the conductor's checkpoint, don't prompt the worker (feature) — `done/agentic-workflow-q7v3k-structural-dist-guard.md`
