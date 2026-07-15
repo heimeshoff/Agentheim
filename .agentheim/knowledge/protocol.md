@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-15 -- Modeling / Captured: agentic-workflow-p5k9m - Drop the "Modeling:" prefix from dashboard prompt-bar launch names
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** Dashboard-side sibling of infrastructure-w6p4k. The prompt bar's Modeling tab sends an explicit `Modeling: <text>` name via `nameForPromptMode`, which the bridge honours as-is (bypassing the fallback derivation w6p4k fixes). Special-case the modeling mode to drop just that prefix while other prompt-bar modes keep `<label>: <text>`.
+
+---
+
 ## 2026-07-15 -- Modeling / Captured: infrastructure-w6p4k - Drop the "modeling:" prefix from bridge-derived session names
 
 **Type:** Modeling / Capture
