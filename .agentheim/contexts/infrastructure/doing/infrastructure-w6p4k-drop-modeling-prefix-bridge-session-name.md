@@ -1,7 +1,7 @@
 ---
 id: infrastructure-w6p4k
 title: Drop the "modeling:" prefix from bridge-derived session names
-status: todo
+status: doing
 type: chore
 context: infrastructure
 created: 2026-07-15

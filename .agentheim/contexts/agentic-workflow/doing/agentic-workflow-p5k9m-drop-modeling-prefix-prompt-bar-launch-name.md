@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-p5k9m
 title: Drop the "Modeling:" prefix from dashboard prompt-bar launch names
-status: todo
+status: doing
 type: chore
 context: agentic-workflow
 created: 2026-07-15

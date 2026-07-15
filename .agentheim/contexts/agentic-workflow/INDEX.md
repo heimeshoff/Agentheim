@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 144
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-p5k9m** — Drop the "Modeling:" prefix from dashboard prompt-bar launch names — modeling-only carve-out in nameForPromptMode (chore) — `todo/agentic-workflow-p5k9m-drop-modeling-prefix-prompt-bar-launch-name.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-p5k9m** — Drop the "Modeling:" prefix from dashboard prompt-bar launch names (chore) — `doing/agentic-workflow-p5k9m-drop-modeling-prefix-prompt-bar-launch-name.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-15 14:19 -- Batch started: [agentic-workflow-p5k9m, infrastructure-w6p4k]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-p5k9m - Drop the "Modeling:" prefix from dashboard prompt-bar launch names, infrastructure-w6p4k - Drop the "modeling:" prefix from bridge-derived session names
+**Parallel:** yes (2 workers — the entire ready set; independent files, no overlap)
+
+---
+
 ## 2026-07-15 -- Modeling / Captured: agentic-workflow-p5k9m - Drop the "Modeling:" prefix from dashboard prompt-bar launch names
 
 **Type:** Modeling / Capture
