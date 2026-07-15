@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-15 14:28 -- Task verified and completed: infrastructure-w6p4k - Drop the "modeling:" prefix from bridge-derived session names
+
+**Type:** Work / Task completion
+**Task:** infrastructure-w6p4k - Drop the "modeling:" prefix from bridge-derived session names
+**Summary:** Drop the "modeling:" prefix from bridge-derived session names (modeling-only carve-out)
+**Duration:** 5m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 2
+**ADRs written:** none
+
+---
+
 ## 2026-07-15 14:28 -- Task verified and completed: agentic-workflow-p5k9m - Drop the "Modeling:" prefix from dashboard prompt-bar launch names
 
 **Type:** Work / Task completion

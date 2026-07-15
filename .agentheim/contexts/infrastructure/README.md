@@ -103,7 +103,9 @@ for an infrastructure BC.
   `"Claude"` in the tab and the `/resume` picker; the installed CLI's `-n, --name <name>` flag now
   names it. The core sanitizes an explicit `name` (trim, strip control chars/newlines, cap ~60
   chars); absent/malformed derives a fallback from the prompt (`/agentheim:<skill> …` →
-  `<skill>: …`; plain text → the prompt itself). The name rides its own raw argv pair `-n <name>`,
+  `<skill>: …`; plain text → the prompt itself) — **except `modeling`** (infrastructure-w6p4k),
+  which derives `<rest>` alone with no `modeling: ` prefix, a deliberate one-skill carve-out to
+  the otherwise-uniform convention. The name rides its own raw argv pair `-n <name>`,
   prepended exactly the way `skipPermissions` already prepends — no shell parses it either. The
   dashboard prompt bar sends an explicit mode-derived name (`"<mode label>: <typed text>"`,
   `prompt-mode.js`'s `nameForPromptMode`); other launch affordances rely on the prompt-derived

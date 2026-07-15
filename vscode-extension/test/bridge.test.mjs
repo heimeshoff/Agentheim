@@ -320,10 +320,21 @@ test('sanitizeName trims, strips control characters/newlines, and caps length', 
 });
 
 test('deriveNameFromPrompt strips a leading /agentheim:<skill> prefix to "<skill>: <rest>" (fallback derivation)', () => {
-  assert.equal(deriveNameFromPrompt('/agentheim:modeling dark mode toggle'), 'modeling: dark mode toggle');
   assert.equal(deriveNameFromPrompt('/agentheim:quick-capture   idea here'), 'quick-capture: idea here');
   // A bare skill invocation with no trailing text degrades to the skill name alone.
   assert.equal(deriveNameFromPrompt('/agentheim:work'), 'work');
+});
+
+test('deriveNameFromPrompt special-cases modeling: drops the "modeling: " prefix, naming the session from the idea text alone (infrastructure-w6p4k)', () => {
+  assert.equal(deriveNameFromPrompt('/agentheim:modeling dark mode toggle'), 'dark mode toggle');
+  // A bare modeling invocation with no trailing text has no rest to name it
+  // from, so it still degrades to the bare 'modeling' label.
+  assert.equal(deriveNameFromPrompt('/agentheim:modeling'), 'modeling');
+});
+
+test('deriveNameFromPrompt leaves non-modeling skills untouched by the modeling carve-out', () => {
+  assert.equal(deriveNameFromPrompt('/agentheim:work foo'), 'work: foo');
+  assert.equal(deriveNameFromPrompt('/agentheim:research bar'), 'research: bar');
 });
 
 test('deriveNameFromPrompt falls back to the prompt text itself when there is no /agentheim: prefix (fallback derivation)', () => {

@@ -266,6 +266,14 @@ function sanitizeName(raw) {
  * the prompt text itself. Both branches are sanitized/capped identically to
  * an explicit name. The prompt itself is never mutated — this only reads it
  * to build a separate display label.
+ *
+ * Modeling carve-out (infrastructure-w6p4k, amends the c6fzb convention): a
+ * `modeling` launch with trailing text names the session from that text
+ * alone — no `modeling: ` prefix — because the builder found the prefix to
+ * be noise specifically for modeling launches. A bare `/agentheim:modeling`
+ * with no rest still falls through to the plain `modeling` label, same as
+ * every other skill's bare-invocation case. Every other skill keeps the
+ * uniform `<skill>: <rest>` convention unchanged.
  * @param {string} prompt — already-trimmed, known non-empty (POST /run
  *   rejects an empty prompt before this is ever called).
  * @returns {string}
@@ -275,7 +283,8 @@ function deriveNameFromPrompt(prompt) {
   if (match) {
     const skill = match[1];
     const rest = match[2].trim();
-    return sanitizeName(rest ? `${skill}: ${rest}` : skill);
+    if (!rest) return sanitizeName(skill);
+    return sanitizeName(skill === 'modeling' ? rest : `${skill}: ${rest}`);
   }
   return sanitizeName(prompt);
 }

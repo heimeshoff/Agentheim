@@ -1,11 +1,11 @@
 ---
 id: infrastructure-w6p4k
 title: Drop the "modeling:" prefix from bridge-derived session names
-status: doing
+status: done
 type: chore
 context: infrastructure
 created: 2026-07-15
-completed:
+completed: 2026-07-15
 depends_on: []
 blocks: []
 tags: [bridge, session-name, vscode-extension]
@@ -72,3 +72,35 @@ unchanged — this only touches the prompt-derived fallback.
 - **Guardrails already present:** `bridge.js`'s naming logic is pure and
   unit-tested with the terminal-launch action injected — the change is a small
   edit to one pure function plus its test.
+
+## Outcome
+`deriveNameFromPrompt` (`vscode-extension/src/bridge.js`) now special-cases
+`modeling`: when the parsed skill is `modeling` and there is trailing text,
+the derived name is `sanitizeName(rest)` alone, dropping the `modeling: `
+prefix; a bare `/agentheim:modeling` with no rest still falls through to the
+plain `modeling` label, matching every other skill's bare-invocation
+behavior. Every other skill's `<skill>: <rest>` derivation, and the
+explicit-`name` path in `resolveSessionName`, are untouched.
+
+`vscode-extension/test/bridge.test.mjs` updated: the old
+`deriveNameFromPrompt('/agentheim:modeling dark mode toggle') ===
+'modeling: dark mode toggle'` assertion is replaced by a dedicated modeling
+carve-out test (unprefixed `rest`, plus the bare-invocation case) and a new
+guard test pinning that non-modeling skills (`work`, `research`) keep their
+`<skill>: ` prefix.
+
+ADR-0018 gained a 2026-07-15 (infrastructure-w6p4k) amendment banner
+documenting the carve-out, plus small in-place clarifications to the
+"Session name" bullet under HTTP shape and status codes. The infrastructure
+BC README's `POST /run { name }` paragraph now notes the modeling exception
+alongside the uniform convention it amends.
+
+Full `vscode-extension` suite: 31/33 passing; the 2 failures are the
+documented pre-existing fixed-port `EADDRINUSE` environmental flake (a live
+VS Code bridge holds port 31425 on this dev box) — every naming-related test,
+including the two new/updated ones, passes.
+
+Key files: `vscode-extension/src/bridge.js`,
+`vscode-extension/test/bridge.test.mjs`,
+`.agentheim/knowledge/decisions/0018-vscode-dashboard-terminal-bridge.md`,
+`.agentheim/contexts/infrastructure/README.md`.

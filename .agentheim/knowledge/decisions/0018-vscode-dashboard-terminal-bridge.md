@@ -4,7 +4,7 @@ title: VS Code dashboard→terminal bridge — fixed-port localhost extension wi
 scope: infrastructure
 status: proposed
 date: 2026-06-14
-related_tasks: [infrastructure-012, infrastructure-013, infrastructure-014, agentic-workflow-020, infrastructure-015, infrastructure-016, agentic-workflow-021, infrastructure-020, infrastructure-c6fzb, infrastructure-h5wnq, infrastructure-v8r3q, agentic-workflow-n4qte]
+related_tasks: [infrastructure-012, infrastructure-013, infrastructure-014, agentic-workflow-020, infrastructure-015, infrastructure-016, agentic-workflow-021, infrastructure-020, infrastructure-c6fzb, infrastructure-h5wnq, infrastructure-v8r3q, agentic-workflow-n4qte, infrastructure-w6p4k]
 related_adrs: [ADR-0002]
 diverges_from: [ADR-0002]
 ---
@@ -173,6 +173,20 @@ diverges_from: [ADR-0002]
 > unchanged; `capabilities` is a purely additive `GET /health` (and
 > `bridge.json`/`GET /api/bridge`) response field.
 
+> **Amended 2026-07-15 (infrastructure-w6p4k).** A one-skill carve-out to the
+> `<skill>: <rest>` fallback convention (infrastructure-c6fzb): when
+> `deriveNameFromPrompt` parses `/agentheim:modeling <rest>` and `<rest>` is
+> non-empty, the derived name is `sanitizeName(rest)` alone — **no**
+> `modeling: ` prefix — because the builder found that prefix to be noise
+> specifically for modeling launches. A bare `/agentheim:modeling` (no rest)
+> still degrades to the plain `modeling` label, same as every other skill's
+> bare-invocation case. **Every other skill is unchanged**, including
+> `resolveSessionName`'s explicit-`name` path, which never reaches this
+> derivation at all. The dashboard prompt bar's capital-`M` `"Modeling: "`
+> explicit name (`agentic-workflow`'s `nameForPromptMode`) is a **separate**
+> surface — it supplies an explicit `name` and bypasses
+> `deriveNameFromPrompt` entirely — and is out of scope for this amendment.
+
 > **Diverges from [ADR-0002](0002-dashboard-runtime-transport.md) on one clause.** ADR-0002 fixed
 > the dashboard runtime as an **ephemeral `:0` port** read back into `runtime.json`. That pattern
 > **cannot serve this bridge**, because the discovery reader here is the dashboard *frontend* — a
@@ -282,9 +296,11 @@ absence degrades safely.
     non-`true` value → seed `claude "<prompt>"` **verbatim**, exactly as before this amendment.
     The activation test is a strict identity check (`skipPermissions === true`), so malformed input
     fails toward the prompt-gated default, never toward the bypass.
-  - **Session name (infrastructure-c6fzb, frozen):** a sanitized explicit `name` when supplied,
-    else a fallback derived from the prompt (`/agentheim:<skill> …` → `<skill>: …`; plain text →
-    the prompt itself), prepended as its own raw argv pair ahead of everything else:
+  - **Session name (infrastructure-c6fzb, frozen; carve-out amended infrastructure-w6p4k):** a
+    sanitized explicit `name` when supplied, else a fallback derived from the prompt
+    (`/agentheim:<skill> …` → `<skill>: …`; plain text → the prompt itself) — **except**
+    `/agentheim:modeling <rest>`, which derives `<rest>` alone with no `modeling: ` prefix. The
+    resolved name is prepended as its own raw argv pair ahead of everything else:
     `args = ['-n', <name>, ...(model-and-skipPermissions-and-prompt args)]`.
   - **Model selection (infrastructure-h5wnq, frozen):** an exact, case-sensitive member of
     `MODEL_ALLOWLIST = ['fable', 'opus', 'sonnet', 'haiku']` when supplied → `--model <id>` rides
