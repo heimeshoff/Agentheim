@@ -5,6 +5,21 @@ Newest entries on top.
 
 ---
 
+## 2026-07-15 14:37 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 18m (batch start 14:19 → 14:37)
+**Completed:** 2 (first-try PASS: 2, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-p5k9m: 1, infrastructure-w6p4k: 1
+**Commits:** 4 (batch start, 2 task integrations, this entry)
+**Vision-conformance:** none — batch aligns with vision. Both tasks are cosmetic session-name UX polish (dropping a "modeling" prefix from a launched terminal's display name — one on the dashboard prompt-bar's explicit-name path, one on the bridge's prompt-derived fallback); neither pulls toward a stated non-goal nor away from a "What success looks like" criterion. Durable-knowledge criterion is actively served: infrastructure-w6p4k recorded its carve-out as an in-place ADR-0018 amendment rather than an undocumented exception.
+**Carry-over:** none — working tree clean
+
+---
+
 ## 2026-07-15 14:28 -- Task verified and completed: infrastructure-w6p4k - Drop the "modeling:" prefix from bridge-derived session names
 
 **Type:** Work / Task completion
