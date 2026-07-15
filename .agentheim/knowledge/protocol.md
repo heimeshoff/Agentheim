@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-15 -- Modeling / Captured: agentic-workflow-d5a9b - Enable parallel worktree sessions with independent idea capture and ticket movement
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Enable parallelization of work through multiple Claude sessions on different features, with worktree-local idea capture and ticket movement from main backlog into focused sessions.
+
+---
+
 ## 2026-07-13 14:20 -- Release shipped: v0.9.2
 
 **Type:** Release

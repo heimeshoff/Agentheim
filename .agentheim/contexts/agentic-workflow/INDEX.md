@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 144
@@ -90,6 +90,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-d5a9b** — Enable parallel worktree sessions with independent idea capture and ticket movement — `backlog/agentic-workflow-d5a9b-parallel-worktree-sessions.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
