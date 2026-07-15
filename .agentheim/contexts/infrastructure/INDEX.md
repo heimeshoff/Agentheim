@@ -11,13 +11,14 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 30
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **infrastructure-w6p4k** — Drop the "modeling:" prefix from bridge-derived session names — modeling-only carve-out in deriveNameFromPrompt (chore) — `todo/infrastructure-w6p4k-drop-modeling-prefix-bridge-session-name.md`
 <!-- todo-list:end -->
 
 ### Doing

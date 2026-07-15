@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-15 -- Modeling / Captured: infrastructure-w6p4k - Drop the "modeling:" prefix from bridge-derived session names
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** The bridge's session-name fallback derivation prepends `modeling:` to modeling launches (`/agentheim:modeling … → modeling: …`). Special-case modeling in `deriveNameFromPrompt` to drop just that prefix while every other skill keeps the uniform `<skill>: …` convention (builder-scoped: modeling-only carve-out).
+
+---
+
 ## 2026-07-15 -- Modeling / Captured: agentic-workflow-d5a9b - Enable parallel worktree sessions with independent idea capture and ticket movement
 
 **Type:** Modeling / Capture
