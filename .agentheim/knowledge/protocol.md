@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 -- Modeling / Captured: 9 tasks — Dorc July-2026 review recommendations A1–A6
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** Captured the six framework-level recommendations from the Dorc agent-time review as nine refined, independently workable tasks: agentic-workflow-mxk6v (falsifiability gate: machine-checkable vs human-eye criteria + verifier metric-drift escalation), agentic-workflow-hvqa4 (salvage worktree diff before abandonment), agentic-workflow-qz1h7 (vacuum guard + session-end batch-mix line), agentic-workflow-z394j (mechanize-or-drop convention enforcement), agentic-workflow-vvmfy (runner-first testing doctrine), agentic-workflow-rx630 (remediation-over-diagnosis dispatch ordering + spike stop-loss), agentic-workflow-ngzwz (INDEX entry length cap), agentic-workflow-hmgav (collision-proof ADR number allocation), agentic-workflow-hhjjx (session-start human-churn reconciliation). Dorc's other A6 complaints (protocol rotation, done-list cap) are already fixed here by ADR-0045/0047 and were not re-captured.
+
+---
+
 ## 2026-07-15 14:37 -- Work session ended
 
 **Type:** Work / Session end
