@@ -45,6 +45,56 @@ What does NOT count:
 - "I ran the code manually and it looked right"
 - A test that asserts the implementation's internal calls (e.g., "method X was called with Y") when the criterion is about externally observable behavior
 
+## Runner-first — a project's first test task establishes the verdict source (ADR-0062)
+
+Dorc's July-2026 review found the corpus-scale version of a trust failure: 155 smoke tests
+accumulated before anything ran them together, and 23% were bad on the first honest run —
+workers and verifiers had been trusting each test's own printed "PASS," not an actual runner's
+verdict. `verification-before-completion`'s check 2 closes that gap per-task going forward
+(the verifier now runs the tests itself and trusts only the runner's exit status/structured
+report, never a printed claim) — but that check needs a runner to exist and to be trustworthy
+*from the first test task on*, or every later verification inherits the same rot.
+
+So: **the first test-bearing task in a project — or the first test-bearing task for a given
+ecosystem within a mixed-stack project (e.g., the first shader test in an otherwise-JS repo) —
+must establish the runner and its verdict convention before the test corpus grows**, as part of
+that task, not as a separate follow-up:
+
+1. Identify (or wire up) a runner whose exit status, or a structured report it emits (TAP,
+   JUnit XML, a summary line), reliably reflects whether the tests it ran actually passed —
+   not a runner that always exits 0 regardless of outcome.
+2. Record the exact invocation somewhere `work`'s pre-resolved-test-command step
+   (`agentic-workflow-g9s3w`) can find it — typically the BC README. This is the string that
+   becomes every subsequent verifier spawn's `## Pre-resolved test command` block; get it right
+   once and every later task's verification reuses it for free.
+3. Prove the runner actually fails on a failure: deliberately break the first test, run the
+   runner, confirm it reports failure (non-zero exit / a FAILED line in its structured report),
+   then fix the test back to green. A runner that stays green when the test is broken is not a
+   runner — it's decoration, and no amount of later test-writing fixes that.
+
+### Fallback for runner-less ecosystems: the external-runner pattern
+
+Some ecosystems have no trustworthy runner out of the box — game engines, embedded targets,
+anything where "run the test" means "load it in a process that exits 0 no matter what happened
+inside." For those, step 1 above is not "find a runner," it's "build one": an external runner
+script that owns the verdict, independent of any individual test's own exit behavior. The
+reference shape is Dorc's own `run_smokes` + SmokeGuard pattern — a wrapper that:
+
+- Invokes each test/smoke and captures its *actual* pass/fail signal through a channel that
+  isn't the untrustworthy exit code — a sentinel line in stdout, a written result file, a
+  structured log the wrapper parses.
+- Aggregates every result into one machine-parseable summary (count run / count passed / count
+  failed) and exits non-zero itself iff anything failed.
+- Becomes the thing check 2 actually invokes and trusts. The individual tests underneath can
+  still print their own "PASS" for a human skimming the log — that's fine, it's decoration —
+  but it is the wrapper's aggregate exit status that is the verdict, never a test's line in
+  isolation.
+
+This is a fallback, not the default. Most ecosystems this project touches (`node --test`,
+standard JS/TS toolchains) already ship a trustworthy runner — use it directly via the
+Pre-resolved test command convention. Build the external-runner wrapper only once the native
+runner is *proven* untrustworthy (step 3 above is exactly that proof), not preemptively.
+
 ## When TDD does not apply
 
 A small set of tasks legitimately skip TDD. The worker must explicitly note the reason in its return when it does.
@@ -66,7 +116,9 @@ Tests are also a place where ubiquitous language lives. A test named `it_rejects
 When TDD applies and the worker returns `RESULT: SUCCESS`, the strict return format includes:
 
 - `TESTS_ADDED: <integer>` — count of new tests written for this task
-- `TESTS_PASSING: yes | no` — whether the full test suite passes after the change
+- `TESTS_PASSING: yes | no` — whether the full test suite passes after the change, per the
+  runner's own verdict (ADR-0062) — actually run it and read its exit status/report, don't infer
+  "yes" from a test printing its own success message
 - `TDD_SKIPPED: <reason or "no">` — when TDD legitimately did not apply (per the list above), which reason; otherwise `no`
 
 If `TESTS_PASSING: no`, the worker must not return SUCCESS — that's either a FAIL (the worker couldn't get tests green) or a BOUNCE (the task as specified can't be satisfied). Returning SUCCESS with failing tests is a protocol violation.

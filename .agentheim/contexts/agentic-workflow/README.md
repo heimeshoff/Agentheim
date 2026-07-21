@@ -98,6 +98,24 @@ separate BC, but today the whole tool lives in this one.
   retry. Closes the Dorc July-2026 review's worst-named burn: a perceptual claim smuggled into a
   machine-checked metric, tuned by three worker iterations while the product stayed broken. See
   ADR-0061, ADR-0059, ADR-0036.
+- **Runner-first testing (ADR-0062, agentic-workflow-vvmfy)** — a test verdict comes **only**
+  from the project's runner (the pre-resolved test command, `agentic-workflow-g9s3w`, or the
+  verifier's discovery fallback) — its exit status or structured report (TAP, JUnit XML,
+  `node --test`'s summary), never a test's own printed "PASS." A printed-green with no runner
+  actually invoked and checked is **unverified**, not evidence, and FAILs `agents/verifier.md`
+  check 2 (mirrored in `skills/verification-before-completion/SKILL.md`). Governs only
+  machine-checkable criteria — a `[human-eye]` criterion (ADR-0061) never reaches a runner at
+  all. Coupled with `skills/test-driven-development/SKILL.md`'s **runner-first rule**: a
+  project's (or a mixed-stack project's ecosystem's) first test-bearing task must establish the
+  runner and prove it actually fails on a failure before the test corpus grows; for ecosystems
+  with no trustworthy native runner, that task must instead build an **external-runner
+  fallback** that owns the verdict (Dorc's `run_smokes` + SmokeGuard shape — capture each test's
+  real pass/fail signal outside an untrustworthy exit code, aggregate to one summary, exit
+  non-zero iff anything failed). Closes the Dorc July-2026 review's A4 finding: 155 smoke tests
+  trusted on their own say-so before anyone ran them together, 23% bad on the first honest run.
+  See ADR-0062, ADR-0059 (self-referential compliance: prose-only judgment enforced by the
+  verifier check, not a lint — the predicate reads live execution output, not committed source),
+  ADR-0061, ADR-0036.
 - **Protocol** — the chronological project diary, newest on top; every action appends.
 - **Index** — a flat catalog (`knowledge/index.md` + per-BC `INDEX.md`) that *points*,
   never duplicates. The memory layer for prior-art and dependency lookup.

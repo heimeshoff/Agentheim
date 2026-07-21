@@ -90,7 +90,7 @@ the prior note's evidence named for that same criterion.
   than re-dispatching — no new machinery needed. Drift proves the criterion was never truly
   falsifiable as worded, which is precisely what `task-under-specified` already means.
 
-### 2. Test execution
+### 2. Test execution — the verdict comes only from the runner (ADR-0062)
 
 If `TESTS_ADDED > 0` in the worker's return (see `references/worker-return-format.md` for the field's source), run the project's test suite. How:
 
@@ -98,6 +98,12 @@ If `TESTS_ADDED > 0` in the worker's return (see `references/worker-return-forma
 2. **Discovery fallback.** Only when the block reads `none` or is absent, look at the BC README and the project root for a test command yourself. Common locations: `package.json` scripts, `Makefile` targets, `pyproject.toml`, `Cargo.toml`, `*.csproj`, `go.mod`. If you find one obvious command, run it.
 3. If multiple test commands exist (unit, integration, e2e), run at minimum the layer that covers the changed files. Use the file paths in `FILE_LIST` to decide.
 4. If no command was supplied **and** none is discoverable, FAIL with `SUGGESTED_FIX: project has no test command discoverable from standard locations — add one to the BC README before this task can be verified`.
+
+**The verdict is the runner's exit status (or its structured report — TAP, JUnit XML, `node --test`'s own summary line), never a test's own printed output.** Dorc's July-2026 review found the failure mode this closes: 155 smoke tests accumulated on trust in each test's self-printed "PASS," and 23% were bad on the first honest run against a real runner. Concretely:
+
+- A test, script, or log line that prints `PASS` / `OK` / `✓` / similar with **no runner actually invoked and its exit status checked** is **unverified** — cite it as such in REASONS, do not count it as PASS evidence, and FAIL this check. This applies even when the worker's `TESTS_PASSING: yes` claim looks plausible; your job is to have actually run the command yourself and read *its* verdict, not the worker's transcript of running it.
+- When the ecosystem's own runner exit code is not trustworthy for this project (documented case: a runner-less ecosystem using the external-runner fallback named in `skills/test-driven-development/SKILL.md`, e.g. Dorc's `run_smokes`/SmokeGuard shape), the pre-resolved command **is** that external runner — its aggregate exit status/report is the verdict you check, and the individual tests it wraps printing their own "PASS" lines underneath it is fine (decoration for a human skimming the log), because the wrapper is what owns the pass/fail signal, not the raw prints.
+- This governs **machine-checkable criteria only.** A `[human-eye]` criterion (ADR-0061) is never run through a runner at all — check 1 already routes it to `builder eye-check pending`, and this check has nothing to say about it. Runner-first and the falsifiability gate compose: falsifiability decides *whether* a criterion should ever reach a runner; runner-first decides what counts as evidence once it does.
 
 If tests fail, FAIL citing the failing tests by name. Do not try to interpret why — the next worker will.
 
@@ -246,7 +252,7 @@ EVIDENCE:
 - ...
 ```
 
-One bullet per acceptance criterion. If a criterion was checked via test, name the test. If via artifact, name the file. If the criterion carries `[human-eye]` (ADR-0061), write `builder eye-check pending` instead — never a proxy metric.
+One bullet per acceptance criterion. If a criterion was checked via test, name the test — "covered by" means check 2's runner confirmed that test passed, not that the test printed its own success message (ADR-0062). If via artifact, name the file. If the criterion carries `[human-eye]` (ADR-0061), write `builder eye-check pending` instead — never a proxy metric.
 
 ### FAIL
 

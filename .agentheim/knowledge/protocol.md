@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 17:09 -- Task verified and completed: agentic-workflow-vvmfy - Runner-first testing — the verifier only trusts an external runner's verdict, never a test's own printed green
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-vvmfy - Runner-first testing — the verifier only trusts an external runner's verdict, never a test's own printed green
+**Summary:** Runner-first testing — a test verdict comes only from the projects runner (a tests own printed green is unverified); the TDD skills first test establishes the runner, with the SmokeGuard/run_smokes external-runner fallback named for runner-less ecosystems
+**Duration:** 7m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 0
+**ADRs written:** 0062-runner-first-testing-verdicts-only-from-the-runner.md
+
+---
+
 ## 2026-07-21 17:02 -- Batch started: [agentic-workflow-vvmfy]
 
 **Type:** Work / Batch start
