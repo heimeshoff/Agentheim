@@ -139,20 +139,41 @@ For each SUCCESS that requires verification, in parallel where the workers ran i
 
 **`VERDICT: FAIL`, iteration 3 (or earlier with `ITERATION_HINT: task-under-specified`)**
 1. Do not merge to `main`. Do not re-dispatch.
-2. **Keep the worktree and branch** — do not remove them. The task remains in `doing/` on `main` (it was never merged to `done/`); all accumulated verifier notes are visible in the task file **inside the worktree**. Surface the worktree's absolute path alongside the task so the user can inspect the live iteration state directly.
-3. Log "Verification failed — escalating to user" to protocol.md.
-4. Surface at end-of-batch (see End-of-run reporting): summarize the task, the iteration history, the latest verifier's SUGGESTED_FIX, and the kept worktree's path. The user decides whether to refine the task (re-route via `modeling` REFINE) or abandon — either way, the worktree is reconciled at session end (see "Reconciling stranded carry-over").
+2. **Salvage the worktree's diff now, before anything else** (agentic-workflow-hvqa4, ADR-0063 — see "Salvaging a worktree's diff before abandonment" below). Do this even though step 3 keeps the worktree rather than removing it: the whole point is that a kept worktree can still be discarded later (a future session's Phase 1 recovery or session-end reconciliation), and the incident this closes is exactly a verified fix vanishing when that later discard happened with nothing captured first. Tag `escalated-iterN` (N = this iteration, normally 3). Append a `## Salvage note` to the task file naming the patch's absolute path.
+3. **Keep the worktree and branch** — do not remove them. The task remains in `doing/` on `main` (it was never merged to `done/`); all accumulated verifier notes are visible in the task file **inside the worktree**. Surface the worktree's absolute path alongside the task so the user can inspect the live iteration state directly.
+4. Log "Verification failed — escalating to user" to protocol.md.
+5. Surface at end-of-batch (see End-of-run reporting): summarize the task, the iteration history, the latest verifier's SUGGESTED_FIX, the kept worktree's path, **and the salvaged patch's path, named explicitly** — the escalation message must name the patch, not just imply the worktree holds the fix. The user decides whether to refine the task (re-route via `modeling` REFINE) or abandon — either way, the worktree is reconciled at session end (see "Reconciling stranded carry-over"), which salvages again (tag `discarded`) immediately before any eventual removal.
 
 ### BOUNCE integration
 
 A worker that returns `RESULT: BOUNCED` moved its task file `doing → backlog` **inside its worktree** and appended a `## Worker note`. This needs no verifier (no code was produced) and is small enough to integrate immediately rather than leaving it stranded once the worktree is torn down — the conservative alternative (never merging it) would silently hide the bounce, strictly worse than the pre-worktree behavior of at least leaving an uncommitted, visible change in the one shared tree. So, on the **main** tree:
 
-1. `git merge --squash aw/<task-id>` — the delta is just the `doing → backlog` move + the `## Worker note`.
-2. Apply the BC `INDEX.md` `doing → backlog` edit and prepend the "Task bounced" `protocol.md` entry (see "Protocol logging").
-3. `git add` the enumerated bookkeeping (`INDEX.md`, `protocol.md` — the squash already staged the moved task file) and commit: `chore(<bc>): task bounced — <title> [<task-id>]`.
-4. Tear down the worktree + branch exactly as on PASS/SKIP (unlink any `dashboard/node_modules` link first, then `git worktree remove --force` + `git branch -D aw/<task-id>`).
+1. **Salvage the worktree's diff first** (agentic-workflow-hvqa4, ADR-0063 — see "Salvaging a worktree's diff before abandonment" below), tag `bounced`, before touching anything else. A bounce is expected to usually be empty-diff (a worker bounces before writing code, per its own "verify workability before any changes" first action) and the empty-diff guard skips writing a file in that case — but an occasional worker starts, discovers under-refinement mid-way, and bounces with real edits already made; this step is what saves those.
+2. `git merge --squash aw/<task-id>` — the delta is just the `doing → backlog` move + the `## Worker note` (plus any other worktree edits the squash picks up).
+3. Apply the BC `INDEX.md` `doing → backlog` edit and prepend the "Task bounced" `protocol.md` entry (see "Protocol logging").
+4. `git add` the enumerated bookkeeping (`INDEX.md`, `protocol.md` — the squash already staged the moved task file) and commit: `chore(<bc>): task bounced — <title> [<task-id>]`.
+5. Tear down the worktree + branch exactly as on PASS/SKIP (unlink any `dashboard/node_modules` link first, then `git worktree remove --force` + `git branch -D aw/<task-id>`).
 
 This resolution is recorded in **ADR-0037** — ADR-0032 covered PASS/FAIL/SKIP explicitly but left the BOUNCE transition unaddressed.
+
+### Salvaging a worktree's diff before abandonment (ADR-0063)
+
+Every abandonment path — FAIL-iteration-3 escalation above, BOUNCE above, and an orphaned worktree's "discard" disposition (see "Reconciling stranded carry-over" below) — removes or eventually removes a worktree that may hold real, working changes the conductor never merged to `main`. **Before any of those three paths' `git worktree remove`, salvage the worktree's diff to a patch file.** This is not cleanup hygiene — it is the fix for a confirmed incident (Dorc review recommendation A1): a FAIL-iteration-3 escalation once had its already-verified fix deleted along with the branch, and the builder had to re-derive work the system had already done.
+
+**Capture (conductor-only — never the worker, never a `lib/` module per ADR-0038's git-free boundary):**
+```
+git -C .worktrees/<task-id> merge-base HEAD main
+git -C .worktrees/<task-id> diff <fork-point-from-above> > <patch-path>
+```
+`git diff <fork-point>` (no `--cached`) reports the union of anything already committed on the branch (a conductor `wip` commit) **and** anything still sitting uncommitted in the worktree's working directory — one command covers both, so it is correct whether or not a `wip` checkpoint happened first for this particular abandonment.
+
+**Resolve `<patch-path>`** via `lib/worktree-salvage.mjs` — git-free, `node --test`-covered (ADR-0038): call `ensureSalvageDir(salvageRoot)` first (`salvageRoot` = `<repo-root>/.agentheim/salvage/`, which does not pre-exist until the first capture), then `salvagePatchPath(salvageRoot, taskId, tag)` where `tag` is one of `escalationTag(N)` (→ `escalated-iterN`), the exported `BOUNCE_TAG` (`bounced`), or `DISCARD_TAG` (`discarded`) — whichever path triggered the capture.
+
+**Skip on empty diff.** If the resulting patch is empty (the worktree never diverged from its fork point), don't write the file and don't reference one — there is nothing to salvage.
+
+**Make it visible, not just stored.** Append a `## Salvage note` to the task file naming the patch's absolute path (use `formatSalvageReference(patchPath)` for the wording), and name the same path explicitly in whatever message reaches the user/builder for that abandonment — the FAIL-iteration-3 escalation summary (End-of-run reporting below) and the discard disposition line (Reconciling stranded carry-over below) both do this.
+
+**Storage convention:** `.agentheim/salvage/<task-id>-<tag>.patch`, gitignored — an advisory rescue artifact (ADR-0027 family), not versioned project knowledge. `work` never deletes a salvage patch on its own initiative. One abandonment **event** = one file; a task abandoned twice (e.g. escalated, then later discarded at a subsequent session's reconciliation) gets two distinct, differently-tagged files, never an overwrite of the earlier record. Full rationale and the mechanize-or-drop declaration for this convention: **ADR-0063**.
 
 ### Verifier Prompt Template
 
@@ -461,7 +482,7 @@ If `TESTS_PASSING: no`, do NOT return SUCCESS — that's a FAIL or a BOUNCE, not
 When `todo/` is empty and all `doing/` is resolved (or the user interrupts):
 
 1. Summarize in plain prose: tasks completed (with verification stats — how many passed first try vs. needed re-dispatch), tasks bounced (and why), tasks failed (and why), tasks escalated after 3 verification failures (these need user attention), ADRs written, new backlog items created, total commits made.
-2. For each task escalated to the user: name it, summarize the iteration history, and show the latest verifier's SUGGESTED_FIX. The user decides whether to REFINE via `modeling` or abandon.
+2. For each task escalated to the user: name it, summarize the iteration history, show the latest verifier's SUGGESTED_FIX, and **name the salvaged patch's absolute path** (ADR-0063 — see "Salvaging a worktree's diff before abandonment"; omit only if that capture found an empty diff and there is genuinely nothing to salvage). The user decides whether to REFINE via `modeling` or abandon.
 3. **Concept candidates.** Aggregate every non-"none" `CONCEPT_CANDIDATE` from worker SUCCESS blocks across the run. If any concept name shows up in 2+ workers' returns, escalate the convergence signal more loudly. For each unique candidate: print the concept name, the BC, and the converging artifact ids. The user decides whether to create the page (per `references/concept-template.md`); never auto-create.
 4. Surface anything that surprised you mid-run: cycles detected, dependency gaps, recovered sessions, repeated verification failures pointing at a common cause.
 5. **Vision-conformance pass** (see the dedicated section below). One bounded read per session over the batch just completed — not per task, not a whole-vision essay. Do this before the carry-over reconciliation and the final protocol entry; its output feeds the **Vision-conformance:** line of that entry and, when a flag is worth the builder's attention, the whats-next advisory (below).
@@ -520,9 +541,9 @@ Run this alongside the working-tree carry-over above, at the same point in the s
 
 1. **Detect.** Run `git worktree list --porcelain` (skip if not a git repo). Every entry other than the main worktree (the repo root) is a candidate. By this point every PASS/SKIP/BOUNCE this session completed already tore its worktree down (Git authority), so what remains is either a **known keep** (a FAIL-iteration-3 escalation from this session) or a genuine **orphan** (a session interrupted mid-cleanup, or a leftover from an earlier session).
 2. **Surface, per worktree — never auto-remove.**
-   - **Escalated this session (FAIL iteration 3)** → not an orphan, a deliberate keep. Record it plainly, no user prompt needed (the escalation itself already surfaced it in step 4 of the FAIL-iteration-3 handling above): `<path>: kept (owner: <task-id>, escalated at iteration 3 — see task notes)`.
-   - **Everything else** (no matching `doing/` task on `main`, or the matching task is already `done/`/`backlog/`) → an **orphan**. Ask the user, per worktree, the same two dispositions as the working-tree case: **discard** it (unlink any `dashboard/node_modules` link first — `unlinkDashboardNodeModules` — then `git worktree remove --force` + `git branch -D aw/<task-id>`) or **keep** it for inspection. Never guess: a live concurrent session's worktree is byte-indistinguishable from an interrupted one's, same caution as the working-tree carry-over above.
-3. **Record the disposition** on the same `**Carry-over:**` line as the working-tree entries (step 6 above) — e.g. `.worktrees/agentic-workflow-f6m2q: kept (owner: agentic-workflow-f6m2q, escalated at iteration 3)` or `.worktrees/agentic-workflow-old1: discarded (orphan, no matching doing/ task)`.
+   - **Escalated this session (FAIL iteration 3)** → not an orphan, a deliberate keep. Record it plainly, no user prompt needed (the escalation itself already surfaced it in step 5 of the FAIL-iteration-3 handling above): `<path>: kept (owner: <task-id>, escalated at iteration 3, salvaged: <patch-path> — see task notes)`.
+   - **Everything else** (no matching `doing/` task on `main`, or the matching task is already `done/`/`backlog/`) → an **orphan**. Ask the user, per worktree, the same two dispositions as the working-tree case: **discard** it (**salvage its diff first — tag `discarded`, see "Salvaging a worktree's diff before abandonment"** — then unlink any `dashboard/node_modules` link — `unlinkDashboardNodeModules` — then `git worktree remove --force` + `git branch -D aw/<task-id>`) or **keep** it for inspection. Never guess: a live concurrent session's worktree is byte-indistinguishable from an interrupted one's, same caution as the working-tree carry-over above.
+3. **Record the disposition** on the same `**Carry-over:**` line as the working-tree entries (step 6 above) — e.g. `.worktrees/agentic-workflow-f6m2q: kept (owner: agentic-workflow-f6m2q, escalated at iteration 3, salvaged: .agentheim/salvage/agentic-workflow-f6m2q-escalated-iter3.patch)` or `.worktrees/agentic-workflow-old1: discarded (orphan, no matching doing/ task, salvaged: .agentheim/salvage/agentic-workflow-old1-discarded.patch)` — or, when the capture found an empty diff and skipped writing a file, `...discarded (orphan, no matching doing/ task, nothing to salvage)`.
 4. **Feeds Phase 1 recovery.** An orphan or a kept escalation that survives to the *next* session is exactly the signal Phase 1's `git worktree list --porcelain` check picks up — the two mechanisms are one continuous thread across sessions, not independent.
 
 ## Protocol rotation check (session-end)

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 17:24 -- Task verified and completed: agentic-workflow-hvqa4 - Escalation salvages the worktree diff — attach a patch before any abandonment discards work
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-hvqa4 - Escalation salvages the worktree diff — attach a patch before any abandonment discards work
+**Summary:** Worktree-abandonment diff salvage — every work path that abandons a worktree (iteration-3 escalation, BOUNCE, orphan discard) captures the diff to .agentheim/salvage/<task-id>-<tag>.patch and names it in the escalation before git worktree remove
+**Duration:** 12m
+**Verification:** PASS (iteration 1)
+**Files changed:** 7
+**Tests added:** 14
+**ADRs written:** 0063-worktree-abandonment-diff-salvage.md
+
+---
+
 ## 2026-07-21 17:10 -- Batch started: [agentic-workflow-hvqa4]
 
 **Type:** Work / Batch start

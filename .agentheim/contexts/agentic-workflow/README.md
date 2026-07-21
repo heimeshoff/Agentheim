@@ -150,6 +150,21 @@ separate BC, but today the whole tool lives in this one.
   worktree remove`** — skipping it silently deletes the shared `node_modules`. Session-end
   reconciliation and recovery both walk `git worktree list --porcelain` alongside `git status
   --porcelain`. See ADR-0032, ADR-0037, ADR-0026, ADR-0007, ADR-0017, ADR-0028.
+- **Worktree-abandonment diff salvage (ADR-0063, agentic-workflow-hvqa4)** — every path that
+  abandons a worker's worktree with un-merged changes still in it (FAIL-iteration-3
+  escalation, BOUNCE, an orphaned worktree's "discard" disposition) captures the worktree's
+  diff to a patch **before** any `git worktree remove`: `git -C <worktree> diff <fork-point>`
+  written to `.agentheim/salvage/<task-id>-<tag>.patch` (`escalated-iterN` / `bounced` /
+  `discarded`), gitignored, an advisory rescue artifact never deleted by `work` on its own
+  initiative. Skipped on an empty diff. Named explicitly wherever the abandonment reaches the
+  user — the escalation summary, the carry-over discard disposition line — not just stored.
+  Closes a confirmed incident (Dorc review A1): an escalated task's already-verified fix once
+  vanished with the branch it lived on. The naming/path convention is mechanized
+  (`lib/worktree-salvage.mjs`, `node --test`-covered, git-free per ADR-0038); the "salvage
+  before every removal" sequencing itself is prose-only, unenforced (ADR-0059) — a lint could
+  only check after-the-fact artifact existence, with no reliable way to catch a skipped
+  capture before the branch is already gone. See ADR-0063, ADR-0032, ADR-0037, ADR-0038,
+  ADR-0027, ADR-0059.
 - **Derived-artifact checkpoint guard (ADR-0057, agentic-workflow-q7v3k)** — workers never
   stage or merge a rebuilt `dashboard/dist/` (it is derived, bundled output, ADR-0003; the
   conductor rebuilds it from **merged** source at integration). Running the test suite

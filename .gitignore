@@ -37,3 +37,10 @@ vscode-extension/*.vsix
 # outside .agentheim/ and is never committed. Removed on PASS/SKIP; kept (and surfaced to
 # the user) on a FAIL-iteration-3 escalation or an unresolved merge-back conflict.
 /.worktrees/
+
+### Agentheim worktree-abandonment diff salvage (ADR-0063)
+# A patch capturing an abandoned worktree's diff (FAIL-iteration-3 escalation, BOUNCE, or
+# an orphaned worktree's "discard" disposition), named <task-id>-<tag>.patch. An advisory
+# rescue artifact (ADR-0027 family) the user/builder consults, applies, or discards by hand
+# — not versioned project knowledge, so it is never committed.
+.agentheim/salvage/
