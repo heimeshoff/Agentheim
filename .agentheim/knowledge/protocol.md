@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 16:46 -- Batch started: [agentic-workflow-mxk6v]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-mxk6v - Falsifiability gate — classify acceptance criteria machine-checkable vs human-eye; verifier escalates on metric drift
+**Parallel:** no (1 worker — sequential run, MAX_PARALLEL=1; 5 more ready tasks held to later waves, builder chose sequential for the overlap-heavy Dorc-review set)
+
+---
+
 ## 2026-07-21 16:45 -- Task verified and completed: agentic-workflow-ngzwz - INDEX entry diet — hard-cap new entry length; the linked artifact carries the detail
 
 **Type:** Work / Task completion

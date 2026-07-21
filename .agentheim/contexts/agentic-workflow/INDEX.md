@@ -11,14 +11,13 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 6
-- **Doing:** 0
+- **Todo:** 5
+- **Doing:** 1
 - **Done:** 148
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-mxk6v** — Falsifiability gate — classify acceptance criteria machine-checkable vs human-eye; verifier escalates on metric drift (feature) — `todo/agentic-workflow-mxk6v-falsifiability-gate-machine-vs-human-eye-criteria.md`
 - **agentic-workflow-hvqa4** — Escalation salvages the worktree diff — attach a patch before any abandonment discards work (feature) — `todo/agentic-workflow-hvqa4-salvage-worktree-diff-on-abandonment.md`
 - **agentic-workflow-qz1h7** — Vacuum guard — an empty board surfaces the blocking decision instead of minting meta-work; session-end batch-mix line (feature) — `todo/agentic-workflow-qz1h7-vacuum-guard-empty-board-surfaces-blocking-decision.md`
 - **agentic-workflow-vvmfy** — Runner-first testing — the verifier only trusts an external runner's verdict, never a test's own printed green (feature) — `todo/agentic-workflow-vvmfy-runner-first-testing-doctrine.md`
@@ -28,6 +27,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-mxk6v** — Falsifiability gate — classify acceptance criteria machine-checkable vs human-eye; verifier escalates on metric drift (feature) — `doing/agentic-workflow-mxk6v-falsifiability-gate-machine-vs-human-eye-criteria.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

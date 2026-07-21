@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-mxk6v
 title: Falsifiability gate — classify acceptance criteria machine-checkable vs human-eye; verifier escalates on metric drift
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-21
