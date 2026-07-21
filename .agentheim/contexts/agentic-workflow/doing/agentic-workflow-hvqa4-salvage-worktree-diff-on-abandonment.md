@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-hvqa4
 title: Escalation salvages the worktree diff — attach a patch before any abandonment discards work
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-21

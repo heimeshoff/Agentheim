@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 17:10 -- Batch started: [agentic-workflow-hvqa4]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-hvqa4 - Escalation salvages the worktree diff — attach a patch before any abandonment discards work
+**Parallel:** no (1 worker — sequential run, MAX_PARALLEL=1; 3 more ready tasks held to later waves, builder chose sequential for the overlap-heavy Dorc-review set)
+
+---
+
 ## 2026-07-21 17:09 -- Task verified and completed: agentic-workflow-vvmfy - Runner-first testing — the verifier only trusts an external runner's verdict, never a test's own printed green
 
 **Type:** Work / Task completion
