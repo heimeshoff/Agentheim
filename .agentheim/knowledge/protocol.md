@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 20:40 -- Task verified and completed: agentic-workflow-p8q3z - BOUNCE integration's squash-merge needs a worktree checkpoint commit first — none is ever made
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-p8q3z - BOUNCE integration's squash-merge needs a worktree checkpoint commit first — none is ever made
+**Summary:** BOUNCE integration checkpoints the task file (checkpoint verb, task-file-only) before its squash-merge so the doing to backlog move actually reaches main; corrected the squash-picks-up parenthetical
+**Duration:** 6m38s
+**Verification:** PASS (iteration 1)
+**Files changed:** 1
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-21 20:33 -- Batch started: [agentic-workflow-p8q3z]
 
 **Type:** Work / Batch start

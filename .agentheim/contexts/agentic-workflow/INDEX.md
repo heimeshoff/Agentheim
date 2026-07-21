@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 154
+- **Doing:** 0
+- **Done:** 155
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-p8q3z** — BOUNCE integration's squash-merge needs a worktree checkpoint commit first — none is ever made (bug) — `doing/agentic-workflow-p8q3z-bounce-squash-merge-needs-a-checkpoint-commit-first.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-p8q3z** — BOUNCE integration's squash-merge needs a worktree checkpoint commit first — none is ever made (bug) — `done/agentic-workflow-p8q3z-bounce-squash-merge-needs-a-checkpoint-commit-first.md`
 - **agentic-workflow-hhjjx** — Session-start human-churn reconciliation — diff human commits, flag ADR-governed files, surface re-alignment work (feature) — `done/agentic-workflow-hhjjx-session-start-human-churn-reconciliation.md`
 - **agentic-workflow-rx630** — Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss (feature) — `done/agentic-workflow-rx630-dispatch-ordering-remediation-over-diagnosis-spike-stop-loss.md`
 - **agentic-workflow-qz1h7** — Vacuum guard — an empty board surfaces the blocking decision instead of minting meta-work; session-end batch-mix line (feature) — `done/agentic-workflow-qz1h7-vacuum-guard-empty-board-surfaces-blocking-decision.md`

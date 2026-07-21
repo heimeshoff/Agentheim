@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-p8q3z
 title: BOUNCE integration's squash-merge needs a worktree checkpoint commit first — none is ever made
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-21
-completed:
+completed: 2026-07-21
 depends_on: []
 blocks: []
 tags: [work-skill, git, worktree, bounce, checkpoint, bug]
@@ -103,3 +103,25 @@ See `skills/work/SKILL.md` "BOUNCE integration" (~L176) + "Verifier dispatch" ch
 ADR-0037 (resolved BOUNCE's squash-merge/teardown shape but not a checkpoint step), ADR-0057
 (derived-artifact checkpoint guard / the `checkpoint` verb), ADR-0063 (worktree-abandonment
 salvage), ADR-0032 (worktree isolation), ADR-0026 (bookkeeping-in-the-integrating-commit).
+
+## Outcome
+
+Added a new step 2 to `skills/work/SKILL.md`'s "BOUNCE integration" (between salvage and the
+squash-merge): a `checkpoint`-verb call scoped to `opts.fileList = ["<abs-path-to-task-file>"]`
+that stages and commits only the task file's `doing → backlog` move + `## Worker note` onto
+`aw/<task-id>`, mirroring the SUCCESS-path checkpoint invocation shape (same verb, same
+`git -C .worktrees/<task-id> add <changed>` / `commit -m "<message>"` pattern) but deliberately
+narrower — a single-element `fileList`, no worker-reported `FILE_LIST` involved. The subsequent
+`git merge --squash aw/<task-id>` step's text was corrected: it now explains the squash's delta is
+exactly the task-file move+note *because* step 2 put it on the branch HEAD, and that any other
+worktree edits are NOT picked up (they were never checkpointed) — replacing the old, incorrect
+"(plus any other worktree edits the squash picks up)" parenthetical with an explicit statement
+that incidental edits stay solely in the salvage patch (ADR-0063), never reaching `main`.
+Confirmed `checkpoint`'s `fileList` accepts a single-element array by reading
+`lib/task-lifecycle-cli.mjs`'s `checkpointFiles` handler and `lib/derived-artifact-guard.mjs`'s
+`partitionCheckpointFiles` (both iterate an arbitrary array, no arity assumption) — no specialist
+consult needed, the design was already settled in the task. `references/worker-return-format.md`
+was read and confirmed unchanged (its `RESULT: BOUNCED` block still carries no `FILE_LIST`).
+Full `node --test lib/test/*.test.mjs` run: 330/330 passing (prose-only change, no new tests).
+
+Key file: `skills/work/SKILL.md` (lines ~176-187, "BOUNCE integration" section).
