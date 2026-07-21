@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 20:16 -- Modeling / Promoted: agentic-workflow-p8q3z - BOUNCE integration's squash-merge needs a worktree checkpoint commit first — none is ever made
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-21 20:16 -- Modeling / Refined: agentic-workflow-p8q3z - BOUNCE integration's squash-merge needs a worktree checkpoint commit first
 
 **Type:** Modeling / Refine

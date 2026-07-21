@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 2
-- **Todo:** 0
+- **Backlog:** 1
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 154
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-p8q3z** — BOUNCE integration's squash-merge needs a worktree checkpoint commit first — none is ever made (bug) — `todo/agentic-workflow-p8q3z-bounce-squash-merge-needs-a-checkpoint-commit-first.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -100,7 +101,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-p8q3z** — BOUNCE integration's squash-merge needs a worktree checkpoint commit first — none is ever made (bug) — `backlog/agentic-workflow-p8q3z-bounce-squash-merge-needs-a-checkpoint-commit-first.md`
 - **agentic-workflow-d5a9b** — Enable parallel worktree sessions with independent idea capture and ticket movement — `backlog/agentic-workflow-d5a9b-parallel-worktree-sessions.md`
 <!-- backlog-list:end -->
 
