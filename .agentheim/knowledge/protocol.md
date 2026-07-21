@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 17:57 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 1h50m (first batch start 16:07 → 17:57)
+**Completed:** 9 (first-try PASS: 9, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** hmgav: 1, z394j: 1, ngzwz: 1, mxk6v: 1, vvmfy: 1, hvqa4: 1, qz1h7: 1, rx630: 1, hhjjx: 1
+**Commits:** 19 (9 batch-start, 9 task integrations, this entry)
+**Batch mix:** 0% product-facing / 100% harness / 0% bookkeeping — the entire Dorc-review remediation set is framework/harness doctrine + lifecycle mechanization (this line is itself one of the batch's deliverables, qz1h7/ADR-0064).
+**Vision-conformance:** none — batch aligns with vision. All nine tasks harden the harness's structural defenses ("wrong work is caught by structure, not luck") and produce durable ADRs (0058–0066) ("knowledge is durable"); none pull toward a stated non-goal. Note (advisory, not a flag): the board is now empty and vision.md's "Brainstorm on existing code" open question has stood since 2026-06-05 (~46 days) — per the just-shipped vacuum guard (ADR-0064), that open decision is the highest-leverage next builder action.
+**Carry-over:** none — working tree clean
+**New backlog:** agentic-workflow-p8q3z (BOUNCE integration's squash-merge needs a worktree checkpoint commit first — filed by the hvqa4 worker in passing).
+**Sequential run:** builder chose MAX_PARALLEL=1 for this overlap-heavy set (all 9 edit the shared skills/work + skills/modeling + verifier doctrine files and each mints an ADR); sequential integration made "next free ADR number" collision-proof by construction and avoided merge-back conflicts entirely. All 9 passed verification first try.
+
+---
+
 ## 2026-07-21 17:56 -- Task verified and completed: agentic-workflow-hhjjx - Session-start human-churn reconciliation — diff human commits, flag ADR-governed files, surface re-alignment work
 
 **Type:** Work / Task completion
