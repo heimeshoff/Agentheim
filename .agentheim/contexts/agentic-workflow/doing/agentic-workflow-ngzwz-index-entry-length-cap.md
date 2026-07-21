@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-ngzwz
 title: INDEX entry diet — hard-cap new entry length; the linked artifact carries the detail
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-21

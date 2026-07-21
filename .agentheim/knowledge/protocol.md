@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 16:32 -- Batch started: [agentic-workflow-ngzwz]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-ngzwz - INDEX entry diet — hard-cap new entry length; the linked artifact carries the detail
+**Parallel:** no (1 worker — sequential run, MAX_PARALLEL=1; 6 more ready tasks held to later waves, builder chose sequential for the overlap-heavy Dorc-review set)
+
+---
+
 ## 2026-07-21 16:32 -- Task verified and completed: agentic-workflow-z394j - Mechanize-or-drop — a convention-establishing task ships its enforcement or records "prose-only, unenforced"
 
 **Type:** Work / Task completion
