@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 16:23 -- Batch started: [agentic-workflow-z394j]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-z394j - Mechanize-or-drop — a convention-establishing task ships its enforcement or records "prose-only, unenforced"
+**Parallel:** no (1 worker — sequential run, MAX_PARALLEL=1; 7 more ready tasks held to later waves, builder chose sequential for the overlap-heavy Dorc-review set)
+
+---
+
 ## 2026-07-21 16:22 -- Task verified and completed: agentic-workflow-hmgav - Central ADR number allocation — collision-proof minting under parallel workers
 
 **Type:** Work / Task completion

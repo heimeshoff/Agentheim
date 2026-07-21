@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-z394j
 title: Mechanize-or-drop — a convention-establishing task ships its enforcement or records "prose-only, unenforced"
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-21

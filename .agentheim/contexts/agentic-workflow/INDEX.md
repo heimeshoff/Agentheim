@@ -11,8 +11,8 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 8
-- **Doing:** 0
+- **Todo:** 7
+- **Doing:** 1
 - **Done:** 146
 <!-- task-counts:end -->
 
@@ -21,7 +21,6 @@ research touching this BC, and concept synthesis pages.
 - **agentic-workflow-mxk6v** — Falsifiability gate — classify acceptance criteria machine-checkable vs human-eye; verifier escalates on metric drift (feature) — `todo/agentic-workflow-mxk6v-falsifiability-gate-machine-vs-human-eye-criteria.md`
 - **agentic-workflow-hvqa4** — Escalation salvages the worktree diff — attach a patch before any abandonment discards work (feature) — `todo/agentic-workflow-hvqa4-salvage-worktree-diff-on-abandonment.md`
 - **agentic-workflow-qz1h7** — Vacuum guard — an empty board surfaces the blocking decision instead of minting meta-work; session-end batch-mix line (feature) — `todo/agentic-workflow-qz1h7-vacuum-guard-empty-board-surfaces-blocking-decision.md`
-- **agentic-workflow-z394j** — Mechanize-or-drop — a convention-establishing task ships its enforcement or records "prose-only, unenforced" (feature) — `todo/agentic-workflow-z394j-mechanize-or-drop-convention-enforcement.md`
 - **agentic-workflow-vvmfy** — Runner-first testing — the verifier only trusts an external runner's verdict, never a test's own printed green (feature) — `todo/agentic-workflow-vvmfy-runner-first-testing-doctrine.md`
 - **agentic-workflow-rx630** — Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss (feature) — `todo/agentic-workflow-rx630-dispatch-ordering-remediation-over-diagnosis-spike-stop-loss.md`
 - **agentic-workflow-ngzwz** — INDEX entry diet — hard-cap new entry length; the linked artifact carries the detail (feature) — `todo/agentic-workflow-ngzwz-index-entry-length-cap.md`
@@ -30,6 +29,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-z394j** — Mechanize-or-drop — a convention-establishing task ships its enforcement or records "prose-only, unenforced" (feature) — `doing/agentic-workflow-z394j-mechanize-or-drop-convention-enforcement.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
