@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 5
-- **Doing:** 1
-- **Done:** 148
+- **Doing:** 0
+- **Done:** 149
 <!-- task-counts:end -->
 
 ### Todo
@@ -27,11 +27,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-mxk6v** — Falsifiability gate — classify acceptance criteria machine-checkable vs human-eye; verifier escalates on metric drift (feature) — `doing/agentic-workflow-mxk6v-falsifiability-gate-machine-vs-human-eye-criteria.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-mxk6v** — Falsifiability gate — classify acceptance criteria machine-checkable vs human-eye; verifier escalates on metric drift (feature) — `done/agentic-workflow-mxk6v-falsifiability-gate-machine-vs-human-eye-criteria.md`
 - **agentic-workflow-ngzwz** — INDEX entry diet — hard-cap new entry length; the linked artifact carries the detail (feature) — `done/agentic-workflow-ngzwz-index-entry-length-cap.md`
 - **agentic-workflow-z394j** — Mechanize-or-drop — a convention-establishing task ships its enforcement or records "prose-only, unenforced" (feature) — `done/agentic-workflow-z394j-mechanize-or-drop-convention-enforcement.md`
 - **agentic-workflow-hmgav** — Central ADR number allocation — collision-proof minting under parallel workers (feature) — `done/agentic-workflow-hmgav-central-adr-number-allocation.md`
@@ -106,6 +106,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0061** — Refinement classifies every acceptance criterion as machine-checkable or `[human-eye]`; human-eye criteria carry an explicit marker and route to a builder-eye check at completion — the verifier never invents a proxy metric for them (reports "builder eye-check pending"), and treats a metric that drifts between iterations while its claim is unchanged as immediate escalation. Marker convention mechanized via `lib/human-eye-criteria.mjs` — `../../knowledge/decisions/0061-falsifiability-gate-machine-vs-human-eye-criteria.md`
 - **ADR-0060** — New INDEX task/ADR bullets are capped at ~2–3 sentences (~60 words): the claim plus the pointer, detail living in the linked artifact. A date-boundary live-tree lint (`lib/index-entry-length.mjs`) grandfathers every entry dated on/before adoption, so existing long entries stay verbatim (ADR-0039 discipline) and only new over-length entries are flagged — `../../knowledge/decisions/0060-index-entry-length-cap-date-grandfathered-lint.md`
 - **ADR-0059** — Mechanize-or-drop: a task that establishes a convention must either ship its enforcement (a lint / live-tree `node --test` check / a verifier gate) in the same task, or explicitly record "prose-only, unenforced" — so an unenforced convention is a visible decision, never an accident. Gated at modeling readiness (CAPTURE/PROMOTE, inherited by REFINE) and at verifier check 6c; cites ADR-0044 / ADR-0052 as in-house exemplars — `../../knowledge/decisions/0059-mechanize-or-drop-convention-enforcement-doctrine.md`
 - **ADR-0058** — ADR numbers are collision-proof under parallel workers: a worker mints a *provisional* number in its worktree; the conductor finalizes it against `main`'s true state at squash-merge (single-threaded writer, ADR-0032), keeping the sequence contiguous with no hole. Helper `lib/adr-allocation.mjs` (`nextAdrNumber` + `finalizeAdrNumbering`), git-free and `node --test`-covered — `../../knowledge/decisions/0058-adr-number-allocation-conductor-finalizes-at-squash-merge.md`

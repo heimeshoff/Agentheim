@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 17:01 -- Task verified and completed: agentic-workflow-mxk6v - Falsifiability gate — classify acceptance criteria machine-checkable vs human-eye; verifier escalates on metric drift
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-mxk6v - Falsifiability gate — classify acceptance criteria machine-checkable vs human-eye; verifier escalates on metric drift
+**Summary:** Falsifiability gate — refinement classifies each acceptance criterion machine-checkable vs [human-eye]; the verifier never proxies human-eye criteria and escalates on metric drift; marker convention mechanized via lib/human-eye-criteria.mjs
+**Duration:** 15m
+**Verification:** PASS (iteration 1)
+**Files changed:** 7
+**Tests added:** 16
+**ADRs written:** 0061-falsifiability-gate-machine-vs-human-eye-criteria.md
+
+---
+
 ## 2026-07-21 16:46 -- Batch started: [agentic-workflow-mxk6v]
 
 **Type:** Work / Batch start

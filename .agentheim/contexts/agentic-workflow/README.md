@@ -81,6 +81,23 @@ separate BC, but today the whole tool lives in this one.
   length.mjs`'s live-tree lint flags a new entry (linked artifact dated strictly after
   `ADOPTION_DATE`) that exceeds the cap, and never touches an entry dated on/before it — the
   ADR-0044 `GRANDFATHERED_IDS` idea, scaled past a single stray id. See ADR-0060.
+- **Falsifiability gate — machine-checkable vs. human-eye acceptance criteria (ADR-0061,
+  agentic-workflow-mxk6v)** — every acceptance criterion is classified at CAPTURE/REFINE time:
+  **machine-checkable** (default, unmarked — a test or artifact can decide it) or **human-eye**
+  (a genuinely perceptual claim, marked with a trailing `[human-eye]` bullet suffix). A
+  `[human-eye]` criterion is never a promotion blocker on its own; a task whose criteria are
+  **all** `[human-eye]` needs a specific "Verification is builder-eye only" `## Notes` line
+  before promotion (PROMOTE readiness step 2b), enforced by `lib/human-eye-criteria.mjs`'s
+  live-tree lint. The verifier (`agents/verifier.md` check 1) never proxies a `[human-eye]`
+  criterion with an invented metric — it reports `builder eye-check pending`; the criterion's
+  checkbox stays unchecked through `done/` as the routing signal to the builder's own eye-check.
+  **Metric drift is escalation fuel, not iteration fuel** (check 1b): on iteration 2/3, if a
+  criterion's text is unchanged but the measurement/proxy checking it changed since the prior
+  `## Verifier note`, the verifier FAILs with `ITERATION_HINT: task-under-specified` — reusing
+  `work`'s existing immediate-escalation handling for that hint rather than granting another
+  retry. Closes the Dorc July-2026 review's worst-named burn: a perceptual claim smuggled into a
+  machine-checked metric, tuned by three worker iterations while the product stayed broken. See
+  ADR-0061, ADR-0059, ADR-0036.
 - **Protocol** — the chronological project diary, newest on top; every action appends.
 - **Index** — a flat catalog (`knowledge/index.md` + per-BC `INDEX.md`) that *points*,
   never duplicates. The memory layer for prior-art and dependency lookup.

@@ -132,6 +132,7 @@ PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + casca
    - **Under-refined → backlog/**: The idea needs more thought, research, or breaking down before anyone could work on it.
    - **Ready → todo/**: The idea is small, well-understood, or already deeply discussed. A worker could pick it up and execute without ambiguity.
    - **Convention check (ADR-0059, mechanize-or-drop):** if the idea *establishes a convention* — a naming, format, or structural rule that other tasks, agents, or artifacts are meant to follow going forward, not a one-off choice scoped to this task alone — it does not count as "Ready" unless it also carries either an enforcement acceptance criterion (a lint, a live-tree `node --test` check, or a build failure shipped in the same task) or an explicit **"prose-only, unenforced"** marker recorded in the task file. Neither present → route to `backlog/` regardless of how well-understood the idea otherwise reads; a missing enforcement-or-marker choice is exactly the kind of ambiguity backlog exists to resolve. See ADR-0044 and ADR-0052 for in-house exemplars of the enforced pattern.
+   - **Falsifiability classification (ADR-0061):** classify every acceptance criterion as it's written — machine-checkable (the default, no marker) or `[human-eye]` (see "Classifying acceptance criteria" below). Human-eye criteria are never a `backlog/` blocker on their own. But if a task landing directly in `todo/` ends up with **every** criterion `[human-eye]`, add the same builder-eye-only `## Notes` line PROMOTE's readiness check requires (below) before placing it — don't let a directly-captured task skip the note just because it bypassed PROMOTE's CLI path.
 
 5. **Delegate deep modeling if needed.** For complex ideas (new feature, domain change, architectural impact), spawn the **`agentheim:orchestrator`** agent with the idea and current state. It will route to `tactical-modeler`, `strategic-modeler`, `architect`, or `researcher` as appropriate, and come back with a refined task (or task set) plus any ADRs. For infrastructure-flavored captures, the orchestrator will typically route to `architect` first.
 
@@ -151,6 +152,10 @@ PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + casca
    - What does this depend on? What depends on it?
    - Does this split into smaller tasks?
    - Does this reveal a decision that should become an ADR?
+   - **Classify each acceptance criterion (ADR-0061):** machine-checkable (default) or
+     `[human-eye]`? If a criterion feels perceptual, first try sharpening it into something
+     testable — the marker is for claims that are irreducibly perceptual, not a shortcut
+     around writing a precise criterion. See "Classifying acceptance criteria" below.
 
 4. **Delegate to the `agentheim:orchestrator`** for depth. Give it the task and the BC context. It will route to specialists.
 
@@ -194,6 +199,24 @@ three-layer boundary (`applyTaskMove` mover / git-free CLI / skill judgment+git)
      in the task file. Neither present → not ready; send it back to REFINE rather
      than promoting an unenforced convention as an accident. See ADR-0044 / ADR-0052
      for the shipped-enforcement exemplars this doctrine generalizes.
+   - **Falsifiability classification (ADR-0061):** every acceptance criterion is either
+     machine-checkable (default) or carries the explicit `[human-eye]` marker — this is
+     **not itself a promotion blocker**: a task with some, or even all, human-eye criteria
+     is still promotable. It changes only what happens next (step 2b).
+
+2b. **All-human-eye note.** If **every** acceptance criterion in the task carries
+   `[human-eye]`, add — unless a matching line is already present — this exact line to the
+   task's `## Notes` section before running the CLI in step 3:
+
+   > Verification is builder-eye only — every acceptance criterion is human-eye (ADR-0061);
+   > the verifier will report each as "builder eye-check pending" rather than PASS/FAIL any
+   > of them on an invented proxy.
+
+   `lib/human-eye-criteria.mjs`'s live-tree lint asserts this note is present on any
+   `backlog/todo/doing/done` task whose criteria are all `[human-eye]` — the enforcement half
+   of this convention (ADR-0059 mechanize-or-drop). Edit the task file in place, in
+   `backlog/`, before the move — the CLI's manifest then naturally covers the edit since it
+   commits the same (now-relocated) file.
 
 3. If ready, run the CLI — git-free, it only writes files, never `git`:
 
@@ -339,6 +362,8 @@ What the change is, in domain language.
 ## Acceptance criteria
 - [ ] Concrete, testable outcomes.
 - [ ] One bullet per criterion.
+- [ ] Perceptual claims that resist testing: mark with a trailing `[human-eye]` (ADR-0061) —
+      see "Classifying acceptance criteria" below.
 
 ## Notes
 Open questions, links to ADRs, references to research reports,
@@ -365,6 +390,41 @@ field legend lives here instead:
 Emit a fresh id `<bc>-<token>` per the id grammar in `references/id-grammar.md` (ADR-0028 §1) — generate the token randomly, never scan existing files for a "next number". Legacy `<bc>-NNN` ids (e.g. `auth-003`) already on disk are kept as-is — never rewrite them.
 
 After minting, verify the new id with `classifyTaskId` from `lib/id-grammar.mjs`: if `classifyTaskId(newId) !== 'token'`, the token is out-of-spec (e.g. it leads with a digit) — discard it and mint a fresh one, no need to ask the user (a random token is free and non-interactive). This is the mint-time backstop ADR-0044 added after an out-of-spec token (`infrastructure-5w5gs`) shipped and stranded the mechanized lifecycle verbs; `lib/id-grammar.mjs`'s live-tree test is the always-on gate if this step is ever skipped.
+
+### Classifying acceptance criteria (ADR-0061)
+
+The Dorc July-2026 review's worst burn: a *perceptual* claim ("the slot visibly shows the
+captured frame") got refined into a machine-checked pixel metric, and three worker iterations
+each produced a metric tuned to pass — while the feature still didn't work for the player.
+Every acceptance criterion is, by construction, one of two kinds, and refinement (CAPTURE or
+REFINE) is where the call gets made — not left for whichever worker or verifier happens to
+touch the task later:
+
+- **Machine-checkable (default, no marker).** A test or a concrete inspectable artifact can
+  decide it. This is the ordinary case — leave the bullet as-is.
+- **Human-eye.** Only a person looking at the actual result can judge it — a genuinely
+  perceptual claim ("the slot visibly shows the captured frame", "the animation feels
+  smooth", "the copy reads naturally"). Mark it explicitly with a trailing `[human-eye]` on
+  the bullet:
+
+  ```markdown
+  - [ ] The slot visibly shows the captured frame. [human-eye]
+  ```
+
+If a criterion feels perceptual, try sharpening it into something testable first — `[human-eye]`
+is for claims that are irreducibly perceptual, not an escape hatch from writing a precise
+criterion. A `[human-eye]` bullet's checkbox is deliberately **left unchecked through the whole
+lifecycle** — worker and verifier never check it off, only the builder does, by hand, once
+they've actually looked. That unchecked box next to the marker, still visible on a `done/`
+task, *is* the routing signal to a builder-checks-by-eye step at completion — no separate
+artifact needed.
+
+Human-eye criteria are never a `backlog/`→`todo/` blocker on their own (see PROMOTE's readiness
+check). The one thing they trigger: a task whose criteria are **all** `[human-eye]` needs the
+builder-eye-only `## Notes` line PROMOTE's readiness check adds (or CAPTURE, for a task landing
+directly in `todo/`) before it's ready. See ADR-0061; `agents/verifier.md` check 1 and
+`skills/verification-before-completion/SKILL.md` for how the verifier treats these criteria
+(never proxied by an invented metric — reported "builder eye-check pending").
 
 ## Decisions as tasks
 

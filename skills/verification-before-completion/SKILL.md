@@ -34,13 +34,20 @@ The `work` skill spawns `verifier` with:
 The verifier is explicitly NOT given:
 - The worker's reasoning, scratchpad, or any explanation beyond the strict SUCCESS block
 - The list of specialists the orchestrator consulted
-- Prior verification attempts on the same task (each verification is independent)
+- Prior verification attempts on the same task, as a *separate* artifact (each verification is
+  judged independently). **Narrow exception (ADR-0061, check 1b):** the task file itself
+  (which the verifier does read) accumulates `## Verifier note (iteration N)` sections that
+  `work` appends on each FAIL — the verifier may read those, but only to compare a criterion's
+  recorded measurement/proxy against the current diff's for metric-drift detection, never to
+  bias re-judgment of a criterion that shows no drift.
 
 ## What the verifier checks
 
 In order, stopping at the first failing check:
 
-1. **Acceptance criteria coverage.** Every `- [ ]` bullet in the task's `## Acceptance criteria` section maps to either: (a) an executable test in the diff that would fail without the production code change, or (b) — for the legitimate TDD-skip categories — a concrete artifact the verifier can inspect (ADR file, config validation, integration smoke check). **Narrowed by ADR-0036:** for a task whose diff touches a runtime surface, a self-reported "exercised manually" note is *never* sufficient on its own — that criterion needs check 8's HTTP-floor drive to pass. A manual note still covers only the visual-DOM delta when render infra is absent; it never substitutes for the HTTP floor. The old unrestricted manual-note carve-out survives only for diffs that touch no runtime surface (or whose BC declares none).
+1. **Acceptance criteria coverage.** Every `- [ ]` bullet in the task's `## Acceptance criteria` section maps to either: (a) an executable test in the diff that would fail without the production code change, or (b) — for the legitimate TDD-skip categories — a concrete artifact the verifier can inspect (ADR file, config validation, integration smoke check). **Narrowed by ADR-0036:** for a task whose diff touches a runtime surface, a self-reported "exercised manually" note is *never* sufficient on its own — that criterion needs check 8's HTTP-floor drive to pass. A manual note still covers only the visual-DOM delta when render infra is absent; it never substitutes for the HTTP floor. The old unrestricted manual-note carve-out survives only for diffs that touch no runtime surface (or whose BC declares none). **Human-eye criteria are never proxied (ADR-0061):** a bullet carrying the `[human-eye]` marker gets no test/artifact hunt and no invented metric — the verifier reports it `builder eye-check pending` in its PASS EVIDENCE, and it is never, on its own, a reason to FAIL this check.
+
+1b. **Metric drift across iterations — escalation, not iteration fuel (ADR-0061).** On iteration 2 or 3 only: for any criterion whose text is unchanged since the prior iteration, the verifier compares the measurement/proxy the current diff uses against what a prior `## Verifier note` recorded for that same criterion (the one sanctioned exception to "each verification is independent" — reading prior notes here is solely for this drift comparison, never to re-bias judgment of criteria that show no drift). If the criterion's text held steady but its measurement changed, that is drift — the worker tuned the metric instead of fixing the underlying claim, the exact pattern the Dorc July-2026 review named. The verifier does not grant this an ordinary retry: it FAILs with `ITERATION_HINT: task-under-specified`, which `work`'s existing handling (`skills/work/SKILL.md` step 5: "do not re-dispatch even on iteration 1 — treat as iteration-3") already escalates immediately rather than re-dispatching, regardless of how many iterations remain under the normal cap — no new machinery, since drift is itself evidence the criterion was never truly falsifiable as worded.
 
 2. **Test execution.** If `TESTS_ADDED > 0`, the verifier runs the test suite and confirms `TESTS_PASSING: yes` is true *now*, not just at the moment the worker reported it.
 
@@ -69,7 +76,8 @@ The diff is committable. `work` proceeds to move the task to `done/` (if the wor
 ```
 VERDICT: PASS
 TASK_ID: <id>
-EVIDENCE: <one line per acceptance criterion, naming the test or artifact that covers it>
+EVIDENCE: <one line per acceptance criterion, naming the test or artifact that covers it —
+  or "builder eye-check pending" for a `[human-eye]` criterion (ADR-0061)>
 ```
 
 ### `VERDICT: FAIL`

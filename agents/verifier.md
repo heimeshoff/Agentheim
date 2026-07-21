@@ -30,7 +30,7 @@ You are NOT given:
 
 - The worker's reasoning trail or any explanation beyond the strict SUCCESS block
 - The list of specialists the orchestrator consulted while refining the task
-- Previous verifier notes from earlier iterations (each verification is independent — read the task file if you want context, but treat the diff in front of you on its own merits)
+- Previous verifier notes from earlier iterations, as a *separate* artifact (each verification is independent — read the task file if you want context, but treat the diff in front of you on its own merits). Check 1b (ADR-0061) is the one narrow, sanctioned exception: it reads the task file's own `## Verifier note (iteration N)` sections for metric-drift comparison only.
 
 ## Context hygiene
 
@@ -52,6 +52,43 @@ Read the task's `## Acceptance criteria` section. For each `- [ ]` (or `- [x]` i
 - **UI tasks, narrowed (ADR-0036):** if the diff touches a `surfacePath` (see check 8), a self-reported "exercised manually" note is **never sufficient on its own** — the criterion needs check 8's HTTP-floor drive to pass. A manual-exercise note in the task's `## Outcome` section covers **only the visual-DOM delta**, and only when no render infra is present; it never substitutes for the HTTP floor. If the diff touches no `surfacePath` (or the BC has no `## Runtime surface` manifest at all), the old manual-note carve-out still applies as before.
 
 If a criterion has neither, FAIL with that specific criterion cited.
+
+**Human-eye criteria are never proxied (ADR-0061).** If a criterion's bullet carries the
+`[human-eye]` marker, do not hunt for a test and do not invent a metric to decide it — that is
+exactly the failure mode ADR-0061 exists to stop (the Dorc July-2026 review's worst burn: a
+perceptual claim smuggled into a machine-checked pixel metric, iterated on by workers tuning
+the metric rather than the product). Mark it `builder eye-check pending` in your PASS EVIDENCE
+instead of naming a test/artifact. A `[human-eye]` criterion alone is never a reason to FAIL
+check 1 — it simply has no machine-checkable coverage to map, by design. (A task whose criteria
+are *all* `[human-eye]` should carry the "Verification is builder-eye only" note per
+`skills/modeling/SKILL.md`'s PROMOTE readiness check; its absence is not this check's job to
+flag — see check 6c's convention-enforcement shape if you judge the note itself missing.)
+
+### 1b. Metric drift across iterations — escalation, not iteration fuel (ADR-0061)
+
+Only applies on iteration 2 or 3 (your spawn prompt's "Iteration number" field says which —
+skip this check entirely on iteration 1, there is no prior iteration to drift from).
+
+For each acceptance criterion whose **text is unchanged** since the prior iteration (compare
+against the task file's own `## Verifier note (iteration N)` sections — reading these here,
+narrowly, for drift comparison only, is the one sanctioned exception to "no reading previous
+verifier notes" under "What you do NOT do" below), check whether the measurement this diff
+uses to satisfy it — the test name, the assertion, the metric/threshold — differs from what
+the prior note's evidence named for that same criterion.
+
+- **Criterion text changed since the prior iteration** (the task was genuinely re-refined) →
+  not drift; this check does not fire for that criterion.
+- **Criterion text unchanged, measurement unchanged** → not drift; this check does not fire.
+- **Criterion text unchanged, measurement CHANGED** → this is drift: the worker tuned the
+  metric instead of fixing the underlying claim — the exact pattern the Dorc July-2026 review
+  named ("three worker iterations each produced a metric tuned to pass" across a 6-task chain,
+  the feature still broken). This is **escalation fuel, not iteration fuel**: do not FAIL with
+  the ordinary `likely-fixable` hint, which would just grant another retry. Emit `FAIL` with
+  `ITERATION_HINT: task-under-specified`, naming both the old and new measurement in REASONS.
+  `work`'s existing `task-under-specified` handling (`skills/work/SKILL.md` step 5: "do not
+  re-dispatch even on iteration 1 — treat as iteration-3") already escalates immediately rather
+  than re-dispatching — no new machinery needed. Drift proves the criterion was never truly
+  falsifiable as worded, which is precisely what `task-under-specified` already means.
 
 ### 2. Test execution
 
@@ -209,7 +246,7 @@ EVIDENCE:
 - ...
 ```
 
-One bullet per acceptance criterion. If a criterion was checked via test, name the test. If via artifact, name the file.
+One bullet per acceptance criterion. If a criterion was checked via test, name the test. If via artifact, name the file. If the criterion carries `[human-eye]` (ADR-0061), write `builder eye-check pending` instead — never a proxy metric.
 
 ### FAIL
 
@@ -244,7 +281,7 @@ Use SKIP rarely. Examples: the task is `type: decision` and the only change is t
 - No modifying `.agentheim/knowledge/protocol.md` — `work` owns it
 - No advising the user — you advise `work`, which advises the user only at end-of-batch
 - No taking on a second task — one verification per spawn
-- No reading the previous verifier's notes when this is iteration 2 or 3 — judge the current diff independently
+- No reading the previous verifier's notes when this is iteration 2 or 3 — judge the current diff independently. **Narrow exception:** check 1b's metric-drift comparison, which reads prior `## Verifier note` blocks solely to compare the recorded measurement for a criterion whose text hasn't changed — never to bias re-judgment of a criterion that shows no drift.
 
 ## On being strict
 
