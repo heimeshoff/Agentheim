@@ -223,6 +223,24 @@ separate BC, but today the whole tool lives in this one.
   The stop-loss clause ships enforcement: `lib/spike-stop-loss.mjs` is a date-grandfathered
   live-tree lint (mirrors ADR-0060's shape) flagging any `type: spike` task minted after
   adoption whose body lacks the clause. See ADR-0065.
+- **Session-start human-churn reconciliation (ADR-0066, agentic-workflow-hhjjx)** — the
+  mirror image of `agentic-workflow-d6q4h`'s session-**end** carry-over reconciliation, at
+  the other end of the session, closing the third and final piece of Dorc review
+  recommendation A6. Once per session, at the end of `work`'s Phase 1, before Phase 2:
+  resolve the last `## ... -- Work session ended` protocol entry as a boundary
+  (`lib/session-start-churn.mjs`'s `resolveSinceLastSessionEnd`; a fresh project with no
+  such entry skips silently), have the conductor read `git log --since=... --name-only
+  --format="%x1eCOMMIT%x1f%H%x1f%s"` (a prose step, never a `lib/` git read, ADR-0038),
+  and filter to commits carrying no `[<task-id>]` bracketed trailer (ADR-0026) via
+  `parseCommitLog`/`findUntrailedCommits`. The skill then judges (not the git-free `lib/`
+  helper) which touched files land on a governed surface — an ADR-described file, or one a
+  BC README documents as load-bearing — and surfaces a session-start line (plus, when a
+  governed hit exists, a `whats-next.md` write, ADR-0027) recommending the builder approve
+  an explicit re-alignment task. Advisory only: never auto-files a task, never gates Phase
+  2, and deliberately does not try to separate genuine human commits from the small number
+  of known machine shapes that also omit the trailer (`modeling` DISMISS, `brainstorm`) —
+  favoring recall over precision on an advisory-only signal. See ADR-0066, ADR-0026,
+  ADR-0027, ADR-0038, ADR-0059.
 - **README consolidation trigger / CONSOLIDATE (ADR-0041, agentic-workflow-w7q2m)** — a BC
   `README.md` at or over **~600 lines** has crossed the point where it can no longer reliably
   be read in one pass (this BC's own README, at 1006 lines, was the case that forced this

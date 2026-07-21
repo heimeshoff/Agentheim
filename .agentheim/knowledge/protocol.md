@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 17:56 -- Task verified and completed: agentic-workflow-hhjjx - Session-start human-churn reconciliation — diff human commits, flag ADR-governed files, surface re-alignment work
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-hhjjx - Session-start human-churn reconciliation — diff human commits, flag ADR-governed files, surface re-alignment work
+**Summary:** Session-start human-churn reconciliation — a work Phase 1 advisory that flags commits since the last session end lacking a [task-id] trailer and surfaces any touching a governed ADR/README surface; never auto-files a task, never gates
+**Duration:** 9m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 17
+**ADRs written:** 0066-session-start-human-churn-reconciliation.md
+
+---
+
 ## 2026-07-21 17:46 -- Batch started: [agentic-workflow-hhjjx]
 
 **Type:** Work / Batch start
