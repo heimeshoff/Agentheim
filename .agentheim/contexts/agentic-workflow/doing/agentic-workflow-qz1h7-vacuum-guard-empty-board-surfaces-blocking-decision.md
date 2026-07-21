@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-qz1h7
 title: Vacuum guard — an empty board surfaces the blocking decision instead of minting meta-work; session-end batch-mix line
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-21

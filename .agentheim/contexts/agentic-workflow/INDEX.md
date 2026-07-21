@@ -11,20 +11,20 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 2
-- **Todo:** 3
-- **Doing:** 0
+- **Todo:** 2
+- **Doing:** 1
 - **Done:** 151
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-qz1h7** — Vacuum guard — an empty board surfaces the blocking decision instead of minting meta-work; session-end batch-mix line (feature) — `todo/agentic-workflow-qz1h7-vacuum-guard-empty-board-surfaces-blocking-decision.md`
 - **agentic-workflow-rx630** — Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss (feature) — `todo/agentic-workflow-rx630-dispatch-ordering-remediation-over-diagnosis-spike-stop-loss.md`
 - **agentic-workflow-hhjjx** — Session-start human-churn reconciliation — diff human commits, flag ADR-governed files, surface re-alignment work (feature) — `todo/agentic-workflow-hhjjx-session-start-human-churn-reconciliation.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-qz1h7** — Vacuum guard — an empty board surfaces the blocking decision instead of minting meta-work; session-end batch-mix line (feature) — `doing/agentic-workflow-qz1h7-vacuum-guard-empty-board-surfaces-blocking-decision.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

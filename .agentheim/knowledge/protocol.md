@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 17:24 -- Batch started: [agentic-workflow-qz1h7]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-qz1h7 - Vacuum guard — an empty board surfaces the blocking decision instead of minting meta-work; session-end batch-mix line
+**Parallel:** no (1 worker — sequential run, MAX_PARALLEL=1; 2 more ready tasks held to later waves, builder chose sequential for the overlap-heavy Dorc-review set)
+
+---
+
 ## 2026-07-21 17:24 -- Task verified and completed: agentic-workflow-hvqa4 - Escalation salvages the worktree diff — attach a patch before any abandonment discards work
 
 **Type:** Work / Task completion
