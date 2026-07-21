@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 16:07 -- Batch started: [agentic-workflow-hmgav]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-hmgav - Central ADR number allocation — collision-proof minting under parallel workers
+**Parallel:** no (1 worker — sequential run, MAX_PARALLEL=1 set by builder; 8 more ready tasks held to later waves due to heavy shared-doctrine-file overlap + ADR-number collision hazard across the 9-task Dorc-review set)
+
+---
+
 ## 2026-07-21 -- Modeling / Captured: 9 tasks — Dorc July-2026 review recommendations A1–A6
 
 **Type:** Modeling / Capture

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-hmgav
 title: Central ADR number allocation — collision-proof minting under parallel workers
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-21

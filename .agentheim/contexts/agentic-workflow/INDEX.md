@@ -11,8 +11,8 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 9
-- **Doing:** 0
+- **Todo:** 8
+- **Doing:** 1
 - **Done:** 145
 <!-- task-counts:end -->
 
@@ -25,12 +25,12 @@ research touching this BC, and concept synthesis pages.
 - **agentic-workflow-vvmfy** — Runner-first testing — the verifier only trusts an external runner's verdict, never a test's own printed green (feature) — `todo/agentic-workflow-vvmfy-runner-first-testing-doctrine.md`
 - **agentic-workflow-rx630** — Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss (feature) — `todo/agentic-workflow-rx630-dispatch-ordering-remediation-over-diagnosis-spike-stop-loss.md`
 - **agentic-workflow-ngzwz** — INDEX entry diet — hard-cap new entry length; the linked artifact carries the detail (feature) — `todo/agentic-workflow-ngzwz-index-entry-length-cap.md`
-- **agentic-workflow-hmgav** — Central ADR number allocation — collision-proof minting under parallel workers (feature) — `todo/agentic-workflow-hmgav-central-adr-number-allocation.md`
 - **agentic-workflow-hhjjx** — Session-start human-churn reconciliation — diff human commits, flag ADR-governed files, surface re-alignment work (feature) — `todo/agentic-workflow-hhjjx-session-start-human-churn-reconciliation.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-hmgav** — Central ADR number allocation — collision-proof minting under parallel workers (feature) — `doing/agentic-workflow-hmgav-central-adr-number-allocation.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
