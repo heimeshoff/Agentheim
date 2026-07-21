@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 16:45 -- Task verified and completed: agentic-workflow-ngzwz - INDEX entry diet — hard-cap new entry length; the linked artifact carries the detail
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-ngzwz - INDEX entry diet — hard-cap new entry length; the linked artifact carries the detail
+**Summary:** INDEX entry-length cap — new task/ADR bullets capped at ~60 words, enforced by a date-grandfathered live-tree lint (lib/index-entry-length.mjs) that leaves existing entries verbatim
+**Duration:** 11m
+**Verification:** PASS (iteration 1)
+**Files changed:** 6
+**Tests added:** 10
+**ADRs written:** 0060-index-entry-length-cap-date-grandfathered-lint.md
+
+---
+
 ## 2026-07-21 16:32 -- Batch started: [agentic-workflow-ngzwz]
 
 **Type:** Work / Batch start

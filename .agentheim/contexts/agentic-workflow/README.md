@@ -70,6 +70,17 @@ separate BC, but today the whole tool lives in this one.
   check 6c (mirrored in `skills/verification-before-completion/SKILL.md`). ADR-0044 (id-grammar
   minting) and ADR-0052 (`agentheim:` namespace lint) are the in-house exemplars this doctrine
   generalizes. See ADR-0059.
+- **INDEX entry-length cap (ADR-0060, agentic-workflow-ngzwz)** — a newly written INDEX task
+  or ADR bullet is capped at **~2-3 sentences, ~60 words**: the claim and the pointer, detail
+  living in the linked task/ADR file, never the catalog line itself. A task's `title:`
+  frontmatter is what lands verbatim in its INDEX line (`insertIndexLineAtTop` embeds it
+  unchanged), so the cap is really a cap on titles `modeling` authors/refines; the ADR-line
+  prose `work` hand-composes on every `adr-local`/`adr-global` insert is capped the same way.
+  Existing over-length entries are left verbatim — no retroactive rewrite (mirrors ADR-0039's
+  verbatim discipline). Grandfathering is by DATE, not an id allowlist: `lib/index-entry-
+  length.mjs`'s live-tree lint flags a new entry (linked artifact dated strictly after
+  `ADOPTION_DATE`) that exceeds the cap, and never touches an entry dated on/before it — the
+  ADR-0044 `GRANDFATHERED_IDS` idea, scaled past a single stray id. See ADR-0060.
 - **Protocol** — the chronological project diary, newest on top; every action appends.
 - **Index** — a flat catalog (`knowledge/index.md` + per-BC `INDEX.md`) that *points*,
   never duplicates. The memory layer for prior-art and dependency lookup.

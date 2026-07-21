@@ -459,6 +459,8 @@ After writing or moving a task file, update the BC's `INDEX.md` so other skills 
 
 If the BC's `INDEX.md` doesn't exist yet, create it from `references/index-template.md` with the BC name filled in. Do not invent sections — only the templated markers are append targets.
 
+**Entry-length cap (ADR-0060):** a task's `title:` frontmatter is what lands verbatim in its INDEX task line (the mechanized lifecycle scripts embed it unchanged) — keep a newly authored or refined title to **~2-3 sentences, ~60 words**: the claim and the pointer, not a walkthrough. Detail belongs in the task file's `Why`/`What` sections, never the title. Applies going forward only; an existing over-length title already on disk is left verbatim — no retroactive rewrite (mirrors ADR-0039's verbatim cap-and-roll discipline). A live-tree lint (`lib/index-entry-length.mjs`, `node --test`) flags a new INDEX entry — one dated after the doctrine's adoption — that still exceeds the cap.
+
 **What not to do:**
 - Do not edit the index across multiple BCs in one skill invocation unless a single capture genuinely lands in multiple BCs, **or a DISMISS cascade set spans BCs** (ADR-0022 — the sanctioned exception).
 - Do not auto-rewrite the entire file — only insert/remove at the markers. Preserve any human-added prose elsewhere.

@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 6
-- **Doing:** 1
-- **Done:** 147
+- **Doing:** 0
+- **Done:** 148
 <!-- task-counts:end -->
 
 ### Todo
@@ -28,11 +28,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-ngzwz** — INDEX entry diet — hard-cap new entry length; the linked artifact carries the detail (feature) — `doing/agentic-workflow-ngzwz-index-entry-length-cap.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-ngzwz** — INDEX entry diet — hard-cap new entry length; the linked artifact carries the detail (feature) — `done/agentic-workflow-ngzwz-index-entry-length-cap.md`
 - **agentic-workflow-z394j** — Mechanize-or-drop — a convention-establishing task ships its enforcement or records "prose-only, unenforced" (feature) — `done/agentic-workflow-z394j-mechanize-or-drop-convention-enforcement.md`
 - **agentic-workflow-hmgav** — Central ADR number allocation — collision-proof minting under parallel workers (feature) — `done/agentic-workflow-hmgav-central-adr-number-allocation.md`
 - **agentic-workflow-p5k9m** — Drop the "Modeling:" prefix from dashboard prompt-bar launch names (chore) — `done/agentic-workflow-p5k9m-drop-modeling-prefix-prompt-bar-launch-name.md`
@@ -106,6 +106,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0060** — New INDEX task/ADR bullets are capped at ~2–3 sentences (~60 words): the claim plus the pointer, detail living in the linked artifact. A date-boundary live-tree lint (`lib/index-entry-length.mjs`) grandfathers every entry dated on/before adoption, so existing long entries stay verbatim (ADR-0039 discipline) and only new over-length entries are flagged — `../../knowledge/decisions/0060-index-entry-length-cap-date-grandfathered-lint.md`
 - **ADR-0059** — Mechanize-or-drop: a task that establishes a convention must either ship its enforcement (a lint / live-tree `node --test` check / a verifier gate) in the same task, or explicitly record "prose-only, unenforced" — so an unenforced convention is a visible decision, never an accident. Gated at modeling readiness (CAPTURE/PROMOTE, inherited by REFINE) and at verifier check 6c; cites ADR-0044 / ADR-0052 as in-house exemplars — `../../knowledge/decisions/0059-mechanize-or-drop-convention-enforcement-doctrine.md`
 - **ADR-0058** — ADR numbers are collision-proof under parallel workers: a worker mints a *provisional* number in its worktree; the conductor finalizes it against `main`'s true state at squash-merge (single-threaded writer, ADR-0032), keeping the sequence contiguous with no hole. Helper `lib/adr-allocation.mjs` (`nextAdrNumber` + `finalizeAdrNumbering`), git-free and `node --test`-covered — `../../knowledge/decisions/0058-adr-number-allocation-conductor-finalizes-at-squash-merge.md`
 - **ADR-0057** — Derived artifacts are unstageable from a worktree: a rebuilt `dashboard/dist/` has exactly ONE channel to reach `main` — the conductor's enumerated stage at the wip-checkpoint — so the guard filters the worker's **declared `FILE_LIST`** there (`lib/derived-artifact-guard.mjs` + a `checkpoint` verb on the lifecycle CLI), making the rebuild **inert** rather than forbidden. It operates on declared data, never the working tree, so it is structurally immune to the `autocrlf` phantom; and the conductor's own sanctioned rebuild-from-merged-source is out of reach **by construction** (checkpoint only ever runs against a worktree) with no actor/identity check anywhere. Records the corrected diagnosis: workers were never defying the contract — `dist-build.test.mjs`'s `before()` hook rebuilds `dist/` on every suite run, so the rebuild is mechanically unavoidable and no prompt could ever prevent it. Alternatives records the "dist matches a fresh build" suite test as **inverted and actively harmful** (that same hook would make it trivially, permanently green) and a git-hook guard as re-litigating ADR-0013 against the wrong actor (workers never run git). In the ADR-0026/0032/0038/0055 lineage; accepted — `../../knowledge/decisions/0057-derived-artifacts-unstageable-from-worktree-checkpoint-guard.md`

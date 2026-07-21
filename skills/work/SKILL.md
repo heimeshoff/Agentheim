@@ -265,6 +265,8 @@ Indexes track artifact movement. The work skill — **never the worker** — upd
 
 These edits are part of the bookkeeping that is written and `git add`ed **before** the integrating commit (ADR-0026 + ADR-0032) — the INDEX edit, the ADR backlinks, and the protocol entry all land in the same commit as the task's squash-merged (or, for the batch-start transition, batch-claimed) work. Do them in the Git authority step's pre-commit phase, not after.
 
+A task line's prose is the task's own `title:` frontmatter, embedded verbatim by the mechanized lifecycle scripts (`lib/task-lifecycle.mjs`'s `insertIndexLineAtTop`) — nothing to compose here. Its length cap (ADR-0060) is therefore enforced where the title is authored/refined, in `modeling`'s "Updating indexes" section, not here.
+
 Per state transition in `contexts/<bc>/INDEX.md`:
 
 | Transition | Marker edits | Counts |
@@ -282,6 +284,7 @@ Per ADR written (from `ADRS_WRITTEN` in worker SUCCESS):
 - `scope: <bc-name>` → insert under `<!-- adr-local:start -->` in `contexts/<bc-name>/INDEX.md`.
 - `scope: global` → insert under `<!-- adr-global:start -->` in `.agentheim/knowledge/index.md`.
 - **Bidirectional backlink:** append the ADR id to the task's `related_adrs` frontmatter, and append the task id to the ADR's `related_tasks` frontmatter. The worker writes the ADR but does not maintain these cross-links — the conductor does, atomically, alongside the index update.
+- **Entry-length cap (ADR-0060):** the one-line ADR summary you compose for the `adr-local`/`adr-global` insert is capped at **~2-3 sentences, ~60 words** — the ADR's headline decision and its pointer, not a restatement of its Context/Consequences. Detail lives in the ADR file itself, which the pointer already reaches. Applies to newly inserted entries only; an existing over-length entry already sitting in an `INDEX.md` is left verbatim — no retroactive rewrite (mirrors ADR-0039's verbatim cap-and-roll discipline). A live-tree lint (`lib/index-entry-length.mjs`, `node --test`) flags a new entry — one dated after the doctrine's adoption — that exceeds the cap; it does not (and cannot, since this prose is hand-composed) rewrite the line for you.
 
 If `.agentheim/knowledge/index.md` or the BC's `INDEX.md` does not exist yet, create it from `references/index-template.md` before inserting. Do not auto-rewrite the file — only insert/remove at markers.
 
