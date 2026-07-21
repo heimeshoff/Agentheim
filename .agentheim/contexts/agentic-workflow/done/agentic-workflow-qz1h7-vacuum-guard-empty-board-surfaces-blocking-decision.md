@@ -1,15 +1,15 @@
 ---
 id: agentic-workflow-qz1h7
 title: Vacuum guard — an empty board surfaces the blocking decision instead of minting meta-work; session-end batch-mix line
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-21
-completed:
+completed: 2026-07-21
 depends_on: []
 blocks: []
 tags: [work, modeling, doctrine, advisory, dorc-review]
-related_adrs: [0040, 0027]
+related_adrs: [0040, 0027, 0064]
 related_research: []
 prior_art: [agentic-workflow-x4t2g, agentic-workflow-v6d4n]
 ---
@@ -37,17 +37,34 @@ dispatch meta-work; the guard only stops *self-generated* filler.
 
 ## Acceptance criteria
 
-- [ ] `skills/work/SKILL.md`: empty ready set + open vision decision → the session
+- [x] `skills/work/SKILL.md`: empty ready set + open vision decision → the session
       surfaces the decision(s) with age instead of generating substitute work; wording
       makes clear this is the highest-leverage builder action.
-- [ ] `skills/modeling/SKILL.md` (Opening flow): bare invocation with an empty backlog
+- [x] `skills/modeling/SKILL.md` (Opening flow): bare invocation with an empty backlog
       surfaces open vision decisions before inviting new capture.
-- [ ] Session-end protocol entry includes the batch-mix line; the classification
+- [x] Session-end protocol entry includes the batch-mix line; the classification
       heuristic (e.g. by task type + target surface) is documented where the entry format
       is defined.
-- [ ] Never a hard gate — explicit builder requests are untouched (vision non-goal 3
+- [x] Never a hard gate — explicit builder requests are untouched (vision non-goal 3
       holds: human stays in the loop, framework doesn't refuse the human).
-- [ ] An ADR records the doctrine.
+- [x] An ADR records the doctrine.
+
+## Outcome
+
+Shipped both coupled mechanisms as a new git-free `lib/vacuum-guard.mjs` (27 `node --test`
+cases, `lib/test/vacuum-guard.test.mjs`) plus prose wiring in `skills/work/SKILL.md`
+(Phase 2 new step 8 "Vacuum guard"; end-of-run reporting new step 6 "Batch-mix
+classification" + the session-end protocol entry's new `**Batch mix:**` line; all
+downstream step numbers renumbered and cross-references fixed) and
+`skills/modeling/SKILL.md` (Opening flow step 2). `vision.md`'s one existing open question
+("Brainstorm on existing code") was backfilled with `(open since 2026-06-05)`, the date
+confirmed via `git log -S"Brainstorm on existing code" --follow -- .agentheim/vision.md`
+(present since the vision's initial commit `e116a87`). `lib/vacuum-guard.mjs` reuses
+`vision-conformance.mjs`'s `extractSection`/`labelFor` rather than duplicating markdown
+extraction. ADR-0064 records the doctrine, including the mechanize-or-drop split (open-
+question extraction and batch-mix classification are mechanized; "remember to annotate a
+newly-captured open question" stays prose-only, documented as such). BC README updated
+with a new bullet. Full `lib/` suite: 304/304 passing.
 
 ## Notes
 

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 17:38 -- Task verified and completed: agentic-workflow-qz1h7 - Vacuum guard — an empty board surfaces the blocking decision instead of minting meta-work; session-end batch-mix line
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-qz1h7 - Vacuum guard — an empty board surfaces the blocking decision instead of minting meta-work; session-end batch-mix line
+**Summary:** Vacuum guard — an empty ready set/backlog with open vision decisions surfaces those decisions with age instead of self-generating filler; the work session-end entry gains a batch-mix classification line (product/harness/bookkeeping); both advisory, never a gate
+**Duration:** 13m
+**Verification:** PASS (iteration 1)
+**Files changed:** 7
+**Tests added:** 27
+**ADRs written:** 0064-vacuum-guard-empty-board-surfaces-blocking-decision.md
+
+---
+
 ## 2026-07-21 17:24 -- Batch started: [agentic-workflow-qz1h7]
 
 **Type:** Work / Batch start

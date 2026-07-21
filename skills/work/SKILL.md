@@ -36,6 +36,12 @@ Before anything else, look at `contexts/*/doing/` **and**, if this is a git repo
 5. For every todo task, read `depends_on`. A task is *ready* if every id in `depends_on` is in `done/`. **Fail-closed** (ADR-0038 Ruling A): a `depends_on` id present in NO lifecycle folder (`backlog/`, `todo/`, `doing/`, `done/`, across every BC) counts as **unsatisfied** — the task is not ready, and the dangling id is surfaced to the user, never silently treated as satisfied. This matches `dependencySatisfied()` in `lib/task-lifecycle.mjs` exactly (no code change needed there — only this prose used to disagree with it).
 6. **Detect cycles.** If the graph has a cycle, stop and surface the cycle to the user. Do not "just pick one".
 7. Briefly tell the user what you found: "X tasks ready across N contexts, Y tasks blocked on Z."
+8. **Vacuum guard** (ADR-0064, agentic-workflow-qz1h7). Run this only when step 7 found **zero ready tasks across every BC** (a genuinely empty ready set, not merely this batch). Read `.agentheim/vision.md`'s "## Open questions" section (already in hand from step 1) through `lib/vacuum-guard.mjs`'s `extractOpenQuestions` — it filters out already-resolved (struck-through) items and returns each remaining item with its `since` date. If it returns **one or more** open items:
+   - **Do not self-generate substitute work.** No manufacturing a chore task, no wandering into unrelated test-suite maintenance, no drafting bookkeeping busywork on your own initiative just because the board is empty and something feels more productive than reporting "nothing to do." That drift — a week's capacity flowing to self-discoverable harness churn instead of the actual blocker — is exactly what this guard exists to stop (Dorc review recommendation A2).
+   - **Surface the open item(s) with their age**, via `formatVacuumGuardLine` (e.g. "Brainstorm on existing code (next iteration). (open 46 days)"), and say plainly that resolving one of these is the single highest-leverage thing the builder can do right now — more valuable to the project than anything this session could invent on its own from an empty board.
+   - Stop there for this run; skip straight to a one-line "nothing ran this session" note rather than the full End-of-run reporting machinery below (there is no batch to summarize).
+   - **Never a hard gate** (`isVacuum` only *informs* this step — it never blocks a command). If the user explicitly asks for something else anyway ("do it anyway", "add a chore for the flaky test", "dispatch harness cleanup") — do exactly that. The guard only suppresses work the session would invent unprompted; it never refuses an explicit builder request (vision non-goal 3, "Not autonomous").
+   If step 7 found ready tasks, or the ready set is empty but `extractOpenQuestions` returns nothing (vision.md has no unresolved open questions, or is missing), this step is a no-op — proceed to Phase 3 exactly as before.
 
 ## Phase 3: Conflict pre-scan — advisory only (ADR-0032 demoted this from a throttle)
 
@@ -486,8 +492,9 @@ When `todo/` is empty and all `doing/` is resolved (or the user interrupts):
 3. **Concept candidates.** Aggregate every non-"none" `CONCEPT_CANDIDATE` from worker SUCCESS blocks across the run. If any concept name shows up in 2+ workers' returns, escalate the convergence signal more loudly. For each unique candidate: print the concept name, the BC, and the converging artifact ids. The user decides whether to create the page (per `references/concept-template.md`); never auto-create.
 4. Surface anything that surprised you mid-run: cycles detected, dependency gaps, recovered sessions, repeated verification failures pointing at a common cause.
 5. **Vision-conformance pass** (see the dedicated section below). One bounded read per session over the batch just completed — not per task, not a whole-vision essay. Do this before the carry-over reconciliation and the final protocol entry; its output feeds the **Vision-conformance:** line of that entry and, when a flag is worth the builder's attention, the whats-next advisory (below).
-6. **Reconcile stranded carry-over — working tree AND worktrees** (see the dedicated section below). Do this *after* the last per-task integration and *before* prepending the session-end protocol entry — its dispositions feed the `**Carry-over:**` line of that entry.
-7. Prepend a final protocol entry:
+6. **Batch-mix classification** (ADR-0064, agentic-workflow-qz1h7). For every task this session completed, you already hold its `type` (from its task file frontmatter) and its `FILE_LIST` (from the worker's SUCCESS return, already used for the checkpoint stage). Feed `[{type, files}, ...]` for the whole batch to `lib/vacuum-guard.mjs`'s `formatBatchMixLine` — it classifies each task **product-facing** / **harness** / **bookkeeping** by the heuristic documented in that module (`classifyTask`'s doc comment: `type: feature`/`decision` → product-facing; `type: chore` whose touched files are *entirely* protocol/INDEX/state bookkeeping surfaces → bookkeeping, else harness; everything else, e.g. `refactor`/`spike` → harness) and renders the one-line mix (e.g. `62% product-facing / 25% harness / 13% bookkeeping (8 tasks)`) for the session-end protocol entry's **Batch mix:** line below. This is purely descriptive — it never blocks, never influences dispatch, and exists only so drift toward meta-work is visible per session instead of discovered a week later (Dorc review recommendation A2).
+7. **Reconcile stranded carry-over — working tree AND worktrees** (see the dedicated section below). Do this *after* the last per-task integration and *before* prepending the session-end protocol entry — its dispositions feed the `**Carry-over:**` line of that entry.
+8. Prepend a final protocol entry:
    ```markdown
    ## YYYY-MM-DD HH:MM -- Work session ended
 
@@ -500,13 +507,14 @@ When `todo/` is empty and all `doing/` is resolved (or the user interrupts):
    **Dispatches:** [per-task tally, one entry per task as `<task-id>: D` where D = 1 + its re-dispatch count, e.g. "b8x2v: 1, j4m6r: 2"]
    **Commits:** <count>
    **Vision-conformance:** [flag list from the session-end vision-conformance pass, `lib/vision-conformance.mjs`'s `formatConformanceLine` — one entry per flagged task as `<task-id>: diverges from <success criterion|non-goal> "<label>" — <note>`; or `none — batch aligns with vision` when the pass raises nothing. Never a gate — a note only (ADR-0027 advisory-write family, ADR-0040).]
-   **Carry-over:** [reconciliation disposition per stranded file, from the step-6 section — one entry each: `<path>: committed (<label>)` or `<path>: left behind (owner: <flow>, <reason>)`; or `none — working tree clean`. NEVER the old "untouched, as in prior sessions" boilerplate — every stranded file names an explicit disposition or the tree was clean.]
+   **Batch mix:** [step 6's `formatBatchMixLine` output, e.g. `62% product-facing / 25% harness / 13% bookkeeping (8 tasks)`, or `none — no tasks completed this session` for an empty batch. Descriptive only — never a gate (ADR-0064).]
+   **Carry-over:** [reconciliation disposition per stranded file, from the step-7 section — one entry each: `<path>: committed (<label>)` or `<path>: left behind (owner: <flow>, <reason>)`; or `none — working tree clean`. NEVER the old "untouched, as in prior sessions" boilerplate — every stranded file names an explicit disposition or the tree was clean.]
 
    ---
    ```
-   This is the one `work` protocol line written *after* a commit (it summarizes the session). To honor the "clean working tree" rule (`references/commit-doctrine.md`, ADR-0026), **commit it** with a scoped add of only `protocol.md`: `git add .agentheim/knowledge/protocol.md` then `chore(<bc>): work session end bookkeeping [<last-task-id>]` (reuse the last completed task's id as the trailer, or `chore: work session end bookkeeping` if the session committed nothing). This is the *only* bookkeeping-after-commit `work` performs, and it is a single line — every per-task INDEX/protocol edit already rode in its own task commit (the old trailing "record SHAs + INDEX/protocol" commit is gone). (Any *deliberately-committed* stranded file from step 6 rode in its own scoped reconciliation commit *before* this entry — see below.)
-8. **Protocol rotation check (session-end)** (see the dedicated section below). Run this immediately after step 7's session-end protocol entry has been committed — the file has just grown, making this the natural, self-firing checkpoint that closes ADR-0039's deferred "who invokes it" non-decision (ADR-0045, ADR-0041's cap-and-roll doctrine).
-9. **INDEX done-list rotation check (session-end)** (see the dedicated section below). Run this immediately after step 8's protocol rotation check. Every task this session completed grew some BC's `INDEX.md` done-list via `completeTask`, so this is the same self-firing seam step 8 uses, applied to the sibling cap-and-roll surface ADR-0045's "Scope boundary" section deferred (ADR-0047 closes it).
+   This is the one `work` protocol line written *after* a commit (it summarizes the session). To honor the "clean working tree" rule (`references/commit-doctrine.md`, ADR-0026), **commit it** with a scoped add of only `protocol.md`: `git add .agentheim/knowledge/protocol.md` then `chore(<bc>): work session end bookkeeping [<last-task-id>]` (reuse the last completed task's id as the trailer, or `chore: work session end bookkeeping` if the session committed nothing). This is the *only* bookkeeping-after-commit `work` performs, and it is a single line — every per-task INDEX/protocol edit already rode in its own task commit (the old trailing "record SHAs + INDEX/protocol" commit is gone). (Any *deliberately-committed* stranded file from step 7 rode in its own scoped reconciliation commit *before* this entry — see below.)
+9. **Protocol rotation check (session-end)** (see the dedicated section below). Run this immediately after step 8's session-end protocol entry has been committed — the file has just grown, making this the natural, self-firing checkpoint that closes ADR-0039's deferred "who invokes it" non-decision (ADR-0045, ADR-0041's cap-and-roll doctrine).
+10. **INDEX done-list rotation check (session-end)** (see the dedicated section below). Run this immediately after step 9's protocol rotation check. Every task this session completed grew some BC's `INDEX.md` done-list via `completeTask`, so this is the same self-firing seam step 9 uses, applied to the sibling cap-and-roll surface ADR-0045's "Scope boundary" section deferred (ADR-0047 closes it).
 
 ## Vision-conformance check (session-end)
 
@@ -525,7 +533,7 @@ The scoped-`git add` rule (ADR-0026 §5) is load-bearing for concurrency, but it
 
 ### Working-tree file carry-over
 
-Run this once per session, at end-of-run step 6 (after the last per-task commit and the vision-conformance pass, before the session-end protocol entry):
+Run this once per session, at end-of-run step 7 (after the last per-task commit, the vision-conformance pass, and the batch-mix classification, before the session-end protocol entry):
 
 1. **Detect.** Run `git status --porcelain`. Each line is a stranded working-tree entry: tracked-modified/staged (` M`, `M `, `MM`, `A `, `D `, `R `, …) **or** untracked (`??`). By this point every task this session completed has already ridden into its own commit, so a clean tree yields no lines. If the output is **empty**, there is nothing to reconcile — record `Carry-over: none — working tree clean` and skip to the protocol entry.
 2. **Surface, per file — never auto-sweep.** For **each** stranded entry (both tracked-modified and untracked), present it to the **user** with the two allowed dispositions. Do not batch them into a single yes/no; a mixed set (one orphan to commit, one live sibling to leave) is the common case.
@@ -533,7 +541,7 @@ Run this once per session, at end-of-run step 6 (after the last per-task commit 
    - **(B) Leave behind with a named owner.** The file belongs to another live flow — a concurrent `modeling` session's in-flight task, a still-un-verified worker's code, the user's own WIP, or known non-work noise (e.g. an untracked screenshot). Leave it untouched and record a leave-behind note that **names the presumed owner and the reason** (e.g. `owner: concurrent modeling session, in-flight task file`). This is a deliberate, attributed decision — not the old anonymous "untouched" boilerplate.
 3. **Concurrency caution — ask, do not assume.** A *live* concurrent session's in-flight files are byte-indistinguishable from a crashed session's orphans. Committing another session's half-written markdown is the exact failure ADR-0026 §5 exists to prevent. So this step **asks the user per file** and never infers the disposition. When the owner is uncertain, the safe default is **(B) leave behind**, not (A) commit — you can always reconcile a true orphan next session, but a wrongly-committed live file is a race you cannot cleanly undo.
 4. **The scoped-add rule is unchanged.** Reconciliation is still an enumerated `git add <path>` per deliberately-committed file — never `git add -A` / `git add .` (`references/commit-doctrine.md`), which would sweep in exactly the concurrent-sibling files disposition (B) exists to protect.
-5. **Record the dispositions.** Carry every file's disposition into the session-end protocol entry's `**Carry-over:**` line (step 7): committed files as `<path>: committed (<label>)`, left-behind files as `<path>: left behind (owner: <flow>, <reason>)`. This replaces the "carry-over untouched, as in prior sessions" boilerplate — the protocol now records *what was decided and why*, per file, instead of silently repeating the leak.
+5. **Record the dispositions.** Carry every file's disposition into the session-end protocol entry's `**Carry-over:**` line (step 8): committed files as `<path>: committed (<label>)`, left-behind files as `<path>: left behind (owner: <flow>, <reason>)`. This replaces the "carry-over untouched, as in prior sessions" boilerplate — the protocol now records *what was decided and why*, per file, instead of silently repeating the leak.
 
 ### Worktree carry-over (extends this reconciliation — ADR-0032)
 
@@ -543,15 +551,15 @@ Run this alongside the working-tree carry-over above, at the same point in the s
 2. **Surface, per worktree — never auto-remove.**
    - **Escalated this session (FAIL iteration 3)** → not an orphan, a deliberate keep. Record it plainly, no user prompt needed (the escalation itself already surfaced it in step 5 of the FAIL-iteration-3 handling above): `<path>: kept (owner: <task-id>, escalated at iteration 3, salvaged: <patch-path> — see task notes)`.
    - **Everything else** (no matching `doing/` task on `main`, or the matching task is already `done/`/`backlog/`) → an **orphan**. Ask the user, per worktree, the same two dispositions as the working-tree case: **discard** it (**salvage its diff first — tag `discarded`, see "Salvaging a worktree's diff before abandonment"** — then unlink any `dashboard/node_modules` link — `unlinkDashboardNodeModules` — then `git worktree remove --force` + `git branch -D aw/<task-id>`) or **keep** it for inspection. Never guess: a live concurrent session's worktree is byte-indistinguishable from an interrupted one's, same caution as the working-tree carry-over above.
-3. **Record the disposition** on the same `**Carry-over:**` line as the working-tree entries (step 6 above) — e.g. `.worktrees/agentic-workflow-f6m2q: kept (owner: agentic-workflow-f6m2q, escalated at iteration 3, salvaged: .agentheim/salvage/agentic-workflow-f6m2q-escalated-iter3.patch)` or `.worktrees/agentic-workflow-old1: discarded (orphan, no matching doing/ task, salvaged: .agentheim/salvage/agentic-workflow-old1-discarded.patch)` — or, when the capture found an empty diff and skipped writing a file, `...discarded (orphan, no matching doing/ task, nothing to salvage)`.
+3. **Record the disposition** on the same `**Carry-over:**` line as the working-tree entries (step 7 above) — e.g. `.worktrees/agentic-workflow-f6m2q: kept (owner: agentic-workflow-f6m2q, escalated at iteration 3, salvaged: .agentheim/salvage/agentic-workflow-f6m2q-escalated-iter3.patch)` or `.worktrees/agentic-workflow-old1: discarded (orphan, no matching doing/ task, salvaged: .agentheim/salvage/agentic-workflow-old1-discarded.patch)` — or, when the capture found an empty diff and skipped writing a file, `...discarded (orphan, no matching doing/ task, nothing to salvage)`.
 4. **Feeds Phase 1 recovery.** An orphan or a kept escalation that survives to the *next* session is exactly the signal Phase 1's `git worktree list --porcelain` check picks up — the two mechanisms are one continuous thread across sessions, not independent.
 
 ## Protocol rotation check (session-end)
 
-Run this once per session, immediately after step 7's session-end protocol entry has been
+Run this once per session, immediately after step 8's session-end protocol entry has been
 committed (ADR-0045, closing ADR-0039's deferred "who invokes it" non-decision). This is the
 self-firing cap-and-roll check ADR-0041 calls for: cheap, deterministic, and it runs exactly when
-the live file has just grown from the entry step 7 just committed.
+the live file has just grown from the entry step 8 just committed.
 
 1. **Invoke `rotateProtocol` via the standard env-free plugin bootstrap** — the same
    homedir→cache→semver-max resolution the `claim`/`complete` CLI invocations already use (ADR-0038),
@@ -569,9 +577,9 @@ the live file has just grown from the entry step 7 just committed.
 3. **`rotated: true`** → `git add` exactly the manifest's `changed` paths (the rewritten
    `protocol.md` plus every new/appended `.agentheim/knowledge/protocol/YYYY-MM.md` archive file it
    lists) — never `git add -A` / `git add .` (`references/commit-doctrine.md`) — and commit as its
-   **own scoped commit**, separate from step 7's session-end-entry commit:
+   **own scoped commit**, separate from step 8's session-end-entry commit:
    `chore(agentic-workflow): rotate protocol — <rolledMonths joined with ", "> [<last-task-id>]`
-   (or `chore: rotate protocol — ...` if the session completed no task, mirroring step 7's fallback
+   (or `chore: rotate protocol — ...` if the session completed no task, mirroring step 8's fallback
    trailer convention).
 4. **No protocol log entry for the rotation itself.** Rotation is infrastructure housekeeping, not a
    project event worth a diary line — logging it would just add another entry pushing the file
@@ -580,7 +588,7 @@ the live file has just grown from the entry step 7 just committed.
 
 ## INDEX done-list rotation check (session-end)
 
-Run this once per session, immediately after the protocol rotation check above (step 9, ADR-0047,
+Run this once per session, immediately after the protocol rotation check above (step 10, ADR-0047,
 closing ADR-0045's deferred "sibling surface" scope boundary). Same self-firing cap-and-roll
 posture as the protocol check, applied to every bounded context's `INDEX.md` `done-list` instead of
 `protocol.md` — cheap, deterministic, and it runs exactly when the session's `completeTask` calls
@@ -627,12 +635,12 @@ have just grown one or more BCs' done-lists.
 4. **`rotated: true`** → `git add` exactly the top-level manifest's `changed` paths (every rewritten
    `INDEX.md` plus every new/appended `contexts/<bc>/done-archive/YYYY-MM.md` file it lists) — never
    `git add -A` / `git add .` (`references/commit-doctrine.md`) — and commit as its **own scoped
-   commit**, separate from both step 7's session-end-entry commit and step 8's protocol-rotation
+   commit**, separate from both step 8's session-end-entry commit and step 9's protocol-rotation
    commit: `chore(agentic-workflow): rotate INDEX done-list — <bc>:<rolledMonths joined with ", ">[, <bc2>:<rolledMonths2>...] [<last-task-id>]`
    — one `<bc>:<rolledMonths>` segment per BC that actually rotated (read each rotated BC's own
    `rolledMonths` from `contexts[<bc>].rolledMonths`, comma-joined when a BC rolled more than one
    month), the segments themselves comma-joined when more than one BC rotated (or `chore: rotate
-   INDEX done-list — ...` if the session completed no task, mirroring step 7's and step 8's fallback
+   INDEX done-list — ...` if the session completed no task, mirroring step 8's and step 9's fallback
    trailer convention). This commit fires independently of whether any BC refused in step 3 — a
    refusal only ever removes that ONE BC's paths from `changed`, never the whole step.
 5. **No protocol log entry for the rotation itself** (refusals/reports included). Same reasoning as

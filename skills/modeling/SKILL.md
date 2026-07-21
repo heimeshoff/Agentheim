@@ -34,7 +34,7 @@ This runs only when the user opened `modeling` without handing you a concrete ne
 
 1. **Gather the backlog.** After the "Before acting" reads, collect every task in `contexts/*/backlog/` across all BCs. Prefer the per-BC `INDEX.md` backlog lists (already loaded) over re-scanning directories.
 
-2. **If the backlog is empty**, say so in one line and go straight to inviting a new idea (CAPTURE). Don't show an empty table.
+2. **If the backlog is empty**, first run the vacuum guard (ADR-0064, agentic-workflow-qz1h7): read `.agentheim/vision.md`'s "## Open questions" section (already read in "Before acting") through `lib/vacuum-guard.mjs`'s `extractOpenQuestions` — it filters out already-resolved (struck-through) items and returns each remaining item with its `since` date. If it returns **one or more** open items, surface them first — one line per item naming it and its age via `formatVacuumGuardLine` (e.g. "Brainstorm on existing code (next iteration). (open 46 days)") — framed as the single highest-leverage thing the builder could decide right now, ahead of capturing anything new. This is advisory, not a gate (vision non-goal 3, "Not autonomous") — after surfacing it, still fall straight through to inviting a new idea (CAPTURE) exactly as below; the guard only makes sure an unmade decision doesn't get buried under an empty backlog, it never blocks capture. If `extractOpenQuestions` returns nothing (no unresolved open questions, or vision.md is missing), say so in one line and go straight to inviting a new idea (CAPTURE). Don't show an empty table.
 
 3. **If the backlog has tasks, present them as a table** and ask whether the user wants to refine any before capturing something new. Use this shape:
 

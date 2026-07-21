@@ -190,6 +190,25 @@ separate BC, but today the whole tool lives in this one.
   (over)write of the same single-latest `.agentheim/state/whats-next.md` artifact `whats-next`
   writes. LLM judgment is exercised by `evals/vision-conformance-check/`'s fixtures; the
   deterministic extraction/formatting halves are unit-tested.
+- **Vacuum guard & batch-mix visibility (ADR-0064, agentic-workflow-qz1h7)** — an empty ready
+  set / backlog is a *user decision waiting*, not agent fuel. When `work`'s Phase 2 finds zero
+  ready tasks across every BC, or `modeling`'s Opening flow finds an empty backlog, both check
+  `vision.md`'s "## Open questions" section (via `lib/vacuum-guard.mjs`'s `extractOpenQuestions`,
+  which excludes already-resolved struck-through items and reads each remaining item's
+  `(open since YYYY-MM-DD)` annotation). If genuinely open items exist, the session **refuses to
+  self-generate substitute filler** — no manufactured chore, no unrelated harness cleanup — and
+  instead surfaces the decision(s) with their age (`formatVacuumGuardLine`, e.g. "Brainstorm on
+  existing code (next iteration). (open 46 days)") as the highest-leverage builder action
+  available. Session-end also gains a **batch-mix line**: every completed task is classified
+  product-facing / harness / bookkeeping by `classifyTask` (type `feature`/`decision` →
+  product-facing; type `chore` whose touched files are entirely protocol/INDEX/state surfaces →
+  bookkeeping, else harness; everything else → harness), rendered by `formatBatchMixLine` into
+  the protocol entry's `**Batch mix:**` line, so drift toward meta-work is visible per session
+  instead of discovered a week later (Dorc review recommendation A2). Both halves are advisory,
+  never a gate — an explicit builder request always overrides the guard (vision non-goal 3). The
+  open-question annotation convention and the batch-mix classification are both mechanized
+  (`lib/vacuum-guard.mjs`, `node --test`-covered, git-free per ADR-0038) per ADR-0059's
+  mechanize-or-drop doctrine. See ADR-0064, ADR-0040, ADR-0027, ADR-0059, ADR-0038.
 - **README consolidation trigger / CONSOLIDATE (ADR-0041, agentic-workflow-w7q2m)** — a BC
   `README.md` at or over **~600 lines** has crossed the point where it can no longer reliably
   be read in one pass (this BC's own README, at 1006 lines, was the case that forced this

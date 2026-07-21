@@ -97,11 +97,12 @@ against exactly that.
 
 ## Open questions
 
-- **Brainstorm on existing code (next iteration).** When `brainstorm` is invoked in a
-  folder that already contains code, it should first reverse-engineer a best-guess
-  vision and domain from the code, present that, and *then* continue the Socratic
-  dialogue as usual. Likely needs multiple collaborating agents to analyze an existing
-  system; to be built later via the skill-creator. Not present today.
+- **Brainstorm on existing code (next iteration).** (open since 2026-06-05) When
+  `brainstorm` is invoked in a folder that already contains code, it should first
+  reverse-engineer a best-guess vision and domain from the code, present that, and
+  *then* continue the Socratic dialogue as usual. Likely needs multiple collaborating
+  agents to analyze an existing system; to be built later via the skill-creator. Not
+  present today.
 - ~~**Branch/registry merge gap.**~~ *Resolved 2026-06-07.* `skills/research/SKILL.md`
   now wires in the review gate end-to-end (post-write, pre-cite), spawning the
   `research-reviewer` with fresh context and looping to a 3-iteration cap.
