@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-hhjjx
 title: Session-start human-churn reconciliation — diff human commits, flag ADR-governed files, surface re-alignment work
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-21

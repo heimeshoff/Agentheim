@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 2
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 153
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-hhjjx** — Session-start human-churn reconciliation — diff human commits, flag ADR-governed files, surface re-alignment work (feature) — `todo/agentic-workflow-hhjjx-session-start-human-churn-reconciliation.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-hhjjx** — Session-start human-churn reconciliation — diff human commits, flag ADR-governed files, surface re-alignment work (feature) — `doing/agentic-workflow-hhjjx-session-start-human-churn-reconciliation.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

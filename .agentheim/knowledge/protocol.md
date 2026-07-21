@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 17:46 -- Batch started: [agentic-workflow-hhjjx]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-hhjjx - Session-start human-churn reconciliation — diff human commits, flag ADR-governed files, surface re-alignment work
+**Parallel:** no (1 worker — sequential run, MAX_PARALLEL=1; final task of the 9-task Dorc-review set, builder chose sequential)
+
+---
+
 ## 2026-07-21 17:46 -- Task verified and completed: agentic-workflow-rx630 - Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss
 
 **Type:** Work / Task completion
