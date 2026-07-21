@@ -11,19 +11,19 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 2
-- **Todo:** 2
-- **Doing:** 0
+- **Todo:** 1
+- **Doing:** 1
 - **Done:** 152
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-rx630** — Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss (feature) — `todo/agentic-workflow-rx630-dispatch-ordering-remediation-over-diagnosis-spike-stop-loss.md`
 - **agentic-workflow-hhjjx** — Session-start human-churn reconciliation — diff human commits, flag ADR-governed files, surface re-alignment work (feature) — `todo/agentic-workflow-hhjjx-session-start-human-churn-reconciliation.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-rx630** — Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss (feature) — `doing/agentic-workflow-rx630-dispatch-ordering-remediation-over-diagnosis-spike-stop-loss.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

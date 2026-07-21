@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 17:38 -- Batch started: [agentic-workflow-rx630]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-rx630 - Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss
+**Parallel:** no (1 worker — sequential run, MAX_PARALLEL=1; 1 more ready task (hhjjx) held to the final wave, builder chose sequential for the overlap-heavy Dorc-review set)
+
+---
+
 ## 2026-07-21 17:38 -- Task verified and completed: agentic-workflow-qz1h7 - Vacuum guard — an empty board surfaces the blocking decision instead of minting meta-work; session-end batch-mix line
 
 **Type:** Work / Task completion

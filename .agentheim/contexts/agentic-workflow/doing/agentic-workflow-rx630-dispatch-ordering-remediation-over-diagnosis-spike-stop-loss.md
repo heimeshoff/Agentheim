@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-rx630
 title: Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-21
