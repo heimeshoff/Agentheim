@@ -2,7 +2,15 @@
 
 Use this shape for every architecture / domain decision record under `.agentheim/knowledge/decisions/`.
 
-Filename convention: `NNNN-kebab-slug.md`, zero-padded 4-digit sequential number. Look at existing ADRs to pick the next number.
+Filename convention: `NNNN-kebab-slug.md`, zero-padded 4-digit sequential number. Mint a
+**provisional** number by looking at the existing ADRs in `.agentheim/knowledge/decisions/`
+(equivalently, `lib/adr-allocation.mjs`'s `nextAdrNumber(decisionsDir)`) and taking the next one —
+this is only a local guess, not authoritative, when you're a worker writing inside your own
+`.worktrees/<task-id>/` (ADR-0032): a sibling worker in a different worktree can guess the same
+number, and you cannot see its file. The conductor finalizes the true number against `main`'s real
+state at squash-merge integration time (`finalizeAdrNumbering`, ADR-0058), renumbering on collision
+so two parallel workers never end up with the same final number, and so a minted-but-never-merged
+guess never leaves a hole in the sequence.
 
 ```markdown
 ---

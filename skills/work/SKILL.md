@@ -277,6 +277,7 @@ Per state transition in `contexts/<bc>/INDEX.md`:
 
 Per ADR written (from `ADRS_WRITTEN` in worker SUCCESS):
 
+- **Finalize the ADR's number first (ADR-0058)**, before anything else in this list — a rename here changes the filename and frontmatter `id:` that every later step (index insertion, backlinks) refers to. On the main tree, after step 1's `git merge --squash` has staged the worker's ADR file(s) but before any `git add`: run `lib/adr-allocation.mjs`'s `finalizeAdrNumbering(decisionsDir, [<the ADRS_WRITTEN filenames>])`. It recomputes the true next-free number(s) against `main`'s real `.agentheim/knowledge/decisions/` and renumbers on collision or gap (filename + frontmatter `id:` + H1 heading, plus an in-file "Note on ADR numbering"), so two parallel workers can never land on the same final ADR number. If it reports a `renumbered` entry, use the NEW number for every step below, and also patch any reference to the OLD provisional number in the task's own Notes/Outcome section (you have both artifacts in hand at this commit boundary) — the finalize step does not sweep prose outside the ADR file itself. Git-free (never shells out to `git`); its `changed` paths (both the removed old path and the added new path, when a rename fired) fold into this commit's scoped `git add` alongside everything below.
 - Read the ADR's frontmatter `scope:` field.
 - `scope: <bc-name>` → insert under `<!-- adr-local:start -->` in `contexts/<bc-name>/INDEX.md`.
 - `scope: global` → insert under `<!-- adr-global:start -->` in `.agentheim/knowledge/index.md`.

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 16:22 -- Task verified and completed: agentic-workflow-hmgav - Central ADR number allocation — collision-proof minting under parallel workers
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-hmgav - Central ADR number allocation — collision-proof minting under parallel workers
+**Summary:** Collision-proof ADR numbering — workers mint a provisional number, the conductor finalizes it against main at squash-merge
+**Duration:** 13m
+**Verification:** PASS (iteration 1)
+**Files changed:** 8
+**Tests added:** 8
+**ADRs written:** 0058-adr-number-allocation-conductor-finalizes-at-squash-merge.md
+
+---
+
 ## 2026-07-21 16:07 -- Batch started: [agentic-workflow-hmgav]
 
 **Type:** Work / Batch start

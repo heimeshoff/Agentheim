@@ -755,6 +755,32 @@ separate BC, but today the whole tool lives in this one.
   ADR-0038 reserves for the skill. Both reuse `lib/task-lifecycle-cli.mjs` — `claim <id-1>,<id-2>,…`
   and `complete <task-id>` (with an optional JSON opts positional for `complete`'s richer
   bookkeeping fields). See ADR-0038, ADR-0007, ADR-0026, ADR-0032, ADR-0042, ADR-0054.
+- **`lib/adr-allocation.mjs`** — collision-proof ADR number allocation (ADR-0058,
+  agentic-workflow-hmgav), extending the ADR-0042 "composition owned by the caller at the
+  squash-merge boundary" pattern to ADR numbering instead of copying ADR-0028's random-token
+  answer (ADR ids keep ordinal continuity — a property actively used, unlike task ids).
+  **`nextAdrNumber(decisionsDir)`** — a PROVISIONAL mint: current max `NNNN-*.md` in
+  `decisionsDir` plus one. Called by a worker inside its own ADR-0032 worktree (or a
+  direct-commit skill); not authoritative — a sibling worker in a different worktree can guess
+  the same number and neither can see the other's file. **`finalizeAdrNumbering(decisionsDir,
+  provisionalFilenames)`** — the AUTHORITATIVE step, conductor-only: called against `main`'s real
+  `decisions/` after a worker's `git merge --squash` stages its ADR file(s) but before the
+  integrating `git add`/commit. Exploits ADR-0032's "`main` written only by the conductor, only
+  sequentially" invariant — every OTHER `NNNN-*.md` file already in `decisionsDir` is by
+  construction already final. Assigns the provisional file(s) sequential numbers starting at the
+  true max + 1 REGARDLESS of their guessed number, so both a collision (a sibling already landed
+  the guess) and an over-guess (leaving a gap) are corrected by one uniform rule; on rename it
+  rewrites the file's filename + frontmatter `id:` + H1 heading and appends a "Note on ADR
+  numbering" trail, mirroring ADR-0038's own hand-written 0037→0038 renumbering precedent, now
+  automatic. Returns `{changed: [oldPath, newPath], renumbered: [{from, to, oldFilename,
+  newFilename}]}`, matching `applyTaskMove`'s rename manifest shape. A bounced/failed task's
+  provisional file is simply never passed to `finalizeAdrNumbering` (ADR-0032's FAIL quarantine —
+  nothing merges to `main`), so it never consumes a slot and leaves no hole. Git-free (ADR-0038):
+  plain `fs` rename + content rewrite, no `git` shell-out. Wired into `skills/work/SKILL.md`'s
+  "Per ADR written" bookkeeping step, ahead of index insertion and backlinks. Scoped to the
+  worktree/squash-merge (`work`) path only — `modeling`/`quick-capture`/`brainstorm`'s
+  direct-commit ADR writes keep the old unmechanized convention (ADR-0058 §4). See ADR-0058,
+  ADR-0028, ADR-0032, ADR-0038, ADR-0042.
 - **`lib/resolve-plugin-file.mjs`** — the env-independent in-plugin file resolver
   (generalizes infrastructure-010's `dashboard/resolve-launcher.mjs`, which now delegates to
   it — agentic-workflow-k5n8f). `locatePluginFile(relPath, opts)` resolves a path inside the

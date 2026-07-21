@@ -116,6 +116,8 @@ For any decision made during the work that deserves to be remembered, write an A
 
 Threshold: if a future maintainer would ask "why this, not the obvious alternative?", write the ADR. Trivial choices don't need one.
 
+**Numbering the ADR (ADR-0058):** pick a **provisional** number — `references/adr-template.md`'s convention, equivalently `lib/adr-allocation.mjs`'s `nextAdrNumber(decisionsDir)` — by looking at the highest `NNNN-*.md` already in `decisionsDir` and taking the next one. This is a local guess against your own worktree's view, not authoritative: you cannot see a sibling worker's freshly-minted ADR in a different worktree, so two workers in the same batch can legitimately guess the same number. Do not treat your guess as final and do not attempt to coordinate with siblings — the conductor finalizes the true number against `main`'s real state at squash-merge integration time (`finalizeAdrNumbering`), renumbering on collision so the final sequence is always contiguous and collision-free. Just write the ADR with your best guess and move on.
+
 ## Fifth action: update domain memory
 
 Before marking the task done:

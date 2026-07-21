@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 8
-- **Doing:** 1
-- **Done:** 145
+- **Doing:** 0
+- **Done:** 146
 <!-- task-counts:end -->
 
 ### Todo
@@ -30,11 +30,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-hmgav** — Central ADR number allocation — collision-proof minting under parallel workers (feature) — `doing/agentic-workflow-hmgav-central-adr-number-allocation.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-hmgav** — Central ADR number allocation — collision-proof minting under parallel workers (feature) — `done/agentic-workflow-hmgav-central-adr-number-allocation.md`
 - **agentic-workflow-p5k9m** — Drop the "Modeling:" prefix from dashboard prompt-bar launch names (chore) — `done/agentic-workflow-p5k9m-drop-modeling-prefix-prompt-bar-launch-name.md`
 - **agentic-workflow-n4qte** — Prompt bar greys out the model selector — and warns loudly — when the live bridge is too old to honour it (bug) — `done/agentic-workflow-n4qte-prompt-bar-capability-skew-grey-out-and-banner.md`
 - **agentic-workflow-vsg9d** — Prompt field stays tall after a launch — the post-clear re-measure runs before React re-renders (bug) — `done/agentic-workflow-vsg9d-prompt-field-stays-tall-after-launch.md`
@@ -106,6 +106,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0058** — ADR numbers are collision-proof under parallel workers: a worker mints a *provisional* number in its worktree; the conductor finalizes it against `main`'s true state at squash-merge (single-threaded writer, ADR-0032), keeping the sequence contiguous with no hole. Helper `lib/adr-allocation.mjs` (`nextAdrNumber` + `finalizeAdrNumbering`), git-free and `node --test`-covered — `../../knowledge/decisions/0058-adr-number-allocation-conductor-finalizes-at-squash-merge.md`
 - **ADR-0057** — Derived artifacts are unstageable from a worktree: a rebuilt `dashboard/dist/` has exactly ONE channel to reach `main` — the conductor's enumerated stage at the wip-checkpoint — so the guard filters the worker's **declared `FILE_LIST`** there (`lib/derived-artifact-guard.mjs` + a `checkpoint` verb on the lifecycle CLI), making the rebuild **inert** rather than forbidden. It operates on declared data, never the working tree, so it is structurally immune to the `autocrlf` phantom; and the conductor's own sanctioned rebuild-from-merged-source is out of reach **by construction** (checkpoint only ever runs against a worktree) with no actor/identity check anywhere. Records the corrected diagnosis: workers were never defying the contract — `dist-build.test.mjs`'s `before()` hook rebuilds `dist/` on every suite run, so the rebuild is mechanically unavoidable and no prompt could ever prevent it. Alternatives records the "dist matches a fresh build" suite test as **inverted and actively harmful** (that same hook would make it trivially, permanently green) and a git-hook guard as re-litigating ADR-0013 against the wrong actor (workers never run git). In the ADR-0026/0032/0038/0055 lineage; accepted — `../../knowledge/decisions/0057-derived-artifacts-unstageable-from-worktree-checkpoint-guard.md`
 - **ADR-0055** — `applyTaskMove` never mutates its source in place: the move step becomes `mkdirSync(dirname(toPath), {recursive:true})` → write the status-rewritten body to the **destination** → `unlinkSync` the source, so any failure before the unlink leaves the source structurally untouched (never written, mtime intact — no false `stale-precondition` on retry) and the only residual is a self-healing duplicate, not an undetectable status-matches-folder violation; a missing destination lifecycle folder is **backfilled, never rejected** (disk-absence of a `LIFECYCLE_FOLDERS` member only ever means "currently empty" under git's no-empty-dirs behavior — rejecting would fail-closed a legal move); the `{ok:false}` contract still means "nothing mutated," so a post-write unlink failure stays an uncaught throw (same severity as the old `renameSync` throw). Amends ADR-0054's "only disk mutation" phrasing (the mover is internally two mutations); reopens neither ADR-0007 nor ADR-0038. Pinned at refinement of [[agentic-workflow-rwxms]]; accepted — `../../knowledge/decisions/0055-applytaskmove-write-destination-then-unlink-source.md`
 - **ADR-0054** — Compute-then-write atomicity for the mechanized lifecycle verbs: `promoteTask`/`claimBatch`/`completeTask` compute their full new `INDEX.md` + `protocol.md` content *before* `applyTaskMove`, so a bookkeeping throw is fail-closed for free (`{ok:false, code:'bookkeeping-marker-mismatch'}`, nothing moved, nothing written) and the move is the last mutation before the two writes; the hand-maintained dry-run mirror `validateBookkeepingMarkers` and its three helpers are deleted, since the computation *is* the guard — killing the bug class of a mirror that must chase the mutation phase's throw sites. Folds in two `adjustIndexCount` hardenings: a below-zero decrement rejects (it silently wrote `-1`, which then poisoned every later verb in that BC) and its replace is scoped to the `task-counts` block. Supersedes `agentic-workflow-k5n8f`'s AC #5 dry-run-mirror *mechanism only*; amends neither ADR-0038's Rulings A/B nor ADR-0042; accepted — `../../knowledge/decisions/0054-compute-then-write-atomicity-supersedes-dry-run-mirror.md`
