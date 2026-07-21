@@ -209,6 +209,20 @@ separate BC, but today the whole tool lives in this one.
   open-question annotation convention and the batch-mix classification are both mechanized
   (`lib/vacuum-guard.mjs`, `node --test`-covered, git-free per ADR-0038) per ADR-0059's
   mechanize-or-drop doctrine. See ADR-0064, ADR-0040, ADR-0027, ADR-0059, ADR-0038.
+- **Remediation-over-diagnosis / spike stop-loss (ADR-0065, agentic-workflow-rx630)** — two
+  coupled doctrine changes closing Dorc review recommendation A5. (1) **Dispatch ordering**
+  (`skills/work/SKILL.md` Phase 3 step 4): a ready remediation task whose root cause is already
+  diagnosed and whose fix is cheap outranks a ready further-diagnosis `spike` on the **same
+  thread** — shared `tags`, a `depends_on`/`blocks` link, or a `prior_art` link. Ordering only,
+  never a gate: a builder who explicitly wants deeper diagnosis still gets it. (2) **Spike
+  stop-loss**: every `type: spike` task carries a standing clause — "if, mid-spike, the
+  mitigation is already known and cheap, record it and stop" — and a worker ending a spike
+  early on that clause records the mitigation in `## Outcome` and completes normally; this is
+  a legitimate completion, not a bounce or fail. The ordering half is prose-only, unenforced
+  (ADR-0059) — it's a judgment call the same shape as the existing planning-advisory weighting.
+  The stop-loss clause ships enforcement: `lib/spike-stop-loss.mjs` is a date-grandfathered
+  live-tree lint (mirrors ADR-0060's shape) flagging any `type: spike` task minted after
+  adoption whose body lacks the clause. See ADR-0065.
 - **README consolidation trigger / CONSOLIDATE (ADR-0041, agentic-workflow-w7q2m)** — a BC
   `README.md` at or over **~600 lines** has crossed the point where it can no longer reliably
   be read in one pass (this BC's own README, at 1006 lines, was the case that forced this

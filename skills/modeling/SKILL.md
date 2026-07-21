@@ -376,7 +376,13 @@ line as the value (a leaked comment on `status` once blanked the board). The
 field legend lives here instead:
 
 - `status` — one of `backlog | todo | doing | done` (also the lifecycle folder).
-- `type` — one of `feature | bug | refactor | chore | spike | decision`.
+- `type` — one of `feature | bug | refactor | chore | spike | decision`. A `spike` task's
+  body must carry the **stop-loss clause** (ADR-0065, agentic-workflow-rx630): "if, mid-spike,
+  the mitigation is already known and cheap, record it and stop." Include it verbatim or in
+  substance (the literal word "stop-loss," or the clause's own "record it and stop" wording,
+  satisfies `lib/spike-stop-loss.mjs`'s live-tree lint — mint every new spike task with the
+  clause present). Without it a worker has no standing permission to end the spike early with
+  a recorded mitigation instead of the full diagnosis the task otherwise asks for.
 - `completed` — left empty; the worker sets the date when the task is done. (There is no
   `commit:` field — ADR-0026 dropped it; a task's commit is found in `git log` via the
   `[<task-id>]` trailer the committing skill writes.)

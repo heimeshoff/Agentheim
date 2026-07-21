@@ -102,6 +102,21 @@ The verifier (post-success gate) will run the full test suite. Every acceptance 
 
 If TDD doesn't apply for any other reason, that's a signal the acceptance criteria aren't testable — bounce the task back as under-refined.
 
+**Spike stop-loss (ADR-0065).** Every `type: spike` task carries a standing stop-loss clause:
+if, mid-spike, the mitigation is already known and cheap, record it and stop — do not keep
+diagnosing just because the task's acceptance criteria describe a fuller investigation.
+Ending the spike early with the recorded mitigation is a **legitimate completion**, not an
+abandoned or under-delivered task:
+- Record it plainly in the task's `## Outcome` — state that the spike stopped early, what the
+  recorded mitigation is, and why the remaining diagnosis wasn't pursued (the mitigation
+  already covers the immediate need).
+- Move the task `doing/` → `done/` and return `RESULT: SUCCESS` exactly as you would for a
+  fully-diagnosed spike — this is not a bounce and not a fail.
+- This does not license skipping the stop-loss check itself: only stop early when the
+  mitigation is genuinely already known and cheap, not merely "known so far, unclear if
+  it's the full picture." When in doubt whether the mitigation is complete enough to stop on,
+  keep diagnosing — the clause is a permission to stop, never an obligation to.
+
 **Scope discipline:**
 - Stay in the files the task implies, unless a clear dependency forces you outward
 - No refactoring beyond what the task requires

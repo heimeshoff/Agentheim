@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 17:46 -- Task verified and completed: agentic-workflow-rx630 - Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-rx630 - Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss
+**Summary:** Remediation-over-diagnosis dispatch ordering — a known-cheap remediation on an already-diagnosed thread outranks further diagnosis spikes; plus a spike stop-loss clause making an early-stopped spike a legitimate completion (lint-enforced)
+**Duration:** 7m
+**Verification:** PASS (iteration 1)
+**Files changed:** 7
+**Tests added:** 9
+**ADRs written:** 0065-remediation-over-diagnosis-dispatch-ordering-spike-stop-loss.md
+
+---
+
 ## 2026-07-21 17:38 -- Batch started: [agentic-workflow-rx630]
 
 **Type:** Work / Batch start

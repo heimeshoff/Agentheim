@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 2
 - **Todo:** 1
-- **Doing:** 1
-- **Done:** 152
+- **Doing:** 0
+- **Done:** 153
 <!-- task-counts:end -->
 
 ### Todo
@@ -23,11 +23,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-rx630** — Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss (feature) — `doing/agentic-workflow-rx630-dispatch-ordering-remediation-over-diagnosis-spike-stop-loss.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-rx630** — Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss (feature) — `done/agentic-workflow-rx630-dispatch-ordering-remediation-over-diagnosis-spike-stop-loss.md`
 - **agentic-workflow-qz1h7** — Vacuum guard — an empty board surfaces the blocking decision instead of minting meta-work; session-end batch-mix line (feature) — `done/agentic-workflow-qz1h7-vacuum-guard-empty-board-surfaces-blocking-decision.md`
 - **agentic-workflow-hvqa4** — Escalation salvages the worktree diff — attach a patch before any abandonment discards work (feature) — `done/agentic-workflow-hvqa4-salvage-worktree-diff-on-abandonment.md`
 - **agentic-workflow-vvmfy** — Runner-first testing — the verifier only trusts an external runner's verdict, never a test's own printed green (feature) — `done/agentic-workflow-vvmfy-runner-first-testing-doctrine.md`
@@ -107,6 +107,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0065** — Two dispatch/spike disciplines: (1) when `work` scans the ready set, a known-cheap remediation on an already-diagnosed thread (same tags / `depends_on`/`blocks` / `prior_art`) outranks further diagnosis spikes — a dispatch-ordering preference, not a gate; (2) every `type: spike` task carries a stop-loss clause ("if the mitigation is already known and cheap, record it and stop"), and an early-stopped spike is a legitimate completion. The spike clause is enforced by the git-free date-grandfathered lint `lib/spike-stop-loss.mjs`; the ordering half is prose-only — `../../knowledge/decisions/0065-remediation-over-diagnosis-dispatch-ordering-spike-stop-loss.md`
 - **ADR-0064** — When the ready set / backlog is empty and `vision.md` carries open questions, `work` and `modeling` refuse to self-generate harness/bookkeeping filler and instead surface the blocking decision with its age (the highest-leverage builder action). The `work` session-end entry also gains a batch-mix line classifying the batch product-facing / harness / bookkeeping. Both advisory (ADR-0027/0040 family), never a gate; deterministic parts in git-free `lib/vacuum-guard.mjs` — `../../knowledge/decisions/0064-vacuum-guard-empty-board-surfaces-blocking-decision.md`
 - **ADR-0063** — Every `work` path that abandons a worktree with un-merged changes (FAIL iteration-3 escalation, BOUNCE, orphan discard) first salvages the diff to `.agentheim/salvage/<task-id>-<tag>.patch`, then removes the worktree — closing the Dorc-A1 loss where a verified fix vanished with its branch. The conductor runs the `git diff` capture; the git-free `lib/worktree-salvage.mjs` computes the patch path/naming. Patches are git-ignored advisory artifacts (ADR-0027 family); the escalation message names the patch — `../../knowledge/decisions/0063-worktree-abandonment-diff-salvage.md`
 - **ADR-0062** — Runner-first testing: a test verdict comes only from the project's runner (its exit status / structured report) — a test's own printed "PASS" without a runner verdict is *unverified*, never PASS evidence. The TDD skill's first test task establishes the runner and its verdict convention before the corpus grows; the SmokeGuard / `run_smokes` external-runner pattern is the named fallback for runner-less ecosystems. Composes with the ADR-0061 human-eye carve-out — `../../knowledge/decisions/0062-runner-first-testing-verdicts-only-from-the-runner.md`
