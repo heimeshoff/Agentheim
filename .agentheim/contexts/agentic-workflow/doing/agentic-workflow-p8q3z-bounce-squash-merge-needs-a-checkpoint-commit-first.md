@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-p8q3z
 title: BOUNCE integration's squash-merge needs a worktree checkpoint commit first — none is ever made
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-21

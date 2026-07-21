@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 154
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-p8q3z** — BOUNCE integration's squash-merge needs a worktree checkpoint commit first — none is ever made (bug) — `todo/agentic-workflow-p8q3z-bounce-squash-merge-needs-a-checkpoint-commit-first.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-p8q3z** — BOUNCE integration's squash-merge needs a worktree checkpoint commit first — none is ever made (bug) — `doing/agentic-workflow-p8q3z-bounce-squash-merge-needs-a-checkpoint-commit-first.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
