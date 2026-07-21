@@ -11,8 +11,8 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 5
-- **Doing:** 0
+- **Todo:** 4
+- **Doing:** 1
 - **Done:** 149
 <!-- task-counts:end -->
 
@@ -20,13 +20,13 @@ research touching this BC, and concept synthesis pages.
 <!-- todo-list:start -->
 - **agentic-workflow-hvqa4** — Escalation salvages the worktree diff — attach a patch before any abandonment discards work (feature) — `todo/agentic-workflow-hvqa4-salvage-worktree-diff-on-abandonment.md`
 - **agentic-workflow-qz1h7** — Vacuum guard — an empty board surfaces the blocking decision instead of minting meta-work; session-end batch-mix line (feature) — `todo/agentic-workflow-qz1h7-vacuum-guard-empty-board-surfaces-blocking-decision.md`
-- **agentic-workflow-vvmfy** — Runner-first testing — the verifier only trusts an external runner's verdict, never a test's own printed green (feature) — `todo/agentic-workflow-vvmfy-runner-first-testing-doctrine.md`
 - **agentic-workflow-rx630** — Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss (feature) — `todo/agentic-workflow-rx630-dispatch-ordering-remediation-over-diagnosis-spike-stop-loss.md`
 - **agentic-workflow-hhjjx** — Session-start human-churn reconciliation — diff human commits, flag ADR-governed files, surface re-alignment work (feature) — `todo/agentic-workflow-hhjjx-session-start-human-churn-reconciliation.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-vvmfy** — Runner-first testing — the verifier only trusts an external runner's verdict, never a test's own printed green (feature) — `doing/agentic-workflow-vvmfy-runner-first-testing-doctrine.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

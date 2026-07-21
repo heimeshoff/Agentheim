@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-vvmfy
 title: Runner-first testing — the verifier only trusts an external runner's verdict, never a test's own printed green
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-21

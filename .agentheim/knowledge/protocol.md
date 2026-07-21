@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 17:02 -- Batch started: [agentic-workflow-vvmfy]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-vvmfy - Runner-first testing — the verifier only trusts an external runner's verdict, never a test's own printed green
+**Parallel:** no (1 worker — sequential run, MAX_PARALLEL=1; 4 more ready tasks held to later waves, builder chose sequential for the overlap-heavy Dorc-review set)
+
+---
+
 ## 2026-07-21 17:01 -- Task verified and completed: agentic-workflow-mxk6v - Falsifiability gate — classify acceptance criteria machine-checkable vs human-eye; verifier escalates on metric drift
 
 **Type:** Work / Task completion
