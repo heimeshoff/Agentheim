@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 16:32 -- Task verified and completed: agentic-workflow-z394j - Mechanize-or-drop — a convention-establishing task ships its enforcement or records "prose-only, unenforced"
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-z394j - Mechanize-or-drop — a convention-establishing task ships its enforcement or records "prose-only, unenforced"
+**Summary:** Mechanize-or-drop doctrine — a convention-establishing task must ship its enforcement or record prose-only, unenforced; gated at modeling readiness and verifier check 6c
+**Duration:** 8m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 0
+**ADRs written:** 0059-mechanize-or-drop-convention-enforcement-doctrine.md
+
+---
+
 ## 2026-07-21 16:23 -- Batch started: [agentic-workflow-z394j]
 
 **Type:** Work / Batch start

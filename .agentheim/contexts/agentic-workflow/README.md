@@ -60,6 +60,16 @@ separate BC, but today the whole tool lives in this one.
   recurring motif.
 - **ADR** — Architecture Decision Record, global or BC-scoped; flows through the backlog as
   `type: decision`.
+- **Mechanize-or-drop (ADR-0059, agentic-workflow-z394j)** — a task that *establishes a
+  convention* (a naming/format/structural rule other tasks or agents are meant to follow
+  going forward, not a one-off choice) must either ship enforcement in the same task (a lint,
+  a live-tree `node --test` check, or a build failure) or explicitly record **"prose-only,
+  unenforced"** in the task file — so an unenforced convention is a visible decision, never
+  an accident. Gated at two points, mirroring the existing ADR gate: `skills/modeling/SKILL.md`'s
+  CAPTURE/PROMOTE readiness checks (REFINE inherits PROMOTE's check), and `agents/verifier.md`
+  check 6c (mirrored in `skills/verification-before-completion/SKILL.md`). ADR-0044 (id-grammar
+  minting) and ADR-0052 (`agentheim:` namespace lint) are the in-house exemplars this doctrine
+  generalizes. See ADR-0059.
 - **Protocol** — the chronological project diary, newest on top; every action appends.
 - **Index** — a flat catalog (`knowledge/index.md` + per-BC `INDEX.md`) that *points*,
   never duplicates. The memory layer for prior-art and dependency lookup.

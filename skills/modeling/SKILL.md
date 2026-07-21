@@ -131,6 +131,7 @@ PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + casca
 4. **Decide refinement level.**
    - **Under-refined → backlog/**: The idea needs more thought, research, or breaking down before anyone could work on it.
    - **Ready → todo/**: The idea is small, well-understood, or already deeply discussed. A worker could pick it up and execute without ambiguity.
+   - **Convention check (ADR-0059, mechanize-or-drop):** if the idea *establishes a convention* — a naming, format, or structural rule that other tasks, agents, or artifacts are meant to follow going forward, not a one-off choice scoped to this task alone — it does not count as "Ready" unless it also carries either an enforcement acceptance criterion (a lint, a live-tree `node --test` check, or a build failure shipped in the same task) or an explicit **"prose-only, unenforced"** marker recorded in the task file. Neither present → route to `backlog/` regardless of how well-understood the idea otherwise reads; a missing enforcement-or-marker choice is exactly the kind of ambiguity backlog exists to resolve. See ADR-0044 and ADR-0052 for in-house exemplars of the enforced pattern.
 
 5. **Delegate deep modeling if needed.** For complex ideas (new feature, domain change, architectural impact), spawn the **`agentheim:orchestrator`** agent with the idea and current state. It will route to `tactical-modeler`, `strategic-modeler`, `architect`, or `researcher` as appropriate, and come back with a refined task (or task set) plus any ADRs. For infrastructure-flavored captures, the orchestrator will typically route to `architect` first.
 
@@ -185,6 +186,14 @@ three-layer boundary (`applyTaskMove` mover / git-free CLI / skill judgment+git)
      Ruling A): a `depends_on` id in no lifecycle folder blocks promotion. The CLI
      enforces this via `applyTaskMove`'s gate in step 3, surfacing a rejection
      rather than a hand-check.
+   - **Convention check (ADR-0059, mechanize-or-drop):** if the task *establishes a
+     convention* — a naming/format/structural rule other tasks or agents are meant
+     to follow going forward, not a one-off implementation choice — it must carry
+     either an enforcement acceptance criterion (a lint, a live-tree `node --test`
+     check, or a build failure) or an explicit **"prose-only, unenforced"** marker
+     in the task file. Neither present → not ready; send it back to REFINE rather
+     than promoting an unenforced convention as an accident. See ADR-0044 / ADR-0052
+     for the shipped-enforcement exemplars this doctrine generalizes.
 
 3. If ready, run the CLI — git-free, it only writes files, never `git`:
 

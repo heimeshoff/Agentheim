@@ -150,6 +150,27 @@ Read the task file's `related_adrs` frontmatter. For each id, read the ADR's `##
 
 If `related_adrs` is empty, skip this check.
 
+### 6c. Mechanize-or-drop — convention enforcement (ADR-0059)
+
+Judge whether this task **establishes a convention**: a naming, format, or structural rule
+that other tasks, agents, or artifacts are expected to follow *going forward* — not merely a
+one-off implementation choice scoped to this diff alone. (ADR-0044's id-grammar rule and
+ADR-0052's `agentheim:` namespace rule are the house exemplars; both shipped their own
+enforcement in the same task.)
+
+- **Not convention-establishing** → this check does not fire; move on.
+- **Convention-establishing** → the task file (as it stands in this diff) must carry one of:
+  - An acceptance criterion, actually met by the diff, that ships enforcement — a lint, a
+    live-tree `node --test` check, or a build failure that would catch a future violation.
+  - An explicit **"prose-only, unenforced"** marker recorded in the task file (typically in
+    `## Notes` or as its own acceptance criterion) — a deliberate, visible decision not to
+    mechanize, not a silent omission.
+
+Neither present → FAIL, naming the specific convention the task establishes and which half
+(enforcement or marker) is missing. `SUGGESTED_FIX`: either add the lint/test that enforces
+the convention, or add the "prose-only, unenforced" marker to the task file so the gap is a
+recorded decision rather than an accident.
+
 ### 7. No protocol, index, or git tampering
 
 Confirm the diff does not modify `.agentheim/knowledge/protocol.md` or any `INDEX.md` (`.agentheim/knowledge/index.md`, `.agentheim/contexts/*/INDEX.md`). Confirm the worker's output did not contain `git add`, `git commit`, `git push`, or similar. If any is violated, FAIL — the worker broke a structural rule. (Protocol and indexes are owned by the `work` skill, not workers.)
