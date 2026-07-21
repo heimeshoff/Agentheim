@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-21 20:16 -- Modeling / Refined: agentic-workflow-p8q3z - BOUNCE integration's squash-merge needs a worktree checkpoint commit first
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo (auto-promoted)
+**Summary:** Confirmed the bug is real from the doctrine's own text (BOUNCE integration makes no pre-squash commit; `git merge --squash` can't see the worktree's uncommitted `doing → backlog` move, so `main` never gets it while INDEX/protocol claim it did). Sharpened the fix into a settled design: checkpoint **only the task file** via the `checkpoint` verb (not `git add -A`, which would restage a rebuilt `dashboard/dist/` and defeat ADR-0057) before the squash-merge; a bouncing worker's incidental unverified edits stay out of `main` (salvage patch, ADR-0063, is their channel), so no BOUNCED-return-format change is needed. Added correction of SKILL.md's misleading "other worktree edits the squash picks up" parenthetical. Expanded related_adrs (0037/0032/0057/0063/0026); 4 crisp machine-checkable acceptance criteria.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-07-21 17:57 -- Work session ended
 
 **Type:** Work / Session end
