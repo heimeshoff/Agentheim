@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-23 00:05 -- Modeling / Promoted: agentic-workflow-jf6qz - Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A)
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-07-23 00:00 -- Modeling / Refined: agentic-workflow-jf6qz - Fix `archivedDoneHeader` phantom-cap wording; heal stale live INDEX headers on no-op rotation
 
 **Type:** Modeling / Refine
