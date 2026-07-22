@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 17:33 -- Batch started: [agentic-workflow-k9pbh, agentic-workflow-w2njd, agentic-workflow-m7xva]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-k9pbh - Small-drift batch from the 2026-07-22 post-survey audit — lib-bootstrap counts and §6 legend, phantom backfill-indexes.sh, two stale line pointers, worker.md pre-worktree-era text, one INDEX annotation, agentic-workflow-w2njd - checkpoint stages only the task file's new location — the wip commit's tree holds the task file in both lifecycle folders, contradicting the squash steps that assert the move is fully captured, agentic-workflow-m7xva - commit-doctrine's churn paragraph drifted a third time — delete-and-pointer it per ADR-0068; the shape table misses trailer-less batch-capture and release commits, so churn misclassifies them as human
+**Parallel:** yes (3 workers — MAX_PARALLEL cap; t8kfq and r4gcz held to next wave to keep this batch skills/work/SKILL.md merge surface small — only k9pbh (Phase 2 step 2) and w2njd (checkpoint steps) touch it this wave, in far-apart sections; f3wqm stays blocked on k9pbh)
+
+---
+
 ## 2026-07-22 17:28 -- Modeling / Captured: agentic-workflow-f3wqm - Audit-closure doctrine
 
 **Type:** Modeling / Capture

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-m7xva
 title: commit-doctrine's churn paragraph drifted a third time — delete-and-pointer it per ADR-0068; the shape table misses trailer-less batch-capture and release commits, so churn misclassifies them as human
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22

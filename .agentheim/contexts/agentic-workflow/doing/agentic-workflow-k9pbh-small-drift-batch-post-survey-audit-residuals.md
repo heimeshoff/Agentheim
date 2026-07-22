@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-k9pbh
 title: Small-drift batch from the 2026-07-22 post-survey audit — lib-bootstrap counts and §6 legend, phantom backfill-indexes.sh, two stale line pointers, worker.md pre-worktree-era text, one INDEX annotation
-status: todo
+status: doing
 type: chore
 context: agentic-workflow
 created: 2026-07-22

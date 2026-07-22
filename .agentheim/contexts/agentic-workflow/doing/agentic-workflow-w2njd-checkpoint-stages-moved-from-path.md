@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-w2njd
 title: checkpoint stages only the task file's new location — the wip commit's tree holds the task file in both lifecycle folders, contradicting the squash steps that assert the move is fully captured
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22
