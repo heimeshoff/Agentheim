@@ -11,19 +11,19 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 3
-- **Todo:** 2
-- **Doing:** 0
+- **Todo:** 1
+- **Doing:** 1
 - **Done:** 172
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-mqwnc** — Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, index-template done-list header wording (chore) — `todo/agentic-workflow-mqwnc-doc-micro-sweep-audit-2026-07-22.md`
 - **agentic-workflow-bx01e** — Strip duplicated rationale narration from the big prompts — rules stay imperative with ADR pointers (refactor) — `todo/agentic-workflow-bx01e-strip-duplicated-rationale-narration.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-mqwnc** — Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, index-template done-list header wording (chore) — `doing/agentic-workflow-mqwnc-doc-micro-sweep-audit-2026-07-22.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

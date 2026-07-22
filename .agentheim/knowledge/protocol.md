@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 15:18 -- Batch started: [agentic-workflow-mqwnc]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-mqwnc - Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, index-template done-list header wording
+**Parallel:** no (1 worker — sole ready task; bx01e still blocked on mqwnc)
+
+---
+
 ## 2026-07-22 15:06 -- Modeling / Refined: agentic-workflow-mqwnc - Doc micro-sweep
 
 **Type:** Modeling / Refine

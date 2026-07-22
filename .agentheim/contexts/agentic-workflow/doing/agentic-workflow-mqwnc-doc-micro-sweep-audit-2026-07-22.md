@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-mqwnc
 title: Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, index-template done-list header wording
-status: todo
+status: doing
 type: chore
 context: agentic-workflow
 created: 2026-07-22
