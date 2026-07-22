@@ -200,7 +200,14 @@ separate BC, but today the whole tool lives in this one.
   self-generate substitute filler** — no manufactured chore, no unrelated harness cleanup — and
   instead surfaces the decision(s) with their age (`formatVacuumGuardLine`, e.g. "Brainstorm on
   existing code (next iteration). (open 46 days)") as the highest-leverage builder action
-  available. Session-end also gains a **batch-mix line**: every completed task is classified
+  available. **The exit itself still writes a minimal session-end protocol entry**
+  (`## ... -- Work session ended` heading, `Type: Work / Session end`, `Completed: 0`, one line
+  noting the vacuum exit — agentic-workflow-c5nvb) rather than skipping the boundary entirely:
+  without it, `resolveSinceLastSessionEnd`'s window reaches back past the vacuum-guard session
+  and the session-start human-churn reconciliation below re-flags the same untrailed commits
+  every subsequent session. No batch-mix line, vision-conformance pass, or carry-over
+  reconciliation runs for this minimal entry — it exists solely to give the *next* session's
+  churn check a boundary. Session-end also gains a **batch-mix line**: every completed task is classified
   product-facing / harness / bookkeeping by `classifyTask` (type `feature`/`decision` →
   product-facing; type `chore` whose touched files are entirely protocol/INDEX/state surfaces →
   bookkeeping, else harness; everything else → harness), rendered by `formatBatchMixLine` into
@@ -240,9 +247,14 @@ separate BC, but today the whole tool lives in this one.
   governed hit exists, a `whats-next.md` write, ADR-0027) recommending the builder approve
   an explicit re-alignment task. Advisory only: never auto-files a task, never gates Phase
   2, and deliberately does not try to separate genuine human commits from the small number
-  of known machine shapes that also omit the trailer (`modeling` DISMISS, `brainstorm`) —
-  favoring recall over precision on an advisory-only signal. See ADR-0066, ADR-0026,
-  ADR-0027, ADR-0038, ADR-0059.
+  of known machine shapes that also omit the trailer (`modeling` DISMISS, `brainstorm`'s
+  session commit, and `work`'s own bare fallback shapes when a session completes no
+  task — reconcile-stranded-carry-over, session-end bookkeeping, both rotation commits;
+  batch-start and BOUNCE integration always carry a trailer, so they're never on this
+  list — the complete, authoritative set lives in `references/commit-doctrine.md`'s
+  "`work`'s own non-task-commit shapes" table, agentic-workflow-c5nvb) — favoring recall
+  over precision on an advisory-only signal. See
+  ADR-0066, ADR-0026, ADR-0027, ADR-0038, ADR-0059.
 - **README consolidation trigger / CONSOLIDATE (ADR-0041, agentic-workflow-w7q2m)** — a BC
   `README.md` at or over **~600 lines** has crossed the point where it can no longer reliably
   be read in one pass (this BC's own README, at 1006 lines, was the case that forced this

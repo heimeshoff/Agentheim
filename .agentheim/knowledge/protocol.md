@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:45 -- Task verified and completed: agentic-workflow-c5nvb - Session-start churn re-flags work's own trailer-less fallback commits; vacuum-guard exits leave no session-end boundary
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-c5nvb - Session-start churn re-flags work's own trailer-less fallback commits; vacuum-guard exits leave no session-end boundary
+**Summary:** Closed both session-start-churn gaps: the churn step now recognizes work own bare fallback commit shapes (reconcile-stranded, session-end bookkeeping, both rotations) via commit-doctrine table, and a vacuum-guard exit now writes a minimal session-end protocol entry so the next session churn window has a boundary
+**Duration:** 18m (2 iterations)
+**Verification:** PASS (iteration 2)
+**Files changed:** 3
+**Tests added:** 1
+**ADRs written:** none
+
+---
+
+## 2026-07-22 11:45 -- Verification failed: agentic-workflow-c5nvb - Session-start churn re-flags work's own trailer-less fallback commits; vacuum-guard exits leave no session-end boundary
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-c5nvb - Session-start churn re-flags work's own trailer-less fallback commits; vacuum-guard exits leave no session-end boundary
+**Iteration:** 1 of 3
+**Reasons:** churn step's inline known-shapes list covers only 3 of work's 4 trailer-less fallback shapes — omits `chore: reconcile stranded …` (trailer-less when no task ran) while framing the list as exhaustive; internal inconsistency with the commit-doctrine.md table it points to
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-07-22 11:32 -- Batch started: [agentic-workflow-c5nvb]
 
 **Type:** Work / Batch start
