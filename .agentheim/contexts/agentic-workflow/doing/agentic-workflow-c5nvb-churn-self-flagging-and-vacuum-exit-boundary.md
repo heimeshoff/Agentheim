@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-c5nvb
 title: Session-start churn re-flags work's own trailer-less fallback commits; vacuum-guard exits leave no session-end boundary
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22

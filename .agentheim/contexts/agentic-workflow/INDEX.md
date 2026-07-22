@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 164
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-c5nvb** — Session-start churn re-flags work's own trailer-less fallback commits; vacuum-guard exits leave no session-end boundary (bug) — `todo/agentic-workflow-c5nvb-churn-self-flagging-and-vacuum-exit-boundary.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-c5nvb** — Session-start churn re-flags work's own trailer-less fallback commits; vacuum-guard exits leave no session-end boundary (bug) — `doing/agentic-workflow-c5nvb-churn-self-flagging-and-vacuum-exit-boundary.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

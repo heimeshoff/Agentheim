@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:32 -- Batch started: [agentic-workflow-c5nvb]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-c5nvb - Session-start churn re-flags work's own trailer-less fallback commits; vacuum-guard exits leave no session-end boundary
+**Parallel:** no (1 worker — last ready task; deliberately sequenced after b4yrm added the churn-step bootstrap and d7ksw extended the commit-doctrine table this session, both now on main and in this worktree base)
+
+---
+
 ## 2026-07-22 11:32 -- Task verified and completed: agentic-workflow-d7ksw - Doc micro-sweep from the audit — bc-readme-template surface slots, research model-pin text, orchestrator worker route, hvqa4/rx630 checkboxes, commit-doctrine table
 
 **Type:** Work / Task completion
