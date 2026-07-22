@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 13:10 -- Task verified and completed: agentic-workflow-n3bbk - research commits nothing it writes — report, INDEX edits, and protocol entry strand as anonymous carry-over
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-n3bbk - research commits nothing it writes — report, INDEX edits, and protocol entry strand as anonymous carry-over
+**Summary:** Gave research its own scoped Committing section (report + INDEX + protocol, chore(<bc-or-global>): research <slug>), added the commit-doctrine table row, and amended ADR-0026 §4 to name research among committing skills
+**Duration:** 4m
+**Verification:** PASS (iteration 1)
+**Files changed:** 3
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 13:09 -- Task verified and completed: agentic-workflow-cvptc - verification-before-completion's PASS handling still describes the pre-worktree git model — staging the raw FILE_LIST on the main tree
 
 **Type:** Work / Task completion

@@ -4,7 +4,7 @@ title: Committing doctrine — every artifact-producing skill commits its own sc
 scope: agentic-workflow
 status: accepted
 date: 2026-06-17
-related_tasks: [agentic-workflow-063]
+related_tasks: [agentic-workflow-063, agentic-workflow-n3bbk]
 related_adrs: [0007, 0017]
 ---
 
@@ -68,14 +68,17 @@ part of its own work — so the working tree is clean after any session.** Concr
    "one task = one commit" invariant, which is exactly why it is recorded here.
 
 4. **Markdown-producing skills commit their own scoped artifacts at end-of-action.**
-   `modeling` (CAPTURE / REFINE / PROMOTE / DISMISS), `quick-capture`, and `brainstorm` each
-   `git add` *only* the `.md` files they touched (new/updated task files + the BC `INDEX.md`
-   + `protocol.md` + any ADRs/vision/context-map they wrote) and commit them at the end of
-   the action, with a defined message convention (below). The commit is **silent** (no
-   confirm prompt) — matching `work`, and matching the user complaint that drove this
-   (leftover uncommitted markdown is the cost of *not* auto-committing). This is a narrow,
-   deliberate exception to the global "commit only when asked" stance: these skills commit
-   only their own `.agentheim/` markdown bookkeeping, never the builder's source code.
+   `modeling` (CAPTURE / REFINE / PROMOTE / DISMISS), `quick-capture`, `brainstorm`, and
+   `research` each `git add` *only* the `.md` files they touched (new/updated task files or
+   report + the BC or global `INDEX.md` + `protocol.md` + any ADRs/vision/context-map they
+   wrote) and commit them at the end of the action, with a defined message convention
+   (below). `research` commits once its report clears the review gate (PASS, SKIP, or the
+   iteration-3 labeled-unverified outcome) — see `skills/research/SKILL.md`'s own Committing
+   section. The commit is **silent** (no confirm prompt) — matching `work`, and matching the
+   user complaint that drove this (leftover uncommitted markdown is the cost of *not*
+   auto-committing). This is a narrow, deliberate exception to the global "commit only when
+   asked" stance: these skills commit only their own `.agentheim/` markdown bookkeeping,
+   never the builder's source code.
 
 5. **Scoped `git add` is mandatory, never `git add -A`.** `modeling` sometimes runs
    concurrently with `work`. Each skill `git add`s an explicit, enumerated list of only its
@@ -99,6 +102,7 @@ All commits carry the `[<task-id>]` (or, for brainstorm, a session marker) trail
 | `modeling` PROMOTE | `model(<bc>): promote <task-id> — <title> [<task-id>]` |
 | `modeling` DISMISS | `chore(<bc>): dismiss <id-or-cascade-set>` (one commit for the whole cascade) |
 | `brainstorm` | `chore(<bc-or-global>): brainstorm <topic> — vision created/revised/extended` |
+| `research` | `chore(<bc-or-global>): research <slug>` (scope token dropped when indexed globally) |
 
 `model` is introduced as a commit `<type>` prefix for modeling's REFINE/PROMOTE markdown
 commits (it is not a task `type:`; task types stay feature/bug/refactor/chore/spike/decision).

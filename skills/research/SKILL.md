@@ -155,6 +155,36 @@ After the report clears the review gate, prepend an entry to `.agentheim/knowled
 ---
 ```
 
+## Committing
+
+Research commits its own markdown once a report clears the review gate (PASS, SKIP, or the
+iteration-3 labeled-unverified outcome), so the working tree is clean after a research run.
+Commit doctrine (scoped `git add`, never `git add -A` / `git add .`, the message convention)
+lives in `references/commit-doctrine.md` (ADR-0026). Research can run while a `work`,
+`modeling`, or `quick-capture` session has its own in-flight files on the working tree, so the
+scoped-add rule is load-bearing here, not a style choice. After the indexing and protocol
+logging steps above:
+
+1. `git add` an **explicit, enumerated** list of *only* this run's artifacts: the new report
+   file (`.agentheim/knowledge/research/<slug>-<date>.md`), the `INDEX.md` it was inserted
+   into (the BC-local `contexts/<bc>/INDEX.md`, or the global `.agentheim/knowledge/index.md`),
+   and `.agentheim/knowledge/protocol.md`. If a citing task/ADR's `related_research` or Notes
+   were updated in the same pass, include that task/ADR file too. Never `git add -A` /
+   `git add .`.
+2. Commit silently (no confirmation prompt, matching the other markdown-producing skills) with:
+   ```
+   chore(<bc-or-global>): research <slug>
+   ```
+   Use the BC short-code when the report indexed BC-local; when it indexed globally, drop
+   the scope token entirely (`chore: research <slug>`), matching the same no-token convention
+   used by `work`'s own multi-BC shapes.
+3. When multiple parallel researchers each finish and clear their own gate independently,
+   commit each report separately with its own scoped add — don't batch several reports into
+   one commit.
+
+If the project isn't a git repo, skip the commit silently — write the files as before and
+report; the working-tree-clean guarantee only applies under git.
+
 ## Parallelism
 
 Research is naturally parallelizable. If the user asks for research on multiple distinct topics, spawn multiple `agentheim:researcher` agents rather than serializing. Each writes its own report.

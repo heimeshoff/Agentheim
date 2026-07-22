@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-n3bbk
 title: research commits nothing it writes — report, INDEX edits, and protocol entry strand as anonymous carry-over
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-22
-completed:
+completed: 2026-07-22
 depends_on: []
 blocks: []
 tags: [audit-2026-07-22-followup, doctrine-drift, commit-doctrine, research]
@@ -48,3 +48,19 @@ carve-out needed.
 ## Notes
 
 Found by the 2026-07-22 four-agent consistency audit (cross-doc drift finding #2, MEDIUM).
+
+## Outcome
+
+Added a Committing section to `skills/research/SKILL.md` (after the Protocol logging
+section): scoped `git add` of the new report file, the touched `INDEX.md` (BC-local or
+global), `protocol.md`, and any citing task/ADR touched in the same pass; commits silently
+once the report clears the review gate (PASS / SKIP / iteration-3 labeled-unverified), with
+message `chore(<bc-or-global>): research <slug>` (scope token dropped when indexed
+globally, mirroring `work`'s own multi-BC shapes). Added the matching `research` row to
+`references/commit-doctrine.md`'s message table. Amended ADR-0026 §4 (and its own
+commit-message table) to name `research` among the committing skills.
+
+Key files:
+- `C:/src/heimeshoff/agentic/agentheim/.worktrees/agentic-workflow-n3bbk/skills/research/SKILL.md`
+- `C:/src/heimeshoff/agentic/agentheim/.worktrees/agentic-workflow-n3bbk/references/commit-doctrine.md`
+- `C:/src/heimeshoff/agentic/agentheim/.worktrees/agentic-workflow-n3bbk/.agentheim/knowledge/decisions/0026-committing-doctrine-bookkeeping-in-task-commit.md`

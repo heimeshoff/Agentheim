@@ -41,6 +41,7 @@ The `[<task-id>]` trailer is the `git log` index for a task's commit:
 | `quick-capture` | `chore(<bc>): capture <task-id> — <title> [<task-id>]` |
 | `quick-capture` re-route (user corrects the routing) | `chore(<new-bc>): re-route <task-id> → <new-bc> [<task-id>]` |
 | `brainstorm` (session) | `chore(<bc-or-global>): brainstorm <topic> — vision created \| vision revised \| vision extended` |
+| `research` (report clears the review gate) | `chore(<bc-or-global>): research <slug>` — drop the scope token (`chore: research <slug>`) when the report indexed globally |
 
 `model` is the commit `<type>` prefix reserved for `modeling`'s REFINE/PROMOTE/CONSOLIDATE actions specifically — everything else `modeling` writes (CAPTURE, DISMISS) uses `chore`.
 
