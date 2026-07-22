@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 3
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 180
+- **Doing:** 0
+- **Done:** 181
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-kp7dq** — checkpoint's moved-from detection is Windows-separator-sensitive — a forward-slash fileList silently misses the doing/ deletion, reintroducing the both-folders bug w2njd closed (bug) — `doing/agentic-workflow-kp7dq-checkpoint-moved-from-detection-separator-insensitive.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-kp7dq** — checkpoint's moved-from detection is Windows-separator-sensitive — a forward-slash fileList silently misses the doing/ deletion, reintroducing the both-folders bug w2njd closed (bug) — `done/agentic-workflow-kp7dq-checkpoint-moved-from-detection-separator-insensitive.md`
 - **agentic-workflow-f3wqm** — Audit-closure doctrine — disposition the three open undershoot residuals, define the audit PASS bar and dated audit stamp with delta-scoping, and ban raw line-number pointers in doctrine prose (lint-enforced) (feature) — `done/agentic-workflow-f3wqm-audit-closure-doctrine-dispositions-pass-bar-pointer-lint.md`
 - **agentic-workflow-r4gcz** — Consumer-tune classifyTask — bug/refactor tasks are bucketed "harness" unconditionally, so a consumer project's legitimate product bug-fixing session reads as majority-harness drift (refactor) — `done/agentic-workflow-r4gcz-consumer-tune-vacuum-guard-classifytask.md`
 - **agentic-workflow-t8kfq** — Verifier check 1 lacks the ADR-0065 stop-loss carve-out — an early-stopped spike gets FAILed into finishing the diagnosis it was told to skip; dispatch never surfaces a backlog-stranded same-thread remediation (bug) — `done/agentic-workflow-t8kfq-verifier-stop-loss-carveout-and-backlog-remediation-surface.md`

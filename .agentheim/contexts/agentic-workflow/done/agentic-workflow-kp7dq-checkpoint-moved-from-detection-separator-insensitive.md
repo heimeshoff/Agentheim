@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-kp7dq
 title: checkpoint's moved-from detection is Windows-separator-sensitive — a forward-slash fileList silently misses the doing/ deletion, reintroducing the both-folders bug w2njd closed
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-22
-completed:
+completed: 2026-07-22
 depends_on: []
 blocks: []
 tags: [checkpoint, worktree, task-lifecycle, staging, windows, path-separator]
@@ -54,16 +54,30 @@ helper tolerant of a path shape it should always have accepted.
 
 ## Acceptance criteria
 
-- [ ] `findMovedFromDoingPath` detects the vacated `doing/` path for a moved task file whose
+- [x] `findMovedFromDoingPath` detects the vacated `doing/` path for a moved task file whose
       fileList entry is given with **forward slashes** on a `path.sep === '\\'` platform (and
       still for native-separator paths) — the manifest's `changed` names both the new and the
       moved-from path in both cases.
-- [ ] A `node --test` case in `lib/test/task-lifecycle-cli.test.mjs` (or sibling) exercises
+- [x] A `node --test` case in `lib/test/task-lifecycle-cli.test.mjs` (or sibling) exercises
       the cross-separator input and would FAIL against the current native-only `startsWith`.
       Prefer driving the live `runCli(['checkpoint', ...])` entrypoint, as w2njd's tests do,
       rather than the helper in isolation.
-- [ ] The existing w2njd checkpoint tests stay green; the full suite
+- [x] The existing w2njd checkpoint tests stay green; the full suite
       (`node --test lib/test/*.test.mjs`) is green.
+
+## Outcome
+
+Fixed `findMovedFromDoingPath` in `lib/task-lifecycle-cli.mjs`: both sides of the
+folder-membership `startsWith` comparison are now run through `path.normalize` before
+comparing, so a `fileList` entry given with forward slashes on a backslash-native (Windows)
+platform still matches its lifecycle folder prefix and the vacated `doing/` counterpart is
+still detected and folded into `changed` (ADR-0057 / w2njd). The `!existsSync` guard is
+unchanged. Verified TDD: added
+`runCli checkpoint: detects the vacated doing/ path even when fileList uses forward slashes on
+a backslash-native platform (agentic-workflow-kp7dq)` in `lib/test/task-lifecycle-cli.test.mjs`,
+confirmed it failed against the pre-fix native-only `startsWith`, then confirmed it (and the
+full 375-test suite via `node --test lib/test/*.test.mjs`) passes after the fix. Key files:
+`lib/task-lifecycle-cli.mjs`, `lib/test/task-lifecycle-cli.test.mjs`.
 
 ## Notes
 

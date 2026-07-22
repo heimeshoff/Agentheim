@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 22:57 -- Task verified and completed: agentic-workflow-kp7dq - checkpoint's moved-from detection is Windows-separator-sensitive — a forward-slash fileList silently misses the doing/ deletion, reintroducing the both-folders bug w2njd closed
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-kp7dq - checkpoint's moved-from detection is Windows-separator-sensitive — a forward-slash fileList silently misses the doing/ deletion, reintroducing the both-folders bug w2njd closed
+**Summary:** Made checkpoint findMovedFromDoingPath separator-insensitive (path.normalize both sides) so a forward-slash fileList entry on Windows still stages the vacated doing/ path — hardens w2njd/ADR-0057; +1 cross-separator node --test case
+**Duration:** 4m
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 1
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 22:51 -- Batch started: [agentic-workflow-kp7dq]
 
 **Type:** Work / Batch start
