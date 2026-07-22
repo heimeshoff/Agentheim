@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 13:45 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 46m (first batch start 12:59 → 13:45)
+**Completed:** 7 (first-try PASS: 5, re-dispatched: 1, skipped: 1)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 1 (mqwnc — task-under-specified)
+**Dispatches:** cvptc: 1, n3bbk: 1, znwve: 1, zbbsw: 1, pzacx: 2, ewt9s: 1, z3grd: 1, mqwnc: 1
+**Commits:** 11 (3 batch-start, 7 task integrations, this entry)
+**Vision-conformance:** none — batch aligns with vision. All seven completed tasks are post-Dorc-audit harness-consistency remediation: they harden the structural defenses ("wrong work is caught by structure, not luck") — verifier/doctrine-doc fidelity (cvptc, z3grd), commit-doctrine completeness so research stops stranding artifacts (n3bbk), churn-advisory accuracy and consumer-tuning of the two reconciliations (pzacx), consumer-install runnability of the conductor helpers (ewt9s) — plus durable ADR knowledge (znwve→ADR-0067 two survey dispositions, zbbsw→ADR-0068 drift-twice rule). Several explicitly tune AWAY from self-hosting-only assumptions toward consumer installs, strengthening the "not stack-prescriptive / not a self-hosting-only tool" posture. None pull toward a stated non-goal.
+**Batch mix:** 29% product-facing / 71% harness / 0% bookkeeping (7 tasks)
+**Carry-over:** none — working tree clean. Worktree: `.worktrees/agentic-workflow-mqwnc` kept (owner: agentic-workflow-mqwnc, escalated at iteration 1 — task-under-specified, salvaged: `.agentheim/salvage/agentic-workflow-mqwnc-escalated-iter1.patch` — see task notes).
+
+---
+
 ## 2026-07-22 13:44 -- Task verified and completed: agentic-workflow-z3grd - Scope the mechanize-or-drop convention checks to doctrine-bearing surfaces — consumer product tasks skip check 6c
 
 **Type:** Work / Task completion
