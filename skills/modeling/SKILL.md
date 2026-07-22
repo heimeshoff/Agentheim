@@ -156,6 +156,9 @@ PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + casca
      `[human-eye]`? If a criterion feels perceptual, first try sharpening it into something
      testable — the marker is for claims that are irreducibly perceptual, not a shortcut
      around writing a precise criterion. See "Classifying acceptance criteria" below.
+   - **Shaping a drift-fix task on a doctrine restatement found drifted before?** Check
+     whether this is its *second* drift (ADR-0068) — if so, the fix deletes the restatement
+     and pointers the canonical source, it does not re-synchronize the copy a second time.
 
 4. **Delegate to the `agentheim:orchestrator`** for depth. Give it the task and the BC context. It will route to specialists.
 

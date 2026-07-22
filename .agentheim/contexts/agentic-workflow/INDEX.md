@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 2
 - **Todo:** 3
-- **Doing:** 3
-- **Done:** 168
+- **Doing:** 2
+- **Done:** 169
 <!-- task-counts:end -->
 
 ### Todo
@@ -25,13 +25,13 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-zbbsw** — Drift-twice rule — a restatement that drifts a second time is deleted and pointered, never re-synced (decision) — `doing/agentic-workflow-zbbsw-drift-twice-single-source-rule.md`
 - **agentic-workflow-pzacx** — Consumer-tune the two session reconciliations — fold recognized machine shapes into a summary, batch non-.agentheim carry-over (refactor) — `doing/agentic-workflow-pzacx-consumer-tune-session-reconciliations.md`
 - **agentic-workflow-mqwnc** — Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, INDEX done-list header wording (chore) — `doing/agentic-workflow-mqwnc-doc-micro-sweep-audit-2026-07-22.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-zbbsw** — Drift-twice rule — a restatement that drifts a second time is deleted and pointered, never re-synced (decision) — `done/agentic-workflow-zbbsw-drift-twice-single-source-rule.md`
 - **agentic-workflow-znwve** — Record the two undocumented survey dispositions — mid-batch checkpoint (decide) and Haiku thin-agent wrapper (decline) (decision) — `done/agentic-workflow-znwve-record-undocumented-survey-dispositions.md`
 - **agentic-workflow-n3bbk** — research commits nothing it writes — report, INDEX edits, and protocol entry strand as anonymous carry-over (bug) — `done/agentic-workflow-n3bbk-research-commits-nothing-it-writes.md`
 - **agentic-workflow-cvptc** — verification-before-completion's PASS handling still describes the pre-worktree git model — staging the raw FILE_LIST on the main tree (bug) — `done/agentic-workflow-cvptc-vbc-pass-flow-pre-worktree-git-text.md`
@@ -127,6 +127,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0068** — The drift-twice rule: when a doctrine restatement is found drifted a **second** time, the fix deletes the copy and leaves a pointer to the canonical source — never re-synced again (first-time drift may still be fixed in place). Applies where drift-fix tasks are shaped (modeling REFINE) and executed (workers); prose-only, unenforced (ADR-0059) — `../../knowledge/decisions/0068-drift-twice-single-source-rule.md`
 - **ADR-0067** — Records two undocumented 2026-07-02 survey dispositions: declines a mandatory mid-batch human checkpoint (between-wave re-scan, FAIL-iteration-3 escalation, and vacuum guard already cover it; vision non-goal #3's gate list omits mid-batch by design), and ratifies the inline decline of the Haiku thin-agent wrapper for quick-capture/whats-next/inquire as a visible decision (ADR-0059) — `../../knowledge/decisions/0067-mid-batch-checkpoint-decline-and-haiku-wrapper-decline.md`
 - **ADR-0066** — `work`'s Phase 1 gains a session-start human-churn reconciliation (mirror of ADR-0026/d6q4h's session-*end* carry-over): commits since the last session-end protocol entry lacking a `[<task-id>]` trailer are enumerated with their touched files, and any file governed by an ADR-referenced path or BC README runtime-surface manifest is surfaced one line per hit. Advisory only (ADR-0027 family) — never auto-files a task, never gates; skips silently on a fresh project. Deterministic detection in git-free `lib/session-start-churn.mjs` (the conductor supplies the `git log` text) — `../../knowledge/decisions/0066-session-start-human-churn-reconciliation.md`
 - **ADR-0065** — Two dispatch/spike disciplines: (1) when `work` scans the ready set, a known-cheap remediation on an already-diagnosed thread (same tags / `depends_on`/`blocks` / `prior_art`) outranks further diagnosis spikes — a dispatch-ordering preference, not a gate; (2) every `type: spike` task carries a stop-loss clause ("if the mitigation is already known and cheap, record it and stop"), and an early-stopped spike is a legitimate completion. The spike clause is enforced by the git-free date-grandfathered lint `lib/spike-stop-loss.mjs`; the ordering half is prose-only — `../../knowledge/decisions/0065-remediation-over-diagnosis-dispatch-ordering-spike-stop-loss.md`

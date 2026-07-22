@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 13:26 -- Task verified and completed: agentic-workflow-zbbsw - Drift-twice rule — a restatement that drifts a second time is deleted and pointered, never re-synced
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-zbbsw - Drift-twice rule — a restatement that drifts a second time is deleted and pointered, never re-synced
+**Summary:** Wrote ADR-0068 establishing the drift-twice rule — a doctrine restatement drifted a second time is deleted and pointered to canonical source, never re-synced (prose-only, unenforced per ADR-0059); added a discovery pointer in modeling REFINE
+**Duration:** 6m
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** 0068-drift-twice-single-source-rule.md
+
+---
+
 ## 2026-07-22 13:11 -- Batch started: [agentic-workflow-mqwnc, agentic-workflow-pzacx, agentic-workflow-zbbsw]
 
 **Type:** Work / Batch start
