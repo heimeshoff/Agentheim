@@ -152,13 +152,8 @@ PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + casca
    - What does this depend on? What depends on it?
    - Does this split into smaller tasks?
    - Does this reveal a decision that should become an ADR?
-   - **Classify each acceptance criterion (ADR-0061):** machine-checkable (default) or
-     `[human-eye]`? If a criterion feels perceptual, first try sharpening it into something
-     testable — the marker is for claims that are irreducibly perceptual, not a shortcut
-     around writing a precise criterion. See "Classifying acceptance criteria" below.
-   - **Shaping a drift-fix task on a doctrine restatement found drifted before?** Check
-     whether this is its *second* drift (ADR-0068) — if so, the fix deletes the restatement
-     and pointers the canonical source, it does not re-synchronize the copy a second time.
+   - **Classify each acceptance criterion (ADR-0061):** machine-checkable (default) or `[human-eye]`? Try sharpening a perceptual-feeling criterion into something testable first. See "Classifying acceptance criteria" below.
+   - **Shaping a drift-fix task on a doctrine restatement found drifted before?** Check whether this is its *second* drift (ADR-0068) — if so, the fix deletes the restatement and pointers the canonical source, it does not re-synchronize the copy a second time.
 
 4. **Delegate to the `agentheim:orchestrator`** for depth. Give it the task and the BC context. It will route to specialists.
 
@@ -177,58 +172,24 @@ PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + casca
 
 ## PROMOTE flow
 
-PROMOTE's mechanics — the `backlog → todo` move, the INDEX marker edit + count
-delta, and the protocol prepend — are mechanized (ADR-0038): `lib/task-lifecycle-cli.mjs
-promote <id>` performs all of it and returns an enumerated manifest
-`{changed, message, verb, id}`, or a structured `{ok:false, code, reason}` rejection.
-This flow keeps only the two things the CLI deliberately does NOT decide —
-**judgment** (readiness) and **git** (the scoped commit) — per ADR-0038's
-three-layer boundary (`applyTaskMove` mover / git-free CLI / skill judgment+git).
+PROMOTE's mechanics — the `backlog → todo` move, the INDEX marker edit + count delta, and the protocol prepend — are mechanized (ADR-0038): `lib/task-lifecycle-cli.mjs promote <id>` performs all of it and returns an enumerated manifest `{changed, message, verb, id}`, or a structured `{ok:false, code, reason}` rejection. This flow keeps only what the CLI deliberately does NOT decide — **judgment** (readiness) and **git** (the scoped commit) — per ADR-0038's three-layer boundary (`applyTaskMove` mover / git-free CLI / skill judgment+git).
 
 1. Find the task (user may name it by id or title, or describe it).
 
 2. Check readiness:
    - Has an acceptance criteria section with at least one concrete criterion
    - Has a clear scope (not "improve the UX")
-   - Dependencies are known and either met or tracked — **fail-closed** (ADR-0038
-     Ruling A): a `depends_on` id in no lifecycle folder blocks promotion. The CLI
-     enforces this via `applyTaskMove`'s gate in step 3, surfacing a rejection
-     rather than a hand-check.
-   - **Convention check (ADR-0059, mechanize-or-drop) — doctrine-bearing surfaces
-     only:** this check applies only when the task's diff/scope touches a
-     doctrine-bearing path — `skills/`, `agents/`, `references/`, `lib/`,
-     `.agentheim/knowledge/`, or a BC README's convention/ubiquitous-language
-     section. A task confined to consumer product surfaces skips this check
-     entirely — self-hosting harness development keeps full coverage; a
-     consumer's product tasks essentially never establish harness-style
-     conventions (ADR-0059 amendment, `agentic-workflow-z3grd`). Where it
-     applies: if the task *establishes a convention* — a naming/format/structural
-     rule other tasks or agents are meant to follow going forward, not a one-off
-     implementation choice — it must carry either an enforcement acceptance
-     criterion (a lint, a live-tree `node --test` check, or a build failure) or an
-     explicit **"prose-only, unenforced"** marker in the task file. Neither
-     present → not ready; send it back to REFINE rather than promoting an
-     unenforced convention as an accident. See ADR-0044 / ADR-0052 for the
-     shipped-enforcement exemplars this doctrine generalizes.
-   - **Falsifiability classification (ADR-0061):** every acceptance criterion is either
-     machine-checkable (default) or carries the explicit `[human-eye]` marker — this is
-     **not itself a promotion blocker**: a task with some, or even all, human-eye criteria
-     is still promotable. It changes only what happens next (step 2b).
+   - Dependencies are known and either met or tracked — **fail-closed** (ADR-0038 Ruling A): a `depends_on` id in no lifecycle folder blocks promotion. The CLI enforces this via `applyTaskMove`'s gate in step 3, surfacing a rejection rather than a hand-check.
+   - **Convention check (ADR-0059, mechanize-or-drop) — doctrine-bearing surfaces only:** applies only when the task's diff/scope touches `skills/`, `agents/`, `references/`, `lib/`, `.agentheim/knowledge/`, or a BC README's convention/ubiquitous-language section; a task confined to consumer product surfaces skips it entirely (ADR-0059 amendment, `agentic-workflow-z3grd`). Where it applies: a task that *establishes a convention* — a naming/format/structural rule other tasks or agents are meant to follow going forward — must carry either an enforcement acceptance criterion (lint, `node --test` check, or build failure) or an explicit **"prose-only, unenforced"** marker. Neither present → not ready; send back to REFINE. See ADR-0044 / ADR-0052 for shipped-enforcement exemplars.
+   - **Falsifiability classification (ADR-0061):** every acceptance criterion is either machine-checkable (default) or carries the explicit `[human-eye]` marker — **not itself a promotion blocker**: a task with some, or even all, human-eye criteria is still promotable. It changes only what happens next (step 2b).
 
-2b. **All-human-eye note.** If **every** acceptance criterion in the task carries
-   `[human-eye]`, add — unless a matching line is already present — this exact line to the
-   task's `## Notes` section before running the CLI in step 3:
+2b. **All-human-eye note.** If **every** acceptance criterion in the task carries `[human-eye]`, add — unless a matching line is already present — this exact line to the task's `## Notes` section before running the CLI in step 3:
 
    > Verification is builder-eye only — every acceptance criterion is human-eye (ADR-0061);
    > the verifier will report each as "builder eye-check pending" rather than PASS/FAIL any
    > of them on an invented proxy.
 
-   `lib/human-eye-criteria.mjs`'s live-tree lint asserts this note is present on any
-   `todo/doing/done` task whose criteria are all `[human-eye]` (a `backlog/` resident is
-   legal without the note by design, ADR-0061) — the enforcement half
-   of this convention (ADR-0059 mechanize-or-drop). Edit the task file in place, in
-   `backlog/`, before the move — the CLI's manifest then naturally covers the edit since it
-   commits the same (now-relocated) file.
+   `lib/human-eye-criteria.mjs`'s live-tree lint enforces this (ADR-0059 mechanize-or-drop) on any `todo/doing/done` task whose criteria are all `[human-eye]` (a `backlog/` resident is legal without the note by design, ADR-0061). Edit the task file in place, in `backlog/`, before the move — the CLI's manifest then naturally covers the edit since it commits the same (now-relocated) file.
 
 3. If ready, run the CLI — git-free, it only writes files, never `git`:
 
@@ -236,21 +197,11 @@ three-layer boundary (`applyTaskMove` mover / git-free CLI / skill judgment+git)
    node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','task-lifecycle-cli.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','task-lifecycle-cli.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no task-lifecycle CLI found under '+c+' (is the plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>m.main(process.argv.slice(1))).catch(e=>{console.error(e.message);process.exit(1)});" promote <task-id>
    ```
 
-   (The same env-free homedir→cache→semver-max bootstrap infrastructure-010
-   established for `/dashboard`, generalized by `lib/resolve-plugin-file.mjs` —
-   runs in-process, cwd = the project, so `discoverRoot` finds the right
-   `.agentheim/`.) It prints the manifest on success, or `{ok:false, code, reason}`
-   on a domain rejection (e.g. `blocked-dependency`, `illegal-move`) — treat a
-   rejection the same as "not ready" in step 4.
+   (The same env-free homedir→cache→semver-max bootstrap infrastructure-010 established for `/dashboard`, generalized by `lib/resolve-plugin-file.mjs`.) It prints the manifest on success, or `{ok:false, code, reason}` on a domain rejection (e.g. `blocked-dependency`, `illegal-move`) — treat a rejection the same as "not ready" in step 4.
 
-4. If not ready (step 2's checklist fails, or the CLI rejects in step 3), tell the
-   user what's missing and offer to switch to the REFINE action on this task.
+4. If not ready (step 2's checklist fails, or the CLI rejects in step 3), tell the user what's missing and offer to switch to the REFINE action on this task.
 
-5. **Commit the promotion.** Scoped `git add` of exactly the manifest's `changed`
-   paths from step 3 — then commit with the manifest's `message` (already the
-   `model(<bc>): promote <task-id> — <title> [<task-id>]` convention — see
-   `references/commit-doctrine.md`). Never `git add -A` / `git add .`. Nothing to
-   commit if the task wasn't ready and stayed in `backlog/`.
+5. **Commit the promotion.** Scoped `git add` of exactly the manifest's `changed` paths from step 3 — then commit with the manifest's `message` (already the `model(<bc>): promote <task-id> — <title> [<task-id>]` convention — see `references/commit-doctrine.md`). Never `git add -A` / `git add .`. Nothing to commit if the task wasn't ready and stayed in `backlog/`.
 
 ## DISMISS flow
 
@@ -292,57 +243,25 @@ The boundary mirrors ADR-0007: the raw `.md` deletes are the mechanical core; th
 
 ## CONSOLIDATE flow
 
-CONSOLIDATE rewrites a BC's `README.md` **in place** to bring it back under the ~600-line
-consolidation trigger, with the builder in the loop throughout. The contract is frozen by
-**ADR-0041** — follow it precisely. Unlike DISMISS (mechanical delete) or PROMOTE (mechanical
-move + a CLI), CONSOLIDATE is **judgment work over prose**: there is no script to shell out to,
-because a machine can't safely rewrite ubiquitous language without dropping meaning. This is the
-family's **flag-and-consolidate** discipline — judgment, human-in-loop, rewritten in place, no
-archive — the deliberate opposite of the k5n8f family's **cap-and-roll** (verbatim, scripted,
-rolled to a dated archive) used for `protocol.md` (ADR-0039) and, prospectively, a BC `INDEX.md`
-done-list.
+CONSOLIDATE rewrites a BC's `README.md` **in place** to bring it back under the ~600-line consolidation trigger, with the builder in the loop throughout (**ADR-0041**). Unlike DISMISS/PROMOTE (mechanical), CONSOLIDATE is **judgment work over prose** — no script, because a machine can't safely rewrite ubiquitous language without dropping meaning. This is the family's **flag-and-consolidate** discipline (judgment, human-in-loop, in place, no archive) — the deliberate opposite of the k5n8f family's **cap-and-roll** (verbatim, scripted, archived) used for `protocol.md` (ADR-0039) and, prospectively, a BC `INDEX.md` done-list.
 
-1. **Resolve the target BC** (see "Identifying which task the user means" above — CONSOLIDATE
-   targets a BC, not a task). If the named README is already under the ~600-line threshold, say
-   so and ask whether the user wants a lighter consolidation anyway — CONSOLIDATE is never
-   auto-triggered by the skill itself, only requested (by the builder) or flagged (by
-   `whats-next`'s advisory line, which the builder still has to act on).
+1. **Resolve the target BC** (see "Identifying which task the user means" above). If the named README is already under the ~600-line threshold, say so and ask whether the user wants a lighter consolidation anyway — CONSOLIDATE is never auto-triggered by the skill itself, only requested or flagged (by `whats-next`'s advisory line).
 
-2. **Read the whole README.** Page it if a single `Read` can't cover it — that ceiling is
-   exactly the problem CONSOLIDATE exists to relieve. Build a mental inventory of every
-   ubiquitous-language term, invariant, aggregate, and backlink (ADR id, task id) currently
-   stated, so nothing can be lost without you noticing.
+2. **Read the whole README.** Page it if a single `Read` can't cover it. Build a mental inventory of every ubiquitous-language term, invariant, aggregate, and backlink (ADR id, task id) currently stated, so nothing can be lost without you noticing.
 
-3. **Consolidate, section by section**, especially any dense per-feature narration (the
-   "aw-0NN did X, then aw-0MM superseded it, then aw-0PP removed it" chains):
-   - **Fold superseded narration into a settled, current-state summary.** Describe what's true
-     *now*; keep lineage only where it is itself load-bearing (an explicit, still-relevant
-     supersession a future reader would want to trace).
-   - **Merge redundant entries** that describe the same term or feature from more than one
-     angle or in more than one place.
-   - **Never silently delete a term or an invariant.** If something is genuinely dead (the
-     feature it named was removed), say so explicitly to the builder and get an explicit yes
-     before dropping it — CONSOLIDATE shortens prose, it does not prune domain knowledge
-     unilaterally.
-   - **Preserve backlinks.** Every ADR id / task id that remains in the rewrite must still
-     resolve (exists in `.agentheim/knowledge/decisions/` or some BC's lifecycle folders).
-     Redundant repeated citations of an id already cited nearby may be trimmed, but never an
-     id's sole remaining occurrence if it's the reader's only path to that context.
+3. **Consolidate, section by section**, especially dense per-feature narration (the "aw-0NN did X, then aw-0MM superseded it" chains):
+   - **Fold superseded narration into a settled, current-state summary.** Describe what's true *now*; keep lineage only where it is itself load-bearing.
+   - **Merge redundant entries** describing the same term/feature from more than one angle or place.
+   - **Never silently delete a term or an invariant.** If something is genuinely dead, say so explicitly to the builder and get an explicit yes before dropping it.
+   - **Preserve backlinks.** Every ADR id / task id that remains must still resolve. Redundant repeated citations may be trimmed, but never an id's sole remaining occurrence.
 
-4. **Verify backlinks resolve** before showing the rewrite: grep every remaining ADR id / task
-   id reference against disk. Fix or flag anything that doesn't resolve — never leave a
-   dangling reference the rewrite itself introduced.
+4. **Verify backlinks resolve** before showing the rewrite: grep every remaining ADR id / task id reference against disk. Fix or flag anything that doesn't resolve.
 
-5. **Confirm with the builder** before writing — summarize what was merged, folded, and (with
-   explicit sign-off per step 3) dropped. A full diff is fine to offer but not required if the
-   summary is clear.
+5. **Confirm with the builder** before writing — summarize what was merged, folded, and (with explicit sign-off per step 3) dropped.
 
-6. **Write the rewritten `README.md` in place.** No archive file, no rolled-out history — the
-   in-place rewrite *is* the deliverable.
+6. **Write the rewritten `README.md` in place.** No archive file, no rolled-out history.
 
-7. **Commit the consolidation** (after the protocol update below). Scoped `git add` of exactly
-   the rewritten `README.md` and `protocol.md` — never the task files or `INDEX.md` (CONSOLIDATE
-   touches neither) — then `model(<bc>): consolidate <bc> README`. See "Committing" below.
+7. **Commit the consolidation** (after the protocol update below). Scoped `git add` of exactly the rewritten `README.md` and `protocol.md` — never the task files or `INDEX.md` — then `model(<bc>): consolidate <bc> README`. See "Committing" below.
 
 ## Task file format
 
@@ -382,22 +301,11 @@ Open questions, links to ADRs, references to research reports,
 rough sketches — anything a worker or refiner would want.
 ```
 
-Keep the frontmatter values clean — **no inline `# …` comments**. They are
-trivial to leave in when filling the template, and the dashboard parses the whole
-line as the value (a leaked comment on `status` once blanked the board). The
-field legend lives here instead:
+Keep the frontmatter values clean — **no inline `# …` comments** (the dashboard parses the whole line as the value; a leaked comment on `status` once blanked the board). The field legend lives here instead:
 
 - `status` — one of `backlog | todo | doing | done` (also the lifecycle folder).
-- `type` — one of `feature | bug | refactor | chore | spike | decision`. A `spike` task's
-  body must carry the **stop-loss clause** (ADR-0065, agentic-workflow-rx630): "if, mid-spike,
-  the mitigation is already known and cheap, record it and stop." Include it verbatim or in
-  substance (the literal word "stop-loss," or the clause's own "record it and stop" wording,
-  satisfies `lib/spike-stop-loss.mjs`'s live-tree lint — mint every new spike task with the
-  clause present). Without it a worker has no standing permission to end the spike early with
-  a recorded mitigation instead of the full diagnosis the task otherwise asks for.
-- `completed` — left empty; the worker sets the date when the task is done. (There is no
-  `commit:` field — ADR-0026 dropped it; a task's commit is found in `git log` via the
-  `[<task-id>]` trailer the committing skill writes.)
+- `type` — one of `feature | bug | refactor | chore | spike | decision`. A `spike` task's body must carry the **stop-loss clause** (ADR-0065, agentic-workflow-rx630): "if, mid-spike, the mitigation is already known and cheap, record it and stop" — verbatim or in substance, satisfying `lib/spike-stop-loss.mjs`'s live-tree lint. Without it a worker has no standing permission to end the spike early with a recorded mitigation.
+- `completed` — left empty; the worker sets the date when the task is done. (No `commit:` field — ADR-0026 dropped it; found via `git log`'s `[<task-id>]` trailer.)
 - `depends_on` — list of task ids this one waits on; `blocks` is populated automatically by worker / refine.
 - `related_adrs` — ADR ids (e.g. `[0007]`); auto-populated by model at capture/refine, orchestrator appends ADRs it writes.
 - `related_research` — research slugs (e.g. `[auth-tokens-2026-04-24]`); auto-populated by model from the research index.
@@ -407,42 +315,25 @@ field legend lives here instead:
 
 Emit a fresh id `<bc>-<token>` per the id grammar in `references/id-grammar.md` (ADR-0028 §1) — generate the token randomly, never scan existing files for a "next number". Legacy `<bc>-NNN` ids (e.g. `auth-003`) already on disk are kept as-is — never rewrite them.
 
-After minting, verify the new id with `classifyTaskId` from `lib/id-grammar.mjs`: if `classifyTaskId(newId) !== 'token'`, the token is out-of-spec (e.g. it leads with a digit) — discard it and mint a fresh one, no need to ask the user (a random token is free and non-interactive). Runnable in a consumer install via the resolve-plugin-file-convention bootstrap in `references/lib-bootstrap.md` §6. This is the mint-time backstop ADR-0044 added after an out-of-spec token (`infrastructure-5w5gs`) shipped and stranded the mechanized lifecycle verbs; `lib/id-grammar.mjs`'s live-tree test is the always-on gate if this step is ever skipped.
+After minting, verify the new id with `classifyTaskId` from `lib/id-grammar.mjs` (ADR-0044 mint-time backstop): if `classifyTaskId(newId) !== 'token'`, the token is out-of-spec — discard it and mint a fresh one, no need to ask the user. Runnable in a consumer install via the resolve-plugin-file-convention bootstrap in `references/lib-bootstrap.md` §6.
 
 ### Classifying acceptance criteria (ADR-0061)
 
-The Dorc July-2026 review's worst burn: a *perceptual* claim ("the slot visibly shows the
-captured frame") got refined into a machine-checked pixel metric, and three worker iterations
-each produced a metric tuned to pass — while the feature still didn't work for the player.
-Every acceptance criterion is, by construction, one of two kinds, and refinement (CAPTURE or
-REFINE) is where the call gets made — not left for whichever worker or verifier happens to
-touch the task later:
+Every acceptance criterion is, by construction, one of two kinds (ADR-0061) — irreducibly
+perceptual claims must never be refined into an invented machine metric standing in for a
+human judgment. Refinement (CAPTURE or REFINE) is where the classification call gets made —
+not left for whichever worker or verifier happens to touch the task later:
 
-- **Machine-checkable (default, no marker).** A test or a concrete inspectable artifact can
-  decide it. This is the ordinary case — leave the bullet as-is.
-- **Human-eye.** Only a person looking at the actual result can judge it — a genuinely
-  perceptual claim ("the slot visibly shows the captured frame", "the animation feels
-  smooth", "the copy reads naturally"). Mark it explicitly with a trailing `[human-eye]` on
-  the bullet:
+- **Machine-checkable (default, no marker).** A test or a concrete inspectable artifact can decide it. This is the ordinary case — leave the bullet as-is.
+- **Human-eye.** Only a person looking at the actual result can judge it — a genuinely perceptual claim ("the animation feels smooth", "the copy reads naturally"). Mark it explicitly with a trailing `[human-eye]` on the bullet:
 
   ```markdown
   - [ ] The slot visibly shows the captured frame. [human-eye]
   ```
 
-If a criterion feels perceptual, try sharpening it into something testable first — `[human-eye]`
-is for claims that are irreducibly perceptual, not an escape hatch from writing a precise
-criterion. A `[human-eye]` bullet's checkbox is deliberately **left unchecked through the whole
-lifecycle** — worker and verifier never check it off, only the builder does, by hand, once
-they've actually looked. That unchecked box next to the marker, still visible on a `done/`
-task, *is* the routing signal to a builder-checks-by-eye step at completion — no separate
-artifact needed.
+If a criterion feels perceptual, try sharpening it into something testable first — `[human-eye]` is for claims that are irreducibly perceptual, not an escape hatch. A `[human-eye]` bullet's checkbox is deliberately **left unchecked through the whole lifecycle** — only the builder checks it, by hand, once they've actually looked; that unchecked box, still visible on a `done/` task, *is* the routing signal to a builder-checks-by-eye step at completion.
 
-Human-eye criteria are never a `backlog/`→`todo/` blocker on their own (see PROMOTE's readiness
-check). The one thing they trigger: a task whose criteria are **all** `[human-eye]` needs the
-builder-eye-only `## Notes` line PROMOTE's readiness check adds (or CAPTURE, for a task landing
-directly in `todo/`) before it's ready. See ADR-0061; `agents/verifier.md` check 1 and
-`skills/verification-before-completion/SKILL.md` for how the verifier treats these criteria
-(never proxied by an invented metric — reported "builder eye-check pending").
+Human-eye criteria are never a `backlog/`→`todo/` blocker on their own (see PROMOTE's readiness check). The one thing they trigger: a task whose criteria are **all** `[human-eye]` needs the builder-eye-only `## Notes` line PROMOTE's readiness check adds (or CAPTURE) before it's ready. See ADR-0061; `agents/verifier.md` check 1 and `skills/verification-before-completion/SKILL.md` for how the verifier treats these criteria (never proxied — reported "builder eye-check pending").
 
 ## Decisions as tasks
 

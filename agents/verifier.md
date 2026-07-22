@@ -54,20 +54,17 @@ Read the task's `## Acceptance criteria` section. For each `- [ ]` (or `- [x]` i
 If a criterion has neither, FAIL with that specific criterion cited.
 
 **Human-eye criteria are never proxied (ADR-0061).** If a criterion's bullet carries the
-`[human-eye]` marker, do not hunt for a test and do not invent a metric to decide it — that is
-exactly the failure mode ADR-0061 exists to stop (the Dorc July-2026 review's worst burn: a
-perceptual claim smuggled into a machine-checked pixel metric, iterated on by workers tuning
-the metric rather than the product). Mark it `builder eye-check pending` in your PASS EVIDENCE
-instead of naming a test/artifact. A `[human-eye]` criterion alone is never a reason to FAIL
-check 1 — it simply has no machine-checkable coverage to map, by design. (A task whose criteria
-are *all* `[human-eye]` should carry the "Verification is builder-eye only" note per
-`skills/modeling/SKILL.md`'s PROMOTE readiness check; its absence is not this check's job to
-flag — see check 6c's convention-enforcement shape if you judge the note itself missing.)
+`[human-eye]` marker, do not hunt for a test and do not invent a metric to decide it. Mark it
+`builder eye-check pending` in your PASS EVIDENCE instead of naming a test/artifact. A
+`[human-eye]` criterion alone is never a reason to FAIL check 1 — it simply has no
+machine-checkable coverage to map, by design. (A task whose criteria are *all* `[human-eye]`
+should carry the "Verification is builder-eye only" note per `skills/modeling/SKILL.md`'s
+PROMOTE readiness check; its absence is check 6c's concern, not this check's.)
 
 ### 1b. Metric drift across iterations — escalation, not iteration fuel (ADR-0061)
 
-Only applies on iteration 2 or 3 (your spawn prompt's "Iteration number" field says which —
-skip this check entirely on iteration 1, there is no prior iteration to drift from).
+Only applies on iteration 2 or 3 — skip entirely on iteration 1, there is no prior iteration
+to drift from.
 
 For each acceptance criterion whose **text is unchanged** since the prior iteration (compare
 against the task file's own `## Verifier note (iteration N)` sections — reading these here,
@@ -80,15 +77,13 @@ the prior note's evidence named for that same criterion.
   not drift; this check does not fire for that criterion.
 - **Criterion text unchanged, measurement unchanged** → not drift; this check does not fire.
 - **Criterion text unchanged, measurement CHANGED** → this is drift: the worker tuned the
-  metric instead of fixing the underlying claim — the exact pattern the Dorc July-2026 review
-  named ("three worker iterations each produced a metric tuned to pass" across a 6-task chain,
-  the feature still broken). This is **escalation fuel, not iteration fuel**: do not FAIL with
-  the ordinary `likely-fixable` hint, which would just grant another retry. Emit `FAIL` with
-  `ITERATION_HINT: task-under-specified`, naming both the old and new measurement in REASONS.
-  `work`'s existing `task-under-specified` handling (`skills/work/SKILL.md` step 5: "do not
-  re-dispatch even on iteration 1 — treat as iteration-3") already escalates immediately rather
-  than re-dispatching — no new machinery needed. Drift proves the criterion was never truly
-  falsifiable as worded, which is precisely what `task-under-specified` already means.
+  metric instead of fixing the underlying claim (ADR-0061). This is **escalation fuel, not
+  iteration fuel**: do not FAIL with the ordinary `likely-fixable` hint, which would just
+  grant another retry. Emit `FAIL` with `ITERATION_HINT: task-under-specified`, naming both
+  the old and new measurement in REASONS. `work`'s existing `task-under-specified` handling
+  (`skills/work/SKILL.md` step 5) already escalates immediately rather than re-dispatching —
+  no new machinery needed. Drift proves the criterion was never truly falsifiable as worded,
+  which is precisely what `task-under-specified` already means.
 
 ### 2. Test execution — the verdict comes only from the runner (ADR-0062)
 
@@ -99,7 +94,7 @@ If `TESTS_ADDED > 0` in the worker's return (see `references/worker-return-forma
 3. If multiple test commands exist (unit, integration, e2e), run at minimum the layer that covers the changed files. Use the file paths in `FILE_LIST` to decide.
 4. If no command was supplied **and** none is discoverable, FAIL with `SUGGESTED_FIX: project has no test command discoverable from standard locations — add one to the BC README before this task can be verified`.
 
-**The verdict is the runner's exit status (or its structured report — TAP, JUnit XML, `node --test`'s own summary line), never a test's own printed output.** Dorc's July-2026 review found the failure mode this closes: 155 smoke tests accumulated on trust in each test's self-printed "PASS," and 23% were bad on the first honest run against a real runner. Concretely:
+**The verdict is the runner's exit status (or its structured report — TAP, JUnit XML, `node --test`'s own summary line), never a test's own printed output (ADR-0062).** Concretely:
 
 - A test, script, or log line that prints `PASS` / `OK` / `✓` / similar with **no runner actually invoked and its exit status checked** is **unverified** — cite it as such in REASONS, do not count it as PASS evidence, and FAIL this check. This applies even when the worker's `TESTS_PASSING: yes` claim looks plausible; your job is to have actually run the command yourself and read *its* verdict, not the worker's transcript of running it.
 - When the ecosystem's own runner exit code is not trustworthy for this project (documented case: a runner-less ecosystem using the external-runner fallback named in `skills/test-driven-development/SKILL.md`, e.g. Dorc's `run_smokes`/SmokeGuard shape), the pre-resolved command **is** that external runner — its aggregate exit status/report is the verdict you check, and the individual tests it wraps printing their own "PASS" lines underneath it is fine (decoration for a human skimming the log), because the wrapper is what owns the pass/fail signal, not the raw prints.
@@ -195,16 +190,13 @@ If `related_adrs` is empty, skip this check.
 
 ### 6c. Mechanize-or-drop — convention enforcement (ADR-0059)
 
-**Scope gate — doctrine-bearing surfaces only.** This check fires only when the diff touches
-a doctrine-bearing path: `skills/`, `agents/`, `references/`, `lib/`, `.agentheim/knowledge/`,
-or a BC README's convention/ubiquitous-language section. A diff confined to consumer product
-surfaces (app/feature code, data, a BC README's non-convention sections, etc.) **skips this
-check entirely** — state the scope and the skip in your evidence (e.g. "6c skipped — diff
-touches no doctrine-bearing path") rather than silently omitting it. Self-hosting harness
-development keeps full coverage; a consumer's product tasks essentially never establish
-harness-style conventions, so judging every diff would be a per-task judgment tax paid for a
-failure mode that recurs only in this repo's own development (ADR-0059 amendment,
-`agentic-workflow-z3grd`).
+**Scope gate — doctrine-bearing surfaces only (ADR-0059 amendment, `agentic-workflow-z3grd`).**
+This check fires only when the diff touches a doctrine-bearing path: `skills/`, `agents/`,
+`references/`, `lib/`, `.agentheim/knowledge/`, or a BC README's convention/ubiquitous-language
+section. A diff confined to consumer product surfaces (app/feature code, data, a BC README's
+non-convention sections, etc.) **skips this check entirely** — state the scope and the skip in
+your evidence (e.g. "6c skipped — diff touches no doctrine-bearing path") rather than silently
+omitting it.
 
 Judge whether this task **establishes a convention**: a naming, format, or structural rule
 that other tasks, agents, or artifacts are expected to follow *going forward* — not merely a

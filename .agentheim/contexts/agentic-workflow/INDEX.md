@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 3
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 173
+- **Doing:** 0
+- **Done:** 174
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-bx01e** — Strip duplicated rationale narration from the big prompts — rules stay imperative with ADR pointers (refactor) — `doing/agentic-workflow-bx01e-strip-duplicated-rationale-narration.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-bx01e** — Strip duplicated rationale narration from the big prompts — rules stay imperative with ADR pointers (refactor) — `done/agentic-workflow-bx01e-strip-duplicated-rationale-narration.md`
 - **agentic-workflow-mqwnc** — Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, index-template done-list header wording (chore) — `done/agentic-workflow-mqwnc-doc-micro-sweep-audit-2026-07-22.md`
 - **agentic-workflow-z3grd** — Scope the mechanize-or-drop convention checks to doctrine-bearing surfaces — consumer product tasks skip check 6c (refactor) — `done/agentic-workflow-z3grd-scope-convention-checks-doctrine-surfaces.md`
 - **agentic-workflow-ewt9s** — Consumer-install bootstrap coverage missing for the vision-conformance and classifyTaskId call sites (bug) — `done/agentic-workflow-ewt9s-lib-bootstrap-pointers-vision-conformance-id-grammar.md`

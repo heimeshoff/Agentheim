@@ -47,13 +47,7 @@ What does NOT count:
 
 ## Runner-first — a project's first test task establishes the verdict source (ADR-0062)
 
-Dorc's July-2026 review found the corpus-scale version of a trust failure: 155 smoke tests
-accumulated before anything ran them together, and 23% were bad on the first honest run —
-workers and verifiers had been trusting each test's own printed "PASS," not an actual runner's
-verdict. `verification-before-completion`'s check 2 closes that gap per-task going forward
-(the verifier now runs the tests itself and trusts only the runner's exit status/structured
-report, never a printed claim) — but that check needs a runner to exist and to be trustworthy
-*from the first test task on*, or every later verification inherits the same rot.
+`verification-before-completion`'s check 2 (ADR-0062) trusts only the runner's exit status or structured report, never a test's own printed "PASS" — but that check needs a runner to exist and be trustworthy *from the first test task on*, or every later verification inherits the same rot.
 
 So: **the first test-bearing task in a project — or the first test-bearing task for a given
 ecosystem within a mixed-stack project (e.g., the first shader test in an otherwise-JS repo) —

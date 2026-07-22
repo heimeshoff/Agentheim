@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 15:48 -- Task verified and completed: agentic-workflow-bx01e - Strip duplicated rationale narration from the big prompts — rules stay imperative with ADR pointers
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-bx01e - Strip duplicated rationale narration from the big prompts — rules stay imperative with ADR pointers
+**Summary:** Stripped duplicated rationale-narration from the five big doctrine files — each rule now stated once, imperatively, with an ADR pointer; removed both Dorc pixel-anecdote retellings; VBC checks section became a pointer to agents/verifier.md. work+modeling+verifier cut 1610->1427 lines, no rule lost
+**Duration:** 21m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 15:26 -- Batch started: [agentic-workflow-bx01e]
 
 **Type:** Work / Batch start
