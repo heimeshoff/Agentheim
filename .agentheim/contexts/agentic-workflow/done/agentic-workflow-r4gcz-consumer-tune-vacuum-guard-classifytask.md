@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-r4gcz
 title: Consumer-tune classifyTask — bug/refactor tasks are bucketed "harness" unconditionally, so a consumer project's legitimate product bug-fixing session reads as majority-harness drift
-status: doing
+status: done
 type: refactor
 context: agentic-workflow
 created: 2026-07-22
-completed:
+completed: 2026-07-22
 depends_on: []
 blocks: []
 tags: [vacuum-guard, batch-mix, consumer-tuning, adr-0064]
@@ -52,3 +52,29 @@ the header comment's rationale, amend ADR-0064 with the consumer-tuning note, an
 Enforcement ships in-task via the `node --test` cases (ADR-0059 satisfied). Segment
 matching caveat from v4gmt applies: FILE_LIST paths are absolute — reuse the existing
 segment-match helpers rather than repo-relative assumptions.
+
+## Outcome
+
+`classifyTask` in `lib/vacuum-guard.mjs` made bucket 3 (`type: bug`/`type: refactor`)
+path-aware instead of unconditionally-harness: a `bug`/`refactor` task whose touched
+files are *entirely* product surfaces (none under `lib/`, `skills/`, `agents/`,
+`references/`, `evals/`, or `.agentheim/knowledge/decisions/`) now classifies
+product-facing; any touch on a harness/doctrine surface (or no files at all) still
+classifies harness — the same conservative "entirely-or-else" bias bucket 1 uses.
+Reintroduced the `HARNESS_SEGMENT_RE`/`ADR_SEGMENT_RE` segment-match regexes
+`agentic-workflow-v4gmt` had found unused and removed — this task gives them their
+intended job. Buckets 1 (chore) and 2 (feature/decision) are unchanged; bucket 4
+(spike/other) stays unconditionally harness. 7 new `node --test` cases added to
+`lib/test/vacuum-guard.test.mjs` (consumer product bug/refactor → product-facing;
+self-hosting doctrine-surface bug/refactor → harness; ADR-touching bug → harness;
+mixed product+harness bug → harness; no-files bug/refactor → harness); one existing
+test renamed for accuracy (spike-only assertion split out, since refactor is no longer
+unconditional). Full suite: 365/365 passing. ADR-0064 amended with a new "Amendment
+(agentic-workflow-r4gcz)" section recording the rationale and the alternative
+considered (scoping to self-hosting installs) and why path-awareness was chosen
+instead. `skills/work/SKILL.md`'s end-of-run step 6 wording and the BC README's
+ADR-0064 ubiquitous-language summary both updated to match the new heuristic.
+
+Key files: `lib/vacuum-guard.mjs`, `lib/test/vacuum-guard.test.mjs`,
+`.agentheim/knowledge/decisions/0064-vacuum-guard-empty-board-surfaces-blocking-decision.md`,
+`skills/work/SKILL.md`, `.agentheim/contexts/agentic-workflow/README.md`.

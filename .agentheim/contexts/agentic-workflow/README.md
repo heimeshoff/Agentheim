@@ -223,7 +223,12 @@ separate BC, but today the whole tool lives in this one.
   churn check a boundary. Session-end also gains a **batch-mix line**: every completed task is classified
   product-facing / harness / bookkeeping by `classifyTask` (type `feature`/`decision` →
   product-facing; type `chore` whose touched files are entirely protocol/INDEX/state surfaces →
-  bookkeeping, else harness; everything else → harness), rendered by `formatBatchMixLine` into
+  bookkeeping, else harness; type `bug`/`refactor` whose touched files are entirely product
+  surfaces (none under `lib/`, `skills/`, `agents/`, `references/`, `evals/`, or
+  `.agentheim/knowledge/decisions/`) → product-facing, else harness — consumer-tuning,
+  agentic-workflow-r4gcz, so a consumer project's own product bug-fixing/refactoring session no
+  longer reads as false-positive meta-work drift; everything else, e.g. `spike` → harness
+  unconditionally), rendered by `formatBatchMixLine` into
   the protocol entry's `**Batch mix:**` line, so drift toward meta-work is visible per session
   instead of discovered a week later (Dorc review recommendation A2). Both halves are advisory,
   never a gate — an explicit builder request always overrides the guard (vision non-goal 3). The

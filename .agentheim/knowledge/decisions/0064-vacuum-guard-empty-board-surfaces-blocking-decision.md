@@ -4,7 +4,7 @@ title: Vacuum guard — an empty board surfaces the open vision decision instead
 scope: agentic-workflow
 status: accepted
 date: 2026-07-21
-related_tasks: [agentic-workflow-qz1h7]
+related_tasks: [agentic-workflow-qz1h7, agentic-workflow-v4gmt, agentic-workflow-r4gcz]
 related_adrs: [0040, 0027, 0059, 0038, 0017]
 ---
 
@@ -93,13 +93,52 @@ through the protocol log by hand.
    shipped feature or a judgment call that changes that capability counts as
    product-facing even when its files live under `skills/`/`lib/` — this bucket is keyed
    on `type` alone, deliberately, unlike buckets 1 and 3's file-based checks.
-3. Everything else (`refactor`, `spike`, or any other type) → **harness** — internal
-   machinery maintenance that is neither new builder-facing capability nor pure
-   bookkeeping.
+3. `type: bug` or `type: refactor` whose touched files are **entirely** product surfaces
+   (none under `lib/`, `skills/`, `agents/`, `references/`, `evals/`, or
+   `.agentheim/knowledge/decisions/`) → **product-facing**. Any touch on a harness/
+   doctrine surface (even mixed with product files), or no files at all, → **harness**
+   — internal machinery maintenance that is neither new builder-facing capability nor
+   pure bookkeeping. (Amended by the consumer-tuning note below — originally this
+   bucket classified every `bug`/`refactor` task as harness unconditionally, by type
+   alone, same as bucket 2.)
+4. Any other type (`spike`, or an unrecognized type) → **harness**, unconditionally.
 
 The inputs (`{type, files}` per completed task) are already in the conductor's hands by
 session end: `type` from the task file frontmatter, `files` from the worker's SUCCESS
 `FILE_LIST` (already used for the checkpoint stage) — no new reads.
+
+### Amendment (agentic-workflow-r4gcz): bug/refactor bucketing made path-aware
+
+The 2026-07-22 post-survey audit (overshoot class) found bucket 3 as originally shipped
+(`qz1h7`) bucketed every `type: bug`/`type: refactor` task as **harness** unconditionally,
+mirroring bucket 2's type-alone keying. That keying is deliberate for bucket 2 (feature/
+decision) because for Agentheim's own self-hosting repo the "product" *is* the framework's
+builder-facing capability — but a `bug`/`refactor` task in a **consumer** project (e.g. the
+Dorc game) that fixes or refactors the consumer's own product code never touches the
+framework's machinery at all, and the unconditional type-alone rule read that entire
+session as majority-harness drift — the meta-work detector this line exists to power
+emitting a false positive against the exact kind of legitimate work it should stay silent
+on.
+
+The fix: bucket 3 is now **path-aware**, reusing the same harness/doctrine segment-match
+shape `agentic-workflow-qz1h7` had already written (and `agentic-workflow-v4gmt` found
+unused and removed as dead code at the time — this amendment gives those segments their
+intended job). A `bug`/`refactor` task classifies **product-facing** only when every
+touched file lands outside `lib/`, `skills/`, `agents/`, `references/`, `evals/`, and
+`.agentheim/knowledge/decisions/`; any touch on one of those surfaces (or no files at all)
+still classifies **harness** — the same conservative "entirely-or-else" bias bucket 1 uses
+for bookkeeping, so a mixed bug/refactor (touching both product and harness files) resolves
+toward the bucket this line exists to surface, not away from it. Buckets 1 (chore) and 2
+(feature/decision) are unchanged; bucket 4 (spike/other) stays unconditionally harness —
+only `bug`/`refactor` was producing the false-positive signal.
+
+Chosen over the simpler alternative of scoping the whole type-based rule to self-hosting
+installs (detecting "is this the Agentheim repo itself" and branching the heuristic on
+that): a path-aware bucket 3 requires no install-detection machinery, generalizes to any
+consumer project shape without a special case, and degrades identically for Agentheim's own
+self-hosting repo (its own `bug`/`refactor` tasks routinely do touch `lib/`/`skills/`/
+`agents/`/`references/`, so they continue to classify harness exactly as before this
+amendment).
 
 ## What's deterministic vs. judged
 
@@ -167,7 +206,9 @@ enforcement or is prose-only:
 2. **The batch-mix classification heuristic.** Mechanized — `classifyTask` /
    `classifyBatch` / `formatBatchMixLine` are the enforcement; the heuristic itself is a
    deterministic function of `{type, files}`, not a judgment call, so it belongs in the
-   git-free `lib/` layer exactly as ADR-0038 draws that boundary.
+   git-free `lib/` layer exactly as ADR-0038 draws that boundary. The `agentic-workflow-
+   r4gcz` consumer-tuning amendment above ships its own `node --test` coverage in the same
+   module and file — no separate mechanize-or-drop call needed for the amendment itself.
 3. **"A newly-captured open question carries a `since` date at capture time."** This one
    half is **prose-only, unenforced** — there is no cheap mechanical check that a human
    (or `brainstorm`/`modeling`) remembered to write the annotation when adding a new open
@@ -232,3 +273,7 @@ enforcement or is prose-only:
   (batch-mix classification), the session-end protocol entry's `**Batch mix:**` line.
 - `skills/modeling/SKILL.md` — Opening flow step 2 (vacuum guard on an empty backlog).
 - `lib/vacuum-guard.mjs`, `lib/test/vacuum-guard.test.mjs` (this task's implementation).
+- `agentic-workflow-v4gmt` — removed the harness/doctrine segment regexes as dead code
+  before this amendment gave them a real caller.
+- `agentic-workflow-r4gcz` — consumer-tuning amendment making bucket 3 (`bug`/`refactor`)
+  path-aware; see "Amendment" above.

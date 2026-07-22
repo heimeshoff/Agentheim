@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 17:59 -- Task verified and completed: agentic-workflow-r4gcz - Consumer-tune classifyTask — bug/refactor tasks are bucketed "harness" unconditionally, so a consumer project's legitimate product bug-fixing session reads as majority-harness drift
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-r4gcz - Consumer-tune classifyTask — bug/refactor tasks are bucketed "harness" unconditionally, so a consumer project's legitimate product bug-fixing session reads as majority-harness drift
+**Summary:** Made classifyTask bug/refactor batch-mix bucket path-aware — a consumer product bug/refactor touching only product files classifies product-facing, not harness — so a consumer project bug-fixing session no longer reads as false meta-work drift; amended ADR-0064, synced SKILL/README wording, +7 tests
+**Duration:** 7m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 7
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 17:59 -- Task verified and completed: agentic-workflow-t8kfq - Verifier check 1 lacks the ADR-0065 stop-loss carve-out — an early-stopped spike gets FAILed into finishing the diagnosis it was told to skip; dispatch never surfaces a backlog-stranded same-thread remediation
 
 **Type:** Work / Task completion
