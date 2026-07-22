@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 4
-- **Doing:** 2
-- **Done:** 159
+- **Doing:** 1
+- **Done:** 160
 <!-- task-counts:end -->
 
 ### Todo
@@ -27,11 +27,11 @@ research touching this BC, and concept synthesis pages.
 ### Doing
 <!-- doing-list:start -->
 - **agentic-workflow-v4gmt** — vacuum-guard.mjs carries dead regexes and a wrong repo-relative-path claim in classifyTask's comment (chore) — `doing/agentic-workflow-v4gmt-vacuum-guard-dead-code-and-comment.md`
-- **agentic-workflow-t6pjd** — TDD's UI-task skip advice contradicts verifier check 8 — manual browser exercise never substitutes for the runtime drive (bug) — `doing/agentic-workflow-t6pjd-tdd-ui-skip-vs-check8-runtime-drive.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-t6pjd** — TDD's UI-task skip advice contradicts verifier check 8 — manual browser exercise never substitutes for the runtime drive (bug) — `done/agentic-workflow-t6pjd-tdd-ui-skip-vs-check8-runtime-drive.md`
 - **agentic-workflow-r2hxk** — worker-return-format.md misses the ADR-0062 runner-verdict qualifier its own restatement-exactness rule demands (bug) — `done/agentic-workflow-r2hxk-worker-return-format-runner-verdict-qualifier.md`
 - **agentic-workflow-s9wtc** — verification-before-completion SKILL.md drifted behind verifier.md — sync checks, tokens, salvage, and the given-list (bug) — `done/agentic-workflow-s9wtc-verification-doctrine-doc-sync.md`
 - **agentic-workflow-e7dnq** — human-eye-criteria lint flags backlog tasks the doctrine says are legal — align its scope with the promote-time note rule (bug) — `done/agentic-workflow-e7dnq-human-eye-lint-scope-and-grandfathering.md`

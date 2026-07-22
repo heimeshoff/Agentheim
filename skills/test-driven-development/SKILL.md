@@ -103,7 +103,7 @@ A small set of tasks legitimately skip TDD. The worker must explicitly note the 
 - **`type: spike` tasks** — exploration with explicit throwaway intent. The worker should still write a smoke test for the walking-skeleton spike, but feature spikes can skip.
 - **Pure config / data migration tasks** where the assertion is "the config validates and the app boots" — a single integration check covers it; no per-criterion unit tests needed.
 - **Pure documentation tasks** — no executable behavior to test.
-- **UI tasks where the project has no UI testing infrastructure** — the worker should call this out as a backlog item (add UI test infra) rather than silently skip, and exercise the change manually in the browser as a substitute.
+- **UI tasks where the project has no UI testing infrastructure** — the worker should call this out as a backlog item (add UI test infra) rather than silently skip, and exercise the change manually in the browser. But that manual exercise covers only the visual-DOM delta a test can't see — it is never a substitute for the verifier's check 8 runtime drive (ADR-0036) when the BC's README declares a `## Runtime surface`: the verifier boots the app and drives it regardless of any self-reported "exercised manually" note. Expect check 8 to run on any UI diff that touches a declared `surfacePath`.
 
 If the worker thinks TDD doesn't apply for any other reason, that's a signal to bounce the task back as under-refined — the acceptance criteria probably aren't testable as written.
 

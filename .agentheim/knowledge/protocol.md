@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:18 -- Task verified and completed: agentic-workflow-t6pjd - TDD's UI-task skip advice contradicts verifier check 8 — manual browser exercise never substitutes for the runtime drive
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-t6pjd - TDD's UI-task skip advice contradicts verifier check 8 — manual browser exercise never substitutes for the runtime drive
+**Summary:** Amended TDD skill UI-skip bullet: manual browser exercise covers only the visual-DOM delta and never substitutes for verifier check 8 runtime drive (ADR-0036) when the BC declares a Runtime surface
+**Duration:** 2m10s
+**Verification:** PASS (iteration 1)
+**Files changed:** 1
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 11:17 -- Task verified and completed: agentic-workflow-r2hxk - worker-return-format.md misses the ADR-0062 runner-verdict qualifier its own restatement-exactness rule demands
 
 **Type:** Work / Task completion
