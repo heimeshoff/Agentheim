@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-n3bbk
 title: research commits nothing it writes — report, INDEX edits, and protocol entry strand as anonymous carry-over
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22

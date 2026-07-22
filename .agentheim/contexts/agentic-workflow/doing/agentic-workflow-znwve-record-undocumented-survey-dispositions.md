@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-znwve
 title: Record the two undocumented survey dispositions — mid-batch checkpoint (decide) and Haiku thin-agent wrapper (decline)
-status: todo
+status: doing
 type: decision
 context: agentic-workflow
 created: 2026-07-22

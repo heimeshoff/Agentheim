@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-cvptc
 title: verification-before-completion's PASS handling still describes the pre-worktree git model — staging the raw FILE_LIST on the main tree
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22

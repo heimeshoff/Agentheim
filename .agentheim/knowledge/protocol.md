@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 12:59 -- Batch started: [agentic-workflow-cvptc, agentic-workflow-n3bbk, agentic-workflow-znwve]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-cvptc - verification-before-completion's PASS handling still describes the pre-worktree git model — staging the raw FILE_LIST on the main tree, agentic-workflow-n3bbk - research commits nothing it writes — report, INDEX edits, and protocol entry strand as anonymous carry-over, agentic-workflow-znwve - Record the two undocumented survey dispositions — mid-batch checkpoint (decide) and Haiku thin-agent wrapper (decline)
+**Parallel:** yes (3 workers — 5 more ready held to later waves at MAX_PARALLEL=3: mqwnc/pzacx/zbbsw, then ewt9s/z3grd; bx01e blocked on cvptc+mqwnc+z3grd+pzacx)
+
+---
+
 ## 2026-07-22 12:49 -- Modeling / Captured: 10 follow-up tasks from the 2026-07-22 four-agent audit
 
 **Type:** Modeling / Capture
