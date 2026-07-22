@@ -11,13 +11,14 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 3
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 180
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-kp7dq** — checkpoint's moved-from detection is Windows-separator-sensitive — a forward-slash fileList silently misses the doing/ deletion, reintroducing the both-folders bug w2njd closed (bug) — `todo/agentic-workflow-kp7dq-checkpoint-moved-from-detection-separator-insensitive.md`
 <!-- todo-list:end -->
 
 ### Doing

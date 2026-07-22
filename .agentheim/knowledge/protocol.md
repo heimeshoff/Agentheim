@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 18:20 -- Modeling / Captured: agentic-workflow-kp7dq - checkpoint moved-from detection is Windows-separator-sensitive
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** Hardening follow-up surfaced during the 2026-07-22 work session: `findMovedFromDoingPath` (the w2njd/ADR-0057 checkpoint moved-from detector) matches lifecycle folders with `startsWith(path.join(...) + path.sep)`, so a caller passing forward-slash paths on Windows silently misses the `doing/` deletion and reintroduces the both-folders bug w2njd closed. Fix: make the comparison separator-insensitive + ship a cross-separator `node --test` case. Not a regression (the doctrine passes native FILE_LISTs where it works); enforcement in-task per ADR-0059. Filed to todo — concrete, workable, criteria + shipped test.
+
+---
+
 ## 2026-07-22 18:16 -- Work session ended
 
 **Type:** Work / Session end
