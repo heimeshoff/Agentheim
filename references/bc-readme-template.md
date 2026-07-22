@@ -37,8 +37,9 @@ Intents that enter this context.
 
 ## Test command (optional)
 The exact test invocation for this BC — e.g. `node --test lib/test/*.test.mjs`. Present this
-section once the BC has a test suite: `work`'s per-batch pre-resolved-test-command step
-(`skills/work/SKILL.md` ~:136-138, `agentic-workflow-g9s3w`) and the verifier's discovery
+section once the BC has a test suite: `work`'s per-batch "Resolve the test command once per
+batch" step (`skills/work/SKILL.md`'s "### Verifier dispatch" section, `agentic-workflow-g9s3w`)
+and the verifier's discovery
 fallback (`agents/verifier.md`) both look at the BC README first, before falling back to
 project-root `package.json`/`Makefile`/etc. TDD's runner-first rule
 (`skills/test-driven-development/SKILL.md` ~:66-69) requires recording the invocation here as

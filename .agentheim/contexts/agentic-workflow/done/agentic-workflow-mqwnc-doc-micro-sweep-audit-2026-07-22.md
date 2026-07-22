@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-mqwnc
 title: Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, index-template done-list header wording
-status: doing
+status: done
 type: chore
 context: agentic-workflow
 created: 2026-07-22
-completed:
+completed: 2026-07-22
 depends_on: []
 blocks: [agentic-workflow-bx01e, agentic-workflow-jf6qz]
 tags: [audit-2026-07-22-followup, doctrine-drift]
@@ -74,3 +74,27 @@ headers — impossible for a worker to satisfy legally. Re-scoped via `modeling`
 2026-07-22 to the three worker-legal reference-doc edits above; the live-header + code side was
 split into `agentic-workflow-jf6qz`. `blocks: agentic-workflow-jf6qz` so the template wording
 this task lands is the canonical string jf6qz's code must match.
+
+## Outcome
+
+All three worker-legal reference-doc edits landed, no `INDEX.md` touched:
+
+1. `agents/verifier.md:21` — "currently in `doing/`" → "currently in `doing/` or `done/`",
+   matching `agents/worker.md:149`, `skills/work/SKILL.md:225`, and
+   `skills/verification-before-completion/SKILL.md:29`.
+2. `references/bc-readme-template.md` — the stale `~:136-138` line-number pointer replaced with a
+   name-the-section pointer: `work`'s "Resolve the test command once per batch" step under
+   `skills/work/SKILL.md`'s "### Verifier dispatch" section (verified that step now sits at
+   line ~145, confirming the drift the task described).
+3. `references/index-template.md` — the "Capped at ~30 live entries" phantom-cap prose (right
+   after the per-BC INDEX template block) reworded to describe the actual discipline:
+   current-month entries stay live in full past the nominal ~30 target (ADR-0039's steady-state,
+   not-a-hard-cap doctrine), and only a whole closed month rolls out verbatim to
+   `done-archive/YYYY-MM.md`, at which point the header is rewritten to name the archive
+   (ADR-0047).
+
+`grep -rn "most recent 30" references/` returns nothing (it never matched `index-template.md`
+directly — the phantom-cap wording lived in the "Capped at ~30" prose paragraph, now fixed). The
+live `.agentheim/contexts/*/INDEX.md` "most recent 30" headers are untouched by design — that
+correction rides `agentic-workflow-jf6qz`'s code fix to `archivedDoneHeader()`. Full suite
+(`node --test lib/test/*.test.mjs`) green: 351 passed, 0 failed. Doc-only change, no new tests.

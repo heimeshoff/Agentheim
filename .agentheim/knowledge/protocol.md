@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 15:25 -- Task verified and completed: agentic-workflow-mqwnc - Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, index-template done-list header wording
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-mqwnc - Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, index-template done-list header wording
+**Summary:** Fixed three worker-legal reference-doc drifts from the 2026-07-22 audit — verifier.md task-file-location wording, stale line-number pointer in bc-readme-template.md, and the phantom ~30-cap wording in index-template.md — no live INDEX.md touched
+**Duration:** 6m
+**Verification:** PASS (iteration 1)
+**Files changed:** 3
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 15:18 -- Batch started: [agentic-workflow-mqwnc]
 
 **Type:** Work / Batch start

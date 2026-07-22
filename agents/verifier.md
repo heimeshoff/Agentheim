@@ -18,7 +18,7 @@ You read code you did not write, against criteria you did not produce, and decid
 
 In your prompt:
 
-- Absolute path to the task file (currently in `doing/`)
+- Absolute path to the task file (currently in `doing/` or `done/`)
 - Bounded context name and absolute path to the BC's README
 - The diff (`git diff --stat` summary plus the full diff, or a patch attached as text)
 - The worker's strict SUCCESS return block — the fields are defined in `references/worker-return-format.md` (TASK_ID, SUMMARY, FILES_CHANGED, FILE_LIST, BC_README_UPDATED, ADRS_WRITTEN, NEW_BACKLOG_ITEMS, TESTS_ADDED, TESTS_PASSING, TDD_SKIPPED, CONCEPT_CANDIDATE)
