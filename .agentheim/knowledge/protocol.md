@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 17:59 -- Task verified and completed: agentic-workflow-t8kfq - Verifier check 1 lacks the ADR-0065 stop-loss carve-out — an early-stopped spike gets FAILed into finishing the diagnosis it was told to skip; dispatch never surfaces a backlog-stranded same-thread remediation
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-t8kfq - Verifier check 1 lacks the ADR-0065 stop-loss carve-out — an early-stopped spike gets FAILed into finishing the diagnosis it was told to skip; dispatch never surfaces a backlog-stranded same-thread remediation
+**Summary:** Added an ADR-0065 spike stop-loss carve-out to verifier check 1 (judge the recorded mitigation, not the skipped diagnosis) and a backlog-stranded same-thread remediation surface line (advisory only) to work Phase 3 step 4; amended ADR-0065, prose-only/unenforced per ADR-0059
+**Duration:** 7m
+**Verification:** PASS (iteration 1)
+**Files changed:** 4
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 17:50 -- Batch started: [agentic-workflow-t8kfq, agentic-workflow-r4gcz]
 
 **Type:** Work / Batch start

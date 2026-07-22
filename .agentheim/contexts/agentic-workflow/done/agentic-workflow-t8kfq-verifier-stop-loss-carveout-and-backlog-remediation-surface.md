@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-t8kfq
 title: Verifier check 1 lacks the ADR-0065 stop-loss carve-out — an early-stopped spike gets FAILed into finishing the diagnosis it was told to skip; dispatch never surfaces a backlog-stranded same-thread remediation
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-22
-completed:
+completed: 2026-07-22
 depends_on: []
 blocks: []
 tags: [spike-stop-loss, verifier, dispatch-ordering, adr-0065]
@@ -51,13 +51,13 @@ the verification path.
 
 ## Acceptance criteria
 
-- [ ] `agents/verifier.md` check 1 names the ADR-0065 early-stop case and instructs
+- [x] `agents/verifier.md` check 1 names the ADR-0065 early-stop case and instructs
       verifying the recorded mitigation instead of FAILing unmet fuller-diagnosis
       criteria on an early-stopped spike.
-- [ ] `skills/work/SKILL.md` Phase 3 step 4 carries the backlog-stranded same-thread
+- [x] `skills/work/SKILL.md` Phase 3 step 4 carries the backlog-stranded same-thread
       remediation surface line, explicitly marked advisory (never gates, never
       auto-promotes).
-- [ ] ADR-0065 amended to record both: the verifier carve-out and the surface line
+- [x] ADR-0065 amended to record both: the verifier carve-out and the surface line
       closing its own founding-incident gap.
 
 ## Notes
@@ -70,3 +70,33 @@ ordering half; no cheap mechanical predicate distinguishes "recorded early stop"
 Touches `skills/work/SKILL.md` (Phase 3 step 4) — same file as agentic-workflow-k9pbh
 (different section, :55); fine to co-batch per the additive-edit heuristic, but don't
 co-batch either with a wholesale rewrite of that file.
+
+## Outcome
+
+Closed both halves of the gap:
+
+1. **Verifier carve-out.** `agents/verifier.md` check 1 gained a "Spike stop-loss early-stop
+   carve-out (ADR-0065)" paragraph, right after the existing `[human-eye]` carve-out: when a
+   `type: spike` task's worker return or `## Outcome` records an ADR-0065 early stop, the
+   unmet fuller-diagnosis criteria are no longer FAIL evidence — the verifier instead checks
+   the stop-loss clause is present in the task body and a concrete mitigation is named in
+   `## Outcome`, judging that record rather than the skipped diagnosis. Confirmed
+   `skills/verification-before-completion/SKILL.md`'s check list is already a pointer to
+   `agents/verifier.md` — no edit needed there.
+2. **Backlog-remediation surface line.** `skills/work/SKILL.md` Phase 3 step 4 gained a new
+   bullet (sibling to the existing remediation-over-diagnosis bullet, same "same thread"
+   definition): when a ready `type: spike` selected for the batch has a same-thread
+   remediation sitting unpromoted in `backlog/`, the conductor surfaces one line in the batch
+   rationale. Explicitly advisory only — never gates the spike, never auto-promotes
+   (ADR-0027 family).
+3. **ADR-0065 amended** with a new "Amended (agentic-workflow-t8kfq)" section recording both
+   closures and their disposition (prose-only/unenforced, ADR-0059 — same judgment-call shape
+   as the original ordering preference; no new lint). `related_tasks` and References updated.
+4. **BC README's ADR-0065 entry updated** with the amendment summary.
+
+No `~:NNN` raw line-number pointers introduced (checked via grep) — all cross-references use
+section/rule names. `node --test lib/test/*.test.mjs`: 358/358 passing, no regressions.
+
+Files: `agents/verifier.md`, `skills/work/SKILL.md`,
+`.agentheim/knowledge/decisions/0065-remediation-over-diagnosis-dispatch-ordering-spike-stop-loss.md`,
+`.agentheim/contexts/agentic-workflow/README.md`.

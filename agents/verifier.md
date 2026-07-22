@@ -61,6 +61,20 @@ machine-checkable coverage to map, by design. (A task whose criteria are *all* `
 should carry the "Verification is builder-eye only" note per `skills/modeling/SKILL.md`'s
 PROMOTE readiness check; its absence is check 6c's concern, not this check's.)
 
+**Spike stop-loss early-stop carve-out (ADR-0065).** When the task is `type: spike` and the
+worker's return or the task's `## Outcome` records an ADR-0065 early stop, the acceptance
+criteria describing the fuller diagnosis are **not** unmet-criteria FAIL evidence — do not
+hunt for a test covering them and do not FAIL check 1 over their absence. Instead check that
+the early stop is recorded per doctrine: the task body carries the stop-loss clause (see
+`agents/worker.md`'s "Spike stop-loss (ADR-0065)" section), and the `## Outcome` names a
+concrete recorded mitigation, not merely an assertion that the worker stopped. Judge *that
+mitigation record* — is a real mitigation named, is it plausible against the diff in front of
+you — never the diagnosis the worker chose to skip. A spike task with no `## Outcome`
+mitigation record, or one that only claims an early stop without naming what the mitigation
+is, still fails this check: the carve-out excuses the skipped diagnosis, never a missing
+record of it. (The VBC skill's own check list needs no edit for this — it already points here
+rather than restating the checks.)
+
 ### 1b. Metric drift across iterations — escalation, not iteration fuel (ADR-0061)
 
 Only applies on iteration 2 or 3 — skip entirely on iteration 1, there is no prior iteration

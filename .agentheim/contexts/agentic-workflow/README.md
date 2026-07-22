@@ -244,7 +244,15 @@ separate BC, but today the whole tool lives in this one.
   (ADR-0059) — it's a judgment call the same shape as the existing planning-advisory weighting.
   The stop-loss clause ships enforcement: `lib/spike-stop-loss.mjs` is a date-grandfathered
   live-tree lint (mirrors ADR-0060's shape) flagging any `type: spike` task minted after
-  adoption whose body lacks the clause. See ADR-0065.
+  adoption whose body lacks the clause. **Amended (agentic-workflow-t8kfq):** the two halves
+  originally fought the verification path itself — an early-stopped spike's unmet
+  fuller-diagnosis criteria got FAILed by verifier check 1, and a same-thread remediation
+  stranded in `backlog/` (rather than `todo/`) raised no dispatch signal at all. Verifier check
+  1 (`agents/verifier.md`) now carves out the ADR-0065 early-stop case explicitly — it checks
+  the recorded mitigation, not the skipped diagnosis — and `skills/work/SKILL.md` Phase 3 step
+  4 now surfaces (advisory only, never a gate, never an auto-promote) a same-thread remediation
+  found unpromoted in `backlog/` when dispatching a same-thread spike. Both additions are
+  prose-only/unenforced per ADR-0059, same shape as the ordering half. See ADR-0065.
 - **Session-start human-churn reconciliation (ADR-0066, agentic-workflow-hhjjx)** — the
   mirror image of `agentic-workflow-d6q4h`'s session-**end** carry-over reconciliation, at
   the other end of the session, closing the third and final piece of Dorc review

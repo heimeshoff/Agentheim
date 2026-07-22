@@ -4,7 +4,7 @@ title: Remediation outranks further diagnosis at dispatch; spikes carry a mid-sp
 scope: agentic-workflow
 status: accepted
 date: 2026-07-21
-related_tasks: [agentic-workflow-rx630]
+related_tasks: [agentic-workflow-rx630, agentic-workflow-t8kfq]
 related_adrs: [0059, 0060, 0032]
 ---
 
@@ -69,6 +69,38 @@ This task establishes two conventions and treats them differently under ADR-0059
   so the lint should never actually fire going forward rather than merely catching drift after
   the fact.
 
+### Amended (agentic-workflow-t8kfq): verifier carve-out + backlog-remediation surface line
+
+The 2026-07-22 post-survey audit found the two halves above fought the verification path
+itself, an overshoot the founding decision didn't anticipate:
+
+- **Verifier carve-out (`agents/verifier.md` check 1).** The worker doctrine above makes an
+  early-stopped spike a legitimate `SUCCESS` completion with the fuller-diagnosis acceptance
+  criteria left unmet — but verifier check 1 originally required every criterion to map to a
+  test or artifact, with no exception for this case. Left as-is, the first real early stop got
+  FAILed and re-dispatched to finish exactly the diagnosis this ADR told it to skip,
+  reproducing the Dorc waste this ADR exists to prevent. Check 1 now names the ADR-0065
+  early-stop case explicitly: when the worker's return or the task's `## Outcome` records an
+  early stop on a `type: spike` task, the unmet fuller-diagnosis criteria are not FAIL
+  evidence — the verifier instead checks that the stop-loss clause is present in the task body
+  and that `## Outcome` names a concrete recorded mitigation, and judges *that record*, not the
+  skipped diagnosis. A spike claiming an early stop with no named mitigation still fails the
+  check — the carve-out excuses the skipped diagnosis, never a missing record of it.
+- **Backlog-remediation surface line (`skills/work/SKILL.md` Phase 3 step 4).** This ADR's
+  founding incident had the diagnosed remediation sitting in **`backlog/`**, not `todo/`, while
+  spikes ran — the original dispatch-ordering preference only reorders among already-*ready*
+  (`todo/`) tasks, so that exact shape still dispatched the spike first with no signal raised.
+  Dispatch now surfaces (never gates, never auto-promotes) a same-thread remediation found
+  unpromoted in `backlog/` when a same-thread `type: spike` is picked for the batch, one line
+  in the batch rationale, so a builder can choose to promote the remediation first.
+
+Both additions are judgment calls of the same shape as the ordering preference above and are
+dispositioned identically under ADR-0059: **prose-only, unenforced.** "Does the worker's return
+record an ADR-0065 early stop per doctrine" and "is this backlog task really the same thread as
+this ready spike" are read-and-judge calls, not mechanical predicates a lint could evaluate
+without re-litigating the judgment itself — the same reasoning that kept the original ordering
+preference prose-only. No new lint was added for either.
+
 ## Consequences
 
 ### Positive
@@ -120,3 +152,5 @@ This task establishes two conventions and treats them differently under ADR-0059
 - `skills/modeling/SKILL.md` `type` field legend — spike task-format implementation.
 - `agents/worker.md` "Third action" TDD-skip notes — spike stop-loss execution doctrine.
 - `lib/spike-stop-loss.mjs`, `lib/test/spike-stop-loss.test.mjs` — the lint and its tests.
+- agentic-workflow-t8kfq — the "Amended" section's verifier carve-out (`agents/verifier.md`
+  check 1) and backlog-remediation surface line (`skills/work/SKILL.md` Phase 3 step 4).
