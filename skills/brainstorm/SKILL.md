@@ -179,6 +179,10 @@ The walking skeleton is inherently globally true (it proves the *whole* stack ru
 - File: `contexts/infrastructure/todo/infrastructure-001-walking-skeleton.md` — the walking skeleton is a **reserved foundation id** (`infrastructure-001-walking-skeleton`), one of the closed set of deterministic ids `brainstorm` mints (ADR-0028 §7); it keeps a digit-tailed literal so downstream references resolve consistently with the styleguide gate. It is **not** a random token.
 - `depends_on:` every decision task you just emitted (both global and BC-local ones)
 - Acceptance criteria are observable, not architectural: "the app boots, hits its DB, returns a response from each BC's entry point", not "architecture works"
+- The task body must carry the stop-loss clause (ADR-0065): "if, mid-spike, the mitigation
+  is already known and cheap, record it and stop." Include it verbatim or in substance —
+  the literal word "stop-loss," or the clause's own "record it and stop" wording, satisfies
+  `lib/spike-stop-loss.mjs`'s live-tree lint. Put it in the task's `## Notes` section.
 
 ### Emit the styleguide task (only if there's any frontend)
 

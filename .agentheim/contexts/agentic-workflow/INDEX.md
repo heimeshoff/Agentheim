@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 7
-- **Doing:** 3
-- **Done:** 155
+- **Doing:** 2
+- **Done:** 156
 <!-- task-counts:end -->
 
 ### Todo
@@ -31,11 +31,11 @@ research touching this BC, and concept synthesis pages.
 <!-- doing-list:start -->
 - **agentic-workflow-s9wtc** — verification-before-completion SKILL.md drifted behind verifier.md — sync checks, tokens, salvage, and the given-list (bug) — `doing/agentic-workflow-s9wtc-verification-doctrine-doc-sync.md`
 - **agentic-workflow-e7dnq** — human-eye-criteria lint flags backlog tasks the doctrine says are legal — align its scope with the promote-time note rule (bug) — `doing/agentic-workflow-e7dnq-human-eye-lint-scope-and-grandfathering.md`
-- **agentic-workflow-w3kfp** — quick-capture and brainstorm mint spike tasks without the ADR-0065 stop-loss clause (bug) — `doing/agentic-workflow-w3kfp-spike-stop-loss-clause-capture-side-skills.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-w3kfp** — quick-capture and brainstorm mint spike tasks without the ADR-0065 stop-loss clause (bug) — `done/agentic-workflow-w3kfp-spike-stop-loss-clause-capture-side-skills.md`
 - **agentic-workflow-p8q3z** — BOUNCE integration's squash-merge needs a worktree checkpoint commit first — none is ever made (bug) — `done/agentic-workflow-p8q3z-bounce-squash-merge-needs-a-checkpoint-commit-first.md`
 - **agentic-workflow-hhjjx** — Session-start human-churn reconciliation — diff human commits, flag ADR-governed files, surface re-alignment work (feature) — `done/agentic-workflow-hhjjx-session-start-human-churn-reconciliation.md`
 - **agentic-workflow-rx630** — Dispatch ordering — a known-cheap remediation outranks further diagnosis; spikes carry a stop-loss (feature) — `done/agentic-workflow-rx630-dispatch-ordering-remediation-over-diagnosis-spike-stop-loss.md`

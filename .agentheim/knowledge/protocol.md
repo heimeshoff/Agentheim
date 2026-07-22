@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:11 -- Task verified and completed: agentic-workflow-w3kfp - quick-capture and brainstorm mint spike tasks without the ADR-0065 stop-loss clause
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-w3kfp - quick-capture and brainstorm mint spike tasks without the ADR-0065 stop-loss clause
+**Summary:** Brought quick-capture and brainstorm capture paths in line with ADR-0065 spike stop-loss clause; fixed quick-capture stale <NNN> id placeholder to token form
+**Duration:** 2m15s
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 11:02 -- Batch started: [agentic-workflow-w3kfp, agentic-workflow-e7dnq, agentic-workflow-s9wtc]
 
 **Type:** Work / Batch start

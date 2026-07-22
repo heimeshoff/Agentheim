@@ -76,7 +76,12 @@ For each idea in the user's message:
 3. **Pick the type.** Infer `type` from the idea with a quick heuristic — `bug` if it
    describes something broken, `decision` if it's a "should we / which way" question,
    `chore` for maintenance, `spike` for "investigate", else `feature`. Don't agonize;
-   refinement can correct it.
+   refinement can correct it. **If the type lands on `spike`,** the task body must carry
+   the stop-loss clause (ADR-0065): "if, mid-spike, the mitigation is already known and
+   cheap, record it and stop." Include it verbatim or in substance — the literal word
+   "stop-loss," or the clause's own "record it and stop" wording, satisfies
+   `lib/spike-stop-loss.mjs`'s live-tree lint. Add it to the `## Notes` section of the
+   template below when minting a spike.
 
 4. **Write the task to `backlog/`.** Always backlog, never todo — captured tasks are raw
    by definition and must pass through refinement before a worker sees them. Use the
@@ -109,7 +114,7 @@ Files live at `contexts/<bc>/backlog/<id>-<slug>.md`. Same shape every other ski
 
 ```markdown
 ---
-id: <bc-short>-<NNN>
+id: <bc>-<token>
 title: <short imperative title>
 status: backlog
 type: feature
