@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 2
 - **Todo:** 6
-- **Doing:** 3
-- **Done:** 165
+- **Doing:** 2
+- **Done:** 166
 <!-- task-counts:end -->
 
 ### Todo
@@ -30,11 +30,11 @@ research touching this BC, and concept synthesis pages.
 <!-- doing-list:start -->
 - **agentic-workflow-znwve** — Record the two undocumented survey dispositions — mid-batch checkpoint (decide) and Haiku thin-agent wrapper (decline) (decision) — `doing/agentic-workflow-znwve-record-undocumented-survey-dispositions.md`
 - **agentic-workflow-n3bbk** — research commits nothing it writes — report, INDEX edits, and protocol entry strand as anonymous carry-over (bug) — `doing/agentic-workflow-n3bbk-research-commits-nothing-it-writes.md`
-- **agentic-workflow-cvptc** — verification-before-completion's PASS handling still describes the pre-worktree git model — staging the raw FILE_LIST on the main tree (bug) — `doing/agentic-workflow-cvptc-vbc-pass-flow-pre-worktree-git-text.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-cvptc** — verification-before-completion's PASS handling still describes the pre-worktree git model — staging the raw FILE_LIST on the main tree (bug) — `done/agentic-workflow-cvptc-vbc-pass-flow-pre-worktree-git-text.md`
 - **agentic-workflow-c5nvb** — Session-start churn re-flags work's own trailer-less fallback commits; vacuum-guard exits leave no session-end boundary (bug) — `done/agentic-workflow-c5nvb-churn-self-flagging-and-vacuum-exit-boundary.md`
 - **agentic-workflow-d7ksw** — Doc micro-sweep from the audit — bc-readme-template surface slots, research model-pin text, orchestrator worker route, hvqa4/rx630 checkboxes, commit-doctrine table (chore) — `done/agentic-workflow-d7ksw-doc-micro-sweep-audit-residuals.md`
 - **agentic-workflow-n8zqe** — whats-next is behind the new advisories — recommends resolved open questions, ignores the ADR-0065 remediation-first tiebreak (bug) — `done/agentic-workflow-n8zqe-whats-next-advisory-catch-up.md`

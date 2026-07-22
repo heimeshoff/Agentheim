@@ -73,7 +73,7 @@ The verifier returns one of three verdicts. Strict format — `work` parses thes
 
 ### `VERDICT: PASS`
 
-The diff is committable. `work` proceeds to move the task to `done/` (if the worker didn't already), runs `git add` on the FILE_LIST and ancillary files, and commits.
+The diff is committable. `work` proceeds per its own **"PASS / SKIP — squash-merge to `main`, one commit"** integration steps — squash-merge the worktree branch (`git merge --squash aw/<task-id>`), run the mechanized COMPLETE script, then `git add` only the `complete` manifest's `changed` paths plus any ADR/task backlink files, and commit. That sequence, not a restatement here, is canonical; in particular it never stages the worker's raw `FILE_LIST` directly — `changed` is the guarded subset (ADR-0057).
 
 ```
 VERDICT: PASS

@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-cvptc
 title: verification-before-completion's PASS handling still describes the pre-worktree git model — staging the raw FILE_LIST on the main tree
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-22
-completed:
+completed: 2026-07-22
 depends_on: []
 blocks: [agentic-workflow-bx01e]
 tags: [audit-2026-07-22-followup, doctrine-drift, verification]
@@ -48,3 +48,19 @@ steps as the canonical source, the same way the doc already defers for the given
 Found by the 2026-07-22 four-agent consistency audit (cross-doc drift finding #1, MEDIUM —
 the only finding that could cause a wrong git action). s9wtc synced this file's checks two
 days ago but this verdict-handling sentence survived that sweep.
+
+## Outcome
+
+Rewrote the `VERDICT: PASS` handling paragraph in
+`skills/verification-before-completion/SKILL.md` (previously the sentence at line 76) to stop
+describing the retired shared-tree choreography (staging the raw FILE_LIST + ancillary files on
+the main tree and committing). It now points at `skills/work/SKILL.md`'s "PASS / SKIP —
+squash-merge to `main`, one commit" section as canonical: squash-merge the worktree branch, run
+the mechanized COMPLETE script, then `git add` only the `complete` manifest's `changed` paths
+plus ADR/task backlink files — explicitly never the raw FILE_LIST (ADR-0057's guarded-subset
+derived-artifact rule). `grep -n "FILE_LIST"
+skills/verification-before-completion/SKILL.md` now shows exactly one hit, in guarded-subset/
+pointer framing, with no restatement of the git choreography elsewhere in the file. No code
+changes; no BC README update needed (no new ubiquitous language); no ADR needed (aligns
+existing doc to already-decided ADR-0032/0038/0057 choreography rather than making a new
+decision).

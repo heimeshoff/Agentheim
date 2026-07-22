@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 13:09 -- Task verified and completed: agentic-workflow-cvptc - verification-before-completion's PASS handling still describes the pre-worktree git model — staging the raw FILE_LIST on the main tree
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-cvptc - verification-before-completion's PASS handling still describes the pre-worktree git model — staging the raw FILE_LIST on the main tree
+**Summary:** Rewrote verification-before-completion PASS-handling to defer to work squash-merge + manifest-scoped stage as canonical, removing the retired shared-tree raw-FILE_LIST staging text
+**Duration:** 3m
+**Verification:** PASS (iteration 1)
+**Files changed:** 1
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 12:59 -- Batch started: [agentic-workflow-cvptc, agentic-workflow-n3bbk, agentic-workflow-znwve]
 
 **Type:** Work / Batch start
