@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 13:34 -- Task verified and completed: agentic-workflow-pzacx - Consumer-tune the two session reconciliations — fold recognized machine shapes into a summary, batch non-.agentheim carry-over
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-pzacx - Consumer-tune the two session reconciliations — fold recognized machine shapes into a summary, batch non-.agentheim carry-over
+**Summary:** Consumer-tuned both session reconciliations — session-start churn now recognizes all eight commit-doctrine machine shapes (incl. CONSOLIDATE and research) deterministically and prints one summary line; session-end carry-over scopes the per-file ask to .agentheim/ paths and batches user WIP; amended ADR-0066
+**Duration:** 22m
+**Verification:** PASS (iteration 2)
+**Files changed:** 6
+**Tests added:** 17
+**ADRs written:** none
+
+---
+
+## 2026-07-22 13:30 -- Verification failed: agentic-workflow-pzacx - Consumer-tune the two session reconciliations
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-pzacx - Consumer-tune the two session reconciliations — fold recognized machine shapes into a summary, batch non-.agentheim carry-over
+**Iteration:** 1 of 3
+**Reasons:** MACHINE_SHAPES omits the `research` trailer-less shape (`chore(<bc-or-global>): research <slug>`) added to commit-doctrine.md earlier this session by n3bbk — a cleared-review research commit would be mis-counted as human churn, the exact false-positive class this task closes; no test covers it; the "authoritative, complete list" claim overclaims while research is absent (suite otherwise green, 349 pass incl. 15 new)
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-07-22 13:26 -- Task verified and completed: agentic-workflow-zbbsw - Drift-twice rule — a restatement that drifts a second time is deleted and pointered, never re-synced
 
 **Type:** Work / Task completion

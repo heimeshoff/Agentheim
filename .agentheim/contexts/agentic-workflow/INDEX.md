@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 2
 - **Todo:** 3
-- **Doing:** 2
-- **Done:** 169
+- **Doing:** 1
+- **Done:** 170
 <!-- task-counts:end -->
 
 ### Todo
@@ -25,12 +25,12 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-pzacx** — Consumer-tune the two session reconciliations — fold recognized machine shapes into a summary, batch non-.agentheim carry-over (refactor) — `doing/agentic-workflow-pzacx-consumer-tune-session-reconciliations.md`
 - **agentic-workflow-mqwnc** — Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, INDEX done-list header wording (chore) — `doing/agentic-workflow-mqwnc-doc-micro-sweep-audit-2026-07-22.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-pzacx** — Consumer-tune the two session reconciliations — fold recognized machine shapes into a summary, batch non-.agentheim carry-over (refactor) — `done/agentic-workflow-pzacx-consumer-tune-session-reconciliations.md`
 - **agentic-workflow-zbbsw** — Drift-twice rule — a restatement that drifts a second time is deleted and pointered, never re-synced (decision) — `done/agentic-workflow-zbbsw-drift-twice-single-source-rule.md`
 - **agentic-workflow-znwve** — Record the two undocumented survey dispositions — mid-batch checkpoint (decide) and Haiku thin-agent wrapper (decline) (decision) — `done/agentic-workflow-znwve-record-undocumented-survey-dispositions.md`
 - **agentic-workflow-n3bbk** — research commits nothing it writes — report, INDEX edits, and protocol entry strand as anonymous carry-over (bug) — `done/agentic-workflow-n3bbk-research-commits-nothing-it-writes.md`

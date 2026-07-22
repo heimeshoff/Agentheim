@@ -130,8 +130,12 @@ separate BC, but today the whole tool lives in this one.
   the SHA chicken-and-egg). One task = one commit, with a bounded **trivial-squash carve-out**
   for a same-BC / same-files / no-behavior-change / same-batch wave of follow-ups. At session
   end `work` **reconciles stranded carry-over**: `git status --porcelain` surfaces every
-  stranded file with an explicit per-file disposition (commit deliberately, or leave with a
-  named owner) — never auto-swept, never assumed. See ADR-0026, ADR-0017, ADR-0007.
+  stranded file. **`.agentheim/`-owned paths** get the full per-file disposition (commit
+  deliberately, or leave with a named owner) — never auto-swept, never assumed. **Everything
+  else** (agentic-workflow-pzacx consumer-tuning: a consumer's working tree routinely carries
+  the builder's own WIP outside `.agentheim/`, where per-file interrogation is friction with a
+  foregone "leave behind" answer) is batched into one line — `left behind (user WIP, N
+  files)` — no per-file ask, no commit offered. See ADR-0026, ADR-0017, ADR-0007.
 - **Per-worker git worktree isolation (ADR-0032, agentic-workflow-f6m2q)** — every parallel
   `work` worker runs in its own git worktree at `<repo-root>/.worktrees/<task-id>/` on a
   private branch `aw/<task-id>`, gitignored and outside `.agentheim/`. A **batch-start claim
@@ -241,19 +245,27 @@ separate BC, but today the whole tool lives in this one.
   such entry skips silently), have the conductor read `git log --since=... --name-only
   --format="%x1eCOMMIT%x1f%H%x1f%s"` (a prose step, never a `lib/` git read, ADR-0038),
   and filter to commits carrying no `[<task-id>]` bracketed trailer (ADR-0026) via
-  `parseCommitLog`/`findUntrailedCommits`. The skill then judges (not the git-free `lib/`
-  helper) which touched files land on a governed surface — an ADR-described file, or one a
-  BC README documents as load-bearing — and surfaces a session-start line (plus, when a
-  governed hit exists, a `whats-next.md` write, ADR-0027) recommending the builder approve
-  an explicit re-alignment task. Advisory only: never auto-files a task, never gates Phase
-  2, and deliberately does not try to separate genuine human commits from the small number
-  of known machine shapes that also omit the trailer (`modeling` DISMISS, `brainstorm`'s
-  session commit, and `work`'s own bare fallback shapes when a session completes no
-  task — reconcile-stranded-carry-over, session-end bookkeeping, both rotation commits;
-  batch-start and BOUNCE integration always carry a trailer, so they're never on this
-  list — the complete, authoritative set lives in `references/commit-doctrine.md`'s
-  "`work`'s own non-task-commit shapes" table, agentic-workflow-c5nvb) — favoring recall
-  over precision on an advisory-only signal. See
+  `parseCommitLog`/`findUntrailedCommits`. **Consumer-tuning amendment (agentic-workflow-pzacx):**
+  `partitionUntrailedCommits` then mechanically splits that set into recognized known-machine-shape
+  commits and genuinely human ones, via `recognizeMachineShape`'s closed, deterministic pattern
+  set matching every trailer-less row of BOTH `references/commit-doctrine.md` tables — its
+  "Message convention" table's four trailer-less rows (`modeling` DISMISS, `modeling` CONSOLIDATE
+  — an audit-found gap every prior enumeration omitted — `brainstorm`'s session commit, and
+  `research`'s report-cleared-review commit, added mid-session by agentic-workflow-n3bbk and
+  initially missed here too until an iteration-2 verifier catch), plus its "`work`'s own
+  non-task-commit shapes" table's four bare fallback rows reached only when a session completes no
+  task (reconcile-stranded-carry-over, session-end bookkeeping, both rotation commits; batch-start
+  and BOUNCE integration always carry a trailer, so they're never on this list) — eight entries
+  total. The skill prints one summary line — `formatChurnSummaryLine`'s "N recognized
+  machine-shape commits, M human commits" — then judges (not the git-free `lib/` helper) which
+  touched files land on a governed surface — an ADR-described file, or one a BC README documents
+  as load-bearing — and **itemizes only those governed-surface hits** (`formatUntrailedCommitLine`
+  per hit), plus, when a governed hit exists, a `whats-next.md` write (ADR-0027) recommending the
+  builder approve an explicit re-alignment task. Advisory only: never auto-files a task, never
+  gates Phase 2. A subject matching none of the known shapes is still counted as human, unchanged
+  — recall over precision on the genuinely-unknown case is exactly as before; only the
+  hand-maintained prose enumeration of the *known* shapes (which drifted twice in one week —
+  agentic-workflow-d7ksw, agentic-workflow-c5nvb) is now mechanized. See
   ADR-0066, ADR-0026, ADR-0027, ADR-0038, ADR-0059.
 - **README consolidation trigger / CONSOLIDATE (ADR-0041, agentic-workflow-w7q2m)** — a BC
   `README.md` at or over **~600 lines** has crossed the point where it can no longer reliably

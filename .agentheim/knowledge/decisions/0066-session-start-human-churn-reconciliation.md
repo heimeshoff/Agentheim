@@ -4,7 +4,7 @@ title: Session-start human-churn reconciliation — untrailed commits since last
 scope: agentic-workflow
 status: accepted
 date: 2026-07-21
-related_tasks: [agentic-workflow-hhjjx]
+related_tasks: [agentic-workflow-hhjjx, agentic-workflow-pzacx]
 related_adrs: [0026, 0027, 0038, 0064, 0040]
 ---
 
@@ -153,6 +153,67 @@ This task establishes one convention and states its enforcement status per ADR-0
   direction — this mechanism exists to *inform*, not to add friction to every session
   start. Every sibling advisory in this family (vacuum guard, vision-conformance,
   carry-over reconciliation) is non-blocking; this one follows the same doctrine.
+
+## Amendment — 2026-07-22 (agentic-workflow-pzacx): mechanize the known-shapes recognition; one summary line replaces per-commit itemization
+
+This is the revisit section 4 and "Alternatives considered" both named as open ("a future task
+could special-case the known machine shapes if the false-positive rate ever proves annoying").
+The condition was met on two fronts:
+
+1. **Cost of the prose-only stance.** Keeping the "known machine shapes" enumeration in sync
+   across `skills/work/SKILL.md`, this ADR, and the BC README had already cost two dedicated
+   fix-tasks in one week (agentic-workflow-d7ksw, agentic-workflow-c5nvb) — every enumeration
+   drifted independently because nothing mechanically enforced they stay in lockstep with
+   `references/commit-doctrine.md`'s actual table. The same audit that flagged that drift also
+   found every one of those enumerations omitted `modeling` CONSOLIDATE, which
+   `references/commit-doctrine.md` itself has defined as trailer-less since the CONSOLIDATE verb
+   was introduced — so a CONSOLIDATE commit silently read as human churn on every prior session.
+2. **Consumer-repo false-positive rate.** This project self-hosts, so machine commits dominate
+   its own history and the "known machine shapes" cost was mostly theoretical here. In a consumer
+   repo where a solo builder commits by hand constantly, the *original* prose-only design flagged
+   nearly every commit for a governed-surface judgment skim, every session — the false-positive
+   rate the original "Alternatives considered" entry treated as hypothetical is the *common* case
+   for a consumer install.
+
+**Decision:** `lib/session-start-churn.mjs` gains `recognizeMachineShape` — a closed, deterministic
+pattern set matching `references/commit-doctrine.md`'s complete known-shapes table exactly
+(`modeling` DISMISS, `modeling` CONSOLIDATE, `brainstorm`'s session commit, `research`'s
+report-cleared-review commit, and `work`'s own four bare fallback shapes: reconcile stranded
+carry-over, session-end bookkeeping, protocol rotation, INDEX done-list rotation — eight entries
+total) — plus `partitionUntrailedCommits` (splits an untrailed-commit list into
+`recognized`/`human`) and `formatChurnSummaryLine` (the new one-line report: "N recognized
+machine-shape commits, M human commits"). `skills/work/SKILL.md`'s churn step now prints exactly
+that one summary line, always, and itemizes individual commit lines (`formatUntrailedCommitLine`,
+unchanged) **only** for the governed-surface hits its judgment step (section 2.4, unchanged) finds
+— applied to every untrailed commit, recognized or human alike, since a known machine shape
+touching a governed file is still worth a glance.
+
+**What does not change:** section 4's core stance — a subject matching none of the known shapes is
+still counted as human, full stop. This amendment narrows the *known* set from "assume nothing" to
+"mechanically recognize this closed list", it does not attempt to reduce false negatives on
+genuinely novel machine shapes; recall over precision on the unknown case is unchanged. The
+"Alternatives considered" entry rejecting this exact move is superseded by this amendment — the
+false-positive cost it weighed against ("one extra glance per session at worst") no longer holds in
+a consumer install, and the maintenance cost it worried about (drifting prose) is now borne by a
+`node --test`-covered pattern set instead of three independent hand-written enumerations.
+
+**Iteration-2 correction (same task, same day):** the first pass of this amendment shipped
+`MACHINE_SHAPES` missing the `research` row — `chore(<bc-or-global>): research <slug>` /
+`chore: research <slug>` — which `references/commit-doctrine.md` had gained earlier the same
+session (agentic-workflow-n3bbk), landing just before this task's worktree was cut. The verifier
+caught the omission (the exact false-positive class this amendment exists to close, mirroring the
+CONSOLIDATE gap it does fix); `research` was added to `MACHINE_SHAPES`, `node --test` coverage
+added for both its BC-scoped and global forms, and the "authoritative, complete list" claim in
+`skills/work/SKILL.md` and this module's header comment corrected to name all eight entries the
+completeness audit above confirms is the full trailer-less set of both `commit-doctrine.md` tables.
+
+**Related, same task, not part of this ADR's decision:** the same task (agentic-workflow-pzacx)
+also consumer-tuned the session-**end** carry-over reconciliation (`agentic-workflow-d6q4h`'s
+mechanism, `skills/work/SKILL.md`'s "Reconciling stranded carry-over" section) — per-file asks now
+scope to `.agentheim/`-owned paths only, with everything else batched into one `left behind (user
+WIP, N files)` line. That mechanism's decision of record isn't a standalone ADR (it lives in the
+`d6q4h` task file and ADR-0026's committing doctrine), so its tuning is recorded there and in the
+BC README, not duplicated as a second ADR here.
 
 ## References
 

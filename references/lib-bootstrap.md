@@ -71,18 +71,23 @@ node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'
 
 Prints `{since, heading}` or `null`. `null` is the SKIP-SILENTLY signal (see the skill prose).
 
-**Step 3 — `parseCommitLog` + `findUntrailedCommits` + `formatHumanChurnSummary`** (arg: a scratch
-file holding the `git log --since="<since>" --name-only --format="%x1eCOMMIT%x1f%H%x1f%s"` capture
-— the conductor writes that command's stdout to a scratch file first, since the git read itself
-stays a conductor prose step per ADR-0038, never a `lib/` call):
+**Step 3 — `parseCommitLog` + `findUntrailedCommits` + `partitionUntrailedCommits` +
+`formatChurnSummaryLine`** (arg: a scratch file holding the `git log --since="<since>" --name-only
+--format="%x1eCOMMIT%x1f%H%x1f%s"` capture — the conductor writes that command's stdout to a
+scratch file first, since the git read itself stays a conductor prose step per ADR-0038, never a
+`lib/` call). Consumer-tuned (agentic-workflow-pzacx, ADR-0066 amendment): the partition now
+mechanically separates known machine-commit shapes from genuinely human ones, so the skill prints
+one summary line instead of skimming every untrailed commit by hand:
 
 ```
-node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','session-start-churn.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','session-start-churn.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no session-start-churn module found under '+c+' (is the Agentheim plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>{const raw=fs.readFileSync(process.argv[1],'utf8');const commits=m.parseCommitLog(raw);const untrailed=m.findUntrailedCommits(commits);console.log(m.formatHumanChurnSummary(untrailed));console.log('---JSON---');console.log(JSON.stringify(untrailed))}).catch(e=>{console.error(e.message);process.exit(1)});" "<path-to-git-log-capture>"
+node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','session-start-churn.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','session-start-churn.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no session-start-churn module found under '+c+' (is the Agentheim plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>{const raw=fs.readFileSync(process.argv[1],'utf8');const commits=m.parseCommitLog(raw);const untrailed=m.findUntrailedCommits(commits);const partition=m.partitionUntrailedCommits(untrailed);console.log(m.formatChurnSummaryLine(partition));console.log('---JSON---');console.log(JSON.stringify(untrailed.map(c=>({...c, shape: m.recognizeMachineShape(c.subject)}))))}).catch(e=>{console.error(e.message);process.exit(1)});" "<path-to-git-log-capture>"
 ```
 
-Prints the formatted advisory text, then a `---JSON---` marker, then the raw `untrailedCommits`
-array (each `{sha, subject, files}`) so the skill's governed-file judgment step (step 4, prose,
-not mechanized) has structured data to reason over.
+Prints the one-line summary text ("N recognized machine-shape commits, M human commits"), then a
+`---JSON---` marker, then the full untrailed-commit array (each `{sha, subject, files, shape}` —
+`shape` is `null` for a genuinely human commit) so the skill's governed-file judgment step (step
+4, prose, not mechanized) has structured data to reason over, and can itemize (via
+`formatUntrailedCommitLine`) only the entries whose files it flags as governed.
 
 ## 3. `lib/vacuum-guard.mjs` — two independent call sites
 
