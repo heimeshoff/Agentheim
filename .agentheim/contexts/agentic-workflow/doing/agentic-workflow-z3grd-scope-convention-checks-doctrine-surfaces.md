@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-z3grd
 title: Scope the mechanize-or-drop convention checks to doctrine-bearing surfaces — consumer product tasks skip check 6c
-status: todo
+status: doing
 type: refactor
 context: agentic-workflow
 created: 2026-07-22

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-ewt9s
 title: Consumer-install bootstrap coverage missing for the vision-conformance and classifyTaskId call sites
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22
