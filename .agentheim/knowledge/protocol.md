@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 18:16 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 43m (first batch start 17:33 → 18:16)
+**Completed:** 6 (first-try PASS: 6, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** k9pbh: 1, w2njd: 1, m7xva: 1, t8kfq: 1, r4gcz: 1, f3wqm: 1
+**Commits:** 10 (3 batch-start, 6 task integrations, this entry)
+**Vision-conformance:** none — batch aligns with vision. All six tasks are internal harness / doctrine-consistency work: w2njd (checkpoint now stages the moved-from doing/ path so a wip tree never holds a task file in two lifecycle folders) and t8kfq (verifier check 1 ADR-0065 stop-loss carve-out) strengthen "wrong work is caught by structure"; m7xva (ADR-0068 delete-and-pointer of the thrice-drifted churn paragraph + MACHINE_SHAPES 8→11), k9pbh (seven doc-drift residuals) and f3wqm (audit-closure doctrine ADR-0069 + a live-tree line-pointer lint) serve "knowledge is durable"; r4gcz (path-aware classifyTask) keeps the batch-mix drift signal trustworthy in consumer installs. None pulls toward a non-goal.
+**Batch mix:** 17% product-facing / 83% harness / 0% bookkeeping (6 tasks)
+**Carry-over:** none — working tree clean. No orphan worktrees.
+
+---
+
 ## 2026-07-22 18:14 -- Task verified and completed: agentic-workflow-f3wqm - Audit-closure doctrine — disposition the three open undershoot residuals, define the audit PASS bar and dated audit stamp with delta-scoping, and ban raw line-number pointers in doctrine prose (lint-enforced)
 
 **Type:** Work / Task completion
