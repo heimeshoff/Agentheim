@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-v4gmt
 title: vacuum-guard.mjs carries dead regexes and a wrong repo-relative-path claim in classifyTask's comment
-status: doing
+status: done
 type: chore
 context: agentic-workflow
 created: 2026-07-22
-completed:
+completed: 2026-07-22
 depends_on: []
 blocks: []
 tags: [dorc-audit-followup, lib-cleanup, vacuum-guard]
@@ -37,10 +37,23 @@ advisory-only classification.
 
 ## Acceptance criteria
 
-- [ ] No unused top-level regex constants remain in `lib/vacuum-guard.mjs`.
-- [ ] The classifyTask comment matches actual matcher behavior; if the anchor fix is chosen instead, a unit test covers a segment-initial repo-relative bookkeeping path classifying as bookkeeping.
-- [ ] `node --test lib/test/vacuum-guard.test.mjs` green (27 existing tests untouched or extended, none deleted).
+- [x] No unused top-level regex constants remain in `lib/vacuum-guard.mjs`.
+- [x] The classifyTask comment matches actual matcher behavior; if the anchor fix is chosen instead, a unit test covers a segment-initial repo-relative bookkeeping path classifying as bookkeeping.
+- [x] `node --test lib/test/vacuum-guard.test.mjs` green (27 existing tests untouched or extended, none deleted).
 
 ## Notes
 
 Found by the 2026-07-22 post-Dorc consistency audit (finding G4).
+
+## Outcome
+
+Removed the two dead top-level regex constants (`HARNESS_SEGMENT_RE`,
+`ADR_SEGMENT_RE`) from `lib/vacuum-guard.mjs` — `classifyTask` only ever
+consulted `BOOKKEEPING_SEGMENT_RE`. Took the cheaper honest fix over the
+anchor rewrite: corrected the comment above `BOOKKEEPING_SEGMENT_RE` to
+state plainly that the segment match requires a leading separator and so
+works for absolute `FILE_LIST` paths but not a repo-relative path where
+`.agentheim` starts the string — matching actual matcher behavior instead
+of the previous false "works for repo-relative paths" claim. No matcher
+behavior changed, so all 27 existing `vacuum-guard.test.mjs` tests pass
+unmodified; full suite (`lib/test/*.test.mjs`, 333 tests) also green.

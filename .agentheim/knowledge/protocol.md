@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:18 -- Task verified and completed: agentic-workflow-v4gmt - vacuum-guard.mjs carries dead regexes and a wrong repo-relative-path claim in classifyTask's comment
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-v4gmt - vacuum-guard.mjs carries dead regexes and a wrong repo-relative-path claim in classifyTask's comment
+**Summary:** Removed two dead regexes (HARNESS_SEGMENT_RE, ADR_SEGMENT_RE) from lib/vacuum-guard.mjs and corrected classifyTask comment to accurately describe segment-match behavior (absolute FILE_LIST paths, not repo-relative)
+**Duration:** 2m00s
+**Verification:** PASS (iteration 1)
+**Files changed:** 1
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 11:18 -- Task verified and completed: agentic-workflow-t6pjd - TDD's UI-task skip advice contradicts verifier check 8 — manual browser exercise never substitutes for the runtime drive
 
 **Type:** Work / Task completion
