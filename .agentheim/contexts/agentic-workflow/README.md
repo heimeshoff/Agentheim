@@ -186,7 +186,13 @@ separate BC, but today the whole tool lives in this one.
   resolving outside the worktree) is silently dropped from `git add` and never fails the
   task. The conductor's own sanctioned rebuild, on `main` at integration, never routes
   through `checkpoint` at all — it isn't exempted by an actor check, it is a different code
-  path by construction, since `checkpoint` only ever runs against a worktree. See ADR-0057,
+  path by construction, since `checkpoint` only ever runs against a worktree. `checkpoint`
+  also closes a second gap in the same seam (agentic-workflow-w2njd): a worker's `FILE_LIST`
+  (or the conductor's BOUNCE fileList) only ever names the task file's NEW lifecycle location
+  (`done/` or `backlog/`); the moved-from `doing/` path — every task's known starting folder,
+  ADR-0032 — is detected from that one entry and folded into `changed` too, so `git add
+  <changed>` stages the deletion half of the rename, not just the addition. Without this, the
+  wip commit's tree held the task file in both lifecycle folders at once. See ADR-0057,
   ADR-0003, ADR-0032, ADR-0038.
 - **Vision-conformance check (session-end, ADR-0040, agentic-workflow-v6d4n)** — a bounded
   advisory pass folded into `work`'s end-of-run reporting, closing the Why→What loop. It reads

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 17:49 -- Task verified and completed: agentic-workflow-w2njd - checkpoint stages only the task file's new location — the wip commit's tree holds the task file in both lifecycle folders, contradicting the squash steps that assert the move is fully captured
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-w2njd - checkpoint stages only the task file's new location — the wip commit's tree holds the task file in both lifecycle folders, contradicting the squash steps that assert the move is fully captured
+**Summary:** checkpoint verb now detects a worker doing->done/backlog move from the fileList and folds the vacated doing/ path into changed, so git add stages the deletion half — the wip commit tree no longer holds the task file in both lifecycle folders; SKILL SUCCESS/BOUNCE steps and squash assertions synced
+**Duration:** 15m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 2
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 17:49 -- Task verified and completed: agentic-workflow-k9pbh - Small-drift batch from the 2026-07-22 post-survey audit — lib-bootstrap counts and §6 legend, phantom backfill-indexes.sh, two stale line pointers, worker.md pre-worktree-era text, one INDEX annotation
 
 **Type:** Work / Task completion

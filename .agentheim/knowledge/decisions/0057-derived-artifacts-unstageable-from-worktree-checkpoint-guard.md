@@ -161,6 +161,25 @@ sharing only the CLI's argv/manifest conventions.
   clean — the rebuild is in-worktree and test-induced, exactly as this ADR's Context section
   describes. No worktree-escape defect exists; no sibling task was filed for it.
 
+## Amendment (agentic-workflow-w2njd): `checkpoint` also stages the moved-from lifecycle path
+
+A second gap in the same seam surfaced independently in a live session and again in the
+2026-07-22 post-survey audit: `checkpoint`'s `fileList` only ever named the task file's **new**
+lifecycle location (`done/` for SUCCESS, `backlog/` for BOUNCE — see `skills/work/SKILL.md`'s
+"FILE_LIST + moved task file" / BOUNCE step 2). The vacated `doing/` path's deletion was never
+staged, so the wip commit's tree — and, after an unamended squash, `main` itself — held the
+task file in **both** lifecycle folders at once, contradicting the very doctrine text asserting
+the squash carries the full move (BOUNCE step 3, PASS/SKIP step 2).
+
+Fixed in `checkpointFiles` (`lib/task-lifecycle-cli.mjs`): given `id` + `fileList`, it detects
+whenever an entry names this task's file under `done/` or `backlog/` (matching the same
+`<id>.md` / `<id>-…` convention `resolveTaskFile` uses) and, if the corresponding `doing/<same
+basename>` no longer exists on disk (confirming a real, in-this-worktree vacate rather than an
+untracked path `git add` would reject), folds that path into the set handed to
+`partitionCheckpointFiles`. No new caller-supplied field, no doctrine hand-rule — the existing
+`git add <changed>` becomes correct by construction. `skills/work/SKILL.md`'s SUCCESS and BOUNCE
+checkpoint steps are updated to describe this; enforced by `lib/test/task-lifecycle-cli.test.mjs`.
+
 ## References
 
 - ADR-0003 — `dashboard/`'s single-source doctrine; the root of why `dist/` is derived.
