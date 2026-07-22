@@ -43,4 +43,27 @@ The `[<task-id>]` trailer is the `git log` index for a task's commit:
 
 `model` is the commit `<type>` prefix reserved for `modeling`'s REFINE/PROMOTE/CONSOLIDATE actions specifically — everything else `modeling` writes (CAPTURE, DISMISS) uses `chore`.
 
+### `work`'s own non-task-commit shapes
+
+The table above covers per-task commits. `work` also mints a handful of trailer-less-by-convention or session-scoped shapes of its own, all documented in `skills/work/SKILL.md`:
+
+| Shape | Message |
+|---|---|
+| Batch-start claim commit (Phase 4 step 1, ADR-0032's ADR-0026 amendment) | `chore(<bc>): batch start [<id-1>] [<id-2>] …` (single-BC batch), or `chore: batch start […]` (multi-BC batch, no `<bc>` token) |
+| BOUNCE integration (verifier-free squash-merge) | `chore(<bc>): task bounced — <title> [<task-id>]` |
+| Reconcile stranded carry-over (session-end, per orphaned file/set) | `chore(<bc>): reconcile stranded <short-desc> [<last-task-id>]`, or `chore: reconcile stranded <short-desc>` if no task ran this session |
+| Session-end bookkeeping (the one post-commit protocol write) | `chore(<bc>): work session end bookkeeping [<last-task-id>]`, or `chore: work session end bookkeeping` if the session committed nothing |
+| Protocol rotation (ADR-0039/ADR-0045, self-firing at session-end) | `chore(agentic-workflow): rotate protocol — <rolledMonths joined with ", "> [<last-task-id>]`, or `chore: rotate protocol — ...` if no task ran |
+| INDEX done-list rotation (ADR-0047, self-firing at session-end) | `chore(agentic-workflow): rotate INDEX done-list — <bc>:<rolledMonths joined with ", ">[, <bc2>:<rolledMonths2>...] [<last-task-id>]`, or `chore: rotate INDEX done-list — ...` if no task ran |
+
+The batch-start and BOUNCE-integration shapes always carry at least one bracketed id; the
+reconcile-stranded/session-end/rotation shapes reuse the last relevant task's id as their
+trailer when one is available, and fall back to a plain `chore: ...` (no bracketed trailer at
+all) when the session ran no task. Session-start human-churn reconciliation
+(`lib/session-start-churn.mjs`'s `findUntrailedCommits`, ADR-0066) still flags every
+genuinely trailer-less commit it finds — it deliberately does not try to distinguish these
+known machine shapes from a real human commit (favoring recall over precision on an
+advisory-only signal) — but this table is what lets a reader recognize one of these fallback
+shapes at a glance instead of mistaking it for out-of-band drift.
+
 ADR of record: `.agentheim/knowledge/decisions/0026-committing-doctrine-bookkeeping-in-task-commit.md`. CONSOLIDATE's contract (trigger, scope, "never silently drop a term or invariant") is fixed by `.agentheim/knowledge/decisions/0041-artifact-growth-two-disciplines-consolidate-verb.md`.

@@ -33,13 +33,13 @@ nothing in dispatch ordering preferred fixing.
 
 ## Acceptance criteria
 
-- [ ] `skills/work/SKILL.md` (scan/dispatch): the remediation-over-diagnosis preference
+- [x] `skills/work/SKILL.md` (scan/dispatch): the remediation-over-diagnosis preference
       is part of dispatch ordering, with the "same thread" linkage defined (tags,
       `depends_on`/`blocks`, or prior-art links).
-- [ ] Spike doctrine (task format notes in `skills/modeling/SKILL.md` and/or the worker's
+- [x] Spike doctrine (task format notes in `skills/modeling/SKILL.md` and/or the worker's
       execution doctrine): every `type: spike` task carries the stop-loss clause; a
       stopped-early spike is a legitimate completion, recorded as such.
-- [ ] An ADR records the doctrine.
+- [x] An ADR records the doctrine.
 
 ## Notes
 

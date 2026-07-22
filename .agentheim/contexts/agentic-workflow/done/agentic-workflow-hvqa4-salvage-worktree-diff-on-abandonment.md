@@ -30,14 +30,14 @@ and only then remove the worktree.
 
 ## Acceptance criteria
 
-- [ ] `skills/work/SKILL.md`: every abandonment path (post-FAIL escalation, bounce,
+- [x] `skills/work/SKILL.md`: every abandonment path (post-FAIL escalation, bounce,
       skip-with-changes) salvages the worktree diff before worktree removal.
-- [ ] The patch's storage convention is decided and documented (location, naming,
+- [x] The patch's storage convention is decided and documented (location, naming,
       lifecycle — e.g. alongside the task file or under a salvage folder), recorded in an
       ADR or the task-format reference.
-- [ ] The escalation message to the builder names the salvaged patch so it is visible,
+- [x] The escalation message to the builder names the salvaged patch so it is visible,
       not just stored.
-- [ ] If a helper lands in `lib/`, it is git-free (ADR-0038 three-layer boundary) and has
+- [x] If a helper lands in `lib/`, it is git-free (ADR-0038 three-layer boundary) and has
       `node --test` coverage.
 
 ## Notes

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:32 -- Task verified and completed: agentic-workflow-d7ksw - Doc micro-sweep from the audit — bc-readme-template surface slots, research model-pin text, orchestrator worker route, hvqa4/rx630 checkboxes, commit-doctrine table
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-d7ksw - Doc micro-sweep from the audit — bc-readme-template surface slots, research model-pin text, orchestrator worker route, hvqa4/rx630 checkboxes, commit-doctrine table
+**Summary:** Five disjoint audit-residual doc fixes: bc-readme-template gained optional Runtime-surface + test-command sections; research SKILL model-pin claim now points to ADR-0031; orchestrator dropped the unsanctioned worker route; hvqa4/rx630 done-file machine-checkable boxes ticked; commit-doctrine table now lists work session/rotation/bounce shapes
+**Duration:** 5m
+**Verification:** PASS (iteration 1)
+**Files changed:** 6
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 11:31 -- Task verified and completed: agentic-workflow-n8zqe - whats-next is behind the new advisories — recommends resolved open questions, ignores the ADR-0065 remediation-first tiebreak
 
 **Type:** Work / Task completion

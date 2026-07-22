@@ -28,7 +28,12 @@ The same task may need multiple specialists. Start from the question being asked
 | Aggregates, entities, value objects, domain events/commands, invariants, workflow within a single BC | `agentheim:tactical-modeler` |
 | Cross-cutting tech: persistence, messaging, transport, deployment, integration with external systems, library choice | `agentheim:architect` |
 | "We don't know enough about X from outside" | `agentheim:researcher` |
-| Concrete implementation of a refined task | `agentheim:worker` |
+
+There is no row routing to `agentheim:worker` here, deliberately: dispatching a worker is the
+`work` skill conductor's job — it claims a task, spawns the worker, and runs the diff through
+the `verifier` gate before commit (`skills/work/SKILL.md`). Routing "concrete implementation of
+a refined task" through the orchestrator would bypass that dispatch/verification gate entirely,
+and nothing sanctions that shortcut.
 
 A feature often needs: strategic-modeler (does it fit current contexts?) → tactical-modeler (what aggregates change?) → architect (any integration impact?) → possibly researcher. Don't mechanically run all four; pick based on what's actually uncertain.
 
