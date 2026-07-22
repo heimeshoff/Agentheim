@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:46 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 44m (first batch start 11:02 → 11:46)
+**Completed:** 10 (first-try PASS: 9, re-dispatched: 1, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-w3kfp: 1, agentic-workflow-e7dnq: 1, agentic-workflow-s9wtc: 1, agentic-workflow-r2hxk: 1, agentic-workflow-t6pjd: 1, agentic-workflow-v4gmt: 1, agentic-workflow-b4yrm: 1, agentic-workflow-n8zqe: 1, agentic-workflow-d7ksw: 1, agentic-workflow-c5nvb: 2
+**Commits:** 15 (4 batch-start, 10 task integrations, this entry)
+**Vision-conformance:** none — batch aligns with vision. All ten tasks are post-Dorc-audit harness-consistency remediation: they harden the structural defenses ("wrong work is caught by structure, not luck") — verifier/doctrine-doc fidelity (s9wtc, r2hxk, t6pjd), churn-advisory accuracy (c5nvb), lint-scope correctness (e7dnq, v4gmt), capture-side spike doctrine (w3kfp), whats-next advisory catch-up (n8zqe), and consumer-install runnability of the conductor helpers (b4yrm) — plus durable ADR/README knowledge (b4yrm amended ADR-0059). None pull toward a stated non-goal.
+**Batch mix:** 0% product-facing / 100% harness / 0% bookkeeping (10 tasks)
+**Carry-over:** none — working tree clean
+
+---
+
 ## 2026-07-22 11:45 -- Task verified and completed: agentic-workflow-c5nvb - Session-start churn re-flags work's own trailer-less fallback commits; vacuum-guard exits leave no session-end boundary
 
 **Type:** Work / Task completion
