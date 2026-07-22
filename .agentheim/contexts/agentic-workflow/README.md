@@ -69,7 +69,10 @@ separate BC, but today the whole tool lives in this one.
   CAPTURE/PROMOTE readiness checks (REFINE inherits PROMOTE's check), and `agents/verifier.md`
   check 6c (mirrored in `skills/verification-before-completion/SKILL.md`). ADR-0044 (id-grammar
   minting) and ADR-0052 (`agentheim:` namespace lint) are the in-house exemplars this doctrine
-  generalizes. See ADR-0059.
+  generalizes. **Scoped to doctrine-bearing surfaces only** — `skills/`, `agents/`,
+  `references/`, `lib/`, `.agentheim/knowledge/`, or a BC README's convention/ubiquitous-language
+  section (ADR-0059 amendment, agentic-workflow-z3grd): a task/diff confined to consumer
+  product surfaces skips both gates entirely, stating the scope and the skip. See ADR-0059.
 - **INDEX entry-length cap (ADR-0060, agentic-workflow-ngzwz)** — a newly written INDEX task
   or ADR bullet is capped at **~2-3 sentences, ~60 words**: the claim and the pointer, detail
   living in the linked task/ADR file, never the catalog line itself. A task's `title:`

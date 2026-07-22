@@ -131,7 +131,7 @@ PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + casca
 4. **Decide refinement level.**
    - **Under-refined → backlog/**: The idea needs more thought, research, or breaking down before anyone could work on it.
    - **Ready → todo/**: The idea is small, well-understood, or already deeply discussed. A worker could pick it up and execute without ambiguity.
-   - **Convention check (ADR-0059, mechanize-or-drop):** if the idea *establishes a convention* — a naming, format, or structural rule that other tasks, agents, or artifacts are meant to follow going forward, not a one-off choice scoped to this task alone — it does not count as "Ready" unless it also carries either an enforcement acceptance criterion (a lint, a live-tree `node --test` check, or a build failure shipped in the same task) or an explicit **"prose-only, unenforced"** marker recorded in the task file. Neither present → route to `backlog/` regardless of how well-understood the idea otherwise reads; a missing enforcement-or-marker choice is exactly the kind of ambiguity backlog exists to resolve. See ADR-0044 and ADR-0052 for in-house exemplars of the enforced pattern.
+   - **Convention check (ADR-0059, mechanize-or-drop) — doctrine-bearing surfaces only:** this check applies only when the idea's scope touches a doctrine-bearing path — `skills/`, `agents/`, `references/`, `lib/`, `.agentheim/knowledge/`, or a BC README's convention/ubiquitous-language section. A capture confined to consumer product surfaces skips this check entirely — self-hosting harness development keeps full coverage; a consumer's product tasks essentially never establish harness-style conventions (ADR-0059 amendment, `agentic-workflow-z3grd`). Where it applies: if the idea *establishes a convention* — a naming, format, or structural rule that other tasks, agents, or artifacts are meant to follow going forward, not a one-off choice scoped to this task alone — it does not count as "Ready" unless it also carries either an enforcement acceptance criterion (a lint, a live-tree `node --test` check, or a build failure shipped in the same task) or an explicit **"prose-only, unenforced"** marker recorded in the task file. Neither present → route to `backlog/` regardless of how well-understood the idea otherwise reads; a missing enforcement-or-marker choice is exactly the kind of ambiguity backlog exists to resolve. See ADR-0044 and ADR-0052 for in-house exemplars of the enforced pattern.
    - **Falsifiability classification (ADR-0061):** classify every acceptance criterion as it's written — machine-checkable (the default, no marker) or `[human-eye]` (see "Classifying acceptance criteria" below). Human-eye criteria are never a `backlog/` blocker on their own. But if a task landing directly in `todo/` ends up with **every** criterion `[human-eye]`, add the same builder-eye-only `## Notes` line PROMOTE's readiness check requires (below) before placing it — don't let a directly-captured task skip the note just because it bypassed PROMOTE's CLI path.
 
 5. **Delegate deep modeling if needed.** For complex ideas (new feature, domain change, architectural impact), spawn the **`agentheim:orchestrator`** agent with the idea and current state. It will route to `tactical-modeler`, `strategic-modeler`, `architect`, or `researcher` as appropriate, and come back with a refined task (or task set) plus any ADRs. For infrastructure-flavored captures, the orchestrator will typically route to `architect` first.
@@ -194,14 +194,22 @@ three-layer boundary (`applyTaskMove` mover / git-free CLI / skill judgment+git)
      Ruling A): a `depends_on` id in no lifecycle folder blocks promotion. The CLI
      enforces this via `applyTaskMove`'s gate in step 3, surfacing a rejection
      rather than a hand-check.
-   - **Convention check (ADR-0059, mechanize-or-drop):** if the task *establishes a
-     convention* — a naming/format/structural rule other tasks or agents are meant
-     to follow going forward, not a one-off implementation choice — it must carry
-     either an enforcement acceptance criterion (a lint, a live-tree `node --test`
-     check, or a build failure) or an explicit **"prose-only, unenforced"** marker
-     in the task file. Neither present → not ready; send it back to REFINE rather
-     than promoting an unenforced convention as an accident. See ADR-0044 / ADR-0052
-     for the shipped-enforcement exemplars this doctrine generalizes.
+   - **Convention check (ADR-0059, mechanize-or-drop) — doctrine-bearing surfaces
+     only:** this check applies only when the task's diff/scope touches a
+     doctrine-bearing path — `skills/`, `agents/`, `references/`, `lib/`,
+     `.agentheim/knowledge/`, or a BC README's convention/ubiquitous-language
+     section. A task confined to consumer product surfaces skips this check
+     entirely — self-hosting harness development keeps full coverage; a
+     consumer's product tasks essentially never establish harness-style
+     conventions (ADR-0059 amendment, `agentic-workflow-z3grd`). Where it
+     applies: if the task *establishes a convention* — a naming/format/structural
+     rule other tasks or agents are meant to follow going forward, not a one-off
+     implementation choice — it must carry either an enforcement acceptance
+     criterion (a lint, a live-tree `node --test` check, or a build failure) or an
+     explicit **"prose-only, unenforced"** marker in the task file. Neither
+     present → not ready; send it back to REFINE rather than promoting an
+     unenforced convention as an accident. See ADR-0044 / ADR-0052 for the
+     shipped-enforcement exemplars this doctrine generalizes.
    - **Falsifiability classification (ADR-0061):** every acceptance criterion is either
      machine-checkable (default) or carries the explicit `[human-eye]` marker — this is
      **not itself a promotion blocker**: a task with some, or even all, human-eye criteria

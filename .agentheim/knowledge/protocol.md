@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 13:44 -- Task verified and completed: agentic-workflow-z3grd - Scope the mechanize-or-drop convention checks to doctrine-bearing surfaces — consumer product tasks skip check 6c
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-z3grd - Scope the mechanize-or-drop convention checks to doctrine-bearing surfaces — consumer product tasks skip check 6c
+**Summary:** Scoped the mechanize-or-drop convention checks (verifier check 6c; modeling CAPTURE step 4 / PROMOTE step 2) to fire only when the diff touches doctrine-bearing surfaces (skills/agents/references/lib/knowledge/BC-README convention sections); consumer product tasks skip; amended ADR-0059 and synced the VBC restatement
+**Duration:** 5m
+**Verification:** PASS (iteration 1)
+**Files changed:** 4
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 13:43 -- Task verified and completed: agentic-workflow-ewt9s - Consumer-install bootstrap coverage missing for the vision-conformance and classifyTaskId call sites
 
 **Type:** Work / Task completion

@@ -195,6 +195,17 @@ If `related_adrs` is empty, skip this check.
 
 ### 6c. Mechanize-or-drop — convention enforcement (ADR-0059)
 
+**Scope gate — doctrine-bearing surfaces only.** This check fires only when the diff touches
+a doctrine-bearing path: `skills/`, `agents/`, `references/`, `lib/`, `.agentheim/knowledge/`,
+or a BC README's convention/ubiquitous-language section. A diff confined to consumer product
+surfaces (app/feature code, data, a BC README's non-convention sections, etc.) **skips this
+check entirely** — state the scope and the skip in your evidence (e.g. "6c skipped — diff
+touches no doctrine-bearing path") rather than silently omitting it. Self-hosting harness
+development keeps full coverage; a consumer's product tasks essentially never establish
+harness-style conventions, so judging every diff would be a per-task judgment tax paid for a
+failure mode that recurs only in this repo's own development (ADR-0059 amendment,
+`agentic-workflow-z3grd`).
+
 Judge whether this task **establishes a convention**: a naming, format, or structural rule
 that other tasks, agents, or artifacts are expected to follow *going forward* — not merely a
 one-off implementation choice scoped to this diff alone. (ADR-0044's id-grammar rule and

@@ -4,7 +4,7 @@ title: Mechanize-or-drop — a convention-establishing task ships its enforcemen
 scope: agentic-workflow
 status: accepted
 date: 2026-07-21
-related_tasks: [agentic-workflow-z394j, agentic-workflow-b4yrm]
+related_tasks: [agentic-workflow-z394j, agentic-workflow-b4yrm, agentic-workflow-z3grd]
 related_adrs: [0044, 0052, 0038]
 ---
 
@@ -114,6 +114,43 @@ install, exactly as every convention was before this ADR, with no lint backing i
 consumer-side violation ever surface, revisit distributing the lints rather than treating this
 note as a permanent close.
 
+## Doctrine-bearing-surface scoping (amendment, agentic-workflow-z3grd, 2026-07-22)
+
+The founding incidents in this ADR's Context are both self-hosting failures: agents violating a
+convention while developing this repo's own harness (the id-grammar rule, the `agentheim:`
+namespace rule). Ten months of the doctrine running unscoped surfaced the 2026-07-22 overshoot
+review's #3 candidate: verifier check 6c fires on *every* verified task, on opus, and
+`modeling`'s CAPTURE step 4 / PROMOTE step 2 mirror the same judgment at every capture and
+promotion — yet a consumer project's product tasks (game features, app code, data changes)
+essentially never establish a harness-style naming/format/structural rule the way a `skills/`
+or `lib/` change does. Judging every diff for convention-establishment was a per-task judgment
+tax paid in full for a failure mode that recurs almost exclusively in this repo's own
+development.
+
+**Both gates (verifier check 6c; modeling's CAPTURE step 4 and PROMOTE step 2) now fire only
+when the task/diff touches a doctrine-bearing surface** — `skills/`, `agents/`, `references/`,
+`lib/`, `.agentheim/knowledge/`, or a BC README's convention/ubiquitous-language section. A
+task or diff confined to consumer product surfaces skips the check entirely; the check states
+the scope and the skip rather than silently omitting it, so the absence is visible rather than
+ambiguous (mirroring how check 8's runtime-surface gate states its own skip when no
+`surfacePath` is touched).
+
+**Rationale:** self-hosting keeps full coverage — the doctrine was purpose-built for exactly
+this repo's harness-development conventions, and nothing about the scoping loosens it there.
+Consumer product tasks are exempt because the underlying premise of the doctrine (a rule other
+tasks/agents/artifacts are expected to follow going forward) essentially never arises in
+ordinary feature/bug work — the rare case where it does (a project-wide naming convention
+introduced by a product task) is still catchable by a careful reader applying check 6's
+adjacent ADR-worthiness judgment, and the false-negative risk of an occasional missed
+product-side convention is judged far cheaper than the false-positive tax of running the full
+judgment call on every task, which this ADR's own Consequences section already flagged as a
+risk (over-reading an ordinary implementation choice into a "convention").
+
+This scoping is itself a deliberate, visible decision, not a silent narrowing of the doctrine's
+reach — consistent with the ADR's own bar that a choice be made and recorded, not defaulted
+into silently. Should a consumer-side convention violation ever surface unflagged because of
+this scoping, revisit widening it rather than treating this note as a permanent close.
+
 ## Consequences
 
 ### Positive
@@ -162,3 +199,4 @@ note as a permanent close.
 - `skills/modeling/SKILL.md` — CAPTURE step 4, PROMOTE step 2 (this task's implementation).
 - `agents/verifier.md` check 6c, `skills/verification-before-completion/SKILL.md` (this task's
   implementation).
+- `agentic-workflow-z3grd` — doctrine-bearing-surface scoping of both gates (amendment above).
