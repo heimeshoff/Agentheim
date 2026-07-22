@@ -116,9 +116,8 @@ Tests are also a place where ubiquitous language lives. A test named `it_rejects
 When TDD applies and the worker returns `RESULT: SUCCESS`, the strict return format includes:
 
 - `TESTS_ADDED: <integer>` — count of new tests written for this task
-- `TESTS_PASSING: yes | no` — whether the full test suite passes after the change, per the
-  runner's own verdict (ADR-0062) — actually run it and read its exit status/report, don't infer
-  "yes" from a test printing its own success message
+- `TESTS_PASSING: yes | no` — per the definition in `references/worker-return-format.md` (ADR-0062:
+  the runner's own verdict, never inferred from a test printing its own success message)
 - `TDD_SKIPPED: <reason or "no">` — when TDD legitimately did not apply (per the list above), which reason; otherwise `no`
 
 If `TESTS_PASSING: no`, the worker must not return SUCCESS — that's either a FAIL (the worker couldn't get tests green) or a BOUNCE (the task as specified can't be satisfied). Returning SUCCESS with failing tests is a protocol violation.

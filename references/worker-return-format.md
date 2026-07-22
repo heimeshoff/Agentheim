@@ -26,6 +26,8 @@ CONCEPT_CANDIDATE: <concept-name> — converging on N artifacts (<comma-separate
 
 `CONCEPT_CANDIDATE` is for opt-in concept page hints (see `references/concept-template.md`). Use it when, mid-task, the worker noticed that 3+ ADRs / research reports / done tasks in the BC converge on a single concept that doesn't yet have a synthesis page in `contexts/<bc>/concepts/`. The worker never creates the page — the user decides. If no convergence was noticed, `CONCEPT_CANDIDATE: none`.
 
+`TESTS_PASSING` is the runner's own verdict (ADR-0062), not the worker's impression of one — read the test runner's exit status or its structured report (TAP, JUnit XML, `node --test`'s own summary line), never infer `yes` from a test printing its own success message with no runner actually invoked and its exit status checked.
+
 If `TESTS_PASSING: no`, the worker must **not** return SUCCESS. That's either a FAIL (couldn't get tests green) or a BOUNCE (the task as specified can't be satisfied). Returning SUCCESS with failing tests is a protocol violation the verifier catches (see "No protocol, index, or git tampering" / test-execution checks in `agents/verifier.md`).
 
 ### For a bounce (task was under-refined)

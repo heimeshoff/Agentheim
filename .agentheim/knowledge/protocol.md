@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:17 -- Task verified and completed: agentic-workflow-r2hxk - worker-return-format.md misses the ADR-0062 runner-verdict qualifier its own restatement-exactness rule demands
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-r2hxk - worker-return-format.md misses the ADR-0062 runner-verdict qualifier its own restatement-exactness rule demands
+**Summary:** Folded the ADR-0062 runner-verdict qualifier into references/worker-return-format.md (the canonical source) and shrank the TDD skill restatement to a pointer; no third copy of the field definition remains
+**Duration:** 2m40s
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 11:12 -- Batch started: [agentic-workflow-r2hxk, agentic-workflow-t6pjd, agentic-workflow-v4gmt]
 
 **Type:** Work / Batch start
