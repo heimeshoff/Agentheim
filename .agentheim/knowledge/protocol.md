@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 17:28 -- Modeling / Captured: agentic-workflow-f3wqm - Audit-closure doctrine
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** Convergence contract for the recurring "did we miss something" audits: one ADR dispositioning the three undispositioned undershoot residuals from the 2026-07-22 audit (vacuum-guard conditional refusal → recommended fix; check-1b cross-task blindness and untyped investigation tasks → recommended declines, ADR-0067 posture), a defined audit PASS bar, a dated audit-stamp + delta-scoping convention, and a lint banning raw line-number pointers in doctrine prose (the class found in three consecutive audits). Depends on k9pbh.
+
+---
+
 ## 2026-07-22 17:01 -- Modeling / Captured: 5 tasks from the 2026-07-22 post-survey consistency audit
 
 **Type:** Modeling / Capture
