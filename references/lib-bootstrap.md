@@ -87,8 +87,8 @@ not mechanized) has structured data to reason over.
 ## 3. `lib/vacuum-guard.mjs` — two independent call sites
 
 **Vacuum guard (`extractOpenQuestions` + `formatVacuumGuardLine`)** — `skills/work/SKILL.md`
-Phase 2 step 8, and `skills/modeling/SKILL.md`'s Opening flow step 2. Arg: absolute path to
-`vision.md`.
+Phase 2 step 8, `skills/modeling/SKILL.md`'s Opening flow step 2, and
+`skills/whats-next/SKILL.md`'s Step 1 vision read. Arg: absolute path to `vision.md`.
 
 ```
 node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','vacuum-guard.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','vacuum-guard.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no vacuum-guard module found under '+c+' (is the Agentheim plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>{const text=fs.readFileSync(process.argv[1],'utf8');const items=m.extractOpenQuestions(text);console.log(JSON.stringify(items));console.log('---');console.log(m.formatVacuumGuardLine(items))}).catch(e=>{console.error(e.message);process.exit(1)});" "<path-to-vision.md>"

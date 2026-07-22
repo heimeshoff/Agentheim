@@ -39,7 +39,8 @@ The `[<task-id>]` trailer is the `git log` index for a task's commit:
 | `modeling` DISMISS | `chore(<bc>): dismiss <id-or-cascade-set>` |
 | `modeling` CONSOLIDATE | `model(<bc>): consolidate <bc> README` |
 | `quick-capture` | `chore(<bc>): capture <task-id> — <title> [<task-id>]` |
-| `brainstorm` (session) | `chore(<bc-or-global>): brainstorm <topic> — vision created \| revised \| extended` |
+| `quick-capture` re-route (user corrects the routing) | `chore(<new-bc>): re-route <task-id> → <new-bc> [<task-id>]` |
+| `brainstorm` (session) | `chore(<bc-or-global>): brainstorm <topic> — vision created \| vision revised \| vision extended` |
 
 `model` is the commit `<type>` prefix reserved for `modeling`'s REFINE/PROMOTE/CONSOLIDATE actions specifically — everything else `modeling` writes (CAPTURE, DISMISS) uses `chore`.
 

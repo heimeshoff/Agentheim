@@ -94,7 +94,10 @@ Key terms with definitions as we currently understand them.
 Expect this to evolve.
 
 ## Open questions
-Things we decided to defer, not resolve.
+Things we decided to defer, not resolve. One bullet per question, each carrying its
+capture date — `- <question> (open since YYYY-MM-DD)` — so the vacuum guard
+(ADR-0064) can surface its age later. Same rule applies whenever a later session
+adds a new question to this section.
 ```
 
 ## Producing context-map.md (when warranted)

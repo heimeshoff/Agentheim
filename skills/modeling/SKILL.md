@@ -213,7 +213,8 @@ three-layer boundary (`applyTaskMove` mover / git-free CLI / skill judgment+git)
    > of them on an invented proxy.
 
    `lib/human-eye-criteria.mjs`'s live-tree lint asserts this note is present on any
-   `backlog/todo/doing/done` task whose criteria are all `[human-eye]` — the enforcement half
+   `todo/doing/done` task whose criteria are all `[human-eye]` (a `backlog/` resident is
+   legal without the note by design, ADR-0061) — the enforcement half
    of this convention (ADR-0059 mechanize-or-drop). Edit the task file in place, in
    `backlog/`, before the move — the CLI's manifest then naturally covers the edit since it
    commits the same (now-relocated) file.
