@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 15:06 -- Modeling / Refined: agentic-workflow-mqwnc - Doc micro-sweep
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** Re-scoped the escalated mqwnc (iteration-1 FAIL, task-under-specified) per its verifier note — dropped the impossible criterion #3 (reword the conductor-owned, code-regenerated live `INDEX.md` headers) and kept the three worker-legal reference-doc edits (`agents/verifier.md:21` wording, `references/bc-readme-template.md` pointer, `references/index-template.md` template header prose). mqwnc moved doing/ → todo/ (ready). The live-INDEX-header + `lib/index-rotation.mjs` `archivedDoneHeader` code side was split into `agentic-workflow-jf6qz` (brought onto main from the escalated worktree, refined with the open live-header-correction design question — stays in backlog until that's decided). mqwnc now `blocks` both bx01e and jf6qz; jf6qz `depends_on` mqwnc so the code matches the canonical template wording. The escalated worktree `.worktrees/agentic-workflow-mqwnc` + branch were removed (moot after re-scope); the salvage patch is retained.
+**Split into:** agentic-workflow-jf6qz (backlog)
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 13:45 -- Work session ended
 
 **Type:** Work / Session end

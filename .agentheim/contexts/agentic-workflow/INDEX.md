@@ -10,20 +10,20 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 2
-- **Todo:** 1
-- **Doing:** 1
+- **Backlog:** 3
+- **Todo:** 2
+- **Doing:** 0
 - **Done:** 172
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-mqwnc** — Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, index-template done-list header wording (chore) — `todo/agentic-workflow-mqwnc-doc-micro-sweep-audit-2026-07-22.md`
 - **agentic-workflow-bx01e** — Strip duplicated rationale narration from the big prompts — rules stay imperative with ADR pointers (refactor) — `todo/agentic-workflow-bx01e-strip-duplicated-rationale-narration.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-mqwnc** — Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, INDEX done-list header wording (chore) — `doing/agentic-workflow-mqwnc-doc-micro-sweep-audit-2026-07-22.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
@@ -120,6 +120,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-jf6qz** — Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; also correct the live INDEX headers (bug) — `backlog/agentic-workflow-jf6qz-fix-archiveddoneheader-phantom-cap-wording.md`
 - **agentic-workflow-d5a9b** — Enable parallel worktree sessions with independent idea capture and ticket movement — `backlog/agentic-workflow-d5a9b-parallel-worktree-sessions.md`
 - **agentic-workflow-e4bjh** — Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI (refactor) — `backlog/agentic-workflow-e4bjh-capture-dismiss-lifecycle-cli-verbs.md`
 <!-- backlog-list:end -->
