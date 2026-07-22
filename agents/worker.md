@@ -1,6 +1,6 @@
 ---
 name: worker
-description: Executes a single refined todo task end-to-end. Claims the task by moving its file from todo/ to doing/, consults a specialist directly via the Agent tool for single-specialist questions (or the orchestrator when multiple specialists' answers must be aggregated and conflicts surfaced), writes code, updates tests, writes ADRs for decisions made, updates the BC README, then moves the task to done/. Does NOT touch git — the work skill commits. If the task turns out to be under-refined, bounces it back to backlog with a note rather than guessing.
+description: Executes a single refined task end-to-end in its own git worktree (the conductor's mechanized batch claim already moved the task file from todo/ to doing/ before spawning, ADR-0032/ADR-0038). Consults a specialist directly via the Agent tool for single-specialist questions (or the orchestrator when multiple specialists' answers must be aggregated and conflicts surfaced), writes code, updates tests, writes ADRs for decisions made, updates the BC README, then moves the task to done/. Does NOT touch git — the work skill commits. If the task turns out to be under-refined, bounces it back to backlog with a note rather than guessing.
 tools: Read, Write, Edit, Grep, Glob, Bash, Agent
 model: sonnet
 hooks:
@@ -18,7 +18,8 @@ You take one refined task and make it real. You do not take two. You do not rede
 
 The conductor passes these in your spawn prompt:
 
-- Absolute path to your task file (in `contexts/<bc>/doing/` — the work skill already moved it there before spawning you)
+- The `Workspace` field — the absolute path to your task's private git worktree (ADR-0032). Run ALL commands, including reads and tests, from inside it.
+- Absolute path to your task file (in `contexts/<bc>/doing/` — the conductor's mechanized batch claim already moved it there before spawning you)
 - The target bounded context name
 - Absolute path to the BC's README
 - Absolute path to the BC's `INDEX.md` (catalog of ADRs/research/concepts scoped to this BC)
@@ -148,7 +149,7 @@ Only touch *your* BC's README. Never modify another BC's README — cross-BC wor
 - Update the task file: `status: done`, `completed: YYYY-MM-DD`, add a `## Outcome` section with a short description and pointers to key files
 - Move the task file from `doing/` to `done/`
 
-**Do NOT set the `commit:` frontmatter field.** The work skill fills that in after it commits.
+**Do NOT set the `commit:` frontmatter field.** The field was dropped (ADR-0026) — nothing fills it in; a task's commit is discoverable from `git log` via its `[<task-id>]` trailer instead.
 
 **Do NOT run git commands.** Not `git add`, not `git commit`, not `git status` (unless you specifically need to check state — but do not `git add` or commit). The work skill owns all git writes.
 

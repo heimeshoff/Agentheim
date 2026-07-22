@@ -41,8 +41,8 @@ section once the BC has a test suite: `work`'s per-batch "Resolve the test comma
 batch" step (`skills/work/SKILL.md`'s "### Verifier dispatch" section, `agentic-workflow-g9s3w`)
 and the verifier's discovery
 fallback (`agents/verifier.md`) both look at the BC README first, before falling back to
-project-root `package.json`/`Makefile`/etc. TDD's runner-first rule
-(`skills/test-driven-development/SKILL.md` ~:66-69) requires recording the invocation here as
+project-root `package.json`/`Makefile`/etc. TDD's "Runner-first" section, step 2
+(`skills/test-driven-development/SKILL.md`) requires recording the invocation here as
 part of a project's or ecosystem's first test-bearing task — get it right once and every later
 task's verification reuses it for free. Omit this section entirely until the BC has tests to run.
 

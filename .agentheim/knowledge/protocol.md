@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 17:49 -- Task verified and completed: agentic-workflow-k9pbh - Small-drift batch from the 2026-07-22 post-survey audit — lib-bootstrap counts and §6 legend, phantom backfill-indexes.sh, two stale line pointers, worker.md pre-worktree-era text, one INDEX annotation
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-k9pbh - Small-drift batch from the 2026-07-22 post-survey audit — lib-bootstrap counts and §6 legend, phantom backfill-indexes.sh, two stale line pointers, worker.md pre-worktree-era text, one INDEX annotation
+**Summary:** Fixed six small-drift doc/comment residuals from the 2026-07-22 audit — lib-bootstrap invocation count + §6 legend, phantom backfill-indexes.sh, two stale line pointers replaced with greppable anchors, worker.md three pre-worktree-era drifts
+**Duration:** 14m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 17:48 -- Task verified and completed: agentic-workflow-m7xva - commit-doctrine's churn paragraph drifted a third time — delete-and-pointer it per ADR-0068; the shape table misses trailer-less batch-capture and release commits, so churn misclassifies them as human
 
 **Type:** Work / Task completion

@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 3
 - **Todo:** 3
-- **Doing:** 2
-- **Done:** 175
+- **Doing:** 1
+- **Done:** 176
 <!-- task-counts:end -->
 
 ### Todo
@@ -26,11 +26,11 @@ research touching this BC, and concept synthesis pages.
 ### Doing
 <!-- doing-list:start -->
 - **agentic-workflow-w2njd** — checkpoint stages only the task file's new location — the wip commit's tree holds the task file in both lifecycle folders, contradicting the squash steps that assert the move is fully captured (bug) — `doing/agentic-workflow-w2njd-checkpoint-stages-moved-from-path.md`
-- **agentic-workflow-k9pbh** — Small-drift batch from the 2026-07-22 post-survey audit — lib-bootstrap counts and §6 legend, phantom backfill-indexes.sh, two stale line pointers, worker.md pre-worktree-era text, one INDEX annotation (chore) — `doing/agentic-workflow-k9pbh-small-drift-batch-post-survey-audit-residuals.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-k9pbh** — Small-drift batch from the 2026-07-22 post-survey audit — lib-bootstrap counts and §6 legend, phantom backfill-indexes.sh, two stale line pointers, worker.md pre-worktree-era text, one INDEX annotation (chore) — `done/agentic-workflow-k9pbh-small-drift-batch-post-survey-audit-residuals.md`
 - **agentic-workflow-m7xva** — commit-doctrine's churn paragraph drifted a third time — delete-and-pointer it per ADR-0068; the shape table misses trailer-less batch-capture and release commits, so churn misclassifies them as human (bug) — `done/agentic-workflow-m7xva-commit-doctrine-churn-paragraph-and-missing-machine-shapes.md`
 - **agentic-workflow-bx01e** — Strip duplicated rationale narration from the big prompts — rules stay imperative with ADR pointers (refactor) — `done/agentic-workflow-bx01e-strip-duplicated-rationale-narration.md`
 - **agentic-workflow-mqwnc** — Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, index-template done-list header wording (chore) — `done/agentic-workflow-mqwnc-doc-micro-sweep-audit-2026-07-22.md`
@@ -127,7 +127,7 @@ research touching this BC, and concept synthesis pages.
 ### Backlog
 <!-- backlog-list:start -->
 - **agentic-workflow-jf6qz** — Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; also correct the live INDEX headers (bug) — `backlog/agentic-workflow-jf6qz-fix-archiveddoneheader-phantom-cap-wording.md`
-- **agentic-workflow-d5a9b** — Enable parallel worktree sessions with independent idea capture and ticket movement — `backlog/agentic-workflow-d5a9b-parallel-worktree-sessions.md`
+- **agentic-workflow-d5a9b** — Enable parallel worktree sessions with independent idea capture and ticket movement (feature) — `backlog/agentic-workflow-d5a9b-parallel-worktree-sessions.md`
 - **agentic-workflow-e4bjh** — Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI (refactor) — `backlog/agentic-workflow-e4bjh-capture-dismiss-lifecycle-cli-verbs.md`
 <!-- backlog-list:end -->
 

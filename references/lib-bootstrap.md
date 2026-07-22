@@ -37,7 +37,7 @@ if(!r){console.error('no <LABEL> found under '+c+' (is the Agentheim plugin inst
 under `lib/`); `<LABEL>` is a short human label for the fail-loud message. This is the exact
 boilerplate already embedded in the `node -e` one-liners at `skills/work/SKILL.md`'s protocol-
 rotation check, INDEX done-list rotation check, and `skills/modeling/SKILL.md`'s PROMOTE step 3 —
-copied here once so the four invocations below don't each restate it.
+copied here once so the nine invocations below don't each restate it.
 
 Text-blob arguments (a `protocol.md` excerpt, a `git log` capture, `vision.md`'s contents) are
 passed as **file paths** via `process.argv`, read inside the script with `fs.readFileSync`, rather
@@ -168,6 +168,10 @@ mint-time backstop (ADR-0044) — verify a freshly minted id's tail before accep
 node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','id-grammar.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','id-grammar.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no id-grammar module found under '+c+' (is the Agentheim plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>{console.log(m.classifyTaskId(process.argv[1]))}).catch(e=>{console.error(e.message);process.exit(1)});" "<newly-minted-id>"
 ```
 
-Prints `token` (well-formed — accept), `legacy` (all-digit tail — accept), or `malformed`
-(discard and mint a fresh one — no need to ask the user, a random token is free and
-non-interactive).
+Prints `token` (well-formed — accept), `legacy`, or `malformed`. At this mint-time backstop
+call site only `token` is acceptable (ADR-0044: `classifyTaskId(newId) === 'token'`) — a
+freshly minted id classifying `legacy` (all-digit tail) is itself out-of-spec and must be
+discarded and re-minted exactly like `malformed`, no need to ask the user, since a random
+token is free and non-interactive. `legacy`-accept is a *reading* behaviour (tolerating an
+already-on-disk id, e.g. `deriveContext`'s resolver) — it does not apply when classifying a
+newly minted id here.
