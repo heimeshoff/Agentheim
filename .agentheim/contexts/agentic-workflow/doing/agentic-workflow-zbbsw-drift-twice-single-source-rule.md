@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-zbbsw
 title: Drift-twice rule — a restatement that drifts a second time is deleted and pointered, never re-synced
-status: todo
+status: doing
 type: decision
 context: agentic-workflow
 created: 2026-07-22

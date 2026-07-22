@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 13:11 -- Batch started: [agentic-workflow-mqwnc, agentic-workflow-pzacx, agentic-workflow-zbbsw]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-mqwnc - Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, INDEX done-list header wording, agentic-workflow-pzacx - Consumer-tune the two session reconciliations — fold recognized machine shapes into a summary, batch non-.agentheim carry-over, agentic-workflow-zbbsw - Drift-twice rule — a restatement that drifts a second time is deleted and pointered, never re-synced
+**Parallel:** yes (3 workers — ewt9s/z3grd held to next wave at MAX_PARALLEL=3; bx01e still blocked on mqwnc+z3grd+pzacx, cvptc already done)
+
+---
+
 ## 2026-07-22 13:10 -- Task completed (verification skipped): agentic-workflow-znwve - Record the two undocumented survey dispositions — mid-batch checkpoint (decide) and Haiku thin-agent wrapper (decline)
 
 **Type:** Work / Task completion

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-pzacx
 title: Consumer-tune the two session reconciliations — fold recognized machine shapes into a summary, batch non-.agentheim carry-over
-status: todo
+status: doing
 type: refactor
 context: agentic-workflow
 created: 2026-07-22
