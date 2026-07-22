@@ -4,8 +4,8 @@ title: Vacuum guard — an empty board surfaces the open vision decision instead
 scope: agentic-workflow
 status: accepted
 date: 2026-07-21
-related_tasks: [agentic-workflow-qz1h7, agentic-workflow-v4gmt, agentic-workflow-r4gcz]
-related_adrs: [0040, 0027, 0059, 0038, 0017]
+related_tasks: [agentic-workflow-qz1h7, agentic-workflow-v4gmt, agentic-workflow-r4gcz, agentic-workflow-f3wqm]
+related_adrs: [0040, 0027, 0059, 0038, 0017, 0069]
 ---
 
 # ADR-0064: Vacuum guard — an empty board surfaces the open vision decision instead of minting filler; session-end batch-mix line
@@ -50,10 +50,29 @@ YYYY-MM-DD.*` convention) and reads each remaining item's age via a new
 `(open since YYYY-MM-DD)` annotation convention (see "What's deterministic vs. judged"
 below).
 
+**The session does not self-generate substitute work, unconditionally, the moment the ready
+set/backlog is found empty** — no manufactured chore task, no wandering into unrelated
+harness/test-suite maintenance on its own initiative — regardless of whether
+`extractOpenQuestions` then turns up anything to point at instead.
+
+### Amendment (agentic-workflow-f3wqm/ADR-0069): refusal-placement fix
+
+As originally shipped, the paragraph above was written (and both call sites implemented it)
+as a bullet nested *inside* "if one or more genuinely open items exist" — so the refusal only
+textually applied when there was an open vision question to surface instead. An empty ready
+set with a fully-resolved "Open questions" section carried no refusal at all: exactly the
+case where a session finding nothing to point at is most tempted to invent its own filler,
+the original Dorc failure this ADR exists to close. The 2026-07-22 audit-closure task
+(`agentic-workflow-f3wqm`, ADR-0069) found this and moved the refusal to sit unconditionally
+on "the ready set/backlog is empty," ahead of the `extractOpenQuestions` read, at both call
+sites (`skills/work/SKILL.md` step 8, `skills/modeling/SKILL.md` Opening step 2 — the latter
+was found to have carried no explicit refusal sentence at all, only an implicit one via its
+"still falls through to inviting CAPTURE" framing; ADR-0069 made it explicit too). The
+open-items-only actions below (surfacing the item, the vacuum-guard session-end entry, the
+hard-gate exemption) are unchanged — only the refusal's placement moved.
+
 If one or more genuinely open items exist:
 
-- The session **does not self-generate substitute work** — no manufactured chore task, no
-  wandering into unrelated harness/test-suite maintenance on its own initiative.
 - It **surfaces the open item(s) with their age** (`formatVacuumGuardLine`, e.g.
   "Brainstorm on existing code (next iteration). (open 46 days)"), framed as the single
   highest-leverage thing the builder can do right now.
@@ -277,3 +296,6 @@ enforcement or is prose-only:
   before this amendment gave them a real caller.
 - `agentic-workflow-r4gcz` — consumer-tuning amendment making bucket 3 (`bug`/`refactor`)
   path-aware; see "Amendment" above.
+- `agentic-workflow-f3wqm` / ADR-0069 — audit-closure doctrine; the refusal-placement fix
+  making the do-not-self-generate refusal unconditional on an empty ready set/backlog,
+  amending this ADR (see "Amendment" above).

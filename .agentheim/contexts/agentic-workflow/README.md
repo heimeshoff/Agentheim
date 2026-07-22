@@ -209,9 +209,14 @@ separate BC, but today the whole tool lives in this one.
   reaches its empty-board rung (Step 2 rung 5), all three check
   `vision.md`'s "## Open questions" section (via `lib/vacuum-guard.mjs`'s `extractOpenQuestions`,
   which excludes already-resolved struck-through items and reads each remaining item's
-  `(open since YYYY-MM-DD)` annotation). If genuinely open items exist, the session **refuses to
-  self-generate substitute filler** — no manufactured chore, no unrelated harness cleanup — and
-  instead surfaces the decision(s) with their age (`formatVacuumGuardLine`, e.g. "Brainstorm on
+  `(open since YYYY-MM-DD)` annotation). **The session refuses to self-generate substitute
+  filler unconditionally, the moment the ready set/backlog is found empty** — no manufactured
+  chore, no unrelated harness cleanup — regardless of whether `extractOpenQuestions` then turns
+  up anything to point at instead (refusal-placement fix, agentic-workflow-f3wqm/ADR-0069
+  amending this ADR: the original prose had nested the refusal inside the "open items exist"
+  branch, so an empty board with a fully-resolved Open Questions section had no textual refusal
+  to hold it). When genuinely open items exist, the session additionally
+  surfaces the decision(s) with their age (`formatVacuumGuardLine`, e.g. "Brainstorm on
   existing code (next iteration). (open 46 days)") as the highest-leverage builder action
   available. **The exit itself still writes a minimal session-end protocol entry**
   (`## ... -- Work session ended` heading, `Type: Work / Session end`, `Completed: 0`, one line
@@ -295,6 +300,30 @@ separate BC, but today the whole tool lives in this one.
   hand-maintained prose enumeration of the *known* shapes (which drifted twice in one week —
   agentic-workflow-d7ksw, agentic-workflow-c5nvb) is now mechanized. See
   ADR-0066, ADR-0026, ADR-0027, ADR-0038, ADR-0059.
+- **Audit-closure doctrine (ADR-0069, agentic-workflow-f3wqm)** — closes the recurring
+  "did we miss something?" loop: undispositioned judgment residuals get re-found by every
+  fresh audit, and un-mechanized finding classes recur by construction. Three parts. **(1)
+  Dispositioning residuals** — a residual from a consistency audit gets fix or
+  decline-with-rationale, ADR-0067 posture (revisit-on-evidence, never silent); this ADR's
+  own three dispositions are the exemplar (vacuum-guard refusal-placement fixed — see the
+  amendment on the *Vacuum guard* entry above; cross-task metric-drift blindness declined
+  pending incident; untyped investigation tasks declined pending incident, but nudged toward
+  `type: spike` in `modeling`'s field legend). **(2) The audit PASS bar** — an audit passes
+  when it yields zero findings of class contradiction / lost-rule / code-doctrine-behavior-
+  mismatch; cosmetic classes (stale pointers, counts, wording) are fixed-or-dismissed the same
+  session, never carried; declined judgment findings land as ADR dispositions the same wave.
+  **(3) Dated audit stamp + delta-scoping** — each audit appends a dated entry to
+  `.agentheim/knowledge/audit-log.md` naming the bar applied, the verdict, the HEAD audited,
+  and any open dispositions; the next "did we miss something?" audit scopes to the diff since
+  the last stamp plus that stamp's open dispositions, not a full-tree re-audit, unless the
+  builder explicitly asks for one. The PASS bar and the stamp convention are both **prose-only,
+  unenforced** (ADR-0059) — audit conduct is conductor/auditor judgment, not lintable. **(4)**
+  ships a fourth, orthogonal, MECHANIZED piece: `lib/doctrine-line-pointer.mjs`'s live-tree
+  lint bans raw line-number pointers (`~:NNN`, `(:NNN-NNN)`, `file.md:NNN`, `#LNNN`) in
+  `skills/`/`agents/`/`references/` prose — doctrine must cite another passage by a greppable
+  anchor (a step/section/rule name) instead, since a raw line number silently goes stale the
+  moment the referenced file is edited (the class recurred across three consecutive audits).
+  See ADR-0069, ADR-0067, ADR-0064, ADR-0059, ADR-0061.
 - **README consolidation trigger / CONSOLIDATE (ADR-0041, agentic-workflow-w7q2m)** — a BC
   `README.md` at or over **~600 lines** has crossed the point where it can no longer reliably
   be read in one pass (this BC's own README, at 1006 lines, was the case that forced this

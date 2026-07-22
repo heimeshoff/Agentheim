@@ -1,15 +1,15 @@
 ---
 id: agentic-workflow-f3wqm
 title: Audit-closure doctrine — disposition the three open undershoot residuals, define the audit PASS bar and dated audit stamp with delta-scoping, and ban raw line-number pointers in doctrine prose (lint-enforced)
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-07-22
-completed:
+completed: 2026-07-22
 depends_on: [agentic-workflow-k9pbh]
 blocks: []
 tags: [audit-closure, convergence, vacuum-guard, doctrine-pointers, adr-0067, adr-0068]
-related_adrs: [0059, 0061, 0064, 0067, 0068]
+related_adrs: [0059, 0061, 0064, 0067, 0068, 0069]
 related_research: []
 prior_art: [agentic-workflow-znwve, agentic-workflow-z394j, agentic-workflow-qz1h7, agentic-workflow-mxk6v]
 ---
@@ -97,3 +97,44 @@ only an ADR, and this one ships a lint plus two small doctrine edits alongside i
 Touches `skills/work/SKILL.md` (Phase 2 step 8) and `skills/modeling/SKILL.md` (Opening
 step 2 + type legend) — different sections from t8kfq/k9pbh's edits, but do not co-batch
 with any wholesale rewrite of either file.
+
+See ADR-0069 (`.agentheim/knowledge/decisions/0069-audit-closure-doctrine-dispositions-pass-bar-pointer-lint.md`,
+provisional number).
+
+## Outcome
+
+Wrote ADR-0069 (audit-closure doctrine, provisional number) dispositioning all three
+2026-07-22 audit residuals, validated against ADR-0064/0061/0065's own reasoning rather
+than transcribed verbatim: residual 1 (vacuum-guard conditional refusal) is **fixed** —
+the do-not-self-generate refusal now sits unconditionally on "the ready set/backlog is
+empty" at both call sites (`skills/work/SKILL.md` step 8, `skills/modeling/SKILL.md`
+Opening step 2), ahead of the `extractOpenQuestions` read, and ADR-0064 is amended
+accordingly. Notably, `modeling`'s call site was found to have carried **no explicit
+refusal sentence at all** (only an implicit one) — sharper than the task's own framing
+assumed — so the fix there adds the statement, not merely relocates it. Residuals 2
+(check 1b cross-task blindness) and 3 (untyped investigation tasks) are **declined
+pending a concrete incident**, ADR-0067 posture; residual 3 additionally gets a
+zero-enforcement-cost nudge added to `modeling`'s `type` field legend toward
+`type: spike` for investigation-shaped captures.
+
+The ADR also defines the audit PASS bar and the dated-audit-stamp + delta-scoping
+convention (both prose-only/unenforced per ADR-0059), and the first stamp is written to
+the new `.agentheim/knowledge/audit-log.md` (HEAD `53f1708652b5e47c85ef9ac70a2679526d899577`).
+
+Shipped `lib/doctrine-line-pointer.mjs` (+ `lib/test/doctrine-line-pointer.test.mjs`,
+9 tests, TDD red-then-green) — a live-tree lint banning raw line-number pointers
+(`~:NNN`, `(:NNN-NNN)`, `file.md:NNN`, `#LNNN`) in `skills/`/`agents/`/`references/`
+prose, with an explicit (currently empty) `ALLOWLIST` escape hatch rather than a
+date-grandfather boundary (a raw pointer has never been a legitimate design choice here,
+only a drift bug). The live tree already had zero occurrences (cleared by the two prior
+audits' fixes, most recently `agentic-workflow-k9pbh`) — the lint ships green.
+
+Updated the BC README with a ubiquitous-language entry for the audit-closure doctrine
+and amended the existing Vacuum guard entry to describe the refusal-placement fix.
+Full suite: `node --test lib/test/*.test.mjs` — 374 tests, 0 failures.
+
+Key files: `.agentheim/knowledge/decisions/0069-audit-closure-doctrine-dispositions-pass-bar-pointer-lint.md`,
+`.agentheim/knowledge/decisions/0064-vacuum-guard-empty-board-surfaces-blocking-decision.md`
+(amended), `.agentheim/knowledge/audit-log.md`, `lib/doctrine-line-pointer.mjs`,
+`lib/test/doctrine-line-pointer.test.mjs`, `skills/work/SKILL.md`, `skills/modeling/SKILL.md`,
+`.agentheim/contexts/agentic-workflow/README.md`.

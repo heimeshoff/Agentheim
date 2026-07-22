@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 3
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 179
+- **Doing:** 0
+- **Done:** 180
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-f3wqm** — Audit-closure doctrine — disposition the three open undershoot residuals, define the audit PASS bar and dated audit stamp with delta-scoping, and ban raw line-number pointers in doctrine prose (lint-enforced) (feature) — `doing/agentic-workflow-f3wqm-audit-closure-doctrine-dispositions-pass-bar-pointer-lint.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-f3wqm** — Audit-closure doctrine — disposition the three open undershoot residuals, define the audit PASS bar and dated audit stamp with delta-scoping, and ban raw line-number pointers in doctrine prose (lint-enforced) (feature) — `done/agentic-workflow-f3wqm-audit-closure-doctrine-dispositions-pass-bar-pointer-lint.md`
 - **agentic-workflow-r4gcz** — Consumer-tune classifyTask — bug/refactor tasks are bucketed "harness" unconditionally, so a consumer project's legitimate product bug-fixing session reads as majority-harness drift (refactor) — `done/agentic-workflow-r4gcz-consumer-tune-vacuum-guard-classifytask.md`
 - **agentic-workflow-t8kfq** — Verifier check 1 lacks the ADR-0065 stop-loss carve-out — an early-stopped spike gets FAILed into finishing the diagnosis it was told to skip; dispatch never surfaces a backlog-stranded same-thread remediation (bug) — `done/agentic-workflow-t8kfq-verifier-stop-loss-carveout-and-backlog-remediation-surface.md`
 - **agentic-workflow-w2njd** — checkpoint stages only the task file's new location — the wip commit's tree holds the task file in both lifecycle folders, contradicting the squash steps that assert the move is fully captured (bug) — `done/agentic-workflow-w2njd-checkpoint-stages-moved-from-path.md`
@@ -134,6 +134,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0069** — Audit-closure doctrine: dispositions the three 2026-07-22 audit residuals (fix the vacuum-guard empty-board refusal placement at both call sites; decline cross-task drift detection and forced spike-typing pending a concrete incident, ADR-0067 posture), defines the audit PASS bar and a dated audit-stamp/delta-scoping convention (both prose-only, unenforced), and ships the live-tree lint `lib/doctrine-line-pointer.mjs` banning raw line-number pointers in doctrine prose — `../../knowledge/decisions/0069-audit-closure-doctrine-dispositions-pass-bar-pointer-lint.md`
 - **ADR-0068** — The drift-twice rule: when a doctrine restatement is found drifted a **second** time, the fix deletes the copy and leaves a pointer to the canonical source — never re-synced again (first-time drift may still be fixed in place). Applies where drift-fix tasks are shaped (modeling REFINE) and executed (workers); prose-only, unenforced (ADR-0059) — `../../knowledge/decisions/0068-drift-twice-single-source-rule.md`
 - **ADR-0067** — Records two undocumented 2026-07-02 survey dispositions: declines a mandatory mid-batch human checkpoint (between-wave re-scan, FAIL-iteration-3 escalation, and vacuum guard already cover it; vision non-goal #3's gate list omits mid-batch by design), and ratifies the inline decline of the Haiku thin-agent wrapper for quick-capture/whats-next/inquire as a visible decision (ADR-0059) — `../../knowledge/decisions/0067-mid-batch-checkpoint-decline-and-haiku-wrapper-decline.md`
 - **ADR-0066** — `work`'s Phase 1 gains a session-start human-churn reconciliation (mirror of ADR-0026/d6q4h's session-*end* carry-over): commits since the last session-end protocol entry lacking a `[<task-id>]` trailer are enumerated with their touched files, and any file governed by an ADR-referenced path or BC README runtime-surface manifest is surfaced one line per hit. Advisory only (ADR-0027 family) — never auto-files a task, never gates; skips silently on a fresh project. Deterministic detection in git-free `lib/session-start-churn.mjs` (the conductor supplies the `git log` text) — `../../knowledge/decisions/0066-session-start-human-churn-reconciliation.md`
