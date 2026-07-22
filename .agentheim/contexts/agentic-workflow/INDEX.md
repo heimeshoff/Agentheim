@@ -11,13 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 3
-- **Todo:** 0
+- **Todo:** 5
 - **Doing:** 0
 - **Done:** 174
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-t8kfq** — Verifier check 1 lacks the ADR-0065 stop-loss carve-out — an early-stopped spike gets FAILed into finishing the diagnosis it was told to skip; dispatch never surfaces a backlog-stranded same-thread remediation (bug) — `todo/agentic-workflow-t8kfq-verifier-stop-loss-carveout-and-backlog-remediation-surface.md`
+- **agentic-workflow-w2njd** — checkpoint stages only the task file's new location — the wip commit's tree holds the task file in both lifecycle folders, contradicting the squash steps that assert the move is fully captured (bug) — `todo/agentic-workflow-w2njd-checkpoint-stages-moved-from-path.md`
+- **agentic-workflow-m7xva** — commit-doctrine's churn paragraph drifted a third time — delete-and-pointer it per ADR-0068; the shape table misses trailer-less batch-capture and release commits, so churn misclassifies them as human (bug) — `todo/agentic-workflow-m7xva-commit-doctrine-churn-paragraph-and-missing-machine-shapes.md`
+- **agentic-workflow-r4gcz** — Consumer-tune classifyTask — bug/refactor tasks are bucketed "harness" unconditionally, so a consumer project's legitimate product bug-fixing session reads as majority-harness drift (refactor) — `todo/agentic-workflow-r4gcz-consumer-tune-vacuum-guard-classifytask.md`
+- **agentic-workflow-k9pbh** — Small-drift batch from the 2026-07-22 post-survey audit — lib-bootstrap counts and §6 legend, phantom backfill-indexes.sh, two stale line pointers, worker.md pre-worktree-era text, one INDEX annotation (chore) — `todo/agentic-workflow-k9pbh-small-drift-batch-post-survey-audit-residuals.md`
 <!-- todo-list:end -->
 
 ### Doing

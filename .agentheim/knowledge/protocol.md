@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 17:01 -- Modeling / Captured: 5 tasks from the 2026-07-22 post-survey consistency audit
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo (5)
+**Summary:** Four-agent audit of the survey/Dorc wave (ADRs 0059-0068) confirmed every fix landed but surfaced follow-ups, captured as: t8kfq (verifier check 1 stop-loss carve-out + backlog-stranded remediation surface line — the ADR-0065 fix currently fights its own verification path), w2njd (checkpoint must stage the moved-from lifecycle path — wip tree holds the task file in both folders), m7xva (commit-doctrine churn paragraph third drift → delete-and-pointer per ADR-0068, plus two missing machine shapes in table + MACHINE_SHAPES), r4gcz (consumer-tune vacuum-guard classifyTask — bug/refactor ≠ unconditionally harness), k9pbh (seven-item small-drift batch: lib-bootstrap counts/§6 legend, phantom backfill-indexes.sh, two stale line pointers, worker.md pre-worktree text, INDEX d5a9b annotation).
+
+---
+
 ## 2026-07-22 15:49 -- Work session ended
 
 **Type:** Work / Session end
