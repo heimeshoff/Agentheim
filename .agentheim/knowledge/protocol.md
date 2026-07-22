@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:12 -- Batch started: [agentic-workflow-r2hxk, agentic-workflow-t6pjd, agentic-workflow-v4gmt]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-r2hxk - worker-return-format.md misses the ADR-0062 runner-verdict qualifier its own restatement-exactness rule demands, agentic-workflow-t6pjd - TDD's UI-task skip advice contradicts verifier check 8 — manual browser exercise never substitutes for the runtime drive, agentic-workflow-v4gmt - vacuum-guard.mjs carries dead regexes and a wrong repo-relative-path claim in classifyTask's comment
+**Parallel:** yes (3 workers — r2hxk/t6pjd/v4gmt; r2hxk+t6pjd both touch skills/test-driven-development/SKILL.md in non-overlapping sections, merged sequentially; v4gmt disjoint lib/vacuum-guard.mjs. 4 more ready held to later waves per MAX_PARALLEL=3 and merge-ordering: b4yrm before c5nvb on skills/work churn step, d7ksw before c5nvb on commit-doctrine)
+
+---
+
 ## 2026-07-22 11:12 -- Task verified and completed: agentic-workflow-s9wtc - verification-before-completion SKILL.md drifted behind verifier.md — sync checks, tokens, salvage, and the given-list
 
 **Type:** Work / Task completion

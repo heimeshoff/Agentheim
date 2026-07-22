@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-t6pjd
 title: TDD's UI-task skip advice contradicts verifier check 8 — manual browser exercise never substitutes for the runtime drive
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22

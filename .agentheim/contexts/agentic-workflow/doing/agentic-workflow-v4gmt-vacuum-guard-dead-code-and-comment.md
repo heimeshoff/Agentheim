@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-v4gmt
 title: vacuum-guard.mjs carries dead regexes and a wrong repo-relative-path claim in classifyTask's comment
-status: todo
+status: doing
 type: chore
 context: agentic-workflow
 created: 2026-07-22

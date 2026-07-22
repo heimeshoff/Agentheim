@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-r2hxk
 title: worker-return-format.md misses the ADR-0062 runner-verdict qualifier its own restatement-exactness rule demands
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22
