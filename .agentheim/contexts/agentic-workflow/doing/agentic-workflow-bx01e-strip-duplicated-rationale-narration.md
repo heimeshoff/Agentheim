@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-bx01e
 title: Strip duplicated rationale narration from the big prompts — rules stay imperative with ADR pointers
-status: todo
+status: doing
 type: refactor
 context: agentic-workflow
 created: 2026-07-22

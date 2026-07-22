@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 15:26 -- Batch started: [agentic-workflow-bx01e]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-bx01e - Strip duplicated rationale narration from the big prompts — rules stay imperative with ADR pointers
+**Parallel:** no (1 worker — sole ready task; unblocked now that mqwnc/cvptc/z3grd/pzacx are all done)
+
+---
+
 ## 2026-07-22 15:25 -- Task verified and completed: agentic-workflow-mqwnc - Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, index-template done-list header wording
 
 **Type:** Work / Task completion
