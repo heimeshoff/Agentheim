@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-b4yrm
 title: Conductor lib helpers have no runnable invocation in consumer installs; lib's own test command is undeclared
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22

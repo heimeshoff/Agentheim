@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-d7ksw
 title: Doc micro-sweep from the audit — bc-readme-template surface slots, research model-pin text, orchestrator worker route, hvqa4/rx630 checkboxes, commit-doctrine table
-status: todo
+status: doing
 type: chore
 context: agentic-workflow
 created: 2026-07-22

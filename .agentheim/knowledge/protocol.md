@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:18 -- Batch started: [agentic-workflow-b4yrm, agentic-workflow-n8zqe, agentic-workflow-d7ksw]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-b4yrm - Conductor lib helpers have no runnable invocation in consumer installs; lib's own test command is undeclared, agentic-workflow-n8zqe - whats-next is behind the new advisories — recommends resolved open questions, ignores the ADR-0065 remediation-first tiebreak, agentic-workflow-d7ksw - Doc micro-sweep from the audit — bc-readme-template surface slots, research model-pin text, orchestrator worker route, hvqa4/rx630 checkboxes, commit-doctrine table
+**Parallel:** yes (3 workers — b4yrm/n8zqe/d7ksw, disjoint files: b4yrm edits skills/work+modeling+BC README+an ADR, n8zqe edits skills/whats-next, d7ksw edits bc-readme-template+research+orchestrator+2 done files+commit-doctrine. 1 more ready (c5nvb) held to next wave: it edits skills/work churn step (after b4yrm) and points at commit-doctrine (after d7ksw)
+
+---
+
 ## 2026-07-22 11:18 -- Task verified and completed: agentic-workflow-v4gmt - vacuum-guard.mjs carries dead regexes and a wrong repo-relative-path claim in classifyTask's comment
 
 **Type:** Work / Task completion

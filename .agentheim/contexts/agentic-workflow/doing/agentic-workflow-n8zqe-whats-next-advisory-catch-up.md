@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-n8zqe
 title: whats-next is behind the new advisories — recommends resolved open questions, ignores the ADR-0065 remediation-first tiebreak
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22
