@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 13:43 -- Task verified and completed: agentic-workflow-ewt9s - Consumer-install bootstrap coverage missing for the vision-conformance and classifyTaskId call sites
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-ewt9s - Consumer-install bootstrap coverage missing for the vision-conformance and classifyTaskId call sites
+**Summary:** Extended references/lib-bootstrap.md with runnable consumer-install invocations for lib/vision-conformance.mjs (§5) and classifyTaskId from lib/id-grammar.mjs (§6), pointed the work/modeling/quick-capture call sites at them, and corrected the intro section/one-liner counts
+**Duration:** 5m
+**Verification:** PASS (iteration 1)
+**Files changed:** 4
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 13:36 -- Batch started: [agentic-workflow-ewt9s, agentic-workflow-z3grd]
 
 **Type:** Work / Batch start

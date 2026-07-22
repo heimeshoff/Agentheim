@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 2
 - **Todo:** 1
-- **Doing:** 3
-- **Done:** 170
+- **Doing:** 2
+- **Done:** 171
 <!-- task-counts:end -->
 
 ### Todo
@@ -24,12 +24,12 @@ research touching this BC, and concept synthesis pages.
 ### Doing
 <!-- doing-list:start -->
 - **agentic-workflow-z3grd** — Scope the mechanize-or-drop convention checks to doctrine-bearing surfaces — consumer product tasks skip check 6c (refactor) — `doing/agentic-workflow-z3grd-scope-convention-checks-doctrine-surfaces.md`
-- **agentic-workflow-ewt9s** — Consumer-install bootstrap coverage missing for the vision-conformance and classifyTaskId call sites (bug) — `doing/agentic-workflow-ewt9s-lib-bootstrap-pointers-vision-conformance-id-grammar.md`
 - **agentic-workflow-mqwnc** — Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, INDEX done-list header wording (chore) — `doing/agentic-workflow-mqwnc-doc-micro-sweep-audit-2026-07-22.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-ewt9s** — Consumer-install bootstrap coverage missing for the vision-conformance and classifyTaskId call sites (bug) — `done/agentic-workflow-ewt9s-lib-bootstrap-pointers-vision-conformance-id-grammar.md`
 - **agentic-workflow-pzacx** — Consumer-tune the two session reconciliations — fold recognized machine shapes into a summary, batch non-.agentheim carry-over (refactor) — `done/agentic-workflow-pzacx-consumer-tune-session-reconciliations.md`
 - **agentic-workflow-zbbsw** — Drift-twice rule — a restatement that drifts a second time is deleted and pointered, never re-synced (decision) — `done/agentic-workflow-zbbsw-drift-twice-single-source-rule.md`
 - **agentic-workflow-znwve** — Record the two undocumented survey dispositions — mid-batch checkpoint (decide) and Haiku thin-agent wrapper (decline) (decision) — `done/agentic-workflow-znwve-record-undocumented-survey-dispositions.md`

@@ -399,7 +399,7 @@ field legend lives here instead:
 
 Emit a fresh id `<bc>-<token>` per the id grammar in `references/id-grammar.md` (ADR-0028 §1) — generate the token randomly, never scan existing files for a "next number". Legacy `<bc>-NNN` ids (e.g. `auth-003`) already on disk are kept as-is — never rewrite them.
 
-After minting, verify the new id with `classifyTaskId` from `lib/id-grammar.mjs`: if `classifyTaskId(newId) !== 'token'`, the token is out-of-spec (e.g. it leads with a digit) — discard it and mint a fresh one, no need to ask the user (a random token is free and non-interactive). This is the mint-time backstop ADR-0044 added after an out-of-spec token (`infrastructure-5w5gs`) shipped and stranded the mechanized lifecycle verbs; `lib/id-grammar.mjs`'s live-tree test is the always-on gate if this step is ever skipped.
+After minting, verify the new id with `classifyTaskId` from `lib/id-grammar.mjs`: if `classifyTaskId(newId) !== 'token'`, the token is out-of-spec (e.g. it leads with a digit) — discard it and mint a fresh one, no need to ask the user (a random token is free and non-interactive). Runnable in a consumer install via the resolve-plugin-file-convention bootstrap in `references/lib-bootstrap.md` §6. This is the mint-time backstop ADR-0044 added after an out-of-spec token (`infrastructure-5w5gs`) shipped and stranded the mechanized lifecycle verbs; `lib/id-grammar.mjs`'s live-tree test is the always-on gate if this step is ever skipped.
 
 ### Classifying acceptance criteria (ADR-0061)
 

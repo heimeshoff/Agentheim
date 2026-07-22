@@ -5,14 +5,15 @@ Every conductor-executed `lib/` helper needs to be **runnable from a consumer in
 itself). The resolution scheme is `lib/resolve-plugin-file.mjs`'s homedir→cache→semver-max walk
 (infrastructure-010), already used verbatim by the `claim`/`complete`/`promote` CLI invocations
 and the protocol-rotation / index-rotation checks (`skills/work/SKILL.md`, `skills/modeling/
-SKILL.md`). **Do not invent a second resolution scheme.** This file exists so the four
+SKILL.md`). **Do not invent a second resolution scheme.** This file exists so the six
 conductor-executed helpers that landed without a runnable call-site invocation —
 `lib/adr-allocation.mjs`, `lib/session-start-churn.mjs`, `lib/vacuum-guard.mjs`,
-`lib/worktree-salvage.mjs` (agentic-workflow-b4yrm) — get one shared, worked-out reference instead
-of five near-duplicate one-liners scattered through skill prose.
+`lib/worktree-salvage.mjs` (agentic-workflow-b4yrm), `lib/vision-conformance.mjs`, and
+`lib/id-grammar.mjs` (agentic-workflow-ewt9s) — get one shared, worked-out reference instead
+of nine near-duplicate one-liners scattered through skill prose.
 
 Unlike `task-lifecycle-cli.mjs` / `protocol-rotation.mjs` / `index-rotation.mjs`, none of these
-four modules ships its own CLI `main(argv)` entrypoint — they are plain function exports, unit
+six modules ships its own CLI `main(argv)` entrypoint — they are plain function exports, unit
 tested directly. The bootstrap below therefore has two parts: the **resolution boilerplate**
 (verbatim shape, parameterized only by the target `relPath` and a human `<LABEL>` for the
 fail-loud message) and a **call tail** that imports the resolved module and invokes the specific
@@ -128,3 +129,45 @@ Prints the resolved patch path, then the `formatSalvageReference` wording for th
 stays the separate, conductor-only git command the skill prose already documents — this
 invocation only resolves the storage path/filename convention, exactly as the module's own
 git-free boundary (ADR-0038) requires.
+
+## 5. `lib/vision-conformance.mjs` — `extractVisionSections` + `labelFor` + `formatConformanceLine` + `worthSurfacing`
+
+Two calls, matching the two ends of `skills/work/SKILL.md`'s "Vision-conformance check
+(session-end)" section (ADR-0040). The judgment in between (does this shipped task pull toward a
+non-goal, or away from a success criterion?) is genuine LLM reasoning, never mechanized — these
+calls only bound the read and format the result.
+
+**Read the bounded inputs (step 1) — `extractVisionSections` + `labelFor`** (arg: absolute path to
+`vision.md`):
+
+```
+node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','vision-conformance.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','vision-conformance.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no vision-conformance module found under '+c+' (is the Agentheim plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>{const text=fs.readFileSync(process.argv[1],'utf8');const sections=m.extractVisionSections(text);const withLabels=(arr)=>arr.map(item=>({item,label:m.labelFor(item)}));console.log(JSON.stringify({successCriteria:withLabels(sections.successCriteria),nonGoals:withLabels(sections.nonGoals)}))}).catch(e=>{console.error(e.message);process.exit(1)});" "<path-to-vision.md>"
+```
+
+Prints `{successCriteria: [{item, label}], nonGoals: [{item, label}]}` — each item paired with the
+`labelFor` label the judgment step (step 2-3, prose, never mechanized) quotes when it flags a
+task, so the label is computed once here rather than by hand per flag.
+
+**Format the flags (steps 4-5) — `formatConformanceLine` + `worthSurfacing`** (arg: a JSON array of
+the flags the judgment step produced, `{taskId, kind, label, note?}[]`; `[]` for a clean batch):
+
+```
+node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','vision-conformance.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','vision-conformance.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no vision-conformance module found under '+c+' (is the Agentheim plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>{const flags=JSON.parse(process.argv[1]);console.log(m.formatConformanceLine(flags));console.log(m.worthSurfacing(flags))}).catch(e=>{console.error(e.message);process.exit(1)});" '[{"taskId":"agentic-workflow-abcde","kind":"non-goal","label":"Not autonomous","note":"shipped without a human ask"}]'
+```
+
+Prints the protocol entry's `**Vision-conformance:**` line, then `true`/`false` for whether step
+5's whats-next advisory (over)write is warranted. An empty array prints
+`none — batch aligns with vision` then `false`.
+
+## 6. `lib/id-grammar.mjs` — `classifyTaskId`
+
+Call site: `skills/modeling/SKILL.md`'s and `skills/quick-capture/SKILL.md`'s ID convention
+mint-time backstop (ADR-0044) — verify a freshly minted id's tail before accepting it.
+
+```
+node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','id-grammar.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','id-grammar.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no id-grammar module found under '+c+' (is the Agentheim plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>{console.log(m.classifyTaskId(process.argv[1]))}).catch(e=>{console.error(e.message);process.exit(1)});" "<newly-minted-id>"
+```
+
+Prints `token` (well-formed — accept), `legacy` (all-digit tail — accept), or `malformed`
+(discard and mint a fresh one — no need to ask the user, a random token is free and
+non-interactive).

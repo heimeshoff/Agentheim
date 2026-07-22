@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-ewt9s
 title: Consumer-install bootstrap coverage missing for the vision-conformance and classifyTaskId call sites
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-22
-completed:
+completed: 2026-07-22
 depends_on: []
 blocks: []
 tags: [audit-2026-07-22-followup, consumer-install, lib-bootstrap]
@@ -51,3 +51,30 @@ Found by the 2026-07-22 board/mechanization audit — same class as b4yrm, expli
 there as outside its scope. The pure `node --test` lints (spike-stop-loss,
 human-eye-criteria, index-entry-length) legitimately need no conductor invocation and stay
 out of lib-bootstrap.
+
+## Outcome
+
+Added `references/lib-bootstrap.md` §5 (`lib/vision-conformance.mjs` —
+`extractVisionSections` + `labelFor` + `formatConformanceLine` + `worthSurfacing`, two
+invocations matching the two ends of the vision-conformance session-end pass) and §6
+(`lib/id-grammar.mjs` — `classifyTaskId`, one invocation for the mint-time backstop).
+Pointed all three call sites at their new sections: `skills/work/SKILL.md`'s
+vision-conformance step 1 → §5, `skills/modeling/SKILL.md`'s and
+`skills/quick-capture/SKILL.md`'s ID-convention mint backstops → §6.
+
+Corrected the intro's stale count: it said "four ... helpers" / "five ... one-liners" while
+the file (pre-edit) already held all four original modules but six `node -e` invocations
+(the audit finding). After the two new sections the file holds six helper modules and nine
+`node -e` invocations total (`grep -c '^node -e'` confirms 9; the six numbered `## N`
+sections plus the "Resolution boilerplate" section confirm the module count). Intro now
+reads "six conductor-executed helpers ... instead of nine near-duplicate one-liners" and
+"none of these six modules ships its own CLI `main(argv)` entrypoint" — both verified by
+direct count, not guessed.
+
+Manually ran all three new invocations against fixtures (vision.md-shaped text, a sample
+flags array, and a sample id) to confirm each prints the documented shape before finalizing
+the doc. `node --test lib/test/vision-conformance.test.mjs lib/test/id-grammar.test.mjs`
+still passes (24/24) — no production code touched, doc-only change.
+
+Key files: `references/lib-bootstrap.md`, `skills/work/SKILL.md`,
+`skills/modeling/SKILL.md`, `skills/quick-capture/SKILL.md`.
