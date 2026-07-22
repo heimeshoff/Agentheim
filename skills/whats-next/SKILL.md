@@ -25,7 +25,11 @@ Two failure modes to avoid above all:
 Read these, cheapest and most informative first. Skip anything that doesn't exist and note its absence rather than guessing.
 
 1. **`.agentheim/vision.md`** — the whole thing, but pay special attention to:
-   - **Open questions** — the explicit list of things not yet built or not yet decided. This is the primary source for "what feature is missing".
+   - **Open questions** — the explicit list of things not yet built or not yet decided. This is the primary source for "what feature is missing". Read this section through `lib/vacuum-guard.mjs`'s `extractOpenQuestions` — the same helper `work`'s vacuum guard (Phase 2 step 8) and `modeling`'s Opening flow (step 2) already route through, ADR-0064 — rather than reading the raw markdown yourself: it filters out already-resolved (`~~struck-through~~ *Resolved YYYY-MM-DD.*`) items and surfaces each remaining item's age from its `(open since YYYY-MM-DD)` annotation, so you never recommend a question the builder already answered. Resolve and run it with the standard env-free plugin bootstrap (infrastructure-010's homedir→cache→semver-max convention, `lib/resolve-plugin-file.mjs` — repo-local `lib/vacuum-guard.mjs` first, else the newest cached plugin version):
+     ```
+     node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','vacuum-guard.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','vacuum-guard.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no vacuum-guard module found under '+c+' (is the plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>{const vision=fs.readFileSync('.agentheim/vision.md','utf8');const oq=m.extractOpenQuestions(vision);console.log(JSON.stringify({count:oq.length,line:m.formatVacuumGuardLine(oq)}))}).catch(e=>{console.error(e.message);process.exit(1)});"
+     ```
+     It prints the filtered, aged open-question line (`formatVacuumGuardLine`) — feed that into rung 5 of Step 2 and the empty-board case below, never a raw re-scan of the section.
    - **What success looks like** — so you can spot gaps between the goal and what's actually been done.
    - **Non-goals** — so you never recommend something the project has deliberately ruled out.
    - If `vision.md` is missing, that *is* the answer: recommend `brainstorm` first.
@@ -49,12 +53,15 @@ This is the usual order of priority. Read it as "what's the most valuable lever 
 1. **Work was interrupted** — `contexts/*/doing/` has any task in it. Half-done work rots and blocks the board; finishing it almost always beats starting something new. Recommend resuming it (`work` picks up `doing/` first). If two or more sit in `doing/`, note that a parallel session was interrupted.
 
 2. **The pipeline is primed** — `todo/` has tasks whose dependencies are all satisfied. The thinking is already done; the highest-value move is to *execute*. Recommend running `work`. If several are ready, mention the highest-leverage one (most `blocks`, or the one continuing the current thread) but the move is the same: run `work`.
+   - **Remediation-over-diagnosis tiebreak (ADR-0065).** Before naming that highest-leverage task, check for this specific tie: a ready remediation task whose root cause is already diagnosed and whose fix is cheap outranks a ready further-diagnosis `type: spike` on the **same thread** — never name the spike as the highest-leverage pick when a same-thread remediation is also ready; name the remediation. **Same thread** means any of: the two tasks share a `tags` entry naming the defect family, one is named in the other's `depends_on`/`blocks`, or one is named in the other's `prior_art`. This mirrors `work`'s own dispatch-ordering preference exactly (Phase 3 step 4) — it's a tiebreak among already-ready tasks, never a reason to withhold the spike from being run at all if the builder asks for it directly.
 
 3. **Refined work is waiting one step back** — `todo/` is empty but `backlog/` holds an item that's already concrete (clear acceptance criteria, dependencies satisfied, not tagged `[captured]`). Recommend promoting it (`modeling` → promote) and working it. Favor one that *continues the thread* visible in the recent protocol — momentum is real and context is already loaded.
 
 4. **The backlog is raw** — `backlog/` holds captures that aren't worked-ready (`[captured]`, "to be defined during refinement", thin acceptance criteria). Recommend a `modeling` **refine** pass on the most valuable / stalest one, naming it.
 
-5. **The board is empty but the vision isn't done** — nothing in doing/todo/backlog worth acting on, but the vision has unanswered **Open questions** or visible gaps against **What success looks like**. Recommend a `modeling` session to capture the missing piece — and say *which* piece, quoting the open question or the unmet success criterion.
+5. **The board is empty but the vision isn't done** — nothing in doing/todo/backlog worth acting on. Two sub-cases, in order:
+   - **One or more genuinely open vision questions** — Step 1's `extractOpenQuestions` read returned at least one item (this is ADR-0064's vacuum-guard trigger, `isVacuum`: ready count zero AND open questions exist). Recommend **exactly that**, and nothing else: surface the open item(s) with their age via `formatVacuumGuardLine` (e.g. "Brainstorm on existing code (next iteration). (open 46 days)"), framed as the single highest-leverage thing the builder can do right now — the same framing `work`'s and `modeling`'s vacuum guard already use for this exact situation. **Never invent filler work** here — no self-generated chore, no "maintain the test suite" busywork, no manufactured task to fill the silence. An empty board plus an open decision *is* the answer; naming that decision is more valuable than anything this recommendation could invent on its own.
+   - **Otherwise** (no unresolved open questions, but a visible gap against **What success looks like**) — recommend a `modeling` session to capture the missing piece, quoting the unmet success criterion.
 
 6. **The vision itself is thin or missing** — recommend `brainstorm` to establish (or deepen) the vision before anything else.
 
@@ -99,9 +106,9 @@ Talk like a colleague who knows the codebase, not a report generator. It's fine 
 >
 > **Next:** say `promote agentic-workflow-060` to queue the diagrams, or `refine agentic-workflow-063` to start unpacking the commit problem.
 
-**Example — empty board, gap against the vision:**
+**Example — empty board, open vision question (vacuum guard):**
 
-> Everything's shipped — board's clear, no backlog. But the vision still carries one open question you haven't touched: brainstorming on *existing* code, where Agentheim reverse-engineers a vision from a repo that already has code before continuing the Socratic dialogue. That's the biggest unbuilt piece of the stated vision.
+> Everything's shipped — board's clear, no backlog, and nothing left ready in `todo/`. But `vision.md` still carries one open question you haven't touched: **Brainstorm on existing code (next iteration).** (open 46 days) — reverse-engineering a vision from a repo that already has code, before continuing the Socratic dialogue. Resolving that is the single highest-leverage thing you can do right now — more valuable than anything I'd invent from an empty board.
 >
 > **Next:** let's `brainstorm` that existing-code path and turn it into a modeled backlog.
 

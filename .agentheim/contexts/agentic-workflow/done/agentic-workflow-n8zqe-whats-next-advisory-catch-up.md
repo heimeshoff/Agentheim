@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-n8zqe
 title: whats-next is behind the new advisories — recommends resolved open questions, ignores the ADR-0065 remediation-first tiebreak
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-22
-completed:
+completed: 2026-07-22
 depends_on: []
 blocks: []
 tags: [dorc-audit-followup, whats-next, dispatch-ordering]
@@ -49,3 +49,31 @@ prior_art: [agentic-workflow-qz1h7, agentic-workflow-rx630, agentic-workflow-x4t
 
 Found by the 2026-07-22 post-Dorc consistency audit (finding L4). Doc-only unless the
 worker finds whats-next needs a lib touch for the bootstrap.
+
+## Outcome
+
+Doc-only, as scoped — no `lib/` touch needed; `lib/vacuum-guard.mjs` already exported
+everything whats-next needed. Three catch-ups landed in `skills/whats-next/SKILL.md`:
+
+1. **Step 1 item 1** (vision.md read) — the "Open questions" bullet now routes through
+   `extractOpenQuestions` (resolved items filtered, age surfaced) instead of a raw
+   markdown read, with the standard env-free `resolve-plugin-file.mjs` bootstrap
+   (repo-local `lib/vacuum-guard.mjs` first, else newest cached plugin version) inlined
+   as a runnable `node -e` invocation, verified against this repo's own `vision.md`
+   (`{"count":1,"line":"Brainstorm on existing code (next iteration). (open 47 days)"}`).
+2. **Step 2 rung 2** (primed pipeline) — added the ADR-0065 remediation-over-diagnosis
+   tiebreak verbatim (same-thread definition: shared `tags` entry / `depends_on`-`blocks`
+   link / `prior_art` link), mirroring `work`'s Phase 3 step 4 wording exactly.
+3. **Step 2 rung 5** (empty board) — split into two sub-cases: a genuinely open vision
+   question now gets the ADR-0064 vacuum-guard framing (open item + age via
+   `formatVacuumGuardLine`, "never invent filler work"), falling through to the old
+   unmet-success-criterion case only when no open question exists. Updated the matching
+   "empty board" example shape in Step 3 to show the age-bearing framing.
+
+No new ADR — this task applies ADR-0064/0065 to a third call site, it doesn't establish
+new doctrine. `TDD` does not apply: doc-only skill-prose change, same posture as
+`agentic-workflow-x4t2g`'s prior doc-only whats-next work. Ran
+`node --test lib/test/*.test.mjs` (333/333 pass) to confirm the change didn't disturb
+anything in `lib/`.
+
+Files touched: `skills/whats-next/SKILL.md`.

@@ -192,7 +192,8 @@ separate BC, but today the whole tool lives in this one.
   deterministic extraction/formatting halves are unit-tested.
 - **Vacuum guard & batch-mix visibility (ADR-0064, agentic-workflow-qz1h7)** — an empty ready
   set / backlog is a *user decision waiting*, not agent fuel. When `work`'s Phase 2 finds zero
-  ready tasks across every BC, or `modeling`'s Opening flow finds an empty backlog, both check
+  ready tasks across every BC, `modeling`'s Opening flow finds an empty backlog, or `whats-next`
+  reaches its empty-board rung (Step 2 rung 5), all three check
   `vision.md`'s "## Open questions" section (via `lib/vacuum-guard.mjs`'s `extractOpenQuestions`,
   which excludes already-resolved struck-through items and reads each remaining item's
   `(open since YYYY-MM-DD)` annotation). If genuinely open items exist, the session **refuses to
@@ -211,7 +212,8 @@ separate BC, but today the whole tool lives in this one.
   mechanize-or-drop doctrine. See ADR-0064, ADR-0040, ADR-0027, ADR-0059, ADR-0038.
 - **Remediation-over-diagnosis / spike stop-loss (ADR-0065, agentic-workflow-rx630)** — two
   coupled doctrine changes closing Dorc review recommendation A5. (1) **Dispatch ordering**
-  (`skills/work/SKILL.md` Phase 3 step 4): a ready remediation task whose root cause is already
+  (`skills/work/SKILL.md` Phase 3 step 4, and mirrored as `whats-next`'s own tiebreak at its
+  Step 2 rung 2): a ready remediation task whose root cause is already
   diagnosed and whose fix is cheap outranks a ready further-diagnosis `spike` on the **same
   thread** — shared `tags`, a `depends_on`/`blocks` link, or a `prior_art` link. Ordering only,
   never a gate: a builder who explicitly wants deeper diagnosis still gets it. (2) **Spike

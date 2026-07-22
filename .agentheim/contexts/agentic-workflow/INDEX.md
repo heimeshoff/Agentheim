@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 1
-- **Doing:** 2
-- **Done:** 162
+- **Doing:** 1
+- **Done:** 163
 <!-- task-counts:end -->
 
 ### Todo
@@ -24,11 +24,11 @@ research touching this BC, and concept synthesis pages.
 ### Doing
 <!-- doing-list:start -->
 - **agentic-workflow-d7ksw** — Doc micro-sweep from the audit — bc-readme-template surface slots, research model-pin text, orchestrator worker route, hvqa4/rx630 checkboxes, commit-doctrine table (chore) — `doing/agentic-workflow-d7ksw-doc-micro-sweep-audit-residuals.md`
-- **agentic-workflow-n8zqe** — whats-next is behind the new advisories — recommends resolved open questions, ignores the ADR-0065 remediation-first tiebreak (bug) — `doing/agentic-workflow-n8zqe-whats-next-advisory-catch-up.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-n8zqe** — whats-next is behind the new advisories — recommends resolved open questions, ignores the ADR-0065 remediation-first tiebreak (bug) — `done/agentic-workflow-n8zqe-whats-next-advisory-catch-up.md`
 - **agentic-workflow-b4yrm** — Conductor lib helpers have no runnable invocation in consumer installs; lib's own test command is undeclared (bug) — `done/agentic-workflow-b4yrm-conductor-helper-bootstrap-and-test-command.md`
 - **agentic-workflow-v4gmt** — vacuum-guard.mjs carries dead regexes and a wrong repo-relative-path claim in classifyTask's comment (chore) — `done/agentic-workflow-v4gmt-vacuum-guard-dead-code-and-comment.md`
 - **agentic-workflow-t6pjd** — TDD's UI-task skip advice contradicts verifier check 8 — manual browser exercise never substitutes for the runtime drive (bug) — `done/agentic-workflow-t6pjd-tdd-ui-skip-vs-check8-runtime-drive.md`

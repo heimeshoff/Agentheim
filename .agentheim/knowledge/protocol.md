@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:31 -- Task verified and completed: agentic-workflow-n8zqe - whats-next is behind the new advisories — recommends resolved open questions, ignores the ADR-0065 remediation-first tiebreak
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-n8zqe - whats-next is behind the new advisories — recommends resolved open questions, ignores the ADR-0065 remediation-first tiebreak
+**Summary:** Caught whats-next up on Dorc-wave advisories: open-question read now routes through extractOpenQuestions (with consumer-install bootstrap), added the ADR-0065 remediation-first tiebreak, and replaced the empty-board recommendation with the ADR-0064 vacuum-guard framing
+**Duration:** 6m
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 11:31 -- Task verified and completed: agentic-workflow-b4yrm - Conductor lib helpers have no runnable invocation in consumer installs; lib's own test command is undeclared
 
 **Type:** Work / Task completion
