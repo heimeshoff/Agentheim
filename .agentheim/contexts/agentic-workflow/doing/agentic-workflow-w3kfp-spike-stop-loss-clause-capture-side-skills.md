@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-w3kfp
 title: quick-capture and brainstorm mint spike tasks without the ADR-0065 stop-loss clause
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22

@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:02 -- Batch started: [agentic-workflow-w3kfp, agentic-workflow-e7dnq, agentic-workflow-s9wtc]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-w3kfp - quick-capture and brainstorm mint spike tasks without the ADR-0065 stop-loss clause, agentic-workflow-e7dnq - human-eye-criteria lint flags backlog tasks the doctrine says are legal — align its scope with the promote-time note rule, agentic-workflow-s9wtc - verification-before-completion SKILL.md drifted behind verifier.md — sync checks, tokens, salvage, and the given-list
+**Parallel:** yes (3 workers — w3kfp/e7dnq/s9wtc, disjoint files; 7 more ready tasks held to later waves per MAX_PARALLEL=3 and merge-ordering: b4yrm before c5nvb on skills/work churn step, d7ksw before c5nvb on commit-doctrine table)
+
+---
+
 ## 2026-07-22 10:52 -- Modeling / Captured: 10 tasks — post-Dorc consistency-audit findings
 
 **Type:** Modeling / Capture

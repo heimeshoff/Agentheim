@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-s9wtc
 title: verification-before-completion SKILL.md drifted behind verifier.md — sync checks, tokens, salvage, and the given-list
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22

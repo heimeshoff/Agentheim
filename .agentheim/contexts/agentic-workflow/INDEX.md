@@ -11,17 +11,14 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 10
-- **Doing:** 0
+- **Todo:** 7
+- **Doing:** 3
 - **Done:** 155
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-w3kfp** — quick-capture and brainstorm mint spike tasks without the ADR-0065 stop-loss clause (bug) — `todo/agentic-workflow-w3kfp-spike-stop-loss-clause-capture-side-skills.md`
-- **agentic-workflow-e7dnq** — human-eye-criteria lint flags backlog tasks the doctrine says are legal — align its scope with the promote-time note rule (bug) — `todo/agentic-workflow-e7dnq-human-eye-lint-scope-and-grandfathering.md`
 - **agentic-workflow-b4yrm** — Conductor lib helpers have no runnable invocation in consumer installs; lib's own test command is undeclared (bug) — `todo/agentic-workflow-b4yrm-conductor-helper-bootstrap-and-test-command.md`
-- **agentic-workflow-s9wtc** — verification-before-completion SKILL.md drifted behind verifier.md — sync checks, tokens, salvage, and the given-list (bug) — `todo/agentic-workflow-s9wtc-verification-doctrine-doc-sync.md`
 - **agentic-workflow-r2hxk** — worker-return-format.md misses the ADR-0062 runner-verdict qualifier its own restatement-exactness rule demands (bug) — `todo/agentic-workflow-r2hxk-worker-return-format-runner-verdict-qualifier.md`
 - **agentic-workflow-t6pjd** — TDD's UI-task skip advice contradicts verifier check 8 — manual browser exercise never substitutes for the runtime drive (bug) — `todo/agentic-workflow-t6pjd-tdd-ui-skip-vs-check8-runtime-drive.md`
 - **agentic-workflow-c5nvb** — Session-start churn re-flags work's own trailer-less fallback commits; vacuum-guard exits leave no session-end boundary (bug) — `todo/agentic-workflow-c5nvb-churn-self-flagging-and-vacuum-exit-boundary.md`
@@ -32,6 +29,9 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-s9wtc** — verification-before-completion SKILL.md drifted behind verifier.md — sync checks, tokens, salvage, and the given-list (bug) — `doing/agentic-workflow-s9wtc-verification-doctrine-doc-sync.md`
+- **agentic-workflow-e7dnq** — human-eye-criteria lint flags backlog tasks the doctrine says are legal — align its scope with the promote-time note rule (bug) — `doing/agentic-workflow-e7dnq-human-eye-lint-scope-and-grandfathering.md`
+- **agentic-workflow-w3kfp** — quick-capture and brainstorm mint spike tasks without the ADR-0065 stop-loss clause (bug) — `doing/agentic-workflow-w3kfp-spike-stop-loss-clause-capture-side-skills.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

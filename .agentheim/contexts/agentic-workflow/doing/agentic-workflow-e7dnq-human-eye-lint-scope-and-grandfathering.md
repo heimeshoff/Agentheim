@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-e7dnq
 title: human-eye-criteria lint flags backlog tasks the doctrine says are legal — align its scope with the promote-time note rule
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22
