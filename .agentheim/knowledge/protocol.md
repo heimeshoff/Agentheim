@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:12 -- Task verified and completed: agentic-workflow-s9wtc - verification-before-completion SKILL.md drifted behind verifier.md — sync checks, tokens, salvage, and the given-list
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-s9wtc - verification-before-completion SKILL.md drifted behind verifier.md — sync checks, tokens, salvage, and the given-list
+**Summary:** Synced skills/verification-before-completion/SKILL.md to verifier.md and work SKILL on all six drifts: added check 6b, INDEX in check 7 title, machine ITERATION_HINT tokens, given-list pointer, doing-or-done location, ADR-0063 salvage on FAIL-iter-3
+**Duration:** 3m26s
+**Verification:** PASS (iteration 1)
+**Files changed:** 1
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 11:12 -- Task verified and completed: agentic-workflow-e7dnq - human-eye-criteria lint flags backlog tasks the doctrine says are legal — align its scope with the promote-time note rule
 
 **Type:** Work / Task completion

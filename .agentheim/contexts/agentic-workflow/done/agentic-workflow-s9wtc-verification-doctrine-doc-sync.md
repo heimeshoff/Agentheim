@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-s9wtc
 title: verification-before-completion SKILL.md drifted behind verifier.md — sync checks, tokens, salvage, and the given-list
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-22
-completed:
+completed: 2026-07-22
 depends_on: []
 blocks: []
 tags: [dorc-audit-followup, doc-sync, verification]
@@ -53,3 +53,29 @@ the given-list) over a second copy.
 ## Notes
 
 Found by the 2026-07-22 post-Dorc consistency audit (findings F1-F6/M3). Doc-only.
+
+## Outcome
+
+Synced `skills/verification-before-completion/SKILL.md` to `agents/verifier.md` and
+`skills/work/SKILL.md` on all six drifts:
+
+1. Inserted check **6b** ("Honored related ADRs") between checks 6 and 6c, matching
+   `agents/verifier.md:186-194`'s semantics (contradicts / silently-ignores / supersedes-without-ADR).
+2. Renamed check 7 to "No protocol, index, or git tampering" and added the INDEX prohibition
+   to its scope, matching `references/worker-return-format.md:29`'s exact cross-referenced title.
+3. Replaced the FAIL template's prose `ITERATION_HINT` values with the exact machine tokens
+   `likely-fixable | task-under-specified`.
+4. Replaced "What the verifier is given"'s restated field list with a pointer to
+   `skills/work/SKILL.md`'s Verifier Prompt Template (pre-resolved test/launch commands,
+   worktree path, iteration number all live there now — avoids a second copy drifting).
+5. Folded the "task-file location" fix into the same pointer rewrite — now reads "in `doing/`
+   or `done/`, inside the worktree", matching work's own template wording.
+6. Added the ADR-0063 mandatory worktree-diff salvage (tag `escalated-iterN`, `## Salvage
+   note` naming the patch path, escalation summary naming the patch explicitly) to the
+   FAIL-iteration-3 bullet under "What `work` does with each verdict".
+
+Doc-only change; no production code touched. Verified `node --test lib/test/*.test.mjs` stays
+green (330/330 pass) post-edit — this run rebuilds `dashboard/dist/` as a side effect, expected
+and not part of this task's diff.
+
+Key file: `skills/verification-before-completion/SKILL.md`.

@@ -23,13 +23,13 @@ If `work` ran the checks inline, it would do so in the same context that just di
 
 ## What the verifier is given
 
-The `work` skill spawns `verifier` with:
-
-- Absolute path to the task file (currently in `doing/` for unverified-success tasks)
-- Absolute path to the BC's README
-- The diff (`git diff` plus a list of changed files, or a generated patch attached as text)
-- The worker's strict SUCCESS return block (so the verifier sees the worker's claims about tests, files, ADRs)
-- Pointers to: `.agentheim/vision.md`, `.agentheim/context-map.md`, `.agentheim/knowledge/decisions/` (verifier reads on demand)
+The `work` skill spawns `verifier` per `skills/work/SKILL.md`'s **Verifier Prompt Template** —
+the authoritative source for the exact field list, restated here only as a pointer to avoid a
+second copy drifting out of sync. That template supplies: the task file's absolute path (in
+`doing/` or `done/`, inside the worktree), the BC name and README path, the worktree's absolute
+path, the iteration number, the diff, the worker's strict SUCCESS return block, a pre-resolved
+test command, a pre-resolved launch command, and pointers to `.agentheim/vision.md`,
+`.agentheim/context-map.md`, and `.agentheim/knowledge/decisions/` for on-demand reading.
 
 The verifier is explicitly NOT given:
 - The worker's reasoning, scratchpad, or any explanation beyond the strict SUCCESS block
@@ -59,9 +59,11 @@ In order, stopping at the first failing check:
 
 6. **ADRs for decisions.** If the diff embeds a decision a future maintainer would ask about (library choice, pattern choice, an invariant chosen over alternatives), is there a corresponding ADR in `ADRS_WRITTEN`? Missing ADR for a real decision is a FAIL.
 
+6b. **Honored related ADRs.** Read the task file's `related_adrs` frontmatter. For each id, read the ADR's `## Decision` section and verify the worker's diff is consistent with it — the worker was given these ADRs pre-loaded and was told reading them is mandatory. A FAIL if the diff contradicts a related ADR, silently ignores a constraint that clearly applies to the criterion at hand, or supersedes an ADR's decision without a new ADR in `ADRS_WRITTEN` naming the superseded id in its `supersedes` field. Skip this check entirely if `related_adrs` is empty.
+
 6c. **Mechanize-or-drop — convention enforcement (ADR-0059).** If the diff *establishes a convention* — a naming/format/structural rule other tasks or agents are meant to follow going forward, not a one-off choice scoped to this task — the task file must carry either an enforcement acceptance criterion (a lint, a live-tree `node --test` check, or a build failure, actually shipped in the diff) or an explicit "prose-only, unenforced" marker recorded in the task file. A convention-establishing task with neither is a FAIL, analogous to the ADR gate above — an unenforced convention must be a visible, recorded decision, never an accident. Non-convention tasks skip this check entirely.
 
-7. **No protocol or git tampering.** The diff must not touch `.agentheim/knowledge/protocol.md` (work owns it) and must contain no git operations in the worker's output. Violation is a FAIL — the worker broke a protocol rule.
+7. **No protocol, index, or git tampering.** The diff must not touch `.agentheim/knowledge/protocol.md` or any `INDEX.md` (`.agentheim/knowledge/index.md`, `.agentheim/contexts/*/INDEX.md`) — both are owned by `work`, not workers — and must contain no git operations in the worker's output. Violation is a FAIL — the worker broke a protocol rule.
 
 8. **Runtime drive (ADR-0036).** The verifier's final and most expensive check. Fires only when the diff touches a `surfacePath` declared in the BC's `## Runtime surface` README manifest — absent manifest, or a diff that touches none of its `surfacePaths`, means the check does not run at all for this task. When it fires: boot the app from the worktree via the manifest's `launch` command, read the *actual* bound port from its runfile (never assume the derived value), assert the declared `probes` (stdlib-only HTTP GETs — status + body shape), run the opt-in render tier only when the task sets `runtime_render: true` and a browser capability is already present, and **always** tear down via the manifest's `stop` command regardless of outcome. A boot failure or any probe mismatch is a FAIL citing the probe. This check replaces the self-reported manual-exercise note as sufficient evidence for a runtime-surface change (see the narrowed check 1 above).
 
@@ -90,7 +92,7 @@ TASK_ID: <id>
 REASONS:
 - <one bullet per concrete defect, citing the file/line where possible>
 SUGGESTED_FIX: <brief — what the next worker should do>
-ITERATION_HINT: <"likely fixable with another worker pass" | "task is under-specified — consider bouncing to backlog">
+ITERATION_HINT: likely-fixable | task-under-specified
 ```
 
 ### `VERDICT: SKIP`
@@ -109,7 +111,7 @@ The operational integration lives in `skills/work/SKILL.md`. In short:
 
 - **PASS** → move task to `done/` (if needed), commit, log "Task verified and completed" to protocol.md.
 - **FAIL, first or second attempt on this task** → append the verifier's REASONS to the task file as a `## Verifier note` block, revert the task's frontmatter `status: done` back to `status: doing`, move it back from `done/` to `doing/` if the worker already moved it, log "Verification failed" to protocol.md, **re-dispatch a worker** on the same task with the verifier note included in its prompt. Hard cap: 2 re-dispatches per task.
-- **FAIL, third time on the same task** → do not re-dispatch. Leave the task in `doing/` with all accumulated verifier notes. Log "Verification failed — escalating to user" to protocol.md. Surface at end of batch.
+- **FAIL, third time on the same task** → do not re-dispatch. Before anything else, salvage the worktree's diff to a patch tagged `escalated-iterN` (ADR-0063) and append a `## Salvage note` to the task file naming the patch's absolute path — the worktree is kept, not removed, at this point, but a later discard (a subsequent session's Phase 1 recovery or session-end reconciliation) could still lose the fix if nothing was captured first. Leave the task in `doing/` with all accumulated verifier notes. Log "Verification failed — escalating to user" to protocol.md. Surface at end of batch, naming the salvaged patch's path explicitly.
 - **SKIP** → commit as on PASS, but the protocol entry reads "Task completed (verification skipped: <reason>)".
 
 The re-dispatch loop has a cap because beyond two retries you're almost always looking at an under-specified task that needs refinement (the modeller's job), not another execution attempt.
