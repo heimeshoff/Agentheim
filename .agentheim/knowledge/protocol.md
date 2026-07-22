@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 22:57 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 5m (batch start 22:52 → 22:57)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** kp7dq: 1
+**Commits:** 3 (1 batch-start, 1 task integration, this entry)
+**Vision-conformance:** none — batch aligns with vision. The one shipped task (kp7dq) hardens checkpoint's moved-from staging so a forward-slash fileList still captures the full doing→done move — strengthening "wrong work is caught by structure" and the per-worker worktree lifecycle correctness (ADR-0032/0057). No pull toward a non-goal.
+**Batch mix:** 100% harness (1 task) — a type:bug fix confined to lib/ (task-lifecycle CLI + its test).
+**Carry-over:** none — working tree clean. No orphan worktrees.
+
+---
+
 ## 2026-07-22 22:57 -- Task verified and completed: agentic-workflow-kp7dq - checkpoint's moved-from detection is Windows-separator-sensitive — a forward-slash fileList silently misses the doing/ deletion, reintroducing the both-folders bug w2njd closed
 
 **Type:** Work / Task completion
