@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 12:49 -- Modeling / Captured: 10 follow-up tasks from the 2026-07-22 four-agent audit
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo (9), backlog (1)
+**Summary:** A four-agent audit (survey coverage, cross-doc consistency, overshoot/friction, board+mechanization state) of the post-Dorc remediation wave found the wave nearly complete and the board clean, but surfaced residuals now captured: drift fixes (cvptc VBC PASS-flow git text, n3bbk research commit gap, mqwnc doc micro-sweep, ewt9s consumer-install bootstrap pointers), overshoot tuning (z3grd scope convention checks to doctrine surfaces, pzacx consumer-tune the two session reconciliations, bx01e strip duplicated rationale narration — depends on the four same-file edits), decisions (znwve record mid-batch-checkpoint + Haiku-wrapper dispositions, zbbsw drift-twice single-source rule, prose-only), and one raw backlog capture (e4bjh capture/dismiss lifecycle-CLI verbs).
+
+---
+
 ## 2026-07-22 11:46 -- Work session ended
 
 **Type:** Work / Session end

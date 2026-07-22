@@ -10,14 +10,23 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 2
+- **Todo:** 9
 - **Doing:** 0
 - **Done:** 165
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-cvptc** — verification-before-completion's PASS handling still describes the pre-worktree git model — staging the raw FILE_LIST on the main tree (bug) — `todo/agentic-workflow-cvptc-vbc-pass-flow-pre-worktree-git-text.md`
+- **agentic-workflow-n3bbk** — research commits nothing it writes — report, INDEX edits, and protocol entry strand as anonymous carry-over (bug) — `todo/agentic-workflow-n3bbk-research-commits-nothing-it-writes.md`
+- **agentic-workflow-mqwnc** — Doc micro-sweep — verifier task-file location, stale bc-readme-template pointer, INDEX done-list header wording (chore) — `todo/agentic-workflow-mqwnc-doc-micro-sweep-audit-2026-07-22.md`
+- **agentic-workflow-ewt9s** — Consumer-install bootstrap coverage missing for the vision-conformance and classifyTaskId call sites (bug) — `todo/agentic-workflow-ewt9s-lib-bootstrap-pointers-vision-conformance-id-grammar.md`
+- **agentic-workflow-z3grd** — Scope the mechanize-or-drop convention checks to doctrine-bearing surfaces — consumer product tasks skip check 6c (refactor) — `todo/agentic-workflow-z3grd-scope-convention-checks-doctrine-surfaces.md`
+- **agentic-workflow-pzacx** — Consumer-tune the two session reconciliations — fold recognized machine shapes into a summary, batch non-.agentheim carry-over (refactor) — `todo/agentic-workflow-pzacx-consumer-tune-session-reconciliations.md`
+- **agentic-workflow-bx01e** — Strip duplicated rationale narration from the big prompts — rules stay imperative with ADR pointers (refactor) — `todo/agentic-workflow-bx01e-strip-duplicated-rationale-narration.md`
+- **agentic-workflow-znwve** — Record the two undocumented survey dispositions — mid-batch checkpoint (decide) and Haiku thin-agent wrapper (decline) (decision) — `todo/agentic-workflow-znwve-record-undocumented-survey-dispositions.md`
+- **agentic-workflow-zbbsw** — Drift-twice rule — a restatement that drifts a second time is deleted and pointered, never re-synced (decision) — `todo/agentic-workflow-zbbsw-drift-twice-single-source-rule.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -112,6 +121,7 @@ research touching this BC, and concept synthesis pages.
 ### Backlog
 <!-- backlog-list:start -->
 - **agentic-workflow-d5a9b** — Enable parallel worktree sessions with independent idea capture and ticket movement — `backlog/agentic-workflow-d5a9b-parallel-worktree-sessions.md`
+- **agentic-workflow-e4bjh** — Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI (refactor) — `backlog/agentic-workflow-e4bjh-capture-dismiss-lifecycle-cli-verbs.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
