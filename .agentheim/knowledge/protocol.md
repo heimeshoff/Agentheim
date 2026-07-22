@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 17:50 -- Batch started: [agentic-workflow-t8kfq, agentic-workflow-r4gcz]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-t8kfq - Verifier check 1 lacks the ADR-0065 stop-loss carve-out — an early-stopped spike gets FAILed into finishing the diagnosis it was told to skip; dispatch never surfaces a backlog-stranded same-thread remediation, agentic-workflow-r4gcz - Consumer-tune classifyTask — bug/refactor tasks are bucketed "harness" unconditionally, so a consumer project's legitimate product bug-fixing session reads as majority-harness drift
+**Parallel:** yes (2 workers — t8kfq (Phase 3 step 4) + r4gcz (End-of-run batch-mix step + lib/vacuum-guard.mjs) touch disjoint sections of skills/work/SKILL.md, merged sequentially; f3wqm held to a final solo wave so its new line-pointer lint validates the fully-merged tree and to avoid a double-amend of ADR-0064 with r4gcz)
+
+---
+
 ## 2026-07-22 17:49 -- Task verified and completed: agentic-workflow-w2njd - checkpoint stages only the task file's new location — the wip commit's tree holds the task file in both lifecycle folders, contradicting the squash steps that assert the move is fully captured
 
 **Type:** Work / Task completion

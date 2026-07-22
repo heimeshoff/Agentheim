@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-r4gcz
 title: Consumer-tune classifyTask — bug/refactor tasks are bucketed "harness" unconditionally, so a consumer project's legitimate product bug-fixing session reads as majority-harness drift
-status: todo
+status: doing
 type: refactor
 context: agentic-workflow
 created: 2026-07-22

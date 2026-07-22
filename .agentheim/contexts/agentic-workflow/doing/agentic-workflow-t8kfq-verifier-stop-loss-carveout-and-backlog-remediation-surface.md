@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-t8kfq
 title: Verifier check 1 lacks the ADR-0065 stop-loss carve-out — an early-stopped spike gets FAILed into finishing the diagnosis it was told to skip; dispatch never surfaces a backlog-stranded same-thread remediation
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22
