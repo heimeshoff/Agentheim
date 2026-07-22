@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-f3wqm
 title: Audit-closure doctrine — disposition the three open undershoot residuals, define the audit PASS bar and dated audit stamp with delta-scoping, and ban raw line-number pointers in doctrine prose (lint-enforced)
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-07-22
