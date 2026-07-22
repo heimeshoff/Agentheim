@@ -127,7 +127,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-jf6qz** — Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; also correct the live INDEX headers (bug) — `backlog/agentic-workflow-jf6qz-fix-archiveddoneheader-phantom-cap-wording.md`
+- **agentic-workflow-jf6qz** — Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A) (bug) — `backlog/agentic-workflow-jf6qz-fix-archiveddoneheader-phantom-cap-wording.md`
 - **agentic-workflow-d5a9b** — Enable parallel worktree sessions with independent idea capture and ticket movement (feature) — `backlog/agentic-workflow-d5a9b-parallel-worktree-sessions.md`
 - **agentic-workflow-e4bjh** — Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI (refactor) — `backlog/agentic-workflow-e4bjh-capture-dismiss-lifecycle-cli-verbs.md`
 <!-- backlog-list:end -->

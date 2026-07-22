@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-23 00:00 -- Modeling / Refined: agentic-workflow-jf6qz - Fix `archivedDoneHeader` phantom-cap wording; heal stale live INDEX headers on no-op rotation
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** Resolved the task's one open design question (What #3 — how the three cosmetically-wrong live `contexts/*/INDEX.md` "most recent 30" headers get corrected). Builder selected **Option A (heal on rotation)**: the ADR-0047 session-end rotation check rewrites a stale header even on a no-op run, gated on the BC already having a `done-archive/` (never a false archive claim), idempotent/self-limiting, ships a heal test + an ADR-0047 amendment. Also firmed: drop `capEntries` from `archivedDoneHeader`, corrected archive-naming header literal, negative test assertion. Dependency mqwnc is done → readiness gate cleared, auto-promoted to todo.
+**Split into:** —
+**ADRs written:** none by modeling — the worker amends ADR-0047 as part of the fix.
+
+---
+
 ## 2026-07-22 22:57 -- Work session ended
 
 **Type:** Work / Session end
