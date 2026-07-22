@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 10:52 -- Modeling / Captured: 10 tasks — post-Dorc consistency-audit findings
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** A four-auditor consistency check of the Dorc-wave implementation (task fidelity, skill cross-consistency, agents-vs-skills alignment, lib wiring) confirmed all nine tasks fully shipped and 330/330 tests green, and surfaced follow-up defects captured here as ten ready tasks, all tagged `dorc-audit-followup`: agentic-workflow-w3kfp (spike stop-loss clause missing from quick-capture/brainstorm capture paths + stale NNN id placeholder), agentic-workflow-e7dnq (human-eye lint scans backlog/ ungrandathered, stricter than ADR-0061 doctrine), agentic-workflow-b4yrm (no runnable bootstrap for the four conductor helpers in consumer installs; lib test command undeclared; lint self-hosting scope unrecorded), agentic-workflow-s9wtc (verification-before-completion doc drifted behind verifier.md on six points), agentic-workflow-r2hxk (worker-return-format.md missing the ADR-0062 runner-verdict qualifier), agentic-workflow-t6pjd (TDD UI-skip advice contradicts check 8), agentic-workflow-c5nvb (churn advisory re-flags work's own fallback commits; vacuum exits leave no session-end boundary), agentic-workflow-n8zqe (whats-next behind ADR-0064/0065), agentic-workflow-v4gmt (vacuum-guard dead regexes + wrong comment), agentic-workflow-d7ksw (doc micro-sweep: bc-readme-template slots, research model-pin text, orchestrator worker route, hvqa4/rx630 checkboxes, commit-doctrine table).
+
+---
+
 ## 2026-07-21 20:41 -- Work session ended
 
 **Type:** Work / Session end

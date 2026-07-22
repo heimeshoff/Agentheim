@@ -11,13 +11,23 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 0
+- **Todo:** 10
 - **Doing:** 0
 - **Done:** 155
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-w3kfp** — quick-capture and brainstorm mint spike tasks without the ADR-0065 stop-loss clause (bug) — `todo/agentic-workflow-w3kfp-spike-stop-loss-clause-capture-side-skills.md`
+- **agentic-workflow-e7dnq** — human-eye-criteria lint flags backlog tasks the doctrine says are legal — align its scope with the promote-time note rule (bug) — `todo/agentic-workflow-e7dnq-human-eye-lint-scope-and-grandfathering.md`
+- **agentic-workflow-b4yrm** — Conductor lib helpers have no runnable invocation in consumer installs; lib's own test command is undeclared (bug) — `todo/agentic-workflow-b4yrm-conductor-helper-bootstrap-and-test-command.md`
+- **agentic-workflow-s9wtc** — verification-before-completion SKILL.md drifted behind verifier.md — sync checks, tokens, salvage, and the given-list (bug) — `todo/agentic-workflow-s9wtc-verification-doctrine-doc-sync.md`
+- **agentic-workflow-r2hxk** — worker-return-format.md misses the ADR-0062 runner-verdict qualifier its own restatement-exactness rule demands (bug) — `todo/agentic-workflow-r2hxk-worker-return-format-runner-verdict-qualifier.md`
+- **agentic-workflow-t6pjd** — TDD's UI-task skip advice contradicts verifier check 8 — manual browser exercise never substitutes for the runtime drive (bug) — `todo/agentic-workflow-t6pjd-tdd-ui-skip-vs-check8-runtime-drive.md`
+- **agentic-workflow-c5nvb** — Session-start churn re-flags work's own trailer-less fallback commits; vacuum-guard exits leave no session-end boundary (bug) — `todo/agentic-workflow-c5nvb-churn-self-flagging-and-vacuum-exit-boundary.md`
+- **agentic-workflow-n8zqe** — whats-next is behind the new advisories — recommends resolved open questions, ignores the ADR-0065 remediation-first tiebreak (bug) — `todo/agentic-workflow-n8zqe-whats-next-advisory-catch-up.md`
+- **agentic-workflow-v4gmt** — vacuum-guard.mjs carries dead regexes and a wrong repo-relative-path claim in classifyTask's comment (chore) — `todo/agentic-workflow-v4gmt-vacuum-guard-dead-code-and-comment.md`
+- **agentic-workflow-d7ksw** — Doc micro-sweep from the audit — bc-readme-template surface slots, research model-pin text, orchestrator worker route, hvqa4/rx630 checkboxes, commit-doctrine table (chore) — `todo/agentic-workflow-d7ksw-doc-micro-sweep-audit-residuals.md`
 <!-- todo-list:end -->
 
 ### Doing
