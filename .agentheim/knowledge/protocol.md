@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 15:49 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 31m (first batch start 15:18 → 15:49)
+**Completed:** 2 (first-try PASS: 2, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** mqwnc: 1, bx01e: 1
+**Commits:** 5 (2 batch-start, 2 task integrations, this entry)
+**Vision-conformance:** none — batch aligns with vision. Both completed tasks are harness context-budget / doctrine-consistency work: mqwnc fixed three worker-legal reference-doc drifts (verifier task-file-location wording, bc-readme-template pointer, index-template phantom-cap prose); bx01e stripped duplicated rationale-narration from the five big doctrine files, cutting work+modeling+verifier 1610→1427 lines while preserving every rule as rule-or-pointer. Both serve "knowledge is durable" (single-sourced rules that can't drift, rationale kept in the cited ADRs) and reduce the per-session prompt-mass tax the Dorc audit named. Neither pulls toward a stated non-goal.
+**Batch mix:** 0% product-facing / 100% harness / 0% bookkeeping (2 tasks)
+**Carry-over:** none — working tree clean. No orphan worktrees.
+
+---
+
 ## 2026-07-22 15:48 -- Task verified and completed: agentic-workflow-bx01e - Strip duplicated rationale narration from the big prompts — rules stay imperative with ADR pointers
 
 **Type:** Work / Task completion
