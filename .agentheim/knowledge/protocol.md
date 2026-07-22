@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 22:51 -- Batch started: [agentic-workflow-kp7dq]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-kp7dq - checkpoint's moved-from detection is Windows-separator-sensitive — a forward-slash fileList silently misses the doing/ deletion, reintroducing the both-folders bug w2njd closed
+**Parallel:** no (1 worker — sole ready task)
+
+---
+
 ## 2026-07-22 18:20 -- Modeling / Captured: agentic-workflow-kp7dq - checkpoint moved-from detection is Windows-separator-sensitive
 
 **Type:** Modeling / Capture

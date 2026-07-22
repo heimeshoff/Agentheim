@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-kp7dq
 title: checkpoint's moved-from detection is Windows-separator-sensitive — a forward-slash fileList silently misses the doing/ deletion, reintroducing the both-folders bug w2njd closed
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22
