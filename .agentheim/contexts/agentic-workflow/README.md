@@ -251,15 +251,21 @@ separate BC, but today the whole tool lives in this one.
   `parseCommitLog`/`findUntrailedCommits`. **Consumer-tuning amendment (agentic-workflow-pzacx):**
   `partitionUntrailedCommits` then mechanically splits that set into recognized known-machine-shape
   commits and genuinely human ones, via `recognizeMachineShape`'s closed, deterministic pattern
-  set matching every trailer-less row of BOTH `references/commit-doctrine.md` tables — its
+  set matching every trailer-less row of `references/commit-doctrine.md`'s three tables — its
   "Message convention" table's four trailer-less rows (`modeling` DISMISS, `modeling` CONSOLIDATE
   — an audit-found gap every prior enumeration omitted — `brainstorm`'s session commit, and
   `research`'s report-cleared-review commit, added mid-session by agentic-workflow-n3bbk and
-  initially missed here too until an iteration-2 verifier catch), plus its "`work`'s own
+  initially missed here too until an iteration-2 verifier catch), its "`work`'s own
   non-task-commit shapes" table's four bare fallback rows reached only when a session completes no
   task (reconcile-stranded-carry-over, session-end bookkeeping, both rotation commits; batch-start
-  and BOUNCE integration always carry a trailer, so they're never on this list) — eight entries
-  total. The skill prints one summary line — `formatChurnSummaryLine`'s "N recognized
+  and BOUNCE integration always carry a trailer, so they're never on this list), and its
+  "Batch-capture and release-flow shapes" table's three rows added by agentic-workflow-m7xva (a
+  legacy trailer-less batch-capture summary commit, the release-manifest-bump commit, and the
+  release protocol-record commit whose `[work]` token is a sanctioned pseudo-trailer given its
+  own row) — eleven entries total. The commit-doctrine.md paragraph describing this mechanism
+  had drifted out of sync a third time by the same task; per ADR-0068 it is now a one-line pointer
+  to `lib/session-start-churn.mjs`/this ADR rather than a fourth restatement. The skill prints
+  one summary line — `formatChurnSummaryLine`'s "N recognized
   machine-shape commits, M human commits" — then judges (not the git-free `lib/` helper) which
   touched files land on a governed surface — an ADR-described file, or one a BC README documents
   as load-bearing — and **itemizes only those governed-surface hits** (`formatUntrailedCommitLine`

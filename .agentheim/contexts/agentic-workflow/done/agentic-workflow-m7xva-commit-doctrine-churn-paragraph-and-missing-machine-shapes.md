@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-m7xva
 title: commit-doctrine's churn paragraph drifted a third time — delete-and-pointer it per ADR-0068; the shape table misses trailer-less batch-capture and release commits, so churn misclassifies them as human
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-22
-completed:
+completed: 2026-07-22
 depends_on: []
 blocks: []
 tags: [commit-doctrine, session-start-churn, drift-twice, adr-0066, adr-0068]
@@ -62,3 +62,27 @@ prior_art: [agentic-workflow-c5nvb, agentic-workflow-pzacx, agentic-workflow-d7k
 
 Enforcement ships in-task via the `node --test` cases (ADR-0059 satisfied). ADR-0066
 should gain a short amendment note recording the table extension.
+
+## Outcome
+
+Applied ADR-0068's delete-and-pointer discipline to `references/commit-doctrine.md`'s
+churn-behavior paragraph (its third drift) — replaced the "deliberately does not
+distinguish" restatement with a pointer to `lib/session-start-churn.mjs`'s `MACHINE_SHAPES`
+and ADR-0066. Added a new "Batch-capture and release-flow shapes" table documenting the
+trailer-less legacy batch-capture commit, `chore(release): vX.Y.Z`, and
+`chore(protocol): record vX.Y.Z release shipped [work]` (the `[work]` token is documented
+as a sanctioned pseudo-trailer and also given its own `MACHINE_SHAPES` row, so the table
+stays 1:1 with the code regardless of how `hasTaskTrailer` evolves). Extended
+`MACHINE_SHAPES` in `lib/session-start-churn.mjs` from eight to eleven entries and updated
+its table↔regex completeness comment. Added `node --test` coverage
+(`lib/test/session-start-churn.test.mjs`) asserting the three real historical subjects
+(`2e2b241`, `2ac05bc`, `a328700`) partition as machine via `recognizeMachineShape` /
+`partitionUntrailedCommits`; all 356 tests pass, including the pre-existing eight-shape
+coverage. Amended ADR-0066 with a dated amendment section recording both fixes and updated
+its `related_tasks`. Updated the agentic-workflow BC README's churn-reconciliation entry to
+match the new eleven-entry, three-table count and note the ADR-0068 pointer fix.
+
+Key files: `references/commit-doctrine.md`, `lib/session-start-churn.mjs`,
+`lib/test/session-start-churn.test.mjs`,
+`.agentheim/knowledge/decisions/0066-session-start-human-churn-reconciliation.md`,
+`.agentheim/contexts/agentic-workflow/README.md`.

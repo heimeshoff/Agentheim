@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 17:48 -- Task verified and completed: agentic-workflow-m7xva - commit-doctrine's churn paragraph drifted a third time — delete-and-pointer it per ADR-0068; the shape table misses trailer-less batch-capture and release commits, so churn misclassifies them as human
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-m7xva - commit-doctrine's churn paragraph drifted a third time — delete-and-pointer it per ADR-0068; the shape table misses trailer-less batch-capture and release commits, so churn misclassifies them as human
+**Summary:** Applied ADR-0068 delete-and-pointer to commit-doctrine.md thrice-drifted churn paragraph; added a batch-capture/release-flow shape table and extended MACHINE_SHAPES (8->11) so batch-capture and release commits partition as machine, not human
+**Duration:** 13m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 5
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 17:33 -- Batch started: [agentic-workflow-k9pbh, agentic-workflow-w2njd, agentic-workflow-m7xva]
 
 **Type:** Work / Batch start

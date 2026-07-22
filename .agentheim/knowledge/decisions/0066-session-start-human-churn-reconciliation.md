@@ -4,7 +4,7 @@ title: Session-start human-churn reconciliation — untrailed commits since last
 scope: agentic-workflow
 status: accepted
 date: 2026-07-21
-related_tasks: [agentic-workflow-hhjjx, agentic-workflow-pzacx]
+related_tasks: [agentic-workflow-hhjjx, agentic-workflow-pzacx, agentic-workflow-m7xva]
 related_adrs: [0026, 0027, 0038, 0064, 0040]
 ---
 
@@ -214,6 +214,34 @@ scope to `.agentheim/`-owned paths only, with everything else batched into one `
 WIP, N files)` line. That mechanism's decision of record isn't a standalone ADR (it lives in the
 `d6q4h` task file and ADR-0026's committing doctrine), so its tuning is recorded there and in the
 BC README, not duplicated as a second ADR here.
+
+## Amendment — 2026-07-22 (agentic-workflow-m7xva): table extension (batch-capture, release-flow shapes) + delete-and-pointer on the churn-behavior paragraph (ADR-0068)
+
+A 2026-07-22 post-survey audit found two problems with the pzacx amendment above, both fixed
+by this task:
+
+1. **`references/commit-doctrine.md`'s churn-behavior paragraph had drifted a third time.**
+   It still stated the pre-pzacx stance ("deliberately does not try to distinguish these known
+   machine shapes from a real human commit") even though `recognizeMachineShape` /
+   `partitionUntrailedCommits` do exactly that. This is the same restatement's *third* drift
+   (after `agentic-workflow-d7ksw` and `agentic-workflow-c5nvb`), so ADR-0068's drift-twice
+   rule applies: the paragraph was deleted and replaced with a one-line pointer to
+   `lib/session-start-churn.mjs` and this ADR — it will not be re-synced a fourth time.
+2. **`MACHINE_SHAPES` (and its source table) were missing three real machine shapes**, so
+   genuine machine commits were miscounted as human churn: a legacy trailer-less
+   batch-capture summary commit (`2e2b241`), the release-manifest-bump commit
+   (`chore(release): vX.Y.Z`, `2ac05bc`), and the release protocol-record commit
+   (`chore(protocol): record vX.Y.Z release shipped [work]`, `a328700`). All three are now
+   in `MACHINE_SHAPES` and in a new "Batch-capture and release-flow shapes" table in
+   `references/commit-doctrine.md`, bringing the closed set to eleven entries. The release
+   protocol-record shape's `[work]` token is documented as a sanctioned pseudo-trailer *and*
+   given its own `MACHINE_SHAPES` row, since it already happens to satisfy `hasTaskTrailer`'s
+   bracket-only predicate today — both are recorded so the table stays 1:1 with the code
+   regardless of how that predicate evolves.
+
+`node --test` coverage (`lib/test/session-start-churn.test.mjs`) asserts all three real
+historical subjects partition as machine, not human, and the existing eight-shape coverage
+stays green.
 
 ## References
 

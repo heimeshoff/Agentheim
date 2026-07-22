@@ -61,11 +61,29 @@ The table above covers per-task commits. `work` also mints a handful of trailer-
 The batch-start and BOUNCE-integration shapes always carry at least one bracketed id; the
 reconcile-stranded/session-end/rotation shapes reuse the last relevant task's id as their
 trailer when one is available, and fall back to a plain `chore: ...` (no bracketed trailer at
-all) when the session ran no task. Session-start human-churn reconciliation
-(`lib/session-start-churn.mjs`'s `findUntrailedCommits`, ADR-0066) still flags every
-genuinely trailer-less commit it finds — it deliberately does not try to distinguish these
-known machine shapes from a real human commit (favoring recall over precision on an
-advisory-only signal) — but this table is what lets a reader recognize one of these fallback
-shapes at a glance instead of mistaking it for out-of-band drift.
+all) when the session ran no task. This table (plus the "Batch-capture and release-flow
+shapes" table below) is what lets a reader recognize one of these known shapes at a glance
+instead of mistaking it for out-of-band drift — the session-start human-churn
+reconciliation's actual recognition behavior lives in `lib/session-start-churn.mjs`'s
+`MACHINE_SHAPES` / `recognizeMachineShape` (ADR-0066, including its pzacx amendment), not
+restated here (ADR-0068 — this paragraph drifted out of sync with that mechanism twice
+already).
+
+### Batch-capture and release-flow shapes
+
+Three more genuinely trailer-less shapes, outside `work`'s own table above:
+
+| Shape | Message |
+|---|---|
+| Batch-capture summary — `modeling` CAPTURE / `quick-capture` capturing several tasks in one commit, legacy form with no per-task `[<task-id>]` trailer at all | `chore(<bc>): capture N <description>` |
+| Release manifest bump (`/release` command / `RELEASE.md` Step 3) | `chore(release): vX.Y.Z` |
+| Release protocol record (`/release` command / `RELEASE.md` Step 7) | `chore(protocol): record vX.Y.Z release shipped [work]` (an optional `(<aside>)` may sit before `[work]`) |
+
+The release protocol-record shape's trailing `[work]` is a **sanctioned pseudo-trailer**, not
+a task-id — it happens to also satisfy the bare bracket-only predicate `hasTaskTrailer` uses,
+so today it never actually reaches the human-churn list via that predicate. It is still given
+its own row here and its own `MACHINE_SHAPES` entry in `lib/session-start-churn.mjs`, rather
+than relying on that coincidence, so the shape stays explicitly documented and the
+table↔`MACHINE_SHAPES` 1:1 agreement holds regardless of how `hasTaskTrailer` evolves.
 
 ADR of record: `.agentheim/knowledge/decisions/0026-committing-doctrine-bookkeeping-in-task-commit.md`. CONSOLIDATE's contract (trigger, scope, "never silently drop a term or invariant") is fixed by `.agentheim/knowledge/decisions/0041-artifact-growth-two-disciplines-consolidate-verb.md`.
