@@ -4,7 +4,7 @@ title: Falsifiability gate — classify acceptance criteria machine-checkable vs
 scope: agentic-workflow
 status: accepted
 date: 2026-07-21
-related_tasks: [agentic-workflow-mxk6v]
+related_tasks: [agentic-workflow-mxk6v, agentic-workflow-e7dnq]
 related_adrs: [0036, 0059, 0060]
 ---
 
@@ -112,10 +112,14 @@ different mechanisms, deliberately:
 
 - **The `[human-eye]` marker + all-human-eye note requirement ships a real lint**, not the
   "prose-only, unenforced" marker: `lib/human-eye-criteria.mjs`'s live-tree `node --test` check
-  (`lib/test/human-eye-criteria.test.mjs`) walks every task file across every BC's lifecycle
-  folders and flags any task whose criteria are all `[human-eye]` but missing the required
-  note. This is the sub-piece that is a plain mechanical predicate (marker presence, note-text
-  presence) — mechanized because it is practical to mechanize.
+  (`lib/test/human-eye-criteria.test.mjs`) walks every task file across every BC's `todo/`,
+  `doing/`, and `done/` folders (not `backlog/` — a `backlog/` resident is legal without the
+  note by design, per this ADR's own "never a `backlog/`→`todo/` promotion blocker on its own"
+  above) and flags any task, created strictly after `ADOPTION_DATE` (2026-07-21), whose
+  criteria are all `[human-eye]` but missing the required note. Corrected to this scope +
+  date-grandfather shape by `agentic-workflow-e7dnq`, which found the lint had drifted stricter
+  than this ADR's own decision text. This is the sub-piece that is a plain mechanical predicate
+  (marker presence, note-text presence) — mechanized because it is practical to mechanize.
 - **The metric-drift escalation doctrine is judgment-embedded, not a lint** — check 1b in
   `agents/verifier.md` / `skills/verification-before-completion/SKILL.md`. "Did the measurement
   actually drift, or was the criterion legitimately re-refined?" is a semantic reading of prior

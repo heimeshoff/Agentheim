@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:12 -- Task verified and completed: agentic-workflow-e7dnq - human-eye-criteria lint flags backlog tasks the doctrine says are legal — align its scope with the promote-time note rule
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-e7dnq - human-eye-criteria lint flags backlog tasks the doctrine says are legal — align its scope with the promote-time note rule
+**Summary:** Aligned lib/human-eye-criteria.mjs with its doctrine: dropped backlog/ from the scan and added ADOPTION_DATE grandfathering (mirroring spike-stop-loss.mjs); corrected the header comment; amended ADR-0061 self-compliance note
+**Duration:** 3m53s
+**Verification:** PASS (iteration 1)
+**Files changed:** 3
+**Tests added:** 4
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 11:11 -- Task verified and completed: agentic-workflow-w3kfp - quick-capture and brainstorm mint spike tasks without the ADR-0065 stop-loss clause
 
 **Type:** Work / Task completion
