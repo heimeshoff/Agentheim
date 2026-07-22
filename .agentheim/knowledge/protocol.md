@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 13:10 -- Task completed (verification skipped): agentic-workflow-znwve - Record the two undocumented survey dispositions — mid-batch checkpoint (decide) and Haiku thin-agent wrapper (decline)
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-znwve - Record the two undocumented survey dispositions — mid-batch checkpoint (decide) and Haiku thin-agent wrapper (decline)
+**Summary:** Recorded both undocumented 2026-07-02 survey dispositions in ADR-0067 — declined a mandatory mid-batch human checkpoint (existing mitigations cover it) and ratified the Haiku thin-agent-wrapper decline per ADR-0059
+**Duration:** 3m
+**Verification:** SKIPPED — decision-only task
+**Files changed:** 1
+
+---
+
 ## 2026-07-22 13:10 -- Task verified and completed: agentic-workflow-n3bbk - research commits nothing it writes — report, INDEX edits, and protocol entry strand as anonymous carry-over
 
 **Type:** Work / Task completion
