@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-07-22 11:31 -- Task verified and completed: agentic-workflow-b4yrm - Conductor lib helpers have no runnable invocation in consumer installs; lib's own test command is undeclared
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-b4yrm - Conductor lib helpers have no runnable invocation in consumer installs; lib's own test command is undeclared
+**Summary:** Made the four conductor helper modules runnable in consumer installs via a shared references/lib-bootstrap.md pointer at every call site; declared the lib test command in the BC README Key-commands; amended ADR-0059 with the live-tree lints self-hosting-only enforcement scope
+**Duration:** 9m
+**Verification:** PASS (iteration 1)
+**Files changed:** 6
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-07-22 11:18 -- Batch started: [agentic-workflow-b4yrm, agentic-workflow-n8zqe, agentic-workflow-d7ksw]
 
 **Type:** Work / Batch start

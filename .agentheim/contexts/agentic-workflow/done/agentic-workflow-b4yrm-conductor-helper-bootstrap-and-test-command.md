@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-b4yrm
 title: Conductor lib helpers have no runnable invocation in consumer installs; lib's own test command is undeclared
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-07-22
-completed:
+completed: 2026-07-22
 depends_on: []
 blocks: []
 tags: [dorc-audit-followup, consumer-install, bootstrap, mechanization]
@@ -47,10 +47,26 @@ Second gap in the same enforcement chain: the three live-tree lints fire only vi
 
 ## Acceptance criteria
 
-- [ ] Every skill step that tells the conductor to call a function from the four helper modules carries (or points at) a runnable bootstrap invocation following the resolve-plugin-file convention.
-- [ ] The agentic-workflow BC README declares the lib test command in a section the verifier's discovery order reads.
-- [ ] The self-hosting-only scope of the live-tree lints is recorded in an ADR (new, or a noted amendment), per mechanize-or-drop's visible-decision rule.
-- [ ] `node --test lib/test/*.test.mjs` green.
+- [x] Every skill step that tells the conductor to call a function from the four helper modules carries (or points at) a runnable bootstrap invocation following the resolve-plugin-file convention.
+- [x] The agentic-workflow BC README declares the lib test command in a section the verifier's discovery order reads.
+- [x] The self-hosting-only scope of the live-tree lints is recorded in an ADR (new, or a noted amendment), per mechanize-or-drop's visible-decision rule.
+- [x] `node --test lib/test/*.test.mjs` green.
+
+## Outcome
+
+Added a new shared reference `references/lib-bootstrap.md` documenting the resolve-plugin-file-
+convention bootstrap (verbatim resolution boilerplate + a call tail per function) for all four
+previously-unrunnable helpers, and pointed every skill-prose call site at it: `skills/work/
+SKILL.md`'s session-start human-churn reconciliation (steps 1 & 3, `lib/session-start-churn.mjs`),
+Phase 2 step 8 and `skills/modeling/SKILL.md`'s Opening flow step 2 (vacuum guard,
+`lib/vacuum-guard.mjs`'s `extractOpenQuestions`/`formatVacuumGuardLine`), end-of-run step 6
+(batch-mix, `formatBatchMixLine`), the ADR-finalization step (`lib/adr-allocation.mjs`'s
+`finalizeAdrNumbering`), and the worktree-salvage section (`lib/worktree-salvage.mjs`). Declared
+`node --test lib/test/*.test.mjs` as the lib test command in the agentic-workflow BC README's
+"Key commands" section (verifier discovery order reads the BC README first). Amended ADR-0059
+with a "Self-hosting-only enforcement scope" section recording that the three live-tree lints
+(`human-eye-criteria.mjs`, `index-entry-length.mjs`, `spike-stop-loss.mjs`) enforce only in this
+self-hosting repo — no new ADR minted. `node --test lib/test/*.test.mjs`: 333/333 passing.
 
 ## Notes
 

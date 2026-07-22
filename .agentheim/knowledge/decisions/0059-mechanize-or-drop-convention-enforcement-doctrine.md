@@ -4,7 +4,7 @@ title: Mechanize-or-drop — a convention-establishing task ships its enforcemen
 scope: agentic-workflow
 status: accepted
 date: 2026-07-21
-related_tasks: [agentic-workflow-z394j]
+related_tasks: [agentic-workflow-z394j, agentic-workflow-b4yrm]
 related_adrs: [0044, 0052, 0038]
 ---
 
@@ -84,6 +84,35 @@ adapted to a doctrine whose "mechanism" is necessarily a judgment-based prompt c
 than a `node --test` script, because — per the "Where the gate lives" section above —
 identifying "does this establish a convention" is not a mechanically checkable predicate the
 way ADR-0044's token shape or ADR-0052's bare-name grep are.
+
+## Self-hosting-only enforcement scope (amendment, agentic-workflow-b4yrm, 2026-07-22)
+
+Every `node --test`-covered convention lint this doctrine has produced so far —
+`lib/human-eye-criteria.mjs`, `lib/index-entry-length.mjs`, `lib/spike-stop-loss.mjs` — asserts
+its invariant against **the live `.agentheim/` tree at the location `node --test
+lib/test/*.test.mjs` is actually run from** (each test resolves its own repo root via
+`import.meta.url`, then walks that root's `contexts/*` folders). That is exactly this repo's own
+root when the suite runs here, during Agentheim's own development — the self-hosting case these
+lints were built and proven against. It is **not** the same thing in a consumer install: a
+project that installs Agentheim as a plugin gets the plugin's cached `lib/test/*.test.mjs` files
+sitting under `~/.claude/plugins/cache/agentheim/agentheim/<version>/lib/test/`, with no wiring
+that runs that suite against the *consumer's own* `.agentheim/` tree — nothing in the consumer's
+build/CI ever invokes it, and even if something did, the `import.meta.url`-relative repo-root walk
+would resolve to the plugin's cache checkout, not the consumer's project.
+
+**This scoping is a deliberate, visible decision, not an oversight the doctrine failed to catch.**
+Mechanizing these three lints so they *also* run inside every consumer install would require
+either shipping a consumer-facing test/CI hook the plugin installs into the host project (a new
+distribution mechanism, out of scope for the conventions themselves) or re-pointing each lint's
+root-resolution at the consumer's project root instead of the plugin's own — both real projects,
+neither justified by any consumer-side incident so far. Per this ADR's own bar ("the choice must
+be made and recorded, not defaulted into silently"), the three lints stay **self-hosting-only
+enforcement**; every consumer project gets the **prose-only** convention the corresponding skill
+step already documents (the mechanize-or-drop doctrine itself, the human-eye-criteria note, the
+index-entry-length cap, the spike stop-loss clause) — enforced by agent judgment in a consumer
+install, exactly as every convention was before this ADR, with no lint backing it there. Should a
+consumer-side violation ever surface, revisit distributing the lints rather than treating this
+note as a permanent close.
 
 ## Consequences
 

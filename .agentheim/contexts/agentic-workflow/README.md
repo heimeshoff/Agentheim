@@ -1031,6 +1031,15 @@ reviewed.
 Intents entering the context. Brainstorm · Quick Capture · Refine · Promote · Dismiss ·
 Consolidate · Work · Research · Dashboard.
 
+**Test command:** `node --test lib/test/*.test.mjs` (run from the repo root; the Node-25 explicit
+glob form is required — the bare-dir form `node --test lib/test/` finds nothing under Node 25).
+This covers every `lib/` module in this BC, including the three live-tree lints
+(`lib/human-eye-criteria.mjs`, `lib/index-entry-length.mjs`, `lib/spike-stop-loss.mjs`) that
+assert invariants against this repo's own `.agentheim/` tree — see ADR-0059's "Self-hosting-only
+enforcement scope" note. Declared here so `work`'s per-batch test-command resolution (the BC
+README first, then the project root — `agentic-workflow-g9s3w`) finds a command for any
+`lib/`-touching task instead of fail-closing (agentic-workflow-b4yrm).
+
 **Dismiss** (the `modeling` skill's fourth action, agentic-workflow-046) hard-deletes a
 `backlog/`/`todo/` task under one confirmation, cascading to its **entire transitive dependent
 subtree** (ADR-0022). Refuses the whole operation if any task in the set is in `doing/`/`done/`.
