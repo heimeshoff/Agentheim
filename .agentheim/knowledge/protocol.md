@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 23:17 -- Batch started: [agentic-workflow-g4zce]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-g4zce - Todo cards get a Work launch button seeded with the ticket id — `/agentheim:work <id>` for exactly that task
+**Parallel:** no (1 worker — the whole ready set after the re-scan: g4zce was blocked on swj2q, which this session integrated at 23:22; no other todo task exists)
+
+---
+
 ## 2026-09-05 23:16 -- Task verified and completed: agentic-workflow-swj2q - "`/agentheim:work <task-id>` — scope a work run to one named todo task instead of the whole ready set"
 
 **Type:** Work / Task completion

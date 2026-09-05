@@ -11,8 +11,8 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 6
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 184
 <!-- task-counts:end -->
 
@@ -22,6 +22,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-g4zce** — Todo cards get a Work launch button seeded with the ticket id — `/agentheim:work <id>` for exactly that task (feature) — `doing/agentic-workflow-g4zce-todo-card-work-launch-button.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

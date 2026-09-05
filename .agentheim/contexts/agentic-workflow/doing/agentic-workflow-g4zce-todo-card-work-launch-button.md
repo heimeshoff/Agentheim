@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-g4zce
 title: Todo cards get a Work launch button seeded with the ticket id — `/agentheim:work <id>` for exactly that task
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-09-05
