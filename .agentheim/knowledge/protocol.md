@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 23:26 -- Batch started: [agentic-workflow-rw6ck]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-rw6ck - Hovering a card re-renders that card and its ring targets, not all 255 — memoized board cards and columns, hover state out of the board root, identity-stable tree projection
+**Parallel:** no (1 worker — the whole ready set after the post-g4zce re-scan: rw6ck was promoted by a concurrent modeling session at 23:21 and was blocked on mvt8x, integrated at 23:15; no other todo task exists)
+
+---
+
 ## 2026-09-05 23:25 -- Task verified and completed: agentic-workflow-g4zce - Todo cards get a Work launch button seeded with the ticket id — `/agentheim:work <id>` for exactly that task
 
 **Type:** Work / Task completion
