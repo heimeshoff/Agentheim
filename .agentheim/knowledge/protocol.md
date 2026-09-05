@@ -1,5 +1,201 @@
-# P
+# Protocol
+
+Chronological log of everything that happens in this project.
+Newest entries on top.
+
+---
+
+## 2026-09-05 22:36 -- Modeling / Captured: agentic-workflow-swj2q + agentic-workflow-g4zce - single-task `/agentheim:work <id>` and the todo-card Work button
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo (both)
+**Summary:** Builder asked whether a worker can be started for one specific todo item and wanted a per-card Work button on todo, symmetric to the backlog Refine/Promote pair. Today `/agentheim:work` has no task-id argument contract — it always dispatches the whole ready set. Captured as two todo tasks: swj2q gives the work skill an explicit `/agentheim:work <task-id>` scoped-run grammar (DAG gate stays fail-closed, run ends after the named task, no mid-run pickup); g4zce adds `workCommandFor(id)` and a single Work LaunchButton in the todo card cornerAction slot, blocked on swj2q. Also repaired protocol.md's header, which the 22:30 session-end prepend had split mid-word ("# P" / "rotocol").
+
+---
+
 ## 2026-09-05 22:30 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 23m (batch start 22:07 → 22:30)
+**Completed:** 2 (first-try PASS: 2, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** infrastructure-w45ce: 1, infrastructure-rgknz: 1
+**Commits:** 4 (1 batch-start, 2 task integrations, this entry)
+**Vision-conformance:** none — batch aligns with vision. Both tasks close the builder's field report ("after updating the plugin the dashboard is not updated") by structure rather than instruction: w45ce makes a stale committed dist a failing check in the suite the verifier runs and a named RELEASE.md step; rgknz makes the runtime replace a live server whose recorded plugin identity is stale or unknown. Serves "wrong work is caught by structure, not luck"; no pull toward a non-goal.
+**Batch mix:** 100% infrastructure (2 type:bug tasks); same BC, same batch — both touched the infrastructure README and it auto-merged cleanly at the second squash (the Phase 3 advisory flagged the overlap; no conflict materialised).
+**Integration note:** w45ce's dist heal landed through the conductor's sanctioned main-tree rebuild (`npm run build` in dashboard/ after the squash, staged in the integrating commit) — the ADR-0057 checkpoint guard correctly kept it off the worker branch. Full merged-main suite: 1307/1307. The suite no longer dirties dashboard/dist/ (dist-build.test.mjs now builds to a scratch outdir). Concurrent modeling sessions committed pcwnn and bmn29 on main during the session — no collision with this session's scoped commits.
+**Carry-over:** none — working tree clean. No orphan worktrees (both torn down after integration).
+
+---
+
+rotocol
+
+Chronological log of everything that happens in this project.
+Newest entries on top.
+
+---
+
+## 2026-09-05 22:29 -- Task verified and completed: infrastructure-rgknz - The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it
+
+**Type:** Work / Task completion
+**Task:** infrastructure-rgknz - The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it
+**Summary:** the runfile records the serving plugin version and root; launch replaces a live server whose recorded identity is stale, unknown, or points at a removed cache dir and reports replaced <old> → <new>; status and GET /healthz surface the serving version; static responses carry Cache-Control: no-cache — ADR-0002 addendum
+**Duration:** 20m
+**Verification:** PASS (iteration 1)
+**Files changed:** 14
+**Tests added:** 17
+**ADRs written:** none (ADR-0002 amended)
+
+---
+
+## 2026-09-05 22:26 -- Task verified and completed: infrastructure-w45ce - A release ships a fresh dashboard — rebuild dist/ as a release step and make dist-vs-source staleness a failing check
+
+**Type:** Work / Task completion
+**Task:** infrastructure-w45ce - A release ships a fresh dashboard — rebuild dist/ as a release step and make dist-vs-source staleness a failing check
+**Summary:** RELEASE.md gains a rebuild-and-stage dashboard/dist step ahead of the version bump; a stdlib-only staleness check (build-stamp.mjs + dist-staleness.test.mjs) fails whenever committed dist lags its sources and names the rebuild command, with dist-build.test.mjs redirected to a scratch outdir so the check is never structurally green; ADR-0013 and ADR-0057 amended; main dist healed via the conductor integration rebuild
+**Duration:** 16m
+**Verification:** PASS (iteration 1)
+**Files changed:** 10
+**Tests added:** 6
+**ADRs written:** none (ADR-0013, ADR-0057 amended)
+
+---
+
+## 2026-09-05 22:20 -- Modeling / Captured: agentic-workflow-bmn29 - Dashboard burns resources at idle on a MacBook — four SSE streams per tab, a 2×tree + 2×doc fan-out on every heartbeat, an unmemoized 255-card board, and box-shadow keyframes
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Builder reported high resource use on a MacBook and suspected polling. Architecture read found no client timer and no server stat-poll on macOS; the waste is emergent — four `useLiveTree` EventSource subscriptions per tab (ADR-0006 assumed one), each tree-changed frame fanning out to 2× /api/tree (sync 255-file walk) + 2× /api/doc, heartbeat writes to .agentheim/state triggering it on every turn end, an unmemoized whole-board re-render on every fetch and card hover, and two infinite box-shadow keyframes painting every frame. Candidate split into agentic-workflow / design-system / infrastructure children at REFINE.
+
+---
+
+## 2026-09-05 22:08 -- Batch started: [infrastructure-rgknz, infrastructure-w45ce]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-rgknz - The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it, infrastructure-w45ce - A release ships a fresh dashboard — rebuild dist/ as a release step and make dist-vs-source staleness a failing check
+**Parallel:** yes (2 workers — the whole ready set; both touch the infrastructure README and ADR-0002, so they are annotated for sequential squash-merge order at integration, not held back)
+
+---
+
+## 2026-09-05 22:06 -- Modeling / Captured: agentic-workflow-pcwnn - Merge-back conflict ladder — rebase the loser onto new main, re-verify, and let the worker resolve a real conflict before escalating to the builder
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** The ADR-0032 "future enhancement" (auto rebase + re-verify), captured honestly: a rebase clears only merge-order conflicts, so the real gain is the next rung — on a rebase conflict, re-dispatch the worker into its own worktree to resolve (counts as an iteration), verify, squash-merge; the builder becomes the last rung, not the first. Salvage before every rung (ADR-0063), main never left mid-merge, ADR amending ADR-0032/0037. Complements ghcaj (which removes the prose-conflict class); neither blocks the other.
+
+---
+
+
+## 2026-09-05 21:59 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 22m (batch start 21:38 → 21:59)
+**Completed:** 1 (first-try PASS: 0, re-dispatched: 1, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** jf6qz: 2
+**Commits:** 3 (1 batch-start, 1 task integration, this entry) — plus the INDEX header-heal commit that follows this entry, if the session-end rotation check heals
+**Vision-conformance:** none — batch aligns with vision. The one shipped task (jf6qz) removes a false machine-generated claim from every BC INDEX header and mechanizes its one-time correction through the ADR-0047 session-end seam, with the heal committed by `work` — serving "knowledge is durable" and "wrong work is caught by structure" (ADR-0059 enforcement shipped in-task). No pull toward a non-goal.
+**Batch mix:** 100% harness (1 task) — a type:bug fix confined to lib/, its test, ADR-0047, the BC README, and one section of skills/work/SKILL.md.
+**Iteration note:** the iteration-1 FAIL was conductor-induced — the dispatch note scoped `skills/` out, so the worker shipped a heal that `work`'s session-end step would write but never commit; iteration 2 widened scope and closed the gap. Concurrent `modeling` sessions committed four captures/promotions on main during this session (w45ce, rgknz, ghcaj, pt0gy) and swept this session's uncommitted "Verification failed" protocol entry into one of their scoped commits — recorded, not lost.
+**Carry-over:** none — working tree clean. No orphan worktrees (jf6qz's worktree and branch torn down after integration).
+
+---
+
+## 2026-09-05 21:59 -- Task verified and completed: agentic-workflow-jf6qz - Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A)
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-jf6qz - Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A)
+**Summary:** archivedDoneHeader no longer emits a phantom "most recent N" cap; a non-rotating session-end run now heals a stale archive-naming header (gated on done-archive/, idempotent) and work commits the heal — ADR-0047 amended, 4 heal tests, SKILL.md rotation step recognizes healed
+**Duration:** 27m (2 iterations)
+**Verification:** PASS (iteration 2)
+**Files changed:** 6
+**Tests added:** 4
+**ADRs written:** none (ADR-0047 amended)
+
+---
+
+## 2026-09-05 21:55 -- Modeling / Captured: agentic-workflow-pt0gy - Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** The builder runs one work session but several modeling sessions in parallel, and they race on the protocol prepend line, the INDEX task-counts/marker lists, and .git/index.lock. Narrower re-capture of the dismissed d5a9b: the pain is multi-writer bookkeeping files, not worktree-local backlogs. Candidate shapes — event-per-action with generated protocol/INDEX read models (aligned with the rework's EventLog/ReadModel ports), CLI-level advisory lock + index.lock retry, or per-session protocol shards. depends_on e4bjh (capture/dismiss must be mechanized before atomicity has a seam).
+
+---
+
+## 2026-09-05 21:55 -- Modeling / Captured: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Builder's complaint that parallel worktrees conflict very often. Evidence from the protocol: every merge-back conflict since ADR-0032 was prose or a build artifact (BC README bullets, ADR amendments at the same anchor, dist bundle), never code. Proposal: the worker's branch carries source + tests only; README delta, ADR bodies and the doing→done move travel as structured blocks in the worker report and are applied by the conductor on main, sequentially, at integration — checkpoint refuses .agentheim/ paths the way ADR-0057 refuses dashboard/dist/. Removes the same-BC-README collision class and lets MAX_PARALLEL rise for same-BC batches.
+
+---
+
+
+## 2026-09-05 21:54 -- Modeling / Promoted: infrastructure-rgknz - The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it
+
+**Type:** Modeling / Promote
+**BC:** infrastructure
+**From → To:** backlog → todo
+
+---
+
+## 2026-09-05 22:02 -- Modeling / Refined: infrastructure-rgknz - The dashboard runtime notices a plugin update
+
+**Type:** Modeling / Refine
+**BC:** infrastructure
+**Status after:** todo
+**Summary:** Builder answered the open symptom question: old UI after an update, no `already running` message noticed. Recorded that the simplest reading is "no release since v0.9.2, so the marketplace had nothing newer" (ADR-0013 manifest lag) — the unblock for that is cutting a release with w45ce's fresh dist; this task still guards the runtime once a newer version is on disk. Added one hardening criterion (`Cache-Control: no-cache` on static assets — today none are sent). Readiness gate cleared → promoted.
+**Split into:** —
+**ADRs written:** none
+
+---
+
+## 2026-09-05 21:52 -- Verification failed: agentic-workflow-jf6qz - Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A)
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-jf6qz - Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A)
+**Iteration:** 1 of 3
+**Reasons:** criterion #7 unreachable — `skills/work/SKILL.md`'s session-end rotation step never commits a healed-only run, so the heal would strand three dirty INDEX.md files; README and ADR-0047 amendment claim a SKILL.md narrowing that does not exist; the worker had scoped `skills/` out on the conductor's over-narrow file-scope note
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
+## 2026-09-05 21:50 -- Modeling / Captured: infrastructure-w45ce, infrastructure-rgknz - A marketplace install/update ships and serves an up-to-date dashboard
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo (w45ce), backlog (rgknz)
+**Summary:** Builder field report — after updating the plugin in a consumer repo the dashboard is not properly installed/updated. Root causes found: (1) the committed `dashboard/dist/` is the shipped artifact and nothing rebuilds it at release time (`RELEASE.md` has no step; ADR-0057 deliberately keeps workers from committing it), and `main` is already stale (app changed 2026-07-15, dist built 2026-07-13); the marketplace also copies `main`, not the tag. → w45ce: release-step rebuild + a stdlib staleness check, filed to todo. (2) `launch.mjs` reuses any live pid regardless of which plugin version it serves — an old-version server survives an update (or serves from a removed cache dir). → rgknz: version-aware replace-not-reuse, filed to backlog pending the builder's observed symptom.
+
+---
+
+## 2026-09-05 21:38 -- Batch started: [agentic-workflow-jf6qz]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-jf6qz - Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A)
+**Parallel:** no (1 worker — the only ready task)
+
+---
+
+## 2026-09-05 21:38 -- Modeling / Dismissed: agentic-workflow-d5a9b
+
+**Type:** Modeling / Dismiss
+**Dismissed:** agentic-workflow-d5a9b - Enable parallel worktree sessions with independent idea capture and ticket movement (agentic-workflow)
+
+---
+
+
+ork session ended
 
 **Type:** Work / Session end
 **Duration:** 23m (batch start 22:07 → 22:30)
