@@ -5,6 +5,56 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 01:15 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 2h18m (batch start 22:57 → 01:15)
+**Completed:** 7 (first-try PASS: 6, re-dispatched: 1, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 1 (agentic-workflow-ghcaj — three FAILs, each on residual pre-ghcaj prose in a doctrine file the diff had not swept: skills/work/SKILL.md twice, then agents/worker.md; code, tests, ADR, README verified clean every time)
+**Dispatches:** design-system-pk4qd: 1, agentic-workflow-mvt8x: 1, agentic-workflow-swj2q: 2, agentic-workflow-g4zce: 1, agentic-workflow-rw6ck: 1, agentic-workflow-pcwnn: 1, agentic-workflow-e4bjh: 1, agentic-workflow-ghcaj: 3
+**Commits:** 15 (5 batch-start, 7 task integrations, 2 INDEX repairs by the conductor, this entry)
+**Vision-conformance:** none — batch aligns with vision. Every shipped task serves "wrong work is caught by structure, not luck" or "independent work runs in parallel"; the ADR-0072 ladder keeps the builder as the last rung and re-verifies, so it does not pull toward the Not-autonomous non-goal.
+**Batch mix:** five batches — [swj2q, mvt8x, pk4qd] at 22:57, then four single/double waves as a concurrent modeling session promoted g4zce (blocked on swj2q), rw6ck, pcwnn, e4bjh and ghcaj mid-run; every parallel squash auto-merged cleanly (mvt8x/pk4qd, e4bjh/ghcaj preview); the two dashboard tasks and the CSS task were healed on main via the conductor integration rebuild of dashboard/dist (ADR-0057). Merged-main suites at the last dashboard-touching integration: lib 421/421 (now 449 after e4bjh), dashboard 976/976.
+**Conductor notes:** two INDEX repairs were needed for the conductor's own bookkeeping (a CRLF-defeated adr-local insert; an over-length ADR-0072 entry caught by the index-entry-length lint on merged main); ADR-0073 is e4bjh's — ghcaj's provisional 0073 will finalize to 0074 at its eventual integration (ADR-0058).
+**Carry-over:** .agentheim/knowledge/protocol.md: committed (this session-end entry plus the three ghcaj verification-failed entries and the swj2q iteration-1 entry it accumulated between task commits); .worktrees/agentic-workflow-ghcaj: kept (owner: agentic-workflow-ghcaj, escalated at iteration 3 — see the three verifier notes in the worktree copy of the task file; task stays in doing/ on main). Working tree otherwise clean.
+
+---
+
+## 2026-09-06 01:12 -- Verification failed — escalating to user: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+**Iteration:** 3 of 3
+**Reasons:** four untouched passages in agents/worker.md (First action bounce move, spike stop-loss doing → done move, create-follow-ups-in-backlog/, resolve-conflict inputs claiming a done/ file in the worktree) still instruct the pre-ghcaj behavior the diff prohibits; code, tests (465/465), ADR, README and the skills/work/SKILL.md sweep are clean
+**Iteration hint:** likely-fixable
+**Next:** escalated to user — worktree .worktrees/agentic-workflow-ghcaj and branch aw/agentic-workflow-ghcaj kept; task stays in doing/ on main; all three verifier notes are in the worktree copy of the task file
+
+---
+
+## 2026-09-06 00:58 -- Verification failed: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+**Iteration:** 2 of 3
+**Reasons:** three more location claims in skills/work/SKILL.md still say the task file lives inside the worktree (Phase 4 step 5, the Subagent Prompt Template lead-in first half, the Verifier Prompt Template task-file line), contradicting the diff's own on-main task-file rule; iteration 1's two lines are fixed; code/tests/ADR/README clean
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker (final iteration)
+
+---
+
+## 2026-09-06 00:50 -- Verification failed: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+**Iteration:** 1 of 3
+**Reasons:** two untouched prose lines in skills/work/SKILL.md contradict the diff's own new rules — the Subagent Prompt Template lead-in still says the Rules list is unchanged and the worker owns its doing → done move; the Index-updates doing → done row still says complete is idempotent against a squash that carried the task file. Code, tests (465/465), ADR, README all verified clean
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-09-06 00:39 -- Task verified and completed: agentic-workflow-e4bjh - Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI
 
 **Type:** Work / Task completion
