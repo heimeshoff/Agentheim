@@ -5,10 +5,10 @@ Newest entries on top.
 
 ---
 
-## 2026-09-06 01:15 -- Work session ended
+## 2026-09-06 01:00 -- Work session ended
 
 **Type:** Work / Session end
-**Duration:** 2h18m (batch start 22:57 → 01:15)
+**Duration:** 2h03m (batch start 22:57 → 01:00)
 **Completed:** 7 (first-try PASS: 6, re-dispatched: 1, skipped: 0)
 **Bounced:** 0
 **Failed:** 0
@@ -22,7 +22,7 @@ Newest entries on top.
 
 ---
 
-## 2026-09-06 01:12 -- Verification failed — escalating to user: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+## 2026-09-06 00:58 -- Verification failed — escalating to user: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
 
 **Type:** Work / Verification failure
 **Task:** agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
@@ -33,7 +33,7 @@ Newest entries on top.
 
 ---
 
-## 2026-09-06 00:58 -- Verification failed: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+## 2026-09-06 00:51 -- Verification failed: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
 
 **Type:** Work / Verification failure
 **Task:** agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
@@ -44,7 +44,7 @@ Newest entries on top.
 
 ---
 
-## 2026-09-06 00:50 -- Verification failed: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+## 2026-09-06 00:44 -- Verification failed: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
 
 **Type:** Work / Verification failure
 **Task:** agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
