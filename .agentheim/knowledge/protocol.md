@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 22:50 -- Modeling / Promoted: design-system-pk4qd - Two ambient cues repaint every frame — ambient-rail-pulse and rail-attention-breathe animate box-shadow inside their keyframes, contradicting the compositor-only claim
+
+**Type:** Modeling / Promote
+**BC:** design-system
+**From → To:** backlog → todo
+
+---
+
+## 2026-09-05 22:50 -- Modeling / Promoted: agentic-workflow-mvt8x - One live-update subscription per tab, one /api/tree fetch per structural frame — an advisory frame (.agentheim/state/**) re-syncs only the panel that reads that artifact, never the board or rail
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-05 22:58 -- Modeling / Refined: agentic-workflow-bmn29 - Dashboard burns resources at idle on a MacBook — split into hub, memoization, and keyframes children; parent keeps the residual hidden-tab scope
 
 **Type:** Modeling / Refine

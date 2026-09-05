@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-mvt8x
 title: One live-update subscription per tab, one /api/tree fetch per structural frame — an advisory frame (.agentheim/state/**) re-syncs only the panel that reads that artifact, never the board or rail
-status: backlog
+status: todo
 type: bug
 context: agentic-workflow
 created: 2026-09-05
