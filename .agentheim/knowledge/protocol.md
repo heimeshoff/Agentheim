@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 23:21 -- Modeling / Refined: agentic-workflow-rw6ck - Hovering a card re-renders that card and its ring targets, not all 255 — memoized board cards and columns, hover state out of the board root, identity-stable tree projection
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo (promoted in the entry above)
+**Summary:** Post-mvt8x readiness pass against the live board — diagnosis re-verified (no React.memo in board.js, hover state at the board root, treeToColumns single-arg); the mvt8x sequencing dependency is discharged (shipped 23:15) and the reconcile's plug-in point named (functional setColumns at applyTree). Three findings folded into the criteria: the inline sortTickets at the column call site defeats column memo and must be memoized per (column, sort); BoardColumn legitimately re-renders on hover for the h9v3m collapsed-section marker, so the hard criterion is the card cascade, and React.memo(BoardCard) alone already meets it; the reconcile's value-equality is the treeTicket field set with mtimeMs deliberately included. Pure-projection and re-projection criteria tightened to exact column-array reuse and exact render counts. Backlinks re-run: ADR-0062, ADR-0070, prior art k5p8w added. No orchestrator round — the task had one this afternoon (tactical-modeler ×2, architect) and the pass was verification against code, not new modeling.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-09-05 23:17 -- Batch started: [agentic-workflow-g4zce]
 
 **Type:** Work / Batch start

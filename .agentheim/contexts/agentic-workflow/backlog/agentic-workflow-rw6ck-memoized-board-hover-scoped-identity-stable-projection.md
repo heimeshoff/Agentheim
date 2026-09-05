@@ -9,9 +9,9 @@ completed:
 depends_on: [agentic-workflow-mvt8x, design-system-001-styleguide]
 blocks: [agentic-workflow-bmn29]
 tags: [dashboard, performance, board, memoization]
-related_adrs: [0033, 0059, 0061]
+related_adrs: [0033, 0059, 0061, 0062, 0070]
 related_research: []
-prior_art: [agentic-workflow-009, agentic-workflow-h9v3m]
+prior_art: [agentic-workflow-009, agentic-workflow-h9v3m, agentic-workflow-k5p8w]
 ---
 
 ## Why
@@ -79,12 +79,19 @@ bite on a re-fetch at all.
       a memoization test that was never seen failing proves nothing).
 - [ ] Pure `node --test` in `board-data.test.mjs`: `treeToColumns(tree, prev)`
       called twice on the same tree returns **referentially identical** ticket
-      objects for every column; after one task moves `todo→doing`, exactly one
-      ticket object differs by identity and all others are reused.
+      objects for every column, reuses each **column array** whose members are
+      all identical, and returns `prev` **itself** when all four columns are
+      reused; after one task moves `todo→doing`, exactly one ticket object
+      differs by identity, exactly the two affected column arrays are fresh,
+      and every other ticket and column array is reused.
 - [ ] jsdom + probe: a re-projection driven by an unchanged `/api/tree` payload
-      produces **0** `BoardCard` renders; a payload differing by one task move
-      produces ≤2 renders (the moved card in its new column, plus the column
-      bodies).
+      produces **0** `BoardCard` renders and **0** `BoardColumn` renders; a
+      payload differing by one task move produces exactly one `BoardCard`
+      render (the moved card in its new column) and exactly two `BoardColumn`
+      renders (source and destination columns). The two untouched columns
+      render **0** times — which requires the per-column sorted array to be
+      memoized on `(columns[status], sort)`, not recomputed inline at the
+      column call site (see Notes, readiness pass).
 - [ ] The existing `dashboard/` `node --test` suite passes **unchanged** — no
       test edited to accommodate memoization. This is the honest refactor bar,
       and it already covers the interactions at risk:
@@ -117,18 +124,52 @@ sets the right verifier bar (prove nothing visibly changed). `bug` is
 defensible if the builder prefers symptom-first typing (the felt hover lag is
 real) — builder's call; default to `refactor` unless told otherwise.
 
-**Dependency on `agentic-workflow-mvt8x` — sequencing only, not logical.** A
-hover never touches the SSE path, so this task is reachable and independently
-measurable even if mvt8x never shipped. The dependency exists for two
-practical reasons: (1) both tasks edit `dashboard/app/board.js` in adjacent
-regions (mvt8x touches `useLiveTree` around the hook definition and its four
-call sites, one of which sits a few dozen lines from this task's hover-state
-block) — sequencing avoids two workers colliding on the same file under
-worktree isolation; (2) this task's render-count measurements are only clean
-once mvt8x removes the heartbeat-driven full-board re-fetch — profiling a
-hover pre-mvt8x risks conflating heartbeat-driven commits with hover-driven
-ones. Do not re-litigate the split; if mvt8x is bounced back to backlog for
-rework, this task should wait.
+**Dependency on `agentic-workflow-mvt8x` — sequencing only, not logical —
+discharged.** mvt8x shipped 2026-09-05 23:15 (ADR-0070 accepted). It was a
+sequencing dependency for two practical reasons: (1) both tasks edit
+`dashboard/app/board.js` in adjacent regions; (2) this task's render-count
+measurements are only clean once the heartbeat-driven full-board re-fetch is
+gone. Both reasons are now satisfied. What the hub changed for this task:
+`useLiveTree(onTree)` in `board.js` is now a subscriber to a module-level
+hub; the board's `applyTree` callback receives one tree per structural frame
+and does `setColumns(treeToColumns(tree))`. That line is where the reconcile
+plugs in — as a functional update, `setColumns(prev => treeToColumns(tree,
+prev))`, so the projection sees the previous columns without a ref.
+
+**Readiness pass (2026-09-05 23:21, post-mvt8x) — three findings from
+re-reading the live board, all folded into the criteria above:**
+
+1. **Inline sort at the column call site defeats column memo.** The board
+   currently renders each column with `tickets=${sortTickets(columns[status],
+   view.lens.sort)}` computed inline, so every board render hands every
+   `BoardColumn` a fresh array even when the underlying column array is
+   identity-stable. Memoize the four sorted arrays on `(columns[status], sort)`
+   (one `useMemo` producing a per-status map is enough). Without this the
+   "two untouched columns render 0 times" criterion cannot pass, and the
+   red-first run will show it.
+2. **The column legitimately re-renders on hover; the cascade into cards is
+   what's forbidden.** `BoardColumn` needs `targetIds` for the
+   agentic-workflow-h9v3m collapsed-section hidden-dependency marker, so on
+   hover the four column bodies will re-render whether or not hover state
+   leaves the root. That is four cheap renders and is acceptable; what must
+   not happen is those four renders re-running every card. Note that
+   `React.memo(BoardCard)` alone already meets the hover criterion:
+   `dependencyRelation` is computed per card in the column and is
+   `undefined → undefined` for every non-target, and the other card props
+   (`ticket`, `status`, `selectedId`, `onOpen`, `skipPermissions`,
+   `onCardHover`) are stable across a hover. "Hover state out of the board
+   root" therefore buys the *column-level* saving — the four
+   `groupTickets`/`annotateSectionHiddenDependency` passes over 249 Done
+   cards per hover — not the card-level one. Ship the card memo first, show
+   the hover test green, then decide how far to take the column half; the
+   hover-criterion does not depend on it.
+3. **Value-equality for the reconcile is the `treeTicket` field set:** `id`,
+   `title`, `status`, `type`, `context`, `path`, `mtimeMs`, `dependsOn[]`,
+   `blocks[]` (the remaining fields are constants). `mtimeMs` is deliberately
+   *in* the comparison — a worker editing a task body changes its mtime and
+   that card should re-render, since the sort's modification-date orderings
+   read it. Compare `dependsOn`/`blocks` element-wise; they are fresh arrays
+   on every fetch.
 
 **Mechanize-or-drop (ADR-0059) — two conventions, two verdicts:**
 
