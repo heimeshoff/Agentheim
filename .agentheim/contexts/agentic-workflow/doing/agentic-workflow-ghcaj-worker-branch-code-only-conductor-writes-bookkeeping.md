@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-ghcaj
 title: Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
-status: todo
+status: doing
 type: refactor
 context: agentic-workflow
 created: 2026-09-05

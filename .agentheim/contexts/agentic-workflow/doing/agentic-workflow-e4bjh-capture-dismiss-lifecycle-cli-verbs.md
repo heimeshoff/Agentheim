@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-e4bjh
 title: Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI
-status: todo
+status: doing
 type: refactor
 context: agentic-workflow
 created: 2026-07-22

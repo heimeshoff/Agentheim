@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 00:12 -- Batch started: [agentic-workflow-e4bjh, agentic-workflow-ghcaj]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-e4bjh - Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI, agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+**Parallel:** yes (2 workers — the whole ready set after the post-pcwnn re-scan; both promoted by a concurrent modeling session tonight, ghcaj unblocked when pcwnn integrated at 00:11). Merge-order advisory: both edit lib/task-lifecycle.mjs, lib/task-lifecycle-cli.mjs, lib/test/task-lifecycle.test.mjs, the agentic-workflow README and allocate a new ADR — squash e4bjh before ghcaj; a real conflict goes through the ADR-0072 ladder that pcwnn just shipped
+
+---
+
 ## 2026-09-06 00:11 -- Modeling / Promoted: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
 
 **Type:** Modeling / Promote
