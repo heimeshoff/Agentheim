@@ -9,7 +9,7 @@ completed:
 depends_on: [agentic-workflow-pcwnn]
 blocks: []
 tags: [captured, worktree, merge-back, mechanization, rework, bookkeeping]
-related_adrs: [0032, 0037, 0057, 0058, 0026, 0038, 0063, 0059, 0041, 0042, 0061]
+related_adrs: [0032, 0037, 0057, 0058, 0026, 0038, 0063, 0059, 0041, 0042, 0061, 0072]
 related_research: []
 prior_art: [agentic-workflow-f6m2q, agentic-workflow-t7m4c, agentic-workflow-k9t3w, agentic-workflow-w2njd, agentic-workflow-q7v3k, agentic-workflow-hmgav]
 ---
@@ -200,7 +200,7 @@ fact the sequence rests on:
 - [ ] `skills/work/SKILL.md` "PASS / SKIP" lists the integration order §3(a)–(f) with the scoped `git add` set; "BOUNCE integration" drops the squash-merge; "Handling the verdict" writes annotations to `main`'s task file; Phase 3 loses the same-BC-README annotation; the `NEW_BACKLOG_ITEMS` INDEX step becomes materialize + insert; a `**README delta:**` protocol line is specified for `merged` / `appended-fallback` dispositions quoting the observed text; the completion entry gains an advisory `**README length:**` line when the README exceeds the ADR-0041 threshold after a delta (advisory only, never gates — the README is already at 1272 lines and accretion needs a visible valve).
 - [ ] The Verifier Prompt Template carries the parsed blocks; `agents/verifier.md` check 5 judges `README_DELTA` against the diff, check 7 fails on `.agentheim/` diff paths, check 6c's scope gate fires on non-empty `ADRS`/`README_DELTA`, and the auto-SKIP rule reads `FILES_CHANGED == 0` AND one `ADRS` entry.
 - [ ] `## Key events` / `## Key commands` in the agentic-workflow README are bullet lists; the README git-model entry states the code-only branch, the delta grammar's monotone invariant, the on-`main` annotation rule, and that `main` now has exactly one writer per `.agentheim/` file on the work side (the pt0gy sibling covers the modeling side).
-- [ ] One new ADR (title below) amends ADR-0032 choreography steps 3, 4, and 6, records the report-carried choice over worktree-carried, the two-op grammar and its monotone invariant, the conductor-merges-prose rule and why ADR-0032's no-auto-guess clause is intact, the on-`main` annotation rule, the retired `BC_README_UPDATED` field, the un-bundling of `MAX_PARALLEL` from the Phase 3 change, the dead moved-from-`doing/` detection, and the mechanize-or-drop declaration (helpers mechanized, sequencing prose-only); backlinked to ADR-0032, ADR-0057, ADR-0058, ADR-0063, ADR-0041, and pcwnn's ADR.
+- [ ] One new ADR (title below) amends ADR-0032 choreography steps 3, 4, and 6, records the report-carried choice over worktree-carried, the two-op grammar and its monotone invariant, the conductor-merges-prose rule and why ADR-0032's no-auto-guess clause is intact, the on-`main` annotation rule, the retired `BC_README_UPDATED` field, the un-bundling of `MAX_PARALLEL` from the Phase 3 change, the dead moved-from-`doing/` detection, and the mechanize-or-drop declaration (helpers mechanized, sequencing prose-only); backlinked to ADR-0032, ADR-0057, ADR-0058, ADR-0063, ADR-0041, and ADR-0072 (pcwnn's ladder).
 
 ## Notes
 
@@ -226,14 +226,12 @@ from capture, resolved:
 - *Rework ports* → this is the seam: the worker reports, the conductor writes; a remote
   TaskStore / DecisionStore implements §3(a)–(f) with no worktree at all. The return-format
   blocks are designed once here.
-- *Sibling `pcwnn`* → **now `depends_on`**. Logically independent, but pcwnn (in `doing/` since
-  2026-09-05 23:30) rewrites "Merge-back conflicts", the Verifier Prompt Template, `worker.md`,
+- *Sibling `pcwnn`* → **now `depends_on`** (shipped 2026-09-06 as ADR-0072 while this
+  refinement ran, so the dependency is already met). Logically independent, but pcwnn rewrote "Merge-back conflicts", the Verifier Prompt Template, `worker.md`,
   the README git-model entry, and `lib/worktree-salvage.mjs` — every file this task edits.
-  Dispatching both in one batch would manufacture exactly the prose conflict this task exists
-  to remove. Once ghcaj lands, pcwnn's ladder allow-list is code-only by construction, and its
-  rung-4 `done → doing` revert is vestigial. pcwnn's own `blocks:` backlink is deliberately
-  not written here — its `doing/` file is mid-squash in a live worktree and editing `main`'s
-  copy would risk the same rename+modify collision; the conductor or the next refine adds it.
+  Dispatching both in one batch would have manufactured exactly the prose conflict this task
+  exists to remove; this task now edits on top of ADR-0072's text. Once ghcaj lands, pcwnn's ladder allow-list is code-only by construction, and its
+  rung-4 `done → doing` revert is vestigial. pcwnn's `done/` file is frozen, so its `blocks:` backlink is not written.
 
 **Worker note for whoever executes this task:** you run under the *pre-ghcaj* choreography —
 edit the README, write the ADR, and move your task file in your worktree exactly as
