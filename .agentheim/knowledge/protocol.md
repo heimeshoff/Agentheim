@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 00:06 -- Modeling / Promoted: agentic-workflow-e4bjh - Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-06 00:05 -- Modeling / Refined: agentic-workflow-e4bjh - Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI
 
 **Type:** Modeling / Refine
