@@ -499,6 +499,17 @@ separate BC, but today the whole tool lives in this one.
   The **add-ticket affordances are backlog-only** too (agentic-workflow-018): `EmptyColumn`'s
   "Add ticket" and `ColumnHeader`'s `+` are optional slots keyed off `onAdd` (default OFF) —
   the board is a projection of disk (ADR-0001). See ADR-0018, ADR-0003, ADR-0009, ADR-0001.
+- **Todo card launch (Work)** — the topbar's standing Work button (agentic-workflow-024)
+  launches the **bare** `/agentheim:work`, dispatching the whole ready set; a todo card
+  sometimes needs to run **alone**. Each todo card surfaces a single-button **Work** launch
+  (agentic-workflow-g4zce) in the same `cornerAction` slot the backlog pair uses
+  (design-system-006), styled primary with a trailing `↗` glyph like the topbar Work button
+  (agentic-workflow-064). It seeds the **scoped-run grammar** `/agentheim:work` gained in
+  ADR-0071 — `/agentheim:work <id>` runs exactly that task, never the whole ready set — via
+  `workCommandFor(id)` (`dashboard/app/modeling-command.js`, unit-tested), through the same
+  `launchOrCopy` bridge/clipboard path and armed-`skipPermissions` cue as every other launch.
+  The top-right dismiss trash can (below) still applies to todo cards; the two coexist without
+  overlap (bottom-right vs. top-right). See ADR-0071, ADR-0018, ADR-0003, ADR-0017, ADR-0001.
 - **Board card dismiss (hover-revealed trash can)** — a **backlog** or **todo** ticket
   sometimes just needs to go away. Each such card carries a **red trash-can button** in its
   **top-right corner** (agentic-workflow-048): hidden at `opacity: 0`, revealed on hover or

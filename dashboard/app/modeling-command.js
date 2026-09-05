@@ -200,6 +200,26 @@ export function plainCommandFor(prompt) {
 }
 
 /**
+ * Build the per-card WORK command — what the todo card's Work launch button
+ * seeds (aw-g4zce). Unlike the modeling-verb builders (refine/promote/dismiss),
+ * WORK has no verb sub-command of its own — `/agentheim:work <id>` is the full
+ * scoped-run grammar ADR-0071 documents — so this mirrors quickCaptureCommandFor's
+ * shape (append the id straight onto the bare command) rather than
+ * refineCommandFor's (append a verb, then the id). Shares the same `safeId` trim/
+ * degrade contract as every other per-card builder: a missing/blank/non-string id
+ * degrades to the bare `WORK_COMMAND`, so the topbar's unscoped "whole ready set"
+ * launch and this scoped one can never collide on payload shape.
+ * @param {string} [id] — the card's ticket id.
+ * @returns {string} `"/agentheim:work <id>"` for a real id (one separating
+ *   space, trimmed ends — no doubled space for a padded id), else the bare
+ *   `WORK_COMMAND`. Pure: no DOM, no I/O, never throws.
+ */
+export function workCommandFor(id) {
+  const trimmed = safeId(id);
+  return trimmed ? `${WORK_COMMAND} ${trimmed}` : WORK_COMMAND;
+}
+
+/**
  * Build the per-card REFINE command — what the backlog card's Refine launch
  * button seeds (aw-022). Refine runs the full Socratic refinement of the ticket.
  * @param {string} [id] — the card's ticket id.

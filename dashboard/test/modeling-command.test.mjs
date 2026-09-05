@@ -27,6 +27,7 @@ import {
   refineCommandFor,
   promoteCommandFor,
   dismissCommandFor,
+  workCommandFor,
   quickCaptureCommandFor,
   modelingCommandFor,
   researchCommandFor,
@@ -211,6 +212,43 @@ test('dismissCommandFor trims a whitespace-padded id before appending', () => {
 
 test('dismissCommandFor collapses an all-whitespace id to the bare verb command', () => {
   assert.equal(dismissCommandFor('   '), '/agentheim:modeling dismiss');
+});
+
+// agentic-workflow-g4zce: the per-card WORK launch on todo cards, seeding the
+// scoped-run grammar ADR-0071 gives `work` — `/agentheim:work <id>` runs exactly
+// that task, not the whole ready set the bare topbar command dispatches. Unlike
+// refine/promote/dismiss, work has no verb sub-command, so the id is appended
+// directly onto WORK_COMMAND (mirrors quickCaptureCommandFor's shape).
+
+test('workCommandFor appends the id directly to the fully-qualified bare work command', () => {
+  assert.equal(
+    workCommandFor('agentic-workflow-abcde'),
+    '/agentheim:work agentic-workflow-abcde',
+  );
+});
+
+test('workCommandFor with no id yields the bare WORK_COMMAND with no trailing id or space', () => {
+  assert.equal(workCommandFor(), WORK_COMMAND);
+  assert.equal(workCommandFor(undefined), WORK_COMMAND);
+  assert.equal(workCommandFor(null), WORK_COMMAND);
+  assert.equal(workCommandFor(''), WORK_COMMAND);
+});
+
+test('workCommandFor with a non-string id degrades to the bare WORK_COMMAND — never "[object Object]", never a throw', () => {
+  assert.equal(workCommandFor(42), WORK_COMMAND);
+  assert.equal(workCommandFor({}), WORK_COMMAND);
+  assert.equal(workCommandFor([]), WORK_COMMAND);
+});
+
+test('workCommandFor trims a whitespace-padded id before appending (no doubled space)', () => {
+  assert.equal(
+    workCommandFor('  agentic-workflow-abcde  '),
+    '/agentheim:work agentic-workflow-abcde',
+  );
+});
+
+test('workCommandFor collapses an all-whitespace id to the bare WORK_COMMAND', () => {
+  assert.equal(workCommandFor('   '), WORK_COMMAND);
 });
 
 // agentic-workflow-023: the board-level prompt bar. The relocated column buttons

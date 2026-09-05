@@ -57,7 +57,7 @@ import { COLUMN_ORDER, treeToColumns } from "./board-data.js";
 import { resolveTheme, saveTheme } from "./theme-state.js";
 import { loadSkipPermissions, saveSkipPermissions } from "./skip-permissions-state.js";
 import { SORT_OPTIONS, DEFAULT_SORT, sortTickets } from "./board-sort.js";
-import { refineCommandFor, promoteCommandFor, dismissCommandFor, WORK_COMMAND, WHATS_NEXT_COMMAND } from "./modeling-command.js";
+import { refineCommandFor, promoteCommandFor, dismissCommandFor, workCommandFor, WORK_COMMAND, WHATS_NEXT_COMMAND } from "./modeling-command.js";
 import { PROMPT_MODES, DEFAULT_PROMPT_MODE_INDEX, clampPromptModeIndex, nextPromptModeIndex, promptBarKeyIntent, PROMPT_KEY_INTENT, canFirePromptMode, nameForPromptMode } from "./prompt-mode.js";
 import { PROMPT_MODELS, DEFAULT_PROMPT_MODEL_INDEX, nextPromptModelIndex, isModelLockedForMode, modelForMode, shouldWindowCtrlMHandle } from "./prompt-model.js";
 import { launchOrCopy, probeBridge, KNOWN_CAPABILITIES } from "./bridge-launch.js";
@@ -1529,6 +1529,29 @@ function BacklogCardLaunchPair({ id, skipPermissions = false }) {
     </div>`;
 }
 
+// The per-CARD todo launch (agentic-workflow-g4zce). The board's only way to start
+// execution was the topbar Work button (aw-024), which launches the BARE
+// `/agentheim:work` and therefore dispatches the whole ready set — that command has
+// no way to name a single task. This adds the symmetric per-card affordance the
+// backlog Refine/Promote pair (aw-022) already has: ONE Work launch button in the
+// styleguide TicketCard's existing cornerAction render-prop slot (design-system-006),
+// consumed UNFORKED (ADR-0003), seeding the SCOPED-RUN grammar ADR-0071 gives `work`
+// — `/agentheim:work <id>` runs exactly that task, never the whole ready set.
+//
+// Styled to read like the topbar Work button (agentic-workflow-064): PRIMARY
+// emphasis with a trailing up-right glyph (`Work ↗`), not the backlog pair's
+// primary/quiet TWO-button group — a todo card invites exactly one action.
+// Reuses launchOrCopy (bridge launch, silent clipboard fallback, ADR-0018)
+// unchanged and threads the armed skipPermissions cue exactly like the backlog
+// pair (aw-021/ADR-0019). The board stays a projection of disk (ADR-0001/ADR-0017)
+// — this adds a launch side-effect only, no lifecycle write.
+function TodoCardLaunch({ id, skipPermissions = false }) {
+  return html`
+    <${LaunchButton} label="Work" command=${workCommandFor(id)}
+      icon="square-arrow-out-up-right" emphasis="primary" trailingIcon=${true}
+      liftOnHover=${true} isolateClick=${true} skipPermissions=${skipPermissions} />`;
+}
+
 // The board's per-BC section now COMPOSES the shared styleguide Collapsible
 // primitive (design-system-005), CONTROLLED: the board owns each (column, BC)
 // collapse state in its persisted view-state store (ADR-0015), so it supplies
@@ -1671,9 +1694,16 @@ function BoardCard({ ticket, status, selectedId, onOpen, skipPermissions = false
   // cornerAction, so their cards render the slot empty (and, since ds-006, no dead
   // estimate chip either). The slot is click-isolated by the styleguide, so
   // launching never opens the slide-over.
+  //
+  // Todo cards (agentic-workflow-g4zce) carry the SYMMETRIC single-action Work
+  // launch in the same slot — seeded with the scoped-run grammar ADR-0071 gives
+  // `work` (`/agentheim:work <id>`, exactly that task). Doing/done cards pass no
+  // cornerAction, unchanged.
   const cornerAction = status === "backlog"
     ? () => html`<${BacklogCardLaunchPair} id=${ticket.id} skipPermissions=${skipPermissions} />`
-    : undefined;
+    : status === "todo"
+      ? () => html`<${TodoCardLaunch} id=${ticket.id} skipPermissions=${skipPermissions} />`
+      : undefined;
   // The TOP-RIGHT dismiss trash can (aw-048) sits on BACKLOG + TODO cards only —
   // doing/done never show it (DISMISS itself refuses those states, ADR-0022). It is a
   // board-local OVERLAY (the styleguide TicketCard has no top-right slot), so the card

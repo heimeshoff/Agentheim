@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-g4zce
 title: Todo cards get a Work launch button seeded with the ticket id — `/agentheim:work <id>` for exactly that task
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-09-05
-completed:
+completed: 2026-09-05
 depends_on: [agentic-workflow-swj2q, design-system-001]
 blocks: []
 tags: [dashboard, board, todo-card, launch-button, work, bridge]
@@ -78,3 +78,45 @@ promise to honour.
   no new design-system primitive, no fork (ADR-0003).
 - Label choice: "Work" (matches the topbar verb). If the builder prefers "Work on
   this", change only the label constant — the command is what matters.
+- ADR-0059 disposition: no new convention introduced — this consumes the existing
+  `cornerAction` slot, `LaunchButton`, `launchOrCopy`, and the `refineCommandFor`-shaped
+  pure-builder pattern as-is (per Notes above). No lint expected, none added.
+
+## Outcome
+
+Todo cards now carry a bottom-right **Work** launch button (`cornerAction` slot,
+mirroring the backlog Refine/Promote pair) that seeds the scoped-run grammar
+ADR-0071 gave `/agentheim:work` — `/agentheim:work <id>` runs exactly that task,
+never the whole ready set the topbar's bare Work button dispatches.
+
+- `dashboard/app/modeling-command.js` — added pure `workCommandFor(id)`, mirroring
+  the shared `safeId` trim/degrade contract (padded id trimmed, blank/non-string
+  degrades to the bare `WORK_COMMAND`). No verb sub-command (unlike
+  refine/promote/dismiss) — the id is appended directly, mirroring
+  `quickCaptureCommandFor`'s shape.
+- `dashboard/app/board.js` — new `TodoCardLaunch` component: a single primary-emphasis
+  `LaunchButton` labelled "Work" with a trailing `square-arrow-out-up-right` glyph
+  (matching the topbar Work restyle, agentic-workflow-064), `isolateClick` +
+  `liftOnHover`, threading `skipPermissions`. `BoardCard`'s `cornerAction` now
+  branches `backlog` → `BacklogCardLaunchPair`, `todo` → `TodoCardLaunch`, else
+  `undefined`. The existing top-right `CardTrashCan` overlay (aw-048) is untouched
+  and coexists with the new bottom-right button (top-right vs. bottom-right, no
+  overlap). The topbar's bare `WORK_COMMAND` launch (aw-024) is unchanged.
+- Tests (TDD, red→green): `dashboard/test/modeling-command.test.mjs` (+5 cases for
+  `workCommandFor`) and a new `dashboard/test/todo-card-launch.test.mjs` (6 static
+  board-glue guards, mirroring `backlog-card-launch.test.mjs`'s source-reading
+  idiom — this project has no DOM render harness for board.js).
+- `dashboard/dist/` rebuilt via `npm run build` so the local/verifier suite's
+  dist-staleness check is green; the conductor performs the sanctioned rebuild on
+  `main` at integration (ADR-0057).
+- `.agentheim/contexts/agentic-workflow/README.md` — added a "Todo card launch
+  (Work)" paragraph next to the backlog Refine/Promote entry.
+- Full suite: `cd dashboard && node --test` → 967 passing (was 956; +11: 5
+  `workCommandFor` cases + 6 `todo-card-launch` guards). `node --test
+  lib/test/*.test.mjs` from the worktree root → 385 passing, unaffected (no `lib/`
+  files touched).
+- No ADR written — this consumes ADR-0003/0017/0018/0071 and the existing
+  `cornerAction`/`LaunchButton`/`launchOrCopy` shapes unchanged (see Notes' ADR-0059
+  disposition).
+- `[human-eye]` left unchecked — the builder still needs to click Work on a real
+  todo card in VS Code and confirm the seeded terminal.

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 23:25 -- Task verified and completed: agentic-workflow-g4zce - Todo cards get a Work launch button seeded with the ticket id — `/agentheim:work <id>` for exactly that task
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-g4zce - Todo cards get a Work launch button seeded with the ticket id — `/agentheim:work <id>` for exactly that task
+**Summary:** todo cards carry a bottom-right primary Work launch button in the styleguide cornerAction slot, seeded by the new pure workCommandFor(id) builder with /agentheim:work <id> (ADR-0071 scoped run) and threaded through launchOrCopy with the armed skip-permissions cue; backlog Refine/Promote, doing/done cards and the topbar bare Work launch are unchanged; dist healed via the conductor integration rebuild
+**Duration:** 12m
+**Verification:** PASS (iteration 1)
+**Files changed:** 6
+**Tests added:** 11
+**ADRs written:** none
+
+---
+
 ## 2026-09-05 23:23 -- Modeling / Promoted: agentic-workflow-rw6ck - Hovering a card re-renders that card and its ring targets, not all 255 — memoized board cards and columns, hover state out of the board root, identity-stable tree projection
 
 **Type:** Modeling / Promote
