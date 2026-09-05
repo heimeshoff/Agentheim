@@ -24,7 +24,7 @@ research touching this BC, and concept synthesis pages.
 <!-- doing-list:start -->
 <!-- doing-list:end -->
 
-### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
+### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
 - **design-system-me97j** — ModelSplitButton's `disabled` deadens the model caret along with Enter — an empty prompt shouldn't block picking a model (bug) — `done/design-system-me97j-split-button-disabled-spares-caret.md`
 - **design-system-k3f7q** — ModelSplitButton's model menu opens upward and escapes the prompt console's clip (bug) — `done/design-system-k3f7q-model-menu-opens-upward-unclipped.md`

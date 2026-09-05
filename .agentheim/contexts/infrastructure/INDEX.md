@@ -26,7 +26,7 @@ research touching this BC, and concept synthesis pages.
 <!-- doing-list:start -->
 <!-- doing-list:end -->
 
-### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
+### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
 - **infrastructure-w6p4k** — Drop the "modeling:" prefix from bridge-derived session names (chore) — `done/infrastructure-w6p4k-drop-modeling-prefix-bridge-session-name.md`
 - **infrastructure-v8r3q** — The bridge advertises what it can honour — a live /health capability handshake, plus a structural guard that stops a fourth silent drift (bug) — `done/infrastructure-v8r3q-bridge-capability-handshake.md`
