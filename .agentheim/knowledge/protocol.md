@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 00:12 -- Modeling / Refined: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog (ready, blocked on agentic-workflow-pcwnn — promotion refused fail-closed until pcwnn is in done/)
+**Summary:** Orchestrator round (architect + tactical-modeler). Report-carried design confirmed over worktree-carried: the worker never writes under .agentheim/; its RESULT block gains README_DELTA / ADRS / OUTCOME / BACKLOG_ITEMS (full bodies), parsed by a new git-free lib/worker-result.mjs. README delta grammar amended against the real README: two ops (append, replace) anchored on (section, termHead), whitespace-collapsed expected precondition, per-op disposition, no remove/rename (ADR-0041 monotone invariant), missing section → appended-fallback; the conductor merges a colliding replace so both intents survive and records it in the protocol and the verifier copy. Checkpoint refuses .agentheim/ as bookkeeping-path. Task-file annotations move to main's copy (no worktree refresh; worker/verifier read the main path). BOUNCE drops its squash-merge. Verifier checks 5/6c/7 and the decision auto-SKIP rewritten. Salvage gains a .bookkeeping.md sibling. MAX_PARALLEL un-bundled from the Phase 3 change. depends_on pcwnn added — both rewrite the same skill/agent/README sections. Backlinks re-run: ADR-0063/0059/0041/0042/0061, prior art q7v3k, hmgav added.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-09-06 00:11 -- Task verified and completed: agentic-workflow-pcwnn - Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung
 
 **Type:** Work / Task completion
