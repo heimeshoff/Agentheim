@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-mvt8x
 title: One live-update subscription per tab, one /api/tree fetch per structural frame — an advisory frame (.agentheim/state/**) re-syncs only the panel that reads that artifact, never the board or rail
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-09-05
-completed:
+completed: 2026-09-05
 depends_on: [design-system-001-styleguide]
 blocks: [agentic-workflow-rw6ck, agentic-workflow-bmn29]
 tags: [dashboard, performance, sse, live-update, advisory-write]
@@ -90,32 +90,32 @@ safe answer" idiom as the `lib/` lints).
 
 ## Acceptance criteria
 
-- [ ] `dashboard/test/live-update-hub.test.mjs` (`node --test`, no DOM): a counting
+- [x] `dashboard/test/live-update-hub.test.mjs` (`node --test`, no DOM): a counting
       `sourceFactory` records constructions. Four subscribers → exactly **1**
       construction. Dropping three → source stays open (0 closes). Dropping the
       last → exactly 1 close. Re-subscribing after full teardown → exactly 1 new
       construction. (Covers "no new connection when the board unmounts for a
       main-pane document and remounts", which today costs three fresh
       connections.)
-- [ ] Same file, injected `fetchTree` counter: one structural frame → exactly
+- [x] Same file, injected `fetchTree` counter: one structural frame → exactly
       **1** `/api/tree` call regardless of consumer count; two consumers
       subscribing in the same tick → exactly **1** fetch (in-flight dedupe); a
       consumer subscribing after the tree is cached receives the current tree
       with **0** additional fetches.
-- [ ] Pure classifier test, table-driven: `.agentheim/state/in-flight.json` →
+- [x] Pure classifier test, table-driven: `.agentheim/state/in-flight.json` →
       advisory; `.agentheim/state/whats-next.md` → advisory;
       `.agentheim/contexts/agentic-workflow/todo/x.md` → structural;
       `.agentheim/knowledge/decisions/0006-*.md` → structural;
       `.agentheim/.dashboard/runtime.json` → runtime; `null` / `undefined` /
       `{}` / a non-string path / a path outside `.agentheim/` → **structural**
       (fail-open).
-- [ ] Hub-level fan-out: an advisory frame naming `in-flight.json` invokes
+- [x] Hub-level fan-out: an advisory frame naming `in-flight.json` invokes
       **only** the in-flight subscriber's callback (board, rail and whats-next
       callbacks recorded 0 invocations); an advisory frame naming
       `whats-next.md` invokes only the whats-next subscriber; a runtime frame
       invokes **none**; a structural frame invokes **all**; a `hello` frame
       invokes all (reconnect catch-up, ADR-0006).
-- [ ] End-to-end in jsdom via the existing `dashboard/test/dom-harness.mjs`, with
+- [x] End-to-end in jsdom via the existing `dashboard/test/dom-harness.mjs`, with
       `globalThis.EventSource` set to a counting fake before importing
       `board.js` and `fetch` stubbed per-URL: mounting the app constructs
       exactly **1** `EventSource`; emitting one `.agentheim/contexts/**` frame
@@ -125,16 +125,16 @@ safe answer" idiom as the `lib/` lints).
       `/api/doc?path=…whats-next.md`. (This is the direct proof of the parent's
       "a heartbeat write does not re-render the board's cards" — the board
       issues no fetch, so it cannot re-project.)
-- [ ] Convention guard: across `dashboard/app/**`, `createLiveUpdate(` and
+- [x] Convention guard: across `dashboard/app/**`, `createLiveUpdate(` and
       `new EventSource(` appear only inside the hub module — a source-regex
       `node --test` static guard, matching the codebase's established idiom
       (see `dashboard/test/launch-button-hover.test.mjs` for the pattern).
-- [ ] Registration consistency: every advisory doc-path constant the app
+- [x] Registration consistency: every advisory doc-path constant the app
       exports (`WHATS_NEXT_DOC_PATH`, `IN_FLIGHT_DOC_PATH` — both already
       exist) classifies as advisory **and** resolves to exactly one registered
       subscriber. A future third advisory artifact added without registering
       it fails this test.
-- [ ] The existing `dashboard/` `node --test` suite passes with no test edited
+- [x] The existing `dashboard/` `node --test` suite passes with no test edited
       to accommodate the change, except `in-flight-lane.test.mjs` /
       `whats-next-panel.test.mjs`'s `useLiveTree(reload)` source assertions,
       which are updated to the routed form (expected, sanctioned churn — not a
@@ -281,3 +281,47 @@ part of this task.
 
 Split from `agentic-workflow-bmn29` at refinement (2026-09-05); the parent keeps the full
 diagnosis and the residual hidden-tab scope.
+
+## Outcome
+
+Built the shared live-tree hub and the read-side frame router ADR-0070 called for, and rewired
+all four `useLiveTree` call sites onto them:
+
+- **`dashboard/app/live-frame-router.js`** — the pure `classifyFramePath` classifier
+  (structural / advisory / runtime, fail-open on anything unrecognized).
+- **`dashboard/app/live-tree-hub.js`** — the refcounted hub: one `createLiveUpdate` source and
+  one `/api/tree` fetch per tab, shared across every subscriber. `subscribeStructural(cb)`
+  delivers the tree on subscribe and on every structural frame / reconnect;
+  `subscribeAdvisory(path, cb)` notifies only on a frame naming that exact path (plus reconnect).
+- **`dashboard/app/board.js`** — `useLiveTree` is now a thin hook over the module-level hub
+  singleton (`useLiveTree(onTree)` structural form; `useLiveTree(onResync, { artifactPath })`
+  advisory form). `DashboardBoard` and `ShellRail` (the two structural subscribers) no longer
+  fetch `/api/tree` themselves — they consume the hub's payload via `applyTree`/`applyTree`
+  callbacks and apply their own projection (`treeToColumns` / `treeToLibrary`). `WhatsNextPanel`
+  and `InFlightLane` (the two advisory subscribers) now re-fetch their own `/api/doc` artifact
+  only when a frame names it, never on an unrelated structural or advisory frame. Removed the
+  now-meaningless `treeUrl` prop from `DashboardBoard` (the fetch is centralized in the hub).
+- Confirmed end-to-end in jsdom: mounting the whole app opens exactly one `EventSource`; a
+  structural frame issues exactly one `/api/tree` and zero `/api/doc`; an advisory frame issues
+  zero `/api/tree` and exactly one matching `/api/doc` — the direct proof that an in-flight
+  heartbeat write no longer re-renders the board's cards.
+- ADR-0070 flipped to `accepted` with a dated status-log entry; ADR-0006 got a one-line backlink
+  to it. BC README's "Live-update (SSE consumer)" bullet corrected (it no longer claims every
+  frame re-fetches everything) and three new ubiquitous-language bullets added (live-tree hub,
+  structural/advisory/runtime frame, routing-is-not-interpretation).
+
+Full `dashboard/` `node --test` suite: 956/956 green (only the two named advisory-panel source
+assertions were edited, to the routed form, as pre-approved). `lib/test/*.test.mjs`: 380/380
+green. `dashboard/dist/` rebuilt so `dist-staleness.test.mjs` stays green.
+
+Deliberately left for follow-up (per this task's own Notes, not new findings): the
+`visibilitychange` pause/resume behavior, and the resource-measurement `[human-eye]` checkbox
+above (left unchecked for the builder's own MacBook check).
+
+Key files: `dashboard/app/live-frame-router.js`, `dashboard/app/live-tree-hub.js`,
+`dashboard/app/board.js`, `dashboard/test/live-frame-router.test.mjs`,
+`dashboard/test/live-update-hub.test.mjs`, `dashboard/test/live-tree-source-guard.test.mjs`,
+`dashboard/test/live-frame-registration.test.mjs`, `dashboard/test/live-tree-hub-e2e.test.mjs`,
+`.agentheim/knowledge/decisions/0070-live-tree-hub-shared-subscription-frame-routing.md`,
+`.agentheim/knowledge/decisions/0006-dashboard-live-update-sse.md`,
+`.agentheim/contexts/agentic-workflow/README.md`.

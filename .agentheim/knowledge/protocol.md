@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 23:15 -- Task verified and completed: agentic-workflow-mvt8x - One live-update subscription per tab, one /api/tree fetch per structural frame — an advisory frame (.agentheim/state/**) re-syncs only the panel that reads that artifact, never the board or rail
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-mvt8x - One live-update subscription per tab, one /api/tree fetch per structural frame — an advisory frame (.agentheim/state/**) re-syncs only the panel that reads that artifact, never the board or rail
+**Summary:** a refcounted, framework-free live-tree hub (dashboard/app/live-tree-hub.js) owns the tab's single /api/events source and single /api/tree fetch; board, rail, WhatsNextPanel and InFlightLane subscribe instead of each opening their own source; a pure classifier (live-frame-router.js) routes frames structural/advisory/runtime so an advisory heartbeat write re-syncs only the panel that reads that artifact, never the board or rail — enforced by a source guard and a registration-consistency test; ADR-0070 accepted, ADR-0006 backlinked; dist healed via the conductor integration rebuild
+**Duration:** 17m
+**Verification:** PASS (iteration 1)
+**Files changed:** 14
+**Tests added:** 27
+**ADRs written:** none (ADR-0070 accepted, ADR-0006 amended)
+
+---
+
 ## 2026-09-05 23:13 -- Task verified and completed: design-system-pk4qd - Two ambient cues repaint every frame — ambient-rail-pulse and rail-attention-breathe animate box-shadow inside their keyframes, contradicting the compositor-only claim
 
 **Type:** Work / Task completion

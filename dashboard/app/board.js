@@ -20,11 +20,16 @@
    state. The dashboard has no write path at all — skills (`modeling`
    / `work`) are the sole owners of task-lifecycle transitions. The
    board's single interactivity concern is staying current:
-   - LIVE-UPDATE: the board subscribes to the SSE stream (GET
-     /api/events) via createLiveUpdate; every tree-changed frame
-     (or reconnect) just RE-FETCHES /api/tree and re-projects — the
-     raw event is never interpreted as a transition. As skills move
-     files on disk, the board reflects it within a frame.
+   - LIVE-UPDATE: the board subscribes to the shared live-tree hub
+     (live-tree-hub.js, agentic-workflow-mvt8x / ADR-0070) — the tab's ONE
+     `/api/events` source and ONE `/api/tree` fetch. A STRUCTURAL
+     tree-changed frame (or reconnect) re-projects the board; an ADVISORY
+     frame (`.agentheim/state/**`) re-syncs only the panel that reads that
+     exact artifact (WhatsNextPanel / InFlightLane below), never the board;
+     a RUNTIME frame re-syncs nobody. The raw event is never interpreted as
+     a transition — routing selects the audience, never the meaning
+     (ADR-0070 §3). As skills move files on disk, the board reflects it
+     within a frame.
    ============================================================ */
 import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from "react";
 
@@ -68,7 +73,7 @@ import { resolveConfettiColors } from "./confetti-palette.js";
 import { confettiFireSequence } from "./confetti-launch.js";
 import { isTaskIntent } from "./intent-route.js";
 import { searchResultsToGroups } from "./search-results.js";
-import { createLiveUpdate } from "./live-update.js";
+import { createLiveTreeHub } from "./live-tree-hub.js";
 import { docUrl } from "./slide-over-data.js";
 import { parseFrontmatter } from "./frontmatter.js";
 import {
@@ -78,20 +83,44 @@ import {
 } from "./whats-next-state.js";
 import { IN_FLIGHT_DOC_PATH, deriveInFlightView } from "./in-flight-state.js";
 
+// The tab's ONE live-tree hub (agentic-workflow-mvt8x, ADR-0070). A single
+// module-level instance — every useLiveTree call below SUBSCRIBES to it; none
+// of them construct their own createLiveUpdate/EventSource (enforced by
+// live-tree-source-guard.test.mjs). Production code passes no options, so the
+// hub's own defaults hit the real EventSource + the real fetch.
+const liveTreeHub = createLiveTreeHub();
+
 /**
- * React hook: subscribe to the SSE live-update stream and call `onResync` on
- * connect and every tree-changed frame. The board passes a /api/tree re-fetch;
- * the consumer never interprets the raw event (ADR-0001). `onResync` is held in a
- * ref so the subscription is established ONCE, not re-built on every render.
+ * React hook: subscribe to the shared live-tree hub.
+ *
+ * STRUCTURAL form (default, no options) — `useLiveTree(onTree)`: `onTree` is
+ * called with the current tree on subscribe (fetched once, shared across
+ * every concurrent structural subscriber) and again on every structural
+ * tree-changed frame / reconnect. Used by the board and the rail, each
+ * applying its own projection (treeToColumns / treeToLibrary) to the same
+ * payload — one fetch, two projections.
+ *
+ * ADVISORY form — `useLiveTree(onResync, { artifactPath })`: `onResync` is
+ * called with no payload only when a frame names EXACTLY `artifactPath` (or
+ * on reconnect) — never on a structural frame, never on another artifact's
+ * advisory frame. Used by WhatsNextPanel / InFlightLane, which already fetch
+ * their own artifact via /api/doc (fetchDoc) on being notified.
+ *
+ * Either form never interprets the raw event as a Task transition (ADR-0001)
+ * — routing selects the audience, never the meaning (ADR-0070 §3). `onResync`
+ * is held in a ref so the subscription is established ONCE, not re-built on
+ * every render.
  */
-function useLiveTree(onResync) {
+function useLiveTree(onResync, { artifactPath } = {}) {
   const cb = useRef(onResync);
   cb.current = onResync;
   useEffect(() => {
     if (typeof EventSource === "undefined") return undefined;
-    const live = createLiveUpdate({ onResync: (evt) => cb.current && cb.current(evt) });
-    return () => live.close();
-  }, []);
+    if (artifactPath) {
+      return liveTreeHub.subscribeAdvisory(artifactPath, () => { cb.current && cb.current(); });
+    }
+    return liveTreeHub.subscribeStructural((tree) => { cb.current && cb.current(tree); });
+  }, [artifactPath]);
 }
 
 const EMPTY_COLUMNS = (() => {
@@ -765,9 +794,12 @@ function WhatsNextPanel({ fetchDoc = defaultFetchWhatsNext }) {
   }, [fetchDoc]);
 
   useEffect(() => reload(), [reload]);
-  // Re-fetch on every SSE frame (ADR-0006): a newer advisory write surfaces live,
-  // and a dismiss-triggered delete surfaces as an absent artifact (404 → nothing).
-  useLiveTree(reload);
+  // Re-fetch ONLY on a frame naming this exact artifact (agentic-workflow-mvt8x,
+  // ADR-0070 §2 — the advisory routing form): a newer advisory write surfaces
+  // live, and a dismiss-triggered delete surfaces as an absent artifact (404 →
+  // nothing). A structural frame (a task moving, e.g.) no longer re-fetches this
+  // panel at all — nothing here changed.
+  useLiveTree(reload, { artifactPath: WHATS_NEXT_DOC_PATH });
 
   if (typeof body !== "string" || body.trim() === "") return null;
 
@@ -938,9 +970,11 @@ function InFlightLane({ fetchDoc = defaultFetchInFlight }) {
   }, [fetchDoc]);
 
   useEffect(() => reload(), [reload]);
-  // Re-fetch on every SSE frame (ADR-0006): a fresher heartbeat, or the window
-  // going stale after the tab has sat idle, both need re-evaluating live.
-  useLiveTree(reload);
+  // Re-fetch ONLY on a frame naming this exact artifact (agentic-workflow-mvt8x,
+  // ADR-0070 §2 — the advisory routing form): a fresher heartbeat, or the window
+  // going stale after the tab has sat idle, both need re-evaluating live. A
+  // structural frame no longer re-fetches this lane at all — nothing here changed.
+  useLiveTree(reload, { artifactPath: IN_FLIGHT_DOC_PATH });
 
   const view = deriveInFlightView(raw, Date.now());
   if (!view) return null;
@@ -1789,14 +1823,13 @@ function EdgeBlinkOverlay({ scrollContainerRef, top, bottom }) {
  * interpreted as a transition. As skills move files on disk the board reflects it.
  *
  * @param {(ticket: object) => void} [onOpen] — open-intent sink (aw-007 wires it).
- * @param {string} [treeUrl] — overridable for tests / alternate mounts.
  * @param {{current: (HTMLElement|null)}} [scrollContainerRef] — a ref onto the
  *        app's SOLE vertical scroll container (DashboardApp's outer
  *        `scroll-quiet` region), threaded down so agentic-workflow-h9v3m's
  *        IntersectionObserver can root itself there (ADR-0033 pt. 1) instead
  *        of the browser viewport.
  */
-export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions = false, scrollContainerRef }) {
+export function DashboardBoard({ onOpen, skipPermissions = false, scrollContainerRef }) {
   const [columns, setColumns] = useState(EMPTY_COLUMNS);
   const [phase, setPhase] = useState("loading"); // loading | ready | error
   const [selectedId, setSelectedId] = useState(null);
@@ -1833,8 +1866,8 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
   // VIEW-STATE ONLY: the board's CONTENT stays a projection of disk, re-fetched
   // on every SSE frame. A board with no stored lens defaults to flat + default
   // sort; a column with no stored state defaults to all-expanded. The order and
-  // grouping are DERIVED below at render time, so every loadTree re-projection
-  // (SSE tree-changed / reconnect) re-applies the current choice — never resets.
+  // grouping are DERIVED below at render time, so every applyTree re-projection
+  // (SSE structural frame / reconnect) re-applies the current choice — never resets.
   const [view, setView] = useState(() => {
     const storage = typeof window !== "undefined" ? window.localStorage : null;
     const stored = loadViewState(storage);
@@ -1893,36 +1926,25 @@ export function DashboardBoard({ onOpen, treeUrl = "/api/tree", skipPermissions 
     });
   }, []);
 
-  // The single board re-projection: re-fetch /api/tree and rebuild the columns.
-  // Called on mount and on every SSE tree-changed frame / reconnect — the board
-  // is always rebuilt from disk, never mutated in place.
-  const loadTree = useCallback(() => {
-    let alive = true;
-    fetch(treeUrl)
-      .then((r) => {
-        if (!r.ok) throw new Error(`/api/tree ${r.status}`);
-        return r.json();
-      })
-      .then((tree) => {
-        if (!alive) return;
-        setColumns(treeToColumns(tree));
-        setPhase("ready");
-      })
-      .catch(() => {
-        if (!alive) return;
-        setColumns(EMPTY_COLUMNS);
-        setPhase("error");
-      });
-    return () => { alive = false; };
-  }, [treeUrl]);
+  // The single board re-projection: rebuild the columns from the shared
+  // live-tree hub's payload (agentic-workflow-mvt8x, ADR-0070) — the hub owns
+  // the ONE /api/tree fetch for the whole tab; the board never fetches it
+  // itself. Delivered once on subscribe (initial load) and again on every
+  // STRUCTURAL tree-changed frame / reconnect — the board is always rebuilt
+  // from disk, never mutated in place. The move's own SSE echo is just another
+  // structural frame → one more re-fetch, idempotent, no double-apply
+  // (ADR-0001). A fetch failure delivers `null` (hub contract) → error phase.
+  const applyTree = useCallback((tree) => {
+    if (!tree) {
+      setColumns(EMPTY_COLUMNS);
+      setPhase("error");
+      return;
+    }
+    setColumns(treeToColumns(tree));
+    setPhase("ready");
+  }, []);
 
-  // Initial load.
-  useEffect(() => { setPhase("loading"); return loadTree(); }, [loadTree]);
-
-  // Live-update: re-sync the board on connect and every tree-changed frame. The
-  // move's own SSE echo is just another tree-changed frame → one more re-fetch,
-  // idempotent, no double-apply (ADR-0001).
-  useLiveTree(loadTree);
+  useLiveTree(applyTree);
 
   // Card click → emit the open intent (aw-007 consumes it). Selection state is
   // tracked here so the clicked card shows the styleguide selected ring.
@@ -3078,35 +3100,26 @@ function ShellRail({ projectName, selectedId, onOpen, onSelectBoard, mainView, o
   const [currentIndex, setCurrentIndex] = useState({});
   const [cleared, setCleared] = useState({});
 
-  // Re-project the rail tree from /api/tree (the non-task half, treeToLibrary). A
-  // failed fetch leaves the tree empty rather than crashing the rail — the board's
-  // own error state already reports an unreachable server. On every (re)projection
-  // we ALSO recompute the research/ADR mtime index (aw-t3b9k) and, on the FIRST
-  // landed projection, freeze it as the session baseline — so the very docs present
-  // at load never blink, only ones that arrive/change afterwards do.
-  const loadTree = useCallback(() => {
-    let alive = true;
-    fetch("/api/tree")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((tree) => {
-        if (!alive) return;
-        setGroups(tree ? treeToLibrary(tree) : []);
-        const index = tree ? railMtimeIndex(tree) : {};
-        // Capture the baseline exactly once, off the first projection that lands
-        // (even an empty one — a fresh page has no "new" artifacts by definition).
-        if (baselineRef.current === null) baselineRef.current = index;
-        setCurrentIndex(index);
-      })
-      .catch(() => {
-        if (!alive) return;
-        setGroups([]);
-        if (baselineRef.current === null) baselineRef.current = {};
-        setCurrentIndex({});
-      });
-    return () => { alive = false; };
+  // Re-project the rail tree from the shared live-tree hub's payload
+  // (agentic-workflow-mvt8x, ADR-0070 — the non-task half, treeToLibrary). A
+  // failed fetch (hub delivers `null`) leaves the tree empty rather than
+  // crashing the rail — the board's own error state already reports an
+  // unreachable server. On every (re)projection we ALSO recompute the
+  // research/ADR mtime index (aw-t3b9k) and, on the FIRST landed projection,
+  // freeze it as the session baseline — so the very docs present at load
+  // never blink, only ones that arrive/change afterwards do. The rail is a
+  // STRUCTURAL subscriber, so it is delivered the tree on subscribe (initial
+  // load) and again on every structural frame / reconnect — never on an
+  // advisory or runtime frame, so a heartbeat write no longer re-projects it.
+  const applyTree = useCallback((tree) => {
+    setGroups(tree ? treeToLibrary(tree) : []);
+    const index = tree ? railMtimeIndex(tree) : {};
+    // Capture the baseline exactly once, off the first projection that lands
+    // (even an empty one — a fresh page has no "new" artifacts by definition).
+    if (baselineRef.current === null) baselineRef.current = index;
+    setCurrentIndex(index);
   }, []);
-  useEffect(() => loadTree(), [loadTree]);
-  useLiveTree(loadTree);
+  useLiveTree(applyTree);
 
   // The flagged set is always the intersection of "created-or-modified vs baseline,
   // not cleared at this mtime" with "present in the current projection" (so a

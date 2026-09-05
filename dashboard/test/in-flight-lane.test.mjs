@@ -44,8 +44,8 @@ test('an absent or stale artifact resolves to render NOTHING — no zombie lane 
   assert.match(lane(), /if \(!view\) return null;/);
 });
 
-test('the lane re-fetches live on every SSE frame (ADR-0006)', () => {
-  assert.match(lane(), /useLiveTree\(reload\)/);
+test('the lane re-fetches live ONLY on a frame naming its own artifact (agentic-workflow-mvt8x, ADR-0070 §2 advisory routing — supersedes the old every-frame form)', () => {
+  assert.match(lane(), /useLiveTree\(reload,\s*\{\s*artifactPath:\s*IN_FLIGHT_DOC_PATH\s*\}\)/);
 });
 
 test('the lane shows a since-when cue derived from startedAt (AC1)', () => {

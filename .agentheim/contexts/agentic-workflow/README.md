@@ -800,13 +800,39 @@ separate BC, but today the whole tool lives in this one.
   `terminate()` and the `/dashboard stop` CLI/skill are **unchanged** — they still own the
   out-of-process kill path. See ADR-0053, ADR-0017, ADR-0046, ADR-0018, ADR-0001, ADR-0003.
 - **Live-update (SSE consumer)** — the board keeps itself current (agentic-workflow-009) by
-  subscribing to `GET /api/events` (infrastructure-003/ADR-0006) via the framework-free
-  `createLiveUpdate` (`dashboard/app/live-update.js`). On every `tree-changed` frame or
-  (re)connect it does **one** thing: re-fetch `/api/tree` and re-project the whole board —
-  never interpreting the raw pointer as a transition; idempotent re-fetching means a burst of
-  changes never double-applies. EventSource auto-reconnects and the board re-syncs, no
-  missed-event bookkeeping. This is the **only** way state reaches the board (ADR-0017). See
-  ADR-0012, ADR-0006, ADR-0017.
+  subscribing to `GET /api/events` (infrastructure-003/ADR-0006). EventSource auto-reconnects
+  and the board re-syncs, no missed-event bookkeeping. This is the **only** way state reaches
+  the board (ADR-0017). Since **agentic-workflow-mvt8x / ADR-0070**, the tab holds this
+  subscription through a shared **live-tree hub** (below), not a per-component
+  `createLiveUpdate` call — see that entry for the current shape; the framing above ("re-fetch
+  `/api/tree` and re-project the whole board" on **every** frame) is the pre-hub design and no
+  longer describes advisory frames. See ADR-0012, ADR-0006, ADR-0017, ADR-0070.
+- **Live-tree hub (one subscription, one fetch, many consumers)** — the tab holds **exactly one**
+  `/api/events` source (ADR-0006's "a long-lived connection per open board tab", finally realized),
+  owned by a refcounted, framework-free hub (`dashboard/app/live-tree-hub.js`) that also owns the
+  single `/api/tree` fetch. Board, rail, and the advisory panels *subscribe*; they never construct
+  `createLiveUpdate`/`EventSource` themselves. First subscriber opens the source, last unsubscribe
+  closes it, concurrent subscribers share one in-flight fetch, and each consumer applies its own
+  projection (`treeToColumns` / `treeToLibrary`) to the one payload. Enforced by a source guard:
+  `createLiveUpdate(` and `new EventSource(` appear only in the hub. See ADR-0070, ADR-0006.
+- **Structural / advisory / runtime frame** — the read-side counterpart to ADR-0027's
+  write-side category split. A `tree-changed` frame under `.agentheim/contexts/**` or
+  `.agentheim/knowledge/**` is **structural**: board and rail re-sync. A frame under
+  `.agentheim/state/**` is **advisory** — it was produced by an advisory write
+  (ADR-0027/0043) and re-syncs ONLY the panel that reads that artifact
+  (`whats-next.md` → `WhatsNextPanel`, `in-flight.json` → `InFlightLane`), never the
+  board or rail. A frame under `.agentheim/.dashboard/**` is **runtime** (runfile, bridge
+  discovery file, last-port marker — infrastructure transport bookkeeping) and re-syncs
+  nobody. An absent, malformed, or unrecognized path classifies as **structural** — fail
+  open, so a classification miss costs a wasted fetch, never a stale board. A new advisory
+  artifact must register with the router (mechanized: `dashboard/test/live-frame-registration.test.mjs`).
+  See ADR-0070, ADR-0027, ADR-0043.
+- **Frame routing is not frame interpretation** — the pointer stays a pointer: it
+  selects the re-sync's **audience**, never its **meaning**. Deciding WHO re-syncs is
+  addressing; deciding WHAT CHANGED in the model would be interpretation, and remains
+  forbidden (ADR-0001). Every routed consumer still re-fetches its whole artifact and
+  re-projects from scratch — nothing diffed, nothing patched, idempotence intact.
+  See ADR-0070, ADR-0006.
 - **No lifecycle write path (read-only-over-lifecycle dashboard)** — the dashboard never
   writes lifecycle state (ADR-0017). The former drag-to-Promote endpoint (`POST
   /api/task/move`, agentic-workflow-009) and its client were **removed**: cards are not drag

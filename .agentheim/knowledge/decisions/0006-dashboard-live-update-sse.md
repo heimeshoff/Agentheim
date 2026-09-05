@@ -118,3 +118,6 @@ This ADR's code lives **here**, in `dashboard/` (`events.mjs`, `watcher.mjs`, th
 route in `server.mjs`) — unlike infrastructure-001, which deferred its build to agentic-workflow,
 because this is pure transport, not domain. The consumer side (subscribing to `/api/events` and
 re-rendering the board) is agentic-workflow-009.
+
+The consumer-side realization of this design — one shared subscription per tab, plus routing a
+frame's path to the right subscriber — is ADR-0070 (agentic-workflow-mvt8x).

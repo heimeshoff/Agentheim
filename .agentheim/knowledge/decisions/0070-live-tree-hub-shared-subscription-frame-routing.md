@@ -2,7 +2,7 @@
 id: ADR-0070
 title: Live-tree hub — one shared subscription and fetch per tab; frame routing extends the advisory/lifecycle split to the read side
 scope: agentic-workflow
-status: proposed
+status: accepted
 date: 2026-09-05
 related_tasks: [agentic-workflow-bmn29, agentic-workflow-mvt8x, agentic-workflow-rw6ck]
 related_adrs: [0006, 0027, 0043]
@@ -195,3 +195,15 @@ the writer may do.
   (`state/whats-next.md`, `state/in-flight.json`, the runtime files under
   `.dashboard/`), so a path-prefix classifier is sufficient and matches how the
   watcher already emits paths (ADR-0006).
+
+## Status log
+
+- **2026-09-05 — accepted.** Implemented by `agentic-workflow-mvt8x`:
+  `dashboard/app/live-tree-hub.js` (the refcounted hub) and
+  `dashboard/app/live-frame-router.js` (the pure classifier), with `board.js`'s
+  `useLiveTree` rewired to subscribe to the hub instead of constructing its own
+  `createLiveUpdate`/`EventSource`. All acceptance criteria in that task are
+  machine-checked (`dashboard/test/live-update-hub.test.mjs`,
+  `live-frame-router.test.mjs`, `live-tree-source-guard.test.mjs`,
+  `live-frame-registration.test.mjs`, `live-tree-hub-e2e.test.mjs`) except the
+  builder's own MacBook resource measurement, which stays `[human-eye]`.

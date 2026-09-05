@@ -69,8 +69,8 @@ test('an absent artifact (fetch failure) resolves to render NOTHING (no shell, n
   assert.match(panel(), /if \(typeof body !== "string" \|\| body\.trim\(\) === ""\) return null;/);
 });
 
-test('the panel re-fetches live on every SSE frame (ADR-0006)', () => {
-  assert.match(panel(), /useLiveTree\(reload\)/);
+test('the panel re-fetches live ONLY on a frame naming its own artifact (agentic-workflow-mvt8x, ADR-0070 §2 advisory routing — supersedes the old every-frame form)', () => {
+  assert.match(panel(), /useLiveTree\(reload,\s*\{\s*artifactPath:\s*WHATS_NEXT_DOC_PATH\s*\}\)/);
 });
 
 test('the panel shows a staleness cue derived from the generated stamp (ADR-0027 §4)', () => {

@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 6
 - **Todo:** 1
-- **Doing:** 2
-- **Done:** 182
+- **Doing:** 1
+- **Done:** 183
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,12 +22,12 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-mvt8x** — One live-update subscription per tab, one /api/tree fetch per structural frame — an advisory frame (.agentheim/state/**) re-syncs only the panel that reads that artifact, never the board or rail (bug) — `doing/agentic-workflow-mvt8x-live-tree-hub-one-subscription-frame-routing.md`
 - **agentic-workflow-swj2q** — "`/agentheim:work <task-id>` — scope a work run to one named todo task instead of the whole ready set" (feature) — `doing/agentic-workflow-swj2q-work-single-task-argument.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-mvt8x** — One live-update subscription per tab, one /api/tree fetch per structural frame — an advisory frame (.agentheim/state/**) re-syncs only the panel that reads that artifact, never the board or rail (bug) — `done/agentic-workflow-mvt8x-live-tree-hub-one-subscription-frame-routing.md`
 - **agentic-workflow-jf6qz** — Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A) (bug) — `done/agentic-workflow-jf6qz-fix-archiveddoneheader-phantom-cap-wording.md`
 <!-- done-list:end -->
 
