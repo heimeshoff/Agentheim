@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 22:58 -- Modeling / Refined: agentic-workflow-bmn29 - Dashboard burns resources at idle on a MacBook — split into hub, memoization, and keyframes children; parent keeps the residual hidden-tab scope
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow (children also in design-system)
+**Status after:** backlog (parent); children promoted to todo in the entries above
+**Summary:** Orchestrator (tactical-modeler ×2, architect) confirmed the capture's diagnosis and split findings 1–5 into three children: agentic-workflow-mvt8x (one refcounted live-tree hub per tab, one /api/tree fetch, frames routed structural/advisory/runtime so a heartbeat write reaches only InFlightLane; source-guard test enforces the one-source rule), agentic-workflow-rw6ck (React.memo on cards/columns, hover state out of the board root, identity-stable treeToColumns reconcile; depends on mvt8x for merge-surface and clean-measurement reasons), design-system-pk4qd (the two box-shadow keyframes become opacity-only over a pre-painted glow layer; ships a compositor-only allowlist lint and amends ADR-0014). The infrastructure shared-fs.watch candidate was dropped — the hub already brings watchers to one per tab. Every criterion classified machine-checkable or [human-eye] (ADR-0061). The parent stays in backlog as the umbrella: residual visibilitychange pause/resume (shapeable only once the hub exists) plus the aggregate before/after MacBook measurement; it now depends on all three children.
+**Split into:** agentic-workflow-mvt8x, agentic-workflow-rw6ck, design-system-pk4qd (infrastructure candidate dropped, id unminted)
+**ADRs written:** ADR-0070
+
+---
+
 ## 2026-09-05 22:36 -- Modeling / Captured: agentic-workflow-swj2q + agentic-workflow-g4zce - single-task `/agentheim:work <id>` and the todo-card Work button
 
 **Type:** Modeling / Capture

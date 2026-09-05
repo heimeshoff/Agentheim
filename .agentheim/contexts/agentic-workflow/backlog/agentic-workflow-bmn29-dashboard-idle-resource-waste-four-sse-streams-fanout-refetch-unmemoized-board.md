@@ -1,15 +1,15 @@
 ---
 id: agentic-workflow-bmn29
-title: Dashboard burns resources at idle on a MacBook — four SSE streams per tab, a 2×tree + 2×doc fan-out on every heartbeat, an unmemoized 255-card board, and box-shadow keyframes
+title: Dashboard burns resources at idle on a MacBook — umbrella for the split (hub, memoization, keyframes); residual hidden-tab pause/resume and the before/after measurement
 status: backlog
 type: bug
 context: agentic-workflow
 created: 2026-09-05
 completed:
-depends_on: [design-system-001-styleguide]
+depends_on: [agentic-workflow-mvt8x, agentic-workflow-rw6ck, design-system-pk4qd]
 blocks: []
 tags: [dashboard, performance, sse, live-update, board, motion]
-related_adrs: [0006, 0014, 0033, 0043]
+related_adrs: [0006, 0014, 0027, 0033, 0043, 0070]
 related_research: []
 prior_art: [agentic-workflow-009, agentic-workflow-073, agentic-workflow-m9w5c, agentic-workflow-n4h7q, agentic-workflow-h9v3m]
 ---
@@ -60,36 +60,37 @@ Findings, ranked by likely impact:
 6. **No `visibilitychange` handling.** A hidden tab keeps its four streams, its re-fetch
    fan-out and its animations alive.
 
-Scope of the fix (to be refined — candidate shape, not yet decided):
-- One SSE subscription per tab (a single `useLiveTree` at `DashboardApp`, or a shared
-  module-level source with subscribers) that fetches `/api/tree` **once** and distributes
-  it; the panels re-fetch their doc only when the frame's `path` points at it.
-- Ignore or debounce frames whose `path` is `.agentheim/state/**` / `.agentheim/.dashboard/**`
-  for the board/rail (advisory artifacts are not tree structure — ADR-0027's category split
-  already names them).
-- `React.memo` on `BoardCard`/`BoardColumn`; keep hover state out of the board root (or
-  derive ring membership per card from a context/set so only affected cards re-render).
-- design-system: rewrite the two box-shadow keyframes as opacity/transform-only (e.g. a
-  pre-painted glow layer whose opacity breathes) — a BC-local styleguide change, candidate
-  child task.
-- infrastructure (optional): share one `fs.watch` across all SSE clients in `events.mjs`
-  instead of one watcher per connection — candidate child task.
+Split at refinement (2026-09-05) into three children that carry findings 1–5; this
+parent keeps the diagnosis above as the shared record, plus the residual scope below:
+
+| Child | Carries | BC |
+|---|---|---|
+| `agentic-workflow-mvt8x` | findings 1–3 — one live-tree hub per tab (one source, one `/api/tree` fetch), frames routed structural / advisory / runtime so a heartbeat write reaches only `InFlightLane` (ADR-0070) | agentic-workflow |
+| `agentic-workflow-rw6ck` | finding 4 — memoized cards/columns, hover state out of the board root, identity-stable tree projection | agentic-workflow |
+| `design-system-pk4qd` | finding 5 — the two ambient keyframes become opacity-only over a pre-painted glow layer | design-system |
+
+The infrastructure candidate (one shared `fs.watch` across SSE clients) was considered and
+**dropped**: once the hub lands, server-side watchers fall 4→1 per tab as a side effect, and
+sharing across tabs serves a many-tabs load profile this local single-user plugin does not have
+(vision non-goal: not multi-tenant). A ref-counted watcher registry is not worth its complexity
+for one or two `fs.watch` handles.
+
+**Residual scope of this task** (finding 6 + the close-out measurement):
+- `visibilitychange` handling on the hub: a hidden tab stops re-fetching (the hub keeps its
+  one source open but drops frames while `document.hidden`), and on becoming visible performs
+  exactly one re-sync. This hangs on the hub's subscriber API, so it is shaped only after
+  `agentic-workflow-mvt8x` ships — refine this task again then.
+- The aggregate before/after measurement on the builder's MacBook, taken after all three
+  children have shipped.
 
 ## Acceptance criteria
-- [ ] With the board open at idle, exactly one `/api/events` connection exists per tab
-      (verify in DevTools Network) and the server holds one watcher per tab.
-- [ ] One `tree-changed` frame produces at most one `/api/tree` request per tab.
-- [ ] An in-flight heartbeat write (`.agentheim/state/in-flight.json`) does not re-render
-      the board's cards (React DevTools profiler shows only `InFlightLane` committing).
-- [ ] Hovering a backlog card re-renders only the hovered card and the ring targets, not
-      all cards.
-- [ ] No infinite keyframe animates `box-shadow`, `filter`, or any other non-compositable
-      property; the doing-card breathe and attention dot still read the same visually.
-- [ ] A hidden tab (`document.hidden`) pauses re-fetching and resumes with one re-sync
-      on visibility.
-- [ ] Before/after measurement recorded on the MacBook: Activity Monitor energy impact
-      (or Chrome Task Manager CPU) for the dashboard tab at idle for 5 minutes, and during
-      a running `work` session.
+- [ ] A hidden tab (`document.hidden`) performs no `/api/tree` or `/api/doc` fetch on any
+      frame; on becoming visible the hub performs exactly one re-sync (node test with the hub's
+      injectable `sourceFactory` / `fetchTree` and a stubbed `document.visibilityState`).
+- [ ] `[human-eye]` Before/after measurement recorded on the MacBook in this task's Notes:
+      Activity Monitor energy impact (or Chrome Task Manager CPU) for the dashboard tab at idle
+      for 5 minutes, and during a running `work` session — the *before* number is the one
+      taken before `agentic-workflow-mvt8x` shipped, the *after* with all three children merged.
 
 ## Notes
 - Builder's hypothesis was "polling". Verified: no client timer, no server stat-poll on
@@ -97,11 +98,16 @@ Scope of the fix (to be refined — candidate shape, not yet decided):
   frequent advisory writes × four subscribers × full re-fetch × full re-render.
 - ADR-0006 (one connection per tab) is the design the code drifted from — the four
   `useLiveTree` call sites arrived one feature at a time (aw-009 board, n4h7q rail,
-  aw-073 whats-next, m9w5c in-flight lane), each correct in isolation.
-- ADR-0014 / ADR-0029 own the breathe animations; ADR-0033 admits the hover-scoped
-  IntersectionObserver; ADR-0043 owns the heartbeat writer.
+  aw-073 whats-next, m9w5c in-flight lane), each correct in isolation. ADR-0070 (written at
+  this refinement) makes the one-hub-per-tab shape and the read-side frame routing a held
+  invariant rather than an aspirational sentence; ADR-0006 itself is untouched.
+- ADR-0014 / ADR-0029 own the breathe animations (design-system-pk4qd amends ADR-0014 in
+  place); ADR-0033 admits the hover-scoped IntersectionObserver; ADR-0043 owns the heartbeat
+  writer (narrowed in part by ADR-0070 on the read side only).
 - Analysis was done against the repo source, which is byte-identical to the 0.9.2 plugin
   cache's `dashboard/app/board.js` and `dist/app.js`, so it describes what actually runs.
-- REFINE should decide whether this stays one task or splits into three (agentic-workflow
-  live-update consolidation + memoization; design-system keyframes; infrastructure shared
-  watcher) — the first is the bulk of the gain and can ship alone.
+- `depends_on` lists all three children: this umbrella is the last to close. It is deliberately
+  left in `backlog/` — the visibility work cannot be shaped until the hub exists, and the
+  measurement criterion needs the children merged. Do not promote before `mvt8x` is done.
+- Take the **before** measurement now, before any child ships, or the close-out has nothing to
+  compare against.
