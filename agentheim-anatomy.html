@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentheim Anatomy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --s0:#FAF8F4;--s1:#EFF1F4;--s2:#E4E7ED;--fg1:#0C0E12;--fg2:#414956;--fg3:#6D788B;--fg4:#A8B0BD;--hair:#D9DDE4;--hair2:#C2C9D4;
+  --ochre:#B87619;--ochre-soft:#E6C28E;--ochre-tint:#FBF2DF;--ochre-fg:#F2F5F9;
+  --skills:#2F7D78;--skills-t:#DFEFED;--agents:#6E54B0;--agents-t:#EFEAF8;--lib:#3F6DB3;--lib-t:#E7EFF9;
+  --state:#B0479A;--state-t:#F7E3F1;--dash:#6A7385;--dash-t:#EEEFF2;--adr:#A8474A;--adr-t:#F6E3E3;--git:#3F6B4A;--git-t:#E1EDE4;
+  --backlog:#6A7385;--backlog-t:#EEEFF2;--todo:#3F6DB3;--todo-t:#E7EFF9;--doing:#B07A2A;--doing-t:#F7EEDC;--done:#3F6B4A;--done-t:#E1EDE4;
+  --code-bg:#F2EFE7;--shadow:0 6px 20px rgba(24,24,32,.10);
+  --font-ui:'Inter Tight','Segoe UI',system-ui,-apple-system,sans-serif;--font-mono:'JetBrains Mono','Cascadia Mono','Consolas',ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --s0:#090C12;--s1:#0D1119;--s2:#121826;--fg1:#F2F5F9;--fg2:#AEB8C4;--fg3:#7D8794;--fg4:#48515C;--hair:#1C2330;--hair2:#2B3548;
+  --ochre:#E5A13C;--ochre-soft:#5E4015;--ochre-tint:#211A0D;--ochre-fg:#0C0E12;
+  --skills:#4FB3AE;--skills-t:#0F211F;--agents:#A98CDC;--agents-t:#1D1830;--lib:#6E9BE6;--lib-t:#141F2D;
+  --state:#D98AC8;--state-t:#2A1626;--dash:#8B93A3;--dash-t:#1B1E25;--adr:#D98A8A;--adr-t:#271618;--git:#6CB58C;--git-t:#13241B;
+  --backlog:#8B93A3;--backlog-t:#1B1E25;--todo:#6E9BE6;--todo-t:#141F2D;--doing:#E0A95C;--doing-t:#271E11;--done:#6CB58C;--done-t:#13241B;
+  --code-bg:#1E222A;--shadow:0 6px 22px rgba(0,0,0,.46);color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --s0:#090C12;--s1:#0D1119;--s2:#121826;--fg1:#F2F5F9;--fg2:#AEB8C4;--fg3:#7D8794;--fg4:#48515C;--hair:#1C2330;--hair2:#2B3548;
+  --ochre:#E5A13C;--ochre-soft:#5E4015;--ochre-tint:#211A0D;--ochre-fg:#0C0E12;
+  --skills:#4FB3AE;--skills-t:#0F211F;--agents:#A98CDC;--agents-t:#1D1830;--lib:#6E9BE6;--lib-t:#141F2D;
+  --state:#D98AC8;--state-t:#2A1626;--dash:#8B93A3;--dash-t:#1B1E25;--adr:#D98A8A;--adr-t:#271618;--git:#6CB58C;--git-t:#13241B;
+  --backlog:#8B93A3;--backlog-t:#1B1E25;--todo:#6E9BE6;--todo-t:#141F2D;--doing:#E0A95C;--doing-t:#271E11;--done:#6CB58C;--done-t:#13241B;
+  --code-bg:#1E222A;--shadow:0 6px 22px rgba(0,0,0,.46);color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--s0);color:var(--fg1);font-family:var(--font-ui);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--ochre);text-decoration:none}a:hover{text-decoration:underline}
+code,kbd,.mono{font-family:var(--font-mono);font-size:.86em}
+code{background:var(--code-bg);border:1px solid var(--hair);border-radius:4px;padding:.05em .35em;white-space:nowrap}
+pre{background:var(--code-bg);border:1px solid var(--hair);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--font-mono);font-size:12.5px;line-height:1.5;margin:10px 0}
+pre code{background:none;border:0;padding:0;white-space:pre}
+h1,h2,h3,h4{margin:0;line-height:1.15;letter-spacing:-.015em;text-wrap:balance}
+h2{font-size:28px;font-weight:700}h3{font-size:18px;font-weight:600;margin-top:28px}h4{font-size:15px;font-weight:600;margin-top:18px}
+p{margin:.55em 0;max-width:72ch}
+ul,ol{margin:.4em 0 .6em;padding-left:1.3em}li{margin:.2em 0}li>p{margin:.2em 0}
+.shell{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:100vh}
+.rail{position:sticky;top:0;height:100vh;overflow:auto;background:var(--s1);border-right:1px solid var(--hair);padding:18px 14px 24px;display:flex;flex-direction:column;gap:6px}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 6px 14px;border-bottom:1px solid var(--hair);margin-bottom:8px}
+.brand .glyph{width:26px;height:26px;border-radius:6px;background:var(--ochre);color:var(--ochre-fg);display:grid;place-items:center;font-family:var(--font-mono);font-weight:600;font-size:13px}
+.brand b{font-weight:700;font-size:14px;letter-spacing:-.01em}.brand small{display:block;color:var(--fg3);font-size:11px;font-family:var(--font-mono)}
+.rail .lbl{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg3);padding:10px 8px 4px}
+.rail a{display:flex;align-items:baseline;gap:8px;padding:6px 8px;border-radius:6px;color:var(--fg2);font-size:13px;font-weight:500;box-shadow:inset 0 0 0 transparent}
+.rail a .n{font-family:var(--font-mono);font-size:11px;color:var(--fg3);min-width:18px}
+.rail a:hover{background:var(--s2);text-decoration:none;color:var(--fg1)}
+.rail a.active{background:var(--s2);color:var(--fg1);box-shadow:inset 2px 0 0 var(--ochre)}
+.rail .foot{margin-top:auto;padding:12px 6px 0;border-top:1px solid var(--hair);font-size:11.5px;color:var(--fg3);font-family:var(--font-mono);display:flex;flex-direction:column;gap:8px}
+.theme{display:inline-flex;border:1px solid var(--hair2);border-radius:6px;overflow:hidden;width:max-content}
+.theme button{font:inherit;font-family:var(--font-mono);font-size:11px;padding:4px 9px;border:0;background:transparent;color:var(--fg2);cursor:pointer}
+.theme button[aria-pressed="true"]{background:var(--s2);color:var(--fg1)}
+main{padding:0 44px 80px;max-width:1180px}
+section{padding:44px 0 12px;border-top:1px solid var(--hair);scroll-margin-top:8px}
+section:first-of-type{border-top:0}
+.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ochre);margin-bottom:8px}
+.sec-head{max-width:76ch;margin-bottom:22px}.sec-head p{color:var(--fg2);font-size:16px}
+.hero{padding:56px 0 30px}
+.hero h1{font-size:clamp(40px,6vw,64px);font-weight:800;letter-spacing:-.03em}
+.hero .lead{font-size:18px;color:var(--fg2);max-width:70ch;margin-top:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:26px 0 6px}
+.stat{background:var(--s1);border:1px solid var(--hair);border-radius:8px;padding:10px 12px}
+.stat b{display:block;font-family:var(--font-mono);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat span{font-size:12px;color:var(--fg3)}
+.layermap{display:grid;grid-template-columns:minmax(0,3fr) minmax(220px,1fr);gap:12px;margin:18px 0 8px}
+.stack{display:flex;flex-direction:column;gap:10px}
+.layer{display:block;border:1.5px solid;border-radius:10px;padding:12px 14px;color:inherit;transition:transform .15s}
+.layer:hover{text-decoration:none;transform:translateY(-1px);box-shadow:var(--shadow)}
+.layer .t{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+.layer h3{margin:2px 0 4px;font-size:17px}
+.layer p{font-size:13px;color:var(--fg2);margin:0}
+.layer .items{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.layer .items span{font-family:var(--font-mono);font-size:11px;padding:2px 7px;border-radius:4px;background:var(--s0);border:1px solid var(--hair)}
+.l-builder{border-color:var(--ochre);background:var(--ochre-tint)}.l-builder .t,.l-builder h3{color:var(--ochre)}
+.l-skills{border-color:var(--skills);background:var(--skills-t)}.l-skills .t,.l-skills h3{color:var(--skills)}
+.l-agents{border-color:var(--agents);background:var(--agents-t)}.l-agents .t,.l-agents h3{color:var(--agents)}
+.l-lib{border-color:var(--lib);background:var(--lib-t)}.l-lib .t,.l-lib h3{color:var(--lib)}
+.l-state{border-color:var(--state);background:var(--state-t)}.l-state .t,.l-state h3{color:var(--state)}
+.l-git{border-color:var(--git);background:var(--git-t)}.l-git .t,.l-git h3{color:var(--git)}
+.l-dash{border-color:var(--dash);background:var(--dash-t);height:100%;display:flex;flex-direction:column}.l-dash .t,.l-dash h3{color:var(--dash)}
+.l-adr{border-color:var(--adr);background:var(--adr-t)}.l-adr .t,.l-adr h3{color:var(--adr)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.arrow{font-family:var(--font-mono);font-size:11px;color:var(--fg3);text-align:center;padding:0 0 2px}
+.loop{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:stretch;gap:8px;margin:14px 0}
+.phase{border:1px solid var(--hair2);border-radius:10px;padding:12px 14px;background:var(--s1)}
+.phase .n{font-family:var(--font-mono);font-size:11px;color:var(--fg3)}.phase h4{margin:2px 0 4px}
+.phase p{font-size:13px;color:var(--fg2);margin:0}.phase .gate{margin-top:8px;font-size:12px;color:var(--ochre);font-weight:600}
+.loop .arr{align-self:center;color:var(--fg3);font-family:var(--font-mono)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin:12px 0}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:12px 0}
+.card{border:1px solid var(--hair);border-radius:10px;background:var(--s1);padding:14px 16px}
+.card h4{margin:0 0 4px;font-size:15px}.card .sub{font-size:12.5px;color:var(--fg3);font-family:var(--font-mono)}
+.card p,.card li{font-size:13.5px}
+.card.c-skills{border-top:3px solid var(--skills)}.card.c-agents{border-top:3px solid var(--agents)}.card.c-lib{border-top:3px solid var(--lib)}
+.card.c-state{border-top:3px solid var(--state)}.card.c-dash{border-top:3px solid var(--dash)}.card.c-adr{border-top:3px solid var(--adr)}.card.c-git{border-top:3px solid var(--git)}
+details{border:1px solid var(--hair);border-radius:8px;background:var(--s0);margin:8px 0}
+details>summary{cursor:pointer;padding:9px 12px;font-weight:600;font-size:14px;list-style:none;display:flex;gap:8px;align-items:center}
+details>summary::before{content:"›";font-family:var(--font-mono);color:var(--fg3);transition:transform .15s;display:inline-block}
+details[open]>summary::before{transform:rotate(90deg)}
+details>summary::-webkit-details-marker{display:none}
+details>summary:focus-visible{outline:2px solid var(--ochre);outline-offset:-2px;border-radius:8px}
+details .body{padding:2px 14px 12px;border-top:1px solid var(--hair);font-size:13.5px}
+details .body p{max-width:none}
+.card details{background:var(--s0)}
+.scroll{overflow-x:auto;margin:10px 0;border:1px solid var(--hair);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;vertical-align:top;padding:7px 10px;border-bottom:1px solid var(--hair)}
+th{background:var(--s1);font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.mono{white-space:nowrap}
+.tag{display:inline-block;font-family:var(--font-mono);font-size:10.5px;padding:1px 6px;border-radius:4px;border:1px solid;white-space:nowrap;line-height:1.6}
+.tag.a{color:var(--ochre);border-color:var(--ochre);background:var(--ochre-tint)}
+.tag.b{color:var(--state);border-color:var(--state);background:var(--state-t)}
+.tag.c{color:var(--git);border-color:var(--git);background:var(--git-t)}
+.tag.d{color:var(--agents);border-color:var(--agents);background:var(--agents-t)}
+.tag.e{color:var(--dash);border-color:var(--dash);background:var(--dash-t)}
+.tag.m{color:var(--lib);border-color:var(--lib);background:var(--lib-t)}
+.tag.p{color:var(--fg3);border-color:var(--hair2);background:var(--s1)}
+.tag.adr{color:var(--adr);border-color:var(--adr);background:var(--adr-t)}
+.st{display:inline-block;font-family:var(--font-mono);font-size:10.5px;padding:1px 7px;border-radius:999px;border:1px solid}
+.st.backlog{color:var(--backlog);border-color:var(--backlog);background:var(--backlog-t)}.st.todo{color:var(--todo);border-color:var(--todo);background:var(--todo-t)}
+.st.doing{color:var(--doing);border-color:var(--doing);background:var(--doing-t)}.st.done{color:var(--done);border-color:var(--done);background:var(--done-t)}
+.note{border-left:3px solid var(--ochre);background:var(--ochre-tint);padding:10px 14px;border-radius:0 8px 8px 0;margin:14px 0;font-size:13.5px}
+.note.warn{border-left-color:var(--adr);background:var(--adr-t)}
+.note p{max-width:none}
+.legend{display:flex;flex-wrap:wrap;gap:8px;font-size:12.5px;color:var(--fg2);margin:8px 0 14px;align-items:center}
+.lifecycle{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.lc{border:1.5px solid;border-radius:10px;padding:10px 12px;background:var(--s1)}
+.lc .h{font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.lc p{font-size:12.5px;color:var(--fg2);margin:4px 0 0}
+.lc.backlog{border-color:var(--backlog)}.lc.backlog .h{color:var(--backlog)}
+.lc.todo{border-color:var(--todo)}.lc.todo .h{color:var(--todo)}
+.lc.doing{border-color:var(--doing)}.lc.doing .h{color:var(--doing)}
+.lc.done{border-color:var(--done)}.lc.done .h{color:var(--done)}
+.tree{font-family:var(--font-mono);font-size:12.5px;line-height:1.6;background:var(--code-bg);border:1px solid var(--hair);border-radius:8px;padding:12px 14px;overflow-x:auto;white-space:pre}
+.tree i{font-style:normal;color:var(--fg3)}
+.tree b{font-weight:600;color:var(--state)}
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+.filters button{font:inherit;font-size:12px;font-family:var(--font-mono);padding:4px 9px;border-radius:999px;border:1px solid var(--hair2);background:var(--s1);color:var(--fg2);cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--ochre);border-color:var(--ochre);color:var(--ochre-fg)}
+.filters input{font:inherit;font-size:13px;padding:5px 10px;border:1px solid var(--hair2);border-radius:6px;background:var(--s0);color:var(--fg1);min-width:220px}
+.filters input:focus-visible,.filters button:focus-visible{outline:2px solid var(--ochre);outline-offset:1px}
+.count{font-family:var(--font-mono);font-size:12px;color:var(--fg3)}
+.timeline{border-left:2px solid var(--hair2);margin:12px 0 12px 6px;padding-left:18px;display:flex;flex-direction:column;gap:10px}
+.tl{position:relative;font-size:13.5px}
+.tl::before{content:"";position:absolute;left:-24px;top:7px;width:9px;height:9px;border-radius:50%;background:var(--ochre)}
+.tl .d{font-family:var(--font-mono);font-size:11.5px;color:var(--fg3)}
+.tl b{font-weight:600}
+.graph{display:grid;grid-template-columns:1fr;gap:8px;margin:12px 0}
+.gnode{border:1.5px solid var(--agents);background:var(--agents-t);border-radius:8px;padding:8px 12px;font-size:13px}
+.gnode.cond{border-color:var(--ochre);background:var(--ochre-tint)}
+.gnode.skill{border-color:var(--skills);background:var(--skills-t)}
+.gnode b{font-family:var(--font-mono);font-weight:600}
+.gnode .sub{color:var(--fg2);font-size:12.5px}
+.gkids{margin-left:26px;display:flex;flex-direction:column;gap:6px;border-left:1px dashed var(--hair2);padding-left:14px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:4px 12px;font-size:13.5px}
+.kv dt{color:var(--fg3);font-family:var(--font-mono);font-size:12px}.kv dd{margin:0}
+.small{font-size:12.5px;color:var(--fg3)}
+.two{columns:2;column-gap:28px}.two li{break-inside:avoid}
+@media (max-width:980px){.shell{grid-template-columns:1fr}.rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--hair)}.rail .foot{margin-top:8px}main{padding:0 20px 60px}.layermap{grid-template-columns:1fr}.loop{grid-template-columns:1fr}.loop .arr{transform:rotate(90deg);justify-self:center}.lifecycle{grid-template-columns:1fr 1fr}.two{columns:1}.pair{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<div class="shell">
+<nav class="rail" aria-label="Sections">
+  <div class="brand"><div class="glyph">A</div><div><b>Agentheim Anatomy</b><small>main @ c35bafa · v0.9.2+</small></div></div>
+  <div class="lbl">Overview</div>
+  <a href="#overview"><span class="n">00</span>The system at a glance</a>
+  <a href="#principles"><span class="n">01</span>Core principles</a>
+  <div class="lbl">Workflow</div>
+  <a href="#skills"><span class="n">02</span>Skills</a>
+  <a href="#agents"><span class="n">03</span>Agents &amp; gates</a>
+  <a href="#tasks"><span class="n">04</span>Task system</a>
+  <a href="#knowledge"><span class="n">05</span>Knowledge &amp; state</a>
+  <a href="#lib"><span class="n">06</span>Mechanized lib</a>
+  <div class="lbl">Projection</div>
+  <a href="#dashboard"><span class="n">07</span>Dashboard &amp; bridge</a>
+  <div class="lbl">Record</div>
+  <a href="#decisions"><span class="n">08</span>69 decisions</a>
+  <a href="#history"><span class="n">09</span>History &amp; open work</a>
+  <div class="lbl">Rework</div>
+  <a href="#rework"><span class="n">10</span>Rework lens</a>
+  <div class="foot">
+    <div class="theme" role="group" aria-label="Theme"><button type="button" data-theme-pick="light">Light</button><button type="button" data-theme-pick="dark">Dark</button><button type="button" data-theme-pick="system">System</button></div>
+    <div>read 2026-09-05 · last protocol entry 2026-07-23</div>
+  </div>
+</nav>
+
+<main>
+<section id="overview">
+  <div class="hero">
+    <div class="eyebrow">Agentheim · feature and decision inventory</div>
+    <h1>Agentheim Anatomy</h1>
+    <p class="lead">Every feature, artifact, script and decision in the Agentheim plugin, read from the source tree at <code>main</code> (commit <code>c35bafa</code>, version 0.9.2 plus the unreleased ADR-0058 to ADR-0069 wave). Start with the layer map, then drill into each layer. The last section reads the whole inventory through the three rework goals: extract the core principles, separate the dashboard from the skills, and put the task system behind an interface.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>10</b><span>skills (7 operational, 3 doctrine)</span></div>
+    <div class="stat"><b>8</b><span>agents, 2 of them adversarial gates</span></div>
+    <div class="stat"><b>21</b><span>lib modules · 375 node tests</span></div>
+    <div class="stat"><b>69</b><span>ADRs · 36 workflow, 33 dashboard</span></div>
+    <div class="stat"><b>3</b><span>bounded contexts · 181 done tasks</span></div>
+    <div class="stat"><b>21</b><span>releases v0.1.0 → v0.9.2 · 690 commits</span></div>
+    <div class="stat"><b>78</b><span>dashboard test files · 4.3k lines of prompts</span></div>
+  </div>
+
+  <h3>The layer map</h3>
+  <p>Six layers, top to bottom. The builder talks in phrases; skills orchestrate; agents do focused work; a git-free mechanized layer performs deterministic bookkeeping; everything lands as markdown in <code>.agentheim/</code> and is committed to git. The dashboard sits beside this stack as a read-only projection that can only <em>launch</em> a Claude session, never write task state. Click a layer to jump to its section.</p>
+  <div class="layermap">
+    <div class="stack">
+      <a class="layer l-builder" href="#principles"><div class="t">Layer 0 · the builder</div><h3>One human, never bypassed</h3><p>Phrases trigger skills. Reviews todo before work. Gates: no-code brainstorm, styleguide sign-off, human-eye criteria, escalation after three failed verifications.</p></a>
+      <div class="arrow">↓ phrasing, not slash commands (one exception: /dashboard)</div>
+      <a class="layer l-skills" href="#skills"><div class="t">Layer 1 · skills</div><h3>Conversations and the conductor loop</h3><p>Socratic dialogue in, markdown out. <code>work</code> is the conductor: it scans the DAG, dispatches workers, commits, logs. It never writes code.</p><div class="items"><span>brainstorm</span><span>quick-capture</span><span>modeling</span><span>research</span><span>work</span><span>whats-next</span><span>inquire</span><span>TDD · verification · research-review (doctrine)</span></div></a>
+      <div class="arrow">↓ Agent tool, agentheim: namespace, model tiers</div>
+      <a class="layer l-agents" href="#agents"><div class="t">Layer 2 · agents</div><h3>Router, specialists, executor, two judges</h3><p>Orchestrator routes and never writes code. Worker executes one task in its own worktree. Verifier and research-reviewer judge with fresh context and a different model tier.</p><div class="items"><span>orchestrator</span><span>strategic-modeler</span><span>tactical-modeler</span><span>architect</span><span>researcher</span><span>worker</span><span>verifier</span><span>research-reviewer</span></div></a>
+      <div class="arrow">↓ node -e bootstrap → lib/ CLI verbs and pure helpers; manifests back</div>
+      <a class="layer l-lib" href="#lib"><div class="t">Layer 3 · mechanized lib</div><h3>Deterministic bookkeeping, git-free, fail-closed</h3><p>Task moves, INDEX and protocol surgery, rotations, ADR numbering, salvage paths, heartbeat, nine live-tree lints. Returns a change manifest; the skill commits it.</p><div class="items"><span>task-lifecycle + CLI</span><span>index/protocol rotation</span><span>adr-allocation</span><span>id-grammar</span><span>vacuum-guard</span><span>session-start-churn</span><span>hook-agent-signal</span><span>7 lints</span></div></a>
+      <div class="arrow">↓ writes files · scoped git add · one commit per task</div>
+      <div class="pair">
+        <a class="layer l-state" href="#knowledge"><div class="t">Layer 4 · state</div><h3>.agentheim/</h3><p>vision, context map, per-BC README + INDEX + four lifecycle folders, ADRs, research, protocol diary, advisory state, salvage.</p></a>
+        <a class="layer l-git" href="#tasks"><div class="t">Layer 5 · git</div><h3>Commits, worktrees, trailers</h3><p>One task = one commit with <code>[task-id]</code> trailer. Workers in <code>.worktrees/&lt;id&gt;</code>, squash-merged by the conductor, the only writer of main.</p></a>
+      </div>
+    </div>
+    <a class="layer l-dash" href="#dashboard"><div class="t">Beside the stack · projection</div><h3>Dashboard + VS Code bridge</h3><p>Stdlib Node server over <code>.agentheim/</code>: tree, doc, search, SSE. React + htm board, prompt console, What's Next panel, in-flight lane. Read-only over task lifecycle (ADR-0017).</p><p style="margin-top:8px"><b>Only writes:</b> delete <code>state/whats-next.md</code>, stop itself, its own runfile.</p><p style="margin-top:8px"><b>Only way to act:</b> seed a <code>claude "/agentheim:…"</code> terminal via the loopback bridge, else copy to clipboard.</p><p style="margin-top:auto;padding-top:10px" class="small">Knows: folder names, frontmatter, command strings, state file schemas, styleguide.</p></a>
+  </div>
+
+  <h3>The loop the builder runs</h3>
+  <p>The in-app Workflow guide (rebuilt in 0.9.1) teaches the tightest mental model: prepare once, then loop between capturing and shipping. Ochre marks the builder's moves, neutral the harness's.</p>
+  <div class="loop">
+    <div class="phase"><div class="n">01 · once per project</div><h4>Prepare</h4><p><b>brainstorm</b>: Socratic vision, optional context map, bounded contexts, an <code>infrastructure/</code> BC always, decision tasks, a walking-skeleton spike, a styleguide task when there is a frontend.</p><div class="gate">Gate: no code is written here.</div></div>
+    <div class="arr">→</div>
+    <div class="phase"><div class="n">02 · any time</div><h4>Capture &amp; refine</h4><p><b>quick-capture</b> files raw ideas to <code>backlog/</code> without questions. <b>modeling</b> captures with dialogue, refines, auto-promotes on readiness, dismisses with cascade, consolidates READMEs. <b>research</b> brings verified outside facts.</p><div class="gate">Gate: nothing leaves the backlog on its own.</div></div>
+    <div class="arr">⇄</div>
+    <div class="phase"><div class="n">03 · when tasks are ready</div><h4>Promote &amp; work</h4><p><b>work</b> claims a batch, spawns parallel workers in worktrees, checkpoints, verifies each SUCCESS with a fresh-context verifier, squash-merges one commit per task, runs session-end advisories and rotations.</p><div class="gate">Gate: you review todo before launch; the verifier guards every commit.</div></div>
+  </div>
+  <p class="small">Any time: <b>whats-next</b> reads the board and writes one advisory file; <b>inquire</b> answers questions read-only; <b>/dashboard</b> launches the projection.</p>
+
+  <h3>How to read this page</h3>
+  <ul>
+    <li><b>Sections 01 to 07</b> inventory one layer each. Each opens with a map, then <em>details</em> blocks hold the fine grain (flows, formats, checks, endpoints).</li>
+    <li><b>Section 08</b> is the full decision record: all 69 ADRs, filterable by theme and by whether the decision is a core principle, a markdown-backend detail, a git concern, a Claude Code concern, or a dashboard concern.</li>
+    <li><b>Section 09</b> is the timeline: releases, turning points, evals, the three open tasks.</li>
+    <li><b>Section 10</b> is the rework lens: coupling points, a derived port catalogue, drift risks, and the smells found during this read.</li>
+  </ul>
+  <div class="legend"><b>Rework tags used throughout:</b> <span class="tag a">a · core principle</span> <span class="tag b">b · markdown-file backend detail</span> <span class="tag c">c · git-specific</span> <span class="tag d">d · Claude-Code-specific</span> <span class="tag e">e · dashboard concern</span> <span class="tag m">M · mechanized in lib/</span> <span class="tag p">P · prose-only (LLM does it)</span></div>
+</section>
+
+<section id="principles">
+  <div class="eyebrow">01 · core principles</div>
+  <div class="sec-head"><h2>What is load-bearing</h2><p>Thirty-one principles the skills, agents, lib and ADRs state or embody. Each names its reason and where it is written down. The tag says whether it should survive any task backend (a) or is an artefact of the current markdown, git, Claude Code or dashboard implementation.</p></div>
+
+  <div class="note"><p><b>The keystone, in the vision's own words:</b> "the acute pain is an agreeable agent that produces shallow domain work at speed. Every load-bearing feature is a structural defense against exactly that." Non-goals: not a teaching tool, not a general-purpose harness, <b>not autonomous</b>, not stack-prescriptive, not SaaS.</p></div>
+
+  <h3>A · Domain discipline</h3>
+  <div class="scroll"><table>
+    <tr><th>Principle</th><th>Why</th><th>Where stated</th><th>Tag</th></tr>
+    <tr><td><b>No code before the vision is locked.</b> Brainstorm is markdown-only; tech choices become <code>type: decision</code> tasks reviewed in the queue.</td><td>Foundation choices ride the same review and commit rail as everything else.</td><td>brainstorm SKILL lines 10–14, 161; vision non-goal 3</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Bounded contexts with a ubiquitous language are the memory.</b> One BC per task; README UL section is never cut; tests are named in BC terms.</td><td>The README is what workers and verifiers read to judge domain correctness.</td><td>bc-readme-template; verifier checks 4, 5; ADR-0041</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Decisions get ADRs; task narration is not a record.</b> Global or BC-scoped, flowing through the backlog as <code>type: decision</code>.</td><td>Weeks later neither builder nor model knows why it is built this way.</td><td>verifier check 6; adr-template; vision</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Phrasing, not slash commands.</b> Skills trigger from natural language; <code>/dashboard</code> is the single named exception (a process launcher, not a dialogue).</td><td>Skills are Socratic dialogues, not commands to memorize.</td><td>commands/dashboard.md; BC README</td><td><span class="tag a">a</span> <span class="tag d">d</span></td></tr>
+    <tr><td><b>Six conversational modes serve model quality, not pedagogy.</b> Interrogator (default), Suggestor, Challenger, Storyteller, Facilitator (CAPTURE default), Synthesizer.</td><td>Different ways of pressing on an idea until it holds.</td><td>references/modes.md; vision</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Match architecture to scale; boring, reversible tech.</b></td><td>One person, one repo, modular monolith until proven otherwise.</td><td>agents/architect.md</td><td><span class="tag a">a</span></td></tr>
+  </table></div>
+
+  <h3>B · Human in the loop</h3>
+  <div class="scroll"><table>
+    <tr><th>Principle</th><th>Why</th><th>Where stated</th><th>Tag</th></tr>
+    <tr><td><b>Gates are named exhaustively and nothing else interrupts.</b> No-code brainstorm, builder review of todo before work, escalation after iteration 3.</td><td>Vision non-goal 3; ADR-0067 declined a mandatory mid-batch checkpoint on this basis.</td><td>vision; ADR-0067</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Bounce, don't guess.</b> An under-refined task goes back to <code>backlog/</code> with a worker note.</td><td>"Workers executing under-specified tasks produce plausible-looking but wrong output — that's the worst possible outcome."</td><td>work SKILL last line; worker action 1</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Do not self-generate work.</b> An empty board surfaces the open vision question with its age instead of minting filler.</td><td>Dorc review A2: an empty todo turned into a week of meta-work.</td><td>ADR-0064, ADR-0069; work, modeling, whats-next</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Perceptual criteria stay with the builder.</b> <code>[human-eye]</code> criteria are never proxied by an invented metric; the checkbox stays unchecked through done as the routing signal.</td><td>Dorc A1: a pixel metric tuned across three iterations while the product stayed broken.</td><td>ADR-0061; verifier check 1</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Destructive or lossy actions confirm first.</b> DISMISS shows the cascade set and asks once; CONSOLIDATE is builder-in-the-loop; styleguide needs human sign-off.</td><td>Deletion and prose rewriting are judgment, not bookkeeping.</td><td>ADR-0022, ADR-0041; modeling</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Advisories never gate.</b> whats-next, vacuum guard, vision-conformance, churn, batch mix, salvage are opinions in gitignored <code>state/</code> or protocol lines.</td><td>Keeps "not autonomous" true while adding observability.</td><td>ADR-0027, 0040, 0043, 0064, 0066</td><td><span class="tag a">a</span></td></tr>
+  </table></div>
+
+  <h3>C · Adversarial structure</h3>
+  <div class="scroll"><table>
+    <tr><th>Principle</th><th>Why</th><th>Where stated</th><th>Tag</th></tr>
+    <tr><td><b>Fresh-context gates.</b> The verifier and research-reviewer read only the artifact and the spec, never the producer's reasoning, discarded sources, or prior attempts.</td><td>"Fluency of a generated answer <em>is</em> the hazard"; self-review shares blind spots.</td><td>verification-before-completion; research-review; vision "deliberate, recurring motif"</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Decorrelate by model tier; never weaken the judge to strengthen the executor.</b> Producers on sonnet, judges and modelers on opus.</td><td>Shared model, shared confabulations.</td><td>ADR-0031; agents/*.md <code>model:</code></td><td><span class="tag a">a</span> <span class="tag d">d</span></td></tr>
+    <tr><td><b>Judges are read-only.</b> No Write, no Edit, no git; they describe and never fix.</td><td>A judge that edits becomes a second producer.</td><td>agents/verifier.md, research-reviewer.md</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Fail closed at the gate.</b> No runner → FAIL; doubt between SKIP and FAIL → FAIL; a dangling dependency blocks promotion.</td><td>A silent pass corrupts trust undetectably.</td><td>verifier "On being strict"; ADR-0038 Ruling A</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Observed behaviour beats claimed behaviour.</b> Verdicts come only from the runner's exit status or structured report (runner-first); the app is booted and probed in its worktree (runtime drive); facts are re-verified against primary sources.</td><td>Dorc A4: 155 smoke tests never run together, 23% bad on the first honest run.</td><td>ADR-0062, ADR-0036; research-review</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Falsifiability: classify every criterion.</b> Machine-checkable by default, <code>[human-eye]</code> when irreducibly perceptual; metric drift on an unchanged criterion escalates instead of iterating.</td><td>Turns a vague claim into a routing decision at capture time.</td><td>ADR-0061; modeling CAPTURE/REFINE</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Label, don't block forever.</b> Research review's terminal state after 3 iterations is <code>⚠️ UNVERIFIED</code>, not deletion.</td><td>An honest label beats an infinite loop or a stripped report.</td><td>research-review</td><td><span class="tag a">a</span></td></tr>
+  </table></div>
+
+  <h3>D · Ownership and write discipline</h3>
+  <div class="scroll"><table>
+    <tr><th>Principle</th><th>Why</th><th>Where stated</th><th>Tag</th></tr>
+    <tr><td><b>One writer per surface.</b> Conductor owns git, protocol, every INDEX, lifecycle verbs. Worker owns code, tests, its own README, ADRs, its task file. Specialists return text. Dashboard reads.</td><td>Parallel safety and context economy: "main is written only by the conductor, only sequentially."</td><td>work "Git authority"; worker rules; ADR-0017</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Orchestrator and conductor never write code; workers never run git.</b></td><td>The router stays cheap and the executor cannot corrupt main.</td><td>orchestrator.md; worker.md; work</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>One task = one commit, bookkeeping inside it, <code>[task-id]</code> trailer as the index.</b> No stored SHA; scoped <code>git add</code>, never <code>-A</code>.</td><td>Clean tree after any session; a parallel modeling session must not be swept in.</td><td>ADR-0026; commit-doctrine</td><td><span class="tag a">a</span> <span class="tag c">c</span></td></tr>
+    <tr><td><b>Lifecycle writes vs advisory writes vs runtime self-lifecycle.</b> Three named write categories; the dashboard may only do the last two, each with no client-supplied path.</td><td>Keeps "read-only" a checkable claim rather than a slogan.</td><td>ADR-0027, 0046, 0053</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Status equals folder, always together.</b> The mover rewrites <code>status:</code> in the same operation as the move.</td><td>The folder is the board; disagreement is a corrupted aggregate.</td><td>lib/task-lifecycle.mjs; ADR-0001/0007</td><td><span class="tag b">b</span></td></tr>
+    <tr><td><b>Derived artifacts never integrate from a worker.</b> <code>dashboard/dist/</code> is filtered at the checkpoint seam; the conductor rebuilds from merged source.</td><td>Two tree-shaken bundles merged from two worktrees describe a source tree that never existed.</td><td>ADR-0057, ADR-0003</td><td><span class="tag c">c</span> <span class="tag e">e</span></td></tr>
+    <tr><td><b>Isolate parallel workers; integrate through one sequential writer; let the VCS detect conflicts.</b></td><td>Worktrees make the verifier's diff structurally free of siblings' changes.</td><td>ADR-0032, 0037, 0063</td><td><span class="tag a">a</span> <span class="tag c">c</span></td></tr>
+    <tr><td><b>Salvage before abandon.</b> Every worktree removal with unmerged changes writes a patch first.</td><td>Dorc A1: a verified fix vanished with its branch.</td><td>ADR-0063</td><td><span class="tag c">c</span></td></tr>
+  </table></div>
+
+  <h3>E · Mechanization and drift control</h3>
+  <div class="scroll"><table>
+    <tr><th>Principle</th><th>Why</th><th>Where stated</th><th>Tag</th></tr>
+    <tr><td><b>Mechanize-or-drop.</b> A convention-establishing task ships a lint, live-tree test or build failure, or records "prose-only, unenforced" with a reason.</td><td>Dorc A3: agents violated an in-context rule twice before a one-evening lint.</td><td>ADR-0059; modeling readiness; verifier 6c</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Three-layer boundary.</b> Mover (transition + invariant) / git-free CLI (deterministic side effects, returns a manifest) / skill (judgment + git).</td><td>Prose restatements of bookkeeping drifted; scripts don't.</td><td>ADR-0038, 0042</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Compute-then-write; write destination, then unlink source.</b> Every verb computes all new content purely, then mutates.</td><td>A dry-run mirror drifted and wrote <code>Todo: -1</code>; a half-moved task is unreachable by construction.</td><td>ADR-0054, 0055</td><td><span class="tag b">b</span></td></tr>
+    <tr><td><b>lib/ is git-free and stdlib-only.</b> Git lives only in skill prose.</td><td>Helpers test without a repo and fit both commit models.</td><td>ADR-0038 Ruling B; ADR-0002</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Cap-and-roll for lists, flag-and-consolidate for prose.</b> Protocol and INDEX done-lists roll verbatim by script; READMEs over ~600 lines are consolidated by judgment.</td><td>Growing artifacts are pre-loaded whole into every spawn.</td><td>ADR-0039, 0041, 0045, 0047</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Ids are random, stable, never renumbered, never reused.</b> Readers tolerate, minters reject.</td><td>Two branches minted the same sequential id.</td><td>ADR-0028, 0044</td><td><span class="tag b">b</span></td></tr>
+    <tr><td><b>Drift-twice rule.</b> A restatement that drifts a second time is deleted and replaced by a pointer.</td><td>The verification restatement drifted six times, then again within two days.</td><td>ADR-0068</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Env-independent plugin resolution, fail loud.</b> Never trust <code>$CLAUDE_PLUGIN_ROOT</code>; walk the plugin cache newest-first; do not invent a second scheme.</td><td>The variable arrived empty in the field (v0.8.3).</td><td>lib-bootstrap; resolve-plugin-file.mjs</td><td><span class="tag d">d</span></td></tr>
+    <tr><td><b>A hook never breaks the session it observes.</b> Heartbeat swallows everything and exits 0; staleness replaces a missing SessionEnd.</td><td>Observability must be free of side effects.</td><td>ADR-0043; hook-agent-signal.mjs</td><td><span class="tag d">d</span></td></tr>
+    <tr><td><b>Loss-tolerant reads, strict writes; pure core, thin I/O shell.</b> Scanners degrade ("can't tell → don't flag"); writers refuse on ambiguity; every module has an injectable clock and root.</td><td>Unit-testable under <code>node --test</code>, no subprocesses.</td><td>every lib module; dashboard projections</td><td><span class="tag a">a</span></td></tr>
+    <tr><td><b>Measure, never fabricate.</b> Durations and iteration counts are recorded; token cost is deliberately omitted.</td><td>"No fabricated metrics."</td><td>work observability fields</td><td><span class="tag a">a</span></td></tr>
+  </table></div>
+</section>
+<section id="skills">
+  <div class="eyebrow">02 · skills</div>
+  <div class="sec-head"><h2>Skills: the conversations and the conductor</h2><p>Ten <code>SKILL.md</code> files plus one slash command. Seven are operational; three are doctrine documents that other skills and agents point at. Every operational skill that writes markdown commits its own files at end-of-action with a scoped <code>git add</code>.</p></div>
+
+  <div class="scroll"><table>
+    <tr><th>Skill</th><th>Kind</th><th>Writes lifecycle?</th><th>Commits</th><th>Spawns</th><th>Lines</th></tr>
+    <tr><td><b>brainstorm</b></td><td>Socratic, markdown-only</td><td>creates BCs and foundation tasks in <code>todo/</code></td><td>one per session</td><td>agentheim:orchestrator → strategic-modeler, architect; research skill</td><td class="mono">282</td></tr>
+    <tr><td><b>quick-capture</b></td><td>non-conversational, <code>model: haiku</code></td><td><code>backlog/</code> only</td><td>one per task</td><td>none</td><td class="mono">252</td></tr>
+    <tr><td><b>modeling</b></td><td>conversational, five verbs</td><td>CAPTURE · REFINE · PROMOTE · DISMISS · CONSOLIDATE</td><td>one per action</td><td>agentheim:orchestrator; research skill</td><td class="mono">507</td></tr>
+    <tr><td><b>research</b></td><td>orchestrating</td><td>no; writes <code>knowledge/research/</code>, INDEX, protocol</td><td>one per report</td><td>agentheim:researcher, agentheim:research-reviewer</td><td class="mono">199</td></tr>
+    <tr><td><b>work</b></td><td>conductor loop</td><td><code>todo→doing→done</code>, bounce, indexes, protocol, ADR numbering, rotations</td><td>many shapes</td><td>agentheim:worker, agentheim:verifier</td><td class="mono">625</td></tr>
+    <tr><td><b>whats-next</b></td><td>read-only + one advisory write</td><td>no; writes <code>state/whats-next.md</code></td><td>never</td><td>none</td><td class="mono">149</td></tr>
+    <tr><td><b>inquire</b></td><td>read-only Q&amp;A</td><td>no</td><td>never</td><td>none</td><td class="mono">45</td></tr>
+    <tr><td><b>test-driven-development</b></td><td>doctrine (worker's third action)</td><td>—</td><td>—</td><td>—</td><td class="mono">129</td></tr>
+    <tr><td><b>verification-before-completion</b></td><td>doctrine (pointers to verifier + work)</td><td>—</td><td>—</td><td>—</td><td class="mono">116</td></tr>
+    <tr><td><b>research-review</b></td><td>doctrine (describes the gate)</td><td>—</td><td>—</td><td>—</td><td class="mono">94</td></tr>
+    <tr><td><b>/dashboard</b> (command)</td><td>process launcher</td><td>no</td><td>never</td><td>none</td><td class="mono">77</td></tr>
+  </table></div>
+
+  <div class="grid2">
+    <div class="card c-skills">
+      <h4>brainstorm</h4><div class="sub">"let's brainstorm" · "start a new project" · "create a vision"</div>
+      <p>Socratic loop over eight dimensions (purpose, users, problem, domain language, success, non-goals, constraints, BC seeds), one question at a time, then writes <code>vision.md</code> and, when more than one area of concern exists, <code>context-map.md</code> with DDD relationship labels second to plain description.</p>
+      <details><summary>Flow, artifacts, invariants</summary><div class="body">
+        <ol>
+          <li>Existing vision → ask revise vs extend; read <code>knowledge/index.md</code> and the protocol head so settled decisions are not re-litigated.</li>
+          <li>Socratic loop; stop when language is shared, non-goals are specific, and the idea can be explained in under a minute.</li>
+          <li>Write <code>vision.md</code>: Purpose / Users / The problem / What success looks like / Non-goals / Ubiquitous language (seed) / Open questions with <code>(open since YYYY-MM-DD)</code> per bullet (feeds the vacuum guard).</li>
+          <li>Optional <code>context-map.md</code>; scaffold <code>contexts/&lt;bc&gt;/README.md</code> from the template.</li>
+          <li><b>Architecture foundation pass</b> (skipped only on explicit no): create <code>contexts/infrastructure/</code> unconditionally; run the architect via the orchestrator; emit <code>type: decision</code> tasks routed by the test "if any single BC didn't exist, would this decision still need to be made?"; emit the walking-skeleton spike at the reserved id <code>infrastructure-001-walking-skeleton</code> with the stop-loss clause; when a frontend exists, create <code>design-system/</code> and the reserved <code>design-system-001-styleguide</code> task. The reserved-id set is closed at exactly these two.</li>
+          <li>Never commit the architect's ADR drafts from brainstorm; they ride inside decision tasks.</li>
+          <li>One protocol entry per session; INDEX inserts for every new BC and foundation task; one commit <code>chore(&lt;bc|global&gt;): brainstorm &lt;topic&gt; — vision created|revised|extended</code>.</li>
+        </ol>
+        <p><b>Cited:</b> ADR-0026, 0028 (§1, §7), 0064, 0065. <b>Scripts:</b> none; ids minted by prose without the <code>classifyTaskId</code> backstop the other minters use.</p>
+      </div></details>
+    </div>
+
+    <div class="card c-skills">
+      <h4>quick-capture</h4><div class="sub">"capture this" · "just file it" · "brain-dump" · pinned to haiku</div>
+      <p>The fast sibling of modeling: no questions, no refinement, one raw task per idea straight into <code>backlog/</code>, routed by ubiquitous-language match. When intent is ambiguous, quick-capture is "the cheaper mistake".</p>
+      <details><summary>Flow and rules</summary><div class="body">
+        <ol>
+          <li>Split multi-idea messages; read only BC READMEs (Purpose + UL), the context map when routing is unclear. Never reads the backlog, INDEXes or protocol.</li>
+          <li>Route to an existing BC (infrastructure test for cross-cutting concerns); never spawn a BC; honour a user-named BC.</li>
+          <li>Pick <code>type</code> by heuristic; spikes carry the stop-loss clause.</li>
+          <li>Write the task with a single placeholder criterion "To be defined during refinement", <code>tags: [captured]</code>, empty backlink fields.</li>
+          <li>INDEX backlog-list insert + count; protocol entry <code>Capture / Captured</code>; commit <code>chore(&lt;bc&gt;): capture &lt;id&gt; — &lt;title&gt; [&lt;id&gt;]</code>, one per task.</li>
+          <li>Re-route after the fact: move file, rewrite <code>context:</code>, fix both INDEXes, keep the original id even if its prefix names the old BC.</li>
+        </ol>
+        <p>Id backstop: <code>classifyTaskId</code> from <code>lib/id-grammar.mjs</code> must return <code>token</code>, else re-mint. Three evals in <code>skills/quick-capture/evals/</code> (100% with skill vs 77% without, 2026-06-08).</p>
+      </div></details>
+    </div>
+
+    <div class="card c-skills">
+      <h4>modeling</h4><div class="sub">"I have an idea" · "refine X" · "promote X" · "there's a bug" · dashboard-fired <code>dismiss &lt;id&gt;</code></div>
+      <p>The conversational intake with five verbs. REFINE auto-promotes on readiness since 0.9.0 ("ready but awaiting go-ahead is not a state this skill produces anymore"). Owns DISMISS and CONSOLIDATE because the dashboard is read-only and all <code>.agentheim/</code> markdown belongs to skills.</p>
+      <details><summary>Before acting, opening flow, resolution rules</summary><div class="body">
+        <p>Reads vision (missing → offer brainstorm), context map, all BC READMEs, <code>knowledge/index.md</code>, protocol head (~100 lines), the advisory <code>state/whats-next.md</code> (surfaced with age, never auto-picked), all backlog tasks, and for CAPTURE the candidate BC's <code>done/</code>.</p>
+        <p>Bare invocation: gather backlog via INDEXes; empty → the do-not-self-generate refusal, then the vacuum guard line from <code>lib/vacuum-guard.mjs</code>; non-empty → table of up to 15 oldest-first, ask refine vs new.</p>
+        <p>Task resolution: exact id; numeric-only across BCs (legacy); keyword or fuzzy substring over title and filename in <code>backlog/</code> and <code>todo/</code>. DISMISS also scans <code>doing/</code> and <code>done/</code> to refuse early. Modes: CAPTURE defaults Facilitator, REFINE defaults Interrogator, PROMOTE and DISMISS are mechanical.</p>
+      </div></details>
+      <details><summary>CAPTURE and REFINE</summary><div class="body">
+        <p><b>CAPTURE:</b> at most 3–4 follow-ups → route (global-vs-BC-local test; never spawn infra-flavoured BCs) → prior-art lookup via the backlink matcher (score ≥ 2; same task → switch to REFINE) → decide backlog vs todo; <b>convention check</b> (ADR-0059, doctrine surfaces only) and <b>falsifiability classification</b> (ADR-0061) → complex ideas to the orchestrator → write file with confirmed <code>related_adrs</code>, <code>related_research</code>, <code>prior_art</code> → commit.</p>
+        <p><b>REFINE:</b> interrogate goal, criteria, dependencies, split, ADR need; classify criteria; second-drift check (ADR-0068: delete the restatement, leave a pointer); delegate to the orchestrator; update the task, create children with <code>depends_on</code>, write ADR; commit <code>model(&lt;bc&gt;): refine &lt;id&gt; — &lt;title&gt; [&lt;id&gt;]</code>; then run PROMOTE wholesale and announce <code>→ promoted &lt;id&gt; to todo/</code>.</p>
+      </div></details>
+      <details><summary>PROMOTE, DISMISS, CONSOLIDATE</summary><div class="body">
+        <p><b>PROMOTE</b> (mechanized, ADR-0038): readiness = at least one concrete criterion, clear scope, dependencies known and met (fail-closed: a <code>depends_on</code> id in no folder blocks); convention check; all-human-eye tasks need the exact "Verification is builder-eye only" note; styleguide gate for frontend tasks. Then <code>node -e "&lt;bootstrap&gt;" promote &lt;id&gt;</code> → manifest <code>{changed, message, verb, id}</code> or <code>{ok:false, code, reason}</code>; <code>git add</code> exactly <code>changed</code>; commit with the manifest message.</p>
+        <p><b>DISMISS</b> (ADR-0022, prose): resolve; refuse if in doing/done; cascade set = fixed point over <code>depends_on</code>/<code>blocks</code> across BCs (upstream dependents only); abort if any member is in doing/done; show the table, one confirmation; hard-delete; reconcile INDEX lines and counts per BC (the one sanctioned multi-BC edit), strip dismissed ids from survivors and from ADRs' <code>related_tasks</code>; one protocol entry; commit <code>chore(&lt;bc&gt;): dismiss &lt;set&gt;</code>. Ids never reused.</p>
+        <p><b>CONSOLIDATE</b> (ADR-0041, prose, builder-in-loop): never auto-triggered; flagged by whats-next at ~600 README lines; fold superseded narration, merge redundant entries, never silently drop a term or invariant, preserve every backlink (grep each id against disk); commit <code>model(&lt;bc&gt;): consolidate &lt;bc&gt; README</code>.</p>
+      </div></details>
+      <p class="small">Cites ADR-0007, 0017, 0022, 0026, 0027, 0028, 0038, 0039, 0041, 0044, 0052, 0059, 0060, 0061, 0064, 0065, 0068.</p>
+    </div>
+
+    <div class="card c-skills">
+      <h4>research</h4><div class="sub">"research X" · "state of the art for" · internal from brainstorm, modeling, work</div>
+      <p>Delegates to the researcher, then gates the report through the research-reviewer before it is citable. Up to three concurrent researchers (matches <code>MAX_PARALLEL</code>); "produce a report; do not produce an ADR."</p>
+      <details><summary>Gate loop and link-back</summary><div class="body">
+        <ol>
+          <li>Researcher: breadth (1–3 WebSearch) → depth (WebFetch 3–7 sources) → parallel angles → cross-check → write <code>knowledge/research/&lt;slug&gt;-&lt;date&gt;.md</code> (Question / Summary / Findings / Sources / Open questions). "Not yet citable."</li>
+          <li>Reviewer with report path, question, iteration only. PASS → ship. SKIP → ship with note. FAIL likely-fixable at iteration 1–2 → re-dispatch the researcher with <code>CHALLENGED_CLAIMS</code>. FAIL at iteration 3 or genuinely-unverifiable → the researcher labels claims <code>⚠️ UNVERIFIED</code> and adds an "Unverified claims" section; ship.</li>
+          <li>Link back: task notes and <code>related_research</code>; ADR references; report <code>related_tasks</code>. INDEX: <code>research-local</code> in one BC or <code>research-global</code> at top level.</li>
+          <li>Protocol <code>Research: [topic]</code> with the review outcome; commit <code>chore(&lt;bc&gt;): research &lt;slug&gt;</code>.</li>
+        </ol>
+        <p>Skip the gate only with a per-run <code>--no-verify</code> or when a report has no checkable claims. Model routing per ADR-0031: researcher sonnet, reviewer opus.</p>
+      </div></details>
+    </div>
+  </div>
+
+  <div class="card c-skills" style="margin:12px 0">
+    <h4>work — the conductor</h4><div class="sub">"start working" · "let's go" · "pick up where you left off" · flags parsed from prose: <code>--no-verify</code>, "run 5 in parallel"</div>
+    <p>"The conductor (you) never writes code." Loops until todo is empty, picking up mid-run promotions. Carries a <code>Stop</code> hook that heartbeats <code>state/in-flight.json</code> every turn. The 625-line skill is the densest doctrine surface in the repo; its phases are below.</p>
+    <details><summary>Phase 1 · Recovery and session-start churn</summary><div class="body">
+      <p>Inspect <code>contexts/*/doing/</code> and <code>git worktree list --porcelain</code>. One stranded task → resume first (reuse or recreate its worktree). Two or more → ask parallel / sequential / abandon (abandon = move back to todo, prose). Orphan worktrees → surface for disposition.</p>
+      <p><b>Human-churn reconciliation</b> (ADR-0066): <code>resolveSinceLastSessionEnd</code> on the protocol head; conductor runs one <code>git log --since … --name-only</code>; <code>parseCommitLog</code>, <code>findUntrailedCommits</code>, <code>partitionUntrailedCommits</code> against eleven known machine commit shapes; the skill judges governed-surface hits (ADR subjects, README runtime surface / UL / key commands); prints one summary line; when flagged, overwrites <code>state/whats-next.md</code>. Never auto-files, never gates.</p>
+    </div></details>
+    <details><summary>Phase 2 · Dependency graph, vacuum guard</summary><div class="body">
+      <p>Read vision, context map, <code>knowledge/index.md</code> (missing → offer <code>scripts/backfill-indexes.ps1</code>), protocol head (~100 lines, passed to workers as recent activity). Scan <code>todo/</code> and <code>doing/</code>. Ready ⇔ every <code>depends_on</code> id is in some <code>done/</code>; a dangling id blocks (ADR-0038 Ruling A). Cycles → stop and surface. Report "X ready across N contexts, Y blocked on Z".</p>
+      <p><b>Vacuum guard</b> (ADR-0064): on zero ready tasks, refuse to self-generate; extract open vision questions with age; write a minimal <code>Work session ended</code> entry; stop. An explicit ask still wins.</p>
+    </div></details>
+    <details><summary>Phase 3 · Batch selection</summary><div class="body">
+      <p>Advisory conflict pre-scan over What / criteria / Notes for shared paths (annotate merge order only). Weigh <code>whats-next.md</code> for ordering among ready tasks. <code>MAX_PARALLEL</code> defaults to 3. "Pick the lowest-numbered unblocked tasks" (stale under random ids). <b>Remediation over diagnosis</b> (ADR-0065): a cheap known-cause fix outranks a same-thread spike, where same thread = shared defect-family tags or a <code>depends_on</code>/<code>blocks</code>/<code>prior_art</code> link; a same-thread remediation stranded in backlog is surfaced with "promote first?", never auto-promoted.</p>
+    </div></details>
+    <details><summary>Phase 4 · Dispatch, worktrees, worker prompt</summary><div class="body">
+      <ol>
+        <li><code>claim id1,id2 '{"parallel":…,"planningAdvisory":…}'</code> → one manifest grouped per BC; race with modeling → <code>{ok:false}</code>, nothing moved. Commit <code>chore(&lt;bc&gt;): batch start [id] [id]</code>. The <code>todo→doing</code> half rides this commit because <code>git worktree add</code> needs committed state (the one deliberate amendment to ADR-0026).</li>
+        <li><code>git worktree add -b aw/&lt;id&gt; .worktrees/&lt;id&gt; HEAD</code> per task; link <code>dashboard/node_modules</code> as a junction when the task touches <code>dashboard/</code>; <code>git config core.longpaths true</code> once per session.</li>
+        <li>Spawn one <code>agentheim:worker</code> per task in one message with the worker prompt template: workspace, task path (already in <code>doing/</code>), BC, README, INDEX, pre-loaded ADR contents, prior-art Outcome excerpts (last 30 lines), research slugs, recent activity, project pointers, nine CRITICAL rules, the strict return format pasted verbatim.</li>
+        <li>Parse returns: SUCCESS → verification gate; BOUNCED → bounce integration; FAILED → log, remove worktree, task stays in <code>doing/</code>. Re-scan.</li>
+      </ol>
+      <p>Fan-out worst case: <code>MAX_PARALLEL × (1 orchestrator + up to 4 specialists)</code>, documented, not enforced.</p>
+    </div></details>
+    <details><summary>Verification gate, verdict handling, bounce, salvage</summary><div class="body">
+      <p>Skip when: not git; <code>--no-verify</code>; <code>type: decision</code> with exactly one changed file that is an ADR. Resolve the test command once per batch per BC (README <code>## Test command</code>, else package.json / Makefile / pyproject / Cargo / csproj / go.mod, else <code>none</code>). Resolve the <code>## Runtime surface</code> manifest once per BC (ADR-0036).</p>
+      <p><b>Checkpoint</b>: <code>checkpoint &lt;id&gt; '{"fileList":[…],"iteration":N}'</code> with cwd in the worktree → <code>{changed, refused}</code>; <code>changed</code> folds in the vacated <code>doing/</code> path, <code>refused</code> drops <code>dashboard/dist/</code>; <code>git -C .worktrees/&lt;id&gt; add &lt;changed&gt;</code>; commit <code>wip [&lt;id&gt;] iter N</code>. Diff = <code>git show HEAD</code>. Spawn <code>agentheim:verifier</code> with task path, BC, README, worktree, iteration N of 3, the worker's SUCCESS block, the diff, the pre-resolved test and launch commands.</p>
+      <p><b>PASS / SKIP</b> → git authority integration. <b>FAIL iteration 1–2</b> → in the worktree move <code>done→doing</code>, revert status, clear <code>completed</code>, append <code>## Verifier note (iteration N)</code>, wip commit, re-dispatch into the same worktree; <code>ITERATION_HINT: task-under-specified</code> is treated as iteration 3. <b>FAIL iteration 3</b> → salvage patch (<code>escalated-iterN</code>), keep worktree and branch, task stays in <code>doing/</code>, surface to the user with history, suggested fix, worktree path, patch path.</p>
+      <p><b>BOUNCE</b> (ADR-0037): salvage (<code>bounced</code>), checkpoint only the task file at its <code>backlog/</code> path, squash-merge, hand-edit INDEX <code>doing→backlog</code>, protocol "Task bounced", commit, teardown.</p>
+    </div></details>
+    <details><summary>Git authority (conductor only)</summary><div class="body">
+      <ol>
+        <li><code>git merge --squash aw/&lt;id&gt;</code> — the conflict detector. Conflict → <code>git reset --hard HEAD</code> (not <code>merge --abort</code>: squash sets no MERGE_HEAD), keep the loser's worktree, surface. Auto-rebase is a named future enhancement.</li>
+        <li><code>complete &lt;id&gt; '{summary, duration, verification:"PASS (iteration N)", filesChanged, testsAdded, adrsWritten}'</code> (or <code>{skipped, skipReason}</code>) — idempotent: the squash already moved the file, so the mover sees <code>done/</code> and skips to bookkeeping.</li>
+        <li>ADR finalization first: <code>finalizeAdrNumbering</code> renames provisional numbers against main; index inserts and bidirectional backlinks by hand; ADR summary line ≤ ~60 words.</li>
+        <li>Enumerated <code>git add</code> of the manifest plus backlink files; commit with the manifest message verbatim <code>&lt;type&gt;(&lt;bc&gt;): &lt;summary&gt; [&lt;id&gt;]</code>.</li>
+        <li>Teardown: unlink the node_modules junction <b>first</b> (removing the worktree with the junction in place deletes the real node_modules), <code>git worktree remove --force</code>, <code>git branch -D</code>.</li>
+      </ol>
+      <p>Trivial-squash carve-out: same BC, same file set, no behaviour change, same batch → run <code>complete</code> once per task and compose one commit with every trailer (ADR-0042). Non-git projects: shared tree, verification auto-skipped, degraded mode noted.</p>
+    </div></details>
+    <details><summary>End of run · ten steps, up to four commits</summary><div class="body">
+      <ol>
+        <li>Prose summary. 2. Escalations with patch paths. 3. <code>CONCEPT_CANDIDATE</code> aggregation (louder at 2+, never auto-created). 4. Surprises.</li>
+        <li value="5"><b>Vision-conformance</b> (ADR-0040): judge each shipped task against "What success looks like" and "Non-goals"; always a protocol line; write <code>whats-next.md</code> only on flags.</li>
+        <li><b>Batch mix</b> (ADR-0064): product-facing / harness / bookkeeping percentages via <code>classifyTask({type, files})</code>.</li>
+        <li><b>Stranded carry-over</b>: <code>git status --porcelain</code>; per-file disposition for <code>.agentheim/</code> paths (commit deliberately or leave with a named owner); everything else batched as <code>left behind (user WIP, N files)</code>; orphan worktrees → discard (salvage first) or keep.</li>
+        <li><code>Work session ended</code> entry (Duration / Completed / Bounced / Failed / Escalated / Dispatches / Commits / Vision-conformance / Batch mix / Carry-over), committed <code>chore(&lt;bc&gt;): work session end bookkeeping [&lt;last-id&gt;]</code>.</li>
+        <li><b>Protocol rotation</b> (ADR-0045): <code>rotateProtocol</code>; rotated → own commit <code>chore(agentic-workflow): rotate protocol — &lt;months&gt;</code>, no protocol entry.</li>
+        <li><b>INDEX done-list rotation</b> (ADR-0047): <code>rotateAllIndexDoneLists</code>; per-BC refusals and unmatched counts surfaced; own commit.</li>
+      </ol>
+    </div></details>
+    <p class="small">Cites 24 ADRs and 18 task ids. Mechanized shapes it invokes: <code>claim</code>, <code>checkpoint</code>, <code>complete</code>, <code>finalizeAdrNumbering</code>, <code>rotateProtocol</code>, <code>rotateAllIndexDoneLists</code>, <code>session-start-churn</code>, <code>vacuum-guard</code>, <code>vision-conformance</code>, <code>worktree-salvage</code>, <code>worktree-node-modules</code>.</p>
+  </div>
+
+  <div class="grid3">
+    <div class="card c-skills"><h4>whats-next</h4><div class="sub">"what's next" · dashboard topbar button</div><p>Reads vision open questions (via <code>extractOpenQuestions</code>, never raw), every INDEX, README line counts, protocol head, and task files for dependencies and <code>tags: [captured]</code>. Walks a six-rung ladder: doing non-empty → resume work; primed todo → work (remediation tiebreak); concrete backlog item → promote and work; raw backlog → refine; empty board → the open vision question, else a gap versus a success criterion; thin vision → brainstorm. A README over ~600 lines yields the greppable line "README &lt;bc&gt; is over the consolidation threshold — consolidate". Output is prose (no tables) plus one advisory write: <code>state/whats-next.md</code> with <code>generated:</code> and three sections. No git of any kind.</p></div>
+    <div class="card c-skills"><h4>inquire</h4><div class="sub">questions about the codebase</div><p>Read-only. Orient on the pointer layer (index → BC README → cited ADRs and tasks), verify against code ("when prose and code disagree, the code wins"), place the answer on the lifecycle (done = shipped, todo/backlog = planned, doing = in flight) and separate decided from implemented. Cites ADR numbers, README sections and <code>path:line</code>. Writes nothing.</p></div>
+    <div class="card c-skills"><h4>/dashboard · stop · status</h4><div class="sub">the one slash command</div><p>Thin trigger with <code>allowed-tools: Bash(node:*)</code>. An inline <code>node -e</code> bootstrap resolves <code>dashboard/resolve-launcher.mjs</code> repo-locally or from the newest semver dir under <code>~/.claude/plugins/cache/agentheim/agentheim/</code>; never trusts <code>$CLAUDE_PLUGIN_ROOT</code> (arrived empty in v0.8.3). Reports URL and pid verbatim, fails loud if the resolver is missing. The command text still says "auto-open the browser" although auto-open was removed.</p></div>
+  </div>
+
+  <h3>The three doctrine skills</h3>
+  <div class="grid3">
+    <div class="card c-skills"><h4>test-driven-development</h4><p>Consumed by the worker at its third action. Three laws; red-green-refactor per criterion; "red for the right reason". <b>Runner-first</b> (ADR-0062): the first test-bearing task per ecosystem establishes a trustworthy runner, records the invocation in the BC README <code>## Test command</code>, proves it fails on a broken test; runner-less ecosystems build an external runner (the Dorc <code>run_smokes</code> + SmokeGuard shape). Legitimate skips (<code>TDD_SKIPPED</code>): decision, spike, pure config or migration, pure docs, UI without test infra. Any other reason → bounce.</p></div>
+    <div class="card c-skills"><h4>verification-before-completion</h4><p>Names the three worker failure modes: plausible-but-wrong, partial-reported-complete, scope drift. "This is the load-bearing structural property; do not collapse it into a function call." After six drifts of its check list (task s9wtc) it is now mostly pointers: inputs → the verifier prompt template in work; checks → <code>agents/verifier.md</code>. Hard cap: two re-dispatches, then salvage and escalate.</p></div>
+    <div class="card c-skills"><h4>research-review</h4><p>The researcher "asserts a checkable fact it never checked" (nonexistent model versions, fantasy prices, unpublished tags). Remedy: a separate agent with fresh context, its own web access and a different model tier. Anti-patterns listed: same context, same model, trusting citations, a reviewer that edits, treating FAIL as failure, stripping instead of labelling, skipping on "small" research. Added as a single variable; the researcher prompt was left untouched.</p></div>
+  </div>
+
+  <h3>Six modes (references/modes.md)</h3>
+  <p><b>Interrogator</b> (default: naive and critical, one question at a time) · <b>Suggestor</b> (propose, invite disagreement) · <b>Challenger</b> (adversarial, sparingly) · <b>Storyteller</b> (named characters, stop mid-story) · <b>Facilitator</b> (scribe; CAPTURE default) · <b>Synthesizer</b> (periodic, may offer unsolicited). Switch is acknowledged in one line (<code>→ Challenger.</code>), never unsolicited; "mode applies to conversation, not artifact format". Picker via <code>AskUserQuestion</code> with four options (tool cap) and the last two reachable through "Other".</p>
+</section>
+
+<section id="agents">
+  <div class="eyebrow">03 · agents and gates</div>
+  <div class="sec-head"><h2>Eight agents, two of them judges</h2><p>Agent definitions are markdown with frontmatter (<code>name</code>, <code>tools</code>, <code>model</code>, optional <code>hooks</code>). There is no <code>agents</code> key in the plugin manifest; discovery is by directory convention. Every spawn identifier is written <code>agentheim:&lt;name&gt;</code> and a live-tree lint enforces it (ADR-0052).</p></div>
+
+  <h3>Who spawns whom</h3>
+  <p>Two coordinators are easy to conflate. The <b>conductor</b> is the main session running the work skill inline: it owns git, protocol, every INDEX, the lifecycle verbs and the gates. The <b>orchestrator</b> is a sonnet subagent that only routes and aggregates; it has no worker row by design.</p>
+  <div class="graph">
+    <div class="gnode cond"><b>Builder session</b> <span class="sub">— runs skills inline</span></div>
+    <div class="gkids">
+      <div class="gnode skill"><b>work</b> (conductor) <span class="sub">— Stop hook: session-heartbeat</span></div>
+      <div class="gkids">
+        <div class="gnode"><b>agentheim:worker</b> <span class="sub">one per ready task, ≤ MAX_PARALLEL, in .worktrees/&lt;id&gt;; re-dispatched into the same worktree on FAIL 1–2 · Stop hook: worker-stop</span></div>
+        <div class="gkids">
+          <div class="gnode"><b>agentheim:tactical-modeler</b> · <b>architect</b> · <b>strategic-modeler</b> <span class="sub">directly, when exactly one routing row matches (ADR-0035)</span></div>
+          <div class="gnode"><b>research skill</b> → researcher → research-reviewer <span class="sub">never a bare researcher spawn</span></div>
+          <div class="gnode"><b>agentheim:orchestrator</b> <span class="sub">when more than one row matches, aggregation or conflict is needed, or in doubt</span></div>
+          <div class="gkids"><div class="gnode"><b>strategic-modeler</b> · <b>tactical-modeler</b> · <b>architect</b> (parallel when independent) · research flow</div></div>
+        </div>
+        <div class="gnode"><b>agentheim:verifier</b> <span class="sub">one per RESULT: SUCCESS, after the checkpoint commit, parallel per batch; spawns nothing · Stop hook: verifier-stop</span></div>
+      </div>
+      <div class="gnode skill"><b>modeling</b> CAPTURE / REFINE · <b>brainstorm</b></div>
+      <div class="gkids"><div class="gnode"><b>agentheim:orchestrator</b> → specialists</div></div>
+      <div class="gnode skill"><b>research</b> <span class="sub">— also triggered by brainstorm, modeling, work, specialists</span></div>
+      <div class="gkids"><div class="gnode"><b>agentheim:researcher</b> (one per topic, ≤ 3) → <b>agentheim:research-reviewer</b> <span class="sub">FAIL likely-fixable → re-dispatch researcher (≤ 3); else label UNVERIFIED</span></div></div>
+    </div>
+  </div>
+  <p class="small">Never-edges: orchestrator → worker; worker → worker; verifier → anything; reviewer → anything; any agent → git.</p>
+
+  <h3>The roster</h3>
+  <div class="scroll"><table>
+    <tr><th>Agent</th><th>Model</th><th>Tools</th><th>Spawned by</th><th>Does</th><th>Must not</th><th>Returns</th></tr>
+    <tr><td><b>orchestrator</b></td><td>sonnet</td><td>Read Write Edit Grep Glob Bash Agent</td><td>modeling, brainstorm, worker (multi-specialist)</td><td>Picks specialists by what is uncertain, runs independent ones in parallel, integrates, surfaces conflicts; produces refined task bodies, <code>depends_on</code> edges, child tasks, plans, ADR drafts</td><td>Decide for specialists, write code, deep modeling, run the brainstorm; dispatch a worker</td><td>Specialists consulted / Decisions surfaced / Conflicts / Concrete outputs</td></tr>
+    <tr><td><b>strategic-modeler</b></td><td>opus</td><td>Read Write Edit Grep Glob</td><td>orchestrator, worker (direct)</td><td>Where things live: BC discovery, classification core/supporting/generic, relationships; drafts <code>context-map.md</code> changes</td><td>Tactical detail; commit ADRs itself</td><td>Strategic analysis block</td></tr>
+    <tr><td><b>tactical-modeler</b></td><td>opus</td><td>Read Write Edit Grep Glob</td><td>orchestrator, worker (direct)</td><td>Inside one BC: aggregates, entities, value objects, events, commands, invariants; UL additions as an "add to README" block</td><td>Decide placement; prescribe file layout</td><td>Tactical analysis block</td></tr>
+    <tr><td><b>architect</b></td><td>opus</td><td>Read Write Edit Grep Glob</td><td>orchestrator, worker, brainstorm foundation pass</td><td>Cross-cutting tech: persistence, messaging, transport, deployment, library choice; ≥ 2 options with tradeoffs; "almost every decision deserves an ADR"</td><td>Invent infra needs</td><td>Architectural analysis block</td></tr>
+    <tr><td><b>researcher</b></td><td>sonnet</td><td>Read Write Edit Grep Glob WebSearch WebFetch</td><td>research skill only</td><td>Breadth → depth → cross-check; writes the report file with frontmatter <code>topic/date/requested_by/related_tasks</code></td><td>Uncited claims; ADRs</td><td>Report path + 3–5 bullets</td></tr>
+    <tr><td><b>worker</b></td><td>sonnet</td><td>Read Write Edit Grep Glob Bash Agent</td><td>work conductor only</td><td>Six actions: verify workability (else bounce) → plan and consult → TDD work → ADRs with provisional numbers → own BC README → complete (tests, <code>status: done</code>, <code>completed:</code>, <code>## Outcome</code>, move to <code>done/</code>)</td><td>Git; protocol; any INDEX; other tasks or BCs; modeling; vision; rebuild or list <code>dashboard/dist/</code></td><td>Strict SUCCESS / BOUNCED / FAILED block</td></tr>
+    <tr><td><b>verifier</b></td><td>opus</td><td>Read Grep Glob Bash</td><td>work conductor only</td><td>Nine checks against task file, BC README and the checkpoint diff; runs the pre-resolved test command; boots and probes the app when a runtime surface path is touched</td><td>Write, Edit, git, fixing, advising the user, reading prior verifier notes except for check 1b</td><td>PASS / FAIL / SKIP with <code>ITERATION_HINT</code></td></tr>
+    <tr><td><b>research-reviewer</b></td><td>opus</td><td>Read Grep Glob WebSearch WebFetch</td><td>research skill gate</td><td>Inventories checkable claims (versions, prices, tags, API surface, dates, benchmarks); re-verifies decision-critical ones against primary sources; judges framing</td><td>Edit, rewrite synthesis, grade style</td><td>PASS / FAIL (<code>CHALLENGED_CLAIMS</code>) / SKIP with <code>ITERATION_HINT</code></td></tr>
+  </table></div>
+
+  <h3>Model routing (ADR-0031)</h3>
+  <p>Producer and gate never share a tier. <b>sonnet:</b> worker (highest volume, refined inputs, bounded by the verifier), researcher (gated by the reviewer), orchestrator (routing is lookup). <b>opus:</b> verifier and research-reviewer (decorrelated from their producers), architect, strategic-modeler, tactical-modeler (rare, expensive to undo). Family names, never pinned versions. The verifier eval's sonnet arm caught one borderline case opus missed; the opus pin was kept for decorrelation.</p>
+
+  <div class="grid2">
+    <div class="card c-agents"><h4>Worker return format (references/worker-return-format.md)</h4>
+<pre><code>RESULT: SUCCESS
+TASK_ID: &lt;id&gt;
+SUMMARY: &lt;one line&gt;
+FILES_CHANGED: &lt;n&gt;
+FILE_LIST: &lt;absolute paths, excluding the moved task file&gt;
+BC_README_UPDATED: yes|no
+ADRS_WRITTEN: [&lt;provisional filenames&gt;]
+NEW_BACKLOG_ITEMS: [&lt;ids&gt;]
+TESTS_ADDED: &lt;n&gt;
+TESTS_PASSING: yes|no        # the runner's verdict (ADR-0062)
+TDD_SKIPPED: none|&lt;category&gt;
+CONCEPT_CANDIDATE: none|&lt;name&gt;
+
+RESULT: BOUNCED  · TASK_ID · REASON
+RESULT: FAILED   · TASK_ID · ERROR</code></pre>
+    <p class="small"><code>TESTS_PASSING: no</code> can never be SUCCESS. "Any site that restates this block must restate it exactly" (it drifted once, task f7k2d).</p></div>
+    <div class="card c-agents"><h4>Verifier verdicts</h4>
+<pre><code>VERDICT: PASS
+TASK_ID: &lt;id&gt;
+EVIDENCE: one bullet per acceptance criterion
+          ("builder eye-check pending" for [human-eye])
+
+VERDICT: FAIL
+TASK_ID · REASONS · SUGGESTED_FIX
+ITERATION_HINT: likely-fixable | task-under-specified
+
+VERDICT: SKIP
+TASK_ID · REASON</code></pre>
+    <p class="small">Doubt between SKIP and PASS → PASS; between SKIP and FAIL → FAIL. <code>task-under-specified</code> skips remaining retries and escalates immediately.</p></div>
+  </div>
+
+  <details><summary>The verifier's checks, in order (stop at first FAIL)</summary><div class="body">
+    <ol>
+      <li><b>Acceptance-criteria coverage</b>: each <code>- [ ]</code> bullet maps to a behaviour-named test whose assertion would fail without the change, or an inspectable artifact for skip categories. A diff touching a runtime <code>surfacePath</code> can never be covered by a manual note (ADR-0036). <code>[human-eye]</code> → "builder eye-check pending", never a FAIL reason (ADR-0061). A recorded spike early-stop with a named mitigation excuses unmet diagnosis criteria (ADR-0065).</li>
+      <li value="1"><b>1b · Metric drift</b> (iterations 2–3 only): criterion text unchanged but the measurement changed since the prior verifier note → FAIL <code>task-under-specified</code>.</li>
+      <li value="2"><b>Test execution, runner-first</b>: run the pre-resolved command; discovery fallback only on <code>none</code>; nothing discoverable → FAIL. Verdict from exit status or structured report (TAP, JUnit, <code>node --test</code> summary), never a printed PASS.</li>
+      <li><b>Scope discipline</b>: allowed files = implied production files, the task file, BC README if reported, listed ADRs and backlog items, matching tests. Forbidden: unrelated production files, other BCs' READMEs, protocol, any INDEX, lockfile churn.</li>
+      <li><b>Ubiquitous language</b>: new identifiers against the README's UL section.</li>
+      <li><b>BC README sync</b>: a reported update must be real; a new aggregate, event or command with <code>no</code> → FAIL.</li>
+      <li><b>ADRs for decisions</b>: frontmatter complete, non-trivial Context / Decision / Consequences; task narration never substitutes. <b>6b</b> related ADRs honoured (supersession needs a new ADR). <b>6c</b> mechanize-or-drop on doctrine surfaces only (ADR-0059).</li>
+      <li><b>No protocol, index or git tampering.</b></li>
+      <li><b>Runtime drive</b> (ADR-0036, last): when <code>FILE_LIST</code> intersects <code>surfacePaths</code>, boot via the manifest's <code>launch</code> from the worktree root, read the real port from the runfile, GET each probe with stdlib http asserting status and body shape, optional render tier when <code>runtime_render: true</code> and a browser capability exists, teardown always via <code>stop</code>.</li>
+    </ol>
+  </div></details>
+
+  <h3>Liveness signalling (ADR-0043)</h3>
+  <p>Three frontmatter <code>Stop</code> hooks (work skill, worker, verifier) run the same inline <code>node -e</code> bootstrap that locates <code>lib/hook-agent-signal.mjs</code> and calls <code>runHook(mode)</code>. The pure core <code>lib/agent-heartbeat.mjs</code> keeps <code>state/in-flight.json</code>: <code>{version:1, sessionId, startedAt, lastHeartbeat, agents:[{agentType, agentId, completedAt}]}</code>, stale after five minutes (an empirical window with "no doc basis"). No plugin-level <code>hooks.json</code> exists; SessionStart, SessionEnd, PreToolUse and PostToolUse are unused. Known risk recorded in-repo: frontmatter hooks in plugin-packaged skills may not fire (issue #17688) and failure is indistinguishable from idle. The payload carries no task id, so the dashboard can only show session-wide counts.</p>
+
+  <div class="note"><p><b>Duplicated contracts to know about:</b> the Signal → Specialist routing table exists in both <code>worker.md</code> and <code>orchestrator.md</code> (ADR-0035 named it as debt); spawn inputs are described in agent prose and again in the skills' prompt templates, with the same path called <code>Workspace</code> in the worker prompt and <code>Worktree</code> in the verifier prompt; the eight-name roster is hardcoded in both <code>agents/*.md</code> and <code>AGENTHEIM_AGENT_NAMES</code>; the specialists hold Write/Edit while doctrine says "return drafts to the orchestrator".</p></div>
+</section>
+<section id="tasks">
+  <div class="eyebrow">04 · task system</div>
+  <div class="sec-head"><h2>The task system as it exists today</h2><p>A task is one markdown file with frontmatter, living in exactly one of four folders per bounded context. Its status is encoded twice, as folder and as frontmatter. Three transitions are mechanized; the rest are prose. This section is the raw material for a <code>TaskStore</code> port.</p></div>
+
+  <h3>Lifecycle and who moves what</h3>
+  <div class="lifecycle">
+    <div class="lc backlog"><div class="h">backlog/</div><p>Captured, not refined. Written by quick-capture, modeling CAPTURE, worker <code>NEW_BACKLOG_ITEMS</code>, bounce. Legal to hold placeholder criteria and all-human-eye tasks without a note.</p></div>
+    <div class="lc todo"><div class="h">todo/</div><p>Ready to work. Entered by <b>promote</b> (mechanized) or directly by brainstorm foundation tasks and modeling CAPTURE. Every <code>depends_on</code> must resolve to a file in some BC's <code>done/</code>.</p></div>
+    <div class="lc doing"><div class="h">doing/</div><p>Claimed. Entered by <b>claim</b> (batch, mechanized, one commit per batch). A task stays here across FAIL iterations and after a worker FAILED, for Phase 1 recovery.</p></div>
+    <div class="lc done"><div class="h">done/</div><p>Completed and verified. The worker moves the file inside its worktree; the conductor's <b>complete</b> verb is idempotent over the squash-merge. Prior-art searches read <code>done/</code> and <code>done-archive/</code>.</p></div>
+  </div>
+  <div class="scroll"><table>
+    <tr><th>Transition</th><th>Actor</th><th>How</th><th>Bookkeeping</th><th>Commit</th></tr>
+    <tr><td>create → <span class="st backlog">backlog</span></td><td>quick-capture, modeling, worker (backlog items), brainstorm</td><td><span class="tag p">P</span> write file</td><td>P: INDEX backlog-list + count, protocol</td><td>per task / per action</td></tr>
+    <tr><td>create → <span class="st todo">todo</span></td><td>brainstorm foundation, modeling CAPTURE</td><td><span class="tag p">P</span></td><td>P</td><td>per session / action</td></tr>
+    <tr><td><span class="st backlog">backlog</span> → <span class="st todo">todo</span></td><td>modeling PROMOTE (also REFINE auto-promote)</td><td><span class="tag m">M</span> <code>promote &lt;id&gt;</code></td><td>M: INDEX list move + counts, protocol "Modeling / Promoted"</td><td><code>model(&lt;bc&gt;): promote …</code></td></tr>
+    <tr><td><span class="st todo">todo</span> → <span class="st doing">doing</span></td><td>work Phase 4</td><td><span class="tag m">M</span> <code>claim id,id,…</code></td><td>M: per-BC INDEX, one protocol "Batch started"</td><td><code>chore(&lt;bc&gt;): batch start […]</code></td></tr>
+    <tr><td><span class="st doing">doing</span> → <span class="st done">done</span> (worker half)</td><td>worker in its worktree</td><td><span class="tag p">P</span> move file, <code>status: done</code>, <code>completed:</code>, <code>## Outcome</code></td><td>none (worker never touches INDEX)</td><td>wip commit by conductor</td></tr>
+    <tr><td><span class="st doing">doing</span> → <span class="st done">done</span> (conductor half)</td><td>work git authority</td><td><span class="tag m">M</span> <code>complete &lt;id&gt; '{…}'</code> (idempotent)</td><td>M: INDEX doing→done + counts, protocol completion entry; P: ADR backlinks and index lines</td><td><code>&lt;type&gt;(&lt;bc&gt;): &lt;summary&gt; [&lt;id&gt;]</code></td></tr>
+    <tr><td><span class="st done">done</span> → <span class="st doing">doing</span> (FAIL rollback)</td><td>work, inside the worktree</td><td><span class="tag p">P</span> move, revert status, clear completed, append verifier note</td><td>P: protocol "Verification failed" on main</td><td>wip commit</td></tr>
+    <tr><td><span class="st doing">doing</span> → <span class="st backlog">backlog</span> (BOUNCE)</td><td>worker moves + note; work integrates</td><td><span class="tag p">P</span> move; <span class="tag m">M</span> checkpoint of the single task path</td><td><b>P: INDEX hand-edited</b>, protocol "Task bounced", salvage patch</td><td><code>chore(&lt;bc&gt;): task bounced …</code></td></tr>
+    <tr><td><span class="st doing">doing</span> → <span class="st todo">todo</span> (abandon in recovery)</td><td>work Phase 1</td><td><span class="tag p">P</span> "move them back to todo"</td><td>P</td><td>—</td></tr>
+    <tr><td>re-route (change BC)</td><td>quick-capture</td><td><span class="tag p">P</span> move file, rewrite <code>context:</code></td><td>P: two INDEXes, protocol note</td><td><code>chore(&lt;new-bc&gt;): re-route …</code></td></tr>
+    <tr><td>DISMISS (delete + cascade)</td><td>modeling</td><td><span class="tag p">P</span> hard-delete the fixed-point set</td><td>P: multi-BC INDEX removals, strip ids from survivors' <code>depends_on</code>/<code>blocks</code>/<code>prior_art</code> and ADRs' <code>related_tasks</code>, one protocol entry</td><td><code>chore(&lt;bc&gt;): dismiss …</code></td></tr>
+  </table></div>
+  <p class="small"><code>applyTaskMove</code>'s legal moves: policy <code>ui</code> = backlog→todo (dead default, no caller); policy <code>skill</code> = backlog→todo, todo→doing, doing→done. Bounce, dismiss, rollback and abandon are not expressible through the mover. The open task <b>agentic-workflow-e4bjh</b> asks for <code>capture</code> and <code>dismiss</code> verbs: "the last remaining LLM-text-surgery-on-derived-state surface."</p>
+
+  <h3>The task file</h3>
+  <div class="grid2">
+    <div>
+<pre><code>contexts/&lt;bc&gt;/&lt;status&gt;/&lt;id&gt;-&lt;slug&gt;.md
+---
+id: agentic-workflow-jf6qz
+title: ≤ ~60 words (lands verbatim in INDEX)
+status: backlog | todo | doing | done
+type: feature | bug | refactor | chore | spike | decision
+context: agentic-workflow
+created: 2026-07-22
+completed:                # worker sets
+depends_on: [id, id]      # single-line list only
+blocks: []                # populated by worker / refine
+tags: [captured]          # marks a raw capture
+related_adrs: [0047]
+related_research: [slug]
+prior_art: [done-id]
+runtime_render: true      # optional, verifier render tier
+---
+## Why
+## What
+## Acceptance criteria
+- [ ] machine-checkable by default
+- [ ] a perceptual claim [human-eye]
+## Notes
+  (stop-loss clause for spikes; "Verification is
+   builder-eye only" line when all criteria are human-eye)
+## Outcome            ← worker, load-bearing, never templated
+## Worker note        ← bounce
+## Verifier note (iteration N)
+## Salvage note</code></pre>
+    </div>
+    <div>
+      <p><b>Rules.</b> No <code>commit:</code> field since ADR-0026; the <code>[&lt;id&gt;]</code> commit trailer is the index. No inline <code># comments</code> in frontmatter (the dashboard parses the whole line; a leaked comment on <code>status</code> once blanked the board). Values single-line; <code>depends_on</code> only as <code>[a, b]</code>. Filename basename rides along across moves; only the folder changes.</p>
+      <p><b>Id grammar</b> (ADR-0028, 0044): <code>&lt;bc&gt;-&lt;token&gt;</code>, token exactly five Crockford base32 lowercase characters without <code>i l o u</code>, letter-led: <code>[a-hjkmnp-tv-z][0-9a-hjkmnp-tv-z]{4}</code>. About 23 million tokens per BC. Legacy <code>&lt;bc&gt;-NNN</code> ids stay forever. Two reserved literal ids: <code>infrastructure-001-walking-skeleton</code>, <code>design-system-001-styleguide</code>. Readers tolerate a digit-led token (<code>deriveContext</code>), minters reject it (<code>classifyTaskId</code>), one grandfathered id <code>infrastructure-5w5gs</code>.</p>
+      <p><b>Resolution</b> (ADR-0012): <code>&lt;id&gt;.md</code> exact, else the first sorted <code>&lt;id&gt;-*.md</code>, anchored on the hyphen so <code>alpha-001</code> never matches <code>alpha-0010</code>.</p>
+      <p><b>Dependencies</b>: satisfied only by a file in some BC's <code>done/</code> (cross-BC scan by prefix); a dangling id is unsatisfied and blocks (ADR-0038 Ruling A). <code>done-archive/</code> is not consulted. Cycle detection is prose in work.</p>
+    </div>
+  </div>
+
+  <h3>Three-layer bookkeeping (ADR-0038)</h3>
+  <div class="grid3">
+    <div class="card c-lib"><h4>Layer 1 · mover</h4><p><code>applyTaskMove(root, id, from, to, {policy, expectedMtimeMs})</code>. Validates the move, resolves the file, checks the optimistic mtime, checks dependencies when moving to todo, rewrites <code>status:</code>, writes the destination (backfilling a missing folder), then unlinks the source (ADR-0055). Returns old and new paths so the caller can stage both halves of the rename. Rejections: <code>illegal-move</code>, <code>stale-precondition</code>, <code>not-found</code>, <code>blocked-dependency</code>, <code>write-failed</code>.</p></div>
+    <div class="card c-lib"><h4>Layer 2 · git-free verbs</h4><p><code>promoteTask</code>, <code>claimBatch</code>, <code>completeTask</code>: resolve the source read-only, compute the full new INDEX and protocol content purely (any throw → <code>bookkeeping-marker-mismatch</code>, nothing written, ADR-0054), call the mover, write both files restoring each file's EOL and BOM. Return an enumerated manifest <code>{changed[], message, verb, id|ids}</code>. No judgment, no git.</p></div>
+    <div class="card c-lib"><h4>Layer 3 · skill</h4><p>Supplies judgment inputs (readiness, batch composition, summaries), runs the verb through the <code>node -e</code> bootstrap, then <code>git add</code> exactly the manifest's <code>changed</code> plus its own files and commits with the manifest's <code>message</code>. Never <code>git add -A</code>.</p></div>
+  </div>
+
+  <h3>CLI verbs (lib/task-lifecycle-cli.mjs)</h3>
+  <div class="scroll"><table>
+    <tr><th>Verb</th><th>argv</th><th>Precondition</th><th>Writes, in order</th><th>Output</th></tr>
+    <tr><td><b>promote</b></td><td><code>promote &lt;id&gt; [json]</code></td><td>task in <code>backlog/</code>; all deps in some <code>done/</code>; INDEX markers and counts valid</td><td>task → <code>todo/</code>; INDEX; protocol</td><td><code>{ok, changed:[from, to, INDEX, protocol], message:'model(&lt;bc&gt;): promote &lt;id&gt; — &lt;title&gt; [&lt;id&gt;]', verb, id}</code></td></tr>
+    <tr><td><b>claim</b></td><td><code>claim id1,id2 '{parallel, planningAdvisory}'</code></td><td>every id in its BC's <code>todo/</code> (else <code>not-found</code> naming all missing, nothing moved)</td><td>per-id moves; each BC's INDEX; one protocol entry</td><td>manifest with all paths, message <code>chore(&lt;bc&gt;): batch start [id]…</code>; a mid-loop failure returns <code>{…, id, claimed[]}</code> with no rollback</td></tr>
+    <tr><td><b>complete</b></td><td><code>complete &lt;id&gt; '{summary, duration, verification, iteration, filesChanged, testsAdded, adrsWritten | skipped, skipReason}'</code></td><td>task in <code>doing/</code>, or already in <code>done/</code> → idempotent</td><td>optional move; INDEX doing→done (Done is a lifetime total); protocol "Task verified and completed" or "completed (verification skipped)"</td><td><code>{ok, changed, message:'&lt;type&gt;(&lt;bc&gt;): &lt;summary|title&gt; [&lt;id&gt;]', verb, id, idempotent}</code></td></tr>
+    <tr><td><b>checkpoint</b></td><td><code>checkpoint &lt;id&gt; '{"fileList":[abs…],"iteration":N}'</code>, cwd inside the worktree</td><td>—</td><td>none</td><td><code>{ok, changed, refused:[{path, reason:'derived-artifact'|'outside-worktree'}], message:'wip [&lt;id&gt;] iter N'}</code>; folds in the vacated <code>doing/</code> path</td></tr>
+  </table></div>
+
+  <h3>Every operation the skills perform on tasks</h3>
+  <p>Forty-three operations, condensed. <span class="tag m">M</span> a lib script does it; <span class="tag p">P</span> the model does it by hand with Read, Edit and Bash. The data columns are what a backend port would have to accept and return.</p>
+  <div class="scroll"><table>
+    <tr><th>#</th><th>Operation</th><th>Who</th><th>How</th><th>Data in → out</th></tr>
+    <tr><td class="mono">1</td><td>Mint id</td><td>brainstorm, modeling, quick-capture</td><td><span class="tag p">P</span> + <span class="tag m">M</span> backstop (not in brainstorm)</td><td>BC → <code>&lt;bc&gt;-&lt;token&gt;</code></td></tr>
+    <tr><td class="mono">2–3</td><td>Create task (backlog or todo)</td><td>capture skills, worker, brainstorm</td><td><span class="tag p">P</span></td><td>frontmatter + body → file, INDEX line, count, protocol, commit</td></tr>
+    <tr><td class="mono">4</td><td>Resolve a reference (id, number, keyword)</td><td>modeling</td><td><span class="tag p">P</span></td><td>user string, INDEX lists, filenames → one task or disambiguation</td></tr>
+    <tr><td class="mono">5</td><td>List backlog with age (cap 15)</td><td>modeling, whats-next</td><td><span class="tag p">P</span> over INDEX</td><td>INDEX backlog-lists, <code>created</code> → table</td></tr>
+    <tr><td class="mono">6</td><td>Refine: edit body, split into children, set deps, write ADR, backlinks</td><td>modeling (+ orchestrator)</td><td><span class="tag p">P</span></td><td>task, README, related → rewritten task, children, INDEX, ADR, protocol</td></tr>
+    <tr><td class="mono">7</td><td>Prior-art / backlink matcher</td><td>modeling</td><td><span class="tag p">P</span> (documented algorithm: slug-word overlap + 2 per shared tag, threshold ≥ 2, cap 5)</td><td>title, tags, What, BC INDEX incl. done-archive, top index → <code>related_adrs</code>, <code>related_research</code>, <code>prior_art</code></td></tr>
+    <tr><td class="mono">8</td><td>Readiness check</td><td>modeling PROMOTE / REFINE</td><td><span class="tag p">P</span>; deps also <span class="tag m">M</span>; human-eye note linted</td><td>task, all folders → pass or missing-items</td></tr>
+    <tr><td class="mono">9</td><td>Promote</td><td>modeling</td><td><span class="tag m">M</span> + P git</td><td>id → manifest</td></tr>
+    <tr><td class="mono">10</td><td>Dismiss with cascade</td><td>modeling</td><td><span class="tag p">P</span></td><td>id, all tasks' edges → deletions, INDEX, backlink strips, protocol</td></tr>
+    <tr><td class="mono">11</td><td>Re-route to another BC</td><td>quick-capture</td><td><span class="tag p">P</span></td><td>id, new BC → move, <code>context:</code>, two INDEXes</td></tr>
+    <tr><td class="mono">12</td><td>Scan lifecycle folders across BCs</td><td>work, whats-next, modeling</td><td><span class="tag p">P</span> glob</td><td>filesystem → task set with frontmatter</td></tr>
+    <tr><td class="mono">13</td><td>Dependency resolution (fail-closed)</td><td>work, whats-next, modeling</td><td><span class="tag p">P</span> in skills; <span class="tag m">M</span> inside promote/claim</td><td>every <code>depends_on</code>, folder membership → ready, blocked, dangling</td></tr>
+    <tr><td class="mono">14</td><td>Cycle detection</td><td>work</td><td><span class="tag p">P</span></td><td>DAG → stop and surface</td></tr>
+    <tr><td class="mono">15</td><td>Batch selection (MAX_PARALLEL, advisory weighting, remediation-over-diagnosis)</td><td>work</td><td><span class="tag p">P</span></td><td>ready set, whats-next, tags, edges → ordered batch + rationale string</td></tr>
+    <tr><td class="mono">16</td><td>Claim batch</td><td>work</td><td><span class="tag m">M</span> + P git</td><td>ids, opts → manifest</td></tr>
+    <tr><td class="mono">18</td><td>Complete (worker half)</td><td>worker</td><td><span class="tag p">P</span></td><td>→ moved file, status, completed, Outcome</td></tr>
+    <tr><td class="mono">19</td><td>Checkpoint (wip commit)</td><td>work</td><td><span class="tag m">M</span> + P git</td><td>FILE_LIST → <code>{changed, refused}</code></td></tr>
+    <tr><td class="mono">20</td><td>Verify</td><td>work → verifier</td><td>Agent</td><td>task, README, worktree, iteration, SUCCESS block, diff, test cmd, runtime manifest → verdict</td></tr>
+    <tr><td class="mono">21</td><td>Rollback on FAIL</td><td>work</td><td><span class="tag p">P</span></td><td>verdict → task in doing, verifier note, wip commit, protocol</td></tr>
+    <tr><td class="mono">22</td><td>Complete (conductor half)</td><td>work</td><td><span class="tag m">M</span> + P git</td><td>id, stats → manifest</td></tr>
+    <tr><td class="mono">23</td><td>Bounce</td><td>worker + work</td><td><span class="tag p">P</span> move; <span class="tag m">M</span> checkpoint; <b>P INDEX</b></td><td>REASON → backlog file, INDEX, protocol, salvage</td></tr>
+    <tr><td class="mono">24</td><td>Fail (worker FAILED)</td><td>work</td><td><span class="tag p">P</span></td><td>ERROR → protocol, worktree removed, task stranded in doing</td></tr>
+    <tr><td class="mono">25</td><td>Escalate (iteration 3 / under-specified)</td><td>work</td><td><span class="tag p">P</span> + <span class="tag m">M</span> salvage path</td><td>→ patch, Salvage note, kept worktree, summary</td></tr>
+    <tr><td class="mono">26</td><td>Recovery of stranded doing / orphan worktrees</td><td>work Phase 1</td><td><span class="tag p">P</span></td><td>doing + worktree list → resume / ask / abandon</td></tr>
+    <tr><td class="mono">27</td><td>ADR write + number finalization</td><td>worker; work</td><td><span class="tag p">P</span> write; <span class="tag m">M</span> <code>finalizeAdrNumbering</code>; P index + backlinks</td><td>ADRS_WRITTEN, scope → renumbered ADR, INDEX line, bidirectional links</td></tr>
+    <tr><td class="mono">28</td><td>Research link-back</td><td>research</td><td><span class="tag p">P</span></td><td>slug, task ids → <code>related_research</code>, ADR refs, report <code>related_tasks</code>, INDEX</td></tr>
+    <tr><td class="mono">29–31</td><td>INDEX line insert/remove + counts; INDEX creation; top-level bc-list</td><td>all writing skills</td><td><span class="tag m">M</span> inside the verbs; <span class="tag p">P</span> everywhere else</td><td>marker, line → edited INDEX</td></tr>
+    <tr><td class="mono">32</td><td>Protocol prepend (13+ entry shapes)</td><td>all writing skills</td><td><span class="tag m">M</span> for Promoted, Batch started, completions; <span class="tag p">P</span> for the rest</td><td>fields → entry at line 4</td></tr>
+    <tr><td class="mono">33–34</td><td>Protocol rotation; INDEX done-list rotation</td><td>work session-end</td><td><span class="tag m">M</span> + P commit</td><td>→ manifests, archives</td></tr>
+    <tr><td class="mono">35</td><td>README consolidation</td><td>modeling CONSOLIDATE</td><td><span class="tag p">P</span> builder-in-loop</td><td>README → rewritten README</td></tr>
+    <tr><td class="mono">36</td><td>Advisory write <code>state/whats-next.md</code></td><td>whats-next; work (churn, vision-conformance)</td><td><span class="tag p">P</span></td><td>three sections → overwritten file</td></tr>
+    <tr><td class="mono">37</td><td>Heartbeat <code>state/in-flight.json</code></td><td>Stop hooks</td><td><span class="tag m">M</span></td><td>hook payload → JSON</td></tr>
+    <tr><td class="mono">38–41</td><td>Vacuum guard; vision-conformance; batch-mix; session-start churn</td><td>work, modeling, whats-next</td><td><span class="tag m">M</span> extract/format + <span class="tag p">P</span> judgment</td><td>vision, tasks, git log → advisory lines, optional whats-next write</td></tr>
+    <tr><td class="mono">42</td><td>Stranded carry-over reconciliation</td><td>work</td><td><span class="tag p">P</span></td><td>working tree, worktree list → commits or leave-behind lines</td></tr>
+    <tr><td class="mono">43</td><td>Live-tree lints</td><td>test suite</td><td><span class="tag m">M</span></td><td>task files, INDEX, doctrine → failures</td></tr>
+  </table></div>
+
+  <div class="note"><p><b>What a task backend would have to expose, derived from the table:</b> task CRUD by id; list by BC × status; transition with preconditions (<code>stale-precondition</code>, <code>illegal-move</code>, <code>blocked-dependency</code>) and an idempotent complete; batch claim; get/set of <code>status</code>, <code>completed</code>, <code>context</code>, <code>depends_on</code>, <code>blocks</code>, <code>tags</code>, <code>related_*</code>, <code>prior_art</code>; append of body sections (worker, verifier, salvage, outcome notes); transitive dependents for the dismiss cascade; dependency satisfaction with dangling-id detection; cycle detection; fuzzy resolve over id, number, title and filename; backlink strip on delete; prior-art search over done work including archives; per-BC counts; the INDEX and protocol side effects or their equivalents inside each mutation; ADR ↔ task and research ↔ task links; id minting and validation; and a change manifest so the caller can commit scoped.</p></div>
+</section>
+
+<section id="knowledge">
+  <div class="eyebrow">05 · knowledge and state</div>
+  <div class="sec-head"><h2>Everything under .agentheim/</h2><p>All project state lives in the consumer project, never in the plugin directory. The memory layer is a set of pointer catalogs (<code>knowledge/index.md</code> and one <code>INDEX.md</code> per BC) that never duplicate content, a chronological diary, and per-BC READMEs holding the ubiquitous language.</p></div>
+
+<div class="tree">.agentheim/                              <i>← project-root marker; discoverRoot walks up for it</i>
+├── vision.md                            <i>brainstorm writes; vacuum-guard and vision-conformance parse two named sections</i>
+├── context-map.md                       <i>only for multi-BC domains</i>
+├── contexts/&lt;bc&gt;/
+│   ├── README.md                        <i>UL, aggregates, events, commands, Test command, Runtime surface; ~600-line consolidate trigger</i>
+│   ├── INDEX.md                         <i>marker blocks: task-counts, todo-list, doing-list, done-list, backlog-list, adr-local, research-local, concepts</i>
+│   ├── backlog/ todo/ doing/ done/      <i>&lt;id&gt;-&lt;slug&gt;.md, status ⇔ folder</i>
+│   ├── done-archive/YYYY-MM.md          <i>rolled INDEX done-list lines, verbatim (ADR-0047)</i>
+│   ├── concepts/&lt;concept&gt;.md            <i>opt-in synthesis pages, 60-line cap, never auto-loaded</i>
+│   └── styleguide/                      <i>design-system BC only: the ESM styleguide the dashboard bundles</i>
+├── knowledge/
+│   ├── index.md                         <i>markers: bc-list, adr-global, research-global</i>
+│   ├── protocol.md                      <i>newest-on-top diary, ~1,000-line cap; entries "## YYYY-MM-DD HH:MM -- Kind: …"</i>
+│   ├── protocol/YYYY-MM.md              <i>rolled months, verbatim (ADR-0039)</i>
+│   ├── decisions/NNNN-slug.md           <i>ADRs, 4-digit ordinal, global or BC scope</i>
+│   ├── research/&lt;slug&gt;-&lt;date&gt;.md        <i>reviewed reports</i>
+│   └── audit-log.md                     <i>dated audit stamps (ADR-0069)</i>
+├── <b>state/</b>                               <i>gitignored, advisory, overwritten (ADR-0027)</i>
+│   ├── whats-next.md                    <i>generated:, three sections; writers: whats-next, work churn, work vision-conformance; dashboard may delete</i>
+│   └── in-flight.json                   <i>heartbeat; stale after 5 min</i>
+├── <b>salvage/</b>&lt;id&gt;-&lt;tag&gt;.patch            <i>gitignored; bounced | discarded | escalated-iterN (ADR-0063)</i>
+└── <b>.dashboard/</b>                          <i>gitignored: runtime.json {pid,port,startedAt}, last-port.json, bridge.json {port,token,pid,v,capabilities}</i>
+&lt;repo&gt;/<b>.worktrees/</b>&lt;task-id&gt;/                 <i>gitignored, outside .agentheim; branch aw/&lt;task-id&gt;; dashboard/node_modules junction when needed</i></div>
+
+  <div class="grid2">
+    <div class="card c-state"><h4>INDEX.md (per BC)</h4>
+<pre><code>&lt;!-- task-counts:start --&gt;
+- **Backlog:** 2   - **Todo:** 1
+- **Doing:** 0     - **Done:** 181   ← lifetime, never decremented
+&lt;!-- task-counts:end --&gt;
+&lt;!-- todo-list:start --&gt;
+- **agentic-workflow-jf6qz** — &lt;title&gt; (bug) — `todo/agentic-workflow-jf6qz-….md`
+&lt;!-- todo-list:end --&gt;
+### Done (most recent N; older entries archived …)
+&lt;!-- done-list:start --&gt; …</code></pre>
+      <p>Newest inserted right after <code>:start</code>. Entries point, never duplicate; new bullets capped at ~60 words (ADR-0060, date-grandfathered lint). Counts are maintained by script in promote/claim/complete and by prose arithmetic everywhere else; <code>scripts/backfill-indexes.ps1</code> rebuilds every index from frontmatter but emits a different line shape than the verbs. The dashboard projects the INDEX path but never reads it.</p></div>
+    <div class="card c-state"><h4>protocol.md</h4>
+<pre><code># Protocol
+
+Chronological log … Newest entries on top.
+
+---
+
+## 2026-07-23 00:05 -- Modeling / Promoted: agentic-workflow-jf6qz - …
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---</code></pre>
+      <p>Kinds: Brainstorm; Capture / Captured; Modeling / Captured, Refined, Promoted, Dismissed, Consolidated; Research; Work / Batch start, Task verified and completed, Task completed (verification skipped), Verification failure, Task bounced, Task failure, Work session ended; Release shipped. Local-time stamps without zone. Simultaneously a diary and a parsed data source: <code>resolveSinceLastSessionEnd</code> reads the newest "Work session ended" heading; modeling and work compare the newest "-- Work /" entry to whats-next's <code>generated</code> for staleness. Live file 4,287 lines at last read; the June archive holds 5,725.</p></div>
+  </div>
+
+  <div class="grid3">
+    <div class="card c-adr"><h4>ADRs</h4><p><code>NNNN-kebab-slug.md</code>; frontmatter <code>id, title, scope (bc|global), status (proposed|accepted|superseded|deprecated), date, supersedes, superseded_by, related_tasks, related_research</code>; sections Context / Decision / Consequences / Alternatives / References. Worker mints a provisional number with <code>nextAdrNumber</code>; the conductor finalizes against main at squash-merge, rewriting id, H1 and filename and appending a numbering note (ADR-0058). Ids are read as a timeline, so random tokens were rejected. Frontmatter id shape is split: 59 files <code>ADR-NNNN</code>, 10 bare.</p></div>
+    <div class="card c-state"><h4>Research reports</h4><p><code>&lt;slug&gt;-&lt;YYYY-MM-DD&gt;.md</code> with <code>topic, date, requested_by, related_tasks</code>; Question / Summary / Findings / Sources / Unverified claims / Open questions. Five reports exist, all from June 2026 and all about the dashboard-to-terminal loop or the README; none after 2026-06-18. Indexed under <code>research-local</code> or <code>research-global</code>.</p></div>
+    <div class="card c-state"><h4>Concepts</h4><p>Opt-in synthesis pages created only when three or more artifacts converge, a worker would re-derive them, and the user agrees. <code>derived_from</code> lists sources; 60-line cap; no code blocks over five lines. Workers flag <code>CONCEPT_CANDIDATE</code> and never write one. The template still references "a future lint skill (Stage 8)"; no skill creates concepts today.</p></div>
+  </div>
+
+  <h3>Growth doctrine (ADR-0041)</h3>
+  <div class="grid2">
+    <div class="card c-lib"><h4>Cap-and-roll · lists · scripted, unattended, archived</h4><p><b>Protocol</b> (ADR-0039/0045): live file ~1,000 lines; whole older months roll verbatim to <code>knowledge/protocol/YYYY-MM.md</code>; the current month never rolls; triggered at work session-end; first real rotation 2026-07-04 after the file reached 7,161 lines. <b>INDEX done-list</b> (ADR-0047): ~30 live entries; month from the done task's <code>completed:</code>; rolls to <code>done-archive/YYYY-MM.md</code>; fails closed on an unparseable list, per BC, without discarding a healthy sibling's result (a WisdomHeim field report drove the refusal branch).</p></div>
+    <div class="card c-state"><h4>Flag-and-consolidate · prose · judgment, builder-in-loop, in place</h4><p>A BC README at or above ~600 lines is flagged by whats-next; modeling CONSOLIDATE merges redundant UL entries and folds superseded narration without dropping a term or breaking a backlink. The agentic-workflow README was consolidated 1,006 → 598 lines on 2026-07-03 and has regrown to 1,206.</p></div>
+  </div>
+
+  <h3>The memory layer in use</h3>
+  <ul>
+    <li><b>Before capture</b>: the backlink matcher scores slug-word overlap plus shared tags across the BC INDEX (including <code>done-archive/</code>), the top-level index and research; hits ≥ 2 populate <code>related_adrs</code>, <code>related_research</code>, <code>prior_art</code> (cap 5 each). REFINE never removes human-curated links.</li>
+    <li><b>Before dispatch</b>: the conductor pastes full ADR contents, the last 30 lines of each prior-art task's <code>## Outcome</code>, research slugs, and the protocol head into the worker prompt; concepts are pointers only.</li>
+    <li><b>Bidirectional links</b>: task <code>related_adrs</code> ↔ ADR <code>related_tasks</code>; task <code>related_research</code> ↔ report <code>related_tasks</code>; maintained by modeling, research and work by hand.</li>
+    <li><b>Advisory surfaces</b>: <code>state/whats-next.md</code> has three writers with last-writer-wins semantics and no recorded ordering contract; <code>state/in-flight.json</code> has one writer and one reader.</li>
+  </ul>
+</section>
+<section id="lib">
+  <div class="eyebrow">06 · mechanized lib</div>
+  <div class="sec-head"><h2>Twenty-one stdlib modules, zero dependencies, no git</h2><p>Everything under <code>lib/</code> is Node stdlib only, tested with <code>node --test lib/test/*.test.mjs</code> (375 tests, 23 files, all green on Node 24). No root <code>package.json</code>, no CI. Every module is either pure, a read-only scanner, or a file writer; none invokes git (ADR-0038 Ruling B).</p></div>
+
+  <div class="scroll"><table>
+    <tr><th>Module</th><th>Lines</th><th>Class</th><th>Purpose and key exports</th><th>ADR</th><th>Called by</th></tr>
+    <tr><td class="mono">task-lifecycle.mjs</td><td class="mono">955</td><td><span class="tag m">writer</span></td><td>The mover and three verbs; <code>deriveContext</code>; EOL/BOM round-trip (<code>normalizeText</code>, <code>denormalizeText</code>); pure INDEX/protocol text helpers (<code>removeIndexLine</code>, <code>insertIndexLineAtTop</code>, <code>prependProtocolEntry</code>)</td><td>0007 0012 0028 0038 0042 0044 0054 0055</td><td>the CLI only</td></tr>
+    <tr><td class="mono">task-lifecycle-cli.mjs</td><td class="mono">245</td><td><span class="tag m">cli</span></td><td>argv → <code>discoverRoot</code> → handler → one JSON line; verbs promote, claim, complete, checkpoint; <code>findMovedFromDoingPath</code> (separator-insensitive)</td><td>0038 0057</td><td>modeling PROMOTE, work</td></tr>
+    <tr><td class="mono">index-rotation.mjs</td><td class="mono">451</td><td><span class="tag m">writer</span></td><td><code>rotateIndexDoneList</code>, <code>rotateAllIndexDoneLists</code>; cap 30; three-face fail-closed refusal; never rolls the newest month; rewrites the Done header</td><td>0039 0041 0047</td><td>work session-end</td></tr>
+    <tr><td class="mono">protocol-rotation.mjs</td><td class="mono">227</td><td><span class="tag m">writer</span></td><td><code>rotateProtocol</code>; cap 1,000 lines; whole months, oldest first, verbatim byte slices</td><td>0039 0045</td><td>work session-end</td></tr>
+    <tr><td class="mono">session-start-churn.mjs</td><td class="mono">270</td><td><span class="tag p">pure</span></td><td><code>resolveSinceLastSessionEnd</code>, <code>parseCommitLog</code>, <code>hasTaskTrailer</code>, <code>findUntrailedCommits</code>, eleven <code>MACHINE_SHAPES</code>, <code>partitionUntrailedCommits</code>, <code>formatChurnSummaryLine</code></td><td>0026 0066</td><td>work Phase 1</td></tr>
+    <tr><td class="mono">vacuum-guard.mjs</td><td class="mono">210</td><td><span class="tag p">pure</span></td><td><code>extractOpenQuestions</code> (skips struck items, parses <code>(open since …)</code>), <code>isVacuum</code>, <code>formatVacuumGuardLine</code>, <code>classifyTask</code> and <code>formatBatchMixLine</code></td><td>0064</td><td>work, modeling, whats-next</td></tr>
+    <tr><td class="mono">vision-conformance.mjs</td><td class="mono">113</td><td><span class="tag p">pure</span></td><td><code>extractVisionSections</code> (success criteria, non-goals), <code>labelFor</code>, <code>formatConformanceLine</code>, <code>worthSurfacing</code>; the judgment between is an LLM call</td><td>0040</td><td>work end-of-run; vacuum-guard imports it</td></tr>
+    <tr><td class="mono">adr-allocation.mjs</td><td class="mono">183</td><td><span class="tag m">writer</span></td><td><code>nextAdrNumber</code> (provisional), <code>finalizeAdrNumbering</code> (renumber provisional files against the true max; rewrite id, H1, filename; append note)</td><td>0058</td><td>worker (mint), work (finalize)</td></tr>
+    <tr><td class="mono">id-grammar.mjs</td><td class="mono">160</td><td><span class="tag p">scanner</span></td><td><code>classifyTaskId</code> → token / legacy / malformed; <code>findMalformedTaskIds</code>; <code>GRANDFATHERED_IDS</code></td><td>0028 0044</td><td>modeling, quick-capture, lint</td></tr>
+    <tr><td class="mono">duplicate-id-check.mjs</td><td class="mono">161</td><td><span class="tag p">scanner</span></td><td><code>findDuplicateTaskIds</code> across all BCs and folders</td><td>0028</td><td>lint only</td></tr>
+    <tr><td class="mono">index-entry-length.mjs</td><td class="mono">210</td><td><span class="tag p">scanner</span></td><td><code>findOverLengthIndexEntries</code>; 60 words; grandfathered by the linked artifact's date ≤ 2026-07-21</td><td>0060</td><td>lint</td></tr>
+    <tr><td class="mono">human-eye-criteria.mjs</td><td class="mono">169</td><td><span class="tag p">scanner</span></td><td><code>parseAcceptanceCriteria</code>, <code>isAllHumanEye</code>, <code>findAllHumanEyeTasksMissingNote</code> (todo, doing, done only)</td><td>0061</td><td>lint</td></tr>
+    <tr><td class="mono">spike-stop-loss.mjs</td><td class="mono">128</td><td><span class="tag p">scanner</span></td><td><code>findSpikeTasksMissingStopLoss</code>; spikes created after 2026-07-21 must contain "stop-loss" or "record it and stop"</td><td>0065</td><td>lint</td></tr>
+    <tr><td class="mono">doctrine-line-pointer.mjs</td><td class="mono">118</td><td><span class="tag p">scanner</span></td><td><code>findLinePointerViolations</code> over skills, agents, references; empty allowlist; not date-grandfathered</td><td>0069</td><td>lint</td></tr>
+    <tr><td class="mono">agent-spawn-namespace.mjs</td><td class="mono">131</td><td><span class="tag p">scanner</span></td><td><code>findBareAgentSpawns</code>; frozen eight-name roster</td><td>0052</td><td>lint</td></tr>
+    <tr><td class="mono">resolve-plugin-file.mjs</td><td class="mono">148</td><td><span class="tag p">scanner</span></td><td><code>cacheRoot</code>, <code>pickNewestVersion</code> (numeric semver), <code>resolvePluginFile</code> (throws, never falls back), <code>locatePluginFile</code> (repo-local first)</td><td>0002 addendum</td><td>dashboard resolve-launcher; every bootstrap inlines the same walk</td></tr>
+    <tr><td class="mono">hook-agent-signal.mjs</td><td class="mono">135</td><td><span class="tag m">writer</span></td><td><code>runHook(mode)</code>: reads the hook payload from stdin, root from <code>CLAUDE_PROJECT_DIR</code> or discovery, writes <code>state/in-flight.json</code>; always exits 0</td><td>0043</td><td>three Stop hooks</td></tr>
+    <tr><td class="mono">agent-heartbeat.mjs</td><td class="mono">113</td><td><span class="tag p">pure</span></td><td><code>STALE_WINDOW_MS</code> = 5 min, <code>isStale</code>, <code>applyHeartbeat</code>, <code>applyAgentCompletion</code> (replace by agentId, prune)</td><td>0043</td><td>hook-agent-signal; mirrored by the dashboard reader</td></tr>
+    <tr><td class="mono">worktree-node-modules.mjs</td><td class="mono">117</td><td><span class="tag m">writer</span></td><td><code>taskTouchesDashboard</code>, <code>linkDashboardNodeModules</code> (junction on Windows, symlink on POSIX), <code>unlinkDashboardNodeModules</code> (refuses non-links)</td><td>0032 0037</td><td>work</td></tr>
+    <tr><td class="mono">worktree-salvage.mjs</td><td class="mono">100</td><td><span class="tag p">pure</span></td><td><code>salvagePatchPath</code>, tags <code>bounced</code> / <code>discarded</code> / <code>escalated-iterN</code>, <code>ensureSalvageDir</code>, <code>formatSalvageReference</code>; the <code>git diff</code> is conductor prose</td><td>0063</td><td>work</td></tr>
+    <tr><td class="mono">derived-artifact-guard.mjs</td><td class="mono">94</td><td><span class="tag p">pure</span></td><td><code>partitionCheckpointFiles</code>; frozen prefix list <code>['dashboard/dist/']</code>; refuses paths outside the worktree; declared-list only, never git status</td><td>0057 0003</td><td>the checkpoint verb</td></tr>
+  </table></div>
+
+  <h3>Hooks: three sites, one event</h3>
+  <p>A whole-repo search finds no <code>hooks.json</code> and no SessionStart, SessionEnd, PreToolUse, PostToolUse or UserPromptSubmit registrations. The only wired event is <code>Stop</code>, in YAML frontmatter at exactly three sites, each pinned by <code>lib/test/hook-command-path.test.mjs</code>, which also reproduces the foreign-install case with a fake plugin cache.</p>
+  <div class="scroll"><table>
+    <tr><th>Site</th><th>Mode</th><th>Effect</th></tr>
+    <tr><td><code>skills/work/SKILL.md</code></td><td><code>session-heartbeat</code></td><td>Every conductor turn while work is active bumps <code>lastHeartbeat</code>.</td></tr>
+    <tr><td><code>agents/worker.md</code></td><td><code>worker-stop</code></td><td>Appends <code>{agentType:'worker', agentId, completedAt}</code>; a subagent's Stop auto-converts to SubagentStop.</td></tr>
+    <tr><td><code>agents/verifier.md</code></td><td><code>verifier-stop</code></td><td>Same for verifiers.</td></tr>
+  </table></div>
+
+  <h3>Live-tree lints</h3>
+  <p>A live-tree lint is a <code>node --test</code> case that scans this repo's own <code>.agentheim/</code>, <code>skills/</code>, <code>agents/</code> or <code>references/</code> and asserts a doctrine invariant holds right now. This is the enforcement ADR-0059 demands. By decision (ADR-0059 amendment), the lints are self-hosting-only: a consumer install gets the prose, never the lint.</p>
+  <div class="scroll"><table>
+    <tr><th>Assertion</th><th>Module</th><th>Grandfathering</th></tr>
+    <tr><td>No duplicate task ids across BCs and folders</td><td class="mono">duplicate-id-check</td><td>none</td></tr>
+    <tr><td>Every task id is token or legacy grammar</td><td class="mono">id-grammar</td><td>id allowlist: <code>infrastructure-5w5gs</code></td></tr>
+    <tr><td>No new INDEX bullet over 60 words</td><td class="mono">index-entry-length</td><td>date ≤ 2026-07-21</td></tr>
+    <tr><td>All-human-eye tasks in todo/doing/done carry the builder-eye note</td><td class="mono">human-eye-criteria</td><td>date ≤ 2026-07-21; backlog exempt</td></tr>
+    <tr><td>Every spike carries the stop-loss clause</td><td class="mono">spike-stop-loss</td><td>date ≤ 2026-07-21</td></tr>
+    <tr><td>No bare agent-name spawn in skills or agents</td><td class="mono">agent-spawn-namespace</td><td>none</td></tr>
+    <tr><td>No raw line-number pointer in doctrine prose</td><td class="mono">doctrine-line-pointer</td><td>explicit allowlist, empty</td></tr>
+    <tr><td>The three Stop hooks use the env-independent bootstrap; a foreign install writes in-flight.json</td><td class="mono">hook-command-path test</td><td>none</td></tr>
+    <tr><td><code>locatePluginFile</code> resolves the real repo-local launcher</td><td class="mono">resolve-plugin-file test</td><td>—</td></tr>
+  </table></div>
+  <p class="small">Three lints share <code>ADOPTION_DATE = '2026-07-21'</code> as three separate constants; three grandfathering shapes (date, explicit allowlist, id allowlist) were argued case by case. <code>frontmatterField</code>, <code>contextNames</code>, <code>mdFilesIn</code> and <code>idForFile</code> are copy-pasted across five scanners.</p>
+
+  <h3>How skills reach lib: the bootstrap</h3>
+  <p><code>references/lib-bootstrap.md</code> fixes one resolution scheme: <code>process.cwd()/lib/&lt;file&gt;</code> first, else the newest semver directory under <code>~/.claude/plugins/cache/agentheim/agentheim/</code>, fail loud. It says "Do not invent a second resolution scheme." The scheme is nonetheless inlined as a <code>node -e</code> one-liner at roughly eighteen sites (work ×4 plus its hook, modeling, the dashboard command, the two agent hooks, nine worked invocations in the reference) because the module cannot be imported before it is found. Text blobs are passed as file paths to avoid shell quoting on Windows. Four lib entry points import <code>discoverRoot</code> from <code>dashboard/discovery.mjs</code>, the one <code>lib → dashboard</code> dependency.</p>
+
+  <h3>Scripts</h3>
+  <p><code>scripts/backfill-indexes.ps1</code> rebuilds <code>knowledge/index.md</code> and every BC INDEX from task, ADR, research and concept frontmatter (offered by work when the index is missing; PowerShell only; writes UTF-8 with BOM on PowerShell 5.1, the plausible origin of the BOM-bearing INDEX that task 5w5gs had to handle). <code>scripts/backfill-github-releases.ps1</code> creates GitHub releases per tag from CHANGELOG sections.</p>
+</section>
+
+<section id="dashboard">
+  <div class="eyebrow">07 · dashboard and bridge</div>
+  <div class="sec-head"><h2>A read-only projection that can only launch sessions</h2><p>A stdlib Node server over the project's <code>.agentheim/</code>, a React 18 + htm frontend bundled by esbuild into a committed <code>dist/</code>, and an optional VS Code extension that turns a button click into a real <code>claude</code> terminal. It knows the folder names, the frontmatter, the command strings and the state-file schemas, and nothing else about the workflow.</p></div>
+
+  <h3>Runtime</h3>
+  <div class="grid2">
+    <div class="card c-dash"><h4>Process model (ADR-0002, 0004)</h4><p><code>/dashboard</code> → <code>resolve-launcher.mjs</code> → <code>launch.mjs</code> spawns <code>serve.mjs</code> detached with <code>cwd = os.tmpdir()</code> (so a long-lived process never locks the project directory on Windows) and <code>AGENTHEIM_ROOT</code> in the environment. Binds <code>127.0.0.1</code> only. Port is deterministic: <code>41000 + sha256(root) mod 1024</code>, sticky via <code>last-port.json</code>, with a ladder of eight on collision, so the origin-keyed localStorage stores survive relaunch. Runfile <code>runtime.json</code> gates liveness by pid. Stop kills the pid (Windows: <code>taskkill /F /T</code>). No auto-open of the browser (removed in aw-032; the command text still claims it).</p></div>
+    <div class="card c-dash"><h4>Bundle (ADR-0003, 0005, 0008, 0009)</h4><p><code>build.mjs</code> runs esbuild once: entry <code>app/app.js</code>, ESM, minified, bundling React 18.3.1, react-dom, htm 3.1.1 (no JSX anywhere), marked 12, canvas-confetti; copies the styleguide's token CSS byte-for-byte and the vendored Inter Tight and JetBrains Mono latin woff2 subsets. <code>dist/</code> is committed and derived. The styleguide canvas itself is buildless via import map. Runtime dependencies: none; devDependencies exist only for build and jsdom tests.</p></div>
+  </div>
+
+  <h3>Endpoints (dispatch order matters)</h3>
+  <div class="scroll"><table>
+    <tr><th>Route</th><th>Reads</th><th>Writes</th><th>Notes</th></tr>
+    <tr><td class="mono">GET /healthz</td><td>—</td><td>—</td><td><code>{status:'ok', root}</code> (leaks the absolute root; loopback only)</td></tr>
+    <tr><td class="mono">GET /api/events</td><td>fs.watch or stat-poll of <code>.agentheim/</code></td><td>—</td><td>SSE: <code>hello</code>, then <code>tree-changed</code> with a path hint the client never interprets; heartbeat comment every 25 s; one watcher per connection</td></tr>
+    <tr><td class="mono">DELETE /api/whats-next</td><td>—</td><td>unlinks <code>state/whats-next.md</code></td><td>exact-equality allowlist (a prefix match would admit <code>in-flight.json</code>); 204 even when absent (ADR-0046)</td></tr>
+    <tr><td class="mono">POST /api/stop</td><td>—</td><td>deletes runfile, <code>process.exit(0)</code></td><td>responds first, exits on finish (ADR-0053)</td></tr>
+    <tr><td colspan="4" class="small">405 gate for any other non-GET/HEAD</td></tr>
+    <tr><td class="mono">GET /api/tree</td><td>every task's frontmatter in the four folders, README/INDEX/concept paths, ADR and research paths with mtimes, vision heading</td><td>—</td><td>pointers and metadata only, never bodies (one exception: the project name)</td></tr>
+    <tr><td class="mono">GET /api/doc?path=</td><td>one in-root markdown file</td><td>—</td><td>raw body; 400 / 403 traversal / 404</td></tr>
+    <tr><td class="mono">GET /api/search?q=</td><td>every body in the corpus</td><td>—</td><td>substring over title + body (frontmatter stripped); title hits first, then fixed category order; ~60-char excerpts; min length 2; no cache (ADR-0023)</td></tr>
+    <tr><td class="mono">GET /api/bridge</td><td><code>.dashboard/bridge.json</code></td><td>—</td><td><code>{port, token, v, capabilities}</code> or <code>{present:false}</code>, never 5xx</td></tr>
+    <tr><td class="mono">GET / · static</td><td><code>dist/</code>, vision heading</td><td>—</td><td><code>&lt;title&gt;</code> rewritten to "&lt;Project&gt; — Dashboard"; 404 with "assets not built yet" when dist is absent</td></tr>
+  </table></div>
+
+  <h3>Frontend feature inventory</h3>
+  <div class="grid3">
+    <div class="card c-dash"><h4>Shell and rail</h4><p>236 px left rail: brand, Board / Workflow / About nav (ochre inset rail on the active item), a "WORKSPACE" tree of Product (vision, map) / Bounded contexts / Concepts / Research / Decisions built by <code>treeToLibrary</code>, footer "all clear · N done". Main pane renders board, a document, the Workflow page or the About page; tasks open in a right-hand slide-over, documents in the main pane (<code>isTaskIntent</code> = truthy status). Rail attention cue: an in-memory session baseline of ADR and research mtimes flags new or modified items until clicked (ADR-0029/0030).</p></div>
+    <div class="card c-dash"><h4>Board</h4><p>Four flat columns pooled across BCs, keyed on <code>status</code> (unknown → backlog). Board-wide View chip: sort (recently modified default, oldest, title A–Z/Z–A) and group-by-context with collapsible sections. Done column peeks at 310 px. Cards are the styleguide <code>TicketCard</code> (mono id, two-line title, status rail); backlog cards carry Refine / Promote; backlog and todo cards a hover trash can with a confirm dialog explaining the cascade. Hover dependency rings: solid = waiting on, dashed = holding up; hidden targets get a hollow dot on collapsed sections and edge chevrons when off-viewport (ADR-0033/0034). Confetti on launch (ADR-0020).</p></div>
+    <div class="card c-dash"><h4>Prompt console (ADR-0050/0051)</h4><p>Docked bottom-centre, 780 px. Five mode tabs: Quick Capture, Modeling, Inquire, Research, Plain. Enter or Ctrl+Enter launches; Shift+Enter newline; Tab / Shift+Tab cycle modes; Ctrl+M cycles the model; Ctrl+Space focuses; Escape blurs. Every mode declines an empty prompt. Model split button over Fable / Opus / Sonnet / Haiku, default Opus, Quick Capture pinned to Haiku, locked when the bridge is absent or too old. A dismissible banner announces a stale bridge. Mode and model survive a launch; nothing is persisted.</p></div>
+    <div class="card c-dash"><h4>Panels</h4><p><b>What's Next</b>: fetches <code>state/whats-next.md</code>, shows a staleness stamp, renders the three sections as a connected flight-plan stepper with step 2 emphasized; dismiss issues the DELETE. <b>In-flight lane</b>: reads <code>state/in-flight.json</code>, shows "N workers, M verifiers this session", disappears after five minutes of silence. <b>Topbar</b>: search combobox (200 ms debounce, five fixed groups), settings gear (theme, skip-permissions switch, Stop), "What's next" CTA in ochre, "Work ↗".</p></div>
+    <div class="card c-dash"><h4>Persistence</h4><p>Three versioned localStorage keys, all origin-bound and degrading to defaults: <code>agentheim.dashboard.theme</code>, <code>agentheim.board.viewState</code> (v2: lens + per-column collapsed and peek), <code>agentheim.dashboard.skipPermissions</code> (strict <code>true</code> only). Session-only: rail attention baseline, prompt highlight and model, banner dismissal. A global <code>window.__agentheimLastOpen</code> test hook ships in the bundle.</p></div>
+    <div class="card c-dash"><h4>Built-in pages</h4><p><b>Workflow</b> page: hand-authored HTML diagrams of the three-phase loop with a two-voice legend, naming every skill, verb, gate and folder. <b>About</b> page with profile and links. Neither fetches or writes.</p></div>
+  </div>
+
+  <h3>Write paths and the commands it seeds</h3>
+  <p>ADR-0017 makes the dashboard read-only over the task lifecycle; there is no move endpoint and a test asserts its absence. Everything below is the complete list of ways it changes the world.</p>
+  <div class="grid2">
+    <div class="scroll"><table>
+      <tr><th>Trigger</th><th>Effect</th></tr>
+      <tr><td>Panel dismiss</td><td><code>DELETE /api/whats-next</code> → unlink the advisory file</td></tr>
+      <tr><td>Settings → Stop</td><td><code>POST /api/stop</code> → delete runfile, exit</td></tr>
+      <tr><td>Server start / launcher</td><td>write <code>runtime.json</code>, <code>last-port.json</code>; kill pid; reap stale runfiles</td></tr>
+      <tr><td>Any launch button</td><td>bridge <code>POST /run</code> → a new interactive <code>claude</code> terminal, or clipboard copy of the prompt</td></tr>
+      <tr><td>Extension activation</td><td>writes and removes <code>bridge.json</code></td></tr>
+      <tr><td>Browser</td><td>three localStorage keys, <code>data-theme</code>, confetti canvas</td></tr>
+    </table></div>
+    <div class="scroll"><table>
+      <tr><th>Surface</th><th>Prompt sent to claude</th></tr>
+      <tr><td>Quick Capture tab</td><td><code>/agentheim:quick-capture &lt;prompt&gt;</code> (haiku)</td></tr>
+      <tr><td>Modeling tab</td><td><code>/agentheim:modeling &lt;prompt&gt;</code></td></tr>
+      <tr><td>Inquire · Research tabs</td><td><code>/agentheim:inquire …</code> · <code>/agentheim:research …</code></td></tr>
+      <tr><td>Plain tab</td><td>the prompt verbatim</td></tr>
+      <tr><td>Card Refine · Promote</td><td><code>/agentheim:modeling refine &lt;id&gt;</code> · <code>promote &lt;id&gt;</code></td></tr>
+      <tr><td>Card trash (after confirm)</td><td><code>/agentheim:modeling dismiss &lt;id&gt;</code></td></tr>
+      <tr><td>Topbar Work · What's next</td><td><code>/agentheim:work</code> · <code>/agentheim:whats-next</code></td></tr>
+    </table></div>
+  </div>
+
+  <h3>The bridge (ADR-0018)</h3>
+  <p>A VS Code extension (not on the marketplace; built with vsce, version 0.5.0) walks up from the workspace to find <code>.agentheim/</code>, binds <code>127.0.0.1:31425</code> (ladder 31426, 31427) with a per-activation random token, and writes <code>bridge.json</code>. <code>GET /health</code> is the authoritative capability handshake (<code>prompt</code>, <code>skipPermissions</code>, <code>name</code>, <code>model</code>; absent → legacy baseline). <code>POST /run {prompt, skipPermissions?, name?, model?}</code> (≤ 64 KB, token header, timing-safe compare) opens <code>createTerminal({name, cwd: root, shellPath: claude, shellArgs})</code> with argv <code>-n &lt;name&gt; [--model &lt;alias&gt;] [--dangerously-skip-permissions] &lt;prompt&gt;</code>; the terminal <em>is</em> the claude process. Model must be in the allowlist fable / opus / sonnet / haiku. The dashboard probes discovery → health (800 ms) → run and falls back to the clipboard on any failure, silently; the clipboard path can never carry the bypass flag. Trust boundary: loopback plus shared secret, single-user dev box; no Origin check on either side (accepted, ADR-0053 §4); the dashboard's <code>/api/bridge</code> hands the token to anything that can reach the dashboard origin.</p>
+
+  <h3>Read-model contract: what the board actually consumes</h3>
+  <div class="grid2">
+    <div>
+<pre><code>GET /api/tree →
+{ root, project:{name},
+  locations:{ vision, contextMap, adrs[], research[],
+              adrsMeta:{path:{mtimeMs}}, researchMeta },
+  contexts:[{ name, readme, index, concepts[],
+              lifecycle:{ backlog:[Task], todo:[…],
+                          doing:[…], done:[…] } }] }
+Task = { id, title, status, type, context, path,
+         mtimeMs, dependsOn[], blocks[] }</code></pre>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>Field</th><th>Fallback</th><th>Used for</th></tr>
+      <tr><td>id</td><td>filename sans .md</td><td>card id, selection, dependency edges, command seeding, sort tie-break</td></tr>
+      <tr><td>title</td><td>''</td><td>card, sort, search</td></tr>
+      <tr><td>status</td><td><b>folder name</b></td><td>column placement, task-vs-doc routing, which actions a card offers</td></tr>
+      <tr><td>type</td><td>''</td><td>carried, unused by board logic</td></tr>
+      <tr><td>context</td><td>BC dir name</td><td>group-by sections</td></tr>
+      <tr><td>mtimeMs</td><td>null (oldest)</td><td>sort</td></tr>
+      <tr><td>dependsOn / blocks</td><td>[]</td><td>hover rings, hidden markers</td></tr>
+    </table><p class="small">Never read: created, completed, tags, related_*, prior_art, any body text, INDEX content, done-archive, protocol.</p></div>
+  </div>
+  <p>Beyond tasks the board needs: vision (name heading + body), context map, BC READMEs titled by BC name, concepts, ADRs and research titled by basename with mtimes for the attention cue; the two advisory files with their schemas; and exactly one event, "something under <code>.agentheim/</code> changed", after which every consumer re-fetches. Four <code>EventSource</code> connections per tab, each with its own watcher.</p>
+
+  <h3>Design system (ADR-0003, 0016, 0048, 0049)</h3>
+  <p>The styleguide lives in the <code>design-system</code> BC at <code>.agentheim/contexts/design-system/styleguide/</code>: 25 ESM modules, two token files, vendored fonts, 21 tests. The dashboard imports it by relative path across the BC boundary and never forks; a primitive is promoted only when a second consumer appears. Palette is the "Command deck": cool blue-grey neutrals derived from a dark reference stack (surfaces <code>#090C12 / #0D1119 / #121826</code>, light anchored at <code>#FAF8F4</code>) with one ochre accent reserved for surfaces that <em>fire, commit or are armed</em> plus two wayfinding exceptions (active nav item, highlighted prompt tab). Selection is by de-emphasis, never accent. Three ambient motion signals with their own tokens: doing-card breathe (active), todo-coloured edge dot (attention), dependency ring (relation), each with a static fallback under reduced motion. The money-domain <code>--obligation</code> red doubles as the danger hue (a named naming smell).</p>
+
+  <h3>Test coverage</h3>
+  <p>78 dashboard test files: real-http server suites against temp fixtures (transport, dispatch order, 403/404/405 pins), a real detached launch test, a real build test, pure-module unit suites, many "source-regex" suites that assert strings in <code>board.js</code> (they break on any restructuring of the file), and five jsdom DOM-render suites via a <code>module.register()</code> resolve hook mirroring esbuild's <code>nodePaths</code> (ADR-0056). Acknowledged gaps: real hook firing, a real <code>/dashboard</code> against an installed plugin, watcher mode selection, POSIX launch.</p>
+
+  <div class="note warn"><p><b>Stale in-repo documentation:</b> <code>dashboard/README.md</code> still says "no write path", lists only tree, doc and events, and omits search, bridge, the whats-next delete, stop, <code>last-port.json</code> and <code>bridge.json</code>. The command file and the launcher header still mention auto-open.</p></div>
+</section>
+<section id="decisions">
+  <div class="eyebrow">08 · decisions</div>
+  <div class="sec-head"><h2>All 69 Architecture Decision Records</h2><p>Filter by theme, by rework tag, or by text. The one-liner is the decision as implemented; the last column says which lib module enforces it, or that it is prose-only. Statuses are as written in the files: several load-bearing ADRs (0003, 0007, 0012, 0027, 0028, 0035) are still <code>proposed</code> while their dependents are <code>accepted</code>.</p></div>
+
+  <div class="filters" id="adr-filters">
+    <span class="count" id="adr-count"></span>
+    <input type="search" id="adr-search" placeholder="filter by text, number, module…" aria-label="Filter decisions">
+    <button type="button" data-f="all" aria-pressed="true">all</button>
+    <button type="button" data-f="cl:lifecycle">lifecycle mechanization</button>
+    <button type="button" data-f="cl:git">commit / worktrees</button>
+    <button type="button" data-f="cl:books">bookkeeping / rotation</button>
+    <button type="button" data-f="cl:gates">gates / verification</button>
+    <button type="button" data-f="cl:ids">ids / allocation</button>
+    <button type="button" data-f="cl:doctrine">doctrine / audits</button>
+    <button type="button" data-f="cl:session">session checks / advisories</button>
+    <button type="button" data-f="cl:agents">agents / plugin</button>
+    <button type="button" data-f="cl:runtime">dashboard runtime</button>
+    <button type="button" data-f="cl:ui">dashboard UI</button>
+    <button type="button" data-f="cl:design">design system</button>
+    <span style="width:100%"></span>
+    <button type="button" data-f="t:a"><span class="tag a">a</span>&nbsp;principle</button>
+    <button type="button" data-f="t:b"><span class="tag b">b</span>&nbsp;md backend</button>
+    <button type="button" data-f="t:c"><span class="tag c">c</span>&nbsp;git</button>
+    <button type="button" data-f="t:d"><span class="tag d">d</span>&nbsp;claude code</button>
+    <button type="button" data-f="t:e"><span class="tag e">e</span>&nbsp;dashboard</button>
+  </div>
+
+  <div class="scroll"><table id="adr-table">
+    <thead><tr><th>#</th><th>Date</th><th>Status</th><th>Decision</th><th>Enforced by</th><th>Tag</th></tr></thead>
+    <tbody>
+    <tr data-cl="ui" data-t="e"><td class="mono">0001</td><td class="mono">06-05</td><td>superseded</td><td><b>Dashboard write semantics.</b> Promote-only UI move, one shared mover, optimistic concurrency. Superseded by 0017.</td><td>—</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="runtime" data-t="e"><td class="mono">0002</td><td class="mono">06-05</td><td>proposed</td><td><b>Dashboard runtime.</b> Node-stdlib localhost server, detached launch, walk-up discovery, in-root path validation; addenda: env-independent launcher resolution, deterministic sticky port.</td><td>dashboard runtime modules</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="design" data-t="e"><td class="mono">0003</td><td class="mono">06-05</td><td>proposed</td><td><b>Styleguide as ES-module single source.</b> Buildless canvas, esbuild-bundled dashboard, committed derived <code>dist/</code>.</td><td>build.mjs, dist-build test</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="runtime" data-t="e"><td class="mono">0004</td><td class="mono">06-06</td><td>proposed</td><td><b>Detached server uses a neutral cwd</b> and <code>AGENTHEIM_ROOT</code>, never the project dir.</td><td>launch.mjs</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="design" data-t="e"><td class="mono">0005</td><td class="mono">06-06</td><td>accepted</td><td><b>Buildless view factory:</b> htm tagged templates plus import map; no JSX shipped.</td><td>structural</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="runtime" data-t="e"><td class="mono">0006</td><td class="mono">06-06</td><td>proposed</td><td><b>Live update:</b> SSE push plus a debounced <code>.agentheim/</code> watcher; consumers re-fetch.</td><td>events.mjs, watcher.mjs</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="lifecycle" data-t="a b"><td class="mono">0007</td><td class="mono">06-06</td><td>proposed</td><td><b>The mover owns only the move</b> (file + status + preconditions); INDEX and protocol side effects stay with skills.</td><td>task-lifecycle applyTaskMove</td><td><span class="tag a">a</span> <span class="tag b">b</span></td></tr>
+    <tr data-cl="design" data-t="e"><td class="mono">0008</td><td class="mono">06-06</td><td>accepted</td><td><b>Vendor webfonts</b> as latin-subset woff2 beside the token CSS; zero network at view time.</td><td>build.mjs</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="ui" data-t="e"><td class="mono">0009</td><td class="mono">06-06</td><td>proposed</td><td><b>Frontend app shell</b> lives in <code>dashboard/app/</code>, consumes the styleguide unforked; build retargets to it.</td><td>structural</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="ui" data-t="e"><td class="mono">0010</td><td class="mono">06-06</td><td>accepted</td><td><b>Slide-over feeds the Drawer a doc-shaped item</b> fetched via <code>/api/doc</code>; reshaped by 0021 to task-only.</td><td>slide-over.js</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="ui" data-t="e"><td class="mono">0011</td><td class="mono">06-06</td><td>accepted</td><td><b>Library groups derive client-side</b> from tree locations (<code>treeToLibrary</code>); the toggle and full-pane library were retired by 0021.</td><td>library-data.js</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="lifecycle" data-t="b e"><td class="mono">0012</td><td class="mono">06-06</td><td>proposed</td><td><b>Resolve slugged filenames from a bare id</b>, anchored on the hyphen; the SSE consumer re-fetches, never interprets.</td><td>resolveTaskFile</td><td><span class="tag b">b</span> <span class="tag e">e</span></td></tr>
+    <tr data-cl="agents" data-t="d c"><td class="mono">0013</td><td class="mono">06-08</td><td>accepted</td><td><b>Release discipline by checklist:</b> manifest bump bound to tag <code>vX.Y.Z</code>; semver against the plugin contract; no CI, no hooks.</td><td>RELEASE.md, /release card</td><td><span class="tag d">d</span> <span class="tag c">c</span></td></tr>
+    <tr data-cl="design" data-t="e"><td class="mono">0014</td><td class="mono">06-09</td><td>accepted</td><td><b>Ambient motion may signal active status:</b> the doing-card pulse, stripped under reduced motion.</td><td>motion.js</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="ui" data-t="e"><td class="mono">0015</td><td class="mono">06-09</td><td>proposed</td><td><b>Board view-state persists in versioned localStorage;</b> amended in 0.9.0 to a board-wide lens with column-scoped collapse and peek.</td><td>board-view-state.js</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="design" data-t="e"><td class="mono">0016</td><td class="mono">06-09</td><td>accepted</td><td><b>Theme-preview swatches use frozen tokens;</b> selection by de-emphasis, never the reserved accent.</td><td>colors_and_type.css</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="ui" data-t="a e"><td class="mono">0017</td><td class="mono">06-14</td><td>accepted</td><td><b>Dashboard is read-only; skills are the sole owners of the task lifecycle.</b> Supersedes 0001; action buttons launch sessions instead of writing.</td><td>server.test asserts no move route</td><td><span class="tag a">a</span> <span class="tag e">e</span></td></tr>
+    <tr data-cl="runtime" data-t="e d"><td class="mono">0018</td><td class="mono">06-14</td><td>proposed</td><td><b>VS Code terminal bridge:</b> fixed-port loopback extension, server-mediated discovery via <code>bridge.json</code>, token, clipboard fallback, capability handshake.</td><td>vscode-extension, bridge-launch.js</td><td><span class="tag e">e</span> <span class="tag d">d</span></td></tr>
+    <tr data-cl="ui" data-t="e"><td class="mono">0019</td><td class="mono">06-15</td><td>accepted</td><td><b>Armed-launch danger treatment</b> reuses <code>--obligation</code> unforked; the bypass is per-launch and never rides the clipboard path.</td><td>skip-permissions-state.js</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="ui" data-t="e"><td class="mono">0020</td><td class="mono">06-15</td><td>accepted</td><td><b>Confetti is a board-local transient ACK,</b> not a styleguide primitive; nothing under reduced motion.</td><td>confetti-launch.js</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="ui" data-t="e"><td class="mono">0021</td><td class="mono">06-15</td><td>accepted</td><td><b>Open-intent split:</b> tasks → slide-over, non-task documents → main pane; search results always to the main pane.</td><td>intent-route.js</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="lifecycle" data-t="a b"><td class="mono">0022</td><td class="mono">06-16</td><td>proposed</td><td><b>DISMISS cascades the whole dependent subtree</b> over <code>depends_on</code>/<code>blocks</code>; refuses if any member is in doing or done; ids never reused.</td><td>prose (modeling)</td><td><span class="tag a">a</span> <span class="tag b">b</span></td></tr>
+    <tr data-cl="runtime" data-t="e"><td class="mono">0023</td><td class="mono">06-16</td><td>proposed</td><td><b><code>/api/search</code>:</b> a pure corpus walk, title-first ranking, body excerpts; the tree stays pointers-only.</td><td>search.mjs</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="design" data-t="e"><td class="mono">0024</td><td class="mono">06-16</td><td>accepted</td><td><b>Search combobox panel is standalone,</b> matching the Menu's elevation by convention, not composition.</td><td>search.js</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="ui" data-t="e"><td class="mono">0025</td><td class="mono">06-17</td><td>proposed</td><td><b>Main pane gains a third state</b> for built-in static pages (Workflow, About) beside board and document.</td><td>board.js mainView</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="git" data-t="a c b"><td class="mono">0026</td><td class="mono">06-17</td><td>accepted</td><td><b>Committing doctrine:</b> every artifact-producing skill commits its own scoped markdown; bookkeeping folds into the task commit before it is made; <code>commit:</code> dropped for the <code>[task-id]</code> trailer; scoped add, never <code>-A</code>; bounded trivial-squash carve-out.</td><td>prose + commit-doctrine.md; trailer parsed by session-start-churn</td><td><span class="tag a">a</span> <span class="tag c">c</span> <span class="tag b">b</span></td></tr>
+    <tr data-cl="session" data-t="a b"><td class="mono">0027</td><td class="mono">06-17</td><td>proposed</td><td><b>Advisory writes are distinct from lifecycle writes;</b> whats-next writes one overwritten, self-timestamped file under new gitignored <code>state/</code>.</td><td>prose</td><td><span class="tag a">a</span> <span class="tag b">b</span></td></tr>
+    <tr data-cl="ids" data-t="b a"><td class="mono">0028</td><td class="mono">06-17</td><td>proposed</td><td><b>Random five-char token task ids</b> replace sequential integers; legacy ids coexist; two reserved foundation ids; never reuse by construction.</td><td>deriveContext; duplicate-id-check lint</td><td><span class="tag b">b</span> <span class="tag a">a</span></td></tr>
+    <tr data-cl="design" data-t="e"><td class="mono">0029</td><td class="mono">06-19</td><td>accepted</td><td><b>An ambient attention cue is a second motion signal,</b> distinct from the status pulse; keeps a static marker under reduced motion.</td><td>motion.js</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="ui" data-t="e"><td class="mono">0030</td><td class="mono">06-19</td><td>accepted</td><td><b>Rail "new item" cue is consumer-driven</b> from an in-memory session baseline, composed from Collapsible + TreeItem directly.</td><td>rail-attention.js</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="agents" data-t="d a"><td class="mono">0031</td><td class="mono">07-02</td><td>accepted</td><td><b>Per-agent model routing:</b> worker, researcher, orchestrator on sonnet; verifier, reviewer and the three modelers on opus; producer and gate never share a tier; never weaken the judge.</td><td><code>model:</code> frontmatter; no lint</td><td><span class="tag d">d</span> <span class="tag a">a</span></td></tr>
+    <tr data-cl="git" data-t="c a"><td class="mono">0032</td><td class="mono">07-02</td><td>accepted</td><td><b>Per-worker git worktree isolation:</b> batch-start claim commit, private <code>aw/&lt;id&gt;</code> branch, conductor wip commits, verifier in the worktree, squash-merge on PASS; main written only by the conductor. Recorded as a forward-looking bet (0 of 15 historical failures were contamination).</td><td>prose + worktree-node-modules, claim/complete verbs</td><td><span class="tag c">c</span> <span class="tag a">a</span></td></tr>
+    <tr data-cl="ui" data-t="e"><td class="mono">0033</td><td class="mono">07-02</td><td>proposed</td><td><b>Ephemeral hover-scoped DOM observation is admissible board-side</b> (IntersectionObserver for off-viewport dependency targets).</td><td>board-dependency-groups.js</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="design" data-t="e"><td class="mono">0034</td><td class="mono">07-02</td><td>proposed</td><td><b>Dependency ring is a third ambient signal:</b> its own token, direction by line style (solid waiting-on, dashed holding-up), static under reduced motion.</td><td>motion.js, agentheim.css</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="agents" data-t="d a"><td class="mono">0035</td><td class="mono">07-03</td><td>proposed</td><td><b>Worker consults a single specialist directly;</b> orchestrator reserved for multi-specialist aggregation and conflict surfacing. Routing table duplicated in two agent files.</td><td>prose</td><td><span class="tag d">d</span> <span class="tag a">a</span></td></tr>
+    <tr data-cl="gates" data-t="a b"><td class="mono">0036</td><td class="mono">07-03</td><td>accepted</td><td><b>Verifier runtime drive:</b> per-BC README <code>## Runtime surface</code> manifest; when a diff touches a surface path the verifier boots the app from the worktree, probes with stdlib http, tears down; manual notes never suffice.</td><td>verifier check 8 (prose)</td><td><span class="tag a">a</span> <span class="tag b">b</span></td></tr>
+    <tr data-cl="git" data-t="c d"><td class="mono">0037</td><td class="mono">07-03</td><td>accepted</td><td><b>Worktree spike resolutions:</b> squash abort is <code>git reset --hard HEAD</code>; the node_modules junction must be unlinked before <code>worktree remove</code> (else the real node_modules is deleted); BOUNCED squash-merges immediately without a verifier.</td><td>unlinkDashboardNodeModules guard; ordering is prose</td><td><span class="tag c">c</span> <span class="tag d">d</span></td></tr>
+    <tr data-cl="lifecycle" data-t="a b c"><td class="mono">0038</td><td class="mono">07-03</td><td>accepted</td><td><b>Lifecycle-mechanization boundary:</b> Ruling A, a dangling <code>depends_on</code> is unsatisfied and blocks; Ruling B, three layers: mover / git-free CLI emitting a manifest / skill owning judgment and git.</td><td>task-lifecycle, task-lifecycle-cli</td><td><span class="tag a">a</span> <span class="tag b">b</span> <span class="tag c">c</span></td></tr>
+    <tr data-cl="books" data-t="b"><td class="mono">0039</td><td class="mono">07-03</td><td>accepted</td><td><b>Protocol rotation doctrine:</b> verbatim monthly archive, ~1,000-line live cap, whole months only, current month never rolls, newest-on-top preserved.</td><td>protocol-rotation.mjs</td><td><span class="tag b">b</span></td></tr>
+    <tr data-cl="session" data-t="a b"><td class="mono">0040</td><td class="mono">07-03</td><td>accepted</td><td><b>Vision-conformance check</b> at work session-end: read "What success looks like" and "Non-goals", one judgment per shipped task, always a protocol line, whats-next write only on flags; never a gate; not in the verifier.</td><td>vision-conformance.mjs + LLM judgment</td><td><span class="tag a">a</span> <span class="tag b">b</span></td></tr>
+    <tr data-cl="books" data-t="a b"><td class="mono">0041</td><td class="mono">07-03</td><td>accepted</td><td><b>Artifact-growth doctrine:</b> cap-and-roll for lists, flag-and-consolidate for prose; README ≥ 600 lines flagged; modeling CONSOLIDATE verb never silently drops a term.</td><td>rotations mechanized; consolidate is prose</td><td><span class="tag a">a</span> <span class="tag b">b</span></td></tr>
+    <tr data-cl="lifecycle" data-t="b c"><td class="mono">0042</td><td class="mono">07-03</td><td>accepted</td><td><b>COMPLETE stays single-task;</b> the trivial-squash carve-out is composed by the caller. <code>claimBatch</code> is batch-shaped only because 0032 forces one claim commit per batch.</td><td>completeTask</td><td><span class="tag b">b</span> <span class="tag c">c</span></td></tr>
+    <tr data-cl="session" data-t="d e a"><td class="mono">0043</td><td class="mono">07-03</td><td>accepted</td><td><b>Live observability:</b> a Stop/SubagentStop hook heartbeat writes a second advisory artifact, <code>state/in-flight.json</code>, stale after five minutes; amended to an env-independent bootstrap that never breaks the session.</td><td>hook-agent-signal, agent-heartbeat</td><td><span class="tag d">d</span> <span class="tag e">e</span> <span class="tag a">a</span></td></tr>
+    <tr data-cl="ids" data-t="b"><td class="mono">0044</td><td class="mono">07-04</td><td>accepted</td><td><b><code>deriveContext</code> becomes digit-lead-tolerant;</b> the leading-letter rule moves from parser precondition to minting rule with <code>classifyTaskId</code> and a live-tree lint.</td><td>id-grammar.mjs</td><td><span class="tag b">b</span></td></tr>
+    <tr data-cl="books" data-t="b c"><td class="mono">0045</td><td class="mono">07-04</td><td>accepted</td><td><b>Protocol rotation trigger</b> is work's session-end check; rotated → its own commit, no protocol entry.</td><td>call site in work prose</td><td><span class="tag b">b</span> <span class="tag c">c</span></td></tr>
+    <tr data-cl="ui" data-t="e"><td class="mono">0046</td><td class="mono">07-04</td><td>accepted</td><td><b>The dashboard may perform one scoped advisory write:</b> deleting <code>state/whats-next.md</code> on explicit dismiss, exact-path allowlisted; the localStorage dismiss store retired.</td><td>whats-next-delete.mjs</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="books" data-t="b"><td class="mono">0047</td><td class="mono">07-04</td><td>accepted</td><td><b>INDEX done-list rotation trigger</b> at work session-end, ~30-entry cap, archive named in the Done header; amended to per-BC fail-closed refusal after a field report.</td><td>index-rotation.mjs</td><td><span class="tag b">b</span></td></tr>
+    <tr data-cl="design" data-t="e"><td class="mono">0048</td><td class="mono">07-05</td><td>proposed</td><td><b>Accent carve-out:</b> ochre marks the primed primary action (fires, commits, armed), not passive selection; nav-rail active item is the bounded wayfinding exception.</td><td>styleguide</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="design" data-t="e"><td class="mono">0049</td><td class="mono">07-05</td><td>proposed</td><td><b>Command-deck palette:</b> cool neutrals derived from a dark reference stack supersede the warm-Ledger heritage; names and roles frozen, values move.</td><td>colors_and_type.css</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="ui" data-t="e"><td class="mono">0050</td><td class="mono">07-05</td><td>proposed</td><td><b>Prompt bar keyboard-committed single-selection model:</b> one highlighted mode, Enter launches, Tab cycles (five amendments).</td><td>prompt-mode.js</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="design" data-t="e"><td class="mono">0051</td><td class="mono">07-05</td><td>proposed</td><td><b>Ochre wayfinding exception extends</b> to the highlighted prompt-mode tab.</td><td>styleguide</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="agents" data-t="d"><td class="mono">0052</td><td class="mono">07-06</td><td>accepted</td><td><b>Every agent-spawn identifier is <code>agentheim:</code>-qualified,</b> unconditionally; bare source-run outside the plugin is unsupported; live-tree lint.</td><td>agent-spawn-namespace.mjs</td><td><span class="tag d">d</span></td></tr>
+    <tr data-cl="runtime" data-t="e"><td class="mono">0053</td><td class="mono">07-09</td><td>accepted</td><td><b>Runtime self-lifecycle is a third dashboard write category;</b> <code>POST /api/stop</code> responds, then deletes the runfile and exits; CSRF on loopback accepted symmetrically.</td><td>stop-api.mjs</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="lifecycle" data-t="b a"><td class="mono">0054</td><td class="mono">07-09</td><td>accepted</td><td><b>Compute-then-write atomicity:</b> each verb resolves read-only, computes full new INDEX and protocol content purely, then moves and writes; the drifting dry-run mirror deleted; negative-count guard.</td><td>task-lifecycle.mjs</td><td><span class="tag b">b</span> <span class="tag a">a</span></td></tr>
+    <tr data-cl="lifecycle" data-t="b"><td class="mono">0055</td><td class="mono">07-13</td><td>accepted</td><td><b>Mover writes destination then unlinks source;</b> never rewrites in place; a missing lifecycle folder is backfilled.</td><td>applyTaskMove</td><td><span class="tag b">b</span></td></tr>
+    <tr data-cl="runtime" data-t="e"><td class="mono">0056</td><td class="mono">07-13</td><td>accepted</td><td><b>A <code>module.register()</code> resolve hook</b> per test file re-resolves the styleguide's bare specifiers against <code>dashboard/node_modules</code>, enabling jsdom DOM-render tests.</td><td>test/resolve-hook.mjs</td><td><span class="tag e">e</span></td></tr>
+    <tr data-cl="git" data-t="c e"><td class="mono">0057</td><td class="mono">07-13</td><td>accepted</td><td><b>Derived artifacts are unstageable from a worktree:</b> the <code>checkpoint</code> verb filters the worker's file list against <code>dashboard/dist/</code>; amended to also stage the vacated <code>doing/</code> path.</td><td>derived-artifact-guard.mjs, checkpoint verb</td><td><span class="tag c">c</span> <span class="tag e">e</span></td></tr>
+    <tr data-cl="ids" data-t="b c"><td class="mono">0058</td><td class="mono">07-21</td><td>accepted</td><td><b>ADR numbering is collision-proof:</b> workers mint provisionally, the conductor finalizes against main at squash-merge; ordinal continuity kept because ADR ids read as a timeline.</td><td>adr-allocation.mjs</td><td><span class="tag b">b</span> <span class="tag c">c</span></td></tr>
+    <tr data-cl="doctrine" data-t="a d"><td class="mono">0059</td><td class="mono">07-21</td><td>accepted</td><td><b>Mechanize-or-drop:</b> a convention-establishing task ships enforcement or records "prose-only, unenforced"; gated at modeling readiness and verifier 6c; amended: lints are self-hosting-only and gates fire only on doctrine-bearing surfaces.</td><td>judgment-embedded checks</td><td><span class="tag a">a</span> <span class="tag d">d</span></td></tr>
+    <tr data-cl="books" data-t="b"><td class="mono">0060</td><td class="mono">07-21</td><td>accepted</td><td><b>INDEX entry-length cap</b> ~60 words for new bullets; grandfathered by date.</td><td>index-entry-length.mjs</td><td><span class="tag b">b</span></td></tr>
+    <tr data-cl="gates" data-t="a b"><td class="mono">0061</td><td class="mono">07-21</td><td>accepted</td><td><b>Falsifiability gate:</b> criteria classified machine-checkable or <code>[human-eye]</code>; the verifier never proxies perceptual claims and escalates on metric drift (check 1b).</td><td>human-eye-criteria lint; 1b is prose</td><td><span class="tag a">a</span> <span class="tag b">b</span></td></tr>
+    <tr data-cl="gates" data-t="a"><td class="mono">0062</td><td class="mono">07-21</td><td>accepted</td><td><b>Runner-first testing:</b> only the runner's verdict counts; the first test-bearing task establishes the runner and proves it can fail; external-runner fallback for runner-less ecosystems.</td><td>verifier check 2 (prose by declaration)</td><td><span class="tag a">a</span></td></tr>
+    <tr data-cl="git" data-t="c"><td class="mono">0063</td><td class="mono">07-21</td><td>accepted</td><td><b>Worktree-abandonment diff salvage:</b> capture <code>git diff</code> to <code>.agentheim/salvage/&lt;id&gt;-&lt;tag&gt;.patch</code> before any removal; named in escalation summaries.</td><td>worktree-salvage.mjs (path); sequencing is prose</td><td><span class="tag c">c</span></td></tr>
+    <tr data-cl="session" data-t="a b"><td class="mono">0064</td><td class="mono">07-21</td><td>accepted</td><td><b>Vacuum guard:</b> an empty board surfaces the open vision decision with its age instead of minting filler, unconditionally; session-end batch-mix line (product-facing / harness / bookkeeping).</td><td>vacuum-guard.mjs</td><td><span class="tag a">a</span> <span class="tag b">b</span></td></tr>
+    <tr data-cl="session" data-t="a b"><td class="mono">0065</td><td class="mono">07-21</td><td>accepted</td><td><b>Remediation outranks further diagnosis at dispatch;</b> every spike carries a stop-loss clause and an early stop is a legitimate SUCCESS.</td><td>spike-stop-loss lint; ordering is prose</td><td><span class="tag a">a</span> <span class="tag b">b</span></td></tr>
+    <tr data-cl="session" data-t="c a"><td class="mono">0066</td><td class="mono">07-21</td><td>accepted</td><td><b>Session-start human-churn reconciliation:</b> untrailed commits since the last session end surfaced as an advisory; eleven machine commit shapes recognized after two amendments.</td><td>session-start-churn.mjs</td><td><span class="tag c">c</span> <span class="tag a">a</span></td></tr>
+    <tr data-cl="doctrine" data-t="a d"><td class="mono">0067</td><td class="mono">07-22</td><td>accepted</td><td><b>Two recorded declines:</b> no mandatory mid-batch checkpoint (the harness is a synchronous watched conversation; invalid under headless invocation); no Haiku thin-agent wrapper for the light skills.</td><td>none</td><td><span class="tag a">a</span> <span class="tag d">d</span></td></tr>
+    <tr data-cl="doctrine" data-t="a"><td class="mono">0068</td><td class="mono">07-22</td><td>accepted</td><td><b>Drift-twice rule:</b> a restatement that drifts a second time is deleted and pointered, never re-synced.</td><td>prose</td><td><span class="tag a">a</span></td></tr>
+    <tr data-cl="doctrine" data-t="a"><td class="mono">0069</td><td class="mono">07-22</td><td>accepted</td><td><b>Audit-closure doctrine:</b> PASS bar, dated stamp in <code>audit-log.md</code> with delta scoping, three residuals dispositioned, raw line-number pointers banned in doctrine prose.</td><td>doctrine-line-pointer.mjs</td><td><span class="tag a">a</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>How the decisions evolved</h3>
+  <div class="timeline">
+    <div class="tl"><div class="d">2026-06-05 → 06-06 · ADR-0001 to 0012</div><b>The dashboard substrate.</b> Stdlib runtime, styleguide as ESM single source, SSE, a mover that owns only the move, slugged-filename resolution. The dashboard could still promote.</div>
+    <div class="tl"><div class="d">2026-06-08 → 06-19 · ADR-0013 to 0030</div><b>Read-only reversal and product surface.</b> Release discipline; on 06-14 the dashboard becomes read-only and the bridge launches sessions instead; DISMISS cascade; committing doctrine and the trailer; advisory writes and <code>state/</code>; random-token ids; search, attention cues, open-intent split.</div>
+    <div class="tl"><div class="d">2026-07-02 → 07-04 · ADR-0031 to 0047</div><b>The self-audit mechanization burst.</b> Model tiers, worktrees, direct specialist consultation, runtime drive, the three-layer boundary with fail-closed dependencies, rotation doctrine and both triggers, vision-conformance, growth doctrine, id-grammar lint, hook heartbeat.</div>
+    <div class="tl"><div class="d">2026-07-05 → 07-13 · ADR-0048 to 0057</div><b>Command-deck redesign and fail-closed hardening.</b> Palette and accent discipline, prompt console, namespace fix for installed plugins, stop endpoint, compute-then-write, write-then-unlink, derived-artifact checkpoint guard.</div>
+    <div class="tl"><div class="d">2026-07-21 → 07-22 · ADR-0058 to 0069</div><b>The Dorc review wave and the audits.</b> Nine doctrine tasks from an external review of the harness in use on another project (A1 to A6), then three consistency audits in one day: declines recorded, drift-twice, audit closure.</div>
+  </div>
+
+  <details><summary>Amendment chains and status inconsistencies</summary><div class="body">
+    <p><b>Chains:</b> 0026 → 0032 (claim commit) → 0042 (carve-out). 0032 → 0037 → 0057 → w2njd. 0028 → 0044. 0039 → 0045 → 0047 → refusal amendment. 0038 → 0054 → 0055. 0059 → two amendments. 0064 → r4gcz, 0069. 0065 → t8kfq. 0066 → pzacx, m7xva. 0027 → 0043 / 0046 / 0053, each adding a write carve-out that erodes the original "one file only".</p>
+    <p><b>Tensions the record leaves open:</b> whats-next has four writers with no ordering contract; 0032 calls itself a bet while 0036 and 0058 build hard guarantees on it; workflow ADRs are split between <code>global</code> and <code>agentic-workflow</code> scope and the top-level index lists only global ones; 0058 covers only the worktree path; every 0060 to 0069 lint is inert in consumer installs by decision; three grandfathering shapes exist; 0067's argument is invalid under headless invocation and nothing detects it; introducing CI would move both 0013 and 0057.</p>
+  </div></details>
+</section>
+<section id="history">
+  <div class="eyebrow">09 · history and open work</div>
+  <div class="sec-head"><h2>How it got here</h2><p>Twenty-one tags between 2026-04-24 and 2026-07-13, then an unreleased doctrine wave on main. The protocol diary holds 878 entries across the live file and the June archive: 234 completions, 184 batch starts, 107 refines, 101 session ends, 99 captures, 10 verification failures, 1 escalation.</p></div>
+
+  <div class="scroll"><table>
+    <tr><th>Version</th><th>Date</th><th>Theme</th><th>What changed</th><th>ADRs</th></tr>
+    <tr><td class="mono">0.1.0</td><td class="mono">04-24</td><td>Initial design</td><td>Skills and agents skeleton; the DDD spine and no-code brainstorm from day one; "100% vs 54.8%" benchmark claim (no artifact records it).</td><td>—</td></tr>
+    <tr><td class="mono">0.2.0</td><td class="mono">04-27</td><td>Installable</td><td>Architecture pass in brainstorm; marketplace manifest; Windows sound hooks; README.</td><td>—</td></tr>
+    <tr><td class="mono">0.3.0</td><td class="mono">05-06</td><td>Modes</td><td>Six switchable conversational modes.</td><td>—</td></tr>
+    <tr><td class="mono">0.4–0.5</td><td class="mono">05-12</td><td>TTS</td><td>Beeps → TTS + voice picker; later extracted into the Utterheim plugin.</td><td>—</td></tr>
+    <tr><td class="mono">0.6.0</td><td class="mono">05-14</td><td>Rename + memory layer</td><td>Agentheim name; per-BC and top-level indexes, backlinks, prior art, concepts; infrastructure BC; TDD and the verifier gate in work; backfill script.</td><td>—</td></tr>
+    <tr><td class="mono">0.8.0</td><td class="mono">06-08</td><td>Dashboard</td><td>Stdlib server, Kanban, slide-over, SSE, a Promote write path; <code>/dashboard</code>; research gated by the reviewer. (No 0.7.x.)</td><td>0001–0012</td></tr>
+    <tr><td class="mono">0.8.1–0.8.4</td><td class="mono">06-08</td><td>capture, release</td><td><code>capture</code> skill; release discipline; per-column sort; plugin-rooted launcher; <code>/release</code>.</td><td>0013</td></tr>
+    <tr><td class="mono">0.8.5</td><td class="mono">06-14</td><td>Read-only + bridge</td><td>Dashboard read-only; VS Code bridge; launch buttons; skip-permissions; theme; doing pulse; <code>capture</code> → <code>quick-capture</code>.</td><td>0014–0019</td></tr>
+    <tr><td class="mono">0.8.6</td><td class="mono">06-16</td><td>DISMISS</td><td>Dismiss with cascade; Button / Modal / Menu primitives; confetti; deterministic port.</td><td>0020, 0022</td></tr>
+    <tr><td class="mono">0.8.7</td><td class="mono">06-18</td><td>What's Next, search</td><td><code>whats-next</code> skill and panel; Workflow guide and About page; search; random-token ids; duplicate-id guard.</td><td>0021, 0023–0025, 0027, 0028</td></tr>
+    <tr><td class="mono">0.8.8</td><td class="mono">06-19</td><td>Inquire</td><td><code>inquire</code> skill; rail attention cues; Done collapse; README restructure per research.</td><td>0029, 0030</td></tr>
+    <tr><td class="mono">0.8.9</td><td class="mono">07-04</td><td>Harness hardening</td><td>In-flight lane via hooks; dependency-aware board; worktrees; runtime drive; bookkeeping mechanized; model tiers; direct specialist consultation; CONSOLIDATE; rotation; session-end advisories; CRLF/BOM handling.</td><td>0031–0045</td></tr>
+    <tr><td class="mono">0.8.10</td><td class="mono">07-04</td><td>(section missing in CHANGELOG)</td><td>Server-side whats-next delete; INDEX done-list rotation wired and first real rotation.</td><td>0046, 0047</td></tr>
+    <tr><td class="mono">0.9.0</td><td class="mono">07-09</td><td>Command-deck</td><td>Docked prompt console with five modes; board-wide View chip; cool-neutral palette; accent discipline; stop endpoint; REFINE auto-promotes; <code>agentheim:</code> namespace fix for installed plugins.</td><td>0048–0053</td></tr>
+    <tr><td class="mono">0.9.1</td><td class="mono">07-10</td><td>Fail-closed scripts</td><td>Rotation refuses unparseable lists; compute-then-write; Workflow guide rebuilt with the loop map.</td><td>0054</td></tr>
+    <tr><td class="mono">0.9.2</td><td class="mono">07-13</td><td>Model selector</td><td>Model split button; bridge capability handshake and skew banner; jsdom harness; dist checkpoint guard; write-then-unlink mover.</td><td>0055–0057</td></tr>
+    <tr><td class="mono">unreleased</td><td class="mono">07-21 → 23</td><td>Dorc wave + audits</td><td>ADR-0058 to 0069 on main; last commit promotes task jf6qz.</td><td>0058–0069</td></tr>
+  </table></div>
+
+  <h3>Four eras</h3>
+  <div class="grid2">
+    <div class="card"><h4>April: prompts and markdown</h4><p>A pure prompts-and-markdown plugin: brainstorm, model, work, research, specialist agents, one task = one commit. Everything the README still calls load-bearing ("no-code brainstorm, strict worker return format, orchestrator never writing code, protocol log on every action") dates from here.</p></div>
+    <div class="card"><h4>May: modes, memory, gates</h4><p>Six modes; the memory layer with indexes and backlinks; TDD and verification before completion; the infrastructure BC; the rename.</p></div>
+    <div class="card"><h4>June: the dashboard era</h4><p>On 2026-06-05 the owner ran brainstorm on Agentheim itself (vision, three BCs, the transport-versus-meaning boundary). Nine days later the largest reversal in the product's history: the dashboard's write path was removed and replaced by bridge-launched sessions. The rest of June is dashboard product surface; four research reports in one evening were all about the dashboard-to-terminal loop.</p></div>
+    <div class="card"><h4>July: mechanization, review, audits</h4><p>A 2026-07-02 self-audit (Fable plus Opus) found "zero hooks, every structural rule is prompt-enforced" and no model pins; 18 tasks captured in one batch. 07-03 was mechanization day (scripts, README consolidated 1,006 → 598, hooks, rotation) with two incidents: an ADR-number collision and a merge conflict resolved with the builder away. 07-06 the installed plugin broke ("Agent type 'worker' not found"). 07-21 an external review of the harness in use on the Dorc project produced findings A1 to A6 → nine doctrine tasks, run sequentially at MAX_PARALLEL=1, batch mix "0% product-facing". 07-22 three audits in one day and the only escalation on record (a criterion asked a worker to edit conductor-owned INDEX headers).</p></div>
+  </div>
+
+  <h3>Evals</h3>
+  <ul>
+    <li><b>quick-capture</b> (skill-creator benchmark, 2026-06-08): 3 evals × 3 runs; pass rate 100% ± 0 with the skill vs 77% ± 6 without; 66 s vs 100 s.</li>
+    <li><b>verifier catch rate</b>: 16 planted-defect fixtures, each a fake worktree with a diff, a worker SUCCESS block and expected verdict, three of them booting a real tiny server for check 8. Dataset of record: 60 scored spawns, 100% catch, 0% false FAIL after a check-6 wording fix.</li>
+    <li><b>vision-conformance</b>: two fixtures (planted drift 3/3 flagged, clean batch 0/4 false positives), a manual runbook pass.</li>
+    <li><b>plugin-level scenarios</b> in <code>evals/evals.json</code>: four prompts with expected outputs, no results recorded.</li>
+    <li>No CI; the only gate is <code>node --test lib/test/*.test.mjs</code>. The README's "100% vs 54.8%" claim has no artifact behind it.</li>
+  </ul>
+
+  <h3>Open work (all of it)</h3>
+  <div class="scroll"><table>
+    <tr><th>Task</th><th>Status</th><th>Type</th><th>Ask</th></tr>
+    <tr><td class="mono">agentic-workflow-jf6qz</td><td><span class="st todo">todo</span></td><td>bug</td><td>Fix <code>archivedDoneHeader</code>'s "most recent N" wording and heal stale live INDEX headers on a no-op rotation (builder chose Option A), with tests and an ADR-0047 amendment. Depends on mqwnc (done).</td></tr>
+    <tr><td class="mono">agentic-workflow-e4bjh</td><td><span class="st backlog">backlog</span></td><td>refactor</td><td>Finish bookkeeping mechanization: <code>capture</code> and <code>dismiss</code> verbs on the lifecycle CLI, so quick-capture, modeling and brainstorm stop hand-editing INDEX markers and protocol. "The last remaining LLM-text-surgery-on-derived-state surface."</td></tr>
+    <tr><td class="mono">agentic-workflow-d5a9b</td><td><span class="st backlog">backlog</span></td><td>feature</td><td>Parallel worktree sessions with independent capture and ticket movement; notes demand modeling of state consistency and ask "whether this adds genuine parallelism or is a presentation/workflow change — challenge the model thoroughly before refining."</td></tr>
+  </table></div>
+  <p><b>Already flagged by the owner elsewhere:</b> vision open question "Brainstorm on existing code" (open since 2026-06-05: reverse-engineer a best-guess vision and domain from code before the dialogue; "likely multi-agent; not present today"); two declined-pending-incident audit residuals (cross-task metric drift, untyped investigation tasks); the README note that a context map "may now be warranted" while <code>knowledge/index.md</code> still says "not warranted — single-BC domain" with three BCs present.</p>
+
+  <div class="note warn"><p><b>Stale documentation to reconcile during the rework:</b> <code>agentheim-workflow.html</code> at the repo root is 0.6.0-era (four skills, <code>/capture</code>, "done frontmatter carries the commit SHA", "cap: 3", FAIL "rolls back to doing/" pre-worktree); the README's skill table says "five skills" and omits whats-next and inquire; CHANGELOG has a 0.8.10 link but no section; the agentic-workflow README carries three resolved open questions and is back over its own consolidation threshold at 1,206 lines.</p></div>
+</section>
+
+<section id="rework">
+  <div class="eyebrow">10 · rework lens</div>
+  <div class="sec-head"><h2>Reading the inventory through the three goals</h2><p>Nothing in the repo mentions separating the dashboard or a pluggable task backend; the nearest existing seams are the transport-versus-meaning boundary drawn on 2026-06-05 and ADR-0038's three-layer mover / CLI / skill boundary. What follows is derived from the inventory above, not from any recorded decision.</p></div>
+
+  <h3>Goal 1 · Extract the core principles</h3>
+  <p>Section 01 lists thirty-one. Counting the tags on the decision table: 24 ADRs carry <span class="tag a">a</span>, 22 carry <span class="tag b">b</span>, 12 carry <span class="tag c">c</span>, 9 carry <span class="tag d">d</span>, 33 carry <span class="tag e">e</span>. The principles that appear nowhere as an ADR but everywhere as doctrine, and should be written down first: no code before the vision; phrasing not commands; the conductor never writes code and workers never run git; one writer per surface; bounce don't guess; advisories never gate; measure never fabricate. The vision's five non-goals are the negative space of the same list.</p>
+
+  <h3>Goal 2 · Separate the dashboard from the skills' workflow</h3>
+  <p>The dashboard is already read-only over lifecycle; the coupling is knowledge, not writes. Every place one side knows about the other:</p>
+  <div class="scroll"><table>
+    <tr><th>Coupling</th><th>Direction</th><th>Where</th><th>Kind</th></tr>
+    <tr><td>Skill names and verb strings seeded into launched sessions (<code>/agentheim:modeling refine|promote|dismiss</code>, the five prompt modes, work, whats-next)</td><td>dashboard → skills</td><td><code>app/modeling-command.js</code>, <code>app/prompt-mode.js</code>, bridge <code>deriveNameFromPrompt</code></td><td>an unrecorded actions catalogue</td></tr>
+    <tr><td>Lifecycle vocabulary <code>['backlog','todo','doing','done']</code> in three copies; status-gated card actions</td><td>dashboard → task model</td><td><code>tree.mjs</code>, <code>board-data.js</code>, styleguide <code>data.js</code></td><td>schema</td></tr>
+    <tr><td>Three independent frontmatter parsers, two vision-heading regexes, filename convention <code>&lt;id&gt;-&lt;slug&gt;.md</code></td><td>dashboard → task model</td><td><code>tree.mjs</code>, <code>app/frontmatter.js</code>, <code>search.mjs</code>, <code>project-name.mjs</code></td><td>schema</td></tr>
+    <tr><td>Folder layout: <code>contexts/&lt;bc&gt;/{README,INDEX,concepts}</code>, <code>knowledge/{decisions,research}</code>, <code>vision.md</code>, <code>context-map.md</code>, the <code>.agentheim/</code> marker</td><td>dashboard → state layout</td><td><code>tree.mjs</code>, <code>discovery.mjs</code></td><td>schema</td></tr>
+    <tr><td>Advisory schemas: <code>whats-next.md</code> sections and <code>generated</code>; <code>in-flight.json</code> and its five-minute window (constant duplicated)</td><td>both</td><td><code>whats-next-state.js</code>, <code>in-flight-state.js</code> ↔ whats-next skill, <code>agent-heartbeat.mjs</code></td><td>schema</td></tr>
+    <tr><td>Modeling's "no inline # comments" rule exists because of the dashboard's parser</td><td>skills → dashboard</td><td>modeling task format</td><td>leak</td></tr>
+    <tr><td><code>lib/</code> imports <code>discoverRoot</code> from <code>dashboard/discovery.mjs</code> (four entry points)</td><td>lib → dashboard</td><td>task-lifecycle-cli, both rotations, hook-agent-signal</td><td>dependency to invert</td></tr>
+    <tr><td>Dashboard-specific mechanics inside the generic conductor and worker prompts: <code>linkDashboardNodeModules</code>, worker rule 9 about <code>dashboard/dist/</code>, the checkpoint guard's frozen prefix, the runtime-surface manifest whose only instance is the dashboard</td><td>workflow → dashboard (self-hosting)</td><td>work SKILL, worker template, derived-artifact-guard</td><td>leak into consumer-facing prompts</td></tr>
+    <tr><td>Styleguide imported by relative path across the BC boundary; content-type registry mirrored by hand</td><td>dashboard → design-system</td><td><code>dashboard/app/*.js</code>, <code>build.mjs</code>, <code>resolve-hook.mjs</code></td><td>build seam</td></tr>
+    <tr><td>Plugin-cache resolution shared by the launcher, the hooks and the lifecycle CLI; <code>dist/</code> must sit beside <code>server.mjs</code></td><td>both</td><td><code>resolve-plugin-file.mjs</code> and every inlined bootstrap</td><td>packaging</td></tr>
+    <tr><td>Workflow page copy, trash-can dialog copy and the stopped overlay name skills, verbs, gates, folders and the <code>/dashboard</code> command</td><td>dashboard → skills</td><td><code>board.js</code></td><td>documentation baked into UI</td></tr>
+  </table></div>
+  <p><b>Already clean:</b> <code>tree.mjs</code> and <code>search.mjs</code> are the only server modules that know the layout; <code>board-data.js</code> is the only frontend module mapping tree to cards; <code>library-data.js</code> the only one mapping locations to the rail; <code>intent-route.js</code> the only discriminator. A read-model port would replace <code>buildTree</code> + <code>searchCorpus</code> + two advisory paths + the watcher's target, and an actions port would replace the command-string constants.</p>
+
+  <h3>Goal 3 · A task system behind an interface</h3>
+  <p>The three-layer boundary is already the seam: layer 1 is the backend primitive, layer 2 is deterministic bookkeeping that never touches the VCS, layer 3 is judgment plus commit. Everything tagged <span class="tag b">b</span> lives in layers 1 and 2. Grouping every operation and read in this inventory by who needs it gives eight ports; the names are working labels.</p>
+  <div class="grid2">
+    <div class="card c-state"><h4>TaskStore (write side)</h4><ul><li>mint and validate ids (stable, never reused, never renumbered)</li><li>create in backlog or todo; get and set fields; append note sections</li><li>transition with preconditions: promote, claim batch, complete (idempotent), rollback, bounce, abandon, re-route</li><li>dismiss with transitive-dependents query and backlink strip</li><li>dependency satisfaction over done work, dangling-id detection, cycle detection</li><li>fuzzy resolve; per-BC counts; prior-art search including archives</li><li>a change manifest for the VCS layer (empty for a remote backend)</li></ul><p class="small">Today: <code>task-lifecycle.mjs</code> for three transitions; prose for eight others.</p></div>
+    <div class="card c-dash"><h4>ReadModel (projection)</h4><ul><li>list tasks by BC × status with id, title, status, type, context, mtime, dependsOn, blocks</li><li>document pointers with mtimes: vision, map, READMEs, concepts, ADRs, research</li><li>one body at a time; full-text search with excerpts</li><li>one change event; the two advisory files</li></ul><p class="small">Today: <code>tree.mjs</code>, <code>search.mjs</code>, <code>watcher.mjs</code>.</p></div>
+    <div class="card c-state"><h4>EventLog (the protocol)</h4><ul><li>append typed entries: promoted, batch started, completed, verification failed, bounced, failed, session ended, captured, refined, dismissed, consolidated, research, release</li><li>query the newest entry of a kind (session-end boundary; staleness comparisons)</li><li>retention: cap-and-roll by month</li></ul><p class="small">Today: <code>protocol.md</code>, 13+ hand-written shapes, four mechanized.</p></div>
+    <div class="card c-state"><h4>Catalog (the INDEXes)</h4><ul><li>per-BC lists per status and counts; ADR, research and concept pointers; top-level BC list</li><li>entry-length cap; done-list rotation to archive</li></ul><p class="small">A derived view kept in sync by text surgery. <code>backfill-indexes.ps1</code> proves it is reconstructible, which makes it a projection candidate rather than a store.</p></div>
+    <div class="card c-adr"><h4>DecisionStore and KnowledgeStore</h4><ul><li>ADRs: ordinal allocation with provisional numbers and finalization; scope; status; bidirectional task links</li><li>vision sections (success, non-goals, open questions with age), context map, BC README sections (UL, test command, runtime surface), research reports with review outcome, concepts</li></ul></div>
+    <div class="card c-lib"><h4>AdvisoryStore</h4><ul><li>whats-next (single latest, overwritten; writers: whats-next, churn, vision-conformance; one delete)</li><li>in-flight heartbeat with staleness</li><li>salvage patches keyed by task and tag</li></ul><p class="small">Its own port because ADR-0027's category boundary is the one rule every writer cites.</p></div>
+    <div class="card c-git"><h4>VCS integration</h4><ul><li>commit a manifest with a message and trailer; scoped staging; rename halves</li><li>isolate a worker (worktree), checkpoint, integrate (squash), detect conflicts, salvage, teardown</li><li>untrailed-commit query since a timestamp; machine-shape recognition</li></ul><p class="small">Independent of the task backend except the batch-start claim commit and the trailer that churn reconciliation mines.</p></div>
+    <div class="card c-agents"><h4>AgentRuntime</h4><ul><li>spawn by namespaced type with a model tier; parallel fan-out; strict return blocks</li><li>liveness hooks; plugin-file resolution; the mode picker</li></ul><p class="small">Everything tagged <span class="tag d">d</span>.</p></div>
+  </div>
+
+  <h3>What a backend must still provide for the doctrine to hold</h3>
+  <p>Stable never-reused ids (ADR-0028); fail-closed dependency resolution (0038); promote, claim, complete, bounce with an optimistic precondition (0007, 0012); a per-task free-text note channel for verifier, salvage and outcome notes (0061, 0063, 0065); a <code>type</code> with at least <code>spike</code> and <code>decision</code> (0064, 0065); prior-art reachability over done work (0047); a task-id-in-commit convention for churn reconciliation (0026, 0066). A Jira backend obviates the mover, INDEX counters and markers, done-list rotation, the duplicate-id guard, ADR-number finalization, the checkpoint's moved-from detection, CRLF/BOM normalization, and task e4bjh.</p>
+
+  <h3>Drift risks: the same rule in several places</h3>
+  <div class="two"><ul>
+    <li>Global-vs-BC-local infrastructure routing test: brainstorm, modeling CAPTURE, quick-capture</li>
+    <li>Spike stop-loss clause: brainstorm, modeling task format, quick-capture</li>
+    <li>Vacuum guard: work, modeling, whats-next</li>
+    <li>"Same thread" definition: work (twice), whats-next</li>
+    <li>whats-next.md shape and staleness weighting: whats-next, work (twice), modeling</li>
+    <li>Protocol header creation: five skills</li>
+    <li>Task file format: modeling (canonical), quick-capture, worker.md, verifier</li>
+    <li>Id minting with backstop: modeling, quick-capture, id-grammar.md, lib-bootstrap; brainstorm omits the backstop</li>
+    <li>Three-iteration cap: work, verification skill, research, research-review</li>
+    <li>Routing table: worker.md and orchestrator.md</li>
+    <li>Verifier checks: verifier.md plus a pointer summary that drifted six times</li>
+    <li>Worker return fields: worker-return-format.md, TDD skill, work template</li>
+    <li>Commit message shapes: commit-doctrine plus every skill; recognized in <code>MACHINE_SHAPES</code></li>
+    <li>Bootstrap one-liner: about eighteen copies</li>
+    <li>Lifecycle vocabulary: three copies in the dashboard</li>
+    <li>Frontmatter parsing: regex in lib (three helper copies), tree.mjs, app/frontmatter.js, search.mjs, backfill-indexes.ps1</li>
+    <li><code>STALE_WINDOW_MS</code>: lib and dashboard</li>
+    <li><code>ADOPTION_DATE</code>: three lint constants</li>
+    <li>Agent roster: eight files and one frozen array</li>
+    <li>Session naming carve-outs: dashboard and bridge</li>
+  </ul></div>
+
+  <h3>Smells found during this read</h3>
+  <div class="two"><ul>
+    <li><b>Uneven mechanization:</b> promote, claim, complete, checkpoint are scripts; bounce's INDEX edit, FAIL rollback, dismiss, re-route, abandon and backlog-item inserts are prose. Two code paths for one transition (worker move + conductor verb).</li>
+    <li><b>INDEX is a hand-maintained cache</b> with counts kept by prose arithmetic; the backfill script emits a different line shape than the verbs, so a regenerated index would break rotation parsing.</li>
+    <li><b>protocol.md is both diary and parsed data source</b>; local timestamps without zone feed <code>git log --since</code>; two entry shapes exist for the same capture operation.</li>
+    <li><b>"Pick the lowest-numbered unblocked tasks"</b> is stale under random ids; modeling's numeric-only resolution and example ids are legacy-only.</li>
+    <li><b><code>## Outcome</code> is load-bearing but never templated</b>; the task schema is split across four files.</li>
+    <li><b>Self-hosting concerns leak into consumer prompts:</b> <code>dashboard/dist/</code> rule, node_modules junction, harness path lists in batch-mix and the convention check, <code>chore(agentic-workflow): rotate …</code> prescribed for every consumer, quick-capture evals tied to this repo's BC names, "For Marco's personal projects" in architect.md.</li>
+    <li><b>Non-git mode is an under-specified second product.</b></li>
+    <li><b>whats-next.md has three writers</b> with last-writer-wins and no owner for its commit story.</li>
+    <li><b>Doctrine-only skills</b> are references living under <code>skills/</code>.</li>
+    <li><b>The three-layer choreography is awkward:</b> complete is idempotent only because the squash moved the file; checkpoint must detect the worker's move; old ADR numbers are hand-patched after finalization. Symptoms of two actors mutating task state in files.</li>
+    <li><b>Session end can produce four commits.</b></li>
+    <li><b>Dead code kept as defaults:</b> the <code>ui</code> move policy; bare command constants unreachable from the UI; a global test hook in the production bundle.</li>
+    <li><b>Dashboard columns key on status, not folder,</b> so a wrong status silently lands in the wrong column while the invariant says they must agree.</li>
+    <li><b>Per-connection watchers:</b> four EventSources per tab, each with its own filesystem watcher; search reads every body per keystroke.</li>
+    <li><b>Source-regex tests</b> dominate the component suites and break on any restructuring of the 3,780-line <code>board.js</code>.</li>
+    <li><b>Loopback trust:</b> <code>/api/bridge</code> exposes the bridge token to any page on the dashboard origin; no Origin checks; the root path leaks in health and tree.</li>
+    <li><b>Hooks may silently not fire</b> in plugin-packaged skills; liveness has no task identity.</li>
+    <li><b>Status inconsistencies</b> in the ADR record; ADR id format split 59 / 10; scope split between global and BC.</li>
+    <li><b>Terminology drift:</b> model vs modeling; conductor vs orchestrator (the concept template calls the conductor "the orchestrator").</li>
+    <li><b>Timestamps mix</b> local-time protocol stamps with ISO UTC advisory stamps.</li>
+  </ul></div>
+
+  <h3>Core versus accreted</h3>
+  <div class="grid2">
+    <div class="card c-skills"><h4>Reads as core (April–May, named load-bearing)</h4><p>Phrase-triggered skills; no-code brainstorm; vision and context map; BCs with README and a memory layer; tasks with frontmatter and a four-state lifecycle; one task = one commit; DAG-aware parallel workers; strict worker return format; conductor and orchestrator never writing code; protocol on every action; two adversarial gates plus TDD; ADRs as decision tasks; the five non-goals.</p></div>
+    <div class="card c-dash"><h4>Reads as accreted (June–July, largely self-referential)</h4><p>The dashboard and everything downstream of it (bridge, token, capability handshake, prompt console axes, three localStorage stores, What's Next panel and delete, in-flight lane and hook heartbeats, confetti, About page, search, rail cues, three write-category ADRs to keep "read-only" true): roughly 115 of 181 done tasks in agentic-workflow plus all design-system and most infrastructure tasks. The lib mechanization lineage exists only because INDEX and protocol are LLM-edited derived markdown. Session-boundary bookkeeping is advisory layered on git-log parsing of a self-imposed trailer. Doctrine-about-doctrine and seven live-tree lints run only against this repo.</p></div>
+  </div>
+</section>
+</main>
+</div>
+
+<script>
+(function(){
+  // theme
+  var root=document.documentElement,btns=document.querySelectorAll('[data-theme-pick]');
+  function apply(v){try{if(v==='system'){root.removeAttribute('data-theme');localStorage.removeItem('anatomy.theme')}else{root.setAttribute('data-theme',v);localStorage.setItem('anatomy.theme',v)}}catch(e){if(v==='system')root.removeAttribute('data-theme');else root.setAttribute('data-theme',v)}
+    btns.forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-theme-pick')===v))})}
+  var saved='system';try{saved=localStorage.getItem('anatomy.theme')||(root.getAttribute('data-theme')||'system')}catch(e){saved=root.getAttribute('data-theme')||'system'}
+  apply(saved);
+  btns.forEach(function(b){b.addEventListener('click',function(){apply(b.getAttribute('data-theme-pick'))})});
+
+  // rail active state
+  var links=Array.prototype.slice.call(document.querySelectorAll('.rail a[href^="#"]'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'))}).filter(Boolean);
+  if('IntersectionObserver' in window){
+    var current=null;
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){if(en.isIntersecting){current=en.target.id;links.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+current)})}})
+    },{rootMargin:'-10% 0px -80% 0px',threshold:0});
+    secs.forEach(function(s){io.observe(s)});
+  }
+
+  // ADR filters
+  var table=document.getElementById('adr-table'),rows=table?Array.prototype.slice.call(table.querySelectorAll('tbody tr')):[];
+  var fbtns=Array.prototype.slice.call(document.querySelectorAll('#adr-filters button')),search=document.getElementById('adr-search'),count=document.getElementById('adr-count');
+  var active='all';
+  function run(){
+    var q=(search.value||'').trim().toLowerCase(),shown=0;
+    rows.forEach(function(r){
+      var ok=true;
+      if(active!=='all'){var kv=active.split(':');if(kv[0]==='cl')ok=r.getAttribute('data-cl')===kv[1];else ok=(' '+r.getAttribute('data-t')+' ').indexOf(' '+kv[1]+' ')>=0}
+      if(ok&&q)ok=r.textContent.toLowerCase().indexOf(q)>=0;
+      r.hidden=!ok;if(ok)shown++;
+    });
+    count.textContent=shown+' of '+rows.length;
+  }
+  fbtns.forEach(function(b){b.addEventListener('click',function(){active=b.getAttribute('data-f');fbtns.forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});run()})});
+  if(search)search.addEventListener('input',run);
+  if(rows.length)run();
+})();
+</script>
+</body>
+</html>
