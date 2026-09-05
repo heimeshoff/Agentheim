@@ -1,11 +1,4 @@
-# Protocol
-
-Chronological log of everything that happens in this project.
-Newest entries on top.
-
----
-
-## 2026-09-05 22:36 -- Modeling / Captured: agentic-workflow-swj2q + agentic-workflow-g4zce - single-task `/agentheim:work <id>` and the todo-card Work button
+# P## 2026-09-05 22:36 -- Modeling / Captured: agentic-workflow-swj2q + agentic-workflow-g4zce - single-task `/agentheim:work <id>` and the todo-card Work button
 
 **Type:** Modeling / Capture
 **BC:** agentic-workflow
