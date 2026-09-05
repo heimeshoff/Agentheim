@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 00:11 -- Modeling / Promoted: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-06 00:12 -- Modeling / Refined: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
 
 **Type:** Modeling / Refine
