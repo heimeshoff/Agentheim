@@ -1,4 +1,11 @@
-# P## 2026-09-05 22:36 -- Modeling / Captured: agentic-workflow-swj2q + agentic-workflow-g4zce - single-task `/agentheim:work <id>` and the todo-card Work button
+# Protocol
+
+Chronological log of everything that happens in this project.
+Newest entries on top.
+
+---
+
+## 2026-09-05 22:36 -- Modeling / Captured: agentic-workflow-swj2q + agentic-workflow-g4zce - single-task `/agentheim:work <id>` and the todo-card Work button
 
 **Type:** Modeling / Capture
 **BC:** agentic-workflow
@@ -21,13 +28,6 @@
 **Batch mix:** 100% infrastructure (2 type:bug tasks); same BC, same batch — both touched the infrastructure README and it auto-merged cleanly at the second squash (the Phase 3 advisory flagged the overlap; no conflict materialised).
 **Integration note:** w45ce's dist heal landed through the conductor's sanctioned main-tree rebuild (`npm run build` in dashboard/ after the squash, staged in the integrating commit) — the ADR-0057 checkpoint guard correctly kept it off the worker branch. Full merged-main suite: 1307/1307. The suite no longer dirties dashboard/dist/ (dist-build.test.mjs now builds to a scratch outdir). Concurrent modeling sessions committed pcwnn and bmn29 on main during the session — no collision with this session's scoped commits.
 **Carry-over:** none — working tree clean. No orphan worktrees (both torn down after integration).
-
----
-
-rotocol
-
-Chronological log of everything that happens in this project.
-Newest entries on top.
 
 ---
 
@@ -202,13 +202,6 @@ ork session ended
 **Batch mix:** 100% infrastructure (2 type:bug tasks); same BC, same batch — both touched the infrastructure README and it auto-merged cleanly at the second squash (the Phase 3 advisory flagged the overlap; no conflict materialised).
 **Integration note:** w45ce's dist heal landed through the conductor's sanctioned main-tree rebuild (`npm run build` in dashboard/ after the squash, staged in the integrating commit) — the ADR-0057 checkpoint guard correctly kept it off the worker branch. Full merged-main suite: 1307/1307. The suite no longer dirties dashboard/dist/ (dist-build.test.mjs now builds to a scratch outdir). Concurrent modeling sessions committed pcwnn and bmn29 on main during the session — no collision with this session's scoped commits.
 **Carry-over:** none — working tree clean. No orphan worktrees (both torn down after integration).
-
----
-
-rotocol
-
-Chronological log of everything that happens in this project.
-Newest entries on top.
 
 ---
 
