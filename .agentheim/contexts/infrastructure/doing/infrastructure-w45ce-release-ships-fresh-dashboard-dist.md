@@ -1,7 +1,7 @@
 ---
 id: infrastructure-w45ce
 title: A release ships a fresh dashboard — rebuild dist/ as a release step and make dist-vs-source staleness a failing check
-status: todo
+status: doing
 type: bug
 context: infrastructure
 created: 2026-09-05

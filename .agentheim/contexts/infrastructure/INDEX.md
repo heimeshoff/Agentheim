@@ -11,19 +11,19 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 2
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 2
 - **Done:** 31
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **infrastructure-rgknz** — The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it (bug) — `todo/infrastructure-rgknz-dashboard-runtime-notices-plugin-update.md`
-- **infrastructure-w45ce** — A release ships a fresh dashboard — rebuild dist/ as a release step and make dist-vs-source staleness a failing check (bug) — `todo/infrastructure-w45ce-release-ships-fresh-dashboard-dist.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **infrastructure-w45ce** — A release ships a fresh dashboard — rebuild dist/ as a release step and make dist-vs-source staleness a failing check (bug) — `doing/infrastructure-w45ce-release-ships-fresh-dashboard-dist.md`
+- **infrastructure-rgknz** — The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it (bug) — `doing/infrastructure-rgknz-dashboard-runtime-notices-plugin-update.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

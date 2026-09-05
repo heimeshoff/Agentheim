@@ -1,7 +1,7 @@
 ---
 id: infrastructure-rgknz
 title: The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it
-status: todo
+status: doing
 type: bug
 context: infrastructure
 created: 2026-09-05

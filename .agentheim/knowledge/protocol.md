@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 22:08 -- Batch started: [infrastructure-rgknz, infrastructure-w45ce]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-rgknz - The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it, infrastructure-w45ce - A release ships a fresh dashboard — rebuild dist/ as a release step and make dist-vs-source staleness a failing check
+**Parallel:** yes (2 workers — the whole ready set; both touch the infrastructure README and ADR-0002, so they are annotated for sequential squash-merge order at integration, not held back)
+
+---
+
 ## 2026-09-05 22:06 -- Modeling / Captured: agentic-workflow-pcwnn - Merge-back conflict ladder — rebase the loser onto new main, re-verify, and let the worker resolve a real conflict before escalating to the builder
 
 **Type:** Modeling / Capture
