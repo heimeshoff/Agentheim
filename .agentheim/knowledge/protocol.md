@@ -5,6 +5,16 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 22:06 -- Modeling / Captured: agentic-workflow-pcwnn - Merge-back conflict ladder — rebase the loser onto new main, re-verify, and let the worker resolve a real conflict before escalating to the builder
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** The ADR-0032 "future enhancement" (auto rebase + re-verify), captured honestly: a rebase clears only merge-order conflicts, so the real gain is the next rung — on a rebase conflict, re-dispatch the worker into its own worktree to resolve (counts as an iteration), verify, squash-merge; the builder becomes the last rung, not the first. Salvage before every rung (ADR-0063), main never left mid-merge, ADR amending ADR-0032/0037. Complements ghcaj (which removes the prose-conflict class); neither blocks the other.
+
+---
+
+
 ## 2026-09-05 21:59 -- Work session ended
 
 **Type:** Work / Session end
