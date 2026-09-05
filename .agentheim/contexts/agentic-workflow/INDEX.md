@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 6
-- **Todo:** 0
+- **Backlog:** 5
+- **Todo:** 1
 - **Doing:** 1
 - **Done:** 184
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-rw6ck** — Hovering a card re-renders that card and its ring targets, not all 255 — memoized board cards and columns, hover state out of the board root, identity-stable tree projection (refactor) — `todo/agentic-workflow-rw6ck-memoized-board-hover-scoped-identity-stable-projection.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -35,7 +36,6 @@ research touching this BC, and concept synthesis pages.
 ### Backlog
 <!-- backlog-list:start -->
 - **agentic-workflow-bmn29** — Dashboard burns resources at idle on a MacBook — umbrella for the split (hub, memoization, keyframes); residual hidden-tab pause/resume and the before/after measurement (bug) — `backlog/agentic-workflow-bmn29-dashboard-idle-resource-waste-four-sse-streams-fanout-refetch-unmemoized-board.md`
-- **agentic-workflow-rw6ck** — Hovering a card re-renders that card and its ring targets, not all 255 — memoized board cards and columns, hover state out of the board root, identity-stable tree projection (refactor) — `backlog/agentic-workflow-rw6ck-memoized-board-hover-scoped-identity-stable-projection.md`
 - **agentic-workflow-pcwnn** — Merge-back conflict ladder — rebase the loser onto new main, re-verify, and let the worker resolve a real conflict before escalating to the builder (feature) — `backlog/agentic-workflow-pcwnn-merge-back-conflict-rebase-reverify-worker-resolves.md`
 - **agentic-workflow-ghcaj** — Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report (refactor) — `backlog/agentic-workflow-ghcaj-worker-branch-code-only-conductor-writes-bookkeeping.md`
 - **agentic-workflow-pt0gy** — Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free (feature) — `backlog/agentic-workflow-pt0gy-concurrent-modeling-sessions-conflict-free-bookkeeping.md`

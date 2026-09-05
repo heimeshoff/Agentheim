@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-rw6ck
 title: Hovering a card re-renders that card and its ring targets, not all 255 — memoized board cards and columns, hover state out of the board root, identity-stable tree projection
-status: backlog
+status: todo
 type: refactor
 context: agentic-workflow
 created: 2026-09-05
