@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 23:16 -- Task verified and completed: agentic-workflow-swj2q - "`/agentheim:work <task-id>` — scope a work run to one named todo task instead of the whole ready set"
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-swj2q - "`/agentheim:work <task-id>` — scope a work run to one named todo task instead of the whole ready set"
+**Summary:** /agentheim:work gains a documented argument grammar — bare (whole ready set, loop until todo is empty) vs. a scoped run over one or more named todo ids with exact-match fail-closed id resolution, no mid-run pickup, and an explicit scoped Batch-started entry; recorded in ADR-0071 and guarded by a live-tree lint (lib/work-argument-grammar-section.mjs) that keeps the cited Argument grammar section present
+**Duration:** 23m
+**Verification:** PASS (iteration 2)
+**Files changed:** 5
+**Tests added:** 5
+**ADRs written:** ADR-0071
+
+---
+
 ## 2026-09-05 23:15 -- Task verified and completed: agentic-workflow-mvt8x - One live-update subscription per tab, one /api/tree fetch per structural frame — an advisory frame (.agentheim/state/**) re-syncs only the panel that reads that artifact, never the board or rail
 
 **Type:** Work / Task completion

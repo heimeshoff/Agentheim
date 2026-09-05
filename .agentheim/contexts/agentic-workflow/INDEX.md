@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 6
 - **Todo:** 1
-- **Doing:** 1
-- **Done:** 183
+- **Doing:** 0
+- **Done:** 184
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-swj2q** — "`/agentheim:work <task-id>` — scope a work run to one named todo task instead of the whole ready set" (feature) — `doing/agentic-workflow-swj2q-work-single-task-argument.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-swj2q** — "`/agentheim:work <task-id>` — scope a work run to one named todo task instead of the whole ready set" (feature) — `done/agentic-workflow-swj2q-work-single-task-argument.md`
 - **agentic-workflow-mvt8x** — One live-update subscription per tab, one /api/tree fetch per structural frame — an advisory frame (.agentheim/state/**) re-syncs only the panel that reads that artifact, never the board or rail (bug) — `done/agentic-workflow-mvt8x-live-tree-hub-one-subscription-frame-routing.md`
 - **agentic-workflow-jf6qz** — Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A) (bug) — `done/agentic-workflow-jf6qz-fix-archiveddoneheader-phantom-cap-wording.md`
 <!-- done-list:end -->
@@ -44,7 +44,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
-- **ADR-0070** — Live-tree hub: one shared SSE subscription and one /api/tree fetch per tab; frames route by path (structural / advisory / runtime) so an advisory write re-syncs only its own panel — routing is addressing, never interpretation; unrecognized paths fail open to structural. Supersedes ADR-0027 §3 / ADR-0043 §4 in part; ADR-0006 untouched (proposed) — `../../knowledge/decisions/0070-live-tree-hub-shared-subscription-frame-routing.md`
+- **ADR-0070** — Live-tree hub: one shared SSE subscription and one /api/tree fetch per tab; frames route by path (structural / advisory / runtime) so an advisory write re-syncs only its own panel — routing is addressing, never interpretation; unrecognized paths fail open to structural. Supersedes ADR-0027 §3 / ADR-0043 §4 in part; ADR-0006 untouched (accepted 2026-09-05, agentic-workflow-mvt8x) — `../../knowledge/decisions/0070-live-tree-hub-shared-subscription-frame-routing.md`
 - **ADR-0069** — Audit-closure doctrine: dispositions the three 2026-07-22 audit residuals (fix the vacuum-guard empty-board refusal placement at both call sites; decline cross-task drift detection and forced spike-typing pending a concrete incident, ADR-0067 posture), defines the audit PASS bar and a dated audit-stamp/delta-scoping convention (both prose-only, unenforced), and ships the live-tree lint `lib/doctrine-line-pointer.mjs` banning raw line-number pointers in doctrine prose — `../../knowledge/decisions/0069-audit-closure-doctrine-dispositions-pass-bar-pointer-lint.md`
 - **ADR-0068** — The drift-twice rule: when a doctrine restatement is found drifted a **second** time, the fix deletes the copy and leaves a pointer to the canonical source — never re-synced again (first-time drift may still be fixed in place). Applies where drift-fix tasks are shaped (modeling REFINE) and executed (workers); prose-only, unenforced (ADR-0059) — `../../knowledge/decisions/0068-drift-twice-single-source-rule.md`
 - **ADR-0067** — Records two undocumented 2026-07-02 survey dispositions: declines a mandatory mid-batch human checkpoint (between-wave re-scan, FAIL-iteration-3 escalation, and vacuum guard already cover it; vision non-goal #3's gate list omits mid-batch by design), and ratifies the inline decline of the Haiku thin-agent wrapper for quick-capture/whats-next/inquire as a visible decision (ADR-0059) — `../../knowledge/decisions/0067-mid-batch-checkpoint-decline-and-haiku-wrapper-decline.md`

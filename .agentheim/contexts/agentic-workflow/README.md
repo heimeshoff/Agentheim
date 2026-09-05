@@ -54,6 +54,13 @@ separate BC, but today the whole tool lives in this one.
   **conductor**: the non-code-writing driving loop of the `work` skill itself (scan the
   DAG, dispatch worker subagents, commit, log) — a role the session plays, not an agent
   the orchestrator can route to.
+- **Scoped run (ADR-0071, agentic-workflow-swj2q)** — invoking `/agentheim:work` with one or
+  more explicit task ids narrows the conductor's loop to exactly that named set: the DAG gate
+  still fail-closes on an unmet/dangling `depends_on` (ADR-0038 Ruling A) and an id not
+  currently in `todo/` is refused (naming its actual lifecycle folder), but nothing else is
+  picked up mid-run — the loop ends once the named set reaches a terminal state, rather than
+  looping until `todo/` is empty (the bare `/agentheim:work` default). See `skills/work/SKILL.md`'s
+  "Argument grammar".
 - **Adversarial gate** — a fresh-context skeptic with no exposure to the producer's
   reasoning, judging the producer's output. `verifier` audits a worker's diff before
   commit; `research-reviewer` re-verifies a report before it's citable. A deliberate,
@@ -968,9 +975,13 @@ separate BC, but today the whole tool lives in this one.
   above.
 - **`claimBatch` / `completeTask`** — the git-free CLAIM and COMPLETE lifecycle scripts, matched to
   the ADR-0032 worktree/squash-merge model (agentic-workflow-t7m4c), same three-layer boundary as
-  `promoteTask`. **`claimBatch(rootDir, ids, opts)` is BATCH-shaped**: it claims a whole ready set
-  `todo → doing` and returns ONE manifest — every id's move via `applyTaskMove`, INDEX marker/count
-  edits grouped **per BC** (a batch may span contexts), and one `protocol.md` "Batch started" entry;
+  `promoteTask`. **`claimBatch(rootDir, ids, opts)` is BATCH-shaped**: it claims whichever id list
+  the caller hands it — the DAG's whole ready set on an unscoped `work` run, or a builder-named
+  subset on a **scoped run** (`/agentheim:work <task-id>` or a small explicit id list, ADR-0071,
+  agentic-workflow-swj2q — see `skills/work/SKILL.md`'s "Argument grammar"; the script itself is
+  unaware of the distinction, it just claims the ids it's given) — `todo → doing` and returns ONE
+  manifest — every id's move via `applyTaskMove`, INDEX marker/count edits grouped **per BC** (a
+  batch may span contexts), and one `protocol.md` "Batch started" entry;
   fail-loud (all ids pre-checked to resolve in `todo/` before any move, so one bad id aborts the
   batch with nothing moved; a rarer mid-batch vanish race after the pre-check surfaces the split
   `claimed` manifest with neither file written — ADR-0054 left this residual race unchanged), and
