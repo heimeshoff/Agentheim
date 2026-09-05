@@ -66,17 +66,25 @@ not a reuse:
       launch.
 - [ ] `commands/dashboard.md` and the infrastructure README's **Runfile** / **Launch / Stop**
       entries describe the version-aware reuse rule; ADR-0002 gets an addendum.
+- [ ] `static.mjs` sends `Cache-Control: no-cache` on every asset response (today it sends no
+      cache headers at all), so a browser or VS Code Simple Browser tab left open across an
+      update revalidates `app.js` against the new server instead of replaying a cached bundle.
+      Cheap hardening, one header, covered by an existing static-handler test.
 
 ## Notes
 
-- **Open question for REFINE — which symptom did the builder actually see?** (a) `/dashboard`
-  answered `already running` with the old UI; (b) the board loaded but assets 404'd after the
-  update; (c) something else (e.g. the resolver picked an old version dir because more than
-  one was cached). The fix above covers (a) and (b); (c) would point at the semver-max
-  resolver instead.
-- Confirm how the marketplace treats the old version dir on update (removed vs kept). The
-  cache on this machine holds only `0.9.2`, which suggests removal, but that is one data
-  point. If kept, (b) never happens and the version field alone is the fix.
+- **Builder's answer (2026-09-05 refine):** the observed symptom was "the dashboard didn't
+  load the newest version" — old UI, no `already running` message noticed. That is consistent
+  with every mechanism this task and w45ce cover, and it also fits the simplest reading,
+  which is not a bug in this task: **no release has been cut since v0.9.2 (2026-07-13)**, so
+  the marketplace has nothing newer to install — the consumer cache stays at `main@bc47e66`
+  however often `/plugin` is updated, because `plugin.json` still says `0.9.2` (ADR-0013's
+  "manifest may lag `main`"). Cutting the next release (with w45ce's fresh `dist/`) is the
+  actual unblock for that reading; this task makes sure that once a newer version *is* on
+  disk, the runtime serves it rather than an older live process.
+- Marketplace treatment of the previous version dir on update (removed vs kept) is still
+  unconfirmed — the cache on this machine holds only `0.9.2`. The fix does not depend on the
+  answer: version mismatch replaces either way, and the `assetRoot` probe covers removal.
 - Reuse/replace on version skew is the dashboard analogue of infrastructure-v8r3q's bridge
   capability handshake: the answering process reports what *it* is, and the caller decides
   from a live signal rather than from an on-disk assumption.

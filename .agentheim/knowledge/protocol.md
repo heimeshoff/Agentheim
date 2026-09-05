@@ -5,6 +5,28 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 22:02 -- Modeling / Refined: infrastructure-rgknz - The dashboard runtime notices a plugin update
+
+**Type:** Modeling / Refine
+**BC:** infrastructure
+**Status after:** todo
+**Summary:** Builder answered the open symptom question: old UI after an update, no `already running` message noticed. Recorded that the simplest reading is "no release since v0.9.2, so the marketplace had nothing newer" (ADR-0013 manifest lag) — the unblock for that is cutting a release with w45ce's fresh dist; this task still guards the runtime once a newer version is on disk. Added one hardening criterion (`Cache-Control: no-cache` on static assets — today none are sent). Readiness gate cleared → promoted.
+**Split into:** —
+**ADRs written:** none
+
+---
+
+## 2026-09-05 21:52 -- Verification failed: agentic-workflow-jf6qz - Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A)
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-jf6qz - Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A)
+**Iteration:** 1 of 3
+**Reasons:** criterion #7 unreachable — `skills/work/SKILL.md`'s session-end rotation step never commits a healed-only run, so the heal would strand three dirty INDEX.md files; README and ADR-0047 amendment claim a SKILL.md narrowing that does not exist; the worker had scoped `skills/` out on the conductor's over-narrow file-scope note
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-09-05 21:50 -- Modeling / Captured: infrastructure-w45ce, infrastructure-rgknz - A marketplace install/update ships and serves an up-to-date dashboard
 
 **Type:** Modeling / Capture
