@@ -5,6 +5,25 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 21:55 -- Modeling / Captured: agentic-workflow-pt0gy - Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** The builder runs one work session but several modeling sessions in parallel, and they race on the protocol prepend line, the INDEX task-counts/marker lists, and .git/index.lock. Narrower re-capture of the dismissed d5a9b: the pain is multi-writer bookkeeping files, not worktree-local backlogs. Candidate shapes — event-per-action with generated protocol/INDEX read models (aligned with the rework's EventLog/ReadModel ports), CLI-level advisory lock + index.lock retry, or per-session protocol shards. depends_on e4bjh (capture/dismiss must be mechanized before atomicity has a seam).
+
+---
+
+## 2026-09-05 21:55 -- Modeling / Captured: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Builder's complaint that parallel worktrees conflict very often. Evidence from the protocol: every merge-back conflict since ADR-0032 was prose or a build artifact (BC README bullets, ADR amendments at the same anchor, dist bundle), never code. Proposal: the worker's branch carries source + tests only; README delta, ADR bodies and the doing→done move travel as structured blocks in the worker report and are applied by the conductor on main, sequentially, at integration — checkpoint refuses .agentheim/ paths the way ADR-0057 refuses dashboard/dist/. Removes the same-BC-README collision class and lets MAX_PARALLEL rise for same-BC batches.
+
+---
+
+
 ## 2026-09-05 21:54 -- Modeling / Promoted: infrastructure-rgknz - The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it
 
 **Type:** Modeling / Promote

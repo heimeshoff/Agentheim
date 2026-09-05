@@ -7,7 +7,7 @@ context: agentic-workflow
 created: 2026-07-22
 completed:
 depends_on: []
-blocks: []
+blocks: [agentic-workflow-pt0gy]
 tags: [captured, audit-2026-07-22-followup, mechanization]
 related_adrs: [0038, 0042, 0022]
 related_research: []
