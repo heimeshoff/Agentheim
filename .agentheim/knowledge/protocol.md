@@ -5,6 +5,13 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 21:38 -- Modeling / Dismissed: agentic-workflow-d5a9b
+
+**Type:** Modeling / Dismiss
+**Dismissed:** agentic-workflow-d5a9b - Enable parallel worktree sessions with independent idea capture and ticket movement (agentic-workflow)
+
+---
+
 ## 2026-07-23 00:05 -- Modeling / Promoted: agentic-workflow-jf6qz - Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A)
 
 **Type:** Modeling / Promote

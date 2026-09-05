@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 2
+- **Backlog:** 1
 - **Todo:** 1
 - **Doing:** 0
 - **Done:** 181
@@ -128,7 +128,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-d5a9b** — Enable parallel worktree sessions with independent idea capture and ticket movement (feature) — `backlog/agentic-workflow-d5a9b-parallel-worktree-sessions.md`
 - **agentic-workflow-e4bjh** — Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI (refactor) — `backlog/agentic-workflow-e4bjh-capture-dismiss-lifecycle-cli-verbs.md`
 <!-- backlog-list:end -->
 
