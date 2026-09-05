@@ -90,20 +90,30 @@ For each idea in the user's message:
    "to be refined" placeholder; capture's job is not to manufacture criteria the user
    didn't give.
 
-5. **Update the target BC's `INDEX.md`** — insert under `<!-- backlog-list:start -->` and
-   increment the Backlog count. (Details below.) This is not optional: the dashboard and
-   the other skills find tasks through the index, so a task that isn't indexed is
-   effectively invisible.
+5. **Register the task with the mechanized `capture` verb.** Once the task file is written,
+   run:
 
-6. **Log to the protocol** — prepend one Capture entry (details below).
+   ```
+   node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','task-lifecycle-cli.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','task-lifecycle-cli.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no task-lifecycle CLI found under '+c+' (is the plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>m.main(process.argv.slice(1))).catch(e=>{console.error(e.message);process.exit(1)});" capture <id> '{"source":"quick-capture","summary":"<1 line — the idea as captured>"}'
+   ```
 
-7. **Commit the captured markdown** — scoped `git add` of just the files this capture
-   touched (the new task file + the BC `INDEX.md` + `protocol.md`), then commit. Details in
-   "Committing" below. This is what keeps the working tree clean after a capture
-   (ADR-0026) — the old behavior left the new task file, INDEX, and protocol all
-   uncommitted.
+   (The same env-free homedir→cache→semver-max bootstrap `modeling/SKILL.md`'s PROMOTE flow
+   uses, targeting the same CLI's `capture` verb.) It performs the INDEX marker insert +
+   count delta and prepends the `Capture / Captured` protocol entry, in one mechanized step
+   (ADR-0038, ADR-0073) — not optional: the dashboard and the other skills find tasks through
+   the index, so a task that isn't registered is effectively invisible. It backfills a
+   missing BC `INDEX.md` from `references/index-template.md` when the BC holds nothing but
+   this task; otherwise a `{ok:false, code:'index-missing'}` rejection means something is off
+   (a mis-typed BC name is the usual cause) — fix it and re-run rather than hand-editing the
+   index.
 
-8. **Report and stop.** One line per task: `✓ <id> → backlog · "<title>" (<bc>)`. If you
+6. **Commit** — `git add` exactly the manifest's `changed` paths from step 5 plus the new
+   task file itself, then commit with the manifest's `message` (already
+   `chore(<bc>): capture <task-id> — <title> [<task-id>]`). Details in "Committing" below.
+   This is what keeps the working tree clean after a capture (ADR-0026) — the old behavior
+   left the new task file, INDEX, and protocol all uncommitted.
+
+7. **Report and stop.** One line per task: `✓ <id> → backlog · "<title>" (<bc>)`. If you
    had to guess the BC, say so and invite a re-route in the same breath — e.g. *"routed to
    agentic-workflow on a guess; reply with a BC to move it."* Then stop. Don't ask "want me
    to refine it?" — if they do, they'll say so.
@@ -163,23 +173,24 @@ After minting, verify each new id with `classifyTaskId` from `lib/id-grammar.mjs
 
 ## Updating the index
 
-Insert a line **immediately after** `<!-- backlog-list:start -->` in
-`contexts/<bc>/INDEX.md`:
+Mechanized (ADR-0038, ADR-0073) — the `capture` verb run in step 5 of "The flow" above
+performs both the INDEX marker insert and the protocol prepend in one call; there is
+nothing to hand-edit here. Its line format always carries `(type)`:
 
 ```
-- **<id>** — <title> — `backlog/<id>-<slug>.md`
+- **<id>** — <title> (<type>) — `backlog/<id>-<slug>.md`
 ```
 
-Then bump the Backlog number under `<!-- task-counts:start -->`. Only touch those two
-markers — never rewrite the file, never duplicate an existing line. If the BC has no
-`INDEX.md` yet, create it from `references/index-template.md` with the BC name filled in,
-then append.
+(This retires the older, `(type)`-less line format quick-capture used to hand-type.) If
+the BC has no `INDEX.md` yet, `capture` backfills one from `references/index-template.md`
+automatically, but only when the BC holds nothing but the task just captured — otherwise it
+refuses `index-missing` rather than seed a template's zero counts over real pre-existing
+tasks; build the index by hand from the template in that case.
 
 ## Protocol logging
 
-Prepend one entry per capture to `.agentheim/knowledge/protocol.md`, right after the `---`
-on line 4 (newest on top). If the file doesn't exist, create it with the standard header
-first (`# Protocol` / "Chronological log…" / "Newest entries on top." / `---`).
+Mechanized (ADR-0038, ADR-0073) — the same `capture` call prepends the entry, keyed by
+`"source":"quick-capture"`:
 
 ```markdown
 ## <YYYY-MM-DD HH:MM> -- Capture / Captured: <task-id> - <title>
@@ -192,15 +203,17 @@ first (`# Protocol` / "Chronological log…" / "Newest entries on top." / `---`)
 ---
 ```
 
-For a multi-idea dump, one entry per task is fine, but keep each to a single summary line —
-the protocol is a diary, not a transcript.
+Nothing to hand-format here — the shape above is the script's actual output, kept as the
+human-readable contract. For a multi-idea dump, one `capture` call (and therefore one
+entry) per task is correct — the protocol is a diary, not a transcript.
 
 ## Committing
 
-Quick-capture commits its own markdown so the working tree is clean after a capture. Commit doctrine lives in `references/commit-doctrine.md` (ADR-0026) — scoped `git add` is mandatory here too: `quick-capture` can run while a `work` or `modeling` session has its own in-flight files on the working tree, so a blanket add would bundle or race them. After writing the task file(s), updating the index, and logging the protocol:
+Quick-capture commits its own markdown so the working tree is clean after a capture. Commit doctrine lives in `references/commit-doctrine.md` (ADR-0026) — scoped `git add` is mandatory here too: `quick-capture` can run while a `work` or `modeling` session has its own in-flight files on the working tree, so a blanket add would bundle or race them. After writing the task file(s) and running `capture` for each:
 
 1. `git add` an **explicit, enumerated** list of *only* this capture's artifacts: the new
-   task file(s), the target BC's `INDEX.md`, and `.agentheim/knowledge/protocol.md`. Never `git add -A` / `git add .`.
+   task file(s) plus each `capture` call's manifest `changed` paths (the target BC's
+   `INDEX.md` and `.agentheim/knowledge/protocol.md`). Never `git add -A` / `git add .`.
 2. Commit silently (no confirmation prompt — capture's whole point is speed) with:
    ```
    chore(<bc>): capture <task-id> — <title> [<task-id>]

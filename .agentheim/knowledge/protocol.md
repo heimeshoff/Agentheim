@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 00:39 -- Task verified and completed: agentic-workflow-e4bjh - Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-e4bjh - Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI
+**Summary:** capture and dismiss verbs join the lifecycle CLI (new lib/task-lifecycle-capture-dismiss.mjs) — capture registers a skill-authored backlog/todo file (fail-closed frontmatter validation, unified (type) INDEX line, template backfill only on an empty BC, protocolEntry:false structural skip, templates keyed by source); dismiss is two-phase plan/confirm with a depends_on-only, exact-id cascade, cascade-drifted / cascade-in-flight guards, INDEX → unlink → strip → protocol write order and removal-count-derived deltas; modeling, quick-capture and brainstorm now call the CLI instead of hand-editing bookkeeping; ADR-0073 amends ADR-0022
+**Duration:** 25m
+**Verification:** PASS (iteration 1)
+**Files changed:** 11
+**Tests added:** 28
+**ADRs written:** ADR-0073
+
+---
+
 ## 2026-09-06 00:12 -- Batch started: [agentic-workflow-e4bjh, agentic-workflow-ghcaj]
 
 **Type:** Work / Batch start

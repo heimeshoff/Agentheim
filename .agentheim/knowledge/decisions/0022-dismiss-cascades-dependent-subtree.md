@@ -4,11 +4,26 @@ title: DISMISS cascades the whole dependent subtree; refuses if it touches doing
 scope: agentic-workflow
 status: proposed
 date: 2026-06-16
-related_tasks: [agentic-workflow-046, agentic-workflow-048]
-related_adrs: [0017, 0007, 0018, 0028]
+related_tasks: [agentic-workflow-046, agentic-workflow-048, agentic-workflow-e4bjh]
+related_adrs: [0017, 0007, 0018, 0028, 0073]
 ---
 
 # ADR-0022: DISMISS cascades the whole dependent subtree; refuses if it touches `doing/` or `done/`
+
+> **Amended by ADR-0073 (2026-09-06, agentic-workflow-e4bjh)**, at the point DISMISS was
+> mechanized into `dismissTask` (`lib/task-lifecycle-capture-dismiss.mjs`). Two live, on-disk
+> contradictions in this ADR's text were fixed at that mechanization boundary rather than
+> carried forward into the script: **the cascade edge is `depends_on` only** — §1's
+> "equivalently, follow `blocks` edges forward" is factually false against the live tree
+> (`blocks`/`depends_on` are not mirrored) and is superseded; `blocks` is
+> reconciliation-only, stripped but never traversed. **Membership and stripping match on
+> exact frontmatter `id` equality only**, never filename/prefix resolution (the live
+> `design-system-001-styleguide` vs `design-system-001` mismatch made this concrete). §4's
+> listed write order (delete first, bookkeeping after) is also reversed by ADR-0073: INDEX
+> edits → unlinks → backlink stripping → protocol, so a mid-operation crash stays
+> "blocked and visible" rather than "ready and invisible." Everything else below — the
+> cascade-vs-warn-and-strip-vs-block decision, the in-flight/shipped refusal, the one
+> confirmation covering the whole set, never-reuse of dismissed ids — stands unamended.
 
 ## Context
 

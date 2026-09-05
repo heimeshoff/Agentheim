@@ -138,7 +138,7 @@ PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + casca
 
 6. **Write the task file(s).** Include the user-confirmed `related_adrs`, `related_research`, `prior_art` from step 3 in the frontmatter. See task format below.
 
-7. **Commit the captured markdown** (after the index + protocol updates below). Scoped `git add` of just this capture's artifacts — the new task file(s), the BC `INDEX.md`, `protocol.md`, and any ADR the orchestrator wrote — then `chore(<bc>): capture <task-id> — <title> [<task-id>]`. See "Committing" below.
+7. **Register + commit.** CAPTURE's bookkeeping — the INDEX marker insert + count delta, and the protocol prepend — is mechanized (ADR-0038, ADR-0073): once per task file just written, run `lib/task-lifecycle-cli.mjs capture <task-id> '{"source":"modeling","summary":"<1-2 sentences>"}'` (the same env-free bootstrap as the PROMOTE flow's step 3, below). It validates the file's own frontmatter (id well-formed, `status`/`context` matching where it was written, required fields present), inserts the INDEX line + count delta, and prepends the `Modeling / Captured` protocol entry — or returns `{ok:false, code, reason}` if something about the just-written file is wrong, in which case fix the file and re-run rather than hand-editing the index. Then `git add` exactly the manifest's `changed` paths plus the new task file(s), and commit with the manifest's `message` (already `chore(<bc>): capture <task-id> — <title> [<task-id>]`). If a brand-new BC is being created during this CAPTURE (rare), insert its line under `<!-- bc-list:start -->` in `.agentheim/knowledge/index.md` by hand first — the CLI only ever touches the target BC's own index.
 
 ## REFINE flow
 
@@ -205,19 +205,15 @@ PROMOTE's mechanics — the `backlog → todo` move, the INDEX marker edit + cou
 
 ## DISMISS flow
 
-DISMISS hard-deletes a task that will never be worked, **plus its entire transitive dependent subtree**, and then reconciles every record that pointed at the deleted ids. The contract is frozen by **ADR-0022** — follow it precisely. The disposition is a hard delete (no archive folder, no `status: dismissed` flag): these are unstarted ideas, little history is lost, and the protocol entry preserves the record that they were dropped.
+DISMISS hard-deletes a task that will never be worked, **plus its entire transitive dependent subtree**, and then reconciles every record that pointed at the deleted ids. The contract is frozen by **ADR-0022, amended by ADR-0073** — follow both precisely. The disposition is a hard delete (no archive folder, no `status: dismissed` flag): these are unstarted ideas, little history is lost, and the protocol entry preserves the record that they were dropped.
 
-The boundary mirrors ADR-0007: the raw `.md` deletes are the mechanical core; the skill owns the INDEX / protocol / backlink reconciliation layered around them. (DISMISS is a delete, not a move, so it does **not** call `applyTaskMove` — but it follows the same side-effect-ownership rule.)
+DISMISS's mechanics — cascade computation, the in-flight/shipped guard, the INDEX marker edits + count deltas, surviving-backlink stripping, and the protocol prepend — are mechanized (ADR-0038, ADR-0073): `lib/task-lifecycle-cli.mjs dismiss <id> <json-opts>` performs all of it, two-phase, and returns an enumerated manifest or a structured `{ok:false, code, reason}` rejection. This flow keeps only what the CLI does NOT decide — **resolving which task the user means** and **the confirm/cancel gesture** — per ADR-0038's three-layer boundary. (DISMISS is a delete, not a move, so it does **not** call `applyTaskMove` — but the CLI follows the same git-free, judgment-free rule.)
 
-1. **Resolve the named task** X (exact id / number / keyword — see "Identifying which task the user means"; list matches on ambiguity). Confirm X is in `backlog/` or `todo/`. **Refuse** with a clear message if X is in `doing/` or `done/` — you don't dismiss work in flight or shipped.
+1. **Resolve the named task** X (exact id / number / keyword — see "Identifying which task the user means"; list matches on ambiguity).
 
-2. **Compute the cascade set.** Start with `{X}`. Repeatedly add every task T (in any BC) whose `depends_on` transitively contains a member of the set — equivalently, follow `blocks` edges forward — until the set stops growing (fixed point). This pulls in **upstream dependents only**: a task queued *behind* X, never a task X itself depends on.
-   - **Only `depends_on`/`blocks` edges drive the cascade.** `prior_art`, `related_adrs`, and `related_tasks` are **not** traversed — references through those fields are *stripped* during bookkeeping (step 6), never followed to delete another task.
-   - To find dependents cheaply, prefer the per-BC `INDEX.md` lists already loaded; scan task frontmatter (`depends_on`/`blocks`) across all BCs only as needed, since the subtree can span BCs.
+2. **Plan the cascade.** Run the bootstrap (the same one PROMOTE's step 3 uses) with `dismiss <X> '{"plan":true}'`. This performs **zero disk writes** and returns `{ok:true, cascade:{leadId, memberIds}, members:[{id,title,bc,status,path}], advisories}` — or `{ok:false, code:'in-flight-or-shipped', reason}` naming the offending `doing/`/`done/` task (X itself included), or `{ok:false, code:'not-found', reason}` if X doesn't resolve. `memberIds` follows **`depends_on` edges only** (ADR-0073 amends ADR-0022: `blocks` is reconciliation-only, never traversed) and matches on **exact frontmatter id**, never filename/prefix resolution — a near-miss or a `blocks`-only edge surfaces in `advisories`, never as a member. A rejection here ends the flow; tell the user what's blocking it.
 
-3. **In-flight / shipped guard — refuse the whole operation.** If **any** member of the cascade set is in `doing/` or `done/`, abort before deleting anything and name the offending in-flight/shipped task. Cascade only ever deletes unstarted (`backlog`/`todo`) tasks; the builder resolves the in-flight edge by hand. (X itself being in `doing/`/`done/` is the same refusal from step 1.)
-
-4. **Surface the full cascade set and confirm once.** Present the complete set — id + title for every task, grouped by BC, so the blast radius is visible — and take a **single** confirm/cancel. If the set is just `{X}`, say so plainly. **Cancel changes nothing on disk.** Never split this into per-task confirmations, and never delete more than the set you showed.
+3. **Surface the full cascade set and confirm once.** Present the complete `members` list — id + title for every task, grouped by BC, so the blast radius is visible — and take a **single** confirm/cancel. If the set is just `{X}`, say so plainly. **Cancel changes nothing on disk** (the plan step already wrote nothing). Never split this into per-task confirmations, and never delete more than the set you showed.
 
    ```
    Dismissing aw-046 will also remove every task queued behind it:
@@ -230,16 +226,11 @@ The boundary mirrors ADR-0007: the raw `.md` deletes are the mechanical core; th
    This hard-deletes 2 task files. Confirm? (yes / cancel)
    ```
 
-5. **On confirm, hard-delete every `.md` file in the set** from disk.
+4. **On confirm, run `dismiss <X> '{"confirm":[<memberIds from step 2>]}'`.** This recomputes the FULL guarded cascade fresh — never trusting the plan — and refuses `cascade-drifted` (membership changed since planning) or `cascade-in-flight` (a member's lifecycle folder changed) before writing anything; re-run from step 2 in either case and re-confirm with the user. On success it hard-deletes every member `.md` file, edits every spanned BC's `INDEX.md` (count deltas derived from lines actually removed, never from the set's size), strips every dismissed id from surviving tasks' `depends_on`/`blocks`/`prior_art` and ADRs' `related_tasks`, and prepends **one** bare `Modeling / Dismissed` entry to `protocol.md` — no builder-typed reason, id + title + timestamp is the record.
 
-6. **Reconcile bookkeeping for the whole set** (layered around the raw deletes):
-   - **INDEX.md** — for each dismissed id, remove its line from its BC `INDEX.md` and decrement the matching Backlog/Todo count at the `<!-- task-counts:start -->` markers (no full-file rewrite — edit only at the markers, like every other index update). The set may span BCs, so **editing several BCs' `INDEX.md` in one DISMISS is legitimate here** — this is the one sanctioned exception to "don't edit the index across multiple BCs in one invocation".
-   - **Surviving backlinks** — strip every dismissed id from any *surviving* task's `depends_on` / `blocks` / `prior_art`, and from any ADR's `related_tasks`. References *within* the set vanish with their files, so only survivors need editing — no dangling references left behind.
-   - **Protocol** — prepend **one** bare `Modeling / Dismissed` entry to `.agentheim/knowledge/protocol.md` listing the whole cascade set (ids + titles). No builder-typed reason — id + title + timestamp is the record (see "Protocol logging").
+5. **IDs are gone, never reused.** For new token ids this holds **by construction** (ADR-0028 §5): the generator emits a random token and never consults history, so a dismissed token is simply one of ~23M points the generator will, with overwhelming probability, never emit again — there is no counter to advance or rewind. For legacy `<bc>-NNN` ids the original rule is retained verbatim: a dismissed number is retired, consistent with "never renumber" — a future capture takes the next free number, never a dismissed one.
 
-7. **IDs are gone, never reused.** For new token ids this holds **by construction** (ADR-0028 §5): the generator emits a random token and never consults history, so a dismissed token is simply one of ~23M points the generator will, with overwhelming probability, never emit again — there is no counter to advance or rewind. For legacy `<bc>-NNN` ids the original rule is retained verbatim: a dismissed number is retired, consistent with "never renumber" — a future capture takes the next free number, never a dismissed one.
-
-8. **Commit the dismissal** per `references/commit-doctrine.md` (ADR-0026). Scoped `git add` of exactly the files the cascade touched — the deleted task file paths (a delete is staged with `git add`/`git rm`), every `INDEX.md` the set spanned, every surviving task file or ADR whose backlinks were stripped, and `protocol.md` — then **one** commit for the whole cascade: `chore(<bc>): dismiss <id-or-cascade-set>` (name the lead id, or the set if small). Note that even though a DISMISS legitimately spans multiple BCs, the add stays an explicit enumeration of only the cascade's files — never `git add -A`.
+6. **Commit the dismissal.** `git add` exactly the manifest's `changed` paths from step 4 (every deleted path plus every edited file — a delete is staged with plain `git add`, no `git rm` special case needed), then commit with the manifest's `message` (already `chore(<bc>): dismiss <lead-id-or-set>`, per `references/commit-doctrine.md`/ADR-0026). Note that even though a DISMISS legitimately spans multiple BCs, `changed` stays an explicit enumeration of only the cascade's files — never `git add -A`.
 
 ## CONSOLIDATE flow
 
@@ -420,13 +411,12 @@ After writing or moving a task file, update the BC's `INDEX.md` so other skills 
 
 **Where to update:**
 
-- **CAPTURE writing to `backlog/`:** insert under `<!-- backlog-list:start -->` in `contexts/<bc>/INDEX.md`. Increment Backlog count under `<!-- task-counts:start -->`.
-- **CAPTURE writing directly to `todo/`:** insert under `<!-- todo-list:start -->`. Increment Todo count.
+- **CAPTURE (backlog/ or todo/):** mechanized (ADR-0038, ADR-0073) — `lib/task-lifecycle-cli.mjs capture <id> <json-opts>` performs the marker insert and count delta (a unified line format that always carries `(type)`) as part of its manifest; see CAPTURE step 7 above. Nothing to hand-edit here. It also backfills a missing `INDEX.md` from `references/index-template.md` when the BC holds nothing but the captured file.
 - **PROMOTE (backlog → todo):** mechanized (ADR-0038) — `lib/task-lifecycle-cli.mjs promote <id>` performs the marker edit and count delta as part of its manifest; see the PROMOTE flow above. Nothing to hand-edit here.
 - **REFINE that splits a task:** remove the parent line, insert child task lines. Update counts.
-- **DISMISS:** for each id in the cascade set, remove its line from its BC `INDEX.md` and decrement the matching Backlog/Todo count at the markers. The set may span BCs — editing several BCs' indexes in one DISMISS is the sanctioned exception below.
+- **DISMISS:** mechanized (ADR-0038, ADR-0073) — `lib/task-lifecycle-cli.mjs dismiss <id> <json-opts>` removes every cascade member's line from its BC `INDEX.md` and decrements the matching count from lines actually removed, as part of its manifest; see the DISMISS flow above. The set may span BCs — editing several BCs' indexes in one DISMISS is the sanctioned exception below.
 
-If the BC's `INDEX.md` doesn't exist yet, create it from `references/index-template.md` with the BC name filled in. Do not invent sections — only the templated markers are append targets.
+If a BC's `INDEX.md` doesn't exist yet: `capture` backfills it automatically (see above) when the BC is otherwise empty, and refuses `index-missing` otherwise — in the refusal case, or for any other index creation, build it from `references/index-template.md` with the BC name filled in by hand. Do not invent sections — only the templated markers are append targets.
 
 **Entry-length cap (ADR-0060):** a task's `title:` frontmatter is what lands verbatim in its INDEX task line (the mechanized lifecycle scripts embed it unchanged) — keep a newly authored or refined title to **~2-3 sentences, ~60 words**: the claim and the pointer, not a walkthrough. Detail belongs in the task file's `Why`/`What` sections, never the title. Applies going forward only; an existing over-length title already on disk is left verbatim — no retroactive rewrite (mirrors ADR-0039's verbatim cap-and-roll discipline). A live-tree lint (`lib/index-entry-length.mjs`, `node --test`) flags a new INDEX entry — one dated after the doctrine's adoption — that still exceeds the cap.
 
@@ -453,15 +443,6 @@ Newest entries on top.
 Then prepend the appropriate entry right after the `---` on line 4:
 
 ```markdown
-## YYYY-MM-DD HH:MM -- Modeling / Captured: <task-id> - [title]
-
-**Type:** Modeling / Capture
-**BC:** <bc-name>
-**Filed to:** backlog | todo
-**Summary:** [1-2 sentences on what the idea is]
-
----
-
 ## YYYY-MM-DD HH:MM -- Modeling / Refined: <task-id> - [title]
 
 **Type:** Modeling / Refine
@@ -470,13 +451,6 @@ Then prepend the appropriate entry right after the `---` on line 4:
 **Summary:** [what was clarified, added, or split]
 **Split into:** [list of new task ids, if split]
 **ADRs written:** [list of ADR ids, if any]
-
----
-
-## YYYY-MM-DD HH:MM -- Modeling / Dismissed: <id-or-id-list>
-
-**Type:** Modeling / Dismiss
-**Dismissed:** [one line per task in the cascade set — `<task-id> - <title> (<bc>)`]
 
 ---
 
@@ -490,9 +464,9 @@ Then prepend the appropriate entry right after the `---` on line 4:
 ---
 ```
 
-The **PROMOTE** entry (`Modeling / Promoted: <task-id> - [title]`, `**Type:** Modeling / Promote`, `**BC:**`, `**From → To:** backlog → todo`) is no longer hand-formatted here — `lib/task-lifecycle-cli.mjs promote <id>` generates and prepends it as part of its manifest (ADR-0038); see the PROMOTE flow above.
+The **CAPTURE** entry (`Modeling / Captured: <task-id> - [title]`, `**Type:** Modeling / Capture`, `**BC:**`, `**Filed to:** backlog | todo`, `**Summary:**`) and the **PROMOTE** entry (`Modeling / Promoted: <task-id> - [title]`, `**Type:** Modeling / Promote`, `**BC:**`, `**From → To:** backlog → todo`) are no longer hand-formatted here — `lib/task-lifecycle-cli.mjs capture <id>` / `promote <id>` generate and prepend them as part of their manifests (ADR-0038, ADR-0073); see the CAPTURE and PROMOTE flows above. `capture`'s `{"protocolEntry": false}` opt skips the protocol write entirely (no entry at all) — `brainstorm`'s per-task foundation capture uses it, keeping its own single hand-formatted session entry instead (see `brainstorm/SKILL.md`).
 
-The DISMISS entry is **bare** — it records the cascade set (ids + titles) and the timestamp, no builder-typed reason. One entry per dismiss regardless of how many tasks the cascade removed.
+The **DISMISS** entry (`Modeling / Dismissed: <id-or-id-list>`, `**Type:** Modeling / Dismiss`, `**Dismissed:**` one line per cascade member — `<task-id> - <title> (<bc>)`) is likewise no longer hand-formatted — `lib/task-lifecycle-cli.mjs dismiss <id> '{"confirm":[...]}'` generates and prepends it as part of its manifest (ADR-0038, ADR-0073); see the DISMISS flow above. It is **bare** — no builder-typed reason. One entry per dismiss regardless of how many tasks the cascade removed.
 
 The CONSOLIDATE entry records the line-count delta and a short summary — no task ids (CONSOLIDATE never touches a task file), no `**Filed to**`/`**Status after**` (there is no lifecycle move).
 

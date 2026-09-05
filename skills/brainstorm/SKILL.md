@@ -212,7 +212,12 @@ If a foundational decision is made during this session (e.g., "we'll treat Custo
 
 ## Protocol logging
 
-After the session produces artifacts, prepend an entry to `.agentheim/knowledge/protocol.md`. If the file doesn't exist, create it with:
+`brainstorm` writes **one hand-formatted session entry**, prose-only and deliberately
+unmechanized (ADR-0059's mechanize-or-drop doctrine: composing N structurally-similar
+foundation-task registrations into one coherent session narrative is judgment work — the
+same three-layer boundary ADR-0038 draws elsewhere reserves narrative composition for the
+skill, not a git-free script). After the session produces artifacts, prepend this entry to
+`.agentheim/knowledge/protocol.md`. If the file doesn't exist, create it with:
 
 ```markdown
 # Protocol
@@ -238,7 +243,10 @@ Then prepend right after the `---` on line 4:
 ---
 ```
 
-One entry per session, not one per exchange.
+One entry per session, not one per exchange. This is the ONE protocol write brainstorm
+performs directly — every foundation task's own registration (below) explicitly skips its
+own protocol entry, so the session narrative above stays the single record of what
+happened, not one of several competing entries.
 
 ## Indexes
 
@@ -248,13 +256,22 @@ For each BC created during this session:
 
 For any global ADR written during the strategic phase (vision-level decisions), insert under `<!-- adr-global:start -->` in the top-level index.
 
-For each `type: decision` / `type: spike` / `type: feature` task emitted during the architecture-foundation step, insert under the appropriate BC's `<!-- todo-list:start -->` and increment Todo count.
+For each `type: decision` / `type: spike` / `type: feature` task emitted during the architecture-foundation step (the walking skeleton, the styleguide, each decision task), **register it with the mechanized `capture` verb** (ADR-0038, ADR-0073) instead of hand-editing the BC's INDEX — composed **per task** (ADR-0042's precedent: composition owned by the caller), with the protocol write structurally suppressed since the session entry above is the record:
+
+```
+node -e "<the same env-free bootstrap modeling/SKILL.md's PROMOTE flow uses, targeting lib/task-lifecycle-cli.mjs>" capture <task-id> '{"protocolEntry": false}'
+```
+
+This inserts the task's line into the BC's `<!-- todo-list:start -->` and increments its
+Todo count — no protocol read or write occurs for `protocolEntry: false` calls. `git add`
+each call's manifest `changed` path (the BC's `INDEX.md`) alongside the task file itself in
+the session's commit below.
 
 ## Committing
 
 `brainstorm` commits the markdown it produced, so the working tree is clean after a session. Commit doctrine lives in `references/commit-doctrine.md` (ADR-0026). After the session's artifacts, indexes, and protocol entry are written:
 
-1. `git add` an **explicit, enumerated** list of *only* the files this session wrote or changed: `.agentheim/vision.md`, `.agentheim/context-map.md` (if produced), each new `contexts/<bc>/README.md` + `contexts/<bc>/INDEX.md`, every foundation task file (decision / walking-skeleton spike / styleguide), `.agentheim/knowledge/index.md`, any **strategic** ADR written this session, and `.agentheim/knowledge/protocol.md`. Never `git add -A` / `git add .`, per `references/commit-doctrine.md`.
+1. `git add` an **explicit, enumerated** list of *only* the files this session wrote or changed: `.agentheim/vision.md`, `.agentheim/context-map.md` (if produced), each new `contexts/<bc>/README.md` + `contexts/<bc>/INDEX.md`, every foundation task file (decision / walking-skeleton spike / styleguide) plus every BC's `INDEX.md` its `capture` call named in `changed` (including a BC's INDEX that already existed before this session), `.agentheim/knowledge/index.md`, any **strategic** ADR written this session, and `.agentheim/knowledge/protocol.md`. Never `git add -A` / `git add .`, per `references/commit-doctrine.md`.
 2. Commit with a single message for the session:
    ```
    chore(<bc-or-global>): brainstorm <topic> — vision created | vision revised | vision extended

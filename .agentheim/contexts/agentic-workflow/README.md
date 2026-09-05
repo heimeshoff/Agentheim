@@ -1046,6 +1046,32 @@ separate BC, but today the whole tool lives in this one.
   ADR-0038 reserves for the skill. Both reuse `lib/task-lifecycle-cli.mjs` — `claim <id-1>,<id-2>,…`
   and `complete <task-id>` (with an optional JSON opts positional for `complete`'s richer
   bookkeeping fields). See ADR-0038, ADR-0007, ADR-0026, ADR-0032, ADR-0042, ADR-0054.
+- **`captureTask` / `dismissTask`** — the git-free CAPTURE and DISMISS lifecycle scripts
+  (ADR-0073, agentic-workflow-e4bjh), completing ADR-0038's mechanization boundary. Both live
+  in a separate module, `lib/task-lifecycle-capture-dismiss.mjs`, wired into the same
+  `lib/task-lifecycle-cli.mjs` dispatch table as `promote`/`claim`/`complete`.
+  **`captureTask(rootDir, id, opts)`** registers a task file the CALLER already wrote to
+  `backlog/` or `todo/` — it never authors task-file prose, only validates frontmatter
+  (id well-formed or grandfathered, status/context/required-fields), inserts the matching
+  INDEX line (a unified format that always carries `(type)`) + count delta, and — unless
+  `opts.protocolEntry: false` (a structural skip `brainstorm`'s per-task foundation capture
+  uses) — prepends a protocol entry keyed by `opts.source` (`modeling` / `quick-capture`). A
+  missing BC `INDEX.md` is backfilled from `references/index-template.md` (read
+  sibling-relative off the module's own `import.meta.url`) only when the BC holds nothing but
+  the captured file; otherwise it refuses `index-missing`. **`dismissTask(rootDir, id, opts)`**
+  is two-phase: `{plan:true}` computes the ADR-0022-amended cascade with zero disk writes,
+  returning a `CascadeSet {leadId, memberIds}` plus a display projection and an advisory list;
+  `{confirm:[...ids]}` recomputes the FULL guarded cascade fresh (never trusting the plan),
+  refusing `cascade-drifted` (membership changed) or `cascade-in-flight` (a member's folder
+  changed) before any write, then performs the hard delete in the order INDEX edits → unlinks
+  → surviving-backlink stripping → protocol entry (ADR-0073 reverses ADR-0022 §4's order for
+  crash-safety). **ADR-0073 amends ADR-0022**: the cascade edge is `depends_on` ONLY (`blocks`
+  is reconciliation-only, never traversed — the live `blocks`/`depends_on` asymmetry made
+  "equivalently, follow blocks" false); cascade membership and backlink stripping match on
+  EXACT frontmatter `id` equality only, never filename/prefix resolution (the live
+  `design-system-001-styleguide` vs `design-system-001` mismatch); INDEX count deltas derive
+  from a strict `removeIndexLine` variant's actual removal count, never cascade-set
+  cardinality. See ADR-0073, ADR-0038, ADR-0022, ADR-0054, ADR-0042, ADR-0059.
 - **`lib/adr-allocation.mjs`** — collision-proof ADR number allocation (ADR-0058,
   agentic-workflow-hmgav), extending the ADR-0042 "composition owned by the caller at the
   squash-merge boundary" pattern to ADR numbering instead of copying ADR-0028's random-token

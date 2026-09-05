@@ -1,15 +1,15 @@
 ---
 id: agentic-workflow-e4bjh
 title: Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI
-status: doing
+status: done
 type: refactor
 context: agentic-workflow
 created: 2026-07-22
-completed:
+completed: 2026-09-06
 depends_on: []
 blocks: [agentic-workflow-pt0gy]
 tags: [captured, audit-2026-07-22-followup, mechanization, lifecycle-cli]
-related_adrs: [0038, 0022, 0054, 0042, 0059]
+related_adrs: [0038, 0022, 0054, 0042, 0059, 0073]
 related_research: []
 prior_art: [agentic-workflow-k5n8f, agentic-workflow-t7m4c, agentic-workflow-wq7fn, agentic-workflow-p3v9k]
 ---
@@ -92,17 +92,17 @@ verb must not re-implement (the worker's ADR amends ADR-0022 accordingly):
 
 ## Acceptance criteria
 
-- [ ] `capture <id>` resolves a task file already written by the caller to exactly one of `backlog/` or `todo/`; rejects fail-closed with `{ok:false, code, reason}` when the file is in neither or both, and when frontmatter fails validation (id per `classifyTaskId` token/legacy/grandfathered, `status` equals the folder found, `context` equals `deriveContext(id)`, required fields present) — no file is created or edited on any rejection.
-- [ ] `capture` inserts into the matching list (`backlog-list` / `todo-list`) and increments the matching count with a unified line format that always includes `(type)` — quick-capture's current `(type)`-less line is retired; backfills a missing BC `INDEX.md` from `references/index-template.md` (read via a sibling-relative path off the module's own `import.meta.url`, never `lib/resolve-plugin-file.mjs` and never an embedded copy) only when the BC's four lifecycle folders hold nothing but the captured file, and refuses `index-missing` otherwise.
-- [ ] `capture` accepts `{"protocolEntry": false}` as a structural skip — no `protocol.md` read or write occurs — verified by a test asserting the file is byte-identical afterwards; with the flag absent the entry template is selected by `source` (`modeling` / `quick-capture`) and carries the caller's `summary`.
-- [ ] `dismiss <id> '{"plan":true}'` performs zero disk writes and returns a `CascadeSet {leadId, memberIds}` (canonically sorted, `depends_on` edges only, exact frontmatter-`id` matching across all BCs) plus a `{id, title, bc, status, path}` projection per member; any `blocks`-only edge and any dangling or non-exact reference is reported as an advisory, never as a member; a member in `doing/` or `done/` yields the refusal naming it, still with zero writes.
-- [ ] `dismiss <id> '{"confirm":[...ids]}'` recomputes the full guarded cascade (traversal and in-flight/shipped guard), refuses `cascade-drifted` when membership differs from the confirmed list and `cascade-in-flight` when a member's lifecycle folder changed with membership unchanged — both before any write.
-- [ ] On confirmed dismiss, writes proceed INDEX edits → task-file unlinks → surviving backlink stripping → protocol entry; INDEX count deltas derive from lines actually removed (a strict `removeIndexLine` variant that reports its removal count), never from cascade-set cardinality; stripping touches only ids in this dismiss's confirmed set (a pre-existing unrelated dangling reference is left alone); the manifest's `changed` lists every deleted path plus every edited file across every spanned BC.
-- [ ] Cascade membership and backlink stripping match on exact frontmatter `id` equality only, never `resolveTaskFile`-style filename resolution — covered by a regression fixture mirroring the live `design-system-001-styleguide` vs `design-system-001` mismatch.
-- [ ] `node --test` covers both verbs' full manifest shapes; every rejection code (`index-missing`, `cascade-drifted`, `cascade-in-flight`, the capture validation codes); compute-then-write atomicity (a forced throw mid-compute leaves disk untouched); a cross-BC dismiss editing two INDEX files; and the `depends_on`-only amendment (a fixture with an unmirrored `blocks` edge asserting it is not cascaded but is stripped).
+- [x] `capture <id>` resolves a task file already written by the caller to exactly one of `backlog/` or `todo/`; rejects fail-closed with `{ok:false, code, reason}` when the file is in neither or both, and when frontmatter fails validation (id per `classifyTaskId` token/legacy/grandfathered, `status` equals the folder found, `context` equals `deriveContext(id)`, required fields present) — no file is created or edited on any rejection.
+- [x] `capture` inserts into the matching list (`backlog-list` / `todo-list`) and increments the matching count with a unified line format that always includes `(type)` — quick-capture's current `(type)`-less line is retired; backfills a missing BC `INDEX.md` from `references/index-template.md` (read via a sibling-relative path off the module's own `import.meta.url`, never `lib/resolve-plugin-file.mjs` and never an embedded copy) only when the BC's four lifecycle folders hold nothing but the captured file, and refuses `index-missing` otherwise.
+- [x] `capture` accepts `{"protocolEntry": false}` as a structural skip — no `protocol.md` read or write occurs — verified by a test asserting the file is byte-identical afterwards; with the flag absent the entry template is selected by `source` (`modeling` / `quick-capture`) and carries the caller's `summary`.
+- [x] `dismiss <id> '{"plan":true}'` performs zero disk writes and returns a `CascadeSet {leadId, memberIds}` (canonically sorted, `depends_on` edges only, exact frontmatter-`id` matching across all BCs) plus a `{id, title, bc, status, path}` projection per member; any `blocks`-only edge and any dangling or non-exact reference is reported as an advisory, never as a member; a member in `doing/` or `done/` yields the refusal naming it, still with zero writes.
+- [x] `dismiss <id> '{"confirm":[...ids]}'` recomputes the full guarded cascade (traversal and in-flight/shipped guard), refuses `cascade-drifted` when membership differs from the confirmed list and `cascade-in-flight` when a member's lifecycle folder changed with membership unchanged — both before any write.
+- [x] On confirmed dismiss, writes proceed INDEX edits → task-file unlinks → surviving backlink stripping → protocol entry; INDEX count deltas derive from lines actually removed (a strict `removeIndexLine` variant that reports its removal count), never from cascade-set cardinality; stripping touches only ids in this dismiss's confirmed set (a pre-existing unrelated dangling reference is left alone); the manifest's `changed` lists every deleted path plus every edited file across every spanned BC.
+- [x] Cascade membership and backlink stripping match on exact frontmatter `id` equality only, never `resolveTaskFile`-style filename resolution — covered by a regression fixture mirroring the live `design-system-001-styleguide` vs `design-system-001` mismatch.
+- [x] `node --test` covers both verbs' full manifest shapes; every rejection code (`index-missing`, `cascade-drifted`, `cascade-in-flight`, the capture validation codes); compute-then-write atomicity (a forced throw mid-compute leaves disk untouched); a cross-BC dismiss editing two INDEX files; and the `depends_on`-only amendment (a fixture with an unmirrored `blocks` edge asserting it is not cascaded but is stripped).
 - [ ] `skills/modeling/SKILL.md` (CAPTURE steps 6-7, the DISMISS flow, "Updating indexes", "Protocol logging"), `skills/quick-capture/SKILL.md` (steps 5-7, "Updating the index", "Protocol logging"), and `skills/brainstorm/SKILL.md` ("Protocol logging", "Indexes") have their hand-edit bookkeeping prose deleted, not duplicated, replaced by "call the CLI, commit its manifest" in PROMOTE's already-rewritten shape; brainstorm's session entry is explicitly marked prose-only. [human-eye]
 - [ ] The `agentic-workflow` README gains a `capture` / `dismiss` entry beside `promoteTask` / `claimBatch` / `completeTask`; the worker's ADR (number via `lib/adr-allocation.mjs`, ADR-0058) records the decisions and amends ADR-0022; both are backlinked (`related_adrs` here, `related_tasks` there). [human-eye]
-- [ ] ADR-0059 mechanize-or-drop: the conventions this task establishes (authoring-vs-registration split, `depends_on`-only cascade edges, exact-id-only matching, template backfill only on an empty BC) ship with their enforcement in the `node --test` coverage above; the one prose-only convention (brainstorm's hand-formatted session entry) is recorded as such in the ADR.
+- [x] ADR-0059 mechanize-or-drop: the conventions this task establishes (authoring-vs-registration split, `depends_on`-only cascade edges, exact-id-only matching, template backfill only on an empty BC) ship with their enforcement in the `node --test` coverage above; the one prose-only convention (brainstorm's hand-formatted session entry) is recorded as such in the ADR.
 
 ## Notes
 
@@ -160,3 +160,53 @@ pre-existing `INDEX.md` files) rather than adding a parallel helper.
 Original open questions (2026-07-22) and their answers: argument shape → register-from-disk;
 cascade location → lib, two-phase; brainstorm composition → per-task with protocol
 suppressed, session entry stays; protocol templates → in lib, keyed by `source`.
+
+**ADR-0059 dispositions (mechanize-or-drop):** authoring-vs-registration split, `depends_on`-only
+cascade edges, exact-id-only matching, and template-backfill-only-on-empty-BC all ship their
+enforcement in `lib/test/task-lifecycle-capture-dismiss.test.mjs` (see AC list above — this is
+the same mechanism ADR-0044/ADR-0052 used). The one prose-only, unenforced convention is
+`brainstorm`'s hand-formatted session protocol entry — recorded as such in both this task and
+ADR-0073's "ADR-0059 mechanize-or-drop dispositions" section, and in `brainstorm/SKILL.md`'s
+"Protocol logging" section itself.
+
+The three follow-up items above are left as recorded candidates, not auto-captured — the task's
+own Notes mark them "builder's call," so no `backlog/` items were minted for them here.
+
+## Outcome
+
+Added `capture`/`dismiss` to `lib/task-lifecycle-cli.mjs`'s dispatch table, backed by a new,
+self-contained module `lib/task-lifecycle-capture-dismiss.mjs` (kept separate from
+`lib/task-lifecycle.mjs` to avoid a merge conflict with the concurrent `agentic-workflow-ghcaj`
+worktree also editing that shared file — see the ADR's "Why a separate module" section).
+`captureTask` registers a caller-authored `backlog/`/`todo/` file (frontmatter validation,
+INDEX insert + count delta with a unified `(type)`-carrying line, template backfill only on an
+otherwise-empty BC, `protocolEntry:false` structural skip). `dismissTask` is two-phase
+(`{plan:true}` / `{confirm:[...ids]}`), amending ADR-0022: the cascade follows `depends_on`
+edges only (`blocks` is reconciliation-only), membership/stripping match on exact frontmatter
+id (never filename/prefix resolution), confirm recomputes the full guarded cascade fresh
+(`cascade-drifted` / `cascade-in-flight`), and the write order is INDEX → unlink → strip →
+protocol (reversing ADR-0022 §4 for crash-safety). Recorded **ADR-0073**, amending ADR-0022
+in place with a pointer note.
+
+Rewired `skills/modeling/SKILL.md` (CAPTURE step 7, the whole DISMISS flow, "Updating indexes",
+"Protocol logging"), `skills/quick-capture/SKILL.md` (step 5 replacing the old steps 5-7,
+"Updating the index", "Protocol logging"), and `skills/brainstorm/SKILL.md` ("Protocol logging",
+"Indexes") to call the CLI and commit its manifest, in PROMOTE's already-rewritten shape;
+`brainstorm`'s session entry is explicitly marked prose-only per ADR-0059. Updated the BC
+README with a `captureTask`/`dismissTask` entry beside `promoteTask`/`claimBatch`/`completeTask`.
+Also fixed `lib/test/task-lifecycle-cli.test.mjs`'s stale "unknown verb" test fixture, which had
+used the now-real `dismiss` verb name as its example of an unknown one.
+
+**Tests** (`node --test`, TDD red→green): 26 new tests in
+`lib/test/task-lifecycle-capture-dismiss.test.mjs` covering both verbs' manifest shapes, every
+rejection code, compute-then-write atomicity for both verbs, a cross-BC dismiss, and the
+`design-system-001-styleguide` vs `design-system-001` exact-id regression fixture; 2 new CLI
+wiring tests in `lib/test/task-lifecycle-cli.test.mjs`. Full `lib/test/*.test.mjs` suite:
+449/449 green (421 before, +28).
+
+Key files: `lib/task-lifecycle-capture-dismiss.mjs`, `lib/task-lifecycle-cli.mjs`,
+`lib/test/task-lifecycle-capture-dismiss.test.mjs`, `lib/test/task-lifecycle-cli.test.mjs`,
+`skills/modeling/SKILL.md`, `skills/quick-capture/SKILL.md`, `skills/brainstorm/SKILL.md`,
+`.agentheim/contexts/agentic-workflow/README.md`,
+`.agentheim/knowledge/decisions/0073-capture-dismiss-mechanization-registration-not-authoring-depends-on-only-cascade-exact-id-matching.md`,
+`.agentheim/knowledge/decisions/0022-dismiss-cascades-dependent-subtree.md` (amendment note).
