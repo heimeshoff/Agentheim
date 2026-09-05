@@ -172,3 +172,13 @@ owner, the conductor.
   conductor's own prose-driven git commands, not through any project-owned wrapper today: 
   adding one here would be a larger, separate refactor of how the conductor issues git commands
   generally, out of scope for closing this specific gap.
+
+## Amended by ADR-0072 (2026-09-06)
+
+The abandonment-path family this ADR names (FAIL-iteration-3 escalation, BOUNCE, orphan
+discard) gains a fourth member: a **real merge-back conflict**, resolved by the merge-back
+conflict ladder. Rung 1 salvages the loser's diff **before** `main` is reset and before the
+branch is touched by the ladder's in-worktree `git merge main`, using a new
+`MERGE_CONFLICT_TAG` (`'merge-conflict'`) alongside this ADR's existing `BOUNCE_TAG` /
+`DISCARD_TAG` / `escalationTag` family in `lib/worktree-salvage.mjs` — same storage
+convention, same empty-diff skip, same visibility requirement. See ADR-0072.

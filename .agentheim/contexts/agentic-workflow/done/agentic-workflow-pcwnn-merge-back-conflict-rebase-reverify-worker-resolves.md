@@ -1,15 +1,15 @@
 ---
 id: agentic-workflow-pcwnn
 title: Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-09-05
-completed:
+completed: 2026-09-06
 depends_on: []
 blocks: []
 tags: [captured, worktree, merge-back, conflict, verification]
-related_adrs: [0032, 0037, 0063, 0038, 0026, 0057, 0058, 0059]
+related_adrs: [0032, 0037, 0063, 0038, 0026, 0057, 0058, 0059, 0072]
 related_research: []
 prior_art: [agentic-workflow-f6m2q, agentic-workflow-k9t3w, agentic-workflow-hvqa4, agentic-workflow-p8q3z]
 ---
@@ -193,3 +193,54 @@ rung, a criterion, or an explicit exclusion above.
 `lib/worktree-salvage.mjs` (tag), a new `lib/merge-conflict-ladder.mjs` (unmerged-path
 parser, dispatch builder, budget model — all pure), `lib/test/merge-conflict-ladder.test.mjs`
 (unit) and `lib/test/git-facts-merge-conflict.test.mjs` (the tmpdir fixture).
+
+## Outcome
+
+Replaced ADR-0032's single "abort and surface" merge-back step with the seven-rung ladder
+described above, recorded as new **ADR-0072** (amends ADR-0032's "Merge-back conflicts" text,
+narrows ADR-0037 §1's abort-command finding to the squash-on-`main` case). A dated backlink
+note was appended to the end of ADR-0032, ADR-0037, and ADR-0063.
+
+**Mechanize-or-drop (ADR-0059), both dispositions stated explicitly, as this ADR itself
+establishes a convention:**
+- **Mechanized:** the six spike-pinned git facts (`lib/test/git-facts-merge-conflict.test.mjs`,
+  a bounded, tmpdir-only, `test.skip`-on-no-git exception to the git-free-`lib` rule per
+  ADR-0038); unmerged-path parsing + the `AA`-under-`knowledge/decisions/` guard + the
+  resolve-dispatch prompt renderer + the one-shot budget arithmetic (all in the new
+  `lib/merge-conflict-ladder.mjs`, `node --test`-covered, git-free); a new `MERGE_CONFLICT_TAG`
+  export on `lib/worktree-salvage.mjs`.
+- **Prose-only, unenforced:** the seven-rung *sequencing* itself (which git command, in what
+  order, across which of the two trees) — `skills/work/SKILL.md`'s "Merge-back conflicts"
+  section — same category as ADR-0063's own "salvage before every removal" rule. A lint could
+  only check after-the-fact artifacts with real false-negative risk; recorded as a deliberate
+  choice, not an accident, in both ADR-0072's "Mechanize-or-drop declaration" and here.
+
+**Prose updated:** `skills/work/SKILL.md` — "Merge-back conflicts" rewritten as the ladder
+(both abort commands in a side-by-side table, the `git stash` prohibition), the "Salvaging a
+worktree's diff before abandonment" subsection extended to a fourth abandonment path, a new
+"Resolve-conflict dispatch" subsection documenting the Subagent Prompt Template variant
+(`done → doing` revert + `## Merge-conflict note (iteration N)` shape), the Verifier Prompt
+Template gained a `## Post-conflict re-verify` block (new base SHA, sibling id/summary,
+residual-marker reminder) plus the two-dot-diff exception on "The diff to audit", and Phase 1
+recovery gained the `MERGE_HEAD`-present case with its two dispositions (resume as a kept
+escalation, or discard after salvage). `agents/verifier.md` gained check 1c (residual conflict
+markers, post-conflict-only) and a "What you are given" bullet for the four inputs.
+`agents/worker.md` gained an "Inputs you receive" bullet describing the resolve-conflict
+dispatch shape a worker may occasionally see. The BC README gained a new bullet under the
+git-model entries.
+
+Full suite: `node --test lib/test/*.test.mjs` → 421/421 passing, including the new
+`lib/test/merge-conflict-ladder.test.mjs` (30 tests) and the new
+`lib/test/git-facts-merge-conflict.test.mjs` (4 tests, each exercising multiple pinned facts
+via real git in a throwaway `os.tmpdir()` repo). `lib/doctrine-line-pointer.mjs`'s live-tree
+scan and `lib/work-argument-grammar-section.mjs`'s live-tree scan both still pass — no raw
+line-number pointers introduced.
+
+Key files: `.agentheim/knowledge/decisions/0072-merge-back-conflict-ladder-in-worktree-merge-worker-resolved-one-shot-budget.md`,
+`.agentheim/knowledge/decisions/0032-worker-worktree-isolation-git-model.md`,
+`.agentheim/knowledge/decisions/0037-worktree-isolation-implementation-resolutions-spike-findings.md`,
+`.agentheim/knowledge/decisions/0063-worktree-abandonment-diff-salvage.md`,
+`lib/merge-conflict-ladder.mjs`, `lib/worktree-salvage.mjs`,
+`lib/test/merge-conflict-ladder.test.mjs`, `lib/test/git-facts-merge-conflict.test.mjs`,
+`lib/test/worktree-salvage.test.mjs`, `skills/work/SKILL.md`, `agents/verifier.md`,
+`agents/worker.md`, `.agentheim/contexts/agentic-workflow/README.md`.

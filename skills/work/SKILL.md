@@ -47,6 +47,7 @@ Before anything else, look at `contexts/*/doing/` **and**, if this is a git repo
 - **1 task** → a previous session was interrupted. Resume it sequentially as the first task of this session, *before* starting any parallel dispatch. If a worktree + branch `aw/<task-id>` already exists for it (a FAIL-iteration interruption), reuse that worktree — do not create a second one. If no worktree exists (the batch-start commit landed but dispatch never happened), create one fresh: `git worktree add -b aw/<task-id> .worktrees/<task-id> HEAD`.
 - **2+ tasks** → a previous parallel session was interrupted. Ask the user: "Resume all in parallel", "Resume one at a time", or "Abandon — move them back to todo". Do not guess. Resuming reuses each task's existing worktree where one exists.
 - **A non-main worktree with no matching `doing/` task** → likely an orphan from a session that ended mid-cleanup. Surface it to the user for an explicit disposition rather than silently removing it — same posture as the session-end reconciliation below.
+- **A non-main worktree with `MERGE_HEAD` set** (ADR-0072 — check `.git/worktrees/<id>/MERGE_HEAD` via `git -C .worktrees/<id> rev-parse -q --verify MERGE_HEAD`) → a session was interrupted **mid-ladder**, between rung 3's `git merge main` and rung 5's checkpoint. This is neither "no worktree" nor an ordinary "FAIL-iteration worktree" — surface it explicitly as **mid-conflict** and let the user choose: **abort the merge** (`git -C .worktrees/<id> merge --abort`) and resume as an ordinary kept-worktree escalation (rung 7's ergonomics), or **discard** it (salvage first — tag `discarded`, see "Salvaging a worktree's diff before abandonment" — then remove). Never silently resume it as a plain FAIL re-dispatch: the worker would be handed marker-laden files under a prompt that never says so.
 
 Also run the **session-start human-churn reconciliation** once per session (see the dedicated section below), independent of which recovery scenario above applied — it runs whether or not there was an interrupted session to resume. Do this last in Phase 1, immediately before moving on to Phase 2.
 
@@ -218,7 +219,7 @@ A worker that returns `RESULT: BOUNCED` moved its task file `doing → backlog` 
 
 ### Salvaging a worktree's diff before abandonment (ADR-0063)
 
-Every abandonment path — FAIL-iteration-3 escalation above, BOUNCE above, and an orphaned worktree's "discard" disposition (see "Reconciling stranded carry-over" below) — removes or eventually removes a worktree that may hold real, working changes the conductor never merged to `main`. **Before any of those three paths' `git worktree remove`, salvage the worktree's diff to a patch file** (ADR-0063).
+Every abandonment path — FAIL-iteration-3 escalation above, BOUNCE above, an orphaned worktree's "discard" disposition (see "Reconciling stranded carry-over" below), and rung 1 of the merge-back conflict ladder (see "Merge-back conflicts" above) — removes or eventually removes a worktree that may hold real, working changes the conductor never merged to `main`. **Before any of those four paths' `git worktree remove`, salvage the worktree's diff to a patch file** (ADR-0063; the merge-back-conflict case added by ADR-0072).
 
 **Capture (conductor-only — never the worker, never a `lib/` module per ADR-0038's git-free boundary):**
 ```
@@ -227,7 +228,7 @@ git -C .worktrees/<task-id> diff <fork-point-from-above> > <patch-path>
 ```
 `git diff <fork-point>` (no `--cached`) reports the union of anything already committed on the branch (a conductor `wip` commit) **and** anything still sitting uncommitted in the worktree's working directory — one command covers both, so it is correct whether or not a `wip` checkpoint happened first for this particular abandonment.
 
-**Resolve `<patch-path>`** via `lib/worktree-salvage.mjs` — git-free, `node --test`-covered (ADR-0038): call `ensureSalvageDir(salvageRoot)` first (`salvageRoot` = `<repo-root>/.agentheim/salvage/`, which does not pre-exist until the first capture), then `salvagePatchPath(salvageRoot, taskId, tag)` where `tag` is one of `escalationTag(N)` (→ `escalated-iterN`), the exported `BOUNCE_TAG` (`bounced`), or `DISCARD_TAG` (`discarded`) — whichever path triggered the capture. Runnable in a consumer install via the resolve-plugin-file-convention bootstrap in `references/lib-bootstrap.md` §4.
+**Resolve `<patch-path>`** via `lib/worktree-salvage.mjs` — git-free, `node --test`-covered (ADR-0038): call `ensureSalvageDir(salvageRoot)` first (`salvageRoot` = `<repo-root>/.agentheim/salvage/`, which does not pre-exist until the first capture), then `salvagePatchPath(salvageRoot, taskId, tag)` where `tag` is one of `escalationTag(N)` (→ `escalated-iterN`), the exported `BOUNCE_TAG` (`bounced`), `DISCARD_TAG` (`discarded`), or `MERGE_CONFLICT_TAG` (`merge-conflict`, ADR-0072 — the merge-back conflict ladder's rung 1 capture) — whichever path triggered the capture. Runnable in a consumer install via the resolve-plugin-file-convention bootstrap in `references/lib-bootstrap.md` §4.
 
 **Skip on empty diff.** If the resulting patch is empty (the worktree never diverged from its fork point), don't write the file and don't reference one — there is nothing to salvage.
 
@@ -253,7 +254,13 @@ Iteration: <N> of max 3
 <paste the worker's full RESULT: SUCCESS block verbatim>
 
 ## The diff to audit
-<paste `git -C <worktree> show HEAD --stat` output, then `git -C <worktree> show HEAD` output — the worktree's one wip-commit, scoped to only this task's changes atop the shared batch-start commit>
+<paste `git -C <worktree> show HEAD --stat` output, then `git -C <worktree> show HEAD` output — the worktree's one wip-commit, scoped to only this task's changes atop the shared batch-start commit. EXCEPTION — a rung-6 post-conflict re-verify (see below): paste `git -C <worktree> diff main HEAD --stat` / `git -C <worktree> diff main HEAD` instead — two-dot, byte-equal to what the eventual `git merge --squash` will stage; `show HEAD` on a merge commit would show only the resolution hunks, hiding the sibling's already-integrated change this diff also carries.>
+
+## Post-conflict re-verify (ADR-0072 — include this whole section ONLY when this task went through the merge-back conflict ladder's rung 4 resolve-dispatch; omit entirely for an ordinary verification)
+This is a re-verify against an updated base, not a first-pass verification: the worker's worktree was merged with the new `main` after a real merge-back conflict, and the worker resolved it.
+New base SHA: <NEW-BASE-SHA, from `git -C <worktree> rev-parse main`>
+Sibling: <SIBLING-TASK-ID> — <SIBLING-SUMMARY>
+Before any PASS, confirm no residual conflict marker (`^<<<<<<< `, `^=======$`, `^>>>>>>> `) survives anywhere in the diff above — see `agents/verifier.md`'s residual-marker check. Any survivor is an automatic FAIL, no matter what else passes.
 
 ## Pre-resolved test command
 The `work` skill resolved this project's test command once for this batch (the same command is reused across every verification iteration for this BC). **Run it from the `## Worktree` path above** — that is what makes this run isolated from any sibling worker's changes. If it reads `none`, resolution found no command; fall back to your own discovery procedure (rooted at the worktree), and if that also finds nothing, apply your fail-closed FAIL.
@@ -317,13 +324,37 @@ After a verifier returns `VERDICT: PASS` (or `VERDICT: SKIP`, or when verificati
 
 The commit SHA is **not** written back anywhere — see `references/commit-doctrine.md` for the `[<task-id>]` trailer / dropped `commit:` field convention. Do **not** add a `commit: <sha>` field and do **not** amend the task file after committing.
 
-### Merge-back conflicts — abort and surface, never auto-guess
+### Merge-back conflicts — the seven-rung ladder (ADR-0072, agentic-workflow-pcwnn)
 
-Two same-BC workers both editing the BC README (the common case the Phase 3 advisory flags) now collide at **merge-back** instead of being predicted from prose. On a clean or auto-mergeable squash-merge, proceed as above. On a **real** conflict (git leaves conflict markers, non-zero exit from step 1):
+Two same-BC workers both editing the BC README (the common case the Phase 3 advisory flags) now collide at **merge-back** instead of being predicted from prose. On a clean or auto-mergeable squash-merge, proceed as above. On a **real** conflict (git leaves conflict markers, non-zero exit from step 1), work the ladder below, in order — every git operation is conductor prose (ADR-0038); the worker never runs git (ADR-0032). **The ladder fires at most once per worktree lifetime** — see "Budget" at the end of this section.
 
-1. **Abort with `git reset --hard HEAD`** — **not** `git merge --abort`. De-risking spike finding (ADR-0037): `git merge --squash` never sets `MERGE_HEAD`, so `git merge --abort` errors ("There is no merge to abort") on a squash merge; `git reset --hard HEAD` is the command that actually restores `main`'s index and working tree to their pre-merge state. `main` is never left in a conflicted state.
-2. Preserve the losing task's worktree + branch **exactly as-is** — do not remove them.
-3. **Surface to the user immediately**: name the conflicting file(s), both task ids, and the worktree path. No merge is ever auto-guessed; the user resolves manually or asks for a re-run. (An automatic rebase-and-reverify is a named future enhancement, not baseline — see ADR-0032.)
+**A refinement spike established the load-bearing fact behind this ladder: there is no separate "rebase" rung.** A squash-merge conflict on `main` and a real `git merge main` inside the loser's worktree are the *same* 3-way merge (same merge-base, same two tips), so they conflict on exactly the same paths — a rebase would replay each ephemeral `wip` commit separately, detach HEAD, and rewrite the branch the salvage patch is cut from, for zero conflict-avoidance gain over a real merge. ADR-0032's named "automatic rebase" future enhancement is retired by ADR-0072 in favor of the ladder below.
+
+**Rung 1 — reset and salvage.** `git reset --hard HEAD` on `main` — **not** `git merge --abort`, which errors (`fatal: There is no merge to abort`) on a squash merge (ADR-0037 §1, narrowed by ADR-0072 to this squash-on-`main` case specifically). Before touching the losing branch at all, salvage its diff (see "Salvaging a worktree's diff before abandonment" above) using the new `MERGE_CONFLICT_TAG` export on `lib/worktree-salvage.mjs` — this is capture-before-risk (ADR-0063), done first so a botched later rung never costs the already-verified work a second time.
+
+**Rung 2 — clean the worktree of derived churn.** For every tracked path the checkpoint guard refuses (today: `dashboard/dist/**`, ADR-0057) that is dirty in the worktree, `git -C .worktrees/<id> checkout -- <path>`. **Never `git stash`** (a 2026-07-13 near-miss) — a dirty tracked file that `main` also changed makes `git merge` refuse to start, and stashing risks losing track of what was set aside.
+
+**Rung 3 — merge `main` into the branch, a real merge.** `git -C .worktrees/<id> merge main`. **`MERGE_HEAD` is set on this tree** (the opposite of the squash on `main`), so `git -C .worktrees/<id> merge --abort` is the correct undo **here** — record both abort commands side by side, since one errors and the other succeeds depending on which tree you're standing in:
+
+| Tree | Abort command | Outcome |
+|---|---|---|
+| `main` (the failed squash) | `git reset --hard HEAD` | restores cleanly; `git merge --abort` here **errors** |
+| `.worktrees/<id>` (the real merge) | `git -C .worktrees/<id> merge --abort` | restores cleanly; `git reset --hard HEAD` here would discard the branch's own prior `wip` commits |
+
+- **Unexpectedly clean** (should not happen — symmetric with the squash that just failed): the merge auto-commits; skip to rung 5.
+- **Conflicted:** `git -C .worktrees/<id> diff --name-only --diff-filter=U` is the **resolution allow-list**. Any `U` path under `.agentheim/knowledge/decisions/` with `AA` status (two identical provisional ADR filenames) → escalate (rung 7), never dispatch — ADR-0058's numbers with differing slugs never actually collide, so this is fail-closed guard prose, not an expected case. Parse the porcelain/diff output with `lib/merge-conflict-ladder.mjs`'s `conflictStateFromPorcelain` (or `conflictStateFromNameOnly` when only the name-only form is in hand) to get `{allowList, adrGuardHits, resolved}`.
+
+**Rung 4 — resolve-conflict dispatch, same worker, same worktree.** Before dispatch: revert the task file `done → doing` inside the worktree exactly as the FAIL path does (the worker is being invoked from `done/` state, which the standard Subagent Prompt Template does not expect), and append a `## Merge-conflict note (iteration N)` section to the task file — see "Resolve-conflict dispatch" under the Subagent Prompt Template below for its exact shape and the prompt block to hand the worker (built by `lib/merge-conflict-ladder.mjs`'s `buildResolveDispatchPrompt`).
+
+**Rung 5 — checkpoint the resolution, fail-closed.** Route the resolved files through the `checkpoint` verb exactly as the ordinary SUCCESS path does. Then assert, before committing: `git -C .worktrees/<id> diff --name-only --diff-filter=U` is **empty** (`isResolved`/`conflictStateFromPorcelain(...).resolved`) **and** no allow-list path still contains a `^<<<<<<< ` marker. Either non-empty/non-clean → rung 7. Otherwise commit with the manifest message suffixed `(merge main)` — this commit *is* the merge commit and is collapsed by the eventual squash like every other `wip` commit.
+
+**Rung 6 — re-verify against the new base, mandatory.** Spawn the verifier in the worktree with the diff captured as `git -C .worktrees/<id> diff main HEAD --stat` / `git -C .worktrees/<id> diff main HEAD` — **two-dot**, byte-equal to what the squash will stage (never `show HEAD`, which on a merge commit shows only the resolution hunks). See "Verifier Prompt Template" below for the four post-conflict inputs this adds. PASS → `git merge --squash aw/<id>` on `main` is clean by construction (the branch now contains `main`); proceed exactly as the normal PASS path, including the ADR-0057 rebuild of `dashboard/dist/` from merged source and ADR-0058's `finalizeAdrNumbering`. FAIL → the ordinary gate: re-dispatch with the verifier note, the FAIL counter **continuing from where it already was** (see "Budget" below), cap 3 unchanged.
+
+**Rung 7 — escalate to the builder, the last rung, not the first.** Triggers: the resolve dispatch returns `FAILED`/`BOUNCED`; unmerged paths or markers survive rung 5; the FAIL cap is reached after a resolve; the `AA`-ADR guard fires; or a **second** merge-back conflict hits the same worktree (the one-shot budget is spent). Action: `git -C .worktrees/<id> merge --abort` (branch back to its pre-merge state, `git status --porcelain` empty), worktree + branch **kept**, the rung-1 patch already on disk, both task ids + conflicted files + worktree path + patch path surfaced — today's iteration-3 escalation ergonomics, reused rather than reinvented.
+
+**Budget — one shot per worktree lifetime.** Mechanized in `lib/merge-conflict-ladder.mjs`: `createLadderState()` / `onMergeBackConflict(state)` / `decideAfterVerifierVerdict(iteration, verdict)` / `onWorktreeTeardown()`. A resolve dispatch (rung 4) is **structurally separate** from the ordinary FAIL-iteration counter — `onMergeBackConflict` never sees or touches it, so a post-resolve FAIL (rung 6) continues the FAIL count from wherever it already was, with the same cap-3 rule as any other FAIL. Mixing the two counters would escalate the *healthiest* tasks (a PASS on iteration 3 that then hits a merge conflict). The one-shot flag resets only on worktree teardown (`onWorktreeTeardown`) — never silently across sessions on the same worktree.
+
+**Excluded by construction.** `INDEX.md` and `protocol.md` never enter this conflict surface — they are conductor-direct writes on `main` the worker branch never touches (ADR-0032/ADR-0038) — so the allow-list can never contain them and the resolve dispatch is never over-scoped to bookkeeping.
 
 ### One commit per task — and the trivial-squash carve-out
 
@@ -538,6 +569,13 @@ When done, the worker returns ONLY a `RESULT: SUCCESS | BOUNCED | FAILED` block,
 
 If `TESTS_PASSING: no`, do NOT return SUCCESS — that's a FAIL or a BOUNCE, not a success.
 ```
+
+### Resolve-conflict dispatch (merge-back conflict ladder rung 4, ADR-0072)
+
+A variant of the Subagent Prompt Template above, used **only** for rung 4 of the merge-back conflict ladder — same worker task, same worktree, invoked after a real `git -C .worktrees/<id> merge main` conflict (see "Merge-back conflicts"). Two things differ from the standard dispatch:
+
+1. **Before dispatch, revert the task file `done → doing` inside the worktree**, exactly as the ordinary FAIL path does (`skills/work/SKILL.md`'s "Handling the verdict", `VERDICT: FAIL` steps) — the worker is being invoked from `done/` state, which the standard template's `## Your task` framing does not expect. Then append a `## Merge-conflict note (iteration N)` section to the task file — its own shape, **never** the `## Verifier note` shape: the sibling task id + summary, the new base SHA (`git -C .worktrees/<id> rev-parse main`), the resolution allow-list, and the sibling's `git log -1 --stat main` **scoped to the allow-list paths**.
+2. **The `## Your task` block gains one extra section**, inserted immediately after it: the rendered output of `lib/merge-conflict-ladder.mjs`'s `buildResolveDispatchPrompt({taskId, siblingId, siblingSummary, newBaseSha, allowList, siblingStatScopedToAllowList})` — pasted verbatim. It carries the **orientation** (`HEAD` = the worker's own work, `main` = the already-integrated sibling), the **authority** statement (the worker may not undo or weaken the sibling's change — both intents must survive), and the **scope** (the allow-list paths verbatim, plus any test that must change to keep both intents green). Everything else — `## Pre-loaded ADRs`, `## Rules — CRITICAL`, the strict `RESULT:` return format — is the standard template, unchanged; the worker still never runs git.
 
 ## End-of-run reporting
 

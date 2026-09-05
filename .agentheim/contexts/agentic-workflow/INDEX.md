@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 3
 - **Todo:** 1
-- **Doing:** 1
-- **Done:** 186
+- **Doing:** 0
+- **Done:** 187
 <!-- task-counts:end -->
 
 ### Todo
@@ -23,11 +23,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-pcwnn** — Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung (feature) — `doing/agentic-workflow-pcwnn-merge-back-conflict-rebase-reverify-worker-resolves.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-pcwnn** — Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung (feature) — `done/agentic-workflow-pcwnn-merge-back-conflict-rebase-reverify-worker-resolves.md`
 - **agentic-workflow-rw6ck** — Hovering a card re-renders that card and its ring targets, not all 255 — memoized board cards and columns, hover state out of the board root, identity-stable tree projection (refactor) — `done/agentic-workflow-rw6ck-memoized-board-hover-scoped-identity-stable-projection.md`
 - **agentic-workflow-g4zce** — Todo cards get a Work launch button seeded with the ticket id — `/agentheim:work <id>` for exactly that task (feature) — `done/agentic-workflow-g4zce-todo-card-work-launch-button.md`
 - **agentic-workflow-swj2q** — "`/agentheim:work <task-id>` — scope a work run to one named todo task instead of the whole ready set" (feature) — `done/agentic-workflow-swj2q-work-single-task-argument.md`
@@ -45,6 +45,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0072** — Merge-back conflict ladder: on a real squash-merge conflict the conductor salvages the loser diff, cleans derived churn, merges `main` INTO the loser worktree (a real merge — never rebase, never stash; `merge --abort` is correct there, `reset --hard HEAD` on main), dispatches the same worker to resolve the U-path allow-list (ours = yours, theirs = the integrated sibling; both intents survive), checkpoints fail-closed on residual markers, re-verifies against the new base via two-dot diff, and escalates to the builder only as the last rung; one-shot budget per worktree lifetime, separate from the FAIL counter; INDEX/protocol excluded by construction; git facts pinned in a tmpdir-only fixture as a bounded exception to git-free lib. Amends ADR-0032, ADR-0037 — `../../knowledge/decisions/0072-merge-back-conflict-ladder-in-worktree-merge-worker-resolved-one-shot-budget.md`
 - **ADR-0071** — `work` argument grammar: `/agentheim:work <id> [<id>…]` scopes a run to the named todo ids (exact-match, fail-closed on unmet/dangling depends_on, refused with the actual lifecycle folder when not in todo/), ends after the named set is integrated/bounced/failed/escalated with no mid-run pickup, and records "scoped" on the Batch-started entry; bare `/agentheim:work` is unchanged. Enforced by the live-tree lint `lib/work-argument-grammar-section.mjs` (ADR-0059) — `../../knowledge/decisions/0071-work-scoped-run-argument-grammar.md`
 - **ADR-0070** — Live-tree hub: one shared SSE subscription and one /api/tree fetch per tab; frames route by path (structural / advisory / runtime) so an advisory write re-syncs only its own panel — routing is addressing, never interpretation; unrecognized paths fail open to structural. Supersedes ADR-0027 §3 / ADR-0043 §4 in part; ADR-0006 untouched (accepted 2026-09-05, agentic-workflow-mvt8x) — `../../knowledge/decisions/0070-live-tree-hub-shared-subscription-frame-routing.md`
 - **ADR-0069** — Audit-closure doctrine: dispositions the three 2026-07-22 audit residuals (fix the vacuum-guard empty-board refusal placement at both call sites; decline cross-task drift detection and forced spike-typing pending a concrete incident, ADR-0067 posture), defines the audit PASS bar and a dated audit-stamp/delta-scoping convention (both prose-only, unenforced), and ships the live-tree lint `lib/doctrine-line-pointer.mjs` banning raw line-number pointers in doctrine prose — `../../knowledge/decisions/0069-audit-closure-doctrine-dispositions-pass-bar-pointer-lint.md`

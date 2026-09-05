@@ -315,3 +315,15 @@ Reviewed end-to-end against ADR-0026 and ADR-0007. Findings:
 
 Verdict: **ratified — status set to `accepted`.** `related_tasks` already names the real child
 ids (`agentic-workflow-k9t3w`, `agentic-workflow-f6m2q`); no placeholder ids found.
+
+## Amended by ADR-0072 (2026-09-06)
+
+The "Merge-back conflicts" decision text above is amended: the named future enhancement ("an
+automatic `git rebase` of the losing branch onto the new `main` + re-verify") is retired — a
+throwaway-repo spike found no rebase-specific conflict class to clear (a squash conflict on
+`main` and an in-worktree `git merge main` are the same 3-way merge, so they conflict on the
+same paths). ADR-0072 replaces the single "abort and surface" step with a seven-rung ladder:
+reset-and-salvage, clean derived churn, a real in-worktree merge (not a rebase), a
+resolve-conflict dispatch to the same worker, a fail-closed checkpoint, a mandatory re-verify
+against the new base, and builder escalation as the **last** rung, not the first. See
+ADR-0072 for the full choreography and its own mechanize-or-drop declaration.

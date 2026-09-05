@@ -126,3 +126,14 @@ carries no risk a verifier would meaningfully gate.
 Builds on **ADR-0032** (the ratified worktree-isolation model this resolves two open corners
 of), preserves **ADR-0026** (one task = one commit; BOUNCE's small commit is that one commit)
 and **ADR-0007** (the conductor, not a redefined mover, performs the BOUNCE move + bookkeeping).
+
+## Amended by ADR-0072 (2026-09-06)
+
+§1's abort-command finding ("the command that actually restores `main`'s index and working
+tree ... is `git reset --hard HEAD`") is narrowed to the **squash-merge on `main`**
+specifically — that finding was never wrong for the case it examined, it simply had no
+second, real-merge case to distinguish from yet. ADR-0072's merge-back conflict ladder adds
+that second case: rung 3's real, non-squash `git merge main` **inside the loser's worktree**
+does set `MERGE_HEAD`, so `git merge --abort` is the correct undo *there* — the opposite
+command in the opposite tree. Both facts now coexist explicitly rather than the second
+silently overriding the first.

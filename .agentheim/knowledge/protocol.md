@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 00:11 -- Task verified and completed: agentic-workflow-pcwnn - Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-pcwnn - Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung
+**Summary:** ADR-0032 abort-and-surface merge-back rule becomes a seven-rung conflict ladder — salvage, clean derived churn, real merge of main into the loser worktree (never rebase, never stash), same-worker resolve dispatch with an allow-list and orientation/authority framing, fail-closed marker check, mandatory re-verify against the new base via two-dot diff, builder escalation as the last rung; one-shot budget per worktree lifetime separate from the FAIL counter; Phase 1 gains the MERGE_HEAD-present recovery case; six git facts pinned in a tmpdir-isolated fixture and the pure helpers (lib/merge-conflict-ladder.mjs, MERGE_CONFLICT_TAG) tested; ADR-0072 amends ADR-0032 and ADR-0037
+**Duration:** 23m
+**Verification:** PASS (iteration 1)
+**Files changed:** 14
+**Tests added:** 40
+**ADRs written:** ADR-0072
+
+---
+
 ## 2026-09-06 00:06 -- Modeling / Promoted: agentic-workflow-e4bjh - Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI
 
 **Type:** Modeling / Promote

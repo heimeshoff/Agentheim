@@ -179,6 +179,38 @@ separate BC, but today the whole tool lives in this one.
   only check after-the-fact artifact existence, with no reliable way to catch a skipped
   capture before the branch is already gone. See ADR-0063, ADR-0032, ADR-0037, ADR-0038,
   ADR-0027, ADR-0059.
+- **Merge-back conflict ladder (ADR-0072, agentic-workflow-pcwnn)** — a real squash-merge
+  conflict at merge-back no longer defaults straight to "abort and surface". A spike found no
+  separate "rebase" rung exists (a squash conflict on `main` and a real `git merge main`
+  inside the loser's worktree are the same 3-way merge, so they conflict on the same paths) —
+  ADR-0032's named rebase enhancement is retired in favor of a seven-rung ladder: reset `main`
+  + salvage the loser's diff first (`MERGE_CONFLICT_TAG` on `lib/worktree-salvage.mjs`), clean
+  derived churn from the worktree (never `git stash`), a **real merge** of `main` into the
+  branch (`git -C <worktree> merge --abort` is the correct undo *there* — the opposite of
+  `main`'s `git reset --hard HEAD`), a **resolve-conflict dispatch to the same worker** in the
+  same worktree (orientation + authority + an allow-list, rendered by
+  `lib/merge-conflict-ladder.mjs`'s `buildResolveDispatchPrompt`), a fail-closed checkpoint
+  (no residual `U` path, no residual marker), a **mandatory re-verify** against the new base
+  (two-dot `diff main HEAD`, byte-equal to what the eventual squash stages), and builder
+  escalation as the **last** rung, not the first. The ladder fires **at most once per worktree
+  lifetime** — a resolve dispatch never touches the ordinary FAIL-iteration counter
+  (`lib/merge-conflict-ladder.mjs`'s `createLadderState`/`onMergeBackConflict`/
+  `decideAfterVerifierVerdict`/`onWorktreeTeardown`), so a post-resolve FAIL continues that
+  counter from its prior value and a **second** conflict on the same worktree escalates
+  without a further dispatch. `INDEX.md`/`protocol.md` are excluded from the conflict surface
+  **by construction** — they are conductor-direct writes on `main` the worker branch never
+  touches, so the resolution allow-list can never contain them. Unmerged-path parsing (plus
+  the fail-closed `AA`-under-`knowledge/decisions/` guard, ADR-0058) is mechanized in
+  `lib/merge-conflict-ladder.mjs`; the seven-rung sequencing itself is prose-only, unenforced
+  (ADR-0059), same posture as ADR-0063's own salvage-ordering rule. Six governing git facts
+  (disjoint-hunk squash order-independence, the squash-vs-real-merge abort asymmetry, the
+  two-dot-diff/squash equivalence, the dirty-tracked-file refusal, an untracked ignored dir's
+  immunity to both) are pinned by `lib/test/git-facts-merge-conflict.test.mjs` — a **bounded,
+  test-only exception** to "`lib/` is git-free" (ADR-0038): it shells out to real `git`, but
+  only inside a throwaway repo it creates itself via `fs.mkdtempSync(path.join(os.tmpdir(),
+  ...))`, never an env-derived path, never this project's own repo, and `test.skip`s entirely
+  when `git --version` fails. See ADR-0072, ADR-0032, ADR-0037, ADR-0063, ADR-0038, ADR-0057,
+  ADR-0058, ADR-0059.
 - **Derived-artifact checkpoint guard (ADR-0057, agentic-workflow-q7v3k)** — workers never
   stage or merge a rebuilt `dashboard/dist/` (it is derived, bundled output, ADR-0003; the
   conductor rebuilds it from **merged** source at integration). Running the test suite

@@ -25,6 +25,7 @@ In your prompt:
 - A `## Pre-resolved test command` block — the `work` skill resolved the project's test command once for this batch and pre-loaded it here, exactly as workers receive pre-loaded ADRs. Use it in check 2. It reads `none` only when resolution found nothing.
 - A `## Pre-resolved launch command` block — the `work` skill resolved the BC's `## Runtime surface` manifest (ADR-0036) once for this batch, from the BC README, and pre-loaded it here. Use it in check 8. It reads `none` when the BC declares no runtime surface at all — in that case check 8 never fires, for any task in that BC.
 - Iteration number — if this is the second or third verification attempt on this task, the prompt will say so
+- **On a post-conflict re-verify only** (ADR-0072, the merge-back conflict ladder's rung 6): a `## Post-conflict re-verify` block carrying the new base SHA, the sibling task id + summary, and the residual-marker check reminder (see check 1c). The diff itself is also captured differently in this case — two-dot (`diff main HEAD`), not the ordinary `show HEAD` — the spawn prompt states which form you're looking at.
 
 You are NOT given:
 
@@ -98,6 +99,12 @@ the prior note's evidence named for that same criterion.
   (`skills/work/SKILL.md` step 5) already escalates immediately rather than re-dispatching —
   no new machinery needed. Drift proves the criterion was never truly falsifiable as worded,
   which is precisely what `task-under-specified` already means.
+
+### 1c. Residual conflict markers — post-conflict re-verify only (ADR-0072)
+
+Only applies when your spawn prompt carries a `## Post-conflict re-verify` block (the merge-back conflict ladder's rung 6, `skills/work/SKILL.md`) — skip this check entirely on an ordinary verification, no evidence line needed.
+
+Scan the diff in front of you for a residual conflict marker — any line matching `^<<<<<<< `, `^=======$` inside what was clearly a merge hunk, or `^>>>>>>> `. **Any survivor is an automatic FAIL**, regardless of what else passes: a marker left in place means the resolution never actually completed, and the file it's in would ship broken syntax or a silently-wrong merge. Cite the exact file and marker in REASONS; `SUGGESTED_FIX: remove the residual conflict marker in <file> and re-run the suite`; `ITERATION_HINT: likely-fixable`.
 
 ### 2. Test execution — the verdict comes only from the runner (ADR-0062)
 
