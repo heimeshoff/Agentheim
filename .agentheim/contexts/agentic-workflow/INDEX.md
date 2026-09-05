@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 4
+- **Backlog:** 5
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 182
@@ -31,6 +31,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-bmn29** — Dashboard burns resources at idle on a MacBook — four SSE streams per tab, a 2×tree + 2×doc fan-out on every heartbeat, an unmemoized 255-card board, and box-shadow keyframes (bug) — `backlog/agentic-workflow-bmn29-dashboard-idle-resource-waste-four-sse-streams-fanout-refetch-unmemoized-board.md`
 - **agentic-workflow-pcwnn** — Merge-back conflict ladder — rebase the loser onto new main, re-verify, and let the worker resolve a real conflict before escalating to the builder (feature) — `backlog/agentic-workflow-pcwnn-merge-back-conflict-rebase-reverify-worker-resolves.md`
 - **agentic-workflow-ghcaj** — Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report (refactor) — `backlog/agentic-workflow-ghcaj-worker-branch-code-only-conductor-writes-bookkeeping.md`
 - **agentic-workflow-pt0gy** — Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free (feature) — `backlog/agentic-workflow-pt0gy-concurrent-modeling-sessions-conflict-free-bookkeeping.md`

@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 22:20 -- Modeling / Captured: agentic-workflow-bmn29 - Dashboard burns resources at idle on a MacBook — four SSE streams per tab, a 2×tree + 2×doc fan-out on every heartbeat, an unmemoized 255-card board, and box-shadow keyframes
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Builder reported high resource use on a MacBook and suspected polling. Architecture read found no client timer and no server stat-poll on macOS; the waste is emergent — four `useLiveTree` EventSource subscriptions per tab (ADR-0006 assumed one), each tree-changed frame fanning out to 2× /api/tree (sync 255-file walk) + 2× /api/doc, heartbeat writes to .agentheim/state triggering it on every turn end, an unmemoized whole-board re-render on every fetch and card hover, and two infinite box-shadow keyframes painting every frame. Candidate split into agentic-workflow / design-system / infrastructure children at REFINE.
+
+---
+
 ## 2026-09-05 22:08 -- Batch started: [infrastructure-rgknz, infrastructure-w45ce]
 
 **Type:** Work / Batch start
