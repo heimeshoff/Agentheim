@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 21:50 -- Modeling / Captured: infrastructure-w45ce, infrastructure-rgknz - A marketplace install/update ships and serves an up-to-date dashboard
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo (w45ce), backlog (rgknz)
+**Summary:** Builder field report — after updating the plugin in a consumer repo the dashboard is not properly installed/updated. Root causes found: (1) the committed `dashboard/dist/` is the shipped artifact and nothing rebuilds it at release time (`RELEASE.md` has no step; ADR-0057 deliberately keeps workers from committing it), and `main` is already stale (app changed 2026-07-15, dist built 2026-07-13); the marketplace also copies `main`, not the tag. → w45ce: release-step rebuild + a stdlib staleness check, filed to todo. (2) `launch.mjs` reuses any live pid regardless of which plugin version it serves — an old-version server survives an update (or serves from a removed cache dir). → rgknz: version-aware replace-not-reuse, filed to backlog pending the builder's observed symptom.
+
+---
+
 ## 2026-09-05 21:38 -- Batch started: [agentic-workflow-jf6qz]
 
 **Type:** Work / Batch start
