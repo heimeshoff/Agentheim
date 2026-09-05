@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 01:55 -- Modeling / Refined: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** doing (escalation re-route after five verification FAILs — no lifecycle move; the kept worktree's copy of the task file received the identical edit so the next dispatch reads it)
+**Summary:** Added a bounded doctrine-consistency sweep criterion: a five-clause definition of a residual pre-ghcaj statement, an exhaustive enumerated surface list (agents/worker, agents/verifier, skills/work, skills/verification-before-completion, the modeling field legend, worker-return-format, commit-doctrine, seven named README bullets plus Key events/commands, the checkpoint/complete doctrine comments in three lib modules, the task's ADR), an explicit out-of-scope list, and a closure rule (a hit outside the list is a follow-up backlog capture, never a FAIL). Records the three open items the iteration-5 verifier named, all inside the list, and the additive README conflict with e4bjh for the ADR-0072 ladder. Prose-only per ADR-0059. No orchestrator round — the design is settled and verified; only the criterion's boundary changed
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-09-06 01:42 -- Work session ended
 
 **Type:** Work / Session end

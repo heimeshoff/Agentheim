@@ -202,7 +202,66 @@ fact the sequence rests on:
 - [ ] `## Key events` / `## Key commands` in the agentic-workflow README are bullet lists; the README git-model entry states the code-only branch, the delta grammar's monotone invariant, the on-`main` annotation rule, and that `main` now has exactly one writer per `.agentheim/` file on the work side (the pt0gy sibling covers the modeling side).
 - [ ] One new ADR (title below) amends ADR-0032 choreography steps 3, 4, and 6, records the report-carried choice over worktree-carried, the two-op grammar and its monotone invariant, the conductor-merges-prose rule and why ADR-0032's no-auto-guess clause is intact, the on-`main` annotation rule, the retired `BC_README_UPDATED` field, the un-bundling of `MAX_PARALLEL` from the Phase 3 change, the dead moved-from-`doing/` detection, and the mechanize-or-drop declaration (helpers mechanized, sequencing prose-only); backlinked to ADR-0032, ADR-0057, ADR-0058, ADR-0063, ADR-0041, and ADR-0072 (pcwnn's ladder).
 
+### Doctrine-consistency sweep — bounded surface list (refined 2026-09-06 after five verification FAILs)
+
+The five prose criteria above name what each surface must *say*. Verification iterations 1–5 all
+FAILed on a different reading: that every surface must also contain *no residual pre-ghcaj
+statement* — and each verifier drew that sweep's boundary wider than the last (`skills/work` →
+`agents/worker` → the README's `lib/` inventory → `references/commit-doctrine.md` and `lib/` code
+comments). This criterion fixes the boundary so the loop converges. It is prose-only, unenforced
+(ADR-0059): a phrase lint over 1,300 README lines would be brittle, so the list itself is the
+mechanism.
+
+**The check.** A surface is consistent when it contains no present-tense statement that (a) the
+worker moves its own task file (`doing → done`, `doing → backlog`) or edits it (`## Outcome`,
+`## Worker note`, Notes); (b) the worker writes a README bullet, an ADR file, or a backlog file
+inside its worktree; (c) the squash-merge carries a task file or an ADR file onto `main`, or
+`complete` is idempotent *because* the worktree already moved the file; (d) the task-file, README,
+or BC-index path handed to a worker or verifier is a worktree copy; (e) `BC_README_UPDATED` /
+`NEW_BACKLOG_ITEMS` are live fields. A statement explicitly marked vestigial, post-ghcaj,
+amended-by-ghcaj, or retired, or one describing the conductor doing these things on `main`, is
+consistent.
+
+**The surfaces — this list is exhaustive; the verifier reads each in full and checks nothing else:**
+
+- [ ] `agents/worker.md`
+- [ ] `agents/verifier.md`
+- [ ] `skills/work/SKILL.md`
+- [ ] `skills/verification-before-completion/SKILL.md`
+- [ ] `skills/modeling/SKILL.md` — the task-file field legend only (the `completed` line)
+- [ ] `references/worker-return-format.md`
+- [ ] `references/commit-doctrine.md`
+- [ ] `.agentheim/contexts/agentic-workflow/README.md` — these `## Ubiquitous language` bullets only, by lead-in: **Per-worker git worktree isolation (ADR-0032 …)**, **Worker branch carries source and tests only …**, **Worktree-abandonment diff salvage (ADR-0063 …)**, **Merge-back conflict ladder (ADR-0072 …)**, **Derived-artifact checkpoint guard (ADR-0057 …)**, **`claimBatch` / `completeTask`**, **`lib/adr-allocation.mjs`**; plus the `## Key events` and `## Key commands` sections
+- [ ] Doctrine comments in `lib/task-lifecycle.mjs` (the `completeTask` block), `lib/task-lifecycle-cli.mjs` (`MOVED_FROM_DOING_FOLDERS`, `findMovedFromDoingPath`, `checkpointFiles`), and `lib/derived-artifact-guard.mjs` (the guard's header comment)
+- [ ] The task's own ADR
+
+**Out of scope, by decision, not omission:** every other file — in particular prior ADRs
+0001–0072 (accepted history; the new ADR amends them), `done/` and `done-archive/` task files,
+`evals/**` fixtures and dated eval records under `.agentheim/knowledge/`, `protocol.md`, every
+`INDEX.md`, the repo-root `README.md`, `CLAUDE.md`, `docs/`, `dashboard/**`, and test titles.
+
+**Closure rule.** A residual statement found *outside* the list is not a FAIL for this task: the
+verifier names it in its verdict, and the conductor captures it as a follow-up backlog item. Only a
+residual statement *inside* the list fails the task.
+
+**Known open items at refinement time (iteration-5 verifier), all inside the list:** the README's
+**Derived-artifact checkpoint guard (ADR-0057 …)** bullet (`FILE_LIST` "only ever names the task
+file's NEW lifecycle location"; refusals "today: `dashboard/dist/` only"); `references/commit-doctrine.md`
+line 16 (README/ADRs attributed to the worker's staging); the three checkpoint comment blocks in
+`lib/task-lifecycle-cli.mjs`.
+
 ## Notes
+
+- *Refinement 2026-09-06 01:55 (escalation re-route, task stays in `doing/`).* Five verification
+  FAILs (iterations 1–3 in the 22:57 session, 4–5 in the 01:15 resume), all on residual pre-ghcaj
+  prose, none on code/tests/ADR. The bounded sweep criterion above replaces the open-ended reading.
+  The kept worktree `.worktrees/agentic-workflow-ghcaj` (branch `aw/agentic-workflow-ghcaj`) holds
+  the accepted implementation plus five verifier notes, a conductor note and a salvage note; salvage
+  patch `.agentheim/salvage/agentic-workflow-ghcaj-escalated-iter5.patch`. *For the conductor at
+  integration:* the branch conflicts with `main` in the README's **`claimBatch` / `completeTask`**
+  bullet — e4bjh appended the `captureTask` / `dismissTask` bullet where iteration 5 appended a
+  "Post-ghcaj" paragraph; additive, ghcaj's paragraph first, e4bjh's bullet after — ADR-0072 ladder.
+  The provisional ADR-0073 finalizes to ADR-0074 (ADR-0058).
 
 Captured via `modeling` on 2026-09-05 from the builder's complaint that parallel worktrees
 conflict "very often". Evidence gathered at capture: protocol entries 2026-07-03 15:32
