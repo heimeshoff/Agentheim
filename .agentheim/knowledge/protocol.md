@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 22:57 -- Batch started: [agentic-workflow-swj2q, agentic-workflow-mvt8x, design-system-pk4qd]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-swj2q - "`/agentheim:work <task-id>` — scope a work run to one named todo task instead of the whole ready set", agentic-workflow-mvt8x - One live-update subscription per tab, one /api/tree fetch per structural frame — an advisory frame (.agentheim/state/**) re-syncs only the panel that reads that artifact, never the board or rail, design-system-pk4qd - Two ambient cues repaint every frame — ambient-rail-pulse and rail-attention-breathe animate box-shadow inside their keyframes, contradicting the compositor-only claim
+**Parallel:** yes (3 workers — the whole ready set at MAX_PARALLEL=3; agentic-workflow-g4zce is the only other todo task and is blocked on swj2q. Merge-order advisory: mvt8x and pk4qd both make dashboard/dist stale (healed by the conductor integration rebuild on main) and both touch dashboard/test — squash mvt8x before pk4qd; swj2q touches skills/work/SKILL.md, lib/, and an ADR only)
+
+---
+
 ## 2026-09-05 22:50 -- Modeling / Promoted: design-system-pk4qd - Two ambient cues repaint every frame — ambient-rail-pulse and rail-attention-breathe animate box-shadow inside their keyframes, contradicting the compositor-only claim
 
 **Type:** Modeling / Promote

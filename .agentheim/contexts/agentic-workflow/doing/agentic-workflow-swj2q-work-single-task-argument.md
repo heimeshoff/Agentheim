@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-swj2q
 title: "`/agentheim:work <task-id>` — scope a work run to one named todo task instead of the whole ready set"
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-09-05
