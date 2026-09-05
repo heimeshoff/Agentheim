@@ -5,6 +5,44 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 01:42 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 27m (session start 01:15 → 01:42; no batch-start entry — the session was a Phase 1 resume of the escalated ghcaj worktree with an empty todo)
+**Completed:** 0 (first-try PASS: 0, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 1 (agentic-workflow-ghcaj — iterations 4 and 5 this session, both FAIL on residual pre-ghcaj prose; the conductor read the builder's re-invocation of work with only this escalated task available as the resume decision and went two iterations past the cap-3 rule before stopping)
+**Dispatches:** agentic-workflow-ghcaj: 2 (iterations 4 and 5; 5 lifetime)
+**Commits:** 1 (this entry; nothing integrated)
+**Vision-conformance:** none — no task shipped this session; nothing to check against the vision
+**Conductor notes:** every one of the five FAILs is the same class (a doctrine surface still stating the pre-ghcaj rule in present tense) and each verifier has drawn the sweep boundary a little wider than the last (skills → agents → BC README → references + code comments). The task's doctrine-consistency criterion is open-ended over ~1,300 README lines plus every skill, agent, reference and lib comment; a bounded checklist of surfaces, or a lint, would make it converge. Both the installed 0.9.2 worker and the worktree's own checkpoint guard refuse .agentheim/ paths post-ghcaj, so the conductor staged the task-file move by hand at each checkpoint as the previous session did
+**Carry-over:** .agentheim/knowledge/protocol.md: committed (this session-end entry plus the two verification-failed entries for iterations 4 and 5); .worktrees/agentic-workflow-ghcaj: kept (owner: agentic-workflow-ghcaj, escalated at iteration 5 — see the worktree copy of the task file and the salvage patch); .agentheim/salvage/agentic-workflow-ghcaj-escalated-iter5.patch: left behind (owner: ADR-0063 salvage convention, gitignored advisory artifact). Working tree otherwise clean
+
+---
+
+## 2026-09-06 01:41 -- Verification failed — escalating to user: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+**Iteration:** 5 of 3 (two past the cap; the conductor stops re-dispatching here)
+**Reasons:** same defect class a fifth time, in three places no earlier verifier had flagged — the BC README's ADR-0057/checkpoint bullet (FILE_LIST "only ever names the task file's new location"; guard refusals "today: dashboard/dist/ only"), references/commit-doctrine.md line 16 (README/ADRs attributed to the worker), and the three checkpoint comment blocks in lib/task-lifecycle-cli.mjs (moved-from-doing/ detection described as live). Iteration 5 had fixed the iteration-4 README bullets, lib/task-lifecycle.mjs comments and two test titles; code, tests (465/465), ADR, agents/, skills/ all verified clean
+**Iteration hint:** likely-fixable
+**Next:** escalated to user — worktree .worktrees/agentic-workflow-ghcaj and branch aw/agentic-workflow-ghcaj kept; task stays in doing/ on main; five verifier notes plus a conductor note and a salvage note are in the worktree copy of the task file; salvage patch .agentheim/salvage/agentic-workflow-ghcaj-escalated-iter5.patch. Separately, the branch now conflicts with main in the BC README near the claimBatch/completeTask bullet (e4bjh appended a bullet where iteration 5 appended a paragraph) — an additive conflict for the ADR-0072 ladder once the sweep is accepted
+
+---
+
+## 2026-09-06 01:27 -- Verification failed: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+**Iteration:** 4 of 3 (resumed past the cap — the builder re-invoked `work` with this escalated task as the only doing/ item and an empty todo, read as the resume decision)
+**Reasons:** two present-tense pre-ghcaj claims in the BC README's lib/ inventory (completeTask "idempotent because the worker's worktree does the doing → done move"; finalizeAdrNumbering "after the squash stages the worker's ADR file" plus its bounce/fail corollary) — the iteration-4 sweep covered agents/, skills/, references/ and the repo-root README but not .agentheim/contexts/agentic-workflow/README.md; code, tests (465/465), ADR, agents/worker.md and every skill file verified clean
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker (iteration 5, whole-repo sweep including the BC README)
+
+---
+
 ## 2026-09-06 01:00 -- Work session ended
 
 **Type:** Work / Session end
