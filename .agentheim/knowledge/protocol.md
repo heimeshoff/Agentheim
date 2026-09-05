@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 21:54 -- Modeling / Promoted: infrastructure-rgknz - The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it
+
+**Type:** Modeling / Promote
+**BC:** infrastructure
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-05 22:02 -- Modeling / Refined: infrastructure-rgknz - The dashboard runtime notices a plugin update
 
 **Type:** Modeling / Refine

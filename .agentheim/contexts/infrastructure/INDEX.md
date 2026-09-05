@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 1
+- **Backlog:** 0
+- **Todo:** 2
 - **Doing:** 0
 - **Done:** 31
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **infrastructure-rgknz** — The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it (bug) — `todo/infrastructure-rgknz-dashboard-runtime-notices-plugin-update.md`
 - **infrastructure-w45ce** — A release ships a fresh dashboard — rebuild dist/ as a release step and make dist-vs-source staleness a failing check (bug) — `todo/infrastructure-w45ce-release-ships-fresh-dashboard-dist.md`
 <!-- todo-list:end -->
 
@@ -42,7 +43,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **infrastructure-rgknz** — The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it (bug) — `backlog/infrastructure-rgknz-dashboard-runtime-notices-plugin-update.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
