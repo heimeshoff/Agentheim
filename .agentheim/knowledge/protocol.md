@@ -1,4 +1,22 @@
-# Protocol
+# P
+## 2026-09-05 22:30 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 23m (batch start 22:07 → 22:30)
+**Completed:** 2 (first-try PASS: 2, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** infrastructure-w45ce: 1, infrastructure-rgknz: 1
+**Commits:** 4 (1 batch-start, 2 task integrations, this entry)
+**Vision-conformance:** none — batch aligns with vision. Both tasks close the builder's field report ("after updating the plugin the dashboard is not updated") by structure rather than instruction: w45ce makes a stale committed dist a failing check in the suite the verifier runs and a named RELEASE.md step; rgknz makes the runtime replace a live server whose recorded plugin identity is stale or unknown. Serves "wrong work is caught by structure, not luck"; no pull toward a non-goal.
+**Batch mix:** 100% infrastructure (2 type:bug tasks); same BC, same batch — both touched the infrastructure README and it auto-merged cleanly at the second squash (the Phase 3 advisory flagged the overlap; no conflict materialised).
+**Integration note:** w45ce's dist heal landed through the conductor's sanctioned main-tree rebuild ( in dashboard/ after the squash, staged in the integrating commit) — the ADR-0057 checkpoint guard correctly kept it off the worker branch. Full merged-main suite: 1307/1307. The suite no longer dirties dashboard/dist/ (dist-build.test.mjs now builds to a scratch outdir). Concurrent modeling sessions committed pcwnn and bmn29 on main during the session — no collision with this session's scoped commits.
+**Carry-over:** none — working tree clean. No orphan worktrees (both torn down after integration).
+
+---
+
+rotocol
 
 Chronological log of everything that happens in this project.
 Newest entries on top.
