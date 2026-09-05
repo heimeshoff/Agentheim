@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 23:36 -- Modeling / Promoted: agentic-workflow-pcwnn - Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-05 23:41 -- Modeling / Refined: agentic-workflow-pcwnn - Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung
 
 **Type:** Modeling / Refine

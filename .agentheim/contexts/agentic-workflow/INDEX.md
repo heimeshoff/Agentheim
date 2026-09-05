@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 5
-- **Todo:** 0
+- **Backlog:** 4
+- **Todo:** 1
 - **Doing:** 1
 - **Done:** 185
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-pcwnn** — Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung (feature) — `todo/agentic-workflow-pcwnn-merge-back-conflict-rebase-reverify-worker-resolves.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -36,7 +37,6 @@ research touching this BC, and concept synthesis pages.
 ### Backlog
 <!-- backlog-list:start -->
 - **agentic-workflow-bmn29** — Dashboard burns resources at idle on a MacBook — umbrella for the split (hub, memoization, keyframes); residual hidden-tab pause/resume and the before/after measurement (bug) — `backlog/agentic-workflow-bmn29-dashboard-idle-resource-waste-four-sse-streams-fanout-refetch-unmemoized-board.md`
-- **agentic-workflow-pcwnn** — Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung (feature) — `backlog/agentic-workflow-pcwnn-merge-back-conflict-rebase-reverify-worker-resolves.md`
 - **agentic-workflow-ghcaj** — Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report (refactor) — `backlog/agentic-workflow-ghcaj-worker-branch-code-only-conductor-writes-bookkeeping.md`
 - **agentic-workflow-pt0gy** — Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free (feature) — `backlog/agentic-workflow-pt0gy-concurrent-modeling-sessions-conflict-free-bookkeeping.md`
 - **agentic-workflow-e4bjh** — Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI (refactor) — `backlog/agentic-workflow-e4bjh-capture-dismiss-lifecycle-cli-verbs.md`

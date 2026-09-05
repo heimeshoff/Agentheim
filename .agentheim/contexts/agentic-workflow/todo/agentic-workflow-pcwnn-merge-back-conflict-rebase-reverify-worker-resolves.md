@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-pcwnn
 title: Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-09-05
