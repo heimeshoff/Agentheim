@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 3
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 181
+- **Doing:** 0
+- **Done:** 182
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-jf6qz** — Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A) (bug) — `doing/agentic-workflow-jf6qz-fix-archiveddoneheader-phantom-cap-wording.md`
 <!-- doing-list:end -->
 
 ### Done (most recent 30; older entries archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-jf6qz** — Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A) (bug) — `done/agentic-workflow-jf6qz-fix-archiveddoneheader-phantom-cap-wording.md`
 - **agentic-workflow-kp7dq** — checkpoint's moved-from detection is Windows-separator-sensitive — a forward-slash fileList silently misses the doing/ deletion, reintroducing the both-folders bug w2njd closed (bug) — `done/agentic-workflow-kp7dq-checkpoint-moved-from-detection-separator-insensitive.md`
 - **agentic-workflow-f3wqm** — Audit-closure doctrine — disposition the three open undershoot residuals, define the audit PASS bar and dated audit stamp with delta-scoping, and ban raw line-number pointers in doctrine prose (lint-enforced) (feature) — `done/agentic-workflow-f3wqm-audit-closure-doctrine-dispositions-pass-bar-pointer-lint.md`
 - **agentic-workflow-r4gcz** — Consumer-tune classifyTask — bug/refactor tasks are bucketed "harness" unconditionally, so a consumer project's legitimate product bug-fixing session reads as majority-harness drift (refactor) — `done/agentic-workflow-r4gcz-consumer-tune-vacuum-guard-classifytask.md`

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 21:59 -- Task verified and completed: agentic-workflow-jf6qz - Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A)
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-jf6qz - Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A)
+**Summary:** archivedDoneHeader no longer emits a phantom "most recent N" cap; a non-rotating session-end run now heals a stale archive-naming header (gated on done-archive/, idempotent) and work commits the heal — ADR-0047 amended, 4 heal tests, SKILL.md rotation step recognizes healed
+**Duration:** 27m (2 iterations)
+**Verification:** PASS (iteration 2)
+**Files changed:** 6
+**Tests added:** 4
+**ADRs written:** none (ADR-0047 amended)
+
+---
+
 ## 2026-09-05 21:55 -- Modeling / Captured: agentic-workflow-pt0gy - Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free
 
 **Type:** Modeling / Capture

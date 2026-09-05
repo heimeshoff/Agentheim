@@ -1044,8 +1044,20 @@ separate BC, but today the whole tool lives in this one.
   `{ok:true, ...}` with a refusing BC simply absent from top-level `changed`. `work`'s session-end
   check surfaces every refusal and every unmatched report in its end-of-run summary; its old
   unqualified "`rotated:false` ⇒ silent no-op" rule is narrowed to apply only when no BC refused and
-  none reported unmatched lines. See ADR-0039, ADR-0041, ADR-0023, ADR-0038, ADR-0026, ADR-0045,
-  ADR-0047.
+  none reported unmatched lines. **Header wording fixed + heal-on-no-op carve-out (ADR-0047 amendment,
+  agentic-workflow-jf6qz):** `archivedDoneHeader()` no longer takes a `capEntries` argument or emits a
+  numeric "most recent N" claim — that string was itself the phantom-cap wording ADR-0039 warns
+  against (the current month is never rolled however large it grows, so a fixed-N figure is always
+  eventually false); it now emits `### Done (current-month entries live; older months archived
+  verbatim under \`done-archive/\` — kept for prior-art search, ADR-0039 convention)`, matching
+  `references/index-template.md`'s corrected post-rotation prose. Because the fix alone can't
+  retroactively correct a live header a worker cannot hand-edit, a no-op (non-rotating) run now also
+  heals a stale header — rewriting it to the corrected form and reporting `healed:true` — **only when**
+  a `done-archive/` already exists for that BC (never a false archive claim on a never-rotated BC),
+  idempotent (fires at most once per BC). `rotateAllIndexDoneLists` collects a healed BC's `changed`
+  path exactly like a rotated BC's and surfaces a top-level `healed` boolean; `work`'s "silent no-op"
+  rule is narrowed once more to also require no BC reported `healed:true`. See ADR-0039, ADR-0041,
+  ADR-0023, ADR-0038, ADR-0026, ADR-0045, ADR-0047, ADR-0059.
 - **`findDuplicateTaskIds`** — the duplicate-id guard (`lib/duplicate-id-check.mjs`, BC-owned,
   node stdlib only), the ADR-0028 **insurance** against the residual token-collision tail and
   the legacy-vs-token clash a bug could produce. A pure, loss-tolerant whole-tree walk collects
