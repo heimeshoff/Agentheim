@@ -62,6 +62,28 @@ test('the attention cue draws from --st-todo and never the reserved ochre accent
   assert.doesNotMatch(cueCss, /--accent-ochre-soft/, 'cue must NOT borrow the reserved selection accent (ADR-0016)');
 });
 
+// Additive (design-system-pk4qd): the attention dot's box-shadow is now a
+// STATIC declaration on .rail-attention::before, not re-declared per keyframe
+// step, so rail-attention-breathe stays compositor-only (opacity only). The
+// dot's own ::after is already spoken for (design-system-b7n2s's hollow
+// dependency marker), so there is no second pseudo-element to hold a
+// separate glow layer here — the halo lives on the dot itself.
+test('rail-attention-breathe keyframes declare only opacity — compositor-only', () => {
+  const match = statusCss.match(/@keyframes\s+rail-attention-breathe\s*\{[\s\S]*?\n\}/);
+  assert.ok(match, 'no @keyframes rail-attention-breathe block found');
+  const block = match[0];
+  assert.doesNotMatch(block, /box-shadow/, 'rail-attention-breathe must not declare box-shadow');
+  assert.doesNotMatch(block, /color-mix/, 'rail-attention-breathe must not re-evaluate color-mix per step');
+});
+
+test('the halo is a static box-shadow declared once on the dot itself', () => {
+  const start = statusCss.indexOf('.rail-attention::before');
+  assert.ok(start >= 0, 'no .rail-attention::before rule found');
+  const end = statusCss.indexOf('\n}', start);
+  const block = statusCss.slice(start, end + 2);
+  assert.match(block, /box-shadow:\s*0 0 5px 0 color-mix\(in oklab, var\(--st-todo\)/, 'the dot must carry a static halo drawn from --st-todo');
+});
+
 test('a prefers-reduced-motion guard strips the loop but keeps a static marker', () => {
   // There are several reduced-motion @media blocks in the sheet; find the one
   // that targets the attention cue specifically.

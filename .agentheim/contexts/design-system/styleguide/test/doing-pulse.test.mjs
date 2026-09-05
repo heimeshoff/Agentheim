@@ -58,3 +58,31 @@ test('a prefers-reduced-motion guard fully suppresses the pulse', () => {
   assert.match(block, /\.ticket-rail--pulse/, 'guard must target the pulse rail');
   assert.match(block, /animation:\s*none/, 'guard must set animation: none');
 });
+
+// Additive (design-system-pk4qd): the pulse's box-shadow is now painted on a
+// separate pre-painted glow layer (::after) that breathes its own opacity, so
+// the ambient-rail-pulse keyframes stay compositor-only (opacity only). The
+// glow layer must be REMOVED under reduced motion, not merely stopped — a
+// stopped-but-present layer would leave a permanent static halo, which
+// ADR-0014 explicitly rejects (the pulse strips to NOTHING).
+test('ambient-rail-pulse keyframes declare only opacity — compositor-only', () => {
+  const match = statusCss.match(/@keyframes\s+ambient-rail-pulse\s*\{[\s\S]*?\n\}/);
+  assert.ok(match, 'no @keyframes ambient-rail-pulse block found');
+  const block = match[0];
+  assert.doesNotMatch(block, /box-shadow/, 'ambient-rail-pulse must not declare box-shadow');
+  assert.doesNotMatch(block, /color-mix/, 'ambient-rail-pulse must not re-evaluate color-mix per step');
+});
+
+test('the pulse ships a pre-painted glow layer whose own opacity breathes', () => {
+  assert.match(statusCss, /@keyframes\s+ambient-rail-glow/, 'no @keyframes ambient-rail-glow');
+  assert.match(statusCss, /\.ticket-rail--pulse::after\b/, 'no .ticket-rail--pulse::after glow layer');
+  assert.match(statusCss, /\.ticket-rail--pulse::after[\s\S]*?var\(--st-doing/, 'glow layer must draw from --st-doing');
+  assert.match(statusCss, /\.ticket-rail--pulse::after[\s\S]*?animation:\s*ambient-rail-glow/, 'glow layer must animate ambient-rail-glow');
+});
+
+test('reduced motion removes the glow layer outright, not merely stops it', () => {
+  const guard = statusCss.match(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*?\}\s*\}/);
+  assert.ok(guard, 'no prefers-reduced-motion guard');
+  const block = guard[0];
+  assert.match(block, /\.ticket-rail--pulse::after\s*\{[^}]*content:\s*none/, 'guard must remove the glow layer (content: none), not merely stop its animation');
+});

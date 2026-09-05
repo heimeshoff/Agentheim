@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 23:13 -- Task verified and completed: design-system-pk4qd - Two ambient cues repaint every frame — ambient-rail-pulse and rail-attention-breathe animate box-shadow inside their keyframes, contradicting the compositor-only claim
+
+**Type:** Work / Task completion
+**Task:** design-system-pk4qd - Two ambient cues repaint every frame — ambient-rail-pulse and rail-attention-breathe animate box-shadow inside their keyframes, contradicting the compositor-only claim
+**Summary:** ambient-rail-pulse and rail-attention-breathe are now compositor-only (opacity-only keyframes) — the doing-rail glow moved to a pre-painted .ticket-rail--pulse::after layer removed outright under reduced motion, the attention dot halo became a static box-shadow on the dot; a new allowlist lint (ambient-motion-compositor.test.mjs) resolves every infinite keyframes in the styleguide and fails on any non-compositable property; ADR-0014 amended with the third clause, ADR-0029 footnoted; dist healed via the conductor integration rebuild
+**Duration:** 14m13s
+**Verification:** PASS (iteration 1)
+**Files changed:** 8
+**Tests added:** 18
+**ADRs written:** none (ADR-0014, ADR-0029 amended)
+
+---
+
+## 2026-09-05 23:11 -- Verification failed: agentic-workflow-swj2q - `/agentheim:work <task-id>` — scope a work run to one named todo task instead of the whole ready set
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-swj2q - `/agentheim:work <task-id>` — scope a work run to one named todo task instead of the whole ready set
+**Iteration:** 1 of 3
+**Reasons:** Check 6c (mechanize-or-drop, ADR-0059) fires and is unmet — the new argument-grammar convention lands on doctrine-bearing surfaces (skills/work/SKILL.md, ADR-0071, BC README ubiquitous language) with neither a lib/test doctrine-lint asserting the "Argument grammar" section nor an explicit "prose-only, unenforced (ADR-0059)" marker in the task Notes / ADR-0071 Consequences
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-09-05 22:57 -- Batch started: [agentic-workflow-swj2q, agentic-workflow-mvt8x, design-system-pk4qd]
 
 **Type:** Work / Batch start

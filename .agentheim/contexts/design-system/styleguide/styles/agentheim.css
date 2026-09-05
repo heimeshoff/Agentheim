@@ -289,7 +289,8 @@ html, body { transition: background var(--duration-base) var(--ease-base); }
 }
 
 /* ============================================================
-   Doing-card ambient pulse (design-system-004 / ADR-0014)
+   Doing-card ambient pulse (design-system-004 / ADR-0014;
+   compositor-only split, design-system-pk4qd / ADR-0014 amendment)
 
    The system's FIRST continuous/ambient animation — it was
    transition-only until now. A card whose status is "doing" gets
@@ -299,25 +300,44 @@ html, body { transition: background var(--duration-base) var(--ease-base); }
 
    Quiet-by-default law upheld: the glow draws ONLY from the
    existing --st-doing status color family — no new hue — and the
-   amplitude stays low so it never demands attention. Composited on
-   opacity + box-shadow only (cheap to run continuously). The loop
+   amplitude stays low so it never demands attention. The loop
    cadence is the --duration-ambient motion token, not a magic
    number. The component (kanban.js / motion.js) adds the
    .ticket-rail--pulse class only when status === "doing".
+
+   Compositor-only (design-system-pk4qd): the rail's own opacity
+   breathes in ambient-rail-pulse; the shadow is painted ONCE, at its
+   peak value, on a separate pre-painted glow layer (::after) whose
+   OWN opacity breathes in a second keyframes block
+   (ambient-rail-glow). Neither keyframes block declares box-shadow,
+   so this loop never forces a main-thread repaint — only opacity is
+   animated, which composites for free. See ADR-0014's amendment.
    ============================================================ */
 @keyframes ambient-rail-pulse {
-  0%, 100% {
-    opacity: 0.9;
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--st-doing) 0%, transparent);
-  }
-  50% {
-    opacity: 0.62;
-    box-shadow: 0 0 7px 0 color-mix(in oklab, var(--st-doing) 38%, transparent);
-  }
+  0%, 100% { opacity: 0.9; }
+  50%      { opacity: 0.62; }
+}
+@keyframes ambient-rail-glow {
+  0%, 100% { opacity: 0; }
+  50%      { opacity: 1; }
 }
 
 .ticket-rail--pulse {
   animation: ambient-rail-pulse var(--duration-ambient) var(--ease-base) infinite;
+  will-change: opacity;
+}
+/* Pre-painted glow layer: the shadow is painted ONCE at its peak value; only
+   this layer's opacity breathes. inset:0 gives it the rail's exact box, so the
+   shadow geometry is identical. An outer shadow paints regardless of the
+   layer's transparent background, and is clipped to outside the border box —
+   so it never covers the rail's own ochre fill. */
+.ticket-rail--pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: 0 0 7px 0 color-mix(in oklab, var(--st-doing) 38%, transparent);
+  animation: ambient-rail-glow var(--duration-ambient) var(--ease-base) infinite;
   will-change: opacity;
 }
 
@@ -330,10 +350,16 @@ html, body { transition: background var(--duration-base) var(--ease-base); }
     box-shadow: none;
     opacity: 0.9;
   }
+  /* The glow layer must be REMOVED, not merely stopped: a stopped layer
+     leaves a permanent static halo, which ADR-0014 explicitly rejects — the
+     pulse strips to NOTHING. */
+  .ticket-rail--pulse::after { content: none; }
 }
 
 /* ============================================================
-   Rail "new item" attention cue (design-system-v8k2p)
+   Rail "new item" attention cue (design-system-v8k2p;
+   compositor-only static halo, design-system-pk4qd / ADR-0014
+   amendment)
 
    The sibling of the doing-card breathe above (ADR-0014): a quiet
    ambient marker that draws the eye to a freshly-arrived rail row
@@ -346,14 +372,23 @@ html, body { transition: background var(--duration-base) var(--ease-base); }
    that breathes at low amplitude, drawn ONLY from the existing
    --st-todo "incoming/new work" status token — NOT the reserved
    selection accent --accent-ochre-soft (ADR-0016) and no new hue.
-   Composited on a cheap box-shadow + opacity loop, cadence from the
-   --duration-attention token (not a magic number). The dot is laid
-   on the row's existing left padding via ::before so the cue never
-   reflows the row text.
+   Cadence from the --duration-attention token (not a magic number).
+   The dot is laid on the row's existing left padding via ::before
+   so the cue never reflows the row text.
+
+   Compositor-only (design-system-pk4qd): ::after on this host is
+   already spoken for (design-system-b7n2s's hollow dependency
+   marker, painted via .rel-present on the ::after pseudo-element,
+   may sit on the same header), so there
+   is no free pseudo-element here for a second glow layer. The halo
+   is instead a STATIC box-shadow declared once on the dot itself;
+   only the dot's own opacity animates, and it multiplies the static
+   halo exactly as it previously multiplied the animated one. The
+   keyframes block below declares no box-shadow.
    ============================================================ */
 @keyframes rail-attention-breathe {
-  0%, 100% { opacity: 0.55; box-shadow: 0 0 0 0 color-mix(in oklab, var(--st-todo) 0%, transparent); }
-  50%      { opacity: 1;    box-shadow: 0 0 5px 0 color-mix(in oklab, var(--st-todo) 45%, transparent); }
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
 }
 
 .rail-attention {
@@ -369,6 +404,7 @@ html, body { transition: background var(--duration-base) var(--ease-base); }
   margin-top: -2.5px;
   border-radius: 50%;
   background: var(--st-todo);
+  box-shadow: 0 0 5px 0 color-mix(in oklab, var(--st-todo) 45%, transparent);
   animation: rail-attention-breathe var(--duration-attention) var(--ease-base) infinite;
   will-change: opacity;
 }
@@ -376,7 +412,9 @@ html, body { transition: background var(--duration-base) var(--ease-base); }
 /* Reduced motion: strip the loop but — unlike the doing-pulse — KEEP the marker.
    An attention cue's job is to remain findable, so the dot falls back to a
    steady, still-legible static marker rather than vanishing (the ADR-0014
-   reduced-motion contract, adapted: strippable to a still-legible baseline). */
+   reduced-motion contract, adapted: strippable to a still-legible baseline).
+   box-shadow: none now strips a STATIC declaration instead of a keyframe-set
+   one; the rendered steady-marker baseline is identical. */
 @media (prefers-reduced-motion: reduce) {
   .rail-attention::before {
     animation: none;

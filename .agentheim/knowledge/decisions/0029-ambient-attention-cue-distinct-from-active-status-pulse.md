@@ -36,7 +36,10 @@ says *"this is new — notice it once, then it is acknowledged."* They are
 different meanings and must be visually separable. The cue is therefore a
 separate mechanism — a small breathing **left-edge dot** (`@keyframes
 rail-attention-breathe`, `.rail-attention::before`) rather than the rail's
-opacity/box-shadow breathe — and is driven by its own duration token,
+opacity/box-shadow breathe **(footnote, design-system-pk4qd, 2026-09-05: this
+phrase goes stale after ADR-0014's compositor-only amendment — the rail's
+breathe no longer animates `box-shadow` either; the decision that the cue is a
+distinct mechanism from the pulse is unaffected)** — and is driven by its own duration token,
 `--duration-attention` (2200ms, slightly quicker than `--duration-ambient`'s
 2600ms so "just arrived" reads with marginally more urgency without ever
 becoming an aggressive blink).

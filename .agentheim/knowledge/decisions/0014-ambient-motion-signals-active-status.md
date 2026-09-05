@@ -49,7 +49,9 @@ Concretely, the doing-card treatment:
    the rail's `opacity` (0.9 → 0.62 → 0.9) and a soft `box-shadow` glow that
    `color-mix`es **`--st-doing`** in and out. Opacity + box-shadow only — cheap to
    composite continuously. **Ochre-only:** no hue outside the doing status family
-   is introduced, so "color used only to signal status" still holds.
+   is introduced, so "color used only to signal status" still holds. **(Stale as
+   of the amendment below, design-system-pk4qd — the mechanism this point
+   describes was replaced; the box-shadow is no longer inside the keyframes.)**
 
 2. **The first loop motion token — `--duration-ambient`.** Added to the motion
    block in `styles/colors_and_type.css` beside `--ease-base` /`--duration-fast`
@@ -103,8 +105,10 @@ design — extending it there is out of scope until a surface needs it.
   the live board in 05) before this is final.
 
 **Neutral**
-- `box-shadow`/`opacity` keyframes are compositor-friendly; the continuous animation
-  is effectively free on the GPU and pauses when the tab is backgrounded.
+- ~~`box-shadow`/`opacity` keyframes are compositor-friendly; the continuous animation
+  is effectively free on the GPU and pauses when the tab is backgrounded.~~ **Retracted
+  (amendment below, design-system-pk4qd):** only the opacity half was ever true. The
+  animation still pauses when the tab is backgrounded.
 
 ## Alternatives considered
 
@@ -118,3 +122,60 @@ design — extending it there is out of scope until a surface needs it.
   would add a second always-on signal for no gain.
 - **CSS transition trick instead of `@keyframes`.** Rejected: a loop is what's
   wanted; `@keyframes` is the natural, legible fit (and the system's first).
+
+## Compositor-only is the third clause of the ambient-motion contract (amendment, design-system-pk4qd, 2026-09-05)
+
+Two artifacts asserted a property the doing-pulse's CSS did not actually have: Decision
+point 1's mechanism sentence, and the Consequences→Neutral bullet claiming the continuous
+animation was "effectively free on the GPU." Both described `box-shadow` as declared
+*inside* `@keyframes ambient-rail-pulse`, re-evaluating a `color-mix()` per step. That is
+a paint property, not a compositor-only one — the browser must repaint every frame, for
+the life of the tab, on every doing card carrying the class. `design-system-pk4qd` found
+this while investigating the resource-waste finding in `agentic-workflow-bmn29`; it also
+found the sibling `rail-attention-breathe` (ADR-0029) had the identical defect.
+
+**The mechanism sentence in Decision point 1 and the Neutral bullet above are corrected by
+this amendment, not by editing the original prose out from under its own history:**
+`ambient-rail-pulse` now animates the rail's `opacity` only (0.9 → 0.62 → 0.9). The soft
+`box-shadow` glow is painted ONCE, at its peak value, on a separate pre-painted glow layer
+(`.ticket-rail--pulse::after`) whose OWN opacity breathes in a second keyframes block
+(`ambient-rail-glow`) — the rail's animated opacity multiplies the glow layer exactly as it
+previously multiplied the shadow, so the composited alpha at every point in the loop is
+unchanged. Reduced motion now removes the glow layer outright (`content: none`), not
+merely its animation, so no residual static halo can survive — the pulse still strips to
+NOTHING, per this ADR's original reduced-motion contract.
+
+**The cheapness claim was only ever half true.** `opacity`/`transform` keyframes composite
+for free; `box-shadow` does not, regardless of what else rides in the same keyframes block.
+The "pauses when the tab is backgrounded" half of the retracted Neutral bullet is broadly
+correct and stands.
+
+**This discovery adds a third clause to the ambient-motion contract, standing beside the
+two ADR-0014 already established (quiet; strippable to a still-legible baseline) and the
+one ADR-0029 added (a signal with no static fallback keeps a steady marker instead of
+stripping to nothing):** an ambient cue must also be **compositor-only** — a `@keyframes`
+block driven by an `infinite` animation may declare **only** `opacity` / `transform` (and
+the transform-family longhands `translate` / `rotate` / `scale`). Any paint property that
+is part of the look must be a static declaration, painted once, on a glow layer (or, when
+no spare pseudo-element exists to host one, a static declaration on the animated element
+itself, multiplied by that element's own opacity — the path this amendment's fix to
+`rail-attention-breathe` took, since `::after` on that host was already spoken for by
+`design-system-b7n2s`'s hidden-dependency marker).
+
+**The clause was discovered on this cue, not invented for it.** `rel-ring-breathe`,
+`rel-present-breathe` and `rel-edge-blink-breathe` (ADR-0034 / `design-system-b7n2s`) were
+already compositor-only from the start — they are the pattern the two corrected cues now
+match, and no changes were needed to their record.
+
+**Enforced by `styleguide/test/ambient-motion-compositor.test.mjs`** (per ADR-0059's
+mechanize-or-drop doctrine): it resolves every `@keyframes` block referenced by an
+`infinite` animation across `styleguide/styles/*.css` and fails if any of its declared
+properties fall outside the allowlist `{opacity, transform, translate, rotate, scale}` —
+an allowlist, not a denylist, so the next paint property someone reaches for is caught by
+default rather than by enumeration. It also fails structurally green: zero `infinite`
+animations found, or any referenced name that doesn't resolve to a defined `@keyframes`
+block, is itself a failure.
+
+See `design-system-pk4qd`, ADR-0029 (its Decision point 1 gains a matching one-line
+footnote), ADR-0059 (mechanize-or-drop), ADR-0061 (falsifiability gate — the visual-parity
+criteria on this fix are marked `[human-eye]`).

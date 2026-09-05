@@ -1,11 +1,11 @@
 ---
 id: design-system-pk4qd
 title: Two ambient cues repaint every frame — ambient-rail-pulse and rail-attention-breathe animate box-shadow inside their keyframes, contradicting the compositor-only claim
-status: doing
+status: done
 type: bug
 context: design-system
 created: 2026-09-05
-completed:
+completed: 2026-09-05
 depends_on: [design-system-001-styleguide]
 blocks: [agentic-workflow-bmn29]
 tags: [motion, ambient-signal, keyframes, performance, css]
@@ -398,3 +398,61 @@ three changes a criterion.
 
 Split from `agentic-workflow-bmn29` at refinement; no dependency on its agentic-workflow
 siblings (`mvt8x`, `rw6ck`) — ships in any order relative to them.
+
+## Outcome
+
+Both violating cues are now compositor-only. `ambient-rail-pulse` animates only `opacity`;
+its box-shadow moved to a new pre-painted glow layer (`.ticket-rail--pulse::after`,
+`@keyframes ambient-rail-glow`) whose own opacity breathes — the rail's existing `position:
+absolute` (kanban.js ~line 107) makes it the layer's containing block, so no component/markup
+change was needed. Reduced motion now removes the glow layer outright (`content: none`), not
+merely its animation, so the pulse still strips to NOTHING. `rail-attention-breathe` animates
+only `opacity`; its halo became a static `box-shadow` declared once on `.rail-attention::before`
+itself (`::after` on that host is already spoken for by `design-system-b7n2s`'s hollow
+dependency marker, so no second layer was available there) — the dot's own opacity multiplies
+the static halo exactly as it previously multiplied the animated one. `rel-ring-breathe`,
+`rel-present-breathe`, `rel-edge-blink-breathe` were untouched (confirmed via `git diff` hunk
+ranges confined to the two corrected cue blocks and their comments).
+
+Shipped `styleguide/test/ambient-motion-compositor.test.mjs`: a pure, exported
+`checkCompositorOnly(css)` predicate (allowlist `{opacity, transform, translate, rotate,
+scale}`) built on `extractKeyframesBlocks` / `propertiesInKeyframesBody` /
+`findInfiniteAnimationNames`, unit-tested against synthetic fixtures (compliant
+opacity/transform blocks pass; `box-shadow` / `filter` / `width` blocks fail; a non-infinite
+entrance animation is ignored; an unresolved keyframes name is reported; the
+`animation-iteration-count: infinite` longhand form resolves too), then run against the live
+`styleguide/styles/*.css` tree asserting a non-zero infinite-animation count, zero unresolved
+names, and zero allowlist violations. The live tree currently carries **six** infinite
+animations, not five — the compositor-only split for the doing-pulse deliberately adds a
+second infinite animation (`ambient-rail-glow`, on the new glow layer), a design decision
+made explicit in the task's own "What" section; this is recorded as its own test rather than
+left as a silent surprise against the task description's original estimate.
+
+Both sibling motion tests (`doing-pulse.test.mjs`, `attention-cue.test.mjs`) gained additive
+compositor-only assertions; their five pre-existing tests each pass unmodified. Extended
+`doing-pulse.test.mjs`'s reduced-motion guard test rather than reordering CSS, per the task's
+regex-trap note (`.ticket-rail--pulse` stays first inside the `@media` block).
+
+ADR-0014 gained a dated amendment section ("Compositor-only is the third clause...") that
+corrects the Decision-point-1 mechanism sentence, retracts (strikethrough) the false
+Consequences→Neutral cheapness claim, and states the new clause plus its lint. ADR-0029 gained
+a one-line dated footnote flagging its Decision point 1 phrase as stale; its decision is
+unaffected. BC README gained the "compositor-only clause" ubiquitous-language paragraph
+(glow layer / pre-painted state layers concepts) between the ADR-0029 attention-cue paragraph
+and the dependency-ring section.
+
+`dashboard/dist/` was rebuilt locally (`cd dashboard && npm run build`) so `dist-staleness.test.mjs`
+and the full dashboard suite (930 tests) are green in this worktree; per this task's guidance the
+rebuilt `dist/` is intentionally excluded from `FILE_LIST` (ADR-0057 checkpoint guard / conductor's
+sanctioned integration rebuild). Full design-system styleguide suite: 218/218 green. Both
+`[human-eye]` acceptance criteria are left unchecked for the builder's eye-check (before/after
+recording of the styleguide canvas sections 06 and 09, plus the live board's doing column, with
+and without OS reduced-motion forced).
+
+Key files: `.agentheim/contexts/design-system/styleguide/styles/agentheim.css`,
+`.agentheim/contexts/design-system/styleguide/test/ambient-motion-compositor.test.mjs` (new),
+`.agentheim/contexts/design-system/styleguide/test/doing-pulse.test.mjs`,
+`.agentheim/contexts/design-system/styleguide/test/attention-cue.test.mjs`,
+`.agentheim/contexts/design-system/README.md`,
+`.agentheim/knowledge/decisions/0014-ambient-motion-signals-active-status.md`,
+`.agentheim/knowledge/decisions/0029-ambient-attention-cue-distinct-from-active-status-pulse.md`.

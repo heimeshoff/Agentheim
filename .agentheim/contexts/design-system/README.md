@@ -175,6 +175,39 @@ the pulse: because "new" is not otherwise encoded on the row, the cue keeps a
 > and must be **rebuilt** to pick up this styleguide change; the source edit alone
 > does not update the bundle.
 
+**The compositor-only clause (`design-system-pk4qd`, ADR-0014 amendment).** The
+ambient-motion contract has **three** clauses, not two. An ambient cue must be
+**quiet** (low amplitude, slow cadence, palette-only — no new hue),
+**strippable to a still-legible baseline** under `prefers-reduced-motion` (to
+*nothing* when the information survives without the cue, to a *steady static
+marker* when it does not — ADR-0029), and **compositor-only**: a `@keyframes`
+block driven by an `infinite` animation may declare **only** `opacity` /
+`transform`. Any paint property that is part of the look — `box-shadow`,
+`filter`, `border`, `background` — must be a **static declaration**, painted
+once, on a **glow layer**; what breathes is that layer's *opacity*. Animating
+`box-shadow` (or re-evaluating a `color-mix()` per keyframe step) forces a
+main-thread repaint every frame for the life of the tab; opacity does not.
+`rel-ring`, `rel-present` and `rel-edge-blink` were built this way from the
+start and are the pattern; the two older cues were corrected to match.
+
+- **Glow layer** — a pseudo-element sized to its host
+  (`position: absolute; inset: 0`) that carries a halo/shadow at a single
+  fixed value and does nothing but fade. It is how a paint effect
+  participates in an ambient loop without costing a paint. A glow layer that a
+  reduced-motion guard merely *stops* leaves a permanent static halo, so a
+  strip-to-nothing cue must remove the layer outright (`content: none`), not
+  just its animation.
+- **Pre-painted state layers, cross-faded** — the general compositor-safe
+  technique for animating any paint property: render each visual state once
+  as its own static layer, then animate only their opacities. Two layers at
+  different blur radii approximate an animated blur; the same trick
+  generalises to colour, border, and shadow transitions.
+
+Enforced by `styleguide/test/ambient-motion-compositor.test.mjs`, which
+resolves every `@keyframes` referenced by an `infinite` animation across
+`styles/*.css` and fails on any declaration outside the
+`{opacity, transform, translate, rotate, scale}` allowlist.
+
 As of `design-system-w4t9k` the taxonomy admits a **third ambient cue**: a
 **dependency-relation ring** around a `TicketCard`'s **perimeter** (ADR-0034). While
 the builder hovers a card, its dependencies can carry a quiet breathing ring so the

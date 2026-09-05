@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 36
+- **Doing:** 0
+- **Done:** 37
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **design-system-pk4qd** — Two ambient cues repaint every frame — ambient-rail-pulse and rail-attention-breathe animate box-shadow inside their keyframes, contradicting the compositor-only claim (bug) — `doing/design-system-pk4qd-ambient-keyframes-compositor-only-glow-layer.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **design-system-pk4qd** — Two ambient cues repaint every frame — ambient-rail-pulse and rail-attention-breathe animate box-shadow inside their keyframes, contradicting the compositor-only claim (bug) — `done/design-system-pk4qd-ambient-keyframes-compositor-only-glow-layer.md`
 - **design-system-me97j** — ModelSplitButton's `disabled` deadens the model caret along with Enter — an empty prompt shouldn't block picking a model (bug) — `done/design-system-me97j-split-button-disabled-spares-caret.md`
 - **design-system-k3f7q** — ModelSplitButton's model menu opens upward and escapes the prompt console's clip (bug) — `done/design-system-k3f7q-model-menu-opens-upward-unclipped.md`
 - **design-system-r9dtm** — ModelSplitButton — the ochre Enter button widens into a labelled split button with a caret (feature) — `done/design-system-r9dtm-model-split-button.md`
