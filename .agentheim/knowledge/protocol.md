@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 00:05 -- Modeling / Refined: agentic-workflow-e4bjh - Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo (promoted in the entry above)
+**Summary:** Four builder-settled decisions: `capture <id>` registers a skill-authored file (validates frontmatter, INDEX line + count, protocol entry keyed by `source`, template backfill only on an otherwise-empty BC, else `index-missing`); `dismiss` is two-phase in lib (`plan` returns the CascadeSet + display projection with zero writes; `confirm` re-runs the full guarded cascade, refuses `cascade-drifted` / `cascade-in-flight`, then INDEX → unlink → strip → protocol); brainstorm composes per task with `protocolEntry:false` (ADR-0042 pattern); one task for both verbs, quick-capture re-route out of scope. Orchestrator round (architect + tactical-modeler) accepted all four with amendments and found two live contradictions to ADR-0022, both verified on disk: `blocks`/`depends_on` are not mirrored (cascade is `depends_on`-only, `blocks` reconciliation-only) and mvt8x names `design-system-001-styleguide` while the id is `design-system-001` (exact-id matching only). 11 criteria, two `[human-eye]`; ADR-0059 clause present; ADR to be written by the worker, outline in Notes. Backlinks: ADR-0054/0059, prior art wq7fn/p3v9k added.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-09-05 23:51 -- Batch started: [agentic-workflow-pcwnn]
 
 **Type:** Work / Batch start
