@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-jf6qz
 title: Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A)
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-07-22

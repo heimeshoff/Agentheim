@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 21:38 -- Batch started: [agentic-workflow-jf6qz]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-jf6qz - Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A)
+**Parallel:** no (1 worker — the only ready task)
+
+---
+
 ## 2026-09-05 21:38 -- Modeling / Dismissed: agentic-workflow-d5a9b
 
 **Type:** Modeling / Dismiss
