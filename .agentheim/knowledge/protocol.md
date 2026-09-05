@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 23:51 -- Batch started: [agentic-workflow-pcwnn]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-pcwnn - Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung
+**Parallel:** no (1 worker — the whole ready set after the post-rw6ck re-scan: pcwnn was refined and promoted by a concurrent modeling session while rw6ck ran; no other todo task exists)
+
+---
+
 ## 2026-09-05 23:50 -- Task verified and completed: agentic-workflow-rw6ck - Hovering a card re-renders that card and its ring targets, not all 255 — memoized board cards and columns, hover state out of the board root, identity-stable tree projection
 
 **Type:** Work / Task completion
