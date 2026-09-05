@@ -87,16 +87,82 @@ function columnFor(task) {
   return normalizeStatus(task && task.status);
 }
 
+/** Element-wise array equality (never by reference — /api/tree hands back a
+ * fresh array on every fetch even when its contents are unchanged). */
+function arraysEqualElementwise(a, b) {
+  if (a === b) return true;
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+/**
+ * Value-equality for the identity-stable reconcile: the full treeTicket field
+ * set EXCEPT the quiet constant placeholders (est/updated/agent, which never
+ * vary). `mtimeMs` is deliberately included — a worker editing a task body
+ * changes its mtime, and the mtime-ordered sorts need that ticket to
+ * re-render. `dependsOn`/`blocks` compare element-wise since they arrive as
+ * fresh arrays on every fetch regardless of content.
+ */
+function ticketsValueEqual(a, b) {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    a.id === b.id &&
+    a.title === b.title &&
+    a.status === b.status &&
+    a.type === b.type &&
+    a.context === b.context &&
+    a.path === b.path &&
+    a.mtimeMs === b.mtimeMs &&
+    arraysEqualElementwise(a.dependsOn, b.dependsOn) &&
+    arraysEqualElementwise(a.blocks, b.blocks)
+  );
+}
+
+/** Whether two column arrays hold, in order, the exact same objects. */
+function columnsIdentical(a, b) {
+  if (a === b) return true;
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
 /**
  * Pool the whole tree projection into four flat lifecycle columns.
  * @param {object|null} tree — the /api/tree JSON ({ contexts: [{ lifecycle }] }).
+ * @param {{ backlog, todo, doing, done }} [prev] — the PREVIOUS columns this
+ *        function returned, for the identity-stable reconcile below. Omit on
+ *        the first call (nothing to reconcile against yet).
  * @returns {{ backlog, todo, doing, done }} arrays of TicketCard-shaped objects.
  *
  * Every bounded context's tasks land in the SAME four columns (flat board, no
  * swimlanes). Degrades to four empty columns for a null/empty/malformed tree so
  * the board renders the styleguide empty-column state rather than throwing.
+ *
+ * IDENTITY-STABLE PROJECTION: when `prev` is supplied, a freshly-projected
+ * ticket that is `ticketsValueEqual` to the prior ticket of the same id keeps
+ * the PRIOR object — never a fresh allocation for an unchanged task. A column
+ * array whose members are then all identical to `prev`'s equivalent column is
+ * itself reused (same array reference); if all four columns reuse, the whole
+ * `prev` object is returned. Re-projecting an unchanged tree therefore commits
+ * nothing, and a single task move changes exactly the one ticket and the two
+ * columns its move touches — the mechanism `React.memo`d board components
+ * depend on to skip a re-render (agentic-workflow-rw6ck). See the BC README's
+ * "Identity-stable projection" entry.
  */
-export function treeToColumns(tree) {
+export function treeToColumns(tree, prev) {
+  const prevById = new Map();
+  if (prev) {
+    for (const c of COLUMN_ORDER) {
+      for (const t of (Array.isArray(prev[c]) ? prev[c] : [])) prevById.set(t.id, t);
+    }
+  }
+
   const cols = {};
   for (const c of COLUMN_ORDER) cols[c] = [];
 
@@ -106,9 +172,24 @@ export function treeToColumns(tree) {
     for (const folder of COLUMN_ORDER) {
       const tasks = Array.isArray(lifecycle[folder]) ? lifecycle[folder] : [];
       for (const task of tasks) {
-        cols[columnFor(task)].push(treeTicket(task));
+        const fresh = treeTicket(task);
+        const prior = prevById.get(fresh.id);
+        const reconciled = prior && ticketsValueEqual(prior, fresh) ? prior : fresh;
+        cols[columnFor(task)].push(reconciled);
       }
     }
   }
-  return cols;
+
+  if (!prev) return cols;
+
+  let allColumnsReused = true;
+  for (const c of COLUMN_ORDER) {
+    const prevArr = Array.isArray(prev[c]) ? prev[c] : [];
+    if (columnsIdentical(prevArr, cols[c])) {
+      cols[c] = prevArr; // reuse the array itself too, not just its members.
+    } else {
+      allColumnsReused = false;
+    }
+  }
+  return allColumnsReused ? prev : cols;
 }

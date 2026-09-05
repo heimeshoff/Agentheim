@@ -1,11 +1,11 @@
 ---
 id: agentic-workflow-rw6ck
 title: Hovering a card re-renders that card and its ring targets, not all 255 — memoized board cards and columns, hover state out of the board root, identity-stable tree projection
-status: doing
+status: done
 type: refactor
 context: agentic-workflow
 created: 2026-09-05
-completed:
+completed: 2026-09-05
 depends_on: [agentic-workflow-mvt8x, design-system-001-styleguide]
 blocks: [agentic-workflow-bmn29]
 tags: [dashboard, performance, board, memoization]
@@ -69,7 +69,7 @@ bite on a re-fetch at all.
 
 ## Acceptance criteria
 
-- [ ] jsdom (`dom-harness.mjs`) + render probe: mount `DashboardBoard` with a
+- [x] jsdom (`dom-harness.mjs`) + render probe: mount `DashboardBoard` with a
       ≥200-card fixture (one backlog card with two dependency targets, the
       rest in Done). Reset the probe after mount, `act()` a real `mouseenter`
       on the backlog card, and assert the recorded `BoardCard` renders are
@@ -77,14 +77,14 @@ bite on a re-fetch at all.
       Done-column card. Also assert the same test is **red** against the
       pre-change board first, then green after the fix (ADR-0062 runner-first:
       a memoization test that was never seen failing proves nothing).
-- [ ] Pure `node --test` in `board-data.test.mjs`: `treeToColumns(tree, prev)`
+- [x] Pure `node --test` in `board-data.test.mjs`: `treeToColumns(tree, prev)`
       called twice on the same tree returns **referentially identical** ticket
       objects for every column, reuses each **column array** whose members are
       all identical, and returns `prev` **itself** when all four columns are
       reused; after one task moves `todo→doing`, exactly one ticket object
       differs by identity, exactly the two affected column arrays are fresh,
       and every other ticket and column array is reused.
-- [ ] jsdom + probe: a re-projection driven by an unchanged `/api/tree` payload
+- [x] jsdom + probe: a re-projection driven by an unchanged `/api/tree` payload
       produces **0** `BoardCard` renders and **0** `BoardColumn` renders; a
       payload differing by one task move produces exactly one `BoardCard`
       render (the moved card in its new column) and exactly two `BoardColumn`
@@ -92,12 +92,12 @@ bite on a re-fetch at all.
       render **0** times — which requires the per-column sorted array to be
       memoized on `(columns[status], sort)`, not recomputed inline at the
       column call site (see Notes, readiness pass).
-- [ ] The existing `dashboard/` `node --test` suite passes **unchanged** — no
+- [x] The existing `dashboard/` `node --test` suite passes **unchanged** — no
       test edited to accommodate memoization. This is the honest refactor bar,
       and it already covers the interactions at risk:
       `board-dependency-hover`, `board-card-dismiss`, `launch-button-hover`,
       `board-done-collapse`, `board-group`, `board-sort`.
-- [ ] The render probe is inert in production: a `dist-build.test.mjs`-style
+- [x] The render probe is inert in production: a `dist-build.test.mjs`-style
       assertion that no probe is installed by default and the built bundle
       contains no test-only import.
 - [ ] With the full board on the MacBook, hovering a backlog card feels
@@ -240,3 +240,108 @@ criteria do not move.
 
 Split from `agentic-workflow-bmn29` at refinement (2026-09-05); the parent keeps the full
 diagnosis and the residual hidden-tab scope.
+
+## Outcome
+
+Shipped all five machine-checkable criteria; the sixth ([human-eye], felt hover latency)
+is left unchecked for the builder per ADR-0061.
+
+**`board-data.js` — identity-stable projection.** `treeToColumns(tree, prev)` now takes an
+optional `prev` (the columns it returned last time) and reconciles: a freshly-projected
+ticket that is value-equal to the prior one (the full field set minus the constant
+placeholders — `id, title, status, type, context, path, mtimeMs`, plus `dependsOn`/`blocks`
+compared element-wise since `/api/tree` always hands back fresh arrays) keeps the PRIOR
+object. A column array whose members are then all identical to `prev`'s is itself reused;
+if all four columns reuse, `prev` itself is returned. `board-data.test.mjs` gained 4 pure
+tests proving: (1) calling it twice on the same tree returns `prev` itself and every ticket/
+column array by reference; (2) after one `todo→doing` move, exactly one ticket differs by
+identity and exactly the two affected columns are fresh; (3) a changed `mtimeMs` forces a
+fresh ticket (the mtime-ordered sorts need to see it); (4) `dependsOn`/`blocks` compare by
+content, not array identity. Ran RED first (18→14 tests before the fix, the 4 new ones
+failing on `strictEqual` — value-equal objects compared unequal by reference), then GREEN
+after implementing the reconcile.
+
+**`board.js` — `React.memo` + a wiring fix, not a redesign.** `BoardCard`/`BoardColumn` are
+now `memo()`-wrapped (`BoardCardMemo`/`BoardColumnMemo`); the raw `function BoardCard`/
+`function BoardColumn` declarations are untouched (existing static-guard tests read them by
+name). `BoardColumnMemo` uses a custom equality function that ignores `onToggleSection`/
+`onToggleCollapse` specifically: both are built at the column call site as fresh
+`(x) => fn(status, x)` closures on every render (not `useCallback`-wrapped there —
+`onToggleCollapse`'s exact literal is asserted verbatim by `board-done-collapse.test.mjs`
+AC1 and `board-view-chip.test.mjs` AC4, so this task left that call site untouched), but
+both are behaviorally invariant across renders (`status` is fixed per column instance,
+`toggleSection`/`setColumnPeek` are themselves stable). `DashboardBoard.applyTree` now does
+`setColumns((prev) => treeToColumns(tree, prev))` — a functional update, so an unchanged
+tree yields `prev` itself and React bails out of re-rendering `DashboardBoard` entirely
+(no render at all, not just a skipped commit). The four per-column sorted arrays are
+memoized via `sortedColumnsRef` — a small per-status cache (source array + sort → result)
+inside one `useMemo`, so a sibling column's array changing doesn't reallocate every
+column's sorted array (a naive single-dependency `useMemo` would: `sortTickets` always
+returns a fresh `.slice().sort()` even for unchanged input). The literal
+`sortTickets(columns[status], view.lens.sort)` the existing `board-view-chip.test.mjs` AC5
+guard asserts on stays in the source, inside that cache's fallback branch.
+
+**Render probe.** `NOOP_RENDER_PROBE = { card() {}, column() {} }` is defined directly in
+`board.js`, no import — the `renderProbe` prop threads `DashboardBoard → BoardColumnMemo →
+BoardCardMemo`, defaulting to the no-op everywhere, exactly the `fetchDoc`
+injectable-callback idiom `WhatsNextPanel`/`InFlightLane` already use. `DashboardApp` (the
+real mount point) never passes one. New `board-render-probe-dist.test.mjs` proves the
+default is the inert literal, `DashboardApp` never installs a probe, and the built bundle
+(rebuilt into a scratch dir, never the committed `dist/`) contains no test-only string.
+
+**Two new jsdom DOM-render tests, both run RED against the pre-memoization board before
+being shown GREEN (ADR-0062):**
+- `board-render-probe-hover.test.mjs` — mounts `DashboardBoard` with a 200-card fixture (1
+  backlog source card depending on a todo target and blocking a doing target, 197 unrelated
+  Done cards), dispatches a real bubbling `mouseover` (what React's `onMouseEnter` is
+  synthesized from) on the source card, and asserts exactly `{src-1, t1, t2}` re-rendered —
+  zero Done-column renders. **Red run** (memo temporarily aliased back to the bare
+  components): `AssertionError: 0 renders for every Done-column card` — 197 Done ids
+  recorded (`ℹ tests 1 / pass 0 / fail 1`). **Green run** after re-enabling `memo(...)`:
+  `ℹ tests 1 / pass 1 / fail 0`.
+- `board-render-probe-reprojection.test.mjs` — mounts `DashboardBoard`, fires a structural
+  SSE frame with the tree unchanged (fresh-parsed clone, same content), then a second frame
+  after moving one task `todo→doing`. **Red run** (whole diff reverted via `git stash` to
+  the pre-task `board.js`/`board-data.js`, restored after): fails on the second assertion —
+  `actual: [] / expected: ['moving-1']` (the unmodified board has no `renderProbe` wiring at
+  all, so nothing is ever recorded — a genuine, specific failure against the real
+  unmodified source, not a vacuous pass). **Green run**: `ℹ tests 1 / pass 1 / fail 0` — 0
+  renders for the unchanged frame, exactly `['moving-1']` card renders and exactly
+  `['doing','todo']` column renders for the moved-task frame.
+
+**Full suite:** `cd dashboard && node --test` → 976/976 pass (973 pre-existing + 4
+board-data.js + 1 hover + 1 re-projection + 3 render-probe-dist, minus a wash from the
+board-data.test.mjs count above — net +18 counted individually across the new files).
+`node --test lib/test/*.test.mjs` from the worktree root → 385/385 pass, unrelated to this
+task. No existing test file's assertions were edited — only new tests were added.
+`dashboard/dist/` was rebuilt (`npm run build`) so `dist-staleness.test.mjs` stays green;
+the rebuilt `dist/` is intentionally excluded from this task's file list per the ADR-0057
+checkpoint-guard convention (the conductor performs the sanctioned `dist/` commit on
+`main` at integration).
+
+**ADR-0059 (mechanize-or-drop) — both dispositions, as flagged in this task's own Notes:**
+- *"The board's tree projection is identity-stable... consumers may rely on that
+  identity."* → **enforcement shipped**: `board-data.test.mjs`'s 4 new reconcile tests
+  fail the moment `treeToColumns` goes back to allocating unconditionally.
+- *"Memoize board list components."* → **prose-only, unenforced** — a lint counting
+  `React.memo(` would over-fire on components that must not be memoized and is trivially
+  gamed by a wrapper that never actually skips a render; judged not worth mechanizing.
+- The gate fires here because the diff touches `.agentheim/contexts/agentic-workflow/
+  README.md`'s ubiquitous-language section (the "Identity-stable projection" entry added
+  above `Content search`), a doctrine-bearing surface per ADR-0059's own scoping amendment.
+
+**No new ADR.** Per the task's own Notes: memoization is an implementation technique with
+no cross-cutting contract; the one contract-like piece (the projection's identity
+stability) is proportionate as the README line + the pure test, not a second ADR.
+
+**Files:**
+- `dashboard/app/board-data.js` — `treeToColumns(tree, prev)` reconcile.
+- `dashboard/app/board.js` — `memo(BoardCard)`/`memo(BoardColumn, boardColumnPropsEqual)`,
+  `NOOP_RENDER_PROBE` + `renderProbe` threading, `sortedColumnsRef` per-column sort memo,
+  functional `setColumns` update.
+- `dashboard/test/board-data.test.mjs` — 4 new pure reconcile tests.
+- `dashboard/test/board-render-probe-hover.test.mjs` — new.
+- `dashboard/test/board-render-probe-reprojection.test.mjs` — new.
+- `dashboard/test/board-render-probe-dist.test.mjs` — new.
+- `.agentheim/contexts/agentic-workflow/README.md` — "Identity-stable projection" entry.
+- `dashboard/dist/**` — rebuilt locally (not in FILE_LIST; see ADR-0057 note above).

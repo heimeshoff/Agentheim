@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 23:50 -- Task verified and completed: agentic-workflow-rw6ck - Hovering a card re-renders that card and its ring targets, not all 255 — memoized board cards and columns, hover state out of the board root, identity-stable tree projection
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-rw6ck - Hovering a card re-renders that card and its ring targets, not all 255 — memoized board cards and columns, hover state out of the board root, identity-stable tree projection
+**Summary:** BoardCard and BoardColumn are React.memo-d over an identity-stable treeToColumns(tree, prev) reconcile (value-equal tickets keep the same object; prev itself returned when nothing changed) with the four sorted column arrays memoized on (column, sort), so a hover re-renders only the hovered card and its dependency targets and a one-task structural re-projection re-renders one card and two columns; proven red-then-green by an injectable render-count probe that is inert in production; README gains the identity-stable projection term; dist healed via the conductor integration rebuild
+**Duration:** 26m
+**Verification:** PASS (iteration 1)
+**Files changed:** 8
+**Tests added:** 9
+**ADRs written:** none
+
+---
+
 ## 2026-09-05 23:36 -- Modeling / Promoted: agentic-workflow-pcwnn - Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung
 
 **Type:** Modeling / Promote

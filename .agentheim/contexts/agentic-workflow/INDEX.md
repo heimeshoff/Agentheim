@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 4
 - **Todo:** 1
-- **Doing:** 1
-- **Done:** 185
+- **Doing:** 0
+- **Done:** 186
 <!-- task-counts:end -->
 
 ### Todo
@@ -23,11 +23,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-rw6ck** — Hovering a card re-renders that card and its ring targets, not all 255 — memoized board cards and columns, hover state out of the board root, identity-stable tree projection (refactor) — `doing/agentic-workflow-rw6ck-memoized-board-hover-scoped-identity-stable-projection.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-rw6ck** — Hovering a card re-renders that card and its ring targets, not all 255 — memoized board cards and columns, hover state out of the board root, identity-stable tree projection (refactor) — `done/agentic-workflow-rw6ck-memoized-board-hover-scoped-identity-stable-projection.md`
 - **agentic-workflow-g4zce** — Todo cards get a Work launch button seeded with the ticket id — `/agentheim:work <id>` for exactly that task (feature) — `done/agentic-workflow-g4zce-todo-card-work-launch-button.md`
 - **agentic-workflow-swj2q** — "`/agentheim:work <task-id>` — scope a work run to one named todo task instead of the whole ready set" (feature) — `done/agentic-workflow-swj2q-work-single-task-argument.md`
 - **agentic-workflow-mvt8x** — One live-update subscription per tab, one /api/tree fetch per structural frame — an advisory frame (.agentheim/state/**) re-syncs only the panel that reads that artifact, never the board or rail (bug) — `done/agentic-workflow-mvt8x-live-tree-hub-one-subscription-frame-routing.md`

@@ -176,3 +176,88 @@ test('treeTicket defaults dependsOn/blocks to [] when absent or malformed', () =
   assert.deepEqual(malformed.dependsOn, []);
   assert.deepEqual(malformed.blocks, []);
 });
+
+// ---- Identity-stable projection (agentic-workflow-rw6ck) -------------------
+// treeToColumns(tree, prev) reconciles against the previously-projected
+// columns: a task whose projected ticket is value-equal to the prior one
+// keeps the SAME object, so a re-fetch of an unchanged tree commits nothing
+// and a single task move re-renders a single card. See the README's
+// "Identity-stable projection" ubiquitous-language entry.
+
+test('treeToColumns(tree, prev) called twice on the same tree reuses every ticket object, every column array, and returns prev itself', () => {
+  const tree = sampleTree();
+  const first = treeToColumns(tree);
+  const second = treeToColumns(tree, first);
+
+  for (const c of COLUMN_ORDER) {
+    assert.equal(second[c].length, first[c].length, `${c} column length must be unchanged`);
+    for (let i = 0; i < first[c].length; i++) {
+      assert.equal(second[c][i], first[c][i], `${c}[${i}] ticket object must be the SAME object (referential identity)`);
+    }
+    assert.equal(second[c], first[c], `${c} column array itself must be reused (all members identical)`);
+  }
+  assert.equal(second, first, 'treeToColumns must return the PREVIOUS columns object itself when every column is reused');
+});
+
+test('treeToColumns(tree, prev) after one task moves todo->doing: exactly one ticket differs by identity, exactly the two affected columns are fresh, everything else is reused', () => {
+  const tree = sampleTree();
+  const first = treeToColumns(tree);
+
+  const moved = sampleTree();
+  moved.contexts[1].lifecycle.todo[0].status = 'doing'; // beta-001: todo -> doing
+  const second = treeToColumns(moved, first);
+
+  assert.notEqual(second, first, 'the top-level columns object must be fresh when something changed');
+  assert.equal(second.backlog, first.backlog, 'backlog is unaffected by the move — array reused');
+  assert.equal(second.done, first.done, 'done is unaffected by the move — array reused');
+  assert.notEqual(second.todo, first.todo, 'todo lost a ticket — must be a fresh array');
+  assert.notEqual(second.doing, first.doing, 'doing gained a ticket — must be a fresh array');
+
+  const firstById = new Map();
+  for (const c of COLUMN_ORDER) for (const t of first[c]) firstById.set(t.id, t);
+  const secondById = new Map();
+  for (const c of COLUMN_ORDER) for (const t of second[c]) secondById.set(t.id, t);
+
+  let differing = 0;
+  for (const [id, t] of secondById) {
+    if (firstById.get(id) !== t) differing += 1;
+  }
+  assert.equal(differing, 1, 'exactly one ticket object must differ by identity after one task move');
+  assert.notEqual(secondById.get('beta-001'), firstById.get('beta-001'), 'the moved ticket itself must be the one that differs');
+});
+
+test('treeToColumns(tree, prev) treats mtimeMs as part of value-equality — a changed mtime allocates a fresh ticket object', () => {
+  const tree = sampleTree();
+  const first = treeToColumns(tree);
+
+  const touched = sampleTree();
+  touched.contexts[0].lifecycle.todo[0].mtimeMs = 1717000000000; // alpha-002 body edited
+  const second = treeToColumns(touched, first);
+
+  const firstAlpha002 = first.todo.find((t) => t.id === 'alpha-002');
+  const secondAlpha002 = second.todo.find((t) => t.id === 'alpha-002');
+  assert.notEqual(secondAlpha002, firstAlpha002, 'an mtime change must allocate a fresh ticket object — the sort reads it');
+});
+
+test('treeToColumns(tree, prev) compares dependsOn/blocks element-wise, not by array identity', () => {
+  const tree = sampleTree();
+  tree.contexts[0].lifecycle.todo[0].dependsOn = ['alpha-001'];
+  const first = treeToColumns(tree);
+
+  // A fresh /api/tree fetch always yields NEW array instances even when the
+  // element contents are unchanged — the reconcile must not be fooled by that
+  // into allocating a fresh ticket.
+  const refetched = sampleTree();
+  refetched.contexts[0].lifecycle.todo[0].dependsOn = ['alpha-001'];
+  const second = treeToColumns(refetched, first);
+
+  const firstAlpha002 = first.todo.find((t) => t.id === 'alpha-002');
+  const secondAlpha002 = second.todo.find((t) => t.id === 'alpha-002');
+  assert.equal(secondAlpha002, firstAlpha002, 'element-wise-equal dependsOn must reuse the prior ticket object');
+
+  const changed = sampleTree();
+  changed.contexts[0].lifecycle.todo[0].dependsOn = ['alpha-003'];
+  const third = treeToColumns(changed, second);
+  const thirdAlpha002 = third.todo.find((t) => t.id === 'alpha-002');
+  assert.notEqual(thirdAlpha002, secondAlpha002, 'a genuinely changed dependsOn must allocate a fresh ticket object');
+});

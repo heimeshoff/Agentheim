@@ -31,7 +31,7 @@
      (ADR-0070 §3). As skills move files on disk, the board reflects it
      within a frame.
    ============================================================ */
-import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo, memo } from "react";
 
 // Styleguide single source (ADR-0003): import the approved Kanban components
 // across the BC boundary. They are CONSUMED, never copied — the design-system
@@ -128,6 +128,18 @@ const EMPTY_COLUMNS = (() => {
   for (const k of COLUMN_ORDER) c[k] = [];
   return c;
 })();
+
+// A test-only render-count PROBE, injected exactly like WhatsNextPanel's/
+// InFlightLane's `fetchDoc` (agentic-workflow-rw6ck): an optional prop,
+// default a no-op, threaded DashboardBoard -> BoardColumn -> BoardCard.
+// Production code (DashboardApp below) never passes one, so this NOOP object
+// is what every real mount uses — there is no test-only IMPORT anywhere in
+// this file (dist-build.test.mjs-style assertion), only an inert default
+// object. A test supplies its own `{ card, column }` recorder to observe
+// exactly which BoardCard/BoardColumn instances React actually re-invoked, a
+// direct measurement a DOM-mutation check cannot make: an unmemoized card
+// that re-renders to IDENTICAL output mutates nothing observable in the DOM.
+const NOOP_RENDER_PROBE = { card() {}, column() {} };
 
 // A quiet board header strip — sized off the styleguide tokens, no new pattern.
 function BoardHeader({ count }) {
@@ -1683,7 +1695,11 @@ function CardTrashCan({ ticket, hostHover, skipPermissions = false }) {
 // (the board sorts before passing it in).
 // One TicketCard. Factored out so the flat list and the grouped sections render
 // cards identically (same selection ring).
-function BoardCard({ ticket, status, selectedId, onOpen, skipPermissions = false, dependencyRelation, onCardHover }) {
+function BoardCard({ ticket, status, selectedId, onOpen, skipPermissions = false, dependencyRelation, onCardHover, renderProbe = NOOP_RENDER_PROBE }) {
+  // agentic-workflow-rw6ck render probe — see NOOP_RENDER_PROBE's own comment.
+  // Called unconditionally, first, so every branch below (including the early
+  // doing/done return) is counted exactly once per actual React invocation.
+  renderProbe.card(ticket.id);
   // Backlog cards carry a Refine / Promote launch pair (aw-022) in the styleguide
   // card's bottom-right cornerAction slot (design-system-006), replacing aw-016's
   // single Copy affordance: Refine (primary) seeds `/agentheim:modeling refine
@@ -1738,13 +1754,25 @@ function BoardCard({ ticket, status, selectedId, onOpen, skipPermissions = false
     </div>`;
 }
 
+// Memoized (agentic-workflow-rw6ck): the varying props a hover or an ordinary
+// re-projection actually change are `ticket`, `selectedId`, and
+// `dependencyRelation` — `onCardHover`/`onOpen` are already useCallback-stable
+// board-root callbacks and `status`/`skipPermissions` are effectively static.
+// Combined with board-data.js's identity-stable projection (an unchanged task
+// keeps its prior `ticket` object across a re-fetch), a shallow prop compare
+// is enough to skip a card whose data genuinely didn't change.
+const BoardCardMemo = memo(BoardCard);
+
 function BoardColumn({
   status, tickets, grouped,
   collapsed, onToggleSection, peek = false, onToggleCollapse,
   selectedId, onOpen, skipPermissions = false,
   waitingOn, holdingUp, onCardHover,
   targetIds, doneMarker = false, bodyRef,
+  renderProbe = NOOP_RENDER_PROBE,
 }) {
+  // agentic-workflow-rw6ck render probe — see NOOP_RENDER_PROBE's own comment.
+  renderProbe.column(status);
   // Pipeline: tickets arrive ALREADY sorted (the board sorts before passing them
   // in); group them into sections here (board-group.groupTickets, pure). A flat
   // column yields one null-bc section; the toggle re-shapes presentation only.
@@ -1763,10 +1791,10 @@ function BoardColumn({
   // overlap, matching resolveHoverDependencies' own precedence. Both sets are
   // empty (no throw, just no match) when nothing is hovered.
   const renderCard = (t) => html`
-    <${BoardCard} key=${t.id} ticket=${t} status=${status}
+    <${BoardCardMemo} key=${t.id} ticket=${t} status=${status}
       selectedId=${selectedId} onOpen=${onOpen} skipPermissions=${skipPermissions}
       dependencyRelation=${waitingOn && waitingOn.has(t.id) ? "waiting-on" : (holdingUp && holdingUp.has(t.id) ? "holding-up" : undefined)}
-      onCardHover=${onCardHover} />`;
+      onCardHover=${onCardHover} renderProbe=${renderProbe} />`;
 
   // aw-m2v8d: when collapsed (peek), the WHOLE column body is height-clamped with a
   // bottom fade — the pure peekClampStyle. The clamp is ONE max-height on the body
@@ -1812,6 +1840,42 @@ function BoardColumn({
           </div>`}
     </div>`;
 }
+
+// `onToggleSection`/`onToggleCollapse` are built at the column call site
+// below as inline `(x) => fn(status, x)` arrows — a FRESH function on every
+// DashboardBoard render, not useCallback-wrapped there (onToggleCollapse's
+// exact literal, `status === "done" ? (p) => setColumnPeek(status, p) :
+// undefined`, is asserted verbatim by board-done-collapse.test.mjs AC1 and
+// board-view-chip.test.mjs AC4 — this task does not touch it). A plain
+// shallow-prop `React.memo` would therefore re-render EVERY column on every
+// re-projection purely because of this incidental prop, regardless of
+// whether that column's own tickets changed. Both closures are, in practice,
+// referentially-fresh but BEHAVIORALLY IDENTICAL across renders: `status` is
+// fixed for the lifetime of a given column instance (React keys it by
+// `status`), and `toggleSection`/`setColumnPeek` are themselves
+// useCallback-stable (empty deps) — so an "older" closure calls the exact
+// same function with the exact same arguments as a "newer" one. Excluding
+// just these two keys from the equality check is therefore safe, and is what
+// actually lets the "two untouched columns render 0 times" criterion hold.
+function boardColumnPropsEqual(prev, next) {
+  const keys = new Set([...Object.keys(prev), ...Object.keys(next)]);
+  for (const key of keys) {
+    if (key === "onToggleSection" || key === "onToggleCollapse") continue;
+    if (prev[key] !== next[key]) return false;
+  }
+  return true;
+}
+
+// Memoized (agentic-workflow-rw6ck): a column legitimately re-renders on hover
+// (it needs the fresh waitingOn/holdingUp/targetIds sets to recompute which of
+// its OWN cards' dependencyRelation/section markers changed) — that cascade is
+// four cheap `groupTickets`/`annotateSectionHiddenDependency` passes, not 255
+// card re-renders. What this memo buys is the OTHER case: an ordinary
+// structural re-projection where a column's own props (tickets included,
+// via board-data.js's identity-stable projection + the board's own per-column
+// sorted-array memo) are unchanged — that column, and every card inside it,
+// is skipped entirely.
+const BoardColumnMemo = memo(BoardColumn, boardColumnPropsEqual);
 
 // The off-viewport edge-blink INDICATOR (agentic-workflow-h9v3m, ADR-0003's
 // "styleguide owns look/mechanics, consumer owns placement" seam per
@@ -1859,7 +1923,7 @@ function EdgeBlinkOverlay({ scrollContainerRef, top, bottom }) {
  *        IntersectionObserver can root itself there (ADR-0033 pt. 1) instead
  *        of the browser viewport.
  */
-export function DashboardBoard({ onOpen, skipPermissions = false, scrollContainerRef }) {
+export function DashboardBoard({ onOpen, skipPermissions = false, scrollContainerRef, renderProbe = NOOP_RENDER_PROBE }) {
   const [columns, setColumns] = useState(EMPTY_COLUMNS);
   const [phase, setPhase] = useState("loading"); // loading | ready | error
   const [selectedId, setSelectedId] = useState(null);
@@ -1964,13 +2028,21 @@ export function DashboardBoard({ onOpen, skipPermissions = false, scrollContaine
   // from disk, never mutated in place. The move's own SSE echo is just another
   // structural frame → one more re-fetch, idempotent, no double-apply
   // (ADR-0001). A fetch failure delivers `null` (hub contract) → error phase.
+  //
+  // agentic-workflow-rw6ck: the re-projection is a FUNCTIONAL update —
+  // `treeToColumns(tree, prev)` — so the identity-stable reconcile
+  // (board-data.js) sees the previous columns without a ref. An unchanged
+  // tree then yields the SAME columns object (setColumns is a no-op commit);
+  // a single task move yields fresh objects for only the one ticket and the
+  // (at most two) columns its move touches — the mechanism the memoized
+  // BoardColumn/BoardCard below depend on to skip everything else.
   const applyTree = useCallback((tree) => {
     if (!tree) {
       setColumns(EMPTY_COLUMNS);
       setPhase("error");
       return;
     }
-    setColumns(treeToColumns(tree));
+    setColumns((prev) => treeToColumns(tree, prev));
     setPhase("ready");
   }, []);
 
@@ -2094,6 +2166,43 @@ export function DashboardBoard({ onOpen, skipPermissions = false, scrollContaine
     };
   }, [hoveredTicket, targetIds, donePeekCandidate, columns.done, scrollContainerRef]);
 
+  // agentic-workflow-rw6ck: the four sorted arrays, memoized on EACH column's
+  // OWN array identity + the board-wide sort choice — not the outer `columns`
+  // object's identity (which changes even when only ONE column's array
+  // actually changed, since board-data.js's reconcile allocates a fresh
+  // top-level object whenever any column differs). An inline
+  // `sortTickets(columns[status], view.lens.sort)` computed at the
+  // BoardColumn call site would hand every column a FRESH array on every
+  // board render regardless of the underlying column's own identity,
+  // defeating BoardColumnMemo's shallow prop compare entirely.
+  //
+  // A single useMemo whose dependency array is the whole `columns` object (or
+  // even all four `columns[status]` arrays at once) is NOT sufficient on its
+  // own: when ANY one column's array changes, the whole memo body re-runs and
+  // `sortTickets` — which always returns a brand-new `.slice().sort()` array,
+  // even for unchanged input — would reallocate a FRESH array for every
+  // column, including the three that didn't change. `sortedColumnsRef` is a
+  // small per-status cache (sourceArray + sort -> result) that survives
+  // across that re-run, so a column whose underlying array/sort didn't change
+  // keeps the EXACT SAME sorted-array reference even when a sibling column's
+  // did — the one useMemo call the AC5 static guard (board-view-chip.test.mjs)
+  // already asserts calls `sortTickets(columns[status], view.lens.sort)`.
+  const sortedColumnsRef = useRef({});
+  const sortedColumns = useMemo(() => {
+    const prevMap = sortedColumnsRef.current;
+    const nextMap = {};
+    for (const status of COLUMN_ORDER) {
+      const prevEntry = prevMap[status];
+      nextMap[status] = (prevEntry && prevEntry.source === columns[status] && prevEntry.sort === view.lens.sort)
+        ? prevEntry
+        : { source: columns[status], sort: view.lens.sort, result: sortTickets(columns[status], view.lens.sort) };
+    }
+    sortedColumnsRef.current = nextMap;
+    const out = {};
+    for (const status of COLUMN_ORDER) out[status] = nextMap[status].result;
+    return out;
+  }, [columns.backlog, columns.todo, columns.doing, columns.done, view.lens.sort]);
+
   if (phase === "loading") {
     return html`<${LoadState}><${Icon} name="loader" size=${15} color="var(--fg-4)" /> Loading board…</${LoadState}>`;
   }
@@ -2142,8 +2251,8 @@ export function DashboardBoard({ onOpen, skipPermissions = false, scrollContaine
         <div style=${{ minWidth: 880 }}>
           <div style=${{ display: "flex", gap: 20, alignItems: "flex-start" }}>
             ${COLUMN_ORDER.map((status) => html`
-              <${BoardColumn} key=${status} status=${status}
-                tickets=${sortTickets(columns[status], view.lens.sort)}
+              <${BoardColumnMemo} key=${status} status=${status}
+                tickets=${sortedColumns[status]}
                 grouped=${view.lens.grouped}
                 collapsed=${view.columns[status].collapsed} onToggleSection=${(bc) => toggleSection(status, bc)}
                 peek=${view.columns[status].peek}
@@ -2152,7 +2261,8 @@ export function DashboardBoard({ onOpen, skipPermissions = false, scrollContaine
                 waitingOn=${waitingOn} holdingUp=${holdingUp} onCardHover=${handleCardHover}
                 targetIds=${targetIds}
                 doneMarker=${status === "done" ? donePeekMarker : false}
-                bodyRef=${status === "done" ? doneBodyRef : undefined} />`)}
+                bodyRef=${status === "done" ? doneBodyRef : undefined}
+                renderProbe=${renderProbe} />`)}
           </div>
         </div>
       </div>

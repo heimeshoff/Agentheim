@@ -356,6 +356,12 @@ separate BC, but today the whole tool lives in this one.
   loss-tolerant: missing/malformed frontmatter falls back to folder/BC name. Document bodies
   are carried separately by `GET /api/doc?path=<in-root path>`. Both endpoints are pure reads,
   share the `startsWith(root)` guard. See ADR-0002.
+- **Identity-stable projection** — `treeToColumns` reconciles against the previous
+  projection: a task whose projected ticket is value-equal to the prior one keeps the
+  **same object**. Re-projecting an unchanged tree therefore commits nothing, and a
+  single task move re-renders a single card. Memoized `BoardCard`/`BoardColumn` depend
+  on this — without it a re-fetch allocates fresh objects and every shallow prop
+  compare fails. Consumers may rely on the identity. See board-data.js.
 - **Content search** — `GET /api/search?q=<term>` (`dashboard/search.mjs`, agentic-workflow-050,
   ADR-0023) is the read-only server's first endpoint to open document *bodies* in bulk: a pure
   walk/rank/excerpt core (stdlib-only, loss-tolerant, mirroring `tree.mjs`). Returns `{ query,
