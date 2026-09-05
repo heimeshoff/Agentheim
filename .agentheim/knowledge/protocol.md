@@ -5,6 +5,23 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 21:59 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 22m (batch start 21:38 → 21:59)
+**Completed:** 1 (first-try PASS: 0, re-dispatched: 1, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** jf6qz: 2
+**Commits:** 3 (1 batch-start, 1 task integration, this entry) — plus the INDEX header-heal commit that follows this entry, if the session-end rotation check heals
+**Vision-conformance:** none — batch aligns with vision. The one shipped task (jf6qz) removes a false machine-generated claim from every BC INDEX header and mechanizes its one-time correction through the ADR-0047 session-end seam, with the heal committed by `work` — serving "knowledge is durable" and "wrong work is caught by structure" (ADR-0059 enforcement shipped in-task). No pull toward a non-goal.
+**Batch mix:** 100% harness (1 task) — a type:bug fix confined to lib/, its test, ADR-0047, the BC README, and one section of skills/work/SKILL.md.
+**Iteration note:** the iteration-1 FAIL was conductor-induced — the dispatch note scoped `skills/` out, so the worker shipped a heal that `work`'s session-end step would write but never commit; iteration 2 widened scope and closed the gap. Concurrent `modeling` sessions committed four captures/promotions on main during this session (w45ce, rgknz, ghcaj, pt0gy) and swept this session's uncommitted "Verification failed" protocol entry into one of their scoped commits — recorded, not lost.
+**Carry-over:** none — working tree clean. No orphan worktrees (jf6qz's worktree and branch torn down after integration).
+
+---
+
 ## 2026-09-05 21:59 -- Task verified and completed: agentic-workflow-jf6qz - Fix `archivedDoneHeader`'s hardcoded "most recent N" wording — it re-introduces the phantom-cap header on rotation; heal the three stale live INDEX headers on no-op rotation (Option A)
 
 **Type:** Work / Task completion
