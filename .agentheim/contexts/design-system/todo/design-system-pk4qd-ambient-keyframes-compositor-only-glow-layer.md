@@ -1,7 +1,7 @@
 ---
 id: design-system-pk4qd
 title: Two ambient cues repaint every frame — ambient-rail-pulse and rail-attention-breathe animate box-shadow inside their keyframes, contradicting the compositor-only claim
-status: backlog
+status: todo
 type: bug
 context: design-system
 created: 2026-09-05

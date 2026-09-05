@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 36
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **design-system-pk4qd** — Two ambient cues repaint every frame — ambient-rail-pulse and rail-attention-breathe animate box-shadow inside their keyframes, contradicting the compositor-only claim (bug) — `todo/design-system-pk4qd-ambient-keyframes-compositor-only-glow-layer.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -43,7 +44,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **design-system-pk4qd** — Two ambient cues repaint every frame — ambient-rail-pulse and rail-attention-breathe animate box-shadow inside their keyframes, contradicting the compositor-only claim (bug) — `backlog/design-system-pk4qd-ambient-keyframes-compositor-only-glow-layer.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
