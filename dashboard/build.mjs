@@ -28,6 +28,8 @@ import { mkdir, rm, writeFile, copyFile, cp } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { writeBuildStamp } from './build-stamp.mjs';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // dashboard/ -> repo root -> styleguide source (single source of truth).
@@ -48,7 +50,13 @@ const FONTS_DIR = path.join(STYLES_DIR, 'fonts');
 // verbatim into dist/ on every build so they survive the dist wipe below and the
 // static handler serves them by URL (e.g. /heimeshoff.jpg).
 const ASSETS_DIR = path.join(__dirname, 'assets');
-const DIST = path.join(__dirname, 'dist');
+// Output dir defaults to the committed dashboard/dist/. An optional CLI arg
+// (dashboard/test/dist-build.test.mjs's before() hook uses this) redirects
+// the build into a scratch directory instead, so the suite's own fresh-build
+// assertions never touch — and never re-freshen — the COMMITTED dist/ that
+// dist-staleness.test.mjs checks (infrastructure-w45ce, ADR-0013 amendment /
+// ADR-0057 doctrine note: see that test file's header for why this matters).
+const DIST = process.argv[2] ? path.resolve(process.argv[2]) : path.join(__dirname, 'dist');
 
 const CSS_FILES = ['colors_and_type.css', 'agentheim.css'];
 const BUNDLE_NAME = 'app.js';
@@ -145,7 +153,13 @@ async function main() {
   // Emit the HTML shell.
   await writeFile(path.join(DIST, 'index.html'), indexHtml(), 'utf8');
 
-  process.stdout.write(`Built dashboard/dist/ (${BUNDLE_NAME} + ${CSS_FILES.join(', ')} + fonts/ + index.html)\n`);
+  // Stamp the build (infrastructure-w45ce): a content hash over the declared
+  // inputs, written alongside the output. dashboard/test/dist-staleness.test.mjs
+  // compares this stamp against a fresh hash of current sources without ever
+  // invoking esbuild, so "is dist/ stale" is checkable stdlib-only.
+  writeBuildStamp({ dashboardDir: __dirname, repoRoot: REPO_ROOT, outDir: DIST });
+
+  process.stdout.write(`Built ${path.relative(REPO_ROOT, DIST)}/ (${BUNDLE_NAME} + ${CSS_FILES.join(', ')} + fonts/ + index.html + .build-stamp.json)\n`);
 }
 
 main().catch((err) => {

@@ -4,8 +4,8 @@ title: Plugin release discipline — manifest bump bound to a versioned git tag,
 scope: infrastructure
 status: accepted
 date: 2026-06-08
-related_tasks: [infrastructure-005, infrastructure-006]
-related_adrs: []
+related_tasks: [infrastructure-005, infrastructure-006, infrastructure-w45ce]
+related_adrs: [0003, 0057]
 ---
 
 # ADR-0013: Plugin release discipline — manifest bump bound to a versioned git tag, by checklist
@@ -120,3 +120,34 @@ strands users).
 This ADR records the decision. Its concrete artifacts are `RELEASE.md` (the ordered checklist
 the builder runs) at the repo root and the infrastructure BC README pointer to it. There is
 **no follow-up tooling task** — enforcement is doc-only by design.
+
+## Amendment (infrastructure-w45ce): the dashboard bundle is part of the release contract
+
+**Finding.** The plugin contract this ADR's semver convention governs is not only skills,
+commands, and `.agentheim/` layout — it also includes `dashboard/dist/`, the pre-bundled UI
+asset set a marketplace consumer runs (ADR-0003). Nothing in the original checklist mentioned
+it, so a release could — and, verified on 2026-09-05, **did** — ship a stale bundle: `main`'s
+committed `dist/` lagged a merged UI change (`dashboard/app/prompt-mode.js`, 2026-07-15) by
+two days at the time this was caught, with no step anywhere that would have noticed.
+
+**Second finding, which changes what "released" means for this artifact.** The marketplace
+does **not** install the tag. It copies the marketplace clone of `main` **at update time** —
+verified against a live installed cache (`gitCommitSha` two commits past the `v0.9.2` tag).
+So "fresh dashboard at the tag" was never the right invariant to begin with; `dashboard/dist/`
+has to be fresh **on `main`** whenever a release is cut, because `main` — not the tag — is
+what a marketplace update actually copies. This sharpens `RELEASE.md`'s existing "push to
+main is the step that reaches users" framing: it was already true for the manifest bump, and
+it is equally true for the dashboard bundle.
+
+**Decision.** `RELEASE.md`'s checklist gains a step *before* the version-bump commit:
+rebuild `dashboard/dist/` from current `main` (`cd dashboard && npm ci && npm run build`), run
+the dashboard suite (which includes `dashboard/test/dist-staleness.test.mjs`, the durable half
+of this discipline — see ADR-0057's amendment below), and stage the rebuilt `dist/` in its own
+`chore(dashboard): rebuild dist` commit ahead of `chore(release): vX.Y.Z`. This keeps the
+existing doc-only enforcement mechanism (a checklist, not CI) but adds the one artifact this
+ADR's original scope missed.
+
+**Consequence.** The escalation path already named in this ADR's Consequences section (a CI
+guard, rejected for cost) now also covers "assert `dashboard/dist/` matches a fresh build" —
+still not adopted; `dist-staleness.test.mjs` under the existing test suite is the interim,
+already-adopted equivalent of that backstop (see ADR-0057's amendment).

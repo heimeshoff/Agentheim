@@ -4,7 +4,7 @@ title: Derived artifacts are unstageable from a worktree — the conductor's che
 scope: agentic-workflow
 status: accepted
 date: 2026-07-13
-related_tasks: [agentic-workflow-q7v3k]
+related_tasks: [agentic-workflow-q7v3k, infrastructure-w45ce]
 related_adrs: [0003, 0013, 0026, 0032, 0038, 0052, 0055]
 ---
 
@@ -180,6 +180,45 @@ untracked path `git add` would reject), folds that path into the set handed to
 `git add <changed>` becomes correct by construction. `skills/work/SKILL.md`'s SUCCESS and BOUNCE
 checkpoint steps are updated to describe this; enforced by `lib/test/task-lifecycle-cli.test.mjs`.
 
+## Amendment (infrastructure-w45ce): a staleness check joins the guard as its complementary half
+
+This ADR's alternative (a) rejected "a suite test asserting `dist/` matches a fresh build of
+current source" as run **inside a worker's worktree**, because `dist-build.test.mjs`'s
+`before()` hook rebuilds `dist/` immediately before such an assertion would read it — the
+assertion could never fail there. That finding stands unchanged. It does **not**, however,
+rule out the same shape of assertion run against `main`'s **committed** `dashboard/dist/`,
+provided the suite never rebuilds that specific directory in place — which was, before this
+task, exactly the bug: `dist-build.test.mjs`'s `before()` hook rebuilt the real
+`dashboard/dist/` on every invocation, in every context, not only inside a worker's worktree.
+
+infrastructure-w45ce fixes that hook to build into a throwaway scratch directory instead (see
+`dashboard/test/dist-build.test.mjs`), so the suite no longer touches the committed `dist/` at
+all, and adds `dashboard/test/dist-staleness.test.mjs`: a stdlib-only comparison of a content
+hash recorded in `dashboard/dist/.build-stamp.json` (written by `build.mjs` on every real
+build) against a fresh hash of current declared sources. This is a **different** mechanism
+than the rejected alternative (a) — it reads a stamp, it never rebuilds — and it closes a gap
+this ADR's guard was never meant to cover: the guard stops an untrusted worktree rebuild from
+reaching `main`, but says nothing about whether `main`'s own committed `dist/` is fresh.
+
+**The two guards are complementary, not contradictory, and a future maintainer should read
+them as one system with two jobs:**
+
+- **This ADR's checkpoint guard** (`lib/derived-artifact-guard.mjs`) is preventive and
+  worker-scoped: it makes a worker's rebuild of `dashboard/dist/` inert before it can ever
+  reach `main`, regardless of whether the worker's task touched `dashboard/app/` at all.
+- **The staleness check** (`dashboard/build-stamp.mjs` / `dist-staleness.test.mjs`) is
+  detective and `main`-scoped: it never blocks a worker (a worker who edits `dashboard/app/`
+  without rebuilding is not failed by it — the guard above already drops that worker's
+  rebuild at checkpoint), but it goes **red on `main`** the moment source and stamp diverge,
+  and stays red until a builder runs the real rebuild (ADR-0013's amended `RELEASE.md` step)
+  and commits the result. It is the in-suite, already-adopted version of the CI backstop
+  ADR-0013 named and deliberately deferred.
+
+Neither guard alone is sufficient: the checkpoint guard alone would let `main` drift silently
+forever (nothing ever told a builder to rebuild); the staleness check alone, without the
+checkpoint guard, would still let a worker's plausible-looking, built-from-a-never-existed
+worktree bundle (this ADR's Context section) leak into `main` on a lucky green run.
+
 ## References
 
 - ADR-0003 — `dashboard/`'s single-source doctrine; the root of why `dist/` is derived.
@@ -193,3 +232,6 @@ checkpoint steps are updated to describe this; enforced by `lib/test/task-lifecy
 - ADR-0055 — `applyTaskMove`'s write-then-unlink discipline; part of the same lifecycle-CLI
   lineage `checkpoint` joins.
 - `agentic-workflow-q7v3k` — this task.
+- `infrastructure-w45ce` — added the complementary staleness check (amendment above); fixed
+  `dist-build.test.mjs`'s `before()` hook to stop rebuilding the committed `dashboard/dist/`
+  in place.

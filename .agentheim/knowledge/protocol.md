@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 22:26 -- Task verified and completed: infrastructure-w45ce - A release ships a fresh dashboard — rebuild dist/ as a release step and make dist-vs-source staleness a failing check
+
+**Type:** Work / Task completion
+**Task:** infrastructure-w45ce - A release ships a fresh dashboard — rebuild dist/ as a release step and make dist-vs-source staleness a failing check
+**Summary:** RELEASE.md gains a rebuild-and-stage dashboard/dist step ahead of the version bump; a stdlib-only staleness check (build-stamp.mjs + dist-staleness.test.mjs) fails whenever committed dist lags its sources and names the rebuild command, with dist-build.test.mjs redirected to a scratch outdir so the check is never structurally green; ADR-0013 and ADR-0057 amended; main dist healed via the conductor integration rebuild
+**Duration:** 16m
+**Verification:** PASS (iteration 1)
+**Files changed:** 10
+**Tests added:** 6
+**ADRs written:** none (ADR-0013, ADR-0057 amended)
+
+---
+
 ## 2026-09-05 22:20 -- Modeling / Captured: agentic-workflow-bmn29 - Dashboard burns resources at idle on a MacBook — four SSE streams per tab, a 2×tree + 2×doc fan-out on every heartbeat, an unmemoized 255-card board, and box-shadow keyframes
 
 **Type:** Modeling / Capture

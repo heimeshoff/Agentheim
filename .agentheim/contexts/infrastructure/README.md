@@ -278,6 +278,13 @@ Apply write request.
   the skill or command surface). Accepted residual risk: a checklist run from memory is the
   same failure class as the original drift, mitigated by binding the bump to the tag act; CI
   is the documented escalation path if drift recurs.
+  - **Amendment (infrastructure-w45ce) — the dashboard bundle joined the release contract.**
+    The marketplace copies the marketplace clone of **`main`**, not the tag (verified against
+    a live installed cache), so `dashboard/dist/` must be fresh on `main` whenever a release
+    is cut — the tag alone was never the right freshness invariant. `RELEASE.md` gained a
+    step, ahead of the version-bump commit, to rebuild + verify + stage `dashboard/dist/`.
+    See "Dist freshness" under Testing below for the durable, in-suite half of this
+    discipline.
 
 - **ADR-0018 — VS Code dashboard→terminal bridge (fixed-port localhost extension).** Agentheim's
   first deployable VS Code component (`vscode-extension/`): a `127.0.0.1`-only `node:http` listener
@@ -393,6 +400,24 @@ Apply write request.
   it: pinning that the window-scoped Ctrl+M listener calls `shouldWindowCtrlMHandle` *before*
   `preventDefault`/`setSelectedModel` proves a call site's ordering, which a behavioral test
   genuinely does not assert.
+
+- **Dist freshness (`dashboard/build-stamp.mjs` + `dist-staleness.test.mjs`, infrastructure-w45ce,
+  ADR-0013 amendment / ADR-0057 doctrine note).** A stdlib-only, `node --test` check that a
+  release checklist alone cannot enforce: it fails when the **committed** `dashboard/dist/`
+  lags its declared inputs (`dashboard/app/**`, the styleguide source `build.mjs` consumes,
+  `dashboard/assets/**`, `build.mjs` itself), and passes right after `cd dashboard && npm run
+  build`. `build.mjs` writes `dist/.build-stamp.json` (a content hash over those inputs, text
+  files normalised to LF so Windows `autocrlf` never phantom-fails it — never the bundle
+  bytes) on every real build; the check only ever reads and re-hashes, never rebuilds, so it
+  needs no esbuild/`node_modules` to run. **Interplay with the ADR-0057 checkpoint guard** (do
+  not confuse the two): a worker who edits `dashboard/app/` without rebuilding is not blocked
+  by this check — ADR-0057's guard still drops that worker's worktree rebuild before it can
+  reach `main` — but this check goes red **on `main`** once the merge lands, and stays red
+  until a builder runs the real rebuild (the `RELEASE.md` step above) and commits it. The two
+  guards are complementary, not contradictory: one is preventive and worker-scoped, the other
+  is detective and `main`-scoped. `dist-build.test.mjs`'s own fresh-build assertions now build
+  into a scratch directory instead of `dashboard/dist/` in place, precisely so this check keeps
+  reading the real, honest, committed `dist/` rather than one a sibling test just refreshed.
 
 ## Open questions
 

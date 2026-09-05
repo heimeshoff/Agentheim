@@ -5,26 +5,42 @@
 // bundle honors ADR-0003 / ADR-0002: framework bundled IN (no CDN), React
 // PRODUCTION build, token CSS present, no in-browser Babel, no import map.
 
-import { test, before } from 'node:test';
+import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DASHBOARD = path.resolve(__dirname, '..');
-const DIST = path.join(DASHBOARD, 'dist');
+
+// Regenerate a build into a SCRATCH directory, never the committed
+// dashboard/dist/ (infrastructure-w45ce). Building in place here — as this
+// hook did before this task — would make dist-staleness.test.mjs's "committed
+// dist matches its source stamp" assertion structurally, permanently green:
+// a sibling test in the SAME `node --test` invocation would have just
+// refreshed the very thing being checked (ADR-0057 alternative (a) names this
+// exact trap for a "dist matches fresh build" assertion). Redirecting the
+// rebuild here means this suite's own test run never touches, and never
+// re-freshens, the committed dist/ — the staleness check reads real,
+// honest, on-disk state instead.
+const SCRATCH_DIST = mkdtempSync(path.join(os.tmpdir(), 'agentheim-dashboard-dist-build-'));
+const DIST = SCRATCH_DIST;
 const BUNDLE = path.join(DIST, 'app.js');
 const INDEX = path.join(DIST, 'index.html');
 
-// Regenerate dist/ once so the assertions test a fresh build, not a stale one.
 // Requires `npm install` to have populated dashboard/node_modules (build-time).
 before(() => {
-  execFileSync(process.execPath, [path.join(DASHBOARD, 'build.mjs')], {
+  execFileSync(process.execPath, [path.join(DASHBOARD, 'build.mjs'), SCRATCH_DIST], {
     cwd: DASHBOARD,
     stdio: 'ignore',
   });
+});
+
+after(() => {
+  rmSync(SCRATCH_DIST, { recursive: true, force: true });
 });
 
 test('build emits index.html, the bundled JS, and both token CSS files', () => {
