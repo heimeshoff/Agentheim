@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 23:41 -- Modeling / Refined: agentic-workflow-pcwnn - Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo (promoted in the entry above)
+**Summary:** A throwaway-repo spike showed the captured rebase rung does not exist — a squash conflict on main and `git merge main` in the loser's worktree are the same 3-way merge and conflict on the same paths, while disjoint-hunk edits never conflict at all. The ladder is now: reset main → salvage (`merge-conflict` tag) → discard derived churn (no stash) → conductor runs a real, abortable `git merge main` INTO the branch → resolve-conflict dispatch to the same worker in the same worktree (allow-list from `--diff-filter=U`, orientation + authority statement, `## Merge-conflict note`) → fail-closed checkpoint → mandatory re-verify against the new base with a two-dot diff → normal squash; builder escalation is the last rung. Budget: one ladder per worktree lifetime, off the 3-iteration FAIL counter. INDEX/protocol excluded by construction; Phase 1 gains a MERGE_HEAD-present recovery case. Enforcement: pure lib helpers + a tmpdir-isolated git-fact fixture (a bounded exception to git-free lib); the sequencing itself is prose-only per ADR-0059. Orchestrator round (architect + tactical-modeler) accepted all three decisions with amendments, all folded in. Backlinks: ADR-0057/0058/0059 added. Title updated to drop "rebase".
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-09-05 23:26 -- Batch started: [agentic-workflow-rw6ck]
 
 **Type:** Work / Batch start
