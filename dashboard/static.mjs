@@ -67,7 +67,14 @@ export function serveStatic(req, res, assetRoot) {
     return true;
   }
 
-  res.writeHead(200, { 'content-type': contentTypeFor(target) });
+  // Cache-Control: no-cache (infrastructure-rgknz) — NOT no-store: the browser
+  // still caches the response body but must revalidate with the server on
+  // every request before reusing it. A cheap hardening against a browser or
+  // VS Code Simple Browser tab left open across a plugin update replaying a
+  // stale bundle from its own cache rather than fetching the new server's
+  // asset (the server itself already changed underneath the open tab once
+  // launch.mjs's version-aware reuse/replace decision swapped it in).
+  res.writeHead(200, { 'content-type': contentTypeFor(target), 'cache-control': 'no-cache' });
   createReadStream(target).pipe(res);
   return true;
 }
@@ -108,15 +115,18 @@ export function serveIndexHtml(req, res, assetRoot, root) {
     html = injectTitle(html, dashboardTitle(resolveProjectName(root)));
   } catch {
     // Could not transform — stream the committed file unchanged rather than 500.
-    res.writeHead(200, { 'content-type': contentTypeFor(target) });
+    res.writeHead(200, { 'content-type': contentTypeFor(target), 'cache-control': 'no-cache' });
     createReadStream(target).pipe(res);
     return true;
   }
 
+  // Cache-Control: no-cache (infrastructure-rgknz) — see serveStatic's 200
+  // response for the rationale; the index document gets the same treatment.
   const body = Buffer.from(html, 'utf8');
   res.writeHead(200, {
     'content-type': contentTypeFor(target),
     'content-length': body.length,
+    'cache-control': 'no-cache',
   });
   if (req.method === 'HEAD') {
     res.end();

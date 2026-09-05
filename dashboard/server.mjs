@@ -26,8 +26,16 @@ import { handleEvents } from './events.mjs';
 import { handleTree, handleDoc, handleSearch, handleBridge } from './read-api.mjs';
 import { handleWhatsNextDelete } from './whats-next-delete.mjs';
 import { handleStop } from './stop-api.mjs';
+import { resolvePluginRoot, readPluginVersion } from './plugin-version.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// The serving plugin's own version (ADR-0002 version-aware addendum,
+// infrastructure-rgknz), exposed on /healthz so a stale-but-live server is
+// visible without a launch attempt — the read-API counterpart to `status`
+// printing it. null when the manifest can't be read (e.g. a dev layout with no
+// .claude-plugin/ above dashboard/).
+const servingPluginVersion = readPluginVersion(resolvePluginRoot(__dirname));
 
 /**
  * Default asset root: the committed dashboard build output, resolved relative to
@@ -57,7 +65,7 @@ export function createDashboardServer({ root, assetRoot = defaultAssetRoot(root)
 
     if (pathname === '/healthz') {
       res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify({ status: 'ok', root }));
+      res.end(JSON.stringify({ status: 'ok', root, version: servingPluginVersion }));
       return;
     }
 

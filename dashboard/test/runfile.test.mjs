@@ -47,6 +47,41 @@ test('writeRunfile then readRunfile round-trips {pid, port, startedAt}', () => {
   }
 });
 
+test('writeRunfile then readRunfile round-trips pluginVersion + pluginRoot (ADR-0002 version-aware addendum)', () => {
+  const root = makeRoot();
+  try {
+    writeRunfile(root, {
+      pid: 4242,
+      port: 51001,
+      startedAt: '2026-06-06T00:00:00.000Z',
+      pluginVersion: '0.9.2',
+      pluginRoot: path.join(root, 'plugin'),
+    });
+    const rf = readRunfile(root);
+    assert.equal(rf.pluginVersion, '0.9.2');
+    assert.equal(rf.pluginRoot, path.join(root, 'plugin'));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('an older runfile written without pluginVersion/pluginRoot is tolerated (undefined, not a parse error)', () => {
+  const root = makeRoot();
+  try {
+    mkdirSync(path.join(root, '.agentheim', '.dashboard'), { recursive: true });
+    writeFileSync(
+      runfilePath(root),
+      JSON.stringify({ pid: 4242, port: 51001, startedAt: 'x' })
+    );
+    const rf = readRunfile(root);
+    assert.equal(rf.pid, 4242);
+    assert.equal(rf.pluginVersion, undefined);
+    assert.equal(rf.pluginRoot, undefined);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('readRunfile returns null when no runfile exists', () => {
   const root = makeRoot();
   try {

@@ -1,6 +1,11 @@
 // Runfile management (ADR-0002): `.agentheim/.dashboard/runtime.json` is the
-// sole runtime state on disk = { pid, port, startedAt }. Provides the
-// reuse-or-replace logic that keeps a relaunch from orphaning a process.
+// sole runtime state on disk = { pid, port, startedAt, pluginVersion, pluginRoot }.
+// Provides the reuse-or-replace logic that keeps a relaunch from orphaning a
+// process. `pluginVersion`/`pluginRoot` (ADR-0002 version-aware addendum,
+// infrastructure-rgknz) identify WHICH installed plugin instance is serving —
+// an older runfile written before this task simply lacks the two fields, and
+// every reader here tolerates their absence (undefined, not a parse error);
+// the reuse-vs-replace DECISION over that absence is launch.mjs's job.
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
@@ -19,11 +24,20 @@ export function dashboardDir(root) {
   return path.join(root, '.agentheim', DASHBOARD_DIR);
 }
 
-/** Write { pid, port, startedAt } atomically-ish to the runfile. */
-export function writeRunfile(root, { pid, port, startedAt }) {
+/**
+ * Write { pid, port, startedAt, pluginVersion, pluginRoot } atomically-ish to
+ * the runfile. `pluginVersion`/`pluginRoot` are optional — a caller that omits
+ * them (or passes null/undefined, e.g. the manifest couldn't be read) still
+ * gets a valid runfile; the value is written through as-is so an "unknown"
+ * plugin identity is recorded explicitly rather than silently dropped.
+ */
+export function writeRunfile(root, { pid, port, startedAt, pluginVersion = null, pluginRoot = null }) {
   const dir = dashboardDir(root);
   mkdirSync(dir, { recursive: true });
-  writeFileSync(runfilePath(root), JSON.stringify({ pid, port, startedAt }, null, 2));
+  writeFileSync(
+    runfilePath(root),
+    JSON.stringify({ pid, port, startedAt, pluginVersion, pluginRoot }, null, 2)
+  );
 }
 
 /** Read the runfile, or null if it does not exist / is unreadable. */

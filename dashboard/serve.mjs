@@ -8,14 +8,28 @@
 // killed. Project root is discovered from cwd (the launcher sets cwd) or taken
 // from AGENTHEIM_ROOT when provided.
 
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { discoverRoot } from './discovery.mjs';
 import { createDashboardServer, defaultAssetRoot } from './server.mjs';
 import { writeRunfile, readLastPort, writeLastPort } from './runfile.mjs';
 import { listenOnLadder } from './port.mjs';
+import { resolvePluginRoot, readPluginVersion } from './plugin-version.mjs';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const root = process.env.AGENTHEIM_ROOT
   ? process.env.AGENTHEIM_ROOT
   : discoverRoot(process.cwd());
+
+// The plugin identity of THIS running instance (ADR-0002 version-aware
+// addendum, infrastructure-rgknz), recorded in the runfile so a later launch
+// can tell a stale-but-alive server (older plugin version) from a fresh one.
+// null when the manifest can't be read — an "unknown" identity a later launch
+// treats as replace-worthy, never reused blind.
+const pluginRoot = resolvePluginRoot(__dirname);
+const pluginVersion = readPluginVersion(pluginRoot);
 
 // Asset root is module-relative by default (infrastructure-004): the committed
 // dist/ lives beside the dashboard module, NOT under the discovered project root
@@ -53,7 +67,13 @@ try {
   // corrupt/foreign marker is ignored by bindSequence's in-window guard.
   const lastGood = readLastPort(root);
   const port = await listenOnLadder(root, tryListen, lastGood);
-  writeRunfile(root, { pid: process.pid, port, startedAt: new Date().toISOString() });
+  writeRunfile(root, {
+    pid: process.pid,
+    port,
+    startedAt: new Date().toISOString(),
+    pluginVersion,
+    pluginRoot,
+  });
   // Remember this origin so the next launch sticks to it. Written at bind time
   // (not coupled to stale-reap) so it survives both a crash and a clean stop.
   writeLastPort(root, port);

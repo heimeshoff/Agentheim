@@ -4,7 +4,7 @@ title: Dashboard runtime — Node-stdlib localhost transport with detached launc
 scope: infrastructure
 status: proposed
 date: 2026-06-05
-related_tasks: [infrastructure-001, agentic-workflow-001, agentic-workflow-002, agentic-workflow-003, infrastructure-010, infrastructure-018, infrastructure-019]
+related_tasks: [infrastructure-001, agentic-workflow-001, agentic-workflow-002, agentic-workflow-003, infrastructure-010, infrastructure-018, infrastructure-019, infrastructure-rgknz]
 related_adrs: [ADR-0006, ADR-0018]
 superseded_in_part_by: [ADR-0006]
 ---
@@ -365,3 +365,89 @@ collision.
 - The derived port becomes only the **first-ever seed**, no longer the always-preferred port. The
   snap-back-to-derived behavior of infrastructure-018 is deliberately **dropped** in favor of
   stickiness; the two are opposite behaviors and stickiness was chosen for origin stability.
+
+## Addendum — version-aware reuse (2026-09-05, infrastructure-rgknz)
+
+> Refines the **"reuses a live server, replaces a stale one"** clause of the "Stop" section
+> above: from "*stale* means only pid is dead" to "*stale* means a dead pid **or** a plugin
+> version/root mismatch". Reverses no other clause — `127.0.0.1`-only binding, detached launch +
+> runfile + explicit stop, walk-up discovery, in-root path validation, the `applyTaskMove` write
+> seam, the deterministic port + sticky-last-good-port addenda all **still stand**. Not a new ADR
+> number; it is part of this transport decision.
+
+### Context
+
+A field report ("I updated the plugin and the dashboard didn't update") traced to a real gap:
+`launch.mjs`'s reuse decision only ever asked "is the pid alive?" The runfile
+(`{ pid, port, startedAt }`) recorded **no plugin identity**. So after a marketplace update in a
+consumer project:
+
+- the dashboard process spawned from the **previous** version's cache dir stays alive;
+- `/dashboard` resolves the **newest** cache dir by semver (infrastructure-010) but then reads the
+  runfile, sees a live pid, and reports `already running` — the builder gets the old UI;
+- if the marketplace also **removed** the previous version's cache dir on update, the old
+  process's `assetRoot` — resolved once at its own startup, module-relative (ADR-0004,
+  infrastructure-004) — points at a path that no longer exists, so every asset 404s while the
+  runfile still claims a healthy runtime.
+
+"Reuse vs. replace" was answering the wrong question: liveness, not **identity**. This addendum
+makes identity the deciding signal, the dashboard-runtime analogue of infrastructure-v8r3q's
+bridge capability handshake — the answering process reports what it *is*, and the caller decides
+from that live signal rather than an on-disk assumption.
+
+### Decision
+
+The runfile gains the serving process's plugin identity:
+`{ pid, port, startedAt, pluginVersion, pluginRoot }`. Both processes that write it — `serve.mjs`
+(the long-running server) — compute their own identity from their own module location, the SAME
+relationship `resolve-plugin-file.mjs` already relies on: `dashboard/` sits one level under the
+plugin root in both layouts (the Agentheim repo, and an installed plugin's cached version dir).
+`pluginRoot = path.resolve(__dirname, '..')`; `pluginVersion` is that root's
+`.claude-plugin/plugin.json` `version` field, or `null` when the manifest can't be read (a
+legitimate "unknown" state, never a crash). `dashboard/plugin-version.mjs` is the shared,
+stdlib-only, injectable (no ambient globals — the caller always passes its own `__dirname`)
+resolver both `serve.mjs` and `launch.mjs` (and `server.mjs`, for the read-API exposure below)
+import.
+
+`launch.mjs`'s reuse decision (`decideReuseOrReplace`, pure — no I/O, `rootExists` probed and
+passed in by the caller so the decision is unit-testable without a live process) compares the live
+runfile's recorded identity against the launcher's own (the newest semver-max cache dir the
+`/dashboard` bootstrap resolved, per the infrastructure-010 addendum above):
+
+- **Reuse** only when `pluginVersion` is equal **and** `pluginRoot` still exists on disk.
+- **Replace** — stop the outgoing pid through the existing external kill path, launch fresh, report
+  `replaced <old-version> → <new-version>` — on any of: a missing `pluginVersion`/`pluginRoot`
+  (an older runfile written before this addendum: "unknown → replace", failing toward freshness),
+  a `pluginRoot` that no longer exists (the previous version's cache dir was removed on update —
+  this ALSO covers the dead-`assetRoot` failure mode above, independent of whether the version
+  string happens to differ), or a `pluginVersion` mismatch.
+- A **dead pid** is unaffected — `inspectExisting` still reaps it as "stale" before this
+  comparison is ever reached; this addendum only changes what happens when the pid **is** alive.
+
+`status` prints the serving `pluginVersion` next to pid/port, so skew is visible without attempting
+a launch. `GET /healthz` exposes the same value as `version` — cheap (`server.mjs` already computes
+its own identity the same way) — so the read API carries it too, for a future About-page display.
+
+`static.mjs` also sends `Cache-Control: no-cache` on every asset and index response (previously no
+cache headers at all): once a replace swaps the live process, a browser or VS Code Simple Browser
+tab left open across the update must revalidate `app.js`/`index.html` against the new server
+rather than replaying a cached bundle — a small, independent piece of the same "serve what's
+actually on disk" property this addendum is about.
+
+### Consequences
+
+- A newer plugin on disk is served on the **next** `/dashboard` invocation with **no manual
+  `stop`** — the exact self-heal the field report needed.
+- The runfile format gains two fields; every reader tolerates their absence, so no migration step
+  is required for a runfile written by a pre-addendum `serve.mjs`.
+- **Verification realism (mirroring infrastructure-010's note):** Node resolves an ES module
+  loaded through a symlink/junction to its **real path** for `import.meta.url` — confirmed
+  empirically. The foreign-project seam's fake-cache-home harness (infrastructure-009/010) links a
+  fake version dir's `dashboard/` to this repo's real `dashboard/`, so two such fake version dirs
+  would collapse to the **same** real `plugin.json` and could never actually differ in a real
+  simulated skew. The integration test for this addendum therefore forces the skew directly on the
+  written runfile (same live pid, a manipulated `pluginVersion`) rather than juggling two symlinked
+  fake versions — still exercised at the real foreign-project + env-independent-resolver + literal
+  card-command seam, still asserting the runfile lands under the consumer project. A REAL installed
+  plugin cache holds a full copy of `dashboard/` per version dir, not a symlink, so this collapse is
+  a test-harness artifact only, not a production gap.

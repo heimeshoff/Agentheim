@@ -4,7 +4,12 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
+import { fileURLToPath } from 'node:url';
+
 import { createDashboardServer } from '../server.mjs';
+import { resolvePluginRoot, readPluginVersion } from '../plugin-version.mjs';
+
+const serverModuleDir = path.dirname(fileURLToPath(new URL('../server.mjs', import.meta.url)));
 
 function makeProjectWithDist() {
   const base = mkdtempSync(path.join(tmpdir(), 'aw004-srv-'));
@@ -45,6 +50,53 @@ test('GET /healthz returns 200 with ok status JSON', async () => {
     const body = await res.json();
     assert.equal(body.status, 'ok');
     assert.equal(body.root, base);
+  } finally {
+    server.close();
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+// ADR-0002 version-aware addendum (infrastructure-rgknz): the serving plugin's
+// own version, exposed on the read API so skew is visible without a launch.
+test('GET /healthz reports the serving plugin version', async () => {
+  const { base, dist } = makeProjectWithDist();
+  const server = createDashboardServer({ root: base, assetRoot: dist });
+  try {
+    const { port } = await start(server);
+    const res = await fetch(`http://127.0.0.1:${port}/healthz`);
+    const body = await res.json();
+    assert.equal(body.version, readPluginVersion(resolvePluginRoot(serverModuleDir)));
+  } finally {
+    server.close();
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+// ADR-0002 version-aware addendum (infrastructure-rgknz): every asset response
+// carries Cache-Control: no-cache so a tab left open across a plugin update
+// revalidates against the new server instead of replaying a cached bundle.
+test('a static asset response carries Cache-Control: no-cache', async () => {
+  const { base, dist } = makeProjectWithDist();
+  const server = createDashboardServer({ root: base, assetRoot: dist });
+  try {
+    const { port } = await start(server);
+    const res = await fetch(`http://127.0.0.1:${port}/app.js`);
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('cache-control'), 'no-cache');
+  } finally {
+    server.close();
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('the served index document also carries Cache-Control: no-cache', async () => {
+  const { base, dist } = makeProjectWithDist();
+  const server = createDashboardServer({ root: base, assetRoot: dist });
+  try {
+    const { port } = await start(server);
+    const res = await fetch(`http://127.0.0.1:${port}/`);
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('cache-control'), 'no-cache');
   } finally {
     server.close();
     rmSync(base, { recursive: true, force: true });

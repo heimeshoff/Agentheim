@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-05 22:29 -- Task verified and completed: infrastructure-rgknz - The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it
+
+**Type:** Work / Task completion
+**Task:** infrastructure-rgknz - The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it
+**Summary:** the runfile records the serving plugin version and root; launch replaces a live server whose recorded identity is stale, unknown, or points at a removed cache dir and reports replaced <old> → <new>; status and GET /healthz surface the serving version; static responses carry Cache-Control: no-cache — ADR-0002 addendum
+**Duration:** 20m
+**Verification:** PASS (iteration 1)
+**Files changed:** 14
+**Tests added:** 17
+**ADRs written:** none (ADR-0002 amended)
+
+---
+
 ## 2026-09-05 22:26 -- Task verified and completed: infrastructure-w45ce - A release ships a fresh dashboard — rebuild dist/ as a release step and make dist-vs-source staleness a failing check
 
 **Type:** Work / Task completion

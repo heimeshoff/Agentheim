@@ -75,3 +75,19 @@ The launcher is detached, so the command returns to a prompt immediately. Report
 the printed URL / pid / status back to the builder verbatim — do not poll, do not
 open anything yourself (auto-open is the launcher's job), and do not run any
 further commands.
+
+## Version-aware reuse — a live server is only reused if it serves the CURRENT plugin
+
+`launch.mjs` no longer reuses any live server it finds by pid alone. It compares
+the runfile's recorded `pluginVersion`/`pluginRoot` against the launcher's own
+(the plugin version this bootstrap just resolved). A **mismatch** — including a
+runfile written before this rule existed (missing the fields) or one whose
+recorded `pluginRoot` no longer exists on disk (a cache dir removed on
+update) — is treated as **replace, not reuse**: the outgoing process is stopped
+through the existing stop path, a fresh one is launched from the current
+plugin, and the reported verb is `replaced <old-version> → <new-version>`.
+Equal versions still report `already running`. `status` prints the serving
+version alongside pid/port so skew is visible without a launch attempt
+(ADR-0002 addendum, infrastructure-rgknz). This is why "I updated the plugin
+but the dashboard shows the old UI" self-heals on the next `/dashboard` call —
+no manual `stop` is required.

@@ -5,8 +5,9 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { launchDashboard, stopDashboard } from '../launch.mjs';
+import { launchDashboard, stopDashboard, decideReuseOrReplace, statusDashboard } from '../launch.mjs';
 import { readRunfile, runfilePath, isPidAlive, writeRunfile } from '../runfile.mjs';
+import { resolvePluginRoot, readPluginVersion } from '../plugin-version.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const serveEntry = path.join(here, '..', 'serve.mjs');
@@ -101,6 +102,106 @@ test('stopDashboard on no runfile reports nothing to stop (no throw)', async () 
   try {
     const r = await stopDashboard(root);
     assert.equal(r.action, 'none');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+// ── version-aware reuse/replace (ADR-0002 addendum, infrastructure-rgknz) ────
+// A live server that serves an OLDER plugin version is a REPLACE condition,
+// not a reuse. `decideReuseOrReplace` is the pure decision (no I/O — injectable
+// via `rootExists`) so it is unit-testable without a live process.
+
+test('decideReuseOrReplace: equal version + existing root -> reuse', () => {
+  const decision = decideReuseOrReplace(
+    { pluginVersion: '0.9.2', pluginRoot: '/plugin/0.9.2' },
+    { pluginVersion: '0.9.2', pluginRoot: '/plugin/0.9.2' },
+    /* rootExists */ true
+  );
+  assert.deepEqual(decision, { action: 'reuse', reason: 'same-version' });
+});
+
+test('decideReuseOrReplace: different version -> replace, from/to carried through', () => {
+  const decision = decideReuseOrReplace(
+    { pluginVersion: '0.9.2', pluginRoot: '/plugin/0.9.2' },
+    { pluginVersion: '0.9.3', pluginRoot: '/plugin/0.9.3' },
+    true
+  );
+  assert.equal(decision.action, 'replace');
+  assert.equal(decision.reason, 'version-mismatch');
+  assert.equal(decision.from, '0.9.2');
+  assert.equal(decision.to, '0.9.3');
+});
+
+test('decideReuseOrReplace: missing pluginVersion/pluginRoot fields (older runfile) -> replace, unknown', () => {
+  const decision = decideReuseOrReplace(
+    { pluginVersion: undefined, pluginRoot: undefined },
+    { pluginVersion: '0.9.3', pluginRoot: '/plugin/0.9.3' },
+    false
+  );
+  assert.equal(decision.action, 'replace');
+  assert.equal(decision.reason, 'unknown-version');
+  assert.equal(decision.from, null);
+  assert.equal(decision.to, '0.9.3');
+});
+
+test('decideReuseOrReplace: same version but recorded pluginRoot no longer exists -> replace', () => {
+  const decision = decideReuseOrReplace(
+    { pluginVersion: '0.9.2', pluginRoot: '/plugin/0.9.2-removed' },
+    { pluginVersion: '0.9.2', pluginRoot: '/plugin/0.9.2-removed' },
+    /* rootExists */ false
+  );
+  assert.equal(decision.action, 'replace');
+  assert.equal(decision.reason, 'missing-root');
+});
+
+test('launchDashboard replaces a live server on a version-mismatched runfile, stopping the old pid', async () => {
+  const root = makeRoot();
+  try {
+    // First launch — real plugin version, real root (this worktree's own).
+    const first = await launchDashboard(root);
+    await waitFor(() => !!readRunfile(root));
+    assert.ok(isPidAlive(first.pid));
+
+    // Force a version mismatch by overwriting the live runfile's recorded
+    // identity — the pid is still alive, but the "plugin" it claims to serve
+    // is not the one this launcher resolves to.
+    writeRunfile(root, {
+      pid: first.pid,
+      port: first.port,
+      startedAt: 'old',
+      pluginVersion: '0.0.1-older',
+      pluginRoot: resolvePluginRoot(path.join(here, '..')),
+    });
+
+    const second = await launchDashboard(root);
+    assert.equal(second.action, 'replaced');
+    assert.equal(second.from, '0.0.1-older');
+    assert.equal(second.to, readPluginVersion(resolvePluginRoot(path.join(here, '..'))));
+    assert.notEqual(second.pid, first.pid);
+
+    const oldGone = await waitFor(() => !isPidAlive(first.pid));
+    assert.ok(oldGone, 'the outgoing (older-version) process must be stopped, never orphaned');
+
+    await stopDashboard(root);
+    await waitFor(() => !isPidAlive(second.pid));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('statusDashboard reports the serving pluginVersion', async () => {
+  const root = makeRoot();
+  try {
+    const result = await launchDashboard(root);
+    await waitFor(() => !!readRunfile(root));
+
+    const status = statusDashboard(root);
+    assert.equal(status.state, 'running');
+    assert.equal(status.pluginVersion, readPluginVersion(resolvePluginRoot(path.join(here, '..'))));
+
+    await stopDashboard(root);
+    await waitFor(() => !isPidAlive(result.pid));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

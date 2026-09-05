@@ -60,7 +60,11 @@ for an infrastructure BC.
   `cd`), resolver unit tests (semver-max incl. the `0.8.10` lexical trap, homedir derivation on
   win32- and POSIX-shaped homes, fail-loud), and a foreign-project integration test that runs
   the literal card form with `CLAUDE_PLUGIN_ROOT` **deleted** from the child env and asserts the
-  runfile lands under the consumer project (infrastructure-009, amended by 010).
+  runfile lands under the consumer project (infrastructure-009, amended by 010). **Version-aware
+  reuse** (infrastructure-rgknz, ADR-0002 addendum): a live server is reused only when its
+  runfile's recorded plugin identity **matches** the launcher's own; any mismatch — including an
+  older runfile missing the fields, or one whose recorded root no longer exists on disk — is a
+  **replace**, not a reuse. See the **Runfile** entry below for the mechanics.
 - **Project discovery** — how the running runtime locates and reads the current project's
   `.agentheim/` folder: **walk up from the invocation directory** until a `.agentheim/`
   folder is found (the way git finds `.git`), resolve an **absolute root once at startup**,
@@ -70,10 +74,23 @@ for an infrastructure BC.
   own what a valid write means — that authority lives in `agentic-workflow`. The single
   write endpoint `POST /api/task/move` **delegates to `applyTaskMove`** (owned by
   `agentic-workflow`, ADR-0001/agentic-workflow-003) and never moves a file itself.
-- **Runfile** — `.agentheim/.dashboard/runtime.json` = `{ pid, port, startedAt }`, the
-  **sole live-runtime** artifact on disk ("present ⇒ a live runtime, gated by pid"). Basis for
-  "open the URL" and "stop the runtime"; gitignored. Relaunch over a live/stale runfile
-  reuses-or-replaces rather than orphaning.
+- **Runfile** — `.agentheim/.dashboard/runtime.json` = `{ pid, port, startedAt, pluginVersion,
+  pluginRoot }`, the **sole live-runtime** artifact on disk ("present ⇒ a live runtime, gated by
+  pid"). Basis for "open the URL" and "stop the runtime"; gitignored. Relaunch over a live/stale
+  runfile reuses-or-replaces rather than orphaning. `pluginVersion`/`pluginRoot`
+  (infrastructure-rgknz, ADR-0002 addendum) identify **which installed plugin instance** wrote the
+  runfile — the serving process's own resolved plugin root
+  (`path.resolve(__dirname, '..')` from `dashboard/`) and that root's `.claude-plugin/plugin.json`
+  `version`. A runfile written before this task simply lacks the two fields; every reader
+  **tolerates their absence** (`undefined`, never a parse error). The relaunch decision
+  (`launch.mjs`'s pure `decideReuseOrReplace`) **fails toward freshness**: a dead pid stays
+  "stale → replace" exactly as before (unaffected — that path never reaches this comparison); for
+  a **live** pid, reuse now requires **both** an equal `pluginVersion` **and** an existing
+  `pluginRoot` on disk — a missing/unknown field, a version mismatch, or a `pluginRoot` that no
+  longer exists (the previous version's cache dir was removed on update) are each independently
+  replace-worthy. `status` prints the serving `pluginVersion` alongside pid/port so skew is
+  visible without a launch attempt; `GET /healthz` exposes the same value as `version` on the read
+  API.
 - **Last-good-port marker** — `.agentheim/.dashboard/last-port.json` = `{ port }`, a separate
   sibling of `runtime.json` in the same gitignored dir (infrastructure-019, ADR-0002 addendum).
   A **pure memory** of the last successfully-bound port, written at bind time so it survives both
