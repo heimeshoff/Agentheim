@@ -5,6 +5,25 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 15:38 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 34m (15:07 batch start → 15:41)
+**Completed:** 2 (first-try PASS: 2, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** e896r: 1, hxq1g: 1
+**Commits:** 3
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (2 tasks)
+**Carry-over:** none — working tree clean; no non-main worktrees
+**Vacuum guard:** ready set empty after the batch — open item surfaced: Brainstorm on existing code (next iteration). (open 93 days); zgav8 now unblocked in backlog (depends only on e896r), promote via modeling; tgr31 waits on zgav8
+**README length:** agentic-workflow README now 1398 lines (ADR-0041 trigger: ~600) — consider `modeling` CONSOLIDATE
+**Verifier advisory (hxq1g):** the 20 styleguide import specifiers in dashboard/app/*.js still spell the legacy path (the esbuild redirect covers the bundle, not node's direct resolution in jsdom tests) — name them in tgr31's scope
+
+---
+
 ## 2026-09-06 15:37 -- Task verified and completed: agentic-workflow-hxq1g - Dashboard reads the two-root layout — `tree.mjs` resolves through `task-system-paths`, BCs enumerate from `knowledge/contexts/` with orphan `board/` folders as warnings, the styleguide bundle and its 20 ESM imports re-point, and a legacy or mixed tree renders a "layout migration pending" notice; dist rebuilt
 
 **Type:** Work / Task completion
