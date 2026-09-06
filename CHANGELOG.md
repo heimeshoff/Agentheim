@@ -8,6 +8,56 @@ its **plugin contract** (skills, commands, `.agentheim/` layout) with
 
 ## [Unreleased]
 
+## [0.9.3] - 2026-09-06
+
+**Bookkeeping is mechanized end-to-end, and parallel sessions stop colliding.** Every
+protocol, INDEX, task-move, and git edit across `work`, `modeling`, `brainstorm`, `research`,
+and quick-capture now runs through locked lifecycle CLI verbs — no skill hand-edits a
+bookkeeping file anymore. Worker branches carry source and tests only; the conductor applies
+the bookkeeping on `main`. Merge-back conflicts climb a ladder before they reach you, and
+`/agentheim:work <id>` runs exactly the task you name.
+
+### Added
+- **Locked lifecycle verbs** — `capture` and `dismiss` (ADR-0073), `log`, `index-add`, and `scoped-commit` (ADR-0075), `bounce` and `reroute` (ADR-0077) join the task-lifecycle CLI. Every remaining hand-written protocol / INDEX / git edit in `work`, `brainstorm`, `research`, `modeling`, and quick-capture is wired onto them and the replaced prose deleted, so `main` has exactly one class of writer per bookkeeping file. `reroute` mints a fresh `<to-bc>-<token>` id, retires the old one, and re-points every project-wide backlink.
+- **Concurrent modeling sessions no longer collide** on `protocol.md`, `INDEX.md`, or the git index — a project-wide advisory lifecycle lock inside every capture-side writer, an `index.lock`-retrying scoped commit, and a two-process concurrency proof whose forced overlap cannot pass by luck (ADR-0075).
+- **Atomic bookkeeping writes** — every INDEX / protocol / archive write is temp-file-plus-rename with bounded `EPERM`/`EBUSY` retry; a real-process `SIGKILL` test proves a crash mid-write leaves both files intact (ADR-0076).
+- **Worker branch carries source and tests only** — the conductor materializes README delta, ADRs, task moves, and backlog items on `main` at squash-merge from the worker's structured report (ADR-0074 amends ADR-0032).
+- **Merge-back conflict ladder** — the abort-and-surface rule becomes seven rungs: salvage, clean derived churn, a real merge of `main` into the loser worktree (never rebase, never stash), a same-worker resolve dispatch, a mandatory re-verify against the new base, and builder escalation only as the last rung (ADR-0072).
+- **`/agentheim:work <id>`** — a documented argument grammar: bare runs the whole ready set, one or more todo ids run a scoped batch with exact-match fail-closed resolution and no mid-run pickup (ADR-0071). Todo cards on the dashboard carry a bottom-right **Work** launch button seeded with that command.
+- **Collision-proof ADR numbering** — workers mint a provisional number; the conductor finalizes it against `main` at squash-merge.
+- **Worktree-abandonment salvage** — every `work` path that abandons a worktree captures its diff to `.agentheim/salvage/` and names it in the escalation before removal.
+- **Runner-first testing** — a verdict comes only from the project's own test runner; the TDD skill's first test establishes the runner, with a SmokeGuard fallback for runner-less ecosystems.
+- **Falsifiability gate** — refinement classifies each acceptance criterion as machine-checkable or `[human-eye]`; the verifier never proxies a human-eye criterion and escalates on metric drift (`lib/human-eye-criteria.mjs`).
+- **Remediation-over-diagnosis dispatch ordering** and a spike stop-loss clause — an early-stopped spike is a legitimate completion, lint-enforced (ADR-0065).
+- **Session-start human-churn reconciliation** — Phase 1 flags untrailered commits touching governed surfaces; advisory only, never auto-files, never gates.
+- **Vacuum guard** — an empty board with open vision decisions surfaces them with their age instead of self-generating filler; session-end reports the batch mix.
+- **Doctrine hygiene lints** — mechanize-or-drop (a convention-establishing task ships its enforcement or records prose-only), a ~60-word cap on new INDEX entries (date-grandfathered), the drift-twice rule (ADR-0068), and audit-closure doctrine with a ban on raw line-number pointers in doctrine prose (ADR-0069).
+- **Dashboard live-tree hub** — one `/api/events` source and one `/api/tree` fetch per tab; board, rail, What's Next, and In-Flight subscribe instead of each opening their own. Advisory frames re-sync only the panel that reads that artifact (ADR-0070). A hidden tab pauses live re-sync and catches up once on return.
+- **The dashboard runtime notices a plugin update** — the runfile records the serving plugin version and root; launch replaces a live server whose identity is stale or points at a removed cache dir; `status` and `GET /healthz` surface the serving version; static responses carry `Cache-Control: no-cache`.
+- **Dist freshness is a failing check** — `RELEASE.md` gains a rebuild-and-stage `dashboard/dist` step ahead of the version bump, and `dist-staleness.test.mjs` fails whenever the committed bundle lags its sources.
+
+### Changed
+- Board cards and columns are memoized over an identity-stable tree projection, so a hover re-renders one card and its dependency targets instead of the whole board.
+- Ambient rail animations are compositor-only (opacity-only keyframes, glow on a pre-painted layer); a new lint fails on any non-compositable property in an infinite keyframe (ADR-0014 amended).
+- The five big doctrine files state each rule once, imperatively, with an ADR pointer — `work` + `modeling` + `verifier` shrank from 1610 to 1427 lines with no rule lost.
+- Both session reconciliations are consumer-tuned: session-start churn recognizes every commit-doctrine machine shape and prints one summary line; session-end carry-over scopes the per-file ask to `.agentheim/` paths and batches user WIP (ADR-0066).
+- Batch-mix classification is path-aware — a consumer product bug or refactor touching only product files no longer reads as meta-work drift (ADR-0064).
+- Mechanize-or-drop checks fire only when a diff touches doctrine-bearing surfaces; consumer product tasks skip them.
+- The four conductor helper modules run in consumer installs via a shared `references/lib-bootstrap.md` pointer at every call site.
+- Dashboard-launched and bridge-derived session names drop the `Modeling:` prefix.
+- `research` gets its own scoped Committing section (report + INDEX + protocol) and a commit-doctrine table row.
+
+### Fixed
+- The `checkpoint` verb detects a worker's `doing → done/backlog` move from the file list and stages the vacated `doing/` path, so the wip commit no longer holds the task file in both lifecycle folders — and the detection is separator-insensitive on Windows.
+- BOUNCE integration checkpoints the task file before its squash-merge, so the `doing → backlog` move actually reaches `main`.
+- `archivedDoneHeader` no longer emits a phantom "most recent N" cap; a non-rotating session-end run heals a stale archive-naming header and `work` commits the heal (ADR-0047 amended).
+- The verifier judges the recorded mitigation, not the skipped diagnosis, on a stop-lossed spike (ADR-0065 carve-out).
+- Two undocumented 2026-07-02 survey dispositions are recorded in ADR-0067.
+- A sweep of doctrine drifts from the 2026-07-22 audits: `verification-before-completion` synced to `verifier.md` on all six drifts, the TDD skill's runner-verdict and UI-skip restatements reduced to pointers, `lib-bootstrap.md` gained runnable consumer-install invocations, `whats-next` caught up on the vacuum-guard and remediation-first advisories, quick-capture's stale `<NNN>` id placeholder fixed, and `human-eye-criteria.mjs` aligned with its doctrine.
+
+### Docs
+- The bridge upgrade path and the "older version" banner are documented.
+
 ## [0.9.2] - 2026-07-13
 
 **Pick the model you launch with.** The prompt bar's Enter button widens into a split
@@ -242,7 +292,8 @@ palette and the board grows a docked prompt console you drive from the keyboard.
 ### Added
 - Initial plugin design.
 
-[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.2...HEAD
+[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.3...HEAD
+[0.9.3]: https://github.com/heimeshoff/Agentheim/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/heimeshoff/Agentheim/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/heimeshoff/Agentheim/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/heimeshoff/Agentheim/compare/v0.8.10...v0.9.0
