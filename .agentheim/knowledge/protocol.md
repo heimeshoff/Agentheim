@@ -5,6 +5,26 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 11:16 -- Modeling / Refined: agentic-workflow-qd24q - Build the two count-coupled lifecycle verbs pt0gy could not cover (bounce, reroute)
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog (auto-promotion follows as its own step)
+**Summary:** Second refinement since pt0gy shipped (ADR-0075). Builder decisions: split into a code-only verb build (qd24q keeps its id so ADR-0075/README/quick-capture pointers stay true) and a prose-only wiring sweep (fn59c, depends_on qd24q); `reroute` mints a new id and retires the old — both the architect and the tactical-modeler independently showed keeping the old id breaks every later verb (`deriveContext` prefix parse with no fallback; `captureTask` fail-closes `context-mismatch`), and the builder confirmed after first leaning toward keeping it. `bounce` gets its own `LEGAL_MOVES.bounce` policy key (never a widened `skill`) and carries the worker note through a `transformBody` hook on the mover's single destination write — the post-move second write was rejected as non-retriable (the retry hits `illegal-move`). `reroute` re-points backlinks by generalizing dismiss's traversal (ADR-0068 reuse) and carries a `rerouted_from` idempotence marker; legal only backlog → backlog. Surface list re-confirmed unchanged (rows 1–14 live, row 15 empty); one adjacent finding — work's dead protocol-header template — folded into fn59c explicitly.
+**Split into:** agentic-workflow-fn59c
+**ADRs written:** none (the worker's ADR records the verb contracts and amends ADR-0028 with §8)
+
+---
+
+## 2026-09-06 11:16 -- Modeling / Captured: agentic-workflow-fn59c - Wire every remaining hand-written protocol, INDEX, and git edit in work, brainstorm, research, and quick-capture onto the locked lifecycle verbs (log, index-add, capture, bounce, reroute, scoped-commit), deleting the replaced prose, so main has exactly one class of writer per bookkeeping file project-wide
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Split out of agentic-workflow-qd24q at its second 2026-09-06 refinement: the prose-only wiring sweep that routes every remaining hand-written protocol/INDEX/git edit in work, brainstorm, research, and quick-capture onto the locked lifecycle verbs (log, index-add, capture, bounce, reroute, scoped-commit); depends on qd24q, which now builds only the two count-coupled verbs.
+
+---
+
 ## 2026-09-06 10:36 -- Work session ended
 
 **Type:** Work / Session end

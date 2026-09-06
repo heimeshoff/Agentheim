@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
+- **Backlog:** 2
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 194
@@ -43,6 +43,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-fn59c** — Wire every remaining hand-written protocol, INDEX, and git edit in work, brainstorm, research, and quick-capture onto the locked lifecycle verbs (log, index-add, capture, bounce, reroute, scoped-commit), deleting the replaced prose, so main has exactly one class of writer per bookkeeping file project-wide (refactor) — `backlog/agentic-workflow-fn59c-wire-remaining-hand-writers-onto-locked-verbs.md`
 - **agentic-workflow-qd24q** — Route the remaining hand-written protocol and INDEX edits through the locked lifecycle verbs — work, brainstorm, research, quick-capture — and add the two count-coupled verbs (bounce, reroute) pt0gy could not cover (refactor) — `backlog/agentic-workflow-qd24q-remaining-hand-writers-onto-locked-verbs-bounce-reroute.md`
 <!-- backlog-list:end -->
 
