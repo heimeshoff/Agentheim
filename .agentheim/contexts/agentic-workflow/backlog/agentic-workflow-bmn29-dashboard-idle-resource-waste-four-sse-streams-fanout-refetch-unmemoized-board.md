@@ -1,6 +1,6 @@
 ---
 id: agentic-workflow-bmn29
-title: Dashboard burns resources at idle on a MacBook — umbrella for the split (hub, memoization, keyframes); residual hidden-tab pause/resume and the before/after measurement
+title: Hidden dashboard tab pauses live re-sync and catches up once on return — closes the idle-waste umbrella (hub, memoization, keyframes shipped) with the before/after MacBook measurement
 status: backlog
 type: bug
 context: agentic-workflow
@@ -8,106 +8,210 @@ created: 2026-09-05
 completed:
 depends_on: [agentic-workflow-mvt8x, agentic-workflow-rw6ck, design-system-pk4qd]
 blocks: []
-tags: [dashboard, performance, sse, live-update, board, motion]
-related_adrs: [0006, 0014, 0027, 0033, 0043, 0070]
+tags: [dashboard, performance, sse, live-update, board, motion, visibility]
+related_adrs: [0006, 0014, 0027, 0033, 0043, 0059, 0061, 0070]
 related_research: []
-prior_art: [agentic-workflow-009, agentic-workflow-073, agentic-workflow-m9w5c, agentic-workflow-n4h7q, agentic-workflow-h9v3m]
+prior_art: [agentic-workflow-009, agentic-workflow-073, agentic-workflow-m9w5c, agentic-workflow-n4h7q, agentic-workflow-h9v3m, agentic-workflow-mvt8x, agentic-workflow-rw6ck]
 ---
 
 ## Why
-The builder reports the dashboard using a lot of resources on a MacBook, assumed to be
-"polling". A read of the frontend architecture (dashboard/app/*, the styleguide CSS, the SSE
-runtime) shows there is **no client-side polling timer at all** — no `setInterval` in the
-app, and on macOS the server uses recursive `fs.watch` (FSEvents), never the stat-poll
-fallback. The waste comes from several structural sources that compound each other. This
-task records them so the fix is measured, not guessed.
+The builder reported the dashboard burning resources on a MacBook, assumed to be "polling".
+The 2026-09-05 diagnosis found no timer anywhere — the waste was emergent: four `EventSource`
+streams per tab, every frame fanning out into two `/api/tree` walks plus two `/api/doc`
+fetches, advisory heartbeat writes (ADR-0043) arriving as structural changes, ~255 unmemoized
+cards re-rendering on every fetch and every hover, and two infinite `box-shadow` keyframes
+painting every frame. The full ranked finding list (1–6) is preserved in the Notes below as
+the shared record.
+
+Findings 1–5 have shipped through the three children this umbrella was split into:
+
+| Child | Carried | Shipped |
+|---|---|---|
+| `agentic-workflow-mvt8x` | findings 1–3 — one refcounted live-tree hub per tab (`dashboard/app/live-tree-hub.js`), one `/api/tree` fetch, frames routed structural / advisory / runtime (ADR-0070) | 2071902, 2026-09-05 |
+| `agentic-workflow-rw6ck` | finding 4 — `React.memo` cards/columns, hover out of the board root, identity-stable projection | fdac98c, 2026-09-05 |
+| `design-system-pk4qd` | finding 5 — the two ambient keyframes are opacity-only over a pre-painted glow layer (ADR-0014 amended) | fa9d1e8, 2026-09-05 |
+
+What is left is **finding 6** — a hidden tab still holds its one source, still re-fetches on
+every structural frame, still re-projects board and rail, still re-fetches the advisory docs
+on every heartbeat — and the aggregate **before/after measurement** that tells the builder
+whether the umbrella actually closed the complaint. mvt8x deliberately left visibility out
+("a distinct failure mode — a paused tab silently missing a change — that deserves its own
+falsifiable criteria; ~10 lines once the hub exists as a single place to gate visibility").
+The hub exists now, so this is that task.
 
 ## What
-Findings, ranked by likely impact:
 
-1. **Four `EventSource` streams per tab, not one.** `useLiveTree` is called by four
-   components — `DashboardBoard`, `ShellRail`, `WhatsNextPanel`, `InFlightLane` — and each
-   call opens its own `/api/events` connection. ADR-0006 explicitly assumed "a long-lived
-   connection per open board tab". Consequences: the server runs four recursive
-   `fs.watch` watchers and four 25 s heartbeat intervals per tab (times the number of open
-   tabs / Simple Browser panes); the browser's 6-connections-per-host HTTP/1.1 budget is
-   4/6 consumed by idle streams, so ordinary fetches queue behind them; on server restart
-   four reconnect loops (`retry: 3000`) fire, each re-triggering a `hello` re-sync.
-2. **Every tree change fans out into 2× `/api/tree` + 2× `/api/doc`.** The board and the
-   rail each re-fetch the full tree; the two panels each re-fetch their artifact. `/api/tree`
-   is a fully synchronous walk (`readFileSync` + two `statSync` per task) over ~255 task
-   files, run twice, blocking the server's event loop both times.
-3. **Tree changes are frequent during a session, so this is polling in effect.** The
-   `Stop`/`SubagentStop` hooks (ADR-0043) overwrite `.agentheim/state/in-flight.json` on
-   every orchestrator turn end and every subagent completion. Each write lands inside the
-   watched `.agentheim/` tree → one `tree-changed` frame → the full fan-out above, plus a
-   whole-board re-render. Protocol/INDEX/task moves and `.agentheim/.dashboard/*` writes do
-   the same. The heartbeat's *purpose* is a timestamp bump, but the dashboard treats it as a
-   structural tree change.
-4. **Every state change re-renders every card.** There is no `React.memo` anywhere in
-   `board.js` (0 occurrences); `DashboardBoard` re-renders all ~255 `BoardCard`s (each a
-   `TicketCard` with several inline-SVG `Icon`s via `dangerouslySetInnerHTML`) on every
-   tree fetch **and on every card hover** (`onCardHover` → `setHoveredId` lifts hover into
-   board state; `resolveHoverDependencies` re-runs; the IntersectionObserver effect
-   re-subscribes on `[hoveredTicket, targetIds, columns.done, …]`). The Done column's 249
-   cards are always mounted — `peek` only height-clamps them.
-5. **Infinite `box-shadow` keyframes are not compositor-only.** `ambient-rail-pulse`
-   (doing cards) and `rail-attention-breathe` (new-item dots) animate `box-shadow` with a
-   per-frame `color-mix()` — that is a paint every frame at 60 fps for as long as the tab is
-   open, regardless of visibility. The CSS comment claims "composited on opacity +
-   box-shadow only (cheap to run continuously)"; only the opacity half is cheap.
-   `rel-ring`, `rel-present`, `rel-edge-blink` are opacity-only and hover-scoped (fine).
-6. **No `visibilitychange` handling.** A hidden tab keeps its four streams, its re-fetch
-   fan-out and its animations alive.
+### 1. Visibility gate in the hub — pause delivery, coalesce, catch up once
 
-Split at refinement (2026-09-05) into three children that carry findings 1–5; this
-parent keeps the diagnosis above as the shared record, plus the residual scope below:
+The hub (`createLiveTreeHub`) gains one injectable dependency alongside `sourceFactory` /
+`fetchTree`, following the same idiom (framework-free, `node --test`-able with no DOM):
 
-| Child | Carries | BC |
-|---|---|---|
-| `agentic-workflow-mvt8x` | findings 1–3 — one live-tree hub per tab (one source, one `/api/tree` fetch), frames routed structural / advisory / runtime so a heartbeat write reaches only `InFlightLane` (ADR-0070) | agentic-workflow |
-| `agentic-workflow-rw6ck` | finding 4 — memoized cards/columns, hover state out of the board root, identity-stable tree projection | agentic-workflow |
-| `design-system-pk4qd` | finding 5 — the two ambient keyframes become opacity-only over a pre-painted glow layer | design-system |
+```
+createLiveTreeHub({ sourceFactory, fetchTree, reconnectMs, visibility })
+// visibility: { isHidden: () => boolean, onChange: (cb) => unsubscribe }
+```
 
-The infrastructure candidate (one shared `fs.watch` across SSE clients) was considered and
-**dropped**: once the hub lands, server-side watchers fall 4→1 per tab as a side effect, and
-sharing across tabs serves a many-tabs load profile this local single-user plugin does not have
-(vision non-goal: not multi-tenant). A ref-counted watcher registry is not worth its complexity
-for one or two `fs.watch` handles.
+- **Default adapter** (production, no options passed): reads
+  `globalThis.document?.visibilityState === 'hidden'` and listens to `visibilitychange` on
+  `document`. When there is no `document` (node) or it has no `visibilityState`, the adapter
+  reports *always visible* and `onChange` is a no-op — every existing hub test keeps passing
+  unedited.
+- **While hidden, `handleFrame` delivers nothing and records what it would have done**, per
+  ADR-0070 category, in a pending set: `hello`/reconnect → `pending.all`; a structural frame →
+  `pending.structural` (and `invalidateTree()`, so a subscriber that mounts while hidden never
+  receives a stale cache); an advisory frame → `pending.advisory.add(path)`; a runtime frame →
+  nothing, exactly as today. **The source stays open** — the tab keeps its one `EventSource`
+  and the server keeps its one watcher; closing it would trade a dropped frame for a reconnect
+  `hello` storm on return and buy nothing the pending set doesn't already give.
+- **On becoming visible, the pending set replays once, then clears**: `pending.all` →
+  `notifyAll()`; otherwise `pending.structural` → `notifyStructural()` (one shared `/api/tree`
+  fetch regardless of how many structural frames were dropped — the existing dedupe) and each
+  pending advisory path → `notifyAdvisory(path)`. **An empty pending set replays nothing** — a
+  tab switch with no change behind it costs zero fetches. The audience rule of ADR-0070 §2 holds
+  across the pause: five in-flight heartbeats while hidden re-sync `InFlightLane` once on
+  return and never touch the board or rail.
+- **Subscribe/unsubscribe while hidden** behave as today (mount-time delivery is not a frame).
+  `ensureSource()` registers the `visibilitychange` listener with the first subscriber;
+  `teardownSource()` removes it and clears the pending set with the last unsubscribe.
+- **Mechanized boundary**: `live-tree-source-guard.test.mjs` gains a third pattern —
+  `visibilitychange` (and `document.hidden` / `visibilityState`) appear under `dashboard/app/**`
+  only in `live-tree-hub.js`. Visibility gating has exactly one home, the same way source
+  construction does (ADR-0059 verdict: this half mechanizes cheaply, so it ships as a guard).
 
-**Residual scope of this task** (finding 6 + the close-out measurement):
-- `visibilitychange` handling on the hub: a hidden tab stops re-fetching (the hub keeps its
-  one source open but drops frames while `document.hidden`), and on becoming visible performs
-  exactly one re-sync. This hangs on the hub's subscriber API, so it is shaped only after
-  `agentic-workflow-mvt8x` ships — refine this task again then.
-- The aggregate before/after measurement on the builder's MacBook, taken after all three
-  children have shipped.
+### 2. Doctrine deltas (in place, no new ADR)
+
+- **ADR-0070** gains a `### 6. Hidden tab — pause, coalesce, catch up once` section stating the
+  rule above and the *why-not* (never close the source on hide; never replay unconditionally),
+  plus a status-log line naming this task. The routing-is-not-interpretation distinction (§3)
+  is untouched: pausing selects *when* an audience is notified, never *what changed*.
+- **BC README** — the *Live-tree hub* bullet gains one sentence on the hidden-tab behaviour,
+  with the `visibilitychange`-lives-only-in-the-hub guard named next to the existing source
+  guard. No new ubiquitous-language term; "pending set" is an implementation word, not a domain
+  one.
+
+### 3. The measurement — close the umbrella against the original complaint
+
+The *before* number was never taken while the pre-hub build was the checked-out code. It is
+still obtainable, and the protocol is pinned here so the close-out is comparable:
+
+- **Before build** — either of:
+  - the installed plugin cache `~/.claude/plugins/cache/agentheim/agentheim/0.9.2/` — verified
+    2026-09-06 to contain none of the hub (`dashboard/app/live-tree-hub.js` absent, no
+    `subscribeStructural` in `dist/app.js`), the memoization, or the keyframe change; launched by
+    `/dashboard` from any consumer project as long as the plugin has not been upgraded past 0.9.2;
+  - or a `git worktree add ../bmn29-before d819612` (the batch-start commit before any child
+    landed; `dashboard/dist/app.js` is committed there) and `node ../bmn29-before/dashboard/launch.mjs`
+    from this repo's root.
+- **After build** — this repo at the commit that merges this task, `node dashboard/launch.mjs`
+  from the repo root (`resolve-launcher.mjs` prefers the repo-local launcher over the cache).
+- **Same project for both** (this repo: ~255 tasks is the load that made finding 2 expensive),
+  same browser, same tab count (one), Simple Browser panes closed.
+- **Three conditions × 5 minutes each**, Chrome Task Manager CPU % (or Safari's equivalent) for
+  the dashboard tab plus Activity Monitor *Energy Impact* for the browser's renderer process:
+  1. foreground, idle (no `work` session);
+  2. foreground, a `work` session running (advisory heartbeat writes every turn end);
+  3. tab hidden behind another tab, `work` session running — *after* only; the *before* build
+     has no pause to measure, but record it anyway if cheap, it is the finding-6 baseline.
+- **Record the table in this task's Notes** at close-out. The same numbers satisfy mvt8x's own
+  still-unchecked `[human-eye]` measurement criterion — tick it there by hand and point at this
+  task; nothing else in mvt8x is open.
 
 ## Acceptance criteria
-- [ ] A hidden tab (`document.hidden`) performs no `/api/tree` or `/api/doc` fetch on any
-      frame; on becoming visible the hub performs exactly one re-sync (node test with the hub's
-      injectable `sourceFactory` / `fetchTree` and a stubbed `document.visibilityState`).
-- [ ] `[human-eye]` Before/after measurement recorded on the MacBook in this task's Notes:
-      Activity Monitor energy impact (or Chrome Task Manager CPU) for the dashboard tab at idle
-      for 5 minutes, and during a running `work` session — the *before* number is the one
-      taken before `agentic-workflow-mvt8x` shipped, the *after* with all three children merged.
+- [ ] `createLiveTreeHub` accepts an injectable `visibility` `{ isHidden, onChange }` beside
+      `sourceFactory` / `fetchTree`; with none injected and no `document` present the hub is
+      always-visible and every existing test in `dashboard/test/live-update-hub.test.mjs`,
+      `live-tree-hub-e2e.test.mjs`, `live-frame-registration.test.mjs`,
+      `live-tree-source-guard.test.mjs` passes **unedited**.
+- [ ] New `dashboard/test/live-tree-hub-visibility.test.mjs` (no DOM, injected fake
+      `visibility`): with two structural and two advisory subscribers, hidden, after three
+      structural frames and five `.agentheim/state/in-flight.json` frames → **zero** `fetchTree`
+      calls and **zero** subscriber callbacks while hidden; on the visibility change to visible →
+      **exactly one** `fetchTree` call, each structural subscriber called **once** with the new
+      tree, the in-flight subscriber called **once**, the whats-next subscriber **never**.
+- [ ] Same file: hidden, only in-flight advisory frames, then visible → **zero** `fetchTree`
+      calls, in-flight subscriber once (ADR-0070's audience rule holds across the pause).
+- [ ] Same file: hidden, no frames, then visible → **zero** fetches, **zero** callbacks. Hidden,
+      a `hello` frame, then visible → every subscriber once, one `fetchTree`.
+- [ ] Same file: across hidden → visible the source is **not** closed and **not** reconstructed
+      (`constructions` stays 1, `closed` stays false); after the last unsubscribe the fake's
+      `visibilitychange` listener count is **0** and a fresh subscribe re-registers exactly one.
+- [ ] `live-tree-hub-e2e.test.mjs` (jsdom, whole app mounted) gains one case using the
+      **default** adapter: `document.visibilityState` overridden to `'hidden'` +
+      `visibilitychange` dispatched, a structural frame → **zero** `/api/tree` fetches; back to
+      `'visible'` + dispatch → **exactly one** `/api/tree` fetch and **zero** `/api/doc` fetches.
+      This is the proof the production adapter actually reads `document`.
+- [ ] `live-tree-source-guard.test.mjs` asserts `visibilitychange`, `visibilityState` and
+      `document.hidden` occur under `dashboard/app/**` only in `live-tree-hub.js` (a component
+      that gates itself on visibility fails the suite).
+- [ ] ADR-0070 has a `### 6.` hidden-tab section and a status-log line for this task; the BC
+      README's *Live-tree hub* bullet states the hidden-tab rule and names the extended guard.
+      Prose deltas are carried per ADR-0074 (conductor materializes README/ADR at integration).
+- [ ] The whole `dashboard/` `node --test` suite passes; `dashboard/dist/` is rebuilt at
+      integration (dist-staleness gate), so the shipped bundle carries the gate.
+- [ ] `[human-eye]` Before/after table recorded in this task's Notes per the protocol in
+      §3 above — before build (0.9.2 cache or worktree at d819612) vs after build, conditions
+      1–3, Chrome Task Manager CPU % + Activity Monitor Energy Impact, 5 min each on the
+      builder's MacBook. No in-repo runner can observe the real browser on the builder's
+      hardware, and every synthetic proxy is already a machine-checked criterion above or in the
+      three children — inventing a "CPU fell N%" number here would be the metric-smuggling
+      ADR-0061 forbids. Per ADR-0062 this box stays unchecked through `done/` as the routing
+      signal to the builder's own check.
 
 ## Notes
-- Builder's hypothesis was "polling". Verified: no client timer, no server stat-poll on
-  macOS (`RECURSIVE_SUPPORTED` covers darwin). The polling-like behaviour is emergent:
-  frequent advisory writes × four subscribers × full re-fetch × full re-render.
-- ADR-0006 (one connection per tab) is the design the code drifted from — the four
-  `useLiveTree` call sites arrived one feature at a time (aw-009 board, n4h7q rail,
-  aw-073 whats-next, m9w5c in-flight lane), each correct in isolation. ADR-0070 (written at
-  this refinement) makes the one-hub-per-tab shape and the read-side frame routing a held
-  invariant rather than an aspirational sentence; ADR-0006 itself is untouched.
-- ADR-0014 / ADR-0029 own the breathe animations (design-system-pk4qd amends ADR-0014 in
-  place); ADR-0033 admits the hover-scoped IntersectionObserver; ADR-0043 owns the heartbeat
-  writer (narrowed in part by ADR-0070 on the read side only).
-- Analysis was done against the repo source, which is byte-identical to the 0.9.2 plugin
-  cache's `dashboard/app/board.js` and `dist/app.js`, so it describes what actually runs.
-- `depends_on` lists all three children: this umbrella is the last to close. It is deliberately
-  left in `backlog/` — the visibility work cannot be shaped until the hub exists, and the
-  measurement criterion needs the children merged. Do not promote before `mvt8x` is done.
-- Take the **before** measurement now, before any child ships, or the close-out has nothing to
-  compare against.
+
+### Original diagnosis (2026-09-05, kept as the shared record)
+Findings, ranked by likely impact at the time:
+
+1. **Four `EventSource` streams per tab, not one.** `useLiveTree` was called by four
+   components — `DashboardBoard`, `ShellRail`, `WhatsNextPanel`, `InFlightLane` — each opening
+   its own `/api/events` connection; four server-side recursive `fs.watch` watchers and four
+   heartbeat intervals per tab; 4/6 of the HTTP/1.1 connection budget idle; four reconnect loops
+   on restart. → mvt8x.
+2. **Every tree change fanned out into 2× `/api/tree` + 2× `/api/doc`.** `/api/tree` is a
+   synchronous walk (`readFileSync` + two `statSync` per task) over ~255 task files, run twice,
+   blocking the event loop both times. → mvt8x.
+3. **Tree changes are frequent during a session, so this was polling in effect.** The
+   `Stop`/`SubagentStop` hooks (ADR-0043) overwrite `.agentheim/state/in-flight.json` on every
+   turn end and subagent completion; each write → one `tree-changed` frame → the full fan-out
+   and a whole-board re-render. → mvt8x (advisory routing).
+4. **Every state change re-rendered every card.** No `React.memo` in `board.js`; hover lifted
+   into board state re-ran `resolveHoverDependencies` and re-subscribed the IntersectionObserver;
+   the Done column's ~249 cards always mounted. → rw6ck.
+5. **Infinite `box-shadow` keyframes were not compositor-only.** `ambient-rail-pulse` and
+   `rail-attention-breathe` animated `box-shadow` with a per-frame `color-mix()` — a paint every
+   frame regardless of visibility. → pk4qd.
+6. **No `visibilitychange` handling.** A hidden tab keeps its stream, its re-fetch fan-out and
+   its animations alive. → **this task** (animations: pk4qd already made them compositor-only;
+   the compositor does not run raster for a hidden tab, so nothing remains there).
+
+The infrastructure candidate (one shared `fs.watch` across SSE clients) was considered and
+dropped at the 2026-09-05 refinement: with the hub, watchers fell 4→1 per tab as a side effect,
+and sharing across tabs serves a many-tabs profile this single-user plugin does not have.
+
+### Design notes for the worker
+- Builder's hypothesis was "polling". Verified then and still true: no client timer, no server
+  stat-poll on macOS (`RECURSIVE_SUPPORTED` covers darwin). Whatever waste remains after the
+  three children is the hidden-tab residue plus whatever the measurement shows.
+- **Why a per-category pending set and not one dirty bit.** A single "something happened" bit
+  would replay `notifyAll()` on return, re-projecting the board after five heartbeats — the
+  exact advisory→structural leak ADR-0070 closed. Tracking `all / structural / advisory paths`
+  keeps the audience rule intact through the pause at the cost of a `Set`.
+- **Why not replay unconditionally on every return.** The 2026-09-05 wording said "exactly one
+  re-sync on becoming visible". Refined to *at most one per category, none if nothing arrived*:
+  an unconditional re-sync is a `/api/tree` walk on every tab switch, which is the waste class
+  this umbrella exists to remove. The missed-change failure mode is covered by the pending set
+  plus `EventSource`'s native reconnect (a connection dropped while hidden re-fires `hello`
+  either while hidden → `pending.all`, or after return → normal `notifyAll`).
+- **Why not close the source on hide.** The server-side cost of one open stream is one watcher
+  and one 25 s heartbeat timer; closing it makes every return a reconnect + full `hello` re-sync
+  and reintroduces the restart-storm shape finding 1 removed. The pending set gives the same
+  catch-up guarantee for free.
+- `useLiveTree` in `board.js` needs no change — the gate sits below the hook. Four call sites
+  today: board (structural), rail (structural), `WhatsNextPanel` and `InFlightLane` (advisory).
+- The hub's `EventSource` is unreachable under jsdom for the unit test; the injected
+  `visibility` fake is how the criteria run at all (same reason `sourceFactory` exists). Keep
+  the hub free of React.
+- ADR-0006 (transport) stays untouched, as at mvt8x. ADR-0014/ADR-0029 (animations) are closed
+  by pk4qd. ADR-0033's hover-scoped IntersectionObserver is unaffected.
+- `depends_on` lists the three children, all in `done/` — the dependency gate is met. This task
+  was held in `backlog/` until the hub existed; it is promotable now.

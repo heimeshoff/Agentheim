@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 09:05 -- Modeling / Refined: agentic-workflow-bmn29 - Hidden dashboard tab pauses live re-sync and catches up once on return — closes the idle-waste umbrella (hub, memoization, keyframes shipped) with the before/after MacBook measurement
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog (promotion follows as its own step — all three depends_on children are in done/)
+**Summary:** The umbrella's deferred residual scope is now shaped: finding 6 (hidden tab) becomes an injectable visibility gate inside the live-tree hub — frames are dropped while document.hidden and recorded per ADR-0070 category in a pending set (all / structural / advisory paths), the source stays open, and on return the pending set replays at most once per category and nothing if nothing arrived (refined from the earlier "exactly one re-sync" wording: an unconditional re-sync is a /api/tree walk on every tab switch, the waste class this task exists to remove). Nine machine-checkable criteria (new no-DOM hub test, one default-adapter jsdom e2e case, the source guard extended to visibilitychange, ADR-0070 §6 + README bullet in place, suite green) plus one [human-eye] before/after measurement whose protocol is now pinned: the never-taken "before" is recoverable from the installed 0.9.2 plugin cache (verified pre-hub today) or a worktree at d819612, three 5-minute conditions, and the same table closes mvt8x's still-open measurement checkbox. Original six-finding diagnosis kept in Notes as the shared record. No orchestrator round — the design was fixed at the 2026-09-05 refinement and in mvt8x's out-of-scope note; only the falsifiable criteria and the measurement protocol were open
+**Split into:** none
+**ADRs written:** none (ADR-0070 amendment is a worker deliverable)
+
+---
+
 ## 2026-09-06 08:59 -- Modeling / Promoted: agentic-workflow-r7dq3 - Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend
 
 **Type:** Modeling / Promote
