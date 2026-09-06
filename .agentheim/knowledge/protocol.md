@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 15:06 -- Batch started: [agentic-workflow-e896r, agentic-workflow-hxq1g]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-e896r - The `migrate` verb — `lib/layout-migration.mjs` moves a legacy `.agentheim/` into the two-root layout under the lifecycle lock, splits every per-BC INDEX losslessly, rewrites every pointer, and is idempotent; refuses a mixed tree; never touches this repo's own tree, agentic-workflow-hxq1g - Dashboard reads the two-root layout — `tree.mjs` resolves through `task-system-paths`, BCs enumerate from `knowledge/contexts/` with orphan `board/` folders as warnings, the styleguide bundle and its 20 ESM imports re-point, and a legacy or mixed tree renders a "layout migration pending" notice; dist rebuilt
+**Parallel:** yes (2 workers — e896r and hxq1g are the whole ready set; no source-file overlap (lib/ vs dashboard/), so no merge-order constraint; zgav8/tgr31/g5ez5 remain blocked in backlog)
+
+---
+
 ## 2026-09-06 14:56 -- Modeling / Promoted: agentic-workflow-hxq1g - Dashboard reads the two-root layout — `tree.mjs` resolves through `task-system-paths`, BCs enumerate from `knowledge/contexts/` with orphan `board/` folders as warnings, the styleguide bundle and its 20 ESM imports re-point, and a legacy or mixed tree renders a "layout migration pending" notice; dist rebuilt
 
 **Type:** Modeling / Promote

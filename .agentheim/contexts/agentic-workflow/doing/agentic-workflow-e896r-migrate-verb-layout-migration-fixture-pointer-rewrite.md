@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-e896r
 title: The `migrate` verb — `lib/layout-migration.mjs` moves a legacy `.agentheim/` into the two-root layout under the lifecycle lock, splits every per-BC INDEX losslessly, rewrites every pointer, and is idempotent; refuses a mixed tree; never touches this repo's own tree
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-09-06

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-hxq1g
 title: Dashboard reads the two-root layout — `tree.mjs` resolves through `task-system-paths`, BCs enumerate from `knowledge/contexts/` with orphan `board/` folders as warnings, the styleguide bundle and its 20 ESM imports re-point, and a legacy or mixed tree renders a "layout migration pending" notice; dist rebuilt
-status: todo
+status: doing
 type: refactor
 context: agentic-workflow
 created: 2026-09-06
