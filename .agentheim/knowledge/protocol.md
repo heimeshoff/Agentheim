@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 12:00 -- Batch started: [agentic-workflow-fn59c]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-fn59c - Wire every remaining hand-written protocol, INDEX, and git edit in work, brainstorm, research, and quick-capture onto the locked lifecycle verbs (log, index-add, capture, bounce, reroute, scoped-commit), deleting the replaced prose, so main has exactly one class of writer per bookkeeping file project-wide
+**Parallel:** no (1 worker — agentic-workflow-fn59c is the whole ready set; todo/ holds nothing else in any BC)
+
+---
+
 ## 2026-09-06 11:58 -- Modeling / Promoted: agentic-workflow-fn59c - Wire every remaining hand-written protocol, INDEX, and git edit in work, brainstorm, research, and quick-capture onto the locked lifecycle verbs (log, index-add, capture, bounce, reroute, scoped-commit), deleting the replaced prose, so main has exactly one class of writer per bookkeeping file project-wide
 
 **Type:** Modeling / Promote
