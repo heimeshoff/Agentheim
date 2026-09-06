@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 10:36 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 57m (first batch start 09:40 → 10:36; two batches — [r7dq3, pt0gy, bmn29] at aeae329, then [dpbjj, vhz69] at 591a505 once pt0gy unblocked them)
+**Completed:** 5 (first-try PASS: 4, re-dispatched: 1, skipped: 0) — agentic-workflow-r7dq3, agentic-workflow-bmn29, agentic-workflow-pt0gy (PASS on iteration 2), agentic-workflow-dpbjj, agentic-workflow-vhz69
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-r7dq3: 1, agentic-workflow-bmn29: 1, agentic-workflow-pt0gy: 2, agentic-workflow-dpbjj: 1, agentic-workflow-vhz69: 1
+**Commits:** 8 (two batch-start claims, five task integrations — 3e2158e, 4467381, 29a3d2b, e0b368c, da82433 — and this entry)
+**ADRs written:** ADR-0075 (pt0gy — lifecycle lock, log/index-add, scoped-commit), ADR-0076 (vhz69 — atomic write-temp-then-rename); ADR-0070 amended in place with §6 (bmn29)
+**Vision-conformance:** none — batch aligns with vision. r7dq3 and pt0gy serve "Knowledge is durable" and "Independent work runs in parallel … without two workers colliding" (the modeling-side half); dpbjj and vhz69 serve "Wrong work is caught by structure, not luck" (a falsifiable concurrency proof; crash-safe bookkeeping writes); bmn29 closes a builder-reported dashboard waste. Nothing pulls toward Not-autonomous or any other non-goal.
+**Batch mix:** 40% product-facing / 60% harness / 0% bookkeeping (5 tasks) — as rendered by formatBatchMixLine; in this repo lib/, skills/, agents/ and dashboard/ are the product
+**Conductor notes:** the installed 0.9.2 plugin cache carries the pre-ADR-0074 work skill; the session conducted from the repo's own skills/work/SKILL.md (report-carried bookkeeping, conductor materializes on main). Worker returns arrived truncated in the task notification three times (pt0gy twice, dpbjj once) and one transcript file was empty — recovered by resuming the worker and asking for the missing header/blocks verbatim. Pre-loaded ADRs and prior art were handed to workers as in-worktree paths rather than pasted bodies, to keep the conductor lean. bmn29's dist-staleness gate was made green for its verifier by rebuilding dist in the worktree (dropped at checkpoint, ADR-0057) and rebuilt again on main at integration. pt0gy's iteration-1 FAIL was a real gap (no lock-timeout test for the two new verbs); the iteration-2 fix was two tests. Merged-main lib suite 549/549 after vhz69; dashboard suite green in bmn29's worktree incl. a runtime drive.
+**Carry-over:** none — working tree clean; no worktrees remain (all five aw/ branches squash-merged and removed)
+
+---
+
 ## 2026-09-06 10:35 -- Task verified and completed: agentic-workflow-vhz69 - Atomic temp-file-plus-rename for every INDEX.md / protocol.md / archive write — a crash mid-write must never truncate a bookkeeping file
 
 **Type:** Work / Task completion
