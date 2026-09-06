@@ -912,14 +912,7 @@ separate BC, but today the whole tool lives in this one.
   `createLiveUpdate` call — see that entry for the current shape; the framing above ("re-fetch
   `/api/tree` and re-project the whole board" on **every** frame) is the pre-hub design and no
   longer describes advisory frames. See ADR-0012, ADR-0006, ADR-0017, ADR-0070.
-- **Live-tree hub (one subscription, one fetch, many consumers)** — the tab holds **exactly one**
-  `/api/events` source (ADR-0006's "a long-lived connection per open board tab", finally realized),
-  owned by a refcounted, framework-free hub (`dashboard/app/live-tree-hub.js`) that also owns the
-  single `/api/tree` fetch. Board, rail, and the advisory panels *subscribe*; they never construct
-  `createLiveUpdate`/`EventSource` themselves. First subscriber opens the source, last unsubscribe
-  closes it, concurrent subscribers share one in-flight fetch, and each consumer applies its own
-  projection (`treeToColumns` / `treeToLibrary`) to the one payload. Enforced by a source guard:
-  `createLiveUpdate(` and `new EventSource(` appear only in the hub. See ADR-0070, ADR-0006.
+- **Live-tree hub (one subscription, one fetch, many consumers)** — the tab holds **exactly one** `/api/events` source (ADR-0006's "a long-lived connection per open board tab", finally realized), owned by a refcounted, framework-free hub (`dashboard/app/live-tree-hub.js`) that also owns the single `/api/tree` fetch. Board, rail, and the advisory panels *subscribe*; they never construct `createLiveUpdate`/`EventSource` themselves. First subscriber opens the source, last unsubscribe closes it, concurrent subscribers share one in-flight fetch, and each consumer applies its own projection (`treeToColumns` / `treeToLibrary`) to the one payload. Enforced by a source guard: `createLiveUpdate(` and `new EventSource(` appear only in the hub. A hidden tab (agentic-workflow-bmn29, ADR-0070 §6) pauses delivery instead of closing the source: `handleFrame` records what arrived per category in a pending set and replays it at most once, never unconditionally, on becoming visible again — an empty pending set replays nothing. The visibility signal is injectable (`{ isHidden, onChange }`, defaulting to `document.visibilityState`/`visibilitychange`) and, like source construction, has exactly one home: the same guard now also asserts `visibilitychange`/`visibilityState`/`document.hidden` appear only in the hub. See ADR-0070, ADR-0006.
 - **Structural / advisory / runtime frame** — the read-side counterpart to ADR-0027's
   write-side category split. A `tree-changed` frame under `.agentheim/contexts/**` or
   `.agentheim/knowledge/**` is **structural**: board and rail re-sync. A frame under

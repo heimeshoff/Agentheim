@@ -54,3 +54,36 @@ test('new EventSource( is constructed ONLY inside live-update.js — no other mo
     );
   }
 });
+
+// agentic-workflow-bmn29, ADR-0070 §6 mechanize-or-drop: visibility gating has
+// exactly ONE home, the same way source construction does above. A component
+// that read `document.visibilityState`/`document.hidden` or listened for
+// `visibilitychange` itself would silently restore the hidden-tab waste this
+// task closes (its own re-fetch fan-out, unpaused) while passing every
+// behavioral test — this static guard is what catches the next author.
+const VISIBILITY_PATTERNS = [
+  { name: 'visibilitychange', re: /visibilitychange/ },
+  { name: 'visibilityState', re: /visibilityState/ },
+  { name: 'document.hidden', re: /document\.hidden/ },
+];
+
+test('visibilitychange / visibilityState / document.hidden appear under dashboard/app/** ONLY in live-tree-hub.js', () => {
+  for (const file of appFiles()) {
+    if (file === HUB_FILE) continue;
+    const src = readFileSync(path.join(appDir, file), 'utf8');
+    for (const { name, re } of VISIBILITY_PATTERNS) {
+      assert.doesNotMatch(
+        src,
+        re,
+        `${file} must not reference ${name} — tab-visibility gating has exactly one home, the injectable visibility adapter in live-tree-hub.js (ADR-0070 §6)`,
+      );
+    }
+  }
+});
+
+test('live-tree-hub.js is the one module that references the visibility signals', () => {
+  const hubSrc = readFileSync(path.join(appDir, HUB_FILE), 'utf8');
+  for (const { name, re } of VISIBILITY_PATTERNS.filter((p) => p.name !== 'document.hidden')) {
+    assert.match(hubSrc, re, `live-tree-hub.js must reference ${name} (its default visibility adapter)`);
+  }
+});

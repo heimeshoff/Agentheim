@@ -20,7 +20,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { mount, flush, act } from './dom-harness.mjs';
+import { mount, flush, act, dom } from './dom-harness.mjs';
 
 class FakeEventSource {
   constructor(url) {
@@ -94,6 +94,39 @@ test('mounting the app opens exactly one EventSource; a structural frame issues 
     );
     assert.equal(calls.doc['in-flight'], 1, 'the in-flight frame issues exactly one matching /api/doc fetch');
     assert.equal(calls.doc['whats-next'] || 0, 0, 'the in-flight frame does not also re-fetch the unrelated whats-next artifact');
+  } finally {
+    await act(async () => root.unmount());
+  }
+});
+
+// agentic-workflow-bmn29, ADR-0070 §6 — the proof the PRODUCTION visibility
+// adapter (not the injected fake live-tree-hub-visibility.test.mjs uses)
+// actually reads `document`: overriding `document.visibilityState` and
+// dispatching a real `visibilitychange` through jsdom must gate the hub the
+// same way the fake does.
+test('a hidden document drops a structural frame (zero /api/tree fetches); back to visible replays it (exactly one /api/tree fetch, zero /api/doc fetches)', async () => {
+  const { root } = await mount(DashboardApp);
+  try {
+    await flush();
+
+    const src = FakeEventSource.instances[FakeEventSource.instances.length - 1];
+    calls.tree = 0;
+    calls.doc = {};
+
+    Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+    document.dispatchEvent(new dom.window.Event('visibilitychange'));
+
+    src.emit('tree-changed', JSON.stringify({ type: 'tree-changed', path: '.agentheim/contexts/agentic-workflow/todo/x-1.md' }));
+    await flush();
+    assert.equal(calls.tree, 0, 'a structural frame while the document is hidden issues zero /api/tree fetches');
+
+    Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
+    document.dispatchEvent(new dom.window.Event('visibilitychange'));
+    await flush();
+
+    assert.equal(calls.tree, 1, 'becoming visible again replays the pending structural frame exactly once');
+    assert.equal(calls.doc['in-flight'] || 0, 0, 'the replay issues zero /api/doc fetches for in-flight.json');
+    assert.equal(calls.doc['whats-next'] || 0, 0, 'the replay issues zero /api/doc fetches for whats-next.md');
   } finally {
     await act(async () => root.unmount());
   }

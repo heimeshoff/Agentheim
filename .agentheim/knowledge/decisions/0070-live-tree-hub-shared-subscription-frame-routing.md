@@ -126,6 +126,52 @@ the dashboard's read-only stance over the artifacts themselves — is fully
 intact; this ADR only narrows how the *reader* reacts to the frame, never what
 the writer may do.
 
+### 6. Hidden tab — pause, coalesce, catch up once
+
+A hidden tab still holds the hub's one `EventSource` and still receives every
+frame, but a hidden tab has no board or rail to project into — routing a
+frame while hidden buys nothing but a wasted fetch or re-render the user
+cannot see. `createLiveTreeHub` gains one injectable `visibility` dependency,
+`{ isHidden, onChange }`, matching `sourceFactory` / `fetchTree`'s own idiom.
+The default adapter reads `document.visibilityState` and listens for
+`visibilitychange`; with no `document` (node) it reports always-visible, so
+every pre-existing test keeps passing unedited.
+
+While hidden, `handleFrame` delivers NOTHING and instead records, per
+category (§2), what it would have done in a pending set: `hello`/reconnect →
+`pending.all`; a structural frame → `pending.structural` (and
+`invalidateTree()`, so a subscriber that mounts while still hidden never
+receives a stale cache); an advisory frame → `pending.advisory.add(path)`;
+runtime → nothing, unchanged. On becoming visible, the pending set replays
+AT MOST ONCE per category, then clears: `pending.all` → `notifyAll()`;
+otherwise `pending.structural` → `notifyStructural()` (one shared `/api/tree`
+fetch no matter how many structural frames were dropped) and each pending
+advisory path → `notifyAdvisory(path)`. An empty pending set replays
+nothing — a tab switch with no change behind it costs zero fetches. The
+audience rule of §2 holds across the pause: five in-flight heartbeats while
+hidden re-sync `InFlightLane` once on return and never touch the board or
+rail.
+
+**Why not close the source on hide.** The server-side cost of one open
+stream is one watcher and one heartbeat timer; closing it turns every return
+into a reconnect plus a full `hello` re-sync, reintroducing the restart-storm
+shape ADR-0070 §1 removed. The pending set gives the same catch-up guarantee
+for free, so the source stays open, always.
+
+**Why not replay unconditionally on every return.** An unconditional re-sync
+on every visibility change is a `/api/tree` walk on every tab switch — the
+exact waste class this hub exists to remove. The missed-change failure mode
+is covered by the pending set plus `EventSource`'s native reconnect (a
+connection dropped while hidden re-fires `hello`, itself subject to the same
+pending-set gate).
+
+This is unconditionally an addressing decision, never an interpretation one:
+§3's routing-is-not-interpretation distinction is untouched — pausing selects
+*when* an audience is notified, never *what changed*. Mechanized:
+`live-tree-source-guard.test.mjs` asserts `visibilitychange` / `visibilityState`
+/ `document.hidden` occur under `dashboard/app/**` only in `live-tree-hub.js` —
+visibility gating has exactly one home, the same way source construction does.
+
 ## Consequences
 
 **Positive**
@@ -207,3 +253,10 @@ the writer may do.
   `live-frame-router.test.mjs`, `live-tree-source-guard.test.mjs`,
   `live-frame-registration.test.mjs`, `live-tree-hub-e2e.test.mjs`) except the
   builder's own MacBook resource measurement, which stays `[human-eye]`.
+- **2026-09-06 — amended.** Implemented by `agentic-workflow-bmn29`: the
+  injectable `visibility` gate (`{ isHidden, onChange }`) on
+  `createLiveTreeHub`, the per-category pending set, and the extended source
+  guard. Machine-checked by `dashboard/test/live-tree-hub-visibility.test.mjs`,
+  a new default-adapter case in `live-tree-hub-e2e.test.mjs`, and the extended
+  `live-tree-source-guard.test.mjs`. The umbrella's `[human-eye]` MacBook
+  measurement stays open at the builder's own check (ADR-0061/0062).

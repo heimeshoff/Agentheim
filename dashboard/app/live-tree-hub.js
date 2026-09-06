@@ -48,6 +48,32 @@ async function defaultFetchTree() {
 }
 
 /**
+ * Default `visibility` adapter (agentic-workflow-bmn29, ADR-0070 §6): reads
+ * `document.visibilityState` and listens to `visibilitychange`. When there is
+ * no `document` (node, and every existing test) or it exposes no
+ * `visibilityState`, the tab is reported always-visible and `onChange` is a
+ * no-op — every pre-existing hub test keeps passing unedited. This is the ONE
+ * place in `dashboard/app/**` allowed to read these DOM signals
+ * (live-tree-source-guard.test.mjs mechanizes that boundary).
+ */
+function defaultVisibility() {
+  return {
+    isHidden() {
+      const doc = globalThis.document;
+      return !!doc && doc.visibilityState === 'hidden';
+    },
+    onChange(cb) {
+      const doc = globalThis.document;
+      if (!doc || typeof doc.visibilityState === 'undefined' || typeof doc.addEventListener !== 'function') {
+        return () => {};
+      }
+      doc.addEventListener('visibilitychange', cb);
+      return () => doc.removeEventListener('visibilitychange', cb);
+    },
+  };
+}
+
+/**
  * Create a live-tree hub. One instance per tab (board.js holds a single
  * module-level instance — see its `useLiveTree` hook).
  *
@@ -57,16 +83,36 @@ async function defaultFetchTree() {
  * @param {() => Promise<object>} [opts.fetchTree] — injectable /api/tree
  *   fetch, defaults to the real fetch.
  * @param {number} [opts.reconnectMs] — forwarded to createLiveUpdate.
+ * @param {{ isHidden: () => boolean, onChange: (cb: () => void) => (() => void) }}
+ *   [opts.visibility] — injectable tab-visibility adapter (agentic-workflow-bmn29,
+ *   ADR-0070 §6). Defaults to reading `document.visibilityState`.
  * @returns {{
  *   subscribeStructural: (cb: (tree: object|null) => void) => () => void,
  *   subscribeAdvisory: (path: string, cb: () => void) => () => void,
  * }}
  */
-export function createLiveTreeHub({ sourceFactory, fetchTree = defaultFetchTree, reconnectMs } = {}) {
+export function createLiveTreeHub({
+  sourceFactory,
+  fetchTree = defaultFetchTree,
+  reconnectMs,
+  visibility = defaultVisibility(),
+} = {}) {
   let live = null; // the underlying createLiveUpdate handle, or null when torn down
   let refcount = 0;
   let cachedTree; // undefined = no cached tree; anything else (including null) = cached
   let pendingFetch = null; // the shared in-flight /api/tree promise, or null
+  let unsubscribeVisibility = null; // the visibility.onChange() teardown, or null
+
+  // What arrived while hidden and still needs to replay once on return
+  // (agentic-workflow-bmn29, ADR-0070 §6) — one bit per ADR-0070 category,
+  // never a single dirty bit, so the audience rule (§2) holds across a pause.
+  const pending = { all: false, structural: false, advisory: new Set() };
+
+  function clearPending() {
+    pending.all = false;
+    pending.structural = false;
+    pending.advisory.clear();
+  }
 
   const structuralSubs = new Set();
   const advisorySubs = new Map(); // path -> Set<callback>
@@ -74,6 +120,7 @@ export function createLiveTreeHub({ sourceFactory, fetchTree = defaultFetchTree,
   function ensureSource() {
     if (live) return;
     live = createLiveUpdate({ sourceFactory, reconnectMs, onResync: handleFrame });
+    unsubscribeVisibility = visibility.onChange(onVisibilityChange);
   }
 
   function teardownSource() {
@@ -81,6 +128,11 @@ export function createLiveTreeHub({ sourceFactory, fetchTree = defaultFetchTree,
       live.close();
       live = null;
     }
+    if (unsubscribeVisibility) {
+      unsubscribeVisibility();
+      unsubscribeVisibility = null;
+    }
+    clearPending();
     cachedTree = undefined;
     pendingFetch = null;
   }
@@ -132,14 +184,44 @@ export function createLiveTreeHub({ sourceFactory, fetchTree = defaultFetchTree,
 
   function handleFrame(evt) {
     if (evt === null || evt === undefined) {
+      if (visibility.isHidden()) { pending.all = true; return; }
       notifyAll();
       return;
     }
     const path = evt && typeof evt === 'object' ? evt.path : undefined;
     const category = classifyFramePath(path);
-    if (category === FRAME_CATEGORY.STRUCTURAL) notifyStructural();
-    else if (category === FRAME_CATEGORY.ADVISORY) notifyAdvisory(path);
-    // RUNTIME: no consumer re-syncs — intentionally a no-op.
+    if (category === FRAME_CATEGORY.STRUCTURAL) {
+      if (visibility.isHidden()) {
+        pending.structural = true;
+        invalidateTree(); // a subscriber that mounts while hidden never sees a stale cache
+        return;
+      }
+      notifyStructural();
+    } else if (category === FRAME_CATEGORY.ADVISORY) {
+      if (visibility.isHidden()) { pending.advisory.add(path); return; }
+      notifyAdvisory(path);
+    }
+    // RUNTIME: no consumer re-syncs — intentionally a no-op, hidden or not.
+  }
+
+  /**
+   * Replay the pending set at most once per ADR-0070 category, then clear it —
+   * never unconditionally, and never more than once per return
+   * (agentic-workflow-bmn29, ADR-0070 §6). An empty pending set replays
+   * nothing: a tab switch with no change behind it costs zero fetches.
+   */
+  function onVisibilityChange() {
+    if (visibility.isHidden()) return; // went hidden — nothing to replay yet
+    if (pending.all) {
+      clearPending();
+      notifyAll();
+      return;
+    }
+    const structural = pending.structural;
+    const advisoryPaths = pending.advisory.size > 0 ? [...pending.advisory] : [];
+    clearPending();
+    if (structural) notifyStructural();
+    for (const path of advisoryPaths) notifyAdvisory(path);
   }
 
   function release() {

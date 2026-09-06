@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-bmn29
 title: Hidden dashboard tab pauses live re-sync and catches up once on return — closes the idle-waste umbrella (hub, memoization, keyframes shipped) with the before/after MacBook measurement
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-09-05
@@ -215,3 +215,19 @@ and sharing across tabs serves a many-tabs profile this single-user plugin does 
   by pk4qd. ADR-0033's hover-scoped IntersectionObserver is unaffected.
 - `depends_on` lists the three children, all in `done/` — the dependency gate is met. This task
   was held in `backlog/` until the hub existed; it is promotable now.
+
+## Outcome
+
+`createLiveTreeHub` (`dashboard/app/live-tree-hub.js`) gained one injectable `visibility` dependency, `{ isHidden, onChange }`, alongside `sourceFactory` / `fetchTree`. The default adapter reads `globalThis.document?.visibilityState` and listens for `visibilitychange`; with no `document` present (node, and every pre-existing hub test) it reports always-visible and `onChange` is a no-op, so all four pre-existing suites pass unedited.
+
+While hidden, `handleFrame` delivers nothing and records what would have happened per ADR-0070 category in a per-hub `pending` set: `hello`/reconnect → `pending.all`; a structural frame → `pending.structural` (plus `invalidateTree()`, so a subscriber mounting while hidden never sees a stale cache); an advisory frame → `pending.advisory.add(path)`; runtime → nothing, unchanged. On becoming visible, `onVisibilityChange` replays the pending set at most once per category then clears it: `pending.all` wins outright (`notifyAll()`); otherwise `pending.structural` (one shared `/api/tree` fetch regardless of how many structural frames were dropped) and each pending advisory path replay independently. An empty pending set replays nothing. The source is never closed on hide — `ensureSource()` registers the `visibility.onChange` listener with the first subscriber; `teardownSource()` (last unsubscribe) removes it and clears the pending set.
+
+New `dashboard/test/live-tree-hub-visibility.test.mjs` (5 tests, no DOM, injected fake `visibility`) covers: (1) two structural + two advisory subscribers, hidden, three structural + five in-flight frames → zero fetches/callbacks while hidden, then visible → one `fetchTree`, each structural subscriber once, in-flight once, whats-next never; (2) hidden with only in-flight advisory frames → zero `fetchTree` on return, in-flight once; (3) hidden with no frames → zero fetches/callbacks on return; (4) hidden with a `hello` frame → every subscriber once, one `fetchTree` on return; (5) the source's `constructions`/`closed` are untouched across the pause, and the fake's visibility-listener count goes to 0 on last unsubscribe and back to 1 on a fresh subscribe. `dashboard/test/live-tree-hub-e2e.test.mjs` gained one jsdom case proving the *production* adapter reads real `document.visibilityState`/`visibilitychange` (override to `'hidden'` + dispatch → zero `/api/tree` fetches for a structural frame; back to `'visible'` + dispatch → exactly one `/api/tree` fetch, zero `/api/doc` fetches). `dashboard/test/live-tree-source-guard.test.mjs` gained two tests: `visibilitychange` / `visibilityState` / `document.hidden` occur under `dashboard/app/**` only in `live-tree-hub.js`, and the hub itself references the first two (its default adapter).
+
+All four pre-existing hub test files (`live-update-hub.test.mjs`, `live-tree-hub-e2e.test.mjs`, `live-frame-registration.test.mjs`, `live-tree-source-guard.test.mjs`) pass unedited alongside the new/extended ones. Full `node --test dashboard/test/*.test.mjs` in the worktree: 981 tests, 980 pass, 1 expected failure — `dist-staleness.test.mjs`'s "committed dist matches sources" check, which goes red the moment a declared source (`live-tree-hub.js`) changes and is resolved by the real `npm run build` rebuild at integration (ADR-0057/ADR-0074; the worker branch carries source and tests only, never `dist/`), exactly as this task's own acceptance criterion anticipates ("`dashboard/dist/` is rebuilt at integration").
+
+The `[human-eye]` before/after MacBook measurement criterion (§3 of the task) stays unchecked — it is the builder's own check per ADR-0061/0062; no number was invented here.
+
+Key files: `dashboard/app/live-tree-hub.js`, `dashboard/test/live-tree-hub-visibility.test.mjs`, `dashboard/test/live-tree-hub-e2e.test.mjs`, `dashboard/test/live-tree-source-guard.test.mjs`.
+
+ADR-0070 amended at integration by the conductor (ADR-0074): a new `### 6. Hidden tab — pause, coalesce, catch up once` section and a `## Status log` line for this task, both carried in the worker's report.

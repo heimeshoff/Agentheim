@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 09:53 -- Task verified and completed: agentic-workflow-bmn29 - Hidden dashboard tab pauses live re-sync and catches up once on return — closes the idle-waste umbrella (hub, memoization, keyframes shipped) with the before/after MacBook measurement
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-bmn29 - Hidden dashboard tab pauses live re-sync and catches up once on return — closes the idle-waste umbrella (hub, memoization, keyframes shipped) with the before/after MacBook measurement
+**Summary:** Hidden dashboard tab pauses live re-sync and catches up once on return — injectable visibility gate in the live-tree hub with a per-ADR-0070-category pending set, source never closed on hide, guard extended so visibility signals live only in the hub; closes the idle-waste umbrella (measurement stays at the builder's own [human-eye] check).
+**Duration:** 12m22s
+**Verification:** PASS (iteration 1)
+**Files changed:** 4
+**Tests added:** 8
+**ADRs written:** none
+
+---
+
 ## 2026-09-06 09:46 -- Task verified and completed: agentic-workflow-r7dq3 - Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend
 
 **Type:** Work / Task completion

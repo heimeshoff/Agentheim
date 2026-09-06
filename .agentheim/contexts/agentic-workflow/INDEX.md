@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 2
-- **Doing:** 2
-- **Done:** 190
+- **Doing:** 1
+- **Done:** 191
 <!-- task-counts:end -->
 
 ### Todo
@@ -24,12 +24,12 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-bmn29** — Hidden dashboard tab pauses live re-sync and catches up once on return — closes the idle-waste umbrella (hub, memoization, keyframes shipped) with the before/after MacBook measurement (bug) — `doing/agentic-workflow-bmn29-dashboard-idle-resource-waste-four-sse-streams-fanout-refetch-unmemoized-board.md`
 - **agentic-workflow-pt0gy** — Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free (feature) — `doing/agentic-workflow-pt0gy-concurrent-modeling-sessions-conflict-free-bookkeeping.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-bmn29** — Hidden dashboard tab pauses live re-sync and catches up once on return — closes the idle-waste umbrella (hub, memoization, keyframes shipped) with the before/after MacBook measurement (bug) — `done/agentic-workflow-bmn29-dashboard-idle-resource-waste-four-sse-streams-fanout-refetch-unmemoized-board.md`
 - **agentic-workflow-r7dq3** — Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend (chore) — `done/agentic-workflow-r7dq3-post-ghcaj-doctrine-residuals-outside-bounded-sweep.md`
 - **agentic-workflow-ghcaj** — Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report (refactor) — `done/agentic-workflow-ghcaj-worker-branch-code-only-conductor-writes-bookkeeping.md`
 - **agentic-workflow-e4bjh** — Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI (refactor) — `done/agentic-workflow-e4bjh-capture-dismiss-lifecycle-cli-verbs.md`
