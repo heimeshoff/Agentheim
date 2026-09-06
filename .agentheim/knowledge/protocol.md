@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 10:35 -- Task verified and completed: agentic-workflow-vhz69 - Atomic temp-file-plus-rename for every INDEX.md / protocol.md / archive write — a crash mid-write must never truncate a bookkeeping file
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-vhz69 - Atomic temp-file-plus-rename for every INDEX.md / protocol.md / archive write — a crash mid-write must never truncate a bookkeeping file
+**Summary:** Atomic temp-file-plus-rename for every INDEX.md / protocol.md / archive write — writeFileAtomic in lib/atomic-write.mjs (same-directory temp, renameSync replace, bounded EPERM/EBUSY retry, temp unlinked on failure) routed through all four writer modules plus applyTaskMove's destination write, materializeTaskFile and dismiss's backlink rewrites; readNormalizedFile/writeNormalizedFile folded into one export; real-process SIGKILL test proves a crash mid-write leaves both files intact (ADR-0076).
+**Duration:** 15m39s
+**Verification:** PASS (iteration 1)
+**Files changed:** 7
+**Tests added:** 7
+**ADRs written:** 0076-atomic-write-temp-then-rename-guarantee-boundary-and-routing.md
+
+---
+
 ## 2026-09-06 10:27 -- Task verified and completed: agentic-workflow-dpbjj - Force overlap in pt0gy's two-process concurrency proof — a child-side hold inside the locked section so the lost-update assertion cannot pass by luck
 
 **Type:** Work / Task completion

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-vhz69
 title: Atomic temp-file-plus-rename for every INDEX.md / protocol.md / archive write — a crash mid-write must never truncate a bookkeeping file
-status: doing
+status: done
 type: chore
 context: agentic-workflow
 created: 2026-09-06
@@ -9,7 +9,7 @@ completed:
 depends_on: [agentic-workflow-pt0gy]
 blocks: []
 tags: [concurrency, bookkeeping, lifecycle-cli, crash-safety]
-related_adrs: [0039, 0047, 0054, 0055, 0073]
+related_adrs: [0039, 0047, 0054, 0055, 0073, 0076]
 related_research: []
 prior_art: [agentic-workflow-e4bjh, agentic-workflow-k5n8f, agentic-workflow-r2c7m, agentic-workflow-wq7fn]
 ---
@@ -87,3 +87,79 @@ process holds open (an editor, the dashboard watcher mid-read) fails with `EPERM
 short bounded retry (the same 3 × 20 ms pt0gy uses for lock release) is the right posture; on
 exhaustion the verb must return a structured rejection with the target untouched and the temp
 file removed, never a half-applied state.
+
+## Outcome
+
+Added `lib/atomic-write.mjs`'s `writeFileAtomic(filePath, data, opts)`: writes to a
+`.{basename}.{pid}.{counter}.tmp` file in the SAME directory as the target, then
+`renameSync`s it into place — atomic replace on POSIX, `MoveFileExW(MOVEFILE_REPLACE_EXISTING)`
+on Windows/NTFS. On any throw after the temp file exists (including rename-retry exhaustion,
+3 attempts × 20ms on EPERM/EBUSY, mirroring `lib/lifecycle-lock.mjs`'s release retry), the temp
+file is unlinked best-effort and the error propagates with the target untouched. The doc
+comment states the guarantee precisely: atomic against process death, not power loss (no
+`fsync`).
+
+**Routing.** Every `INDEX.md`/`protocol.md`/archive write in the four named modules now goes
+through it: `writeNormalizedFile` (`task-lifecycle.mjs`'s promote/claim/complete writes, and
+`task-lifecycle-capture-dismiss.mjs`'s capture/dismiss writes via the same function, imported —
+see the fold below); `rotateProtocol`'s live-file + archive writes and `rotateIndexDoneList`'s
+live-file, archive, and header-heal writes. Also routed, decided as the same corruption class:
+`applyTaskMove`'s destination write (`lib/task-lifecycle.mjs`, drops in cleanly — `toDir` is
+already backfilled by the preceding `mkdirSync`, and it hardens ADR-0055's self-healing
+duplicate-overwrite path), `materializeTaskFile`'s new-task-file write, and `dismissTask`'s
+confirm-phase surviving-backlink rewrites (a survivor task file's `depends_on`/`blocks`/
+`prior_art`, an ADR's `related_tasks`).
+
+**Grep proof — no remaining direct `writeFileSync` to any of these targets:**
+```
+$ grep -n "writeFileSync" lib/task-lifecycle.mjs lib/task-lifecycle-capture-dismiss.mjs lib/protocol-rotation.mjs lib/index-rotation.mjs
+(no output)
+```
+(`writeFileSync` was also removed from every one of those four files' `node:fs` import list,
+since nothing in them calls it directly anymore — `lib/atomic-write.mjs` is the only remaining
+`writeFileSync` call site across this surface, and it only ever targets the temp file, never
+the real target path.)
+
+**The `readNormalizedFile`/`writeNormalizedFile` fold.** ADR-0073 named this pair's duplication
+(among others) a deliberate concurrent-worktree merge-risk trade, to be re-examined once none
+was in flight. `pt0gy` has since landed, so both functions are now `export`ed from
+`lib/task-lifecycle.mjs` and imported by `lib/task-lifecycle-capture-dismiss.mjs`, which drops
+its own copies (that module's other duplicated helpers — `parseFrontmatterField`,
+`formatProtocolTimestamp`, `adjustIndexCount`, the task-file resolver — are unchanged, out of
+this task's scope).
+
+**Temp-file naming and dashboard frame-routing.** Name: `.<basename>.<pid>.<counter>.tmp`.
+Verified against `dashboard/app/live-frame-router.js`'s `classifyFramePath`: neither
+`.agentheim/contexts/<bc>/` (where the INDEX temp file lands) nor `.agentheim/knowledge/`
+(protocol/archives) matches the ADVISORY (`.agentheim/state/`) or RUNTIME
+(`.agentheim/.dashboard/`) prefix, so a temp-file create classifies STRUCTURAL — the SAME
+category the real write already produces. `dashboard/watcher.mjs`'s 150ms debounce (confirmed
+by reading its `flush`/`queue` logic) collapses a create+rename(+unlink-on-failure) burst into
+the ONE `tree-changed` frame the write already emits, so in practice **no extra frame** is
+observed at all; even in the worst case, one extra STRUCTURAL frame per write sits inside the
+router's own documented FAIL OPEN cost ("a classification miss can only cost one wasted fetch,
+it can never produce a stale board").
+
+**Real-process kill test.** `lib/test/atomic-write-real-process-kill.test.mjs` spawns
+`node lib/task-lifecycle-cli.mjs capture <id> ...` with
+`AGENTHEIM_ATOMIC_WRITE_TEST_HOLD_MS=8000` set (the primitive's own test-only env-var hold seam,
+read internally — NOT `agentic-workflow-dpbjj`'s lifecycle-lock hold, which has not landed on
+this branch; neither `lib/lifecycle-lock.mjs` nor
+`lib/test/task-lifecycle-cli-mechanics.test.mjs` were touched), polls for the `.tmp` temp file
+to appear beside `INDEX.md`, then `child.kill('SIGKILL')`s the process. Asserts: the killed
+process's lock file is left behind (proving it died mid-critical-section, not after);
+`INDEX.md` and `protocol.md` are byte-identical to their pre-spawn content; and a subsequent
+in-process `capture` call for the same id succeeds (the stale, dead-pid lock is reaped, not a
+permanent jam). Platform-gated to `test.skip` with a named reason on any platform other than
+`win32`/`linux`/`darwin` (the platforms Node documents an unconditional-kill `child.kill()`
+for) — this repo's CI/dev platform is `win32`, where the test runs and passes (verified stable
+across 5 consecutive runs).
+
+**Files:** `lib/atomic-write.mjs` (new), `lib/task-lifecycle.mjs`, `lib/task-lifecycle-capture-
+dismiss.mjs`, `lib/protocol-rotation.mjs`, `lib/index-rotation.mjs`, `lib/test/atomic-
+write.test.mjs` (new, 6 tests), `lib/test/atomic-write-real-process-kill.test.mjs` (new, 1
+test). `node --test lib/test/*.test.mjs`: 549 passing, 0 failing (up from the 542-test batch-
+start baseline), 0 skipped on this platform.
+
+Decision recorded in ADR-0076 (reported in the ADRS block, not written to disk per this task's
+rules).

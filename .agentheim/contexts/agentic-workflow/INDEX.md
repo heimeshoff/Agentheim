@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 193
+- **Doing:** 0
+- **Done:** 194
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-vhz69** — Atomic temp-file-plus-rename for every INDEX.md / protocol.md / archive write — a crash mid-write must never truncate a bookkeeping file (chore) — `doing/agentic-workflow-vhz69-atomic-tmp-rename-bookkeeping-writes.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-vhz69** — Atomic temp-file-plus-rename for every INDEX.md / protocol.md / archive write — a crash mid-write must never truncate a bookkeeping file (chore) — `done/agentic-workflow-vhz69-atomic-tmp-rename-bookkeeping-writes.md`
 - **agentic-workflow-dpbjj** — Force overlap in pt0gy's two-process concurrency proof — a child-side hold inside the locked section so the lost-update assertion cannot pass by luck (chore) — `done/agentic-workflow-dpbjj-forced-overlap-concurrency-proof.md`
 - **agentic-workflow-pt0gy** — Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free (feature) — `done/agentic-workflow-pt0gy-concurrent-modeling-sessions-conflict-free-bookkeeping.md`
 - **agentic-workflow-bmn29** — Hidden dashboard tab pauses live re-sync and catches up once on return — closes the idle-waste umbrella (hub, memoization, keyframes shipped) with the before/after MacBook measurement (bug) — `done/agentic-workflow-bmn29-dashboard-idle-resource-waste-four-sse-streams-fanout-refetch-unmemoized-board.md`
@@ -49,6 +49,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0076** — Atomic write-temp-then-rename primitive (`lib/atomic-write.mjs`, `writeFileAtomic`): every INDEX.md / protocol.md / archive write, plus `applyTaskMove`'s destination write, `materializeTaskFile` and dismiss's backlink rewrites, goes through a same-directory temp file + `renameSync` with bounded EPERM/EBUSY retry; atomic against process death, not power loss (no fsync). Folds the duplicated `readNormalizedFile`/`writeNormalizedFile` pair. Implements agentic-workflow-vhz69 — `knowledge/decisions/0076-atomic-write-temp-then-rename-guarantee-boundary-and-routing.md`
 - **ADR-0075** — Lifecycle lock + `log` / `index-add` mechanics verbs + `scoped-commit`: serialize modeling-side bookkeeping instead of event-sourcing it (deferred to the rework's ReadModel port). One project-wide advisory lock (`lib/lifecycle-lock.mjs`, `openSync 'wx'`, dead-pid staleness) inside every capture-side writer; two opts-only verbs with a five-section deny-list; an index.lock-retrying scoped commit. Implements agentic-workflow-pt0gy — `knowledge/decisions/0075-lifecycle-lock-mechanics-verbs-scoped-commit.md`
 - **ADR-0074** — Worker branch carries source and tests only: the worker reports README_DELTA / ADRS / OUTCOME / BACKLOG_ITEMS blocks and the conductor materializes them on main at squash-merge (two-op README delta grammar with a monotone invariant, conductor-merges-prose rule, on-main task-file annotations, bookkeeping-path checkpoint refusal); amends ADR-0032 §3/§4/§6. Implements agentic-workflow-ghcaj — `knowledge/decisions/0074-worker-branch-source-and-tests-only-conductor-materializes-bookkeeping.md`
 - **ADR-0073** — capture/dismiss mechanization: `capture` registers a skill-authored task file (never authors it), backfilling a missing INDEX only on an empty BC; `dismiss` is two-phase plan/confirm, cascades `depends_on` edges only with exact frontmatter-id matching, guards cascade-drifted / cascade-in-flight, writes INDEX → unlink → strip → protocol. Amends ADR-0022 — `../../knowledge/decisions/0073-capture-dismiss-mechanization-registration-not-authoring-depends-on-only-cascade-exact-id-matching.md`
