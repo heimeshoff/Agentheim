@@ -106,8 +106,9 @@ checks the list, not "every surface agrees" (the ghcaj lesson, ADR-0069 audit-cl
 Split out of `agentic-workflow-qd24q` at its second 2026-09-06 refinement, by builder
 decision: qd24q keeps its id and becomes the code-only verb build (`bounce`, `reroute`), so
 ADR-0075's, the README's, and `quick-capture/SKILL.md`'s existing pointers to it stay true;
-this task is the prose-only wiring sweep and waits on qd24q in the work DAG (its `depends_on`
-is tracked, not met — dispatch when qd24q integrates, exactly as dpbjj/vhz69 waited on pt0gy).
+this task is the prose-only wiring sweep and stays in `backlog/` until qd24q is in `done/` —
+PROMOTE's gate is fail-closed on an unmet `depends_on` (ADR-0038 Ruling A, `blocked-dependency`),
+so promote it right after qd24q integrates; it is otherwise ready.
 
 File-disjoint with qd24q by construction: qd24q touches `lib/`, its tests, one ADR, and the
 README's lib inventory; this task touches the four skill files, the two agent files (read
