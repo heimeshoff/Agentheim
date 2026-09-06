@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 02:09 -- Capture / Captured: agentic-workflow-r7dq3 - Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend
+
+**Type:** Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Five post-ghcaj stale doctrine passages the iteration-6 verifier named outside the bounded sweep bar; captured by the work conductor under the closure rule
+
+---
+
 ## 2026-09-06 02:07 -- Task verified and completed: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
 
 **Type:** Work / Task completion
