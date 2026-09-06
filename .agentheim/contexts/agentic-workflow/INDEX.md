@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 196
@@ -45,6 +45,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-g5ez5** — Split the operational task system out of `contexts/` and `knowledge/` — every BC's lifecycle folders, `INDEX.md`, and the protocol log move to one dedicated folder, leaving BC READMEs in `contexts/` and durable knowledge in `knowledge/`, with an automatic on-upgrade migration of existing projects (refactor) — `backlog/agentic-workflow-g5ez5-split-task-system-folder-from-contexts-and-knowledge.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC

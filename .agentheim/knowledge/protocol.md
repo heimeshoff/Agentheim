@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 13:04 -- Modeling / Captured: agentic-workflow-g5ez5 - Split the operational task system out of `contexts/` and `knowledge/` — every BC's lifecycle folders, `INDEX.md`, and the protocol log move to one dedicated folder, leaving BC READMEs in `contexts/` and durable knowledge in `knowledge/`, with an automatic on-upgrade migration of existing projects
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Builder wants .agentheim/ split into knowledge, context descriptions, and one dedicated task-system folder holding every BC lifecycle folder, INDEX.md, and the protocol log, with an automatic migration of existing projects on upgrade. Captured under-refined: folder name (board/ recommended), migration trigger, and split shape are open for REFINE.
+
+---
+
 ## 2026-09-06 12:32 -- Release shipped: v0.9.3
 
 **Type:** Release
