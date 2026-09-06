@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 0
-- **Doing:** 2
-- **Done:** 192
+- **Doing:** 1
+- **Done:** 193
 <!-- task-counts:end -->
 
 ### Todo
@@ -23,11 +23,11 @@ research touching this BC, and concept synthesis pages.
 ### Doing
 <!-- doing-list:start -->
 - **agentic-workflow-vhz69** — Atomic temp-file-plus-rename for every INDEX.md / protocol.md / archive write — a crash mid-write must never truncate a bookkeeping file (chore) — `doing/agentic-workflow-vhz69-atomic-tmp-rename-bookkeeping-writes.md`
-- **agentic-workflow-dpbjj** — Force overlap in pt0gy's two-process concurrency proof — a child-side hold inside the locked section so the lost-update assertion cannot pass by luck (chore) — `doing/agentic-workflow-dpbjj-forced-overlap-concurrency-proof.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-dpbjj** — Force overlap in pt0gy's two-process concurrency proof — a child-side hold inside the locked section so the lost-update assertion cannot pass by luck (chore) — `done/agentic-workflow-dpbjj-forced-overlap-concurrency-proof.md`
 - **agentic-workflow-pt0gy** — Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free (feature) — `done/agentic-workflow-pt0gy-concurrent-modeling-sessions-conflict-free-bookkeeping.md`
 - **agentic-workflow-bmn29** — Hidden dashboard tab pauses live re-sync and catches up once on return — closes the idle-waste umbrella (hub, memoization, keyframes shipped) with the before/after MacBook measurement (bug) — `done/agentic-workflow-bmn29-dashboard-idle-resource-waste-four-sse-streams-fanout-refetch-unmemoized-board.md`
 - **agentic-workflow-r7dq3** — Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend (chore) — `done/agentic-workflow-r7dq3-post-ghcaj-doctrine-residuals-outside-bounded-sweep.md`

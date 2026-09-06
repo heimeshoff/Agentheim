@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 10:27 -- Task verified and completed: agentic-workflow-dpbjj - Force overlap in pt0gy's two-process concurrency proof — a child-side hold inside the locked section so the lost-update assertion cannot pass by luck
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-dpbjj - Force overlap in pt0gy's two-process concurrency proof — a child-side hold inside the locked section so the lost-update assertion cannot pass by luck
+**Summary:** Forced overlap in the two-process concurrency proof — a test-only, NODE_TEST_CONTEXT-gated holdMs inside withLifecycleLock's held section, reached through the existing lock sub-opt, so the spawned-capture test now asserts first-spawn to last-exit wall clock >= 2H and the lock file is gone; falsifiability shown against a stubbed lock, no production disable switch.
+**Duration:** 9m40s
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-09-06 10:18 -- Batch started: [agentic-workflow-dpbjj, agentic-workflow-vhz69]
 
 **Type:** Work / Batch start
