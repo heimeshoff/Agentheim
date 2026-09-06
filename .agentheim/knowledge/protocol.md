@@ -5,6 +5,26 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 09:25 -- Modeling / Refined: agentic-workflow-pt0gy - Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** Builder chose serialize-over-event-source: a project-wide advisory lock (.agentheim/state/lifecycle.lock, openSync 'wx', dead-pid staleness, sync waiter) taken inside all seven bookkeeping writers (promote/claim/complete/capture/dismiss-confirm/rotateProtocol/rotateIndexDoneList), two mechanics verbs log ({title, body}) and index-add (five forbidden sections incl. task-counts, two-way duplicate split, never backfills), and a layer-3 lib/scoped-commit.mjs with bounded index.lock retry. Rewires modeling + quick-capture only; fixes the REFINE-split count defect and deletes the dead protocol-header template. The event/read-model shape is deferred to the rework's ReadModel port. Architect + tactical-modeler round corrected lock placement (inside writers, not CLI dispatch), applyTaskMove stays unlocked (no dashboard caller exists), and surfaced three count-coupled gaps (bounce, reroute, materialization) that went to the child.
+**Split into:** agentic-workflow-qd24q (remaining hand-writers + bounce/reroute verbs; depends_on pt0gy)
+**ADRs written:** none — the worker writes the lock/verbs ADR during the task (ADR-0042 precedent)
+
+---
+
+## 2026-09-06 09:25 -- Modeling / Captured: agentic-workflow-qd24q - Route the remaining hand-written protocol and INDEX edits through the locked lifecycle verbs — work, brainstorm, research, quick-capture — and add the two count-coupled verbs (bounce, reroute) pt0gy could not cover
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Child split out of pt0gy at refinement: migrate the remaining hand-written protocol/INDEX edits in work, brainstorm, research and quick-capture onto the locked log/index-add verbs, and add the two count-coupled verbs (bounce, reroute) those mechanics verbs may not touch; fifteen-row enumerated surface list with a closure rule.
+
+---
+
 ## 2026-09-06 09:04 -- Modeling / Promoted: agentic-workflow-bmn29 - Hidden dashboard tab pauses live re-sync and catches up once on return — closes the idle-waste umbrella (hub, memoization, keyframes shipped) with the before/after MacBook measurement
 
 **Type:** Modeling / Promote

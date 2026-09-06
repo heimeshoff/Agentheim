@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
+- **Backlog:** 2
 - **Todo:** 2
 - **Doing:** 0
 - **Done:** 189
@@ -40,6 +40,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-qd24q** — Route the remaining hand-written protocol and INDEX edits through the locked lifecycle verbs — work, brainstorm, research, quick-capture — and add the two count-coupled verbs (bounce, reroute) pt0gy could not cover (refactor) — `backlog/agentic-workflow-qd24q-remaining-hand-writers-onto-locked-verbs-bounce-reroute.md`
 - **agentic-workflow-pt0gy** — Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free (feature) — `backlog/agentic-workflow-pt0gy-concurrent-modeling-sessions-conflict-free-bookkeeping.md`
 <!-- backlog-list:end -->
 
