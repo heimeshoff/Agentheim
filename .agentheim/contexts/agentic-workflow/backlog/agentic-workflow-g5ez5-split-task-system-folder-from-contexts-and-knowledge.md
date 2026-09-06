@@ -1,6 +1,6 @@
 ---
 id: agentic-workflow-g5ez5
-title: Split the operational task system out of `contexts/` and `knowledge/` — every BC's lifecycle folders, `INDEX.md`, and the protocol log move to one dedicated folder, leaving BC READMEs in `contexts/` and durable knowledge in `knowledge/`, with an automatic on-upgrade migration of existing projects
+title: Collapse `.agentheim/` into two roots — `knowledge/` (ADRs, research, index, and every BC README under `knowledge/contexts/<bc>/`) and one dedicated task-system folder (every BC's lifecycle folders + `INDEX.md`, the protocol log) — retiring the top-level `contexts/` folder, with an automatic on-upgrade migration of existing projects
 status: backlog
 type: refactor
 context: agentic-workflow
@@ -24,11 +24,13 @@ Likewise `.agentheim/knowledge/` mixes durable knowledge (ADRs, research, the to
 `index.md`) with `protocol.md` and its `protocol/YYYY-MM.md` archives — a chronological
 diary of the system operating, not knowledge about the domain.
 
-The builder's intent: **every file under `.agentheim/` is either knowledge, a context
-description, or task-system noise — and the noise lives in exactly one folder.** That
-makes "what is this project" (contexts + knowledge) readable without wading through
-lifecycle files, makes the noise folder trivially ignorable/greppable as a unit, and gives
-the mechanized lifecycle verbs (ADR-0038/0075) one root to own instead of two.
+The builder's intent: **every file under `.agentheim/` is either knowledge or task-system
+noise — two roots, nothing else.** A BC's README is knowledge about the domain, so it
+belongs under `knowledge/` in a bounded-context subfolder; a separate top-level
+`contexts/` parent is not needed once the lifecycle files have left it. That makes "what
+is this project" (`knowledge/`) readable without wading through lifecycle files, makes the
+noise folder trivially ignorable/greppable as a unit, and gives the mechanized lifecycle
+verbs (ADR-0038/0075) one root to own instead of two.
 
 ## What
 
@@ -36,9 +38,14 @@ the mechanized lifecycle verbs (ADR-0038/0075) one root to own instead of two.
    - per BC: the four lifecycle folders (`backlog/ todo/ doing/ done/`), `done-archive/`
      (ADR-0047 rotation target), and `INDEX.md`;
    - the protocol log `protocol.md` and its `protocol/YYYY-MM.md` archives (ADR-0039).
-   `contexts/<bc>/` keeps only `README.md` (and any concept pages that describe the
-   domain). `knowledge/` keeps `index.md`, `decisions/`, `research/`, audits.
-   **Name to be settled at REFINE** — see Notes for candidates and a recommendation.
+   `knowledge/` keeps `index.md`, `decisions/`, `research/`, audits, **and gains
+   `knowledge/contexts/<bc>/README.md`** (plus any concept pages that describe the
+   domain) — the BC description is knowledge, so it moves in with the rest. The
+   top-level `.agentheim/contexts/` folder is retired: after migration `.agentheim/` holds
+   `vision.md`, `context-map.md`, `knowledge/`, the task-system folder, and the gitignored
+   runtime folders (`state/`, `salvage/`, `.dashboard/`) — no third parent.
+   **Task-system folder name to be settled at REFINE** — see Notes for candidates and a
+   recommendation.
 2. **Centralize path resolution** in `lib/` (one module that answers "where do this BC's
    lifecycle folder / INDEX / the protocol live?") and re-point every consumer: the
    lifecycle verbs and movers (`applyTaskMove`, promote/claim/complete/bounce/reroute/
@@ -49,36 +56,43 @@ the mechanized lifecycle verbs (ADR-0038/0075) one root to own instead of two.
 3. **Automatic migration on upgrade.** A project created under the old layout is moved
    into the new one the first time the new plugin version touches it — no manual step:
    detect legacy layout → move every lifecycle folder, `done-archive/`, `INDEX.md`,
-   `protocol.md`, `protocol/` under the new root (plain renames, so git records them as
-   renames and history survives) → rewrite the pointers that name the old paths
-   (`knowledge/index.md`'s BC lines and Pointers section; BC README lines that spell
-   `contexts/<bc>/INDEX.md`) → commit the migration as one scoped commit → log one
-   protocol entry. Idempotent: a second run on a migrated tree is a no-op; a mixed
-   half-migrated tree is refused with a structured reason rather than guessed at.
+   `protocol.md`, `protocol/` under the new root, and every `contexts/<bc>/README.md`
+   (+ concept pages) to `knowledge/contexts/<bc>/` (plain renames, so git records them
+   as renames and history survives) → remove the now-empty top-level `contexts/` →
+   rewrite the pointers that name the old paths (`knowledge/index.md`'s BC lines and
+   Pointers section; BC README lines that spell `contexts/<bc>/INDEX.md`; any relative
+   link inside a README, whose depth changes now that it sits one level deeper under
+   `knowledge/`) → commit
+   the migration as one scoped commit → log one protocol entry. Idempotent: a second
+   run on a migrated tree is a no-op; a mixed half-migrated tree is refused with a
+   structured reason rather than guessed at.
 
 ## Acceptance criteria
 
 - [ ] A fresh project (`brainstorm` foundation capture) creates lifecycle folders,
-      `INDEX.md`, and `protocol.md` only under the new task-system root; `contexts/<bc>/`
-      contains `README.md` (plus concept pages) and no lifecycle folders.
-- [ ] Exactly one `lib/` module resolves task-system paths; no other `lib/`, `dashboard/`
-      (source, not `dist/`), `skills/`, `agents/`, or `references/` file spells
-      `contexts/<bc>/{backlog,todo,doing,done,done-archive,INDEX.md}` or
-      `knowledge/protocol` as a live path — a live-tree `node --test` lint fails on any
-      reappearance (ADR-0059 enforcement; historical protocol entries and ADR bodies are
-      exempt, they are verbatim records).
+      `INDEX.md`, and `protocol.md` only under the new task-system root, and every BC
+      `README.md` (plus concept pages) under `knowledge/contexts/<bc>/`; no top-level
+      `.agentheim/contexts/` folder is created.
+- [ ] Exactly one `lib/` module resolves task-system and BC-README paths; no other `lib/`,
+      `dashboard/` (source, not `dist/`), `skills/`, `agents/`, or `references/` file spells
+      `.agentheim/contexts/` (any child — `README.md`, lifecycle folders, `done-archive`,
+      `INDEX.md`) or `knowledge/protocol` as a live path — a live-tree `node --test` lint
+      fails on any reappearance (ADR-0059 enforcement; historical protocol entries and ADR
+      bodies are exempt, they are verbatim records).
 - [ ] Every existing lifecycle verb test (`lib/test/*`, currently 574 passing) passes
       against the new layout with fixtures rebuilt under the new root; the full suite
       (`npm test`, 984 today) is green.
-- [ ] Migration: a `node --test` fixture of a legacy-layout project (three BCs with tasks in
-      all four folders, a `done-archive/`, `protocol.md` + one `protocol/YYYY-MM.md`) ends
-      up byte-identical in file *content* under the new root, with the old lifecycle
-      folders, `INDEX.md`s, and protocol files gone from their old locations.
+- [ ] Migration: a `node --test` fixture of a legacy-layout project (three BCs with READMEs,
+      tasks in all four folders, a `done-archive/`, `protocol.md` + one `protocol/YYYY-MM.md`)
+      ends up byte-identical in file *content* — task files, INDEXes, protocol under the
+      new root; READMEs under `knowledge/contexts/<bc>/` — and the top-level `contexts/`
+      folder no longer exists.
 - [ ] Migration is idempotent (second run returns a `no-op` manifest, zero writes) and
       refuses a half-migrated tree with a structured `{ok:false, code, reason}` naming the
       offending path — it never mixes layouts silently.
 - [ ] Migration rewrites every pointer to an old path in `knowledge/index.md` and the BC
-      READMEs; a lint over the migrated fixture finds zero references to
+      READMEs (including README-relative links, which sit one level deeper afterwards);
+      a lint over the migrated fixture finds zero references to `.agentheim/contexts/`,
       `contexts/<bc>/INDEX.md`, `contexts/<bc>/<lifecycle>/`, or `knowledge/protocol`.
 - [ ] Migration runs under the lifecycle lock (ADR-0075), writes through `writeFileAtomic`
       for rewritten files (ADR-0076), and produces a manifest `{changed, message, verb}`
@@ -115,6 +129,27 @@ the mechanized lifecycle verbs (ADR-0038/0075) one root to own instead of two.
 Recommendation: `board/<bc>/{backlog,todo,doing,done,done-archive}/`, `board/<bc>/INDEX.md`,
 `board/protocol.md`, `board/protocol/YYYY-MM.md`. Settle at REFINE; the ADR records it.
 
+**Settled by the builder (2026-09-06):** BC READMEs move to `knowledge/contexts/<bc>/README.md`
+— a bounded-context subfolder of `knowledge/`, no separate top-level parent. The resulting
+`.agentheim/` tree:
+
+```
+.agentheim/
+  vision.md
+  context-map.md
+  knowledge/
+    index.md
+    decisions/
+    research/
+    contexts/<bc>/README.md      (+ concept pages)
+  <task-system>/                 (name open — board/ recommended)
+    protocol.md
+    protocol/YYYY-MM.md
+    <bc>/{backlog,todo,doing,done,done-archive}/
+    <bc>/INDEX.md
+  state/  salvage/  .dashboard/  (gitignored runtime, unchanged)
+```
+
 **Decisions REFINE must settle** (likely an ADR + a split):
 
 1. **The name** (above).
@@ -133,13 +168,21 @@ Recommendation: `board/<bc>/{backlog,todo,doing,done,done-archive}/`, `board/<bc
    already runtime noise but are gitignored and path-pinned by hooks and the dashboard
    launcher. Default: leave them; record the choice in the ADR. `lifecycle.lock` in
    particular must stay resolvable *before* migration runs, since migration takes it.
-4. **Split shape.** Probable children: (i) decision ADR + `lib/` path module +
-   verb/rotation/lint re-pointing + tests; (ii) migration verb + fixture tests + pointer
-   rewrite; (iii) skill/agent/reference prose sweep (~180 path mentions across
-   `skills/work`, `modeling`, `brainstorm`, `research`, `quick-capture`, `whats-next`,
-   `agents/worker`, `agents/verifier`, `references/index-template`, `lib-bootstrap`,
-   `commit-doctrine`, `bc-readme-template`); (iv) dashboard tree/rail/library + legacy
-   notice + dist rebuild. (i) before (ii)/(iii)/(iv).
+4. **Split shape.** Probable children: (i) decision ADR + `lib/` path module (task-system
+   paths *and* the BC-README path) + verb/rotation/lint re-pointing + tests; (ii) migration
+   verb + fixture tests + pointer rewrite; (iii) skill/agent/reference prose sweep (~180 path
+   mentions across `skills/work`, `modeling`, `brainstorm` — which *creates* BC READMEs and
+   must write them under `knowledge/contexts/` —, `research`, `quick-capture`, `whats-next`,
+   `agents/worker`, `agents/verifier`, `agents/strategic-modeler`, `references/index-template`,
+   `lib-bootstrap`, `commit-doctrine`, `bc-readme-template`); (iv) dashboard tree/rail/library
+   (BC READMEs now discovered under `knowledge/contexts/`, BC names enumerated from the
+   task-system root and/or `knowledge/contexts/` — decide which is authoritative when they
+   disagree) + legacy notice + dist rebuild. (i) before (ii)/(iii)/(iv).
+5. **BC enumeration source.** Today "which BCs exist" = `readdir(contexts/)`. Afterwards a BC
+   can exist as a README without tasks (`knowledge/contexts/<bc>/`) or as tasks without a
+   README (`<task-system>/<bc>/`). Recommend: `knowledge/contexts/` is authoritative
+   (a BC is a domain description first); a task-system folder with no README is a lint
+   finding, and `capture`'s empty-BC INDEX backfill creates the task-system folder on demand.
 
 **Blast radius (grep of live path literals, 2026-09-06):** `lib/task-lifecycle.mjs` 51,
 `lib/task-lifecycle-capture-dismiss.mjs` 32, `lib/index-rotation.mjs` 28,

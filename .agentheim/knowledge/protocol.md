@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 13:07 -- Modeling / Refined: agentic-workflow-g5ez5 - Collapse .agentheim/ into two roots: knowledge/ (incl. BC READMEs under knowledge/contexts/<bc>/) and one task-system folder
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Builder clarified the layout: BC READMEs move into knowledge/contexts/<bc>/README.md and the top-level contexts/ folder is retired entirely, leaving .agentheim/ with exactly two content roots (knowledge/ and the task-system folder) plus vision/context-map and the gitignored runtime folders. Title, Why, What, acceptance criteria (fresh-project layout, path lint scope, migration fixture, pointer rewrite incl. README-relative links), and Notes (settled tree sketch, split shape, BC-enumeration source) updated. Still open for REFINE: task-system folder name (board/ recommended), migration trigger, split.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-09-06 13:04 -- Modeling / Captured: agentic-workflow-g5ez5 - Split the operational task system out of `contexts/` and `knowledge/` — every BC's lifecycle folders, `INDEX.md`, and the protocol log move to one dedicated folder, leaving BC READMEs in `contexts/` and durable knowledge in `knowledge/`, with an automatic on-upgrade migration of existing projects
 
 **Type:** Modeling / Capture
