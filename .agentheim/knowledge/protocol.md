@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 14:32 -- Task verified and completed: agentic-workflow-cj54k - One path module for the two-root layout — `lib/task-system-paths.mjs` with `detectLayout` (legacy / board / mixed) — and every lifecycle verb, rotation, and live-tree lint re-pointed through it, resolving both layouts during the transition; ADR-0078 accepted
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-cj54k - One path module for the two-root layout — `lib/task-system-paths.mjs` with `detectLayout` (legacy / board / mixed) — and every lifecycle verb, rotation, and live-tree lint re-pointed through it, resolving both layouts during the transition; ADR-0078 accepted
+**Summary:** One path module `lib/task-system-paths.mjs` (detectLayout legacy/board/mixed + 14 getters + 2 enumerators) with all nine lib/ consumers re-pointed through it, the INDEX template split into task and knowledge halves, and ADR-0078 accepted — this repo's own tree stays legacy
+**Duration:** 29m35s
+**Verification:** PASS (iteration 1)
+**Files changed:** 16
+**Tests added:** 40
+**ADRs written:** ADR-0078 (amended in place: accepted + Enforcement)
+
+---
+
 ## 2026-09-06 13:51 -- Batch started: [agentic-workflow-cj54k]
 
 **Type:** Work / Batch start

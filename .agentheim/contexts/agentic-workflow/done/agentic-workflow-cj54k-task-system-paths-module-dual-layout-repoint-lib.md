@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-cj54k
 title: One path module for the two-root layout — `lib/task-system-paths.mjs` with `detectLayout` (legacy / board / mixed) — and every lifecycle verb, rotation, and live-tree lint re-pointed through it, resolving both layouts during the transition; ADR-0078 accepted
-status: doing
+status: done
 type: refactor
 context: agentic-workflow
 created: 2026-09-06
@@ -95,3 +95,72 @@ dashboard (hxq1g), refusing `legacy` (g5ez5 closure).
 - Do not add a `dashboard/` import here; hxq1g introduces the `dashboard → lib` edge and
   records it.
 - Parent: agentic-workflow-g5ez5 (closure task); decision record: ADR-0078.
+
+## Outcome
+
+Added `lib/task-system-paths.mjs`: `detectLayout(rootDir)` (`'legacy'` / `'board'` /
+`'mixed'`, with a documented, uniformly-applied convention — every getter and enumerator
+throws a Error carrying `.code === 'mixed-layout'` on a mixed tree, never guesses), plus a
+getter per path (`taskFolderPath`, `taskIndexPath`, `doneArchiveDir`, `protocolPath`,
+`protocolArchiveDir`, `knowledgeIndexPath`, `bcReadmePath`, `bcConceptsDir`, `topIndexPath`,
+`decisionsDir`, `researchDir`, `visionPath`, `contextMapPath`, `styleguideDir` — each
+`(rootDir, ...args, opts={}) → string` with an `opts.layout` override) and two enumerators
+(`listBoardContexts`, `listKnowledgeContexts`).
+
+Re-pointed all nine consumers named in the task (`lib/task-lifecycle.mjs`,
+`lib/task-lifecycle-capture-dismiss.mjs`, `lib/task-lifecycle-cli.mjs`,
+`lib/index-rotation.mjs`, `lib/protocol-rotation.mjs`, `lib/index-entry-length.mjs`,
+`lib/duplicate-id-check.mjs`, `lib/human-eye-criteria.mjs`, `lib/spike-stop-loss.mjs`),
+deleting every inline `.agentheim/contexts/...` / `.agentheim/knowledge/protocol.md` join —
+verified by a `node --test` grep lint (`lib/test/task-system-paths-literal-lint.test.mjs`)
+over that enumerated file list. `lib/index-entry-length.mjs`'s `findOverLengthIndexEntries`
+additionally branches on layout: under `'legacy'` it checks the one combined per-BC INDEX
+(unchanged behavior); under `'board'` it checks the task-half INDEX for task sections and
+the knowledge-half INDEX for ADR sections separately, since the two live in different files
+there. `captureTask`/`rerouteTask`'s empty-BC INDEX backfill (`renderIndexTemplate`, now
+exported) branches the same way: the combined LEGACY template under `'legacy'`, the
+task-half-only template under `'board'`.
+
+Split `references/index-template.md` into `references/task-index-template.md` (task-counts
++ the four task-status marker blocks) and `references/knowledge-index-template.md`
+(adr-local / research-local / concepts); `references/index-template.md` keeps its top-level
+`knowledge/index.md` template section unchanged and its Per-BC section relabeled "LEGACY
+combined shape" with a pointer to the two new files, its fenced example otherwise kept
+byte-verbatim since `captureTask`'s legacy renderer still reads it. A marker-set test
+(`lib/test/task-index-template-split.test.mjs`) proves the two new files' marker union is
+exactly today's 8-marker Per-BC set, diffed against the kept-verbatim legacy section.
+
+`lib/task-system-paths.mjs`'s own `detectLayout` "neither contexts/ nor board/" branch
+resolves `'legacy'` when `.agentheim/` already exists on disk (even empty, or holding only
+e.g. `knowledge/protocol.md`) and `'board'` only when `.agentheim/` is completely absent (a
+genuinely fresh, pre-brainstorm project) — refining the task's "neither → board" prose so
+every pre-existing `lib/test/*` fixture (several of which create only `.agentheim/knowledge/`
+or an empty `.agentheim/` without ever touching `contexts/`) keeps resolving `'legacy'`
+unmodified, while a truly fresh project still gets the forward-looking `'board'` default.
+
+ADR-0078 flips to `status: accepted` in this diff (see the `ADRS` block — the conductor
+rewrites `.agentheim/knowledge/decisions/0078-two-root-layout-knowledge-and-board-retiring-contexts-with-on-upgrade-migration.md`
+on `main`), with an `## Enforcement` paragraph naming this module and task.
+
+Tests: `lib/test/task-system-paths.test.mjs` (31 tests: `detectLayout` across legacy/
+board/mixed/fresh/empty-agentheim/live-repo fixtures, every getter's exact path per layout,
+every getter+enumerator's structured mixed-layout throw, the `opts.layout` override, both
+enumerators, and a byte-identical snapshot across the nine call sites),
+`lib/test/task-system-paths-literal-lint.test.mjs` (2 tests: the zero-literal grep lint plus
+a self-check that its regexes actually match), `lib/test/task-index-template-split.test.mjs`
+(7 tests: the marker-set split and captureTask's dual-layout byte-for-byte backfill). All
+574 pre-existing `lib/test/*` tests pass unmodified; the full suite is 614/614 green.
+`node --test` at the repo root additionally runs `dashboard/test/*` and a few unrelated
+suites (`evals/`, `vscode-extension/`) — 20 dashboard failures are due to
+`dashboard/node_modules` not being linked in this worktree (confirmed absent; not run via
+`npm install` per instructions), 1 is an evals fixture deliberately asserting a failure, and
+2 are `vscode-extension/test/bridge.test.mjs` port-in-use flakiness unrelated to this diff;
+none touch `lib/` or this task's files. `detectLayout(<this repo root>)` returns `'legacy'`,
+confirmed by a live-tree test.
+
+Key files: `lib/task-system-paths.mjs`, `lib/task-lifecycle.mjs`,
+`lib/task-lifecycle-capture-dismiss.mjs`, `lib/task-lifecycle-cli.mjs`,
+`lib/index-rotation.mjs`, `lib/protocol-rotation.mjs`, `lib/index-entry-length.mjs`,
+`lib/duplicate-id-check.mjs`, `lib/human-eye-criteria.mjs`, `lib/spike-stop-loss.mjs`,
+`references/task-index-template.md`, `references/knowledge-index-template.md`,
+`references/index-template.md`.

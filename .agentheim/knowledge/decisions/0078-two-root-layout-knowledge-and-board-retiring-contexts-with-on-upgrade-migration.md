@@ -2,7 +2,7 @@
 id: ADR-0078
 title: Two-root layout — `knowledge/` and `board/` — retiring top-level `contexts/`, with a `migrate` verb every skill runs before its own reads
 scope: agentic-workflow
-status: proposed
+status: accepted
 date: 2026-09-06
 related_tasks: [agentic-workflow-g5ez5, agentic-workflow-cj54k, agentic-workflow-e896r, agentic-workflow-zgav8, agentic-workflow-hxq1g, agentic-workflow-tgr31]
 related_adrs: [0017, 0026, 0038, 0039, 0043, 0047, 0057, 0059, 0073, 0074, 0075, 0076]
@@ -196,3 +196,17 @@ paths already classify as structural).
 - ADR-0057 — `dashboard/dist/` is rebuilt, never hand-edited, after the styleguide re-point.
 - ADR-0059 — each child records its enforcement-or-marker disposition in its task file.
 - ADR-0073, ADR-0074, ADR-0075, ADR-0076 — the mechanized-verb family this builds on.
+
+## Enforcement
+
+`lib/task-system-paths.mjs` (agentic-workflow-cj54k) is this decision's enforcement seam:
+`detectLayout` plus a getter per path and two BC-list enumerators, re-pointing all nine
+path-resolving `lib/` modules named in Context above (the four live-tree lints included), a
+`node --test` grep lint asserting zero remaining inline `'contexts'` / `'knowledge',
+'protocol'` path-segment literals in those nine files, and the `references/
+index-template.md` → `task-index-template.md` + `knowledge-index-template.md` split §3
+describes. Every getter and enumerator resolves correctly against whichever of `'legacy'` /
+`'board'` is actually on disk and throws a structured `{code:'mixed-layout'}` error on
+`'mixed'`, never guessing — the transition-window contract §5 describes. The `migrate` verb
+(§4), the dogfood tree move (§7's remaining child), and the `'legacy'`-refusal hardening
+(§5's second phase) remain separate, later tasks.

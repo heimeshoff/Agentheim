@@ -49,7 +49,18 @@ reports are listed in each BC's `INDEX.md`.
 
 The `<!-- name:start --> ... <!-- name:end -->` markers are how the skills locate where to append. Do not remove them — the backfill script and append logic look for them.
 
-## Per-BC: `.agentheim/contexts/<bc>/INDEX.md`
+## Per-BC (LEGACY combined shape): `.agentheim/contexts/<bc>/INDEX.md`
+
+**Legacy pointer (agentic-workflow-cj54k, ADR-0078):** this combined shape — one file
+carrying both the task-status half AND the ADR/research/concepts half — only applies under
+the transitional `'legacy'` layout (`lib/task-system-paths.mjs`'s `detectLayout`), where the
+two halves are still the SAME file. Under the `board/` layout the per-BC INDEX has split
+into two independent templates: `references/task-index-template.md` (task-counts + the four
+status lists) and `references/knowledge-index-template.md` (adr-local / research-local /
+concepts). Read those instead once a project has migrated. This fenced block is kept
+byte-verbatim — `captureTask`'s empty-BC backfill still renders it for a `'legacy'`-layout
+tree — until the dogfood migration (agentic-workflow-tgr31) retires legacy support, at which
+point agentic-workflow-g5ez5's closure deletes this file.
 
 BC-local catalog. Workers read this before designing; model reads it to find prior art and related decisions.
 
