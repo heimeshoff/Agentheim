@@ -52,7 +52,7 @@ The table above covers per-task commits. `work` also mints a handful of trailer-
 | Shape | Message |
 |---|---|
 | Batch-start claim commit (Phase 4 step 1, ADR-0032's ADR-0026 amendment) | `chore(<bc>): batch start [<id-1>] [<id-2>] …` (single-BC batch), or `chore: batch start […]` (multi-BC batch, no `<bc>` token) |
-| BOUNCE integration (verifier-free squash-merge) | `chore(<bc>): task bounced — <title> [<task-id>]` |
+| BOUNCE integration (ADR-0037, no longer squash-merges since agentic-workflow-ghcaj — a conductor-only `doing → backlog` move on `main` plus a `## Worker note`) | `chore(<bc>): task bounced — <title> [<task-id>]` |
 | Reconcile stranded carry-over (session-end, per orphaned file/set) | `chore(<bc>): reconcile stranded <short-desc> [<last-task-id>]`, or `chore: reconcile stranded <short-desc>` if no task ran this session |
 | Session-end bookkeeping (the one post-commit protocol write) | `chore(<bc>): work session end bookkeeping [<last-task-id>]`, or `chore: work session end bookkeeping` if the session committed nothing |
 | Protocol rotation (ADR-0039/ADR-0045, self-firing at session-end) | `chore(agentic-workflow): rotate protocol — <rolledMonths joined with ", "> [<last-task-id>]`, or `chore: rotate protocol — ...` if no task ran |

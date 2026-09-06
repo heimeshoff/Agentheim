@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-r7dq3
 title: Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend
-status: doing
+status: done
 type: chore
 context: agentic-workflow
 created: 2026-09-06
@@ -97,3 +97,15 @@ Refined 2026-09-06 (modeling, no orchestrator round — the design is settled an
 refinement only pinned each fix's target wording and corrected the passage-5 attribution). The
 verifier for this task should judge each passage against the named target, not run its own
 open-ended sweep — the sweep is exactly what ghcaj's closure rule bounded.
+
+## Outcome
+
+Fixed the five post-ghcaj-stale doctrine passages named by agentic-workflow-ghcaj's iteration-6 verifier, each brought in line with its task-pinned target wording:
+
+1. `agents/verifier.md` (TDD-skip artifact list, check 1) — now points a `decision` task's skip artifact at the parsed `adrs` block (`body` per `ADRS_WRITTEN` filename) and a documentation task's at the parsed `readmeDelta` block, agreeing with the file's own rewritten checks 5 and 6; the config-task item is unchanged.
+2. `skills/work/SKILL.md` (ADR-0072 ladder, rung 2) — rewritten to name both families the checkpoint guard refuses (`derived-artifact`: `dashboard/dist/**`, ADR-0057/ADR-0003; `bookkeeping-path`: any `.agentheim/` path, ADR-0074), matching the file's own checkpoint paragraph; the `git checkout -- <path>` instruction now applies to both.
+3. `references/commit-doctrine.md` (BOUNCE row of the non-task-commit-shapes table) — relabeled from "verifier-free squash-merge" to "ADR-0037, no longer squash-merges since agentic-workflow-ghcaj — a conductor-only `doing → backlog` move on `main` plus a `## Worker note`"; the commit-message column and the later "BOUNCE-integration shape" reference are unchanged and still don't mention squash-merge.
+4. `skills/verification-before-completion/SKILL.md` (`VERDICT: PASS` paragraph) — the abbreviated squash-merge/COMPLETE-script sequence replaced with a one-line pointer to the file's own "What `work` does with each verdict" PASS bullet (README delta(s), ADR(s) + `finalizeAdrNumbering`, `## Outcome` append, real `doing → done` move, new backlog items, one commit); the load-bearing "never stages the raw `FILE_LIST`, only the `complete` manifest's `changed` subset (ADR-0057)" clause is preserved.
+5. `skills/modeling/SKILL.md` (field legend, `blocks`) — now states `blocks` is the optional reverse edge maintained by modeling (CAPTURE / REFINE) when it writes the task file, never auto-mirrored from `depends_on` by any mechanized helper (ADR-0073) and never written by the worker; the inaccurate "populated automatically by worker / refine" phrasing is gone.
+
+Verified: all five pinned phrases return zero grep hits outside `.agentheim/` (the task file itself, a frozen `done/` task, and ADR-0072's own body still quote the old wording historically, which is expected and out of scope); `git status --porcelain` in the worktree shows exactly the five named files modified, no others; `node --test lib/test/*.test.mjs` — 493/493 passing, no `lib/` behavior changed. Prose-only per ADR-0059; no new ADR, no README delta.

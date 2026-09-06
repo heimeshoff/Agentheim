@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 09:46 -- Task verified and completed: agentic-workflow-r7dq3 - Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-r7dq3 - Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend
+**Summary:** Amended five post-ghcaj-stale doctrine passages (verifier.md TDD-skip artifact list, work SKILL.md rung 2's two refused-path families, commit-doctrine.md's BOUNCE row, verification-before-completion SKILL.md's PASS short form, modeling SKILL.md's `blocks` field legend) to agree with their named target wording; no lib behavior changed.
+**Duration:** 5m16s
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-09-06 09:40 -- Modeling / Captured: agentic-workflow-vhz69 - Atomic temp-file-plus-rename for every INDEX.md / protocol.md / archive write — a crash mid-write must never truncate a bookkeeping file
 
 **Type:** Modeling / Capture

@@ -50,7 +50,7 @@ Stop at the first failing check and emit a FAIL. Earlier checks are cheaper and 
 Read the task's `## Acceptance criteria` section. For each `- [ ]` (or `- [x]` if the worker marked them off — same thing for your purposes), map it to either:
 
 - An executable test in the diff. The test must be **named after the criterion's behavior**, not after an implementation function. The test must contain at least one assertion. Crucially: the test must be one that *would fail* if the production code change were absent. A test that's pre-existing and unmodified does not count as new coverage.
-- For TDD-skip categories: a concrete artifact you can inspect. ADR file for a `decision` task; integration config + a boot check for config tasks; the README diff for documentation tasks.
+- For TDD-skip categories: a concrete artifact you can inspect. For a `decision` task, the parsed `adrs` block (one `body` per `ADRS_WRITTEN` filename — there is no ADR file on disk yet, see check 6); integration config + a boot check for config tasks; for documentation tasks, the parsed `readmeDelta` block (there is no README diff to read anymore, see check 5).
 - **UI tasks, narrowed (ADR-0036):** if the diff touches a `surfacePath` (see check 8), a self-reported "exercised manually" note is **never sufficient on its own** — the criterion needs check 8's HTTP-floor drive to pass. A manual-exercise note in the task's `## Outcome` section covers **only the visual-DOM delta**, and only when no render infra is present; it never substitutes for the HTTP floor. If the diff touches no `surfacePath` (or the BC has no `## Runtime surface` manifest at all), the old manual-note carve-out still applies as before.
 
 If a criterion has neither, FAIL with that specific criterion cited.

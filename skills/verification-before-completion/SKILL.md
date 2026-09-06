@@ -53,7 +53,7 @@ The verifier returns one of three verdicts. Strict format — `work` parses thes
 
 ### `VERDICT: PASS`
 
-The diff is committable. `work` proceeds per its own **"PASS / SKIP — squash-merge to `main`, one commit"** integration steps — squash-merge the worktree branch (`git merge --squash aw/<task-id>`), run the mechanized COMPLETE script, then `git add` only the `complete` manifest's `changed` paths plus any ADR/task backlink files, and commit. That sequence, not a restatement here, is canonical; in particular it never stages the worker's raw `FILE_LIST` directly — `changed` is the guarded subset (ADR-0057).
+The diff is committable. `work` proceeds per the PASS bullet under "What `work` does with each verdict" below (agentic-workflow-ghcaj, ADR-0074) — the conductor materializes, in order, README delta(s), ADR(s) + `finalizeAdrNumbering`, the `## Outcome` append, the real `doing → done` move, any new backlog items, then commits once. That sequence, not a restatement here, is canonical; in particular it never stages the worker's raw `FILE_LIST` directly — only the `complete` manifest's `changed` subset (ADR-0057).
 
 ```
 VERDICT: PASS
