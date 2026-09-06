@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 09:40 -- Modeling / Captured: agentic-workflow-vhz69 - Atomic temp-file-plus-rename for every INDEX.md / protocol.md / archive write — a crash mid-write must never truncate a bookkeeping file
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** Every INDEX.md / protocol.md / archive write is a truncating writeFileSync; a process killed mid-write leaves a zero-length or half-written bookkeeping file. Route all of them through one same-directory temp-file-plus-rename primitive, fold the duplicated writeNormalizedFile pair, pin the dashboard frame-routing behaviour of the temp name
+
+---
+
+## 2026-09-06 09:40 -- Modeling / Captured: agentic-workflow-dpbjj - Force overlap in pt0gy's two-process concurrency proof — a child-side hold inside the locked section so the lost-update assertion cannot pass by luck
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** pt0gy's two-process lock proof can pass with no lock when the spawned children never overlap; add a test-only hold inside the held section and assert wall-clock >= 2*H so serialization is proven, not assumed
+
+---
+
 ## 2026-09-06 09:40 -- Batch started: [agentic-workflow-r7dq3, agentic-workflow-pt0gy, agentic-workflow-bmn29]
 
 **Type:** Work / Batch start
