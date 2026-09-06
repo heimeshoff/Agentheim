@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 15:37 -- Task verified and completed: agentic-workflow-hxq1g - Dashboard reads the two-root layout — `tree.mjs` resolves through `task-system-paths`, BCs enumerate from `knowledge/contexts/` with orphan `board/` folders as warnings, the styleguide bundle and its 20 ESM imports re-point, and a legacy or mixed tree renders a "layout migration pending" notice; dist rebuilt
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-hxq1g - Dashboard reads the two-root layout — `tree.mjs` resolves through `task-system-paths`, BCs enumerate from `knowledge/contexts/` with orphan `board/` folders as warnings, the styleguide bundle and its 20 ESM imports re-point, and a legacy or mixed tree renders a "layout migration pending" notice; dist rebuilt
+**Summary:** The dashboard now reads either `.agentheim/` layout — `tree.mjs`, `project-name.mjs`, `build.mjs`, and `build-stamp.mjs` resolve every path through `lib/task-system-paths.mjs` (the first `dashboard → lib` import), BCs enumerate from `knowledge/contexts/` with orphan `board/` folders surfaced as warnings, the styleguide bundle resolves via a build-time esbuild redirect keyed off `styleguideDir`, and a legacy or mixed tree renders a "layout migration pending" notice with zero task columns.
+**Duration:** 29m50s
+**Verification:** PASS (iteration 1)
+**Files changed:** 10
+**Tests added:** 13
+**ADRs written:** none
+
+---
+
 ## 2026-09-06 15:36 -- Task verified and completed: agentic-workflow-e896r - The `migrate` verb — `lib/layout-migration.mjs` moves a legacy `.agentheim/` into the two-root layout under the lifecycle lock, splits every per-BC INDEX losslessly, rewrites every pointer, and is idempotent; refuses a mixed tree; never touches this repo's own tree
 
 **Type:** Work / Task completion

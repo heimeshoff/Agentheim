@@ -25,6 +25,8 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
+import { styleguideDir } from '../lib/task-system-paths.mjs';
+
 const TEXT_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.jsx', '.css', '.html', '.json', '.md']);
 
 /** The one command a builder runs to heal a stale `dashboard/dist/`. */
@@ -62,7 +64,7 @@ function normalizedBytes(absPath) {
  * absolute path on disk, so the hash is identical across machines/checkouts.
  */
 export function declaredInputRoots({ dashboardDir, repoRoot }) {
-  const styleguide = path.join(repoRoot, '.agentheim', 'contexts', 'design-system', 'styleguide');
+  const styleguide = styleguideDir(repoRoot);
   return [
     { label: 'dashboard/app', dir: path.join(dashboardDir, 'app') },
     { label: 'dashboard/assets', dir: path.join(dashboardDir, 'assets') },

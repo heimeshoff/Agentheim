@@ -12,6 +12,11 @@ const CASES = [
   ['.agentheim/state/whats-next.md', FRAME_CATEGORY.ADVISORY],
   ['.agentheim/contexts/agentic-workflow/todo/x.md', FRAME_CATEGORY.STRUCTURAL],
   ['.agentheim/knowledge/decisions/0006-dashboard-live-update-sse.md', FRAME_CATEGORY.STRUCTURAL],
+  // ADR-0078's two-root layout: board/ and knowledge/contexts/ frames must
+  // keep classifying as structural (agentic-workflow-hxq1g) — asserted, not
+  // assumed, since the default arm already covers anything unrecognized.
+  ['.agentheim/board/agentic-workflow/todo/x.md', FRAME_CATEGORY.STRUCTURAL],
+  ['.agentheim/knowledge/contexts/agentic-workflow/README.md', FRAME_CATEGORY.STRUCTURAL],
   ['.agentheim/.dashboard/runtime.json', FRAME_CATEGORY.RUNTIME],
   [null, FRAME_CATEGORY.STRUCTURAL],
   [undefined, FRAME_CATEGORY.STRUCTURAL],

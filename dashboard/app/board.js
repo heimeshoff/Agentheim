@@ -1925,7 +1925,7 @@ function EdgeBlinkOverlay({ scrollContainerRef, top, bottom }) {
  */
 export function DashboardBoard({ onOpen, skipPermissions = false, scrollContainerRef, renderProbe = NOOP_RENDER_PROBE }) {
   const [columns, setColumns] = useState(EMPTY_COLUMNS);
-  const [phase, setPhase] = useState("loading"); // loading | ready | error
+  const [phase, setPhase] = useState("loading"); // loading | ready | error | migration-pending
   const [selectedId, setSelectedId] = useState(null);
   // agentic-workflow-k5p8w: transient, client-side hover view-state only
   // (ADR-0017 — no disk write, never persisted). Hovering a backlog/todo card
@@ -2040,6 +2040,15 @@ export function DashboardBoard({ onOpen, skipPermissions = false, scrollContaine
     if (!tree) {
       setColumns(EMPTY_COLUMNS);
       setPhase("error");
+      return;
+    }
+    // ADR-0078 two-root layout (agentic-workflow-hxq1g): a 'legacy' or
+    // 'mixed' tree renders a migration notice instead of an empty or
+    // half-shaped board — the dashboard never migrates (ADR-0017), it only
+    // reports. No columns are drawn while this phase is active.
+    if (tree.migrationPending) {
+      setColumns(EMPTY_COLUMNS);
+      setPhase("migration-pending");
       return;
     }
     setColumns((prev) => treeToColumns(tree, prev));
@@ -2208,6 +2217,12 @@ export function DashboardBoard({ onOpen, skipPermissions = false, scrollContaine
   }
   if (phase === "error") {
     return html`<${LoadState}><${Icon} name="triangle-alert" size=${15} color="var(--st-doing)" /> Could not load the board. Is the dashboard server running?</${LoadState}>`;
+  }
+  if (phase === "migration-pending") {
+    // ADR-0078 (agentic-workflow-hxq1g): a legacy or half-migrated `.agentheim/`
+    // tree renders this instruction instead of an empty or half-shaped board —
+    // the dashboard never runs the `migrate` verb itself (ADR-0017).
+    return html`<${LoadState}><${Icon} name="compass" size=${15} color="var(--fg-4)" /> Layout migration pending — run any Agentheim skill to finish migrating this project.</${LoadState}>`;
   }
 
   // aw-m2v8d: every lifecycle column is always rendered (the aw-072 drop-from-layout

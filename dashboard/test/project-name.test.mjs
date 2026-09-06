@@ -75,6 +75,50 @@ test('resolveProjectName falls back to the folder basename when vision.md has no
   }
 });
 
+// --- resolveProjectName under the ADR-0078 two-root `board` layout ---
+
+function makeBoardProject(folderName, visionContents) {
+  const base = mkdtempSync(path.join(tmpdir(), 'agentheim-pn-board-'));
+  const root = path.join(base, folderName);
+  // A marker `board/` directory is enough for detectLayout to resolve 'board'.
+  mkdirSync(path.join(root, '.agentheim', 'board'), { recursive: true });
+  if (visionContents !== undefined) {
+    mkdirSync(path.join(root, '.agentheim', 'knowledge'), { recursive: true });
+    writeFileSync(path.join(root, '.agentheim', 'knowledge', 'vision.md'), visionContents, 'utf8');
+  }
+  return { root, cleanup: () => rmSync(base, { recursive: true, force: true }) };
+}
+
+test('resolveProjectName reads knowledge/vision.md on a board-layout fixture (ADR-0078, agentic-workflow-hxq1g)', () => {
+  const { root, cleanup } = makeBoardProject('some-folder', '# Vision: Books\n');
+  try {
+    assert.equal(resolveProjectName(root), 'Books');
+  } finally {
+    cleanup();
+  }
+});
+
+test('resolveProjectName falls back to the folder basename on a board fixture with no vision.md', () => {
+  const { root, cleanup } = makeBoardProject('my-board-app', undefined);
+  try {
+    assert.equal(resolveProjectName(root), 'my-board-app');
+  } finally {
+    cleanup();
+  }
+});
+
+test('resolveProjectName falls back to the folder basename on a mixed layout (visionPath throws, never surfaces)', () => {
+  const base = mkdtempSync(path.join(tmpdir(), 'agentheim-pn-mixed-'));
+  const root = path.join(base, 'mixed-folder');
+  mkdirSync(path.join(root, '.agentheim', 'contexts'), { recursive: true });
+  mkdirSync(path.join(root, '.agentheim', 'board'), { recursive: true });
+  try {
+    assert.equal(resolveProjectName(root), 'mixed-folder');
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
 // --- dashboardTitle: the ` — Dashboard` suffix/format is preserved ---
 
 test('dashboardTitle appends the preserved " — Dashboard" suffix', () => {

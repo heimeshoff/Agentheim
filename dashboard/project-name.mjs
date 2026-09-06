@@ -9,8 +9,10 @@
 // and the static handler's traversal/validation guarantees stay intact.
 //
 // Name source, in order:
-//   1. the `# Vision: <Name>` heading in <root>/.agentheim/vision.md (human-authored,
-//      correct casing — e.g. `Agentheim`);
+//   1. the `# Vision: <Name>` heading in vision.md — `.agentheim/vision.md` under
+//      the legacy layout, `.agentheim/knowledge/vision.md` under `board`
+//      (ADR-0078; resolved through `lib/task-system-paths.mjs`'s `visionPath`,
+//      never a raw `path.join` here — agentic-workflow-hxq1g);
 //   2. fall back to the project root folder name (path.basename(root)).
 //
 // Pure, stdlib-only (node:fs, node:path) — no new dependency, install step, or CDN
@@ -18,6 +20,8 @@
 
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+
+import { visionPath } from '../lib/task-system-paths.mjs';
 
 const VISION_HEADING = /^[ \t]*#[ \t]+Vision:[ \t]*(.+?)[ \t]*$/m;
 
@@ -36,19 +40,20 @@ export function parseVisionName(visionText) {
 }
 
 /**
- * Resolve the discovered project's name. Reads <root>/.agentheim/vision.md and
- * uses its `# Vision:` heading; falls back to the root folder basename when the
- * file is missing or carries no heading. Never throws — falls back on any read
- * error.
+ * Resolve the discovered project's name. Reads vision.md (layout-resolved via
+ * `visionPath`) and uses its `# Vision:` heading; falls back to the root
+ * folder basename when the file is missing, carries no heading, or the layout
+ * is `'mixed'` (a `visionPath` throw — ADR-0017: the dashboard never guesses,
+ * it degrades). Never throws.
  */
 export function resolveProjectName(root) {
-  const visionPath = path.join(root, '.agentheim', 'vision.md');
   try {
-    const text = readFileSync(visionPath, 'utf8');
+    const text = readFileSync(visionPath(root), 'utf8');
     const name = parseVisionName(text);
     if (name) return name;
   } catch {
-    // vision.md absent or unreadable — fall through to the folder name.
+    // vision.md absent/unreadable, or the layout is 'mixed' (visionPath
+    // throws) — fall through to the folder name either way.
   }
   return path.basename(path.resolve(root));
 }

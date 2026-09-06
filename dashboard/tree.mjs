@@ -9,9 +9,37 @@
 // No document bodies cross this boundary — /api/doc carries those. "Disk is the
 // source of truth; the tree is a projection" — this module never writes and never
 // interprets a lifecycle move (aw-009 owns interpretation).
+//
+// TWO-ROOT LAYOUT (ADR-0078, agentic-workflow-hxq1g): every `.agentheim/` path
+// this module resolves goes through `lib/task-system-paths.mjs` — the FIRST
+// `dashboard -> lib` import (previously the only cross-import ran `lib ->
+// dashboard`, for `discoverRoot`). BC enumeration is authoritative from
+// `knowledge/contexts/` (`listKnowledgeContexts`, ADR-0078 §6) — a `board/<bc>/`
+// folder with no matching README is not a BC, it is an `orphan-task-folder`
+// warning on the payload. `buildTree` calls `detectLayout` ONCE and threads the
+// resolved `{layout}` opt into every getter, because each getter THROWS on a
+// 'mixed' detect; a 'mixed' tree short-circuits into a `migrationPending`
+// payload before any getter is touched. The dashboard NEVER migrates (ADR-0017)
+// and NEVER calls the `migrate` verb — on `'legacy'` or `'mixed'` it renders a
+// "layout migration pending" notice instead of an empty or half-shaped board.
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
+
+import {
+  detectLayout,
+  taskFolderPath,
+  bcReadmePath,
+  taskIndexPath,
+  knowledgeIndexPath,
+  bcConceptsDir,
+  visionPath as resolveVisionPath,
+  contextMapPath as resolveContextMapPath,
+  decisionsDir,
+  researchDir,
+  listBoardContexts,
+  listKnowledgeContexts,
+} from '../lib/task-system-paths.mjs';
 
 const LIFECYCLE_FOLDERS = ['backlog', 'todo', 'doing', 'done'];
 
@@ -183,22 +211,32 @@ export function projectTask(root, absFile, folder, bcName) {
   return task;
 }
 
-/** Project one bounded-context folder. */
-function projectContext(root, bcDir, bcName) {
+/**
+ * Project one bounded context. Under `'board'` a BC's surfaces are split
+ * across two roots (ADR-0078 §3): the four lifecycle folders + the task-half
+ * `INDEX.md` live under `board/<bc>/`, while `README.md` + the knowledge-half
+ * `INDEX.md` + `concepts/` live under `knowledge/contexts/<bc>/`. Under
+ * `'legacy'` every getter below resolves into the SAME shared `contexts/<bc>/`
+ * directory, so `index` and `knowledgeIndex` point at the identical file —
+ * every existing app-side reader of `.index` keeps working unchanged.
+ */
+function projectContext(root, bcName, layout) {
   const lifecycle = {};
   for (const folder of LIFECYCLE_FOLDERS) {
-    const dir = path.join(bcDir, folder);
+    const dir = taskFolderPath(root, bcName, folder, { layout });
     lifecycle[folder] = listMarkdown(dir).map((abs) =>
       projectTask(root, abs, folder, bcName)
     );
   }
-  const readmePath = path.join(bcDir, 'README.md');
-  const indexPath = path.join(bcDir, 'INDEX.md');
-  const conceptsDir = path.join(bcDir, 'concepts');
+  const readmePath = bcReadmePath(root, bcName, { layout });
+  const indexPath = taskIndexPath(root, bcName, { layout });
+  const knowledgeIndex = knowledgeIndexPath(root, bcName, { layout });
+  const conceptsDir = bcConceptsDir(root, bcName, { layout });
   return {
     name: bcName,
     readme: existsSync(readmePath) ? relPointer(root, readmePath) : null,
     index: existsSync(indexPath) ? relPointer(root, indexPath) : null,
+    knowledgeIndex: existsSync(knowledgeIndex) ? relPointer(root, knowledgeIndex) : null,
     concepts: listMarkdown(conceptsDir).map((abs) => relPointer(root, abs)),
     lifecycle,
   };
@@ -207,41 +245,55 @@ function projectContext(root, bcDir, bcName) {
 /**
  * Build the full read projection for the project rooted at `root` (the directory
  * holding `.agentheim/`). Pure read; returns a plain JSON-serializable object.
+ *
+ * DETECT ONCE, THEN OVERRIDE: every getter in `task-system-paths.mjs` throws a
+ * `{code:'mixed-layout'}` error on a mixed detect, so a 'mixed' tree is handled
+ * BEFORE any getter is called — never by catching the throw. `layout` is then
+ * threaded as an explicit opt into every remaining call so the whole build
+ * stays internally consistent even if the tree changes under it mid-walk.
  */
 export function buildTree(root) {
   const absRoot = path.resolve(root);
-  const ah = path.join(absRoot, '.agentheim');
+  const layout = detectLayout(absRoot);
 
-  const visionPath = path.join(ah, 'vision.md');
-  const contextMapPath = path.join(ah, 'context-map.md');
-  const adrsDir = path.join(ah, 'knowledge', 'decisions');
-  const researchDir = path.join(ah, 'knowledge', 'research');
-
-  const contextsDir = path.join(ah, 'contexts');
-  let bcNames = [];
-  if (existsSync(contextsDir)) {
-    try {
-      bcNames = readdirSync(contextsDir, { withFileTypes: true })
-        .filter((e) => e.isDirectory())
-        .map((e) => e.name)
-        .sort();
-    } catch {
-      bcNames = [];
-    }
+  if (layout === 'mixed') {
+    // A half-migrated tree renders the "layout migration pending" notice, not
+    // a 500 and not a guess at which root to trust (ADR-0078 §5).
+    return {
+      root: absRoot,
+      layout,
+      migrationPending: true,
+      project: { name: null },
+      locations: {},
+      contexts: [],
+      warnings: [],
+    };
   }
 
-  const contexts = bcNames.map((name) =>
-    projectContext(absRoot, path.join(contextsDir, name), name)
-  );
+  const visionFile = resolveVisionPath(absRoot, { layout });
+  const contextMapFile = resolveContextMapPath(absRoot, { layout });
+  const adrsDir = decisionsDir(absRoot, { layout });
+  const researchDirResolved = researchDir(absRoot, { layout });
+
+  // knowledge/contexts/ is the authoritative BC list (ADR-0078 §6) — a BC
+  // exists when it has a domain description, not merely a task folder.
+  const knowledgeBcNames = listKnowledgeContexts(absRoot, { layout }).slice().sort();
+  const boardBcNames = listBoardContexts(absRoot, { layout });
+  const warnings = boardBcNames
+    .filter((name) => !knowledgeBcNames.includes(name))
+    .sort()
+    .map((bc) => ({ code: 'orphan-task-folder', bc }));
+
+  const contexts = knowledgeBcNames.map((name) => projectContext(absRoot, name, layout));
 
   // Derived project METADATA: the project name from vision.md's `# Vision:`
   // heading (aw-015). Disambiguates WHICH project's .agentheim the dashboard
   // header is showing (Agentheim is installed across many repos). One trimmed
   // string, never the vision body — still pointers+metadata only (ADR-0002).
   let projectName = null;
-  if (existsSync(visionPath)) {
+  if (existsSync(visionFile)) {
     try {
-      projectName = parseProjectName(readFileSync(visionPath, 'utf8'));
+      projectName = parseProjectName(readFileSync(visionFile, 'utf8'));
     } catch {
       projectName = null;
     }
@@ -250,14 +302,18 @@ export function buildTree(root) {
   // List once so the flat string arrays and the parallel meta maps share a
   // single source of truth (same files, same in-root path keys).
   const adrFiles = listMarkdown(adrsDir);
-  const researchFiles = listMarkdown(researchDir);
+  const researchFiles = listMarkdown(researchDirResolved);
 
   return {
     root: absRoot,
+    layout,
+    // 'legacy' still needs migrating; 'board' is the target shape. 'mixed' is
+    // handled above, before this point is ever reached.
+    migrationPending: layout === 'legacy',
     project: { name: projectName },
     locations: {
-      vision: existsSync(visionPath) ? relPointer(absRoot, visionPath) : null,
-      contextMap: existsSync(contextMapPath) ? relPointer(absRoot, contextMapPath) : null,
+      vision: existsSync(visionFile) ? relPointer(absRoot, visionFile) : null,
+      contextMap: existsSync(contextMapFile) ? relPointer(absRoot, contextMapFile) : null,
       adrs: adrFiles.map((abs) => relPointer(absRoot, abs)),
       research: researchFiles.map((abs) => relPointer(absRoot, abs)),
       // Additive parallel metadata maps (aw-t3b9k): same path keys, each value
@@ -267,5 +323,6 @@ export function buildTree(root) {
       researchMeta: metaMap(absRoot, researchFiles),
     },
     contexts,
+    warnings,
   };
 }

@@ -29,22 +29,27 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { writeBuildStamp } from './build-stamp.mjs';
+import { styleguideDir } from '../lib/task-system-paths.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// dashboard/ -> repo root -> styleguide source (single source of truth).
+// dashboard/ -> repo root. The styleguide source itself is resolved PER BUILD
+// via `styleguideDir(repoRoot)` (ADR-0078, agentic-workflow-hxq1g) — it lives
+// at `.agentheim/contexts/design-system/styleguide/` under the legacy layout
+// or `.agentheim/knowledge/contexts/design-system/styleguide/` under `board`,
+// and `repoRoot` is itself overridable (see `runBuild` below) so a test can
+// prove the build succeeds against either shape without touching this repo's
+// own (still-legacy) tree.
 const REPO_ROOT = path.resolve(__dirname, '..');
-const STYLEGUIDE = path.join(
-  REPO_ROOT,
-  '.agentheim', 'contexts', 'design-system', 'styleguide',
-);
 // ENTRY is the LIVE dashboard frontend app (agentic-workflow-006, ADR-0009),
-// which imports the styleguide components from STYLEGUIDE across the BC boundary.
-// esbuild follows those relative imports and bundles the styleguide source in;
-// the styleguide stays the single source — it is consumed, not forked.
+// which imports the styleguide components across the BC boundary via 20
+// literal relative specifiers ending in `design-system/styleguide/app/*.js`
+// (unchanged text — ADR-0003/ADR-0009 precedent, no fork). `styleguideRedirectPlugin`
+// below intercepts every such specifier at BUILD time and resolves it against
+// the CORRECT physical directory for whichever `repoRoot` this build targets,
+// so the bundle works from either layout during the transition without a
+// single import statement changing.
 const ENTRY = path.join(__dirname, 'app', 'app.js');
-const STYLES_DIR = path.join(STYLEGUIDE, 'styles');
-const FONTS_DIR = path.join(STYLES_DIR, 'fonts');
 // Static binary assets owned by the dashboard app (agentic-workflow-062): the About
 // page's profile photo. These live in dashboard/assets/ (the build's SOURCE), copied
 // verbatim into dist/ on every build so they survive the dist wipe below and the
@@ -57,6 +62,26 @@ const ASSETS_DIR = path.join(__dirname, 'assets');
 // dist-staleness.test.mjs checks (infrastructure-w45ce, ADR-0013 amendment /
 // ADR-0057 doctrine note: see that test file's header for why this matters).
 const DIST = process.argv[2] ? path.resolve(process.argv[2]) : path.join(__dirname, 'dist');
+
+// Any literal ESM import ending in `design-system/styleguide/app/<file>.js` —
+// regardless of which root prefix precedes it (`.agentheim/contexts/...` or
+// `.agentheim/knowledge/contexts/...`) — is redirected to `<styleguideAppDir>/
+// <file>.js`. esbuild's own `alias` option only accepts package-name-shaped
+// keys (proven empirically: a relative-looking alias key throws "Invalid
+// alias name"), so a plugin `onResolve` filter is the mechanism, not `alias`.
+const STYLEGUIDE_IMPORT_FILTER = /\/design-system\/styleguide\/app\/[^/]+\.js$/;
+
+function styleguideRedirectPlugin(styleguideAppDir) {
+  return {
+    name: 'styleguide-redirect',
+    setup(buildApi) {
+      buildApi.onResolve({ filter: STYLEGUIDE_IMPORT_FILTER }, (args) => {
+        const file = args.path.split('/').pop();
+        return { path: path.join(styleguideAppDir, file) };
+      });
+    },
+  };
+}
 
 const CSS_FILES = ['colors_and_type.css', 'agentheim.css'];
 const BUNDLE_NAME = 'app.js';
@@ -106,15 +131,27 @@ function indexHtml() {
 `;
 }
 
-async function main() {
-  await rm(DIST, { recursive: true, force: true });
-  await mkdir(DIST, { recursive: true });
+/**
+ * Run the real build against `repoRoot` (the STYLEGUIDE source, resolved via
+ * `styleguideDir`, is read from there), emitting into `outDir`. Exported so a
+ * test can drive it directly against a fixture root without shelling out
+ * (`dashboard/test/build-layout.test.mjs`); the CLI entry below calls it with
+ * the repo's own real root and the CLI-selected dist dir.
+ */
+export async function runBuild({ repoRoot = REPO_ROOT, outDir = DIST } = {}) {
+  const styleguideRoot = styleguideDir(repoRoot);
+  const styleguideAppDir = path.join(styleguideRoot, 'app');
+  const stylesDir = path.join(styleguideRoot, 'styles');
+  const fontsDir = path.join(stylesDir, 'fonts');
+
+  await rm(outDir, { recursive: true, force: true });
+  await mkdir(outDir, { recursive: true });
 
   // Bundle the styleguide entry. esbuild resolves react / react-dom/client /
   // marked / htm from dashboard/node_modules at build time and inlines them.
   await build({
     entryPoints: [ENTRY],
-    outfile: path.join(DIST, BUNDLE_NAME),
+    outfile: path.join(outDir, BUNDLE_NAME),
     bundle: true,
     // The styleguide source lives OUTSIDE dashboard/, so esbuild's default
     // node_modules walk (rooted at each importing file) never reaches our
@@ -122,6 +159,7 @@ async function main() {
     // for the bare specifiers (react, react-dom/client, marked, htm) without
     // touching or copying the source.
     nodePaths: [path.join(__dirname, 'node_modules')],
+    plugins: [styleguideRedirectPlugin(styleguideAppDir)],
     minify: true,
     format: 'esm',
     platform: 'browser',
@@ -134,7 +172,7 @@ async function main() {
 
   // Copy the token CSS (single source of truth — referenced, not edited).
   for (const css of CSS_FILES) {
-    await copyFile(path.join(STYLES_DIR, css), path.join(DIST, css));
+    await copyFile(path.join(stylesDir, css), path.join(outDir, css));
   }
 
   // Copy the vendored webfonts (design-system-003). The token CSS @font-face
@@ -143,26 +181,35 @@ async function main() {
   // relative path to resolve when served from dashboard/dist/. Mirrors the CSS
   // copy above — the woff2 (+ OFL licenses) remain owned by design-system; this
   // pipeline only relocates them into the derived dist artifact.
-  await cp(FONTS_DIR, path.join(DIST, 'fonts'), { recursive: true });
+  await cp(fontsDir, path.join(outDir, 'fonts'), { recursive: true });
 
   // Copy the dashboard's own static binary assets (agentic-workflow-062) flat into
   // dist/ root, so the static handler serves each by a top-level URL (the About page
   // references /heimeshoff.jpg). Copied AFTER the dist wipe so they always survive.
-  await cp(ASSETS_DIR, DIST, { recursive: true });
+  await cp(ASSETS_DIR, outDir, { recursive: true });
 
   // Emit the HTML shell.
-  await writeFile(path.join(DIST, 'index.html'), indexHtml(), 'utf8');
+  await writeFile(path.join(outDir, 'index.html'), indexHtml(), 'utf8');
 
   // Stamp the build (infrastructure-w45ce): a content hash over the declared
   // inputs, written alongside the output. dashboard/test/dist-staleness.test.mjs
   // compares this stamp against a fresh hash of current sources without ever
   // invoking esbuild, so "is dist/ stale" is checkable stdlib-only.
-  writeBuildStamp({ dashboardDir: __dirname, repoRoot: REPO_ROOT, outDir: DIST });
+  writeBuildStamp({ dashboardDir: __dirname, repoRoot, outDir });
 
-  process.stdout.write(`Built ${path.relative(REPO_ROOT, DIST)}/ (${BUNDLE_NAME} + ${CSS_FILES.join(', ')} + fonts/ + index.html + .build-stamp.json)\n`);
+  return { outDir };
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+async function main() {
+  const { outDir } = await runBuild({ repoRoot: REPO_ROOT, outDir: DIST });
+  process.stdout.write(`Built ${path.relative(REPO_ROOT, outDir)}/ (${BUNDLE_NAME} + ${CSS_FILES.join(', ')} + fonts/ + index.html + .build-stamp.json)\n`);
+}
+
+// Only run the CLI entry when this file is EXECUTED, not when it is imported
+// (dashboard/test/build-layout.test.mjs imports `runBuild` directly).
+if (path.resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

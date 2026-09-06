@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 3
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 198
+- **Doing:** 0
+- **Done:** 199
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-hxq1g** — Dashboard reads the two-root layout — `tree.mjs` resolves through `task-system-paths`, BCs enumerate from `knowledge/contexts/` with orphan `board/` folders as warnings, the styleguide bundle and its 20 ESM imports re-point, and a legacy or mixed tree renders a "layout migration pending" notice; dist rebuilt (refactor) — `doing/agentic-workflow-hxq1g-dashboard-two-root-layout-tree-styleguide-repoint-migration-notice.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-hxq1g** — Dashboard reads the two-root layout — `tree.mjs` resolves through `task-system-paths`, BCs enumerate from `knowledge/contexts/` with orphan `board/` folders as warnings, the styleguide bundle and its 20 ESM imports re-point, and a legacy or mixed tree renders a "layout migration pending" notice; dist rebuilt (refactor) — `done/agentic-workflow-hxq1g-dashboard-two-root-layout-tree-styleguide-repoint-migration-notice.md`
 - **agentic-workflow-e896r** — The `migrate` verb — `lib/layout-migration.mjs` moves a legacy `.agentheim/` into the two-root layout under the lifecycle lock, splits every per-BC INDEX losslessly, rewrites every pointer, and is idempotent; refuses a mixed tree; never touches this repo's own tree (feature) — `done/agentic-workflow-e896r-migrate-verb-layout-migration-fixture-pointer-rewrite.md`
 - **agentic-workflow-cj54k** — One path module for the two-root layout — `lib/task-system-paths.mjs` with `detectLayout` (legacy / board / mixed) — and every lifecycle verb, rotation, and live-tree lint re-pointed through it, resolving both layouts during the transition; ADR-0078 accepted (refactor) — `done/agentic-workflow-cj54k-task-system-paths-module-dual-layout-repoint-lib.md`
 - **agentic-workflow-fn59c** — Wire every remaining hand-written protocol, INDEX, and git edit in work, brainstorm, research, and quick-capture onto the locked lifecycle verbs (log, index-add, capture, bounce, reroute, scoped-commit), deleting the replaced prose, so main has exactly one class of writer per bookkeeping file project-wide (refactor) — `done/agentic-workflow-fn59c-wire-remaining-hand-writers-onto-locked-verbs.md`

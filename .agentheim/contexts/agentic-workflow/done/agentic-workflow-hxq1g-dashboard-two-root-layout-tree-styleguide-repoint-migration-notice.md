@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-hxq1g
 title: Dashboard reads the two-root layout — `tree.mjs` resolves through `task-system-paths`, BCs enumerate from `knowledge/contexts/` with orphan `board/` folders as warnings, the styleguide bundle and its 20 ESM imports re-point, and a legacy or mixed tree renders a "layout migration pending" notice; dist rebuilt
-status: doing
+status: done
 type: refactor
 context: agentic-workflow
 created: 2026-09-06
@@ -139,3 +139,30 @@ as structural — no edit), any `lib/` verb, any skill prose.
   for anything outside the advisory/runtime prefixes (read on disk, confirming the
   architect round), so this is an assertion to add, not a change to make.
 - Parent: agentic-workflow-g5ez5; decision record: ADR-0078.
+
+## Outcome
+
+The dashboard's read side now resolves both ADR-0078 `.agentheim/` layouts (`legacy` and `board`), never throws on `mixed`, and never migrates anything itself (ADR-0017).
+
+**`dashboard/tree.mjs`** now imports `lib/task-system-paths.mjs` — the first `dashboard → lib` import (the reverse of the existing `lib → dashboard` `discoverRoot` edge, recorded in a module comment and the README delta). `buildTree` calls `detectLayout` once and short-circuits a `'mixed'` detect into `{root, layout:'mixed', migrationPending:true, contexts:[], locations:{}, warnings:[]}` *before* touching any getter — every getter in `task-system-paths.mjs` throws `{code:'mixed-layout'}`, so this had to happen ahead of any call, never via catching the throw. For `'legacy'`/`'board'`, the resolved `{layout}` opt threads into every remaining getter call. BC enumeration is authoritative from `listKnowledgeContexts` (ADR-0078 §6); `listBoardContexts` entries with no matching knowledge-side counterpart become `warnings: [{code:'orphan-task-folder', bc}]`. `projectContext(root, bcName, layout)` was re-shaped from its old single-`bcDir` signature to resolve each surface (`taskFolderPath`, `bcReadmePath`, `taskIndexPath`, `knowledgeIndexPath`, `bcConceptsDir`) through its own getter; the payload's `contexts[].index` keeps its task-half meaning and gains a sibling `contexts[].knowledgeIndex` (both point at the same file under `legacy`). `locations.vision`/`contextMap`/`adrs`/`research` route through `visionPath`/`contextMapPath`/`decisionsDir`/`researchDir`. `migrationPending` is `true` for `legacy` (and the short-circuited `mixed`), `false` for `board`.
+
+**`dashboard/project-name.mjs`**'s `resolveProjectName` reads vision.md via `visionPath(root)` instead of a raw `path.join`; a `visionPath` throw (mixed layout) degrades to the folder-basename fallback, same as any other read failure — never surfaces.
+
+**`dashboard/build.mjs`** keeps all 20 literal styleguide ESM import specifiers across `app.js`/`board.js`/`main-pane-reader.js`/`slide-over.js` byte-unchanged (no edit needed to any of the four files' import statements) and instead resolves them at BUILD time: a new `runBuild({repoRoot, outDir})` (exported; the CLI `main()` calls it with the real repo root, guarded so importing the module for tests never re-triggers the CLI) computes `styleguideDir(repoRoot)` and registers an esbuild `onResolve` plugin (`styleguideRedirectPlugin`) that intercepts any import path ending in `design-system/styleguide/app/<file>.js` and redirects it to the resolved directory. esbuild's own `alias` option was tried and rejected — it only accepts package-name-shaped keys, throwing `Invalid alias name` on a relative-looking key (verified empirically) — so a plugin filter was the only mechanism that could redirect a *relative* literal specifier without touching the 20 import lines. **`dashboard/build-stamp.mjs`**'s `declaredInputRoots` now calls `styleguideDir(repoRoot)` too, replacing its own independent raw join.
+
+**`dashboard/app/board.js`**: `applyTree` checks `tree.migrationPending` before `treeToColumns` and sets a new `"migration-pending"` phase (columns emptied); the render branch shows a `LoadState` notice ("Layout migration pending — run any Agentheim skill to finish migrating this project.") with no lifecycle columns.
+
+**Tests** (13 new, all TDD'd red-then-green against the real fixtures, no mocks of `task-system-paths.mjs` itself):
+- `dashboard/test/tree-layout.test.mjs` (5) — a legacy/board fixture-diff comparing normalized output (path-prefix-stripped) for identical content across all four lifecycle folders + readme + concepts + locations; the `index`/`knowledgeIndex` split on both layouts; the orphan-task-folder warning; `migrationPending` across all three `detectLayout` outcomes, confirming `buildTree` never throws on `mixed`.
+- `dashboard/test/build-layout.test.mjs` (2) — drives `runBuild` directly against two fixture roots (the real on-disk styleguide copied to a legacy-shaped and a board-shaped location) and asserts the real esbuild build succeeds against both — build success is itself the proof all 20 imports resolve, since a resolution miss on any one throws out of `runBuild`.
+- `dashboard/test/board-migration-pending.test.mjs` (1) — jsdom mount asserting the notice text renders and zero `[data-ticket-id]`/column-header text appears.
+- `dashboard/test/project-name.test.mjs` (+3) — board-layout vision resolution, board-layout fallback, and mixed-layout fallback (visionPath throw never surfaces).
+- `dashboard/test/live-frame-router.test.mjs` (+2) — `classifyFramePath` asserted (not assumed) STRUCTURAL for `.agentheim/board/**` and `.agentheim/knowledge/contexts/**` (ADR-0070); `dashboard/app/live-frame-router.js` itself needed no edit, per the task's own scope note.
+
+**Out of scope, confirmed unaffected by inspection + passing suite**: `dashboard/search.mjs` (consumes `tree.contexts` — no raw path literal, no edit); `dashboard/watcher.mjs` (already watches the whole `.agentheim/` tree recursively — `board/`/`knowledge/` are covered for free); `dashboard/runfile.mjs`/`read-api.mjs`'s `.dashboard/` joins (ADR-0078 §7: `.dashboard/` stays put, untouched).
+
+**Verification**: `lib/test/*.test.mjs` 614/614 green. `dashboard` suite: 996/997 green — the sole failure is `dist-staleness.test.mjs`'s "committed dist matches sources" check, which goes red the moment a declared input (`build.mjs`, now import-graph-different) changes, exactly the same expected-red pattern prior tasks (e.g. agentic-workflow-bmn29) recorded; resolved by the conductor's real `npm run build` rebuild on `main` at integration (ADR-0057/ADR-0074) — this worker's worktree carries source and tests only, never `dashboard/dist/`. A grep over `dashboard/**` (excluding `dist/`/`node_modules/`) confirms zero remaining raw `.agentheim`+`contexts`/`vision.md`/`context-map.md` `path.join` calls in production source outside `lib/task-system-paths.mjs`.
+
+The "[human-eye]" notice-clarity criterion is left unchecked per its own annotation — the builder's own read.
+
+Key files: `dashboard/tree.mjs`, `dashboard/project-name.mjs`, `dashboard/build.mjs`, `dashboard/build-stamp.mjs`, `dashboard/app/board.js`, `dashboard/test/tree-layout.test.mjs`, `dashboard/test/build-layout.test.mjs`, `dashboard/test/board-migration-pending.test.mjs`, `dashboard/test/project-name.test.mjs`, `dashboard/test/live-frame-router.test.mjs`.
