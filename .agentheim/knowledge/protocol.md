@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 08:59 -- Modeling / Promoted: agentic-workflow-r7dq3 - Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-06 02:31 -- Modeling / Refined: agentic-workflow-r7dq3 - Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend
 
 **Type:** Modeling / Refine
