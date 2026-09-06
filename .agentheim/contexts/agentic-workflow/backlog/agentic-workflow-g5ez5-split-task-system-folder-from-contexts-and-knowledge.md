@@ -36,14 +36,27 @@ verbs (ADR-0038/0075) one root to own instead of two.
 
 1. **Introduce one dedicated task-system folder** under `.agentheim/` that holds:
    - per BC: the four lifecycle folders (`backlog/ todo/ doing/ done/`), `done-archive/`
-     (ADR-0047 rotation target), and `INDEX.md`;
+     (ADR-0047 rotation target), and the **task half** of `INDEX.md` — the
+     `task-counts` block and the four task-status lists;
    - the protocol log `protocol.md` and its `protocol/YYYY-MM.md` archives (ADR-0039).
-   `knowledge/` keeps `index.md`, `decisions/`, `research/`, audits, **and gains
-   `knowledge/contexts/<bc>/README.md`** (plus any concept pages that describe the
-   domain) — the BC description is knowledge, so it moves in with the rest. The
-   top-level `.agentheim/contexts/` folder is retired: after migration `.agentheim/` holds
-   `vision.md`, `context-map.md`, `knowledge/`, the task-system folder, and the gitignored
-   runtime folders (`state/`, `salvage/`, `.dashboard/`) — no third parent.
+   `knowledge/` keeps `index.md`, `decisions/`, `research/`, audits, **and gains**:
+   - `knowledge/vision.md` and `knowledge/context-map.md` (moved from the `.agentheim/`
+     root — the most reviewer-relevant information of all belongs with the rest);
+   - `knowledge/contexts/<bc>/README.md` plus the BC's `concepts/` pages — the BC
+     description is knowledge, so it moves in with the rest;
+   - `knowledge/contexts/<bc>/INDEX.md` — the **knowledge half** of today's per-BC INDEX:
+     the `adr-local`, `research-local`, and `concepts` catalog sections. Today's INDEX is a
+     mixed file (task churn + knowledge pointers); it is split so the BC's catalog of
+     ADRs/research/concepts stays reviewable beside the README while the task lists live
+     with the tasks. `index-add`'s legal surface already separates the two halves
+     (`adr-local`/`research-local`/`concepts` vs the refused task sections), so each half
+     has exactly the writers it has today;
+   - `knowledge/contexts/design-system/styleguide/` — the styleguide app source
+     (`index.html`, `app/*.js`, `styles/`, vendored fonts) moves with the design-system
+     README; `dashboard/build.mjs`'s STYLEGUIDE path re-points to it.
+   The top-level `.agentheim/contexts/` folder is retired: after migration `.agentheim/`
+   holds exactly `knowledge/`, the task-system folder, and the gitignored runtime folders
+   (`state/`, `salvage/`, `.dashboard/`) — two content roots, no third parent.
    **Task-system folder name to be settled at REFINE** — see Notes for candidates and a
    recommendation.
 2. **Centralize path resolution** in `lib/` (one module that answers "where do this BC's
@@ -55,45 +68,69 @@ verbs (ADR-0038/0075) one root to own instead of two.
    and the prose in every skill/agent/reference that spells the old paths.
 3. **Automatic migration on upgrade.** A project created under the old layout is moved
    into the new one the first time the new plugin version touches it — no manual step:
-   detect legacy layout → move every lifecycle folder, `done-archive/`, `INDEX.md`,
-   `protocol.md`, `protocol/` under the new root, and every `contexts/<bc>/README.md`
-   (+ concept pages) to `knowledge/contexts/<bc>/` (plain renames, so git records them
-   as renames and history survives) → remove the now-empty top-level `contexts/` →
-   rewrite the pointers that name the old paths (`knowledge/index.md`'s BC lines and
-   Pointers section; BC README lines that spell `contexts/<bc>/INDEX.md`; any relative
-   link inside a README, whose depth changes now that it sits one level deeper under
-   `knowledge/`) → commit
+   detect legacy layout → move every lifecycle folder, `done-archive/`, `protocol.md`,
+   `protocol/` under the new root; move `vision.md`, `context-map.md`, every
+   `contexts/<bc>/README.md` (+ `concepts/`), and `contexts/design-system/styleguide/`
+   under `knowledge/` (plain renames, so git records them as renames and history
+   survives) → **split each per-BC `INDEX.md`**: the header + `task-counts` + four
+   task-status blocks become `<task-system>/<bc>/INDEX.md`, the `adr-local` /
+   `research-local` / `concepts` blocks become `knowledge/contexts/<bc>/INDEX.md`, every
+   line carried verbatim (the ADR lines' `../../knowledge/decisions/…` links become
+   `../../decisions/…` from the new depth) → remove the now-empty top-level `contexts/` →
+   rewrite the pointers that name the old paths (`knowledge/index.md`'s bc-list lines now
+   end in `contexts/<bc>/README.md` — the knowledge side, not the task INDEX — and its
+   Pointers section names the new vision / context-map / protocol locations; BC README
+   lines that spell `contexts/<bc>/INDEX.md`; any relative link inside a README, whose
+   depth changes now that it sits one level deeper under `knowledge/`) → commit
    the migration as one scoped commit → log one protocol entry. Idempotent: a second
    run on a migrated tree is a no-op; a mixed half-migrated tree is refused with a
    structured reason rather than guessed at.
 
 ## Acceptance criteria
 
-- [ ] A fresh project (`brainstorm` foundation capture) creates lifecycle folders,
-      `INDEX.md`, and `protocol.md` only under the new task-system root, and every BC
-      `README.md` (plus concept pages) under `knowledge/contexts/<bc>/`; no top-level
-      `.agentheim/contexts/` folder is created.
-- [ ] Exactly one `lib/` module resolves task-system and BC-README paths; no other `lib/`,
+- [ ] A fresh project (`brainstorm` foundation capture) creates `vision.md` and
+      `context-map.md` under `knowledge/`, every BC `README.md` (plus concept pages) and
+      the knowledge-half `INDEX.md` under `knowledge/contexts/<bc>/`, and lifecycle
+      folders, the task-half `INDEX.md`, and `protocol.md` only under the new task-system
+      root; no top-level `.agentheim/contexts/`, `.agentheim/vision.md`, or
+      `.agentheim/context-map.md` is created.
+- [ ] Exactly one `lib/` module resolves task-system and knowledge paths (lifecycle folders,
+      both INDEX halves, protocol, BC README, vision, context-map); no other `lib/`,
       `dashboard/` (source, not `dist/`), `skills/`, `agents/`, or `references/` file spells
       `.agentheim/contexts/` (any child — `README.md`, lifecycle folders, `done-archive`,
-      `INDEX.md`) or `knowledge/protocol` as a live path — a live-tree `node --test` lint
-      fails on any reappearance (ADR-0059 enforcement; historical protocol entries and ADR
-      bodies are exempt, they are verbatim records).
+      `INDEX.md`, `styleguide/`), `.agentheim/vision.md`, `.agentheim/context-map.md`, or
+      `knowledge/protocol` as a live path — a live-tree `node --test` lint fails on any
+      reappearance (ADR-0059 enforcement; historical protocol entries and ADR bodies are
+      exempt, they are verbatim records).
+- [ ] The per-BC INDEX split is lossless: for every BC, the union of lines in the two new
+      INDEX halves equals the old INDEX's lines (modulo the relative-link depth rewrite on
+      ADR lines), the task-half carries `task-counts` + the four task-status marker blocks
+      and nothing else, and the knowledge-half carries `adr-local` / `research-local` /
+      `concepts` and nothing else. `index-add` routes `adr-local`/`research-local`/`concepts`
+      to the knowledge half and still refuses every task section; the lifecycle verbs and
+      `rotateIndexDoneList` touch only the task half.
+- [ ] `dashboard/build.mjs` bundles from `knowledge/contexts/design-system/styleguide/`; the
+      styleguide's own entry and the dashboard build both succeed from the new location.
 - [ ] Every existing lifecycle verb test (`lib/test/*`, currently 574 passing) passes
       against the new layout with fixtures rebuilt under the new root; the full suite
       (`npm test`, 984 today) is green.
-- [ ] Migration: a `node --test` fixture of a legacy-layout project (three BCs with READMEs,
-      tasks in all four folders, a `done-archive/`, `protocol.md` + one `protocol/YYYY-MM.md`)
-      ends up byte-identical in file *content* — task files, INDEXes, protocol under the
-      new root; READMEs under `knowledge/contexts/<bc>/` — and the top-level `contexts/`
-      folder no longer exists.
+- [ ] Migration: a `node --test` fixture of a legacy-layout project (root `vision.md` +
+      `context-map.md`; three BCs with READMEs, a `concepts/` page, a mixed INDEX, tasks in
+      all four folders, a `done-archive/`; one BC with a `styleguide/` subtree;
+      `protocol.md` + one `protocol/YYYY-MM.md`) ends up byte-identical in file *content* —
+      task files, task-half INDEXes, protocol under the new root; vision, context-map,
+      READMEs, concepts, knowledge-half INDEXes, styleguide under `knowledge/` — and the
+      top-level `contexts/`, `vision.md`, and `context-map.md` no longer exist at the root.
 - [ ] Migration is idempotent (second run returns a `no-op` manifest, zero writes) and
       refuses a half-migrated tree with a structured `{ok:false, code, reason}` naming the
       offending path — it never mixes layouts silently.
-- [ ] Migration rewrites every pointer to an old path in `knowledge/index.md` and the BC
-      READMEs (including README-relative links, which sit one level deeper afterwards);
-      a lint over the migrated fixture finds zero references to `.agentheim/contexts/`,
-      `contexts/<bc>/INDEX.md`, `contexts/<bc>/<lifecycle>/`, or `knowledge/protocol`.
+- [ ] Migration rewrites every pointer to an old path in `knowledge/index.md` (bc-list lines
+      end in `contexts/<bc>/README.md`; Pointers name `vision.md`, `context-map.md`, and the
+      protocol at their new locations) and the BC READMEs (including README-relative links,
+      which sit one level deeper afterwards); a lint over the migrated fixture finds zero
+      references to `.agentheim/contexts/`, `contexts/<bc>/INDEX.md`,
+      `contexts/<bc>/<lifecycle>/`, root-level `vision.md`/`context-map.md`, or
+      `knowledge/protocol`.
 - [ ] Migration runs under the lifecycle lock (ADR-0075), writes through `writeFileAtomic`
       for rewritten files (ADR-0076), and produces a manifest `{changed, message, verb}`
       that the invoking skill commits via `scoped-commit` — the dashboard never triggers
@@ -130,25 +167,39 @@ Recommendation: `board/<bc>/{backlog,todo,doing,done,done-archive}/`, `board/<bc
 `board/protocol.md`, `board/protocol/YYYY-MM.md`. Settle at REFINE; the ADR records it.
 
 **Settled by the builder (2026-09-06):** BC READMEs move to `knowledge/contexts/<bc>/README.md`
-— a bounded-context subfolder of `knowledge/`, no separate top-level parent. The resulting
-`.agentheim/` tree:
+— a bounded-context subfolder of `knowledge/`, no separate top-level parent. Then, after a
+full inventory of everything Agentheim writes: `vision.md` and `context-map.md` also move into
+`knowledge/`; the per-BC INDEX is split into a task half and a knowledge half; `index.md`'s
+bc-list points at READMEs; the design-system styleguide source moves with its README. The
+resulting `.agentheim/` tree:
 
 ```
 .agentheim/
-  vision.md
-  context-map.md
   knowledge/
-    index.md
+    vision.md
+    context-map.md
+    index.md                     (bc-list → contexts/<bc>/README.md)
     decisions/
     research/
-    contexts/<bc>/README.md      (+ concept pages)
+    contexts/<bc>/README.md
+    contexts/<bc>/INDEX.md       (knowledge half: adr-local / research-local / concepts)
+    contexts/<bc>/concepts/
+    contexts/design-system/styleguide/   (app source; dashboard build reads it here)
   <task-system>/                 (name open — board/ recommended)
     protocol.md
     protocol/YYYY-MM.md
     <bc>/{backlog,todo,doing,done,done-archive}/
-    <bc>/INDEX.md
+    <bc>/INDEX.md                (task half: task-counts + four status lists)
   state/  salvage/  .dashboard/  (gitignored runtime, unchanged)
 ```
+
+**Why the INDEX split rather than a whole-file move:** the per-BC INDEX was a mixed file —
+the task lists and counts are churn, the ADR/research/concept catalog is what a reviewer
+reads to find the BC's decisions. Moving it whole would drag the catalog into the noise
+folder. The two halves already have disjoint writers today (`index-add` for the catalog
+sections; the lifecycle verbs + done-list rotation for the task sections), so the split adds
+no new writer class. Naming the knowledge half (`INDEX.md` vs e.g. `CATALOG.md`) is REFINE's
+call; the task-half keeps `INDEX.md` so every verb's path stays one segment away.
 
 **Decisions REFINE must settle** (likely an ADR + a split):
 
@@ -194,11 +245,16 @@ plus ~20 `lib/test/*` files and a tail of 1–8-hit files. There is no central p
 
 **Things that move together and must not be forgotten:** `done-archive/` (ADR-0047 —
 INDEX's `### Done (…)` header names it, relative); `protocol/YYYY-MM.md` (ADR-0039);
-INDEX task lines link `done/<file>.md` relative to the INDEX (unaffected if INDEX moves
-with its BC folder) and ADR lines link `../../knowledge/decisions/…` (same depth under
-`<root>/<bc>/`, so still resolves — verify, don't assume); `knowledge/index.md`'s bc-list
-lines end in `contexts/<bc>/INDEX.md` and its Pointers section names
-`knowledge/protocol.md` — both need rewriting by the migration.
+INDEX task lines link `done/<file>.md` relative to the task-half INDEX (unaffected — it
+moves with its BC's lifecycle folders); ADR lines in the knowledge-half INDEX link
+`../../knowledge/decisions/…` today and must become `../../decisions/…` from
+`knowledge/contexts/<bc>/`; `knowledge/index.md`'s bc-list lines and Pointers section;
+every reader of `vision.md` (`modeling`/`work`/`brainstorm` "Before acting", the vacuum
+guard `lib/vacuum-guard.mjs`, `lib/vision-conformance.mjs`, `whats-next`, the dashboard
+rail/library) and of `context-map.md`; `dashboard/build.mjs`'s STYLEGUIDE constant and the
+design-system README's file inventory of `styleguide/…` paths; `references/index-template.md`
+becomes two templates (or one template with a `half` switch) and `capture`'s empty-BC INDEX
+backfill creates the task half only.
 
 **Risks:** (1) `scoped-commit` takes an enumerated path list — a migration of this repo
 touches ~250 files (196 done tasks + archives + protocol); Windows argv limits (~32K chars)

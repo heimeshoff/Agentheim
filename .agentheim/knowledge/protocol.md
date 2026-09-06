@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 13:25 -- Modeling / Refined: agentic-workflow-g5ez5 - Full write-site inventory folded in: vision/context-map into knowledge/, per-BC INDEX split into task and knowledge halves, bc-list points at READMEs, styleguide moves with the design-system README
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Inventoried every path Agentheim writes (skills, agents, lib, dashboard, hooks) and classified each as reviewer-relevant information vs operational churn. Builder settled four gaps: (1) the per-BC INDEX.md is a mixed file and is split — task-counts + four status lists go to the task system, adr-local/research-local/concepts stay beside the README under knowledge/contexts/<bc>/; (2) vision.md and context-map.md move into knowledge/ so .agentheim/ has exactly two content roots; (3) knowledge/index.md bc-list lines point at contexts/<bc>/README.md, not the task INDEX; (4) the design-system styleguide source moves to knowledge/contexts/design-system/styleguide/ and dashboard/build.mjs re-points. Gitignored runtime folders (state/, salvage/, .dashboard/, .worktrees/) stay put. What, acceptance criteria (fresh layout, lint scope, lossless INDEX split, dashboard build, fixture, pointer rewrite), and Notes (tree sketch, split rationale, move-together list) updated. Still open: task-system folder name (board/ recommended), knowledge-half INDEX filename, migration trigger, split into children.
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-09-06 13:07 -- Modeling / Refined: agentic-workflow-g5ez5 - Collapse .agentheim/ into two roots: knowledge/ (incl. BC READMEs under knowledge/contexts/<bc>/) and one task-system folder
 
 **Type:** Modeling / Refine
