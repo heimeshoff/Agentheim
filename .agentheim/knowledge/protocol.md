@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 02:31 -- Modeling / Refined: agentic-workflow-r7dq3 - Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo (auto-promoted on clearing the readiness gate)
+**Summary:** Re-verified all five stale passages present at feaa8d3 and pinned each fix's target wording (the parsed adrs/readmeDelta blocks for verifier check 1; the two checkpoint-guard families for ADR-0072 rung 2; the post-ghcaj BOUNCE heading for the commit-doctrine table; the file's own line-92 PASS bullet for the verification-before-completion short form; and for the modeling field legend, that blocks is maintained by modeling only — never by the worker, never auto-mirrored per ADR-0073, and not by the conductor's step (f), which the capture wording had wrongly implied). Added an explicit out-of-scope list (plugin-cache copies, BC README, the resolving ADR-0073 reference) and made the grep criterion verbatim per phrase. Added ADR-0073 backlink. lib suite 493/493. No orchestrator round — the design is settled; only the fix targets were pinned
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-09-06 02:10 -- Work session ended
 
 **Type:** Work / Session end
