@@ -238,24 +238,40 @@ report; the working-tree-clean guarantee only applies under git.
 
 ## Re-routing after the fact
 
-If the user corrects the BC after you report ("no, that's infrastructure"), just **move the
-file**: relocate `backlog/<id>-<slug>.md` to the new BC's `backlog/`, update the `context`
-frontmatter field, remove the index line from the old BC's INDEX and add it to the new
-one's (fixing both Backlog counts), and append a one-line protocol note. Don't re-capture
-or renumber — it's the same task, only its home changed. (If the BC short-code is part of
-the id, keep the original id; ids are stable and renumbering breaks references.)
+If the user corrects the BC after you report ("no, that's infrastructure"), run the
+mechanized **`reroute`** verb (ADR-0077, agentic-workflow-qd24q/fn59c) — never a hand file
+move, never a hand INDEX edit:
 
-**This cross-BC re-route is prose-only, unenforced (ADR-0059)** — it hand-edits *two* BCs'
-`backlog-list` blocks and both Backlog counts in one motion, the largest remaining
-count-coupled hand-edit this task's mechanization leaves standing. Neither `log` nor
-`index-add` may legally touch a task-list section (`task-list-section-forbidden`), and
-mechanizing a cross-BC move needs its own verb — tracked as `reroute` in
-`agentic-workflow-qd24q` (depends on this task). Until that verb lands, do this by hand,
-carefully, exactly as described above.
+```
+node -e "<same env-free bootstrap 'The flow' step 5's capture call uses>" reroute <task-id> '{"to": "<new-bc>"}'
+```
 
-Then **commit the re-route** via `scoped-commit` with exactly those touched files (the moved
-task file's new and old paths, both BCs' `INDEX.md`, and `protocol.md`) under
-`chore(<new-bc>): re-route <task-id> → <new-bc> [<task-id>]` (ADR-0026).
+It relocates the task **across bounded contexts**, minting a fresh `<new-bc>-<token>` id and
+**retiring the old one** — `reroute` never keeps the original id, since `captureTask`'s own
+`context-mismatch` guard would otherwise permanently disagree with a task whose id and BC
+disagree. The new file carries `rerouted_from: <old-task-id>` as its crash-retry
+idempotence marker. It re-points (never strips) every project-wide `depends_on`/`blocks`/
+`prior_art`/`related_tasks` backlink and every ADR's `related_tasks` that named the old id,
+removes the old BC's `backlog-list` line and count, inserts the new BC's, and prepends one
+`Modeling / Re-routed: <old-task-id> → <new-task-id>` protocol entry — all under the one
+project-wide lifecycle lock, in one locked call.
+
+It returns one manifest — `{ok:true, changed:[newTaskPath, oldTaskPath, oldIndexPath,
+newIndexPath, protocolPath, ...everyBacklinkFileTouched], message:'chore(<new-bc>): re-route
+<old-task-id> → <new-task-id> [<new-task-id>]', verb:'reroute', id:<old-task-id>, newId}` —
+`changed` is **open-ended**: it names every backlink file `reroute` actually touched, not a
+fixed count, so **commit the manifest's full `changed` array, exactly as returned**, via
+`scoped-commit` with the manifest's `message` verbatim. **Report the manifest's `newId` to
+the builder** — the old id is gone, so the one-line report in step 7 of "The flow" above
+names the new id, not the one the builder originally saw.
+
+Rejections, fail-closed, nothing written:
+- `missing-to` — no target BC named; ask which BC before retrying (`lib/task-lifecycle-capture-dismiss.mjs`).
+- `same-bc` — the named BC is the task's own; nothing to re-route.
+- `not-in-backlog` — the task isn't in its BC's `backlog/` (already promoted, or already re-routed) — re-check where it actually is.
+- `unknown-bc` — no `contexts/<bc>/` directory for the named target — confirm the BC name.
+- `index-missing` — the target BC has no `INDEX.md` and holds more than just this task — the builder decides how to backfill it; never hand-build one to force the call through.
+- `lock-timeout` — a sibling session holds the lifecycle lock; retry once it clears — never delete `.agentheim/state/lifecycle.lock` by hand.
 
 ## Handoff to modeling — why "raw" is fine
 

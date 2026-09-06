@@ -130,18 +130,24 @@ This bidirectional linking is how knowledge stays findable.
 
 ## Updating indexes
 
-After the researcher writes the report, update the index entries so the report is discoverable. Index template lives at `references/index-template.md`.
+After the researcher writes the report, register it via the mechanized **`index-add`** verb (agentic-workflow-fn59c, ADR-0075) — never a hand-edit — so the report is discoverable. Index template lives at `references/index-template.md`. The report's `<slug>-<date>` (the filename's identifying portion, e.g. `auth-tokens-2026-05-13`) is the `id` `index-add` dedupes on:
 
-- If the report's `related_tasks` are all in **one BC**, or the topic is clearly scoped to one BC → insert under `<!-- research-local:start -->` in `contexts/<bc>/INDEX.md`.
-- If the report spans multiple BCs, has no tasks yet, or is project-level → insert under `<!-- research-global:start -->` in `.agentheim/knowledge/index.md`.
+- If the report's `related_tasks` are all in **one BC**, or the topic is clearly scoped to one BC → `node -e "<the same env-free bootstrap modeling/SKILL.md's PROMOTE flow uses, targeting lib/task-lifecycle-cli.mjs>" index-add '{"bc":"<bc-name>","section":"research-local","id":"<slug>-<date>","line":"<the composed one-line entry>"}'`.
+- If the report spans multiple BCs, has no tasks yet, or is project-level → the same call with `{"bc":null,"section":"research-global",...}`.
 
-If the target INDEX.md doesn't exist yet, create it from `references/index-template.md` first.
+It returns `{ok:true, changed:[indexPath], skipped, verb:'index-add', id, message:null}` — fold `changed` into this run's commit (see "Committing" below) — or a structured rejection: `index-missing` (the target `INDEX.md` doesn't exist yet — `index-add` never backfills a fresh template over what may be a live index; build it from `references/index-template.md` by hand first, then re-run) or `duplicate-id-conflict` (this report already has a *different* line in the block). A byte-identical re-run is a silent no-op (`skipped:true`).
 
-A later task or ADR that adopts this report should update the inserted line's BC scope if it migrates from global to BC-local (rare).
+A later task or ADR that adopts this report should update the inserted line's BC scope if it migrates from global to BC-local (rare) — this stays a hand-edit, since `index-add` only ever inserts, it never rewrites an existing line.
 
 ## Protocol logging
 
-After the report clears the review gate, prepend an entry to `.agentheim/knowledge/protocol.md` (creating the file with its header if missing — see brainstorm/modeling/work skills for the header template):
+After the report clears the review gate, compose the entry's `title`/`body` yourself and prepend it via the **`log`** mechanics verb (agentic-workflow-fn59c) — never a hand file edit; it calls `readProtocolOrDefault` internally, so nothing here creates `protocol.md` by hand even if it's missing:
+
+```
+node -e "<the same env-free bootstrap modeling/SKILL.md's PROMOTE flow uses, targeting lib/task-lifecycle-cli.mjs>" log '{"title":"Research: [topic]","body":"**Type:** Research\n**Requested by:** brainstorm | model | work | user\n**Report:** knowledge/research/<slug>-<date>.md\n**Review:** PASS (iteration N) | labeled-unverified (iteration 3) | skipped (no checkable claims)\n**Summary:** [2-3 bullet findings]"}'
+```
+
+It returns `{changed:[protocolPath], message:null, verb:'log', timestamp}` — fold `protocolPath` into this run's commit (see "Committing" below). Renders the exact shape below; kept as the human-readable contract, not a template to compose by hand:
 
 ```markdown
 ## YYYY-MM-DD HH:MM -- Research: [topic]
@@ -158,29 +164,39 @@ After the report clears the review gate, prepend an entry to `.agentheim/knowled
 ## Committing
 
 Research commits its own markdown once a report clears the review gate (PASS, SKIP, or the
-iteration-3 labeled-unverified outcome), so the working tree is clean after a research run.
-Commit doctrine (scoped `git add`, never `git add -A` / `git add .`, the message convention)
-lives in `references/commit-doctrine.md` (ADR-0026). Research can run while a `work`,
-`modeling`, or `quick-capture` session has its own in-flight files on the working tree, so the
-scoped-add rule is load-bearing here, not a style choice. After the indexing and protocol
+iteration-3 labeled-unverified outcome), so the working tree is clean after a research run,
+via the **`scoped-commit`** helper (`lib/scoped-commit.mjs`'s `runScopedCommit(cwd, paths,
+message)`), not a hand-composed `git add` + `git commit` (agentic-workflow-fn59c). Commit
+doctrine (scoped add, never `-A` / `.` / a glob, the message convention) lives in
+`references/commit-doctrine.md` (ADR-0026) — `scoped-commit` *enforces* the never-`-A`/`.`/
+glob half of that doctrine (`{ok:false, code:'invalid-path'}`) rather than leaving it
+prose-only. Research can run while a `work`, `modeling`, or `quick-capture` session has its
+own in-flight files on the working tree, so the scoped-add rule is load-bearing here, not a
+style choice — and `scoped-commit` retries `add`/`commit` independently, with a bounded
+backoff, on a sibling session's own `.git/index.lock` (agentic-workflow-pt0gy) — never delete
+`.git/index.lock` by hand; a live sibling may still hold it. After the indexing and protocol
 logging steps above:
 
-1. `git add` an **explicit, enumerated** list of *only* this run's artifacts: the new report
-   file (`.agentheim/knowledge/research/<slug>-<date>.md`), the `INDEX.md` it was inserted
-   into (the BC-local `contexts/<bc>/INDEX.md`, or the global `.agentheim/knowledge/index.md`),
-   and `.agentheim/knowledge/protocol.md`. If a citing task/ADR's `related_research` or Notes
-   were updated in the same pass, include that task/ADR file too. Never `git add -A` /
-   `git add .`.
+1. Call `scoped-commit` with an **explicit, enumerated** list of *only* this run's artifacts:
+   the new report file (`.agentheim/knowledge/research/<slug>-<date>.md`), the `INDEX.md`
+   `index-add` named in its `changed` (the BC-local `contexts/<bc>/INDEX.md`, or the global
+   `.agentheim/knowledge/index.md`), and `.agentheim/knowledge/protocol.md` (from `log`'s
+   `changed`). If a citing task/ADR's `related_research` or Notes were updated in the same
+   pass, include that task/ADR file too. Never `-A` / `.` — `scoped-commit` refuses either
+   outright.
 2. Commit silently (no confirmation prompt, matching the other markdown-producing skills) with:
    ```
    chore(<bc-or-global>): research <slug>
    ```
    Use the BC short-code when the report indexed BC-local; when it indexed globally, drop
    the scope token entirely (`chore: research <slug>`), matching the same no-token convention
-   used by `work`'s own multi-BC shapes.
+   used by `work`'s own multi-BC shapes. Runnable through the same env-free
+   homedir→cache→semver-max bootstrap used above, targeting `lib/scoped-commit.mjs`'s
+   `runScopedCommit` instead of the task-lifecycle CLI's `main` — see `modeling/SKILL.md`'s
+   "Committing" section for the full one-liner.
 3. When multiple parallel researchers each finish and clear their own gate independently,
-   commit each report separately with its own scoped add — don't batch several reports into
-   one commit.
+   commit each report separately with its own scoped `scoped-commit` call — don't batch
+   several reports into one commit.
 
 If the project isn't a git repo, skip the commit silently — write the files as before and
 report; the working-tree-clean guarantee only applies under git.

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 12:26 -- Task verified and completed: agentic-workflow-fn59c - Wire every remaining hand-written protocol, INDEX, and git edit in work, brainstorm, research, and quick-capture onto the locked lifecycle verbs (log, index-add, capture, bounce, reroute, scoped-commit), deleting the replaced prose, so main has exactly one class of writer per bookkeeping file project-wide
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-fn59c - Wire every remaining hand-written protocol, INDEX, and git edit in work, brainstorm, research, and quick-capture onto the locked lifecycle verbs (log, index-add, capture, bounce, reroute, scoped-commit), deleting the replaced prose, so main has exactly one class of writer per bookkeeping file project-wide
+**Summary:** Wired every remaining hand-written protocol/INDEX/git edit across work, brainstorm, research, and quick-capture onto the locked lifecycle verbs (log, index-add, capture, bounce, reroute, scoped-commit), deleting the replaced prose so main has exactly one class of writer per bookkeeping file project-wide.
+**Duration:** 26m14s
+**Verification:** PASS (iteration 1)
+**Files changed:** 4
+**Tests added:** 0
+**ADRs written:** none new; 0077-bounce-reroute-lifecycle-verbs.md amended in place (missing-to added to reroute's ladder; Consequences addendum)
+
+---
+
 ## 2026-09-06 12:00 -- Batch started: [agentic-workflow-fn59c]
 
 **Type:** Work / Batch start

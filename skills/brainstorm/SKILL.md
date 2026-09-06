@@ -212,23 +212,29 @@ If a foundational decision is made during this session (e.g., "we'll treat Custo
 
 ## Protocol logging
 
-`brainstorm` writes **one hand-formatted session entry**, prose-only and deliberately
-unmechanized (ADR-0059's mechanize-or-drop doctrine: composing N structurally-similar
-foundation-task registrations into one coherent session narrative is judgment work — the
-same three-layer boundary ADR-0038 draws elsewhere reserves narrative composition for the
-skill, not a git-free script). After the session produces artifacts, prepend this entry to
-`.agentheim/knowledge/protocol.md`. If the file doesn't exist, create it with:
+`brainstorm` writes **one hand-authored session entry**, prose-only and deliberately
+unmechanized in its *content* (ADR-0059's mechanize-or-drop doctrine: composing N
+structurally-similar foundation-task registrations into one coherent session narrative is
+judgment work — the same three-layer boundary ADR-0038 draws elsewhere reserves narrative
+composition for the skill, not a git-free script). Only the entry's **prepend** — the
+mechanical act of stamping a timestamp and splicing the entry into `protocol.md` — is
+mechanized (agentic-workflow-fn59c), via the `log` verb below; the narrative itself stays
+prose-only and hand-composed, exactly as ADR-0073 established. After the session produces
+artifacts, compose the entry's
+`title`/`body` yourself — the narrative stays hand-authored, only the **prepend** is
+mechanized (agentic-workflow-fn59c, mirroring `pt0gy`'s own deletion of this same dead
+hand-prepend from `modeling`) — via the `log` mechanics verb, never a hand file edit:
 
-```markdown
-# Protocol
-
-Chronological log of everything that happens in this project.
-Newest entries on top.
-
----
+```
+node -e "<the same env-free bootstrap modeling/SKILL.md's PROMOTE flow uses, targeting lib/task-lifecycle-cli.mjs>" log '{"title":"Brainstorm: [topic]","body":"**Type:** Brainstorm\n**Outcome:** vision created | vision revised | vision extended\n**BCs identified:** [list or \"none\"]\n**Summary:** [2-3 sentences on what was decided]\n**ADRs written:** [list of ADR ids or \"none\"]\n**Foundation tasks emitted:** [decision task ids, walking-skeleton id, styleguide id — or \"skipped\" with one-line reason]"}'
 ```
 
-Then prepend right after the `---` on line 4:
+It calls `readProtocolOrDefault` internally, so nothing here creates `protocol.md` by hand
+even on a fresh project — the header materializes on this first write if the file doesn't
+exist yet. It renders the exact shape below and returns `{changed:[protocolPath],
+message:null, verb:'log', timestamp}` — fold `protocolPath` into the session's commit (see
+"Committing" below). Kept as the human-readable contract (what the script actually writes),
+not as a template to compose by hand:
 
 ```markdown
 ## YYYY-MM-DD HH:MM -- Brainstorm: [topic]
@@ -252,9 +258,13 @@ happened, not one of several competing entries.
 
 For each BC created during this session:
 - Create `contexts/<bc>/INDEX.md` from `references/index-template.md` (per-BC index, mostly empty initially).
-- Insert a line under `<!-- bc-list:start -->` in `.agentheim/knowledge/index.md` (creating the file from the template first if needed).
+- Insert a line under `<!-- bc-list:start -->` in `.agentheim/knowledge/index.md` via the mechanized **`index-add`** verb (agentic-workflow-fn59c, ADR-0075) — never a hand-edit:
+  ```
+  node -e "<the same env-free bootstrap modeling/SKILL.md's PROMOTE flow uses, targeting lib/task-lifecycle-cli.mjs>" index-add '{"bc":null,"section":"bc-list","id":"<bc-name>","line":"- **<bc-name>** — <one-line purpose> — `contexts/<bc-name>/INDEX.md`"}'
+  ```
+  It returns `{ok:true, changed:[indexPath], skipped, verb:'index-add', id, message:null}` — fold `changed` into the session's commit (see "Committing" below) — or `{ok:false, code:'index-missing', ...}` on a fresh project whose `.agentheim/knowledge/index.md` doesn't exist yet: `index-add` never backfills a fresh template over what may be a live index, so build it from `references/index-template.md` by hand first, then re-run.
 
-For any global ADR written during the strategic phase (vision-level decisions), insert under `<!-- adr-global:start -->` in the top-level index.
+For any global ADR written during the strategic phase (vision-level decisions), insert under `<!-- adr-global:start -->` in the top-level index the same way: `index-add '{"bc":null,"section":"adr-global","id":"<ADR-id>","line":"<the composed one-line entry>"}'` — same `index-missing` recovery as above.
 
 For each `type: decision` / `type: spike` / `type: feature` task emitted during the architecture-foundation step (the walking skeleton, the styleguide, each decision task), **register it with the mechanized `capture` verb** (ADR-0038, ADR-0073) instead of hand-editing the BC's INDEX — composed **per task** (ADR-0042's precedent: composition owned by the caller), with the protocol write structurally suppressed since the session entry above is the record:
 
@@ -263,20 +273,20 @@ node -e "<the same env-free bootstrap modeling/SKILL.md's PROMOTE flow uses, tar
 ```
 
 This inserts the task's line into the BC's `<!-- todo-list:start -->` and increments its
-Todo count — no protocol read or write occurs for `protocolEntry: false` calls. `git add`
-each call's manifest `changed` path (the BC's `INDEX.md`) alongside the task file itself in
+Todo count — no protocol read or write occurs for `protocolEntry: false` calls. Fold
+each call's manifest `changed` path (the BC's `INDEX.md`) alongside the task file itself into
 the session's commit below.
 
 ## Committing
 
-`brainstorm` commits the markdown it produced, so the working tree is clean after a session. Commit doctrine lives in `references/commit-doctrine.md` (ADR-0026). After the session's artifacts, indexes, and protocol entry are written:
+`brainstorm` commits the markdown it produced, so the working tree is clean after a session, via the **`scoped-commit`** helper (`lib/scoped-commit.mjs`'s `runScopedCommit(cwd, paths, message)`), not a hand-composed `git add` + `git commit` (agentic-workflow-fn59c). Commit doctrine lives in `references/commit-doctrine.md` (ADR-0026) — `scoped-commit` *enforces* the never-`-A`/`.`/glob half of that doctrine (`{ok:false, code:'invalid-path'}`) rather than leaving it prose-only, and retries `add`/`commit` independently, with a bounded backoff, on a sibling `modeling`/`quick-capture`/`work`/`research` session's own `.git/index.lock` (agentic-workflow-pt0gy) — never delete `.git/index.lock` by hand; a live sibling may still hold it. After the session's artifacts, indexes, and protocol entry are written:
 
-1. `git add` an **explicit, enumerated** list of *only* the files this session wrote or changed: `.agentheim/vision.md`, `.agentheim/context-map.md` (if produced), each new `contexts/<bc>/README.md` + `contexts/<bc>/INDEX.md`, every foundation task file (decision / walking-skeleton spike / styleguide) plus every BC's `INDEX.md` its `capture` call named in `changed` (including a BC's INDEX that already existed before this session), `.agentheim/knowledge/index.md`, any **strategic** ADR written this session, and `.agentheim/knowledge/protocol.md`. Never `git add -A` / `git add .`, per `references/commit-doctrine.md`.
+1. Call `scoped-commit` with an **explicit, enumerated** list of *only* the files this session wrote or changed: `.agentheim/vision.md`, `.agentheim/context-map.md` (if produced), each new `contexts/<bc>/README.md` + `contexts/<bc>/INDEX.md`, every foundation task file (decision / walking-skeleton spike / styleguide) plus every BC's `INDEX.md` any `capture`/`index-add` call named in `changed` (including a BC's INDEX that already existed before this session), `.agentheim/knowledge/index.md`, any **strategic** ADR written this session, and `.agentheim/knowledge/protocol.md` (from the "Protocol logging" `log` call's `changed`). Never `-A` / `.`, per `references/commit-doctrine.md` — `scoped-commit` refuses either outright.
 2. Commit with a single message for the session:
    ```
    chore(<bc-or-global>): brainstorm <topic> — vision created | vision revised | vision extended
    ```
-   One commit for the session is fine — brainstorm produces one coherent foundation drop, not a stream of independent tasks.
+   One commit for the session is fine — brainstorm produces one coherent foundation drop, not a stream of independent tasks. Runnable through the same env-free homedir→cache→semver-max bootstrap used above, targeting `lib/scoped-commit.mjs`'s `runScopedCommit` instead of the task-lifecycle CLI's `main` — see `modeling/SKILL.md`'s "Committing" section for the full one-liner.
 
 **Do not commit the architect's foundation ADRs.** As the architecture-foundation step already states, those ADR drafts ride in the `Notes` of their `type: decision` tasks and are committed later by `work` when each decision task is executed — never from `brainstorm`. Only the *strategic* ADRs (vision-level decisions made in the Socratic phase) are committed here.
 

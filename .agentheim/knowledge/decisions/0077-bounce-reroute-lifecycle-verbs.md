@@ -155,7 +155,10 @@ old id.
 protocolPath, ...everyBacklinkFileTouched], message:'chore(<new-bc>): re-route <old-id> →
 <new-id> [<new-id>]', verb:'reroute', id:<old-id>, newId}`.
 
-**Rejections, fail-closed, nothing written:** `same-bc`; `not-in-backlog` (the task is neither
+**Rejections, fail-closed, nothing written:** `missing-to` (no `opts.to` named -- the target
+bounded-context is the one judgment input this verb needs and cannot infer one; added to this
+ladder's text by agentic-workflow-fn59c -- the code path itself shipped with this task, see
+`lib/task-lifecycle-capture-dismiss.mjs`); `same-bc`; `not-in-backlog` (the task is neither
 in the source BC's `backlog/` nor does a retry-successor already exist); `unknown-bc` (no
 `contexts/<to>/` directory); `index-missing`; `lock-timeout`.
 
@@ -195,3 +198,29 @@ codes are meant to name each verb's own domain vocabulary, not share a wire form
 
 Builds on ADR-0007, ADR-0038, ADR-0054, ADR-0055, ADR-0059, ADR-0068, ADR-0073, ADR-0074,
 ADR-0075. Amends **ADR-0028** with a new §8 (re-routing).
+
+## Consequences addendum (agentic-workflow-fn59c, 2026-09-06)
+
+Wiring every remaining hand-written protocol/INDEX/git surface in `work`, `brainstorm`,
+`research`, and `quick-capture` onto `log`/`index-add`/`capture`/`bounce`/`reroute`/
+`scoped-commit` (agentic-workflow-fn59c) closes the last gap this ADR's own Consequences
+section named: "every remaining hand-writer ... has a locked, tested verb to be wired onto
+by agentic-workflow-fn59c." That wiring is done. `main` now has exactly **one class of
+writer per bookkeeping file, project-wide** -- not just on the modeling side (pt0gy) and not
+just for the two verbs this ADR ships (bounce/reroute) -- across every markdown-producing
+skill and `work`'s own remaining git-authority commits.
+
+**This wiring is prose-only by nature (ADR-0059).** Every row fn59c's task touched is a
+skill-prose change describing which verb to call and which manifest fields to commit -- no
+`lib/` behavior changed, and this is a prose-to-prose rewrite that calls an already-tested
+verb: the verb's own rejection ladder (this ADR, `node --test`-covered) is the enforcement
+floor for every call site fn59c wired, and a live-tree grep across `skills/*/SKILL.md` and
+`agents/*.md` for the retired hand-prepend/hand-insert/`git add`+`git commit` idioms
+(recorded in agentic-workflow-fn59c's Outcome) is this task's own falsifiable check that the
+sweep is complete as specified.
+
+**`missing-to` amendment.** `reroute`'s rejection ladder above is corrected to include
+`missing-to` -- present in `rerouteTaskLocked` (`lib/task-lifecycle-capture-dismiss.mjs`)
+since this ADR's own code shipped, but omitted from this ADR's §3 ladder text at the time.
+No code changed; only this ADR's own prose is brought into agreement with the code it
+describes.
