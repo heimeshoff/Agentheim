@@ -4,7 +4,7 @@ title: Task ids carry a short random token tail, replacing sequential integers; 
 scope: global
 status: proposed
 date: 2026-06-17
-related_tasks: [agentic-workflow-077]
+related_tasks: [agentic-workflow-077, agentic-workflow-qd24q]
 related_adrs: [0001, 0012, 0017, 0022, 0026]
 ---
 
@@ -186,6 +186,38 @@ foundation task has no two-writer race to protect against. Reservation is strict
 and keeps the gate references literal and greppable. For *this* repo the point is moot —
 `design-system-001-styleguide` already exists as a kept legacy id — but the reservation rule
 is what makes the gate survive in a **new** project.
+
+### 8. Re-routing across bounded contexts (amends, agentic-workflow-qd24q / ADR-0077)
+
+A cross-BC move of a backlog task (`reroute`) cannot keep the moved task's id. The id is a
+composite `{context, token}` value (§1 above): the `<bc>-` prefix is not decoration, it is
+load-bearing — `deriveContext(id)` is a pure prefix parse with no fallback, and
+`promoteTask`/`completeTask`/the vestigial `findMovedFromDoingPath` all default their BC
+through it with no explicit `context` override supplied by any current skill. `captureTask`
+additionally fail-closes a frontmatter `context:` that disagrees with the id-derived prefix
+(`context-mismatch`). A re-route that kept the old id and merely rewrote `context:` in
+frontmatter would therefore mint exactly the state `captureTask` already refuses to accept,
+and would silently disagree with `deriveContext` everywhere else the id is used.
+
+**Decision: `reroute` mints a fresh `<to-bc>-<token>` id via the new `mintTaskId(context)`
+(`lib/id-grammar.mjs`) and retires the old id, rather than keeping it under the new BC.** The
+token is generated randomly, exactly per §1 (never by scanning history), and verified against
+`classifyTaskId` before use (the ADR-0044 backstop). This is the first CODE call site that
+mints an id — every other minting instruction in this ADR (§6) is agent prose a skill
+executes; `reroute` is a mechanized verb with no agent turn in the loop to hand-pick a token,
+so the mint itself had to become code.
+
+Because the old and new ids are *different* (unlike every other mechanized move in this
+project, which preserves the id across a folder transition), the retired-old/minted-new pair
+needs its own crash-retry idempotence story: the new file carries a `rerouted_from: <old-id>`
+frontmatter field, which a retry scans the target BC's `backlog/` for before minting anything,
+reusing the found successor's id rather than manufacturing a second one. See
+`agentic-workflow-qd24q`'s ADR-0077 for the full verb contract, its manifest, and its
+rejection ladder.
+
+This section amends §1's scope statement only insofar as a token is now also minted by code,
+not only by agent prose — the token grammar itself (§1) and the collision model (§2) are
+unchanged and govern the code-minted case identically.
 
 ## Consequences
 

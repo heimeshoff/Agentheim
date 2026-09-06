@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 11:49 -- Task verified and completed: agentic-workflow-qd24q - Build the two count-coupled lifecycle verbs pt0gy could not cover — `bounce` (doing → backlog under its own mover policy, worker note riding the mover's single write) and `reroute` (cross-BC backlog move that mints a new id, retires the old, re-points every backlink)
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-qd24q - Build the two count-coupled lifecycle verbs pt0gy could not cover — `bounce` (doing → backlog under its own mover policy, worker note riding the mover's single write) and `reroute` (cross-BC backlog move that mints a new id, retires the old, re-points every backlink)
+**Summary:** Two more locked lifecycle verbs — bounce (doing → backlog under its own LEGAL_MOVES.bounce policy key, the Worker note riding applyTaskMove's single destination write through a new transformBody hook) and reroute (cross-BC backlog → backlog move that mints a fresh <to-bc>-<token> id via mintTaskId, retires the old id, carries a rerouted_from crash-retry marker, and re-points every project-wide backlink by generalizing dismiss's traversal into mapIdsInField); both wired onto task-lifecycle-cli with full fail-closed rejection ladders (ADR-0077, ADR-0028 §8).
+**Duration:** 28m30s
+**Verification:** PASS (iteration 1)
+**Files changed:** 8
+**Tests added:** 25
+**ADRs written:** 0077-bounce-reroute-lifecycle-verbs.md; 0028-collision-resistant-task-ids-short-random-token.md amended in place (new §8)
+
+---
+
 ## 2026-09-06 11:19 -- Batch started: [agentic-workflow-qd24q]
 
 **Type:** Work / Batch start

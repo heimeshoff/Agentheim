@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-qd24q
 title: Build the two count-coupled lifecycle verbs pt0gy could not cover — `bounce` (doing → backlog under its own mover policy, worker note riding the mover's single write) and `reroute` (cross-BC backlog move that mints a new id, retires the old, re-points every backlink)
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-09-06
@@ -9,7 +9,7 @@ completed:
 depends_on: [agentic-workflow-pt0gy]
 blocks: [agentic-workflow-fn59c]
 tags: [concurrency, bookkeeping, mechanization, lifecycle-cli, lifecycle-verbs]
-related_adrs: [0007, 0026, 0028, 0038, 0054, 0055, 0059, 0068, 0073, 0074, 0075]
+related_adrs: [0007, 0026, 0028, 0038, 0054, 0055, 0059, 0068, 0073, 0074, 0075, 0077]
 related_research: []
 prior_art: [agentic-workflow-e4bjh, agentic-workflow-ghcaj, agentic-workflow-k5n8f, agentic-workflow-pt0gy, agentic-workflow-t7m4c]
 ---
@@ -165,3 +165,49 @@ dashboard; removing the vestigial `MOVED_FROM_DOING_FOLDERS` / `findMovedFromDoi
 in `task-lifecycle-cli.mjs` (already noted post-ghcaj); the merge-back ladder's rung-4
 `done → doing` revert prose in `work/SKILL.md`, dead for the same reason. Capture separately
 if wanted.
+
+## Outcome
+
+Built both verbs `agentic-workflow-pt0gy` left open, on the same three-layer boundary /
+compute-then-write / lifecycle-lock contract as `promote`/`claim`/`complete`/`capture`/
+`dismiss`:
+
+- **`bounce`** (`lib/task-lifecycle.mjs`: `bounceTask`/`bounceTaskLocked`) — moves
+  `doing → backlog` under a new, dedicated `LEGAL_MOVES.bounce` policy key on `applyTaskMove`
+  (never a widened `'skill'`). `applyTaskMove` gained one new optional hook,
+  `options.transformBody`, applied to the source content immediately before `rewriteStatus`
+  and published by the mover's single destination write — this is how `bounce`'s
+  `## Worker note` (built from the caller's `reason`) rides that one write instead of needing
+  a second, non-retriable write. Every pre-existing caller of `applyTaskMove` is untouched
+  (proven by the full pre-existing suite passing byte-for-byte). Rejects `not-found`,
+  `illegal-move`, `missing-reason`, `lock-timeout` with nothing written; a
+  `NODE_TEST_CONTEXT`-gated test-only crash injection proves the note survives an INDEX-write
+  failure.
+- **`reroute`** (`lib/task-lifecycle-capture-dismiss.mjs`: `rerouteTask`/`rerouteTaskLocked`)
+  — relocates a `backlog`-only task across bounded contexts, minting a fresh `<to>-<token>`
+  id via the new `mintTaskId`/`mintTaskToken` (`lib/id-grammar.mjs`) and retiring the old one.
+  The new file carries `rerouted_from: <old-id>` as its crash-retry idempotence marker,
+  written before the old file is unlinked (hand-rolled ADR-0055 ordering — this transition
+  never wraps `applyTaskMove`). Every project-wide `depends_on`/`blocks`/`prior_art`/
+  `related_tasks` backlink is re-pointed (never stripped) by generalizing `dismissTask`'s own
+  strip logic into a shared `mapIdsInField`/`renameIdInField` pair (`dismissTask`'s own tests
+  are unchanged and green). Rejects `same-bc`, `not-in-backlog`, `unknown-bc`,
+  `index-missing`, `lock-timeout` with nothing written.
+- Both verbs are wired onto `lib/task-lifecycle-cli.mjs`'s `HANDLERS`/`ARITY` tables
+  (`'id'`-arity, same argv shape as every other lifecycle verb).
+
+25 new `node --test` cases across four files cover both verbs' happy paths, every named
+rejection code, the `bounce` policy-key regression (`skill` still rejects `doing->backlog`),
+the `transformBody` seam (applied + omitted), the CLI wiring, and `mintTaskId`'s
+well-formedness/non-determinism. Full `lib/test/*.test.mjs` suite: 574/574 green.
+
+Recorded in ADR-0077 (both verb contracts, the rejected "widen `skill`" and "second write" /
+"write-source-in-place" alternatives, the mint-new-id decision with its `deriveContext`/
+`context-mismatch` hazard, the `rerouted_from` marker, backlog→backlog-only legality, and
+ADR-0059 enforcement declarations) and a new §8 on ADR-0028 (re-routing, amending it in
+place).
+
+Key files: `lib/task-lifecycle.mjs` (`LEGAL_MOVES.bounce`, `applyTaskMove`'s
+`transformBody`, `bounceTask`), `lib/task-lifecycle-capture-dismiss.mjs`
+(`mapIdsInField`/`renameIdInField`, `rerouteTask`), `lib/task-lifecycle-cli.mjs` (`bounce`/
+`reroute` wiring), `lib/id-grammar.mjs` (`mintTaskToken`/`mintTaskId`).
