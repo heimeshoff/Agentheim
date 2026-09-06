@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-e896r
 title: The `migrate` verb — `lib/layout-migration.mjs` moves a legacy `.agentheim/` into the two-root layout under the lifecycle lock, splits every per-BC INDEX losslessly, rewrites every pointer, and is idempotent; refuses a mixed tree; never touches this repo's own tree
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-09-06
@@ -159,3 +159,50 @@ the dashboard notice (hxq1g).
   `bc-list` needs *no* rewrite (its links already resolve into the knowledge half). The
   INDEX-split fork (verbatim vs. additive cross-half pointer) was settled additive.
 - Parent: agentic-workflow-g5ez5; decision record: ADR-0078.
+
+## Outcome
+
+Built and shipped `lib/layout-migration.mjs`'s `migrateLayout(rootDir, opts) → manifest`, wired
+as the `migrate` verb on `lib/task-lifecycle-cli.mjs` (`ARITY.migrate = 'opts'`, alongside
+`log`/`index-add`). It moves a legacy `.agentheim/contexts/` tree into ADR-0078's two-root
+`knowledge/`+`board/` layout: `board` layout → `{ok:true, noop:true, changed:[]}` zero-write
+no-op (unlocked); `mixed` → `{ok:false, code:'mixed-layout'}` naming the root, zero writes;
+`legacy` → under `withLifecycleLock` (ADR-0075), renames every lifecycle folder / `done-archive/`
+/ README / `concepts/` / the design-system `styleguide/` / root `vision.md` and `context-map.md`
+/ `protocol.md` and its archive dir into their board-layout destinations via plain
+`fs.renameSync` (so `git log --follow` survives across the move), splits each per-BC combined
+`INDEX.md` losslessly via the pure `splitIndexContent(text, bc)` into its task half and
+knowledge half (byte-verbatim except the adr-local/research-local relative-link depth rewrite
+plus exactly one new cross-half Pointers line per half, written through `writeFileAtomic`,
+ADR-0076), rewrites the two remaining stale-pointer surfaces via the pure
+`rewriteTopIndexPointers` and `rewriteReadmeContent`, refuses `worktree-active` when a live
+`aw/<task-id>` worker worktree is registered (read-only `git worktree list --porcelain`), and
+removes the emptied `contexts/` tree. `board/` is always created, even with zero BCs, closing
+the re-migrate-forever trap for a project whose `.agentheim/` exists but has populated neither
+root yet. Every getter call in the write phase passes an explicit `{layout}` opt — proved by a
+dedicated test against a genuinely mid-migration mixed tree — since `task-system-paths.mjs`'s
+getters throw `mixed-layout` on a bare re-detect.
+
+14 new `node --test` cases in `lib/test/layout-migration.test.mjs` (4 pure-function unit tests
+for `splitIndexContent`/the two pointer rewrites, plus 10 fixture-driven integration tests)
+cover every acceptance criterion: the full multi-BC legacy fixture (byte-identical moves,
+lossless INDEX-split union check, zero stale references excluding `knowledge/index.md`'s
+`bc-list` block, every rewritten link resolving); the "no `contexts/` at all" fixture and its
+resulting idempotent second `migrate`; a second run's zero-write/mtime-unchanged idempotence; a
+mixed-fixture refusal; the layout-override discipline against a real transiently-mixed tree; a
+spawned two-process proof that `migrate` holds the lifecycle lock for its whole write phase
+against a concurrent `log` call (mirroring pt0gy/dpbjj's `holdMs` harness); a forced
+`injectFailureAfterWrite` proof that every rewritten file goes through `writeFileAtomic` with no
+truncation; `runCli`'s verb-table/usage-line wiring and manifest shape; a real-git
+`worktree-active` refusal; and `runScopedCommit` + `git log --follow` against the migrated
+fixture. Full suite: `node --test lib/test/*.test.mjs` reports 628/628 passing (614 pre-existing
++ 14 new), 0 failing. `cd dashboard && npm test` (after temporarily linking
+`dashboard/node_modules` via `linkDashboardNodeModules`, then unlinking again before returning,
+since this task doesn't touch `dashboard/` and so gets no automatic link): 984/984 passing. This
+repo's own `.agentheim/` was never touched and still detects `legacy`.
+
+Key files: `lib/layout-migration.mjs` (new), `lib/task-lifecycle-cli.mjs` (wired `migrate` into
+`OPTS_HANDLERS`/`ARITY`), `lib/test/layout-migration.test.mjs` (new).
+
+Out of scope (per this task): wiring `migrate` into skill prose (agentic-workflow-zgav8) and
+running it against this repo's own tree (agentic-workflow-tgr31).

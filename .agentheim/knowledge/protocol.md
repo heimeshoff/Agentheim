@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 15:36 -- Task verified and completed: agentic-workflow-e896r - The `migrate` verb — `lib/layout-migration.mjs` moves a legacy `.agentheim/` into the two-root layout under the lifecycle lock, splits every per-BC INDEX losslessly, rewrites every pointer, and is idempotent; refuses a mixed tree; never touches this repo's own tree
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-e896r - The `migrate` verb — `lib/layout-migration.mjs` moves a legacy `.agentheim/` into the two-root layout under the lifecycle lock, splits every per-BC INDEX losslessly, rewrites every pointer, and is idempotent; refuses a mixed tree; never touches this repo's own tree
+**Summary:** Built the `migrate` verb (`lib/layout-migration.mjs`, wired onto `lib/task-lifecycle-cli.mjs`) that moves a legacy `.agentheim/` tree into the ADR-0078 two-root `knowledge/`+`board/` layout under the lifecycle lock — splitting every per-BC INDEX losslessly, rewriting stale pointers, refusing a mixed tree or a live worker worktree, and behaving idempotently — proved entirely against fixtures without touching this repo's own (still-legacy) tree.
+**Duration:** 28m46s
+**Verification:** PASS (iteration 1)
+**Files changed:** 3
+**Tests added:** 14
+**ADRs written:** none
+
+---
+
 ## 2026-09-06 15:06 -- Batch started: [agentic-workflow-e896r, agentic-workflow-hxq1g]
 
 **Type:** Work / Batch start
