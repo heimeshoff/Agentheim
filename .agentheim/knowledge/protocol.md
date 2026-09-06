@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 02:07 -- Task verified and completed: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
+**Summary:** Worker branch carries source and tests only; the conductor materializes README delta / ADR / task-move / backlog-item bookkeeping on main at squash-merge integration (new lib/readme-delta.mjs, lib/worker-result.mjs, materializeTaskFile, bookkeeping-path checkpoint refusal, bookkeepingSalvagePath); ADR-0074 amends ADR-0032 §3/§4/§6. Landed on iteration 6 after the builder bounded the doctrine-consistency sweep; README conflict with e4bjh resolved through the ADR-0072 ladder
+**Duration:** 12m (iteration 6 dispatch 01:54 → verdict 02:06; 3h09m lifetime from the 22:57 batch start)
+**Verification:** PASS (iteration 6 — first verification under the refined bounded-sweep criterion; iterations 1–5 FAILed on residual pre-ghcaj prose; ADR-0072 ladder rung 6 re-verify against base b10cf83)
+**Files changed:** 25
+**Tests added:** 0
+**ADRs written:** ADR-0074 (provisional 0073, finalized per ADR-0058)
+
+---
+
 ## 2026-09-06 01:55 -- Modeling / Refined: agentic-workflow-ghcaj - Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report
 
 **Type:** Modeling / Refine

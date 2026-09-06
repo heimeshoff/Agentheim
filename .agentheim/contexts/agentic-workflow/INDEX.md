@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 2
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 188
+- **Doing:** 0
+- **Done:** 189
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-ghcaj** — Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report (refactor) — `doing/agentic-workflow-ghcaj-worker-branch-code-only-conductor-writes-bookkeeping.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-ghcaj** — Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report (refactor) — `done/agentic-workflow-ghcaj-worker-branch-code-only-conductor-writes-bookkeeping.md`
 - **agentic-workflow-e4bjh** — Finish the bookkeeping mechanization — capture and dismiss verbs on the lifecycle CLI (refactor) — `done/agentic-workflow-e4bjh-capture-dismiss-lifecycle-cli-verbs.md`
 - **agentic-workflow-pcwnn** — Merge-back conflict ladder — merge the new main into the loser's worktree, let the worker resolve the real conflict, re-verify against the new base, and escalate to the builder only as the last rung (feature) — `done/agentic-workflow-pcwnn-merge-back-conflict-rebase-reverify-worker-resolves.md`
 - **agentic-workflow-rw6ck** — Hovering a card re-renders that card and its ring targets, not all 255 — memoized board cards and columns, hover state out of the board root, identity-stable tree projection (refactor) — `done/agentic-workflow-rw6ck-memoized-board-hover-scoped-identity-stable-projection.md`
@@ -45,6 +45,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0074** — Worker branch carries source and tests only: the worker reports README_DELTA / ADRS / OUTCOME / BACKLOG_ITEMS blocks and the conductor materializes them on main at squash-merge (two-op README delta grammar with a monotone invariant, conductor-merges-prose rule, on-main task-file annotations, bookkeeping-path checkpoint refusal); amends ADR-0032 §3/§4/§6. Implements agentic-workflow-ghcaj — `knowledge/decisions/0074-worker-branch-source-and-tests-only-conductor-materializes-bookkeeping.md`
 - **ADR-0073** — capture/dismiss mechanization: `capture` registers a skill-authored task file (never authors it), backfilling a missing INDEX only on an empty BC; `dismiss` is two-phase plan/confirm, cascades `depends_on` edges only with exact frontmatter-id matching, guards cascade-drifted / cascade-in-flight, writes INDEX → unlink → strip → protocol. Amends ADR-0022 — `../../knowledge/decisions/0073-capture-dismiss-mechanization-registration-not-authoring-depends-on-only-cascade-exact-id-matching.md`
 - **ADR-0072** — Merge-back conflict ladder: on a real squash conflict the conductor salvages the loser diff, merges `main` INTO the loser worktree (real merge, never rebase or stash), dispatches the same worker to resolve the U-path allow-list with both intents surviving, re-verifies against the new base, and escalates to the builder only last; one-shot budget per worktree. Amends ADR-0032, ADR-0037 — `../../knowledge/decisions/0072-merge-back-conflict-ladder-in-worktree-merge-worker-resolved-one-shot-budget.md`
 - **ADR-0071** — `work` argument grammar: `/agentheim:work <id> [<id>…]` scopes a run to the named todo ids (exact-match, fail-closed on unmet/dangling depends_on, refused with the actual lifecycle folder when not in todo/), ends after the named set is integrated/bounced/failed/escalated with no mid-run pickup, and records "scoped" on the Batch-started entry; bare `/agentheim:work` is unchanged. Enforced by the live-tree lint `lib/work-argument-grammar-section.mjs` (ADR-0059) — `../../knowledge/decisions/0071-work-scoped-run-argument-grammar.md`

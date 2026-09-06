@@ -13,7 +13,7 @@ Every commit `git add`s an **explicit, enumerated** list of only the files the a
 
 ## One task, one commit
 
-`work` folds all of a task's bookkeeping — the `doing → done` move, frontmatter rewrite, BC `INDEX.md` edits, ADR backlinks, and the `protocol.md` entry — into **one commit**, `git add`ed together with the worker's `FILE_LIST`, README, and ADRs. There is no separate post-commit write step, and no `commit: <sha>` frontmatter field.
+`work` folds all of a task's bookkeeping — the `doing → done` move, frontmatter rewrite, BC `INDEX.md` edits, ADR backlinks, and the `protocol.md` entry — into **one commit**, `git add`ed together with the worker's code `FILE_LIST`. **Post-ghcaj (agentic-workflow-ghcaj):** the README and ADR halves of that same commit are no longer part of the worker's stage — the worker branch carries source and tests only — they are the conductor's own materialization on `main` from the worker's `README_DELTA` and `ADRS` report blocks, staged alongside `FILE_LIST` in the same one commit. There is no separate post-commit write step, and no `commit: <sha>` frontmatter field.
 
 The `commit:` field is **dropped** (ADR-0026) — a task's commit is discoverable from `git log` via the `[<task-id>]` trailer in the commit message, not a stored SHA. Never add a `commit: <sha>` field and never amend a task file after committing.
 

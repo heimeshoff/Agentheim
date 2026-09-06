@@ -296,7 +296,7 @@ Keep the frontmatter values clean — **no inline `# …` comments** (the dashbo
 
 - `status` — one of `backlog | todo | doing | done` (also the lifecycle folder).
 - `type` — one of `feature | bug | refactor | chore | spike | decision`. A `spike` task's body must carry the **stop-loss clause** (ADR-0065, agentic-workflow-rx630): "if, mid-spike, the mitigation is already known and cheap, record it and stop" — verbatim or in substance, satisfying `lib/spike-stop-loss.mjs`'s live-tree lint. Without it a worker has no standing permission to end the spike early with a recorded mitigation. An "investigate why X" / "find out what's causing Y" capture is investigation-shaped even if it reads like a `bug` or `chore` at a glance — prefer `type: spike` for it so it gets the stop-loss clause and ADR-0065's ordering preference, rather than letting it escape that apparatus under a different label (agentic-workflow-f3wqm; declined mechanization, see the audit-closure ADR).
-- `completed` — left empty; the worker sets the date when the task is done. (No `commit:` field — ADR-0026 dropped it; found via `git log`'s `[<task-id>]` trailer.)
+- `completed` — left empty; the conductor sets the date when it applies the worker's reported `OUTCOME` at integration (post-ghcaj — the worker never edits its own task file). (No `commit:` field — ADR-0026 dropped it; found via `git log`'s `[<task-id>]` trailer.)
 - `depends_on` — list of task ids this one waits on; `blocks` is populated automatically by worker / refine.
 - `related_adrs` — ADR ids (e.g. `[0007]`); auto-populated by model at capture/refine, orchestrator appends ADRs it writes.
 - `related_research` — research slugs (e.g. `[auth-tokens-2026-04-24]`); auto-populated by model from the research index.

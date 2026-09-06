@@ -26,9 +26,11 @@ If `work` ran the checks inline, it would do so in the same context that just di
 The `work` skill spawns `verifier` per `skills/work/SKILL.md`'s **Verifier Prompt Template** —
 the authoritative source for the exact field list, restated here only as a pointer to avoid a
 second copy drifting out of sync. That template supplies: the task file's absolute path (in
-`doing/` or `done/`, inside the worktree), the BC name and README path, the worktree's absolute
-path, the iteration number, the diff, the worker's strict SUCCESS return block, a pre-resolved
-test command, a pre-resolved launch command, and pointers to `.agentheim/vision.md`,
+`doing/`, on `main` — read-only, agentic-workflow-ghcaj), the BC name and README path, the worktree's absolute
+path, the iteration number, the diff, the worker's strict SUCCESS return block, the **parsed
+bookkeeping blocks** (`readmeDelta` / `adrs` / `outcome` / `backlogItems` — agentic-workflow-
+ghcaj; there is no README/ADR diff to read, since the worker never writes those files), a
+pre-resolved test command, a pre-resolved launch command, and pointers to `.agentheim/vision.md`,
 `.agentheim/context-map.md`, and `.agentheim/knowledge/decisions/` for on-demand reading.
 
 The verifier is explicitly NOT given:
@@ -87,8 +89,8 @@ REASON: <why verification doesn't usefully apply to this task>
 
 The operational integration lives in `skills/work/SKILL.md`. In short:
 
-- **PASS** → move task to `done/` (if needed), commit, log "Task verified and completed" to protocol.md.
-- **FAIL, first or second attempt on this task** → append the verifier's REASONS to the task file as a `## Verifier note` block, revert the task's frontmatter `status: done` back to `status: doing`, move it back from `done/` to `doing/` if the worker already moved it, log "Verification failed" to protocol.md, **re-dispatch a worker** on the same task with the verifier note included in its prompt. Hard cap: 2 re-dispatches per task.
+- **PASS** → the conductor materializes the worker's reported bookkeeping on `main`, in order — README delta(s), ADR(s) + `finalizeAdrNumbering`, the `## Outcome` append, the real `doing → done` move (here, for the first time — the worker's worktree never touched the task file at all, agentic-workflow-ghcaj), any new backlog items — then commits once, and logs "Task verified and completed" to protocol.md.
+- **FAIL, first or second attempt on this task** → append the verifier's REASONS to the task file **on `main`** (there is no worktree copy to append to or revert — the file never moved out of `doing/` in the first place, post-ghcaj) as a `## Verifier note` block, log "Verification failed" to protocol.md, **re-dispatch a worker** on the same task with the verifier note included in its prompt. Hard cap: 2 re-dispatches per task.
 - **FAIL, third time on the same task** → do not re-dispatch. Before anything else, salvage the worktree's diff to a patch tagged `escalated-iterN` (ADR-0063) and append a `## Salvage note` to the task file naming the patch's absolute path — the worktree is kept, not removed, at this point, but a later discard (a subsequent session's Phase 1 recovery or session-end reconciliation) could still lose the fix if nothing was captured first. Leave the task in `doing/` with all accumulated verifier notes. Log "Verification failed — escalating to user" to protocol.md. Surface at end of batch, naming the salvaged patch's path explicitly.
 - **SKIP** → commit as on PASS, but the protocol entry reads "Task completed (verification skipped: <reason>)".
 
@@ -101,7 +103,7 @@ The user can disable verification for a `work` batch by invoking `work` with `--
 `work` also skips verification automatically when:
 - The project isn't a git repo (no diff to inspect)
 - A worker returned `RESULT: BOUNCED` or `RESULT: FAILED` (nothing to verify)
-- The task is `type: decision` AND the ADR was the only artifact AND `FILES_CHANGED == 1` (just the ADR file) — auto-SKIP without spawning the verifier.
+- The task is `type: decision` AND `FILES_CHANGED == 0` AND the worker's `ADRS` block carries exactly one entry (the ADR travels in the block, never as a file — agentic-workflow-ghcaj) — auto-SKIP without spawning the verifier.
 
 ## Anti-patterns
 

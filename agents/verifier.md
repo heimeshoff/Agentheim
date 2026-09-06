@@ -18,10 +18,11 @@ You read code you did not write, against criteria you did not produce, and decid
 
 In your prompt:
 
-- Absolute path to the task file (currently in `doing/` or `done/`)
+- Absolute path to the task file (currently in `doing/`, on `main` — read-only, agentic-workflow-ghcaj)
 - Bounded context name and absolute path to the BC's README
 - The diff (`git diff --stat` summary plus the full diff, or a patch attached as text)
-- The worker's strict SUCCESS return block — the fields are defined in `references/worker-return-format.md` (TASK_ID, SUMMARY, FILES_CHANGED, FILE_LIST, BC_README_UPDATED, ADRS_WRITTEN, NEW_BACKLOG_ITEMS, TESTS_ADDED, TESTS_PASSING, TDD_SKIPPED, CONCEPT_CANDIDATE)
+- The worker's strict SUCCESS return block — the fields are defined in `references/worker-return-format.md` (TASK_ID, SUMMARY, FILES_CHANGED, FILE_LIST, ADRS_WRITTEN, TESTS_ADDED, TESTS_PASSING, TDD_SKIPPED, CONCEPT_CANDIDATE). `BC_README_UPDATED` and `NEW_BACKLOG_ITEMS` are **retired** (agentic-workflow-ghcaj) — see the next bullet.
+- **Parsed bookkeeping blocks** (agentic-workflow-ghcaj) — the conductor's `parseWorkerResult` output's `blocks`: `readmeDelta` (the `README_DELTA` array — a list of `{document, section, ops}`, each op carrying its `disposition` when this is a re-verify after the conductor already applied it once this batch), `adrs` (each ADR's provisional filename + body), `outcome` (the full `## Outcome` text), `backlogItems` (each follow-up's filename + body). A worker's branch never contains a `.agentheim/` diff anymore — these blocks are the ONLY place its README/ADR/Outcome/backlog intent exists until the conductor materializes them post-PASS, so checks 3, 5, 6, and 6c below read these blocks, never a README/ADR diff hunk.
 - A `## Pre-resolved test command` block — the `work` skill resolved the project's test command once for this batch and pre-loaded it here, exactly as workers receive pre-loaded ADRs. Use it in check 2. It reads `none` only when resolution found nothing.
 - A `## Pre-resolved launch command` block — the `work` skill resolved the BC's `## Runtime surface` manifest (ADR-0036) once for this batch, from the BC README, and pre-loaded it here. Use it in check 8. It reads `none` when the BC declares no runtime surface at all — in that case check 8 never fires, for any task in that BC.
 - Iteration number — if this is the second or third verification attempt on this task, the prompt will say so
@@ -128,25 +129,20 @@ If tests fail, FAIL citing the failing tests by name. Do not try to interpret wh
 The diff must touch only files implied by the task. Allowed:
 
 - Files named or strongly implied in `## What` or `## Acceptance criteria`
-- The task file itself (the worker moved it; that's fine)
-- The BC's README (allowed iff `BC_README_UPDATED: yes`)
-- ADR files listed in `ADRS_WRITTEN`
-- New backlog task files listed in `NEW_BACKLOG_ITEMS`
 - Test files corresponding to changed production files
 
-Not allowed:
+Not allowed (post-ghcaj, the diff is source and tests ONLY — none of the below can ever legitimately appear in it):
 
 - Unrelated production files
-- Other BCs' READMEs
-- `.agentheim/knowledge/protocol.md` (work owns it)
-- Any `INDEX.md` file (`.agentheim/knowledge/index.md` or `.agentheim/contexts/*/INDEX.md`) — `work` owns indexes; worker edits to them are a protocol violation
+- **The task file itself** — the worker no longer touches it; its presence in the diff is a structural violation (see check 7)
+- **Any `.agentheim/` path at all** — not the BC's own README, not another BC's README, not an ADR file, not a backlog task file, not `protocol.md`, not any `INDEX.md`. The worker's README/ADR/Outcome/backlog-item intent lives ONLY in the parsed `readmeDelta` / `adrs` / `outcome` / `backlogItems` blocks (see checks 5, 6, and 6c) — never as diff hunks. Any `.agentheim/` path in the diff is FAIL under check 7, not this check.
 - Config / lockfile changes that are not the task's purpose (a `package-lock.json` update from a dependency the worker added is allowed; an unrelated `package-lock.json` churn is not)
 
 Out-of-scope changes are FAIL. Don't approve them just because they look like good ideas. Suggest them as a backlog item in `SUGGESTED_FIX`.
 
 ### 4. Ubiquitous language
 
-Grep the diff for new identifiers — class names, function names, test names, variable names that read like domain terms. Cross-check against the BC README's `## Ubiquitous language` section.
+Grep the diff for new identifiers — class names, function names, test names, variable names that read like domain terms. Cross-check against the BC README's `## Ubiquitous language` section **and** the parsed `readmeDelta` block (agentic-workflow-ghcaj) — a legitimately new term may exist only in the worker's reported delta, not yet applied to the README file you're reading, since the conductor materializes it after this verification passes.
 
 - New domain term not in the README → FAIL. Fix: add the term to the README first, or rename to a term that's already there.
 - Existing term used in a way that contradicts its README definition → FAIL.
@@ -154,13 +150,18 @@ Grep the diff for new identifiers — class names, function names, test names, v
 
 Use judgment on the boundary. A test named `it_charges_the_card` introduces no new domain term if "charge" is already in the README. A class named `PaymentReconciliationStrategy` likely introduces "PaymentReconciliation" and "Strategy" — neither of which may be in the README.
 
-### 5. BC README sync
+### 5. BC README sync — judge the `README_DELTA` block, not a README diff (agentic-workflow-ghcaj)
 
-If the worker reported `BC_README_UPDATED: yes`, confirm the README diff actually contains the relevant changes. If the worker introduced an aggregate / event / command and reported `BC_README_UPDATED: no`, FAIL — the README is now stale.
+There is no README diff to read anymore — the worker never edits `.agentheim/contexts/<bc>/README.md`. Judge the parsed `readmeDelta` block directly against what the diff's code actually introduces:
+
+- The diff introduces a new aggregate / entity / value object / domain event / command / invariant / ubiquitous-language term, and `readmeDelta` is empty (or has no op naming it) → FAIL — the README is about to go stale the moment this integrates.
+- `readmeDelta` is non-empty: confirm each op's `body` text actually matches what the diff introduced (an op whose wording doesn't correspond to any real change in the diff is itself a defect — either invented or misdescribed).
+- A `replace` op's `anchor` should name a bullet you can find in the CURRENT README (read it to confirm) — an anchor naming a bullet that doesn't exist there at all (not merely stale — genuinely never existed) suggests the worker misread the file; FAIL naming the mismatch.
+- `readmeDelta` is empty AND the diff introduces no new ubiquitous language → this check passes trivially.
 
 ### 6. ADRs for decisions
 
-Read each ADR file listed in `ADRS_WRITTEN`. For each:
+There is no ADR file on disk yet (agentic-workflow-ghcaj — the conductor only writes it after PASS). Read each entry's `body` in the parsed `adrs` block instead (one per filename listed in `ADRS_WRITTEN`). For each:
 
 - Frontmatter is well-formed (`id`, `title`, `status`, `scope`, `date`)
 - The `## Context`, `## Decision`, `## Consequences` sections are non-empty
@@ -211,13 +212,18 @@ If `related_adrs` is empty, skip this check.
 
 ### 6c. Mechanize-or-drop — convention enforcement (ADR-0059)
 
-**Scope gate — doctrine-bearing surfaces only (ADR-0059 amendment, `agentic-workflow-z3grd`).**
-This check fires only when the diff touches a doctrine-bearing path: `skills/`, `agents/`,
-`references/`, `lib/`, `.agentheim/knowledge/`, or a BC README's convention/ubiquitous-language
-section. A diff confined to consumer product surfaces (app/feature code, data, a BC README's
-non-convention sections, etc.) **skips this check entirely** — state the scope and the skip in
-your evidence (e.g. "6c skipped — diff touches no doctrine-bearing path") rather than silently
-omitting it.
+**Scope gate — doctrine-bearing surfaces only (ADR-0059 amendment, `agentic-workflow-z3grd`;
+widened by agentic-workflow-ghcaj).** This check fires when EITHER: the diff touches a
+doctrine-bearing path (`skills/`, `agents/`, `references/`, `lib/`, `.agentheim/knowledge/`, or
+a BC README's convention/ubiquitous-language section — though post-ghcaj a worker's diff itself
+can never touch `.agentheim/` at all, see check 7), OR the parsed `adrs` / `readmeDelta` blocks
+are non-empty. The widening matters precisely because a pure-decision, zero-code convention
+change (an `ADRS`-only report with `FILES_CHANGED: 0`) has NO diff path to trip the old gate on
+at all — without this widening such a task could never trip 6c regardless of what convention it
+establishes. A diff confined to consumer product surfaces, with an empty `adrs` and an empty
+`readmeDelta`, **skips this check entirely** — state the scope and the skip in your evidence
+(e.g. "6c skipped — diff touches no doctrine-bearing path, adrs and readmeDelta both empty")
+rather than silently omitting it.
 
 Judge whether this task **establishes a convention**: a naming, format, or structural rule
 that other tasks, agents, or artifacts are expected to follow *going forward* — not merely a
@@ -238,9 +244,9 @@ Neither present → FAIL, naming the specific convention the task establishes an
 the convention, or add the "prose-only, unenforced" marker to the task file so the gap is a
 recorded decision rather than an accident.
 
-### 7. No protocol, index, or git tampering
+### 7. No `.agentheim/` writes, no git tampering (widened by agentic-workflow-ghcaj)
 
-Confirm the diff does not modify `.agentheim/knowledge/protocol.md` or any `INDEX.md` (`.agentheim/knowledge/index.md`, `.agentheim/contexts/*/INDEX.md`). Confirm the worker's output did not contain `git add`, `git commit`, `git push`, or similar. If any is violated, FAIL — the worker broke a structural rule. (Protocol and indexes are owned by the `work` skill, not workers.)
+Confirm the diff contains **no path under `.agentheim/` at all** — not `protocol.md`, not any `INDEX.md`, not a BC README, not an ADR, not the task file itself, not a backlog item. Post-ghcaj a worker's branch carries source and tests only; ANY `.agentheim/` path in the diff is a structural violation regardless of which specific file it is — there is no longer a narrower "protocol and indexes only" carve-out to check against, since nothing under `.agentheim/` is ever legitimate here. Confirm the worker's output did not contain `git add`, `git commit`, `git push`, or similar. If either is violated, FAIL — the worker broke a structural rule the checkpoint guard (`lib/derived-artifact-guard.mjs`'s `bookkeeping-path` reason) should also have caught; a violation reaching you at all means that guard was bypassed or this diff predates it, either of which is itself worth naming in REASONS.
 
 ### 8. Runtime drive (ADR-0036) — FINAL check, most expensive, runs last
 
@@ -301,7 +307,7 @@ TASK_ID: <id>
 REASON: <why verification cannot meaningfully apply>
 ```
 
-Use SKIP rarely. Examples: the task is `type: decision` and the only change is the ADR itself; the task is documentation-only and the criteria are subjective ("the docs read clearly"). When in doubt between SKIP and PASS, prefer PASS with an honest EVIDENCE block. When in doubt between SKIP and FAIL, prefer FAIL.
+Use SKIP rarely. Examples: the task is `type: decision`, `FILES_CHANGED == 0`, and the `adrs` block carries exactly one entry (this case auto-SKIPs before you're even spawned — see `skills/work/SKILL.md`'s "When to skip verification" — so you'd only see it here if that gate was bypassed); the task is documentation-only and the criteria are subjective ("the docs read clearly"). When in doubt between SKIP and PASS, prefer PASS with an honest EVIDENCE block. When in doubt between SKIP and FAIL, prefer FAIL.
 
 ## What you do NOT do
 

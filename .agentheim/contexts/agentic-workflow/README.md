@@ -164,6 +164,46 @@ separate BC, but today the whole tool lives in this one.
   worktree remove`** — skipping it silently deletes the shared `node_modules`. Session-end
   reconciliation and recovery both walk `git worktree list --porcelain` alongside `git status
   --porcelain`. See ADR-0032, ADR-0037, ADR-0026, ADR-0007, ADR-0017, ADR-0028.
+- **Worker branch carries source and tests only — report-carried bookkeeping (amends ADR-0032
+  §3/§4/§6, agentic-workflow-ghcaj)** — a worker's private worktree/branch never writes under
+  `.agentheim/` again: not its README, not an ADR, not its own task file, not a backlog item.
+  Everything it would have written travels in four new fenced blocks on its `RESULT: SUCCESS`
+  (`README_DELTA`, `ADRS`, `OUTCOME`, `BACKLOG_ITEMS` — `references/worker-return-format.md`;
+  `BC_README_UPDATED` and the old id-only `NEW_BACKLOG_ITEMS` field are retired), parsed
+  mechanically by `lib/worker-result.mjs`'s `parseWorkerResult` (four-backtick fences so an
+  ADR body's own three-backtick code sample nests without ambiguity). The conductor
+  materializes all of it on `main`, sequentially, at squash-merge integration, in one commit
+  (ADR-0026 shape): `applyReadmeDelta` → write ADR file(s) + `finalizeAdrNumbering` (ADR-0058,
+  unchanged) → append `## Outcome` to the task file → `complete` (the real `doing → done` move,
+  here for the first time) → `materializeTaskFile` per backlog item → INDEX/backlink inserts.
+  `lib/readme-delta.mjs`'s `applyReadmeDelta(content, {section, ops})` is a two-op grammar —
+  `append` (a new bullet at a section's end) and `replace` (anchored on `(section, termHead)`,
+  the bullet's bold lead-in truncated at its first `(`, whitespace-collapsed; `expected` is an
+  optimistic precondition compared whitespace-collapsed) — deliberately **monotone**: no
+  `remove`, no `rename-section`, no section creation, preserving ADR-0041's own invariant that
+  only CONSOLIDATE (builder in the loop) may reduce a README's stated terms/invariants. A
+  `replace` whose `expected` no longer matches (a sibling landed first, the conductor's own
+  earlier write, or a concurrent `modeling` session) never clobbers or refuses — the conductor
+  **merges both intents onto the bullet** (`disposition: 'merged'`, pcwnn's authority rule:
+  never undo the other change, re-express your own on top), which is why ADR-0032's "no merge
+  is ever auto-guessed" clause stays intact: there is no git conflict here to auto-resolve,
+  only a prose merge the conductor — already the sole `main` writer and judgment layer — was
+  always going to make. A delta naming a missing section lands as `appended-fallback` into
+  `## Ubiquitous language`, never a silent drop. The checkpoint guard gained a second frozen
+  prefix, `.agentheim/` (`lib/derived-artifact-guard.mjs`'s `BOOKKEEPING_PATH_PREFIXES`,
+  reason `bookkeeping-path`), so a worker that still writes there is rendered inert, not
+  failed — ADR-0057's posture, extended. `checkpointFiles`'s moved-from-`doing/` detection
+  (agentic-workflow-w2njd) is now vestigial for the worker path (no task file ever moves
+  inside a worktree again) — kept with this note, not removed; a follow-up may clean it up.
+  BOUNCE no longer squash-merges at all: the conductor performs the `doing → backlog` move and
+  the `## Worker note` directly on `main` from the worker's `REASON` alone. Task-file mid-batch
+  annotations (`## Verifier note`, `## Salvage note`, pcwnn's `## Merge-conflict note`) are now
+  conductor-written into `main`'s one copy of the task file, uncommitted between iterations —
+  the worker and the verifier are always handed that same absolute path; reading never needed
+  worktree isolation, only writing did. `main` now has **exactly one writer per `.agentheim/`
+  file on the `work` side** of this project (the parallel `modeling`-side sibling,
+  agentic-workflow-pt0gy, covers the modeling-session half of the same invariant). See
+  ADR-ghcaj (amends ADR-0032, backlinked to ADR-0057, ADR-0058, ADR-0063, ADR-0041, ADR-0072).
 - **Worktree-abandonment diff salvage (ADR-0063, agentic-workflow-hvqa4)** — every path that
   abandons a worker's worktree with un-merged changes still in it (FAIL-iteration-3
   escalation, BOUNCE, an orphaned worktree's "discard" disposition) captures the worktree's
@@ -233,6 +273,15 @@ separate BC, but today the whole tool lives in this one.
   <changed>` stages the deletion half of the rename, not just the addition. Without this, the
   wip commit's tree held the task file in both lifecycle folders at once. See ADR-0057,
   ADR-0003, ADR-0032, ADR-0038.
+  **Post-ghcaj (agentic-workflow-ghcaj):** `refused` is no longer a single family — the guard
+  now refuses two prefix lists, `derived-artifact` (`dashboard/dist/`, unchanged) and
+  `bookkeeping-path` (`BOOKKEEPING_PATH_PREFIXES`, `.agentheim/`), since the worker branch
+  carries source and tests only and any `.agentheim/` write it still made in its worktree is
+  silently dropped the same way. The moved-from-`doing/` detection described above is now
+  vestigial: a worker's `FILE_LIST` never names a task file at all (it names source and test
+  paths only), and no task file ever moves inside a worktree — the conductor performs the one
+  `doing → done`/`doing → backlog` move directly on `main` at integration. Kept, not removed,
+  pending a follow-up cleanup task.
 - **Vision-conformance check (session-end, ADR-0040, agentic-workflow-v6d4n)** — a bounded
   advisory pass folded into `work`'s end-of-run reporting, closing the Why→What loop. It reads
   exactly two named `vision.md` sections ("What success looks like", "Non-goals") plus the
@@ -1046,6 +1095,13 @@ separate BC, but today the whole tool lives in this one.
   ADR-0038 reserves for the skill. Both reuse `lib/task-lifecycle-cli.mjs` — `claim <id-1>,<id-2>,…`
   and `complete <task-id>` (with an optional JSON opts positional for `complete`'s richer
   bookkeeping fields). See ADR-0038, ADR-0007, ADR-0026, ADR-0032, ADR-0042, ADR-0054.
+  **Post-ghcaj (agentic-workflow-ghcaj, amending the paragraph above):** the ordinary path no
+  longer relies on `completeTask`'s `done/`-resolving branch to be a no-op — the worker branch
+  carries source and tests only (it never touches `.agentheim/`), so the CONDUCTOR performs the
+  real `doing → done` move on `main` at squash-merge integration step (d), the first time the
+  file moves at all. The `done/`-resolving idempotent branch described above is retained
+  purely for a resumed/interrupted session — a re-run of `complete` after a crash finds the
+  file already moved and is a true no-op there, not on the ordinary path.
 - **`captureTask` / `dismissTask`** — the git-free CAPTURE and DISMISS lifecycle scripts
   (ADR-0073, agentic-workflow-e4bjh), completing ADR-0038's mechanization boundary. Both live
   in a separate module, `lib/task-lifecycle-capture-dismiss.mjs`, wired into the same
@@ -1081,18 +1137,23 @@ separate BC, but today the whole tool lives in this one.
   direct-commit skill); not authoritative — a sibling worker in a different worktree can guess
   the same number and neither can see the other's file. **`finalizeAdrNumbering(decisionsDir,
   provisionalFilenames)`** — the AUTHORITATIVE step, conductor-only: called against `main`'s real
-  `decisions/` after a worker's `git merge --squash` stages its ADR file(s) but before the
-  integrating `git add`/commit. Exploits ADR-0032's "`main` written only by the conductor, only
-  sequentially" invariant — every OTHER `NNNN-*.md` file already in `decisionsDir` is by
-  construction already final. Assigns the provisional file(s) sequential numbers starting at the
-  true max + 1 REGARDLESS of their guessed number, so both a collision (a sibling already landed
-  the guess) and an over-guess (leaving a gap) are corrected by one uniform rule; on rename it
-  rewrites the file's filename + frontmatter `id:` + H1 heading and appends a "Note on ADR
-  numbering" trail, mirroring ADR-0038's own hand-written 0037→0038 renumbering precedent, now
-  automatic. Returns `{changed: [oldPath, newPath], renumbered: [{from, to, oldFilename,
-  newFilename}]}`, matching `applyTaskMove`'s rename manifest shape. A bounced/failed task's
-  provisional file is simply never passed to `finalizeAdrNumbering` (ADR-0032's FAIL quarantine —
-  nothing merges to `main`), so it never consumes a slot and leaves no hole. Git-free (ADR-0038):
+  `decisions/`. **Post-ghcaj (agentic-workflow-ghcaj):** the worker's `git merge --squash` no
+  longer stages any ADR file — the worker branch carries source and tests only, and each ADR
+  body travels in the RESULT block's `ADRS` fenced field instead. The conductor writes each
+  `ADRS` block's body directly to `decisions/` on `main` first, under its worker-guessed
+  provisional filename, and only then calls `finalizeAdrNumbering` against that same `main`
+  `decisions/`, ahead of the integrating `git add`/commit. Exploits ADR-0032's "`main` written
+  only by the conductor, only sequentially" invariant — every OTHER `NNNN-*.md` file already in
+  `decisionsDir` is by construction already final. Assigns the provisional file(s) sequential
+  numbers starting at the true max + 1 REGARDLESS of their guessed number, so both a collision (a
+  sibling already landed the guess) and an over-guess (leaving a gap) are corrected by one
+  uniform rule; on rename it rewrites the file's filename + frontmatter `id:` + H1 heading and
+  appends a "Note on ADR numbering" trail, mirroring ADR-0038's own hand-written 0037→0038
+  renumbering precedent, now automatic. Returns `{changed: [oldPath, newPath], renumbered:
+  [{from, to, oldFilename, newFilename}]}`, matching `applyTaskMove`'s rename manifest shape. A
+  bounced/failed task's `ADRS` block is simply never materialized to disk at all (post-ghcaj) —
+  there is no provisional file to pass to `finalizeAdrNumbering` or to clean up, so it never
+  consumes a slot and leaves no hole. Git-free (ADR-0038):
   plain `fs` rename + content rewrite, no `git` shell-out. Wired into `skills/work/SKILL.md`'s
   "Per ADR written" bookkeeping step, ahead of index insertion and backlinks. Scoped to the
   worktree/squash-merge (`work`) path only — `modeling`/`quick-capture`/`brainstorm`'s
@@ -1228,15 +1289,38 @@ separate BC, but today the whole tool lives in this one.
 
 ## Key events
 
-Past-tense, domain-language. Vision created · Bounded context identified · Idea captured ·
-Task refined · Task promoted · Task claimed · Task completed · Task verified · Task bounced ·
-Task dismissed · README consolidated · Decision recorded (ADR) · Research published · Research
-reviewed.
+Past-tense, domain-language (normalized to a bullet list, agentic-workflow-ghcaj — every
+`README_DELTA` target section now shares the same bullet-extent shape; `## Runtime surface`'s
+YAML fence stays the one deliberate exception, out of scope for deltas).
+
+- Vision created
+- Bounded context identified
+- Idea captured
+- Task refined
+- Task promoted
+- Task claimed
+- Task completed
+- Task verified
+- Task bounced
+- Task dismissed
+- README consolidated
+- Decision recorded (ADR)
+- Research published
+- Research reviewed
 
 ## Key commands
 
-Intents entering the context. Brainstorm · Quick Capture · Refine · Promote · Dismiss ·
-Consolidate · Work · Research · Dashboard.
+Intents entering the context (normalized to a bullet list, agentic-workflow-ghcaj).
+
+- Brainstorm
+- Quick Capture
+- Refine
+- Promote
+- Dismiss
+- Consolidate
+- Work
+- Research
+- Dashboard
 
 **Test command:** `node --test lib/test/*.test.mjs` (run from the repo root; the Node-25 explicit
 glob form is required — the bare-dir form `node --test lib/test/` finds nothing under Node 25).
