@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
+- **Backlog:** 6
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 196
@@ -45,12 +45,18 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-tgr31** — Dogfood the migration — run the `migrate` verb on this repo's own `.agentheim/` on `main`, commit it as one rename-detected scoped commit, and prove history, lints, and the dashboard survive; conductor-owned, never dispatched to a worker (chore) — `backlog/agentic-workflow-tgr31-dogfood-migrate-this-repo-agentheim-to-two-root-layout.md`
+- **agentic-workflow-hxq1g** — Dashboard reads the two-root layout — `tree.mjs` resolves through `task-system-paths`, BCs enumerate from `knowledge/contexts/` with orphan `board/` folders as warnings, the styleguide bundle and its 14 ESM imports re-point, and a legacy or mixed tree renders a "layout migration pending" notice; dist rebuilt (refactor) — `backlog/agentic-workflow-hxq1g-dashboard-two-root-layout-tree-styleguide-repoint-migration-notice.md`
+- **agentic-workflow-zgav8** — Prose sweep for the two-root layout — every skill, agent, and reference spells `board/` and `knowledge/contexts/`, the five entry skills run `migrate` as "Before acting" step 0, and a permanent live-tree lint fails on any reappearing legacy path literal (refactor) — `backlog/agentic-workflow-zgav8-skill-agent-reference-prose-sweep-step0-migrate-path-literal-lint.md`
+- **agentic-workflow-e896r** — The `migrate` verb — `lib/layout-migration.mjs` moves a legacy `.agentheim/` into the two-root layout under the lifecycle lock, splits every per-BC INDEX losslessly, rewrites every pointer, and is idempotent; refuses a mixed tree; never touches this repo's own tree (feature) — `backlog/agentic-workflow-e896r-migrate-verb-layout-migration-fixture-pointer-rewrite.md`
+- **agentic-workflow-cj54k** — One path module for the two-root layout — `lib/task-system-paths.mjs` with `detectLayout` (legacy / board / mixed) — and every lifecycle verb, rotation, and live-tree lint re-pointed through it, resolving both layouts during the transition; ADR-0078 accepted (refactor) — `backlog/agentic-workflow-cj54k-task-system-paths-module-dual-layout-repoint-lib.md`
 - **agentic-workflow-g5ez5** — Split the operational task system out of `contexts/` and `knowledge/` — every BC's lifecycle folders, `INDEX.md`, and the protocol log move to one dedicated folder, leaving BC READMEs in `contexts/` and durable knowledge in `knowledge/`, with an automatic on-upgrade migration of existing projects (refactor) — `backlog/agentic-workflow-g5ez5-split-task-system-folder-from-contexts-and-knowledge.md`
 <!-- backlog-list:end -->
 
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0078** — Two-root layout: `knowledge/` (vision, context map, ADRs, research, BC READMEs + knowledge-half INDEX) and `board/` (lifecycle folders, task-half INDEX, protocol); top-level `contexts/` retired; a lock-held `migrate` verb every skill runs before its own reads; `knowledge/contexts/` is the authoritative BC list (proposed) — `knowledge/decisions/0078-two-root-layout-knowledge-and-board-retiring-contexts-with-on-upgrade-migration.md`
 - **ADR-0077** — Two more locked lifecycle verbs: `bounce` (doing → backlog under its own `LEGAL_MOVES.bounce` key, Worker note riding `applyTaskMove`'s single write via a `transformBody` hook) and `reroute` (cross-BC backlog → backlog, mints a new id, `rerouted_from` retry marker, re-points every backlink); amends ADR-0028 §8. Implements agentic-workflow-qd24q — `knowledge/decisions/0077-bounce-reroute-lifecycle-verbs.md`
 - **ADR-0076** — Atomic write-temp-then-rename primitive (`lib/atomic-write.mjs`, `writeFileAtomic`): every INDEX.md / protocol.md / archive write, plus `applyTaskMove`'s destination write, `materializeTaskFile` and dismiss's backlink rewrites, goes through a same-directory temp file + `renameSync` with bounded EPERM/EBUSY retry; atomic against process death, not power loss (no fsync). Folds the duplicated `readNormalizedFile`/`writeNormalizedFile` pair. Implements agentic-workflow-vhz69 — `knowledge/decisions/0076-atomic-write-temp-then-rename-guarantee-boundary-and-routing.md`
 - **ADR-0075** — Lifecycle lock + `log` / `index-add` mechanics verbs + `scoped-commit`: serialize modeling-side bookkeeping instead of event-sourcing it (deferred to the rework's ReadModel port). One project-wide advisory lock (`lib/lifecycle-lock.mjs`, `openSync 'wx'`, dead-pid staleness) inside every capture-side writer; two opts-only verbs with a five-section deny-list; an index.lock-retrying scoped commit. Implements agentic-workflow-pt0gy — `knowledge/decisions/0075-lifecycle-lock-mechanics-verbs-scoped-commit.md`

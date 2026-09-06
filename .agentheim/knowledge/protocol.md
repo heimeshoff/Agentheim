@@ -5,6 +5,62 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 13:47 -- Modeling / Refined: agentic-workflow-g5ez5 - Third refinement: builder settled board/, INDEX.md for both halves, the migrate-verb trigger, and knowledge/contexts/ as the BC list; ADR-0078 written; split into five children plus the parent as closure
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog (parent is the closure task, depends on tgr31; cj54k auto-promotion follows as its own step)
+**Summary:** Builder settled the four open decisions, all on the recommended option: task-system folder `board/`; the knowledge-half INDEX keeps the filename `INDEX.md`; migration trigger is a `migrate` verb on the lifecycle CLI run as step 0 of every entry skill's Before acting; `knowledge/contexts/` is the authoritative BC list. An architect round grounded the split in the code and corrected three assumptions: scoped-commit accepts a directory pathspec and spawns git with an argv array (migration commit is one `.agentheim` pathspec, no argv seam); vacuum-guard / vision-conformance / session-start-churn carry no path literals; the dashboard app holds 14 literal styleguide ESM imports. Sequencing rule: main's live-tree lints walk this repo's real tree, so children 1-4 resolve both layouts via detectLayout, tgr31 moves the tree, and only the closure refuses legacy. Parent rewritten as the closure task (legacy refusal, scaffolding removal, fresh-project proof).
+**Split into:** agentic-workflow-cj54k (path module + lib re-point, no deps), agentic-workflow-e896r (migrate verb, after cj54k), agentic-workflow-zgav8 (prose sweep + step 0 + path-literal lint, after e896r), agentic-workflow-hxq1g (dashboard, after cj54k), agentic-workflow-tgr31 (dogfood migration of this repo, conductor-owned, after zgav8 + hxq1g); parent g5ez5 depends on tgr31
+**ADRs written:** ADR-0078 (proposed; cj54k flips it to accepted)
+
+---
+
+## 2026-09-06 13:47 -- Modeling / Captured: agentic-workflow-tgr31 - Dogfood the migration — run the `migrate` verb on this repo's own `.agentheim/` on `main`, commit it as one rename-detected scoped commit, and prove history, lints, and the dashboard survive; conductor-owned, never dispatched to a worker
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Child 5 of the g5ez5 split (ADR-0078): the dogfood run - migrate this repo's own .agentheim/ on main as one rename-detected scoped commit, conductor-owned (a worker cannot write .agentheim/), verified by history, lints, dashboard. Gate before the parent closure refuses legacy trees.
+
+---
+
+## 2026-09-06 13:47 -- Modeling / Captured: agentic-workflow-hxq1g - Dashboard reads the two-root layout — `tree.mjs` resolves through `task-system-paths`, BCs enumerate from `knowledge/contexts/` with orphan `board/` folders as warnings, the styleguide bundle and its 14 ESM imports re-point, and a legacy or mixed tree renders a "layout migration pending" notice; dist rebuilt
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Child 4 of the g5ez5 split (ADR-0078): dashboard tree resolves through task-system-paths, BCs enumerate from knowledge/contexts/ with orphan board folders as warnings, the styleguide bundle and 14 ESM imports re-point, legacy or mixed trees render a migration-pending notice, dist rebuilt. Parallel to e896r; needs only cj54k.
+
+---
+
+## 2026-09-06 13:47 -- Modeling / Captured: agentic-workflow-zgav8 - Prose sweep for the two-root layout — every skill, agent, and reference spells `board/` and `knowledge/contexts/`, the five entry skills run `migrate` as "Before acting" step 0, and a permanent live-tree lint fails on any reappearing legacy path literal
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Child 3 of the g5ez5 split (ADR-0078): prose sweep over skills, agents, and references to the board/ and knowledge/contexts/ paths, step-0 migrate in modeling, quick-capture, work, brainstorm, research, and the permanent legacy-path-literal lint with an enumerated exemption list.
+
+---
+
+## 2026-09-06 13:47 -- Modeling / Captured: agentic-workflow-e896r - The `migrate` verb — `lib/layout-migration.mjs` moves a legacy `.agentheim/` into the two-root layout under the lifecycle lock, splits every per-BC INDEX losslessly, rewrites every pointer, and is idempotent; refuses a mixed tree; never touches this repo's own tree
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Child 2 of the g5ez5 split (ADR-0078): the migrate verb and lib/layout-migration.mjs - lock-held, atomic, idempotent move of a legacy .agentheim/ into knowledge/ + board/, lossless per-BC INDEX split, pointer rewrite, refuses mixed trees and active worker worktrees. Fixture-proven only; never touches this repo's tree.
+
+---
+
+## 2026-09-06 13:47 -- Modeling / Captured: agentic-workflow-cj54k - One path module for the two-root layout — `lib/task-system-paths.mjs` with `detectLayout` (legacy / board / mixed) — and every lifecycle verb, rotation, and live-tree lint re-pointed through it, resolving both layouts during the transition; ADR-0078 accepted
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Child 1 of the g5ez5 split (ADR-0078): the single path module lib/task-system-paths.mjs with detectLayout (legacy / board / mixed), nine lib modules re-pointed through it, the INDEX template split in two, ADR-0078 accepted. Resolves both layouts so main stays green before the dogfood migration.
+
+---
+
 ## 2026-09-06 13:25 -- Modeling / Refined: agentic-workflow-g5ez5 - Full write-site inventory folded in: vision/context-map into knowledge/, per-BC INDEX split into task and knowledge halves, bc-list points at READMEs, styleguide moves with the design-system README
 
 **Type:** Modeling / Refine
