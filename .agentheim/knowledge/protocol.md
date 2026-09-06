@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 11:58 -- Modeling / Refined: agentic-workflow-fn59c - Wire every remaining hand-writer in work, brainstorm, research, and quick-capture onto the locked lifecycle verbs
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog (auto-promotion follows as its own step)
+**Summary:** Third refinement, the first since agentic-workflow-qd24q shipped (aad4a48, ADR-0077 + ADR-0028 §8), reconciling the wiring sweep against the verbs as actually built. Surface rows 1–14 re-confirmed live and row 15 empty by a fresh grep plus an architect round; no hand-write outside the list. Deltas folded in: row 2 now states bounce's real manifest and fail-closed ladder (not-found / illegal-move / missing-reason / lock-timeout) with the conductor's reaction to each and no hand-move fallback; row 5 corrects work's "Task bounced" template to the field set bounceTask writes (BC / From → To / Reason); row 14 commits reroute's open-ended `changed` array instead of quick-capture's fixed five-path sentence, echoes the manifest's `newId`, and lists the full ladder including `missing-to`; row 1's section pointer fixed to Phase 2 step 8; the ADR-amendment criterion names ADR-0077 explicitly. Frontmatter gains ADR-0028 and ADR-0077; ADR-0077's related_tasks gains this task. Dependency met — auto-promotion follows.
+**Split into:** none
+**ADRs written:** none (ADR-0077 gains this task in related_tasks; the task now cites it)
+
+---
+
 ## 2026-09-06 11:51 -- Work session ended
 
 **Type:** Work / Session end

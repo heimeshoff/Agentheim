@@ -4,7 +4,7 @@ title: Two more lifecycle verbs — a dedicated `bounce` policy key with a `tran
 scope: agentic-workflow
 status: accepted
 date: 2026-09-06
-related_tasks: [agentic-workflow-qd24q]
+related_tasks: [agentic-workflow-qd24q, agentic-workflow-fn59c]
 related_adrs: [0007, 0026, 0028, 0038, 0054, 0055, 0059, 0068, 0073, 0074, 0075]
 ---
 
