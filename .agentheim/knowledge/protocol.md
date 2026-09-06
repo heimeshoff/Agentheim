@@ -5,6 +5,25 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 11:51 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 31m (batch start 11:20 → 11:51; one batch — [qd24q] at dcad6e3, the whole ready set)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0) — agentic-workflow-qd24q
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-qd24q: 1
+**Commits:** 3 (batch-start claim dcad6e3, task integration aad4a48, and this entry)
+**ADRs written:** ADR-0077 (qd24q — bounce/reroute verbs, dedicated bounce policy key, transformBody seam, mint-new-id reroute with rerouted_from marker); ADR-0028 amended in place with §8 (re-routing across bounded contexts)
+**Vision-conformance:** none — batch aligns with vision. qd24q serves "Knowledge is durable" (every count-coupled bookkeeping move now goes through a locked, tested verb instead of hand prose) and "Independent work runs in parallel … without two workers colliding" (the modeling-side single-writer invariant pt0gy/ghcaj claim now has no verb-side hole). Nothing pulls toward Not-autonomous or any other non-goal — both verbs are opts-driven mechanics a skill invokes, never a self-initiated move.
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (1 task) — as rendered by formatBatchMixLine; in this repo lib/ is the product
+**Vacuum guard:** ready set empty after qd24q integrated — no substitute work self-generated (ADR-0064). Open question surfaced: "Brainstorm on existing code (next iteration)." (open 93 days). agentic-workflow-fn59c (the four-skill wiring sweep) is now unblocked in backlog and needs a `modeling` PROMOTE before the next `work` run can pick it up.
+**Conductor notes:** the installed 0.9.2 plugin cache still carries the pre-ADR-0074 work skill; conducted from the repo's own skills/work/SKILL.md. Session-start churn check: 4 commits since the 10:36 session end, 3 trailed modeling commits + 1 recognized machine-shape bookkeeping commit, 0 human commits, no governed-surface hits. The worker's transcript file was empty and its task notification arrived HTML-escaped; recovered by resuming the worker and having it write its RESULT block verbatim to a scratchpad file, which parseWorkerResult accepted. The ADR-0028 amendment was diffed against main before the in-place rewrite: only §8 added. Verifier notes carried forward (non-blocking): bounce's `missing-reason` test asserts INDEX unchanged tautologically; reroute's `missing-to` guard is a sixth rejection code neither named in ADR-0077's ladder nor directly tested. Merged-main lib suite 574/574.
+**Carry-over:** none — working tree clean; no worktrees remain (aw/agentic-workflow-qd24q squash-merged and removed)
+
+---
+
 ## 2026-09-06 11:49 -- Task verified and completed: agentic-workflow-qd24q - Build the two count-coupled lifecycle verbs pt0gy could not cover — `bounce` (doing → backlog under its own mover policy, worker note riding the mover's single write) and `reroute` (cross-BC backlog move that mints a new id, retires the old, re-points every backlink)
 
 **Type:** Work / Task completion
