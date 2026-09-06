@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 194
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-qd24q** — Build the two count-coupled lifecycle verbs pt0gy could not cover — `bounce` (doing → backlog under its own mover policy, worker note riding the mover's single write) and `reroute` (cross-BC backlog move that mints a new id, retires the old, re-points every backlink) (feature) — `todo/agentic-workflow-qd24q-remaining-hand-writers-onto-locked-verbs-bounce-reroute.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-qd24q** — Build the two count-coupled lifecycle verbs pt0gy could not cover — `bounce` (doing → backlog under its own mover policy, worker note riding the mover's single write) and `reroute` (cross-BC backlog move that mints a new id, retires the old, re-points every backlink) (feature) — `doing/agentic-workflow-qd24q-remaining-hand-writers-onto-locked-verbs-bounce-reroute.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

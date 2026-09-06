@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-qd24q
 title: Build the two count-coupled lifecycle verbs pt0gy could not cover — `bounce` (doing → backlog under its own mover policy, worker note riding the mover's single write) and `reroute` (cross-BC backlog move that mints a new id, retires the old, re-points every backlink)
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-09-06

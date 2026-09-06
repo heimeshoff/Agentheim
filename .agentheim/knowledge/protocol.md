@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 11:19 -- Batch started: [agentic-workflow-qd24q]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-qd24q - Build the two count-coupled lifecycle verbs pt0gy could not cover — `bounce` (doing → backlog under its own mover policy, worker note riding the mover's single write) and `reroute` (cross-BC backlog move that mints a new id, retires the old, re-points every backlink)
+**Parallel:** no (1 worker — the whole ready set; agentic-workflow-fn59c is the only other todo-adjacent task and stays in backlog behind PROMOTE's fail-closed dependency gate until this task is done)
+
+---
+
 ## 2026-09-06 11:17 -- Modeling / Promoted: agentic-workflow-qd24q - Build the two count-coupled lifecycle verbs pt0gy could not cover — `bounce` (doing → backlog under its own mover policy, worker note riding the mover's single write) and `reroute` (cross-BC backlog move that mints a new id, retires the old, re-points every backlink)
 
 **Type:** Modeling / Promote
