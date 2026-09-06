@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 15:53 -- Modeling / Promoted: agentic-workflow-zgav8 - Prose sweep for the two-root layout — every skill, agent, and reference spells `board/` and `knowledge/contexts/`, the five entry skills run `migrate` as "Before acting" step 0, and a permanent live-tree lint fails on any reappearing legacy path literal
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-06 15:53 -- Modeling / Refined: agentic-workflow-zgav8 - Prose sweep for the two-root layout — skills, agents, references spell `board/` and `knowledge/contexts/`, five entry skills run `migrate` as step 0, permanent legacy-path-literal lint
 
 **Type:** Modeling / Refine
