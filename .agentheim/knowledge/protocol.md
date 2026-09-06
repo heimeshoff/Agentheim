@@ -5,6 +5,25 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 12:28 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 28m (batch start 12:00 → 12:28; one batch — [fn59c] at 7975ee0, the whole ready set)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0) — agentic-workflow-fn59c
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-fn59c: 1
+**Commits:** 3 (batch-start claim 7975ee0, task integration 42f7af4, and this entry)
+**ADRs written:** none new; ADR-0077 amended in place (missing-to added to reroute's rejection ladder; Consequences addendum marking the fn59c wiring prose-only per ADR-0059 and stating one class of writer per bookkeeping file project-wide)
+**Vision-conformance:** none — batch aligns with vision. fn59c serves "Knowledge is durable" (every protocol/INDEX/git bookkeeping write in work, brainstorm, research, and quick-capture now goes through a locked, tested verb, so the diary and indexes cannot be silently corrupted by an interleaved hand edit) and "Independent work runs in parallel … without two workers colliding" (the conductor's own main-tree commits now retry a sibling's index.lock through scoped-commit). Nothing pulls toward Not-autonomous — every verb still takes its judgment inputs from the skill, and the builder gates are untouched.
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (1 task) — as rendered by formatBatchMixLine for a type: refactor task over four skills/*/SKILL.md files; in this repo the skills are the product
+**Vacuum guard:** ready set empty after fn59c integrated — no substitute work self-generated (ADR-0064). Open question surfaced: "Brainstorm on existing code (next iteration)." (open 93 days). todo/ and backlog/ are empty in every BC.
+**Conductor notes:** the installed 0.9.2 plugin cache still carries the pre-ADR-0074 work skill; conducted from the repo's own skills/work/SKILL.md, and this session's own integration commit, session-end log, and commit already use the runScopedCommit / log seams fn59c wires in. Session-start churn check: 2 commits since the 11:51 session end, both trailed modeling commits (fn59c refine + promote), 0 human commits, no governed-surface hits. The worker wrote its RESULT block to a scratchpad file on request, so parseWorkerResult read it byte-exact without the HTML-escaped-notification recovery of the last session. The ADR-0077 amendment was diffed against main before the in-place rewrite: only the missing-to ladder sentence and the addendum section changed. Verifier note carried forward (non-blocking, builder's eye): skills/work/SKILL.md's new Committing (scoped-commit) subsection lists the FAILED-path protocol entry among the add+commit pairs while the Task-failed template correctly says that entry never commits on its own — over-inclusive enumeration, not a contradicting call site. runScopedCommit needed 2 attempts on the integration commit (a transient index.lock). Merged-main lib suite 574/574.
+**Carry-over:** none — working tree clean; no worktrees remain (aw/agentic-workflow-fn59c squash-merged and removed)
+
+---
+
 ## 2026-09-06 12:26 -- Task verified and completed: agentic-workflow-fn59c - Wire every remaining hand-written protocol, INDEX, and git edit in work, brainstorm, research, and quick-capture onto the locked lifecycle verbs (log, index-add, capture, bounce, reroute, scoped-commit), deleting the replaced prose, so main has exactly one class of writer per bookkeeping file project-wide
 
 **Type:** Work / Task completion
