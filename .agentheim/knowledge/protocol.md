@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 11:58 -- Modeling / Promoted: agentic-workflow-fn59c - Wire every remaining hand-written protocol, INDEX, and git edit in work, brainstorm, research, and quick-capture onto the locked lifecycle verbs (log, index-add, capture, bounce, reroute, scoped-commit), deleting the replaced prose, so main has exactly one class of writer per bookkeeping file project-wide
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-06 11:58 -- Modeling / Refined: agentic-workflow-fn59c - Wire every remaining hand-writer in work, brainstorm, research, and quick-capture onto the locked lifecycle verbs
 
 **Type:** Modeling / Refine

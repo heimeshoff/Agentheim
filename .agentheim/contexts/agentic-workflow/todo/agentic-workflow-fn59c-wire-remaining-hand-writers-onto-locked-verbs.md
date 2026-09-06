@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-fn59c
 title: Wire every remaining hand-written protocol, INDEX, and git edit in work, brainstorm, research, and quick-capture onto the locked lifecycle verbs (log, index-add, capture, bounce, reroute, scoped-commit), deleting the replaced prose, so main has exactly one class of writer per bookkeeping file project-wide
-status: backlog
+status: todo
 type: refactor
 context: agentic-workflow
 created: 2026-09-06
