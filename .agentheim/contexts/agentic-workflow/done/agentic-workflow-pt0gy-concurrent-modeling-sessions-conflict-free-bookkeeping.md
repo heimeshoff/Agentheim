@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-pt0gy
 title: Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-09-05
@@ -9,7 +9,7 @@ completed:
 depends_on: [agentic-workflow-e4bjh]
 blocks: [agentic-workflow-qd24q]
 tags: [concurrency, bookkeeping, mechanization, rework, lifecycle-cli]
-related_adrs: [0026, 0038, 0039, 0054, 0055, 0059, 0070, 0073, 0074]
+related_adrs: [0026, 0038, 0039, 0054, 0055, 0059, 0070, 0073, 0074, 0075]
 related_research: [work-session-presence-lock-2026-06-15]
 prior_art: [agentic-workflow-k5n8f, agentic-workflow-r2c7m, agentic-workflow-wq7fn, agentic-workflow-e4bjh, agentic-workflow-t7m4c]
 ---
@@ -229,3 +229,94 @@ mechanized) and gains `scoped-commit` — it is covered.
 
 Captured via `modeling` on 2026-09-05, same conversation as `agentic-workflow-ghcaj`; refined
 2026-09-06.
+
+## Verifier note (iteration 1)
+
+**Verdict:** FAIL — 2026-09-06 10:17
+
+**REASONS:**
+- Acceptance criterion 3 ("`log` and `index-add` … covered for every rejection code named in What §2") is not fully covered: What §2 names `lock-timeout` as one of `log`'s eight rejection codes, and no test anywhere in the diff exercises `log` or `index-add` under a held lock. `lib/test/task-lifecycle-cli-mechanics.test.mjs` covers `missing-opts`, `missing-title`, `invalid-title` (×2), `missing-body`, `heading-in-body`, `separator-in-body`, `bookkeeping-marker-mismatch` for `log`, and the full `index-add` ladder — but never `lock-timeout` for either verb. `grep -n "lock-timeout" lib/test/` returns hits only in `lifecycle-lock.test.mjs` (the primitive) and `lifecycle-lock-integration.test.mjs` (the seven pre-existing writers).
+- Coupled to the above, acceptance criterion 1 names `log` and `index-add` alongside the seven writers as lock sites, and criterion 9 requires "the lock placement … ship[s] with [its] enforcement in the tests above". `lib/test/lifecycle-lock-integration.test.mjs` deliberately covers one case per writer function (`promoteTask`, `claimBatch`, `completeTask`, `captureTask`, `dismissTask` confirm, `rotateProtocol`, `rotateIndexDoneList`) plus the unlocked plan phase — but stops there. The two new verbs' lock wrappers (`lib/task-lifecycle-cli.mjs:252` `logEntry` → `withLifecycleLock`, `lib/task-lifecycle-cli.mjs:379` `indexAdd` → `withLifecycleLock`) are asserted by nothing: deleting either wrapper leaves the whole 540-test suite green, since the concurrency proof (`task-lifecycle-cli-mechanics.test.mjs:488`) drives `capture`, not `log`/`index-add`. That is precisely the invariant this task exists to protect, left un-mechanized on the two surfaces the task itself introduces.
+- Minor, non-blocking, worth fixing in the same pass: `lib/test/lifecycle-lock-integration.test.mjs:6-7` points at `task-lifecycle-cli.test.mjs` for the concurrency proof; the proof actually lives in `lib/test/task-lifecycle-cli-mechanics.test.mjs`.
+
+Everything else checked out and should not be re-litigated on re-dispatch: the runner is green (`node --test lib/test/*.test.mjs` in the worktree — 540 pass / 0 fail, exit 0, no skips); the concurrency proof genuinely spawns two real `child_process.spawn`ed CLI processes and asserts both exits 0, both ids in `backlog-list`, `**Backlog:**` == `readdirSync(backlogDir).length`, and `## ` heading count +2; no existing writer function or test became `async` (`withLifecycleLock` is synchronous, `runScopedCommit` is the only async addition and has no existing callers); `lib/scoped-commit.mjs` refuses `-A`/`.`/globs, retries each step independently, never unlinks `index.lock`, and pins `attempts: 6` on exhaustion at the default backoff; both skill files are fully rewired with no hand-composed `git add`/`git commit` or hand-prepended protocol entry left, the REFINE-split count defect is fixed and the dead protocol-header template is replaced by a pointer; quick-capture's re-route carries the explicit ADR-0059 prose-only disposition naming `agentic-workflow-qd24q`; ADR-0075's frontmatter, Context/Decision/Consequences, alternatives, and both named residuals are all present and non-trivial; the diff touches no `.agentheim/` path, no `INDEX.md`, no `protocol.md`, and no other BC (ADR-0074 compliant); check 8 does not fire (no `dashboard/**` path touched).
+
+**SUGGESTED_FIX:** Add two tests to `lib/test/task-lifecycle-cli-mechanics.test.mjs` (or extend `lifecycle-lock-integration.test.mjs`) that pre-hold `lifecycleLockPath(root)` with the test process's own live pid, then assert `runCli(['log', …], {taskOpts:{lock:{timeoutMs:100,waitIntervalMs:20}}})` and `runCli(['index-add', …], {…})` each return `{ok:false, code:'lock-timeout'}` with `protocol.md`/`INDEX.md` byte-identical to before — the same shape as the existing eight writer cases. Fix the stale test-file pointer in `lifecycle-lock-integration.test.mjs:6-7` while there.
+
+**ITERATION_HINT:** likely-fixable
+
+## Outcome
+
+Shipped the modeling-side half of "one class of writer per file" (post-ghcaj, ADR-0074, this
+was the work-side half; this task is the modeling side).
+
+**`lib/lifecycle-lock.mjs`** — one project-wide advisory lock (`fs.openSync(.., 'wx')`,
+`.agentheim/state/lifecycle.lock`, dead-pid staleness via a copied `isPidAlive` probe, a
+synchronous `Atomics.wait` poll so nothing turns `async`). `withLifecycleLock(rootDir, fn,
+opts)` wraps a writer's whole compute-then-write body. Wired into the seven writer functions —
+`promoteTask` / `claimBatch` / `completeTask` (`lib/task-lifecycle.mjs`), `captureTask` and
+`dismissTask`'s confirm phase only (`lib/task-lifecycle-capture-dismiss.mjs`), `rotateProtocol`
+(`lib/protocol-rotation.mjs`), `rotateIndexDoneList`'s per-BC body, not
+`rotateAllIndexDoneLists`'s loop (`lib/index-rotation.mjs`) — each renamed internally to a
+`*Locked` implementation function, never at a CLI dispatch layer. `dismissTask`'s zero-write
+plan phase and `applyTaskMove` stay unlocked, by design.
+
+**`log` and `index-add`** — two new opts-only mechanics verbs added directly to
+`lib/task-lifecycle-cli.mjs` (mirroring `checkpointFiles`'s in-file handler style), with a new
+per-verb arity table (`ARITY`) distinguishing `'id'`-arity verbs (argv unchanged for the six
+existing verbs) from the two new `'opts'`-arity verbs (`<verb> [json-opts]`, no positional id).
+`log` renders the timestamp only, taking `title`/`body` as pure judgment input, with the full
+rejection ladder from the task's What §2. `index-add` enforces a five-section deny-list
+(`FORBIDDEN_INDEX_ADD_SECTIONS`, exported) covering every marker in `references/index-
+template.md`'s task-status region (proven by a live-tree test), a word/hyphen-boundary
+duplicate split, and never backfills a missing INDEX.md.
+
+**`lib/scoped-commit.mjs`** — the new, ASYNC layer-3 git helper. `runScopedCommit(cwd, paths,
+message, opts)` refuses `-A`/`.`/glob paths, retries `git add` and `git commit` independently
+on `.git/index.lock` contention (50ms→800ms backoff, 6 attempts), never deletes the lock, and
+returns `{ok:true, sha, attempts}` or a structured rejection.
+
+**Tests** (47 new, all in `lib/test/`): `lifecycle-lock.test.mjs` (7 — acquire/release, dead-pid
+reap, live-holder wait ≥250ms via a spawned real child process, injected-timeout exhaustion,
+`withLifecycleLock` success/throw/timeout paths); `lifecycle-lock-integration.test.mjs` (8 — one
+per writer function proving the lock is acquired INSIDE it, via a pre-held live-pid lock +
+short injected timeout, plus proof that `dismissTask`'s plan phase stays unlocked);
+`task-lifecycle-cli-mechanics.test.mjs` (24 — every `log`/`index-add` rejection code, the
+duplicate split, the boundary-match anti-false-positive case, the live-tree deny-list lint, and
+the load-bearing concurrency proof: two REAL `child_process.spawn`ed `capture` calls into one
+BC of one temp project, asserting both exit 0, the INDEX `backlog-list` names both ids, the
+`**Backlog:**` count equals `readdirSync(backlogDir).length`, and `protocol.md`'s `## ` heading
+count rose by exactly 2); `scoped-commit.test.mjs` (8 — invalid-path/message, a real commit,
+the index.lock-removed-by-a-timer and index.lock-never-removed cases against a throwaway `git
+init`'d repo, and a genuine `git-failed` distinguished from lock contention).
+
+`node --test lib/test/*.test.mjs` on the merged worktree tree: **540/540 passing** (493
+pre-existing + 47 new).
+
+**Skills rewired**: `skills/modeling/SKILL.md` — CAPTURE step 7, REFINE (new step 5b + step 6),
+PROMOTE step 5, DISMISS step 6, and CONSOLIDATE (new step 7 + step 8) all commit via
+`scoped-commit`; REFINE/CONSOLIDATE protocol entries now go through `log`; the rare bc-list
+insert goes through `index-add`; the REFINE-split count-desync bullet is fixed (children
+register through `capture`, the parent's line is left alone, DISMISS it if superseded); the
+dead protocol-header-creation template is deleted for a pointer. `skills/quick-capture/
+SKILL.md` — step 6 and the "Committing" section call `scoped-commit`; the cross-BC
+"Re-routing after the fact" flow now carries an explicit "prose-only, unenforced — tracked in
+`agentic-workflow-qd24q` as the `reroute` verb" disposition (ADR-0059).
+
+**ADR-0075** (provisional filename `0075-lifecycle-lock-mechanics-verbs-scoped-commit.md`)
+records the lock's path/primitive/staleness/placement, both verbs' full contracts, `scoped-
+commit`, the ReadModel/EventLog deferral, and two named residuals (the git-add sweep-in window,
+and the pre-existing INDEX-then-protocol two-file non-atomicity).
+
+Key files: `lib/lifecycle-lock.mjs`, `lib/scoped-commit.mjs`, `lib/task-lifecycle-cli.mjs`,
+`lib/task-lifecycle.mjs`, `lib/task-lifecycle-capture-dismiss.mjs`, `lib/protocol-rotation.mjs`,
+`lib/index-rotation.mjs`, `skills/modeling/SKILL.md`, `skills/quick-capture/SKILL.md`.
+
+Iteration 2 (after the iteration-1 verifier FAIL): added "runCli log refuses lock-timeout when the
+lifecycle lock is already held: protocol.md left untouched" and "runCli index-add refuses
+lock-timeout when the lifecycle lock is already held: INDEX.md left untouched" to
+`lib/test/lifecycle-lock-integration.test.mjs`, mirroring the existing seven-writer
+pre-hold-lock pattern via `runCli` with an injected `taskOpts: { lock: SHORT_LOCK }`; also fixed
+the file's header comment, which had pointed at `task-lifecycle-cli.test.mjs` for the
+spawned-capture concurrency proof, to correctly name `task-lifecycle-cli-mechanics.test.mjs`.
+Full suite: `node --test lib/test/*.test.mjs` reports 542/542 passing, 0 failing.

@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 10:18 -- Task verified and completed: agentic-workflow-pt0gy - Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-pt0gy - Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free
+**Summary:** Concurrent modeling sessions no longer collide on protocol.md, INDEX.md, or the git index — a project-wide advisory lifecycle lock inside every capture-side writer, two opts-only mechanics verbs (log, index-add) with a five-section deny-list, and an index.lock-retrying scoped-commit rewired into modeling and quick-capture (ADR-0075).
+**Duration:** 37m09s
+**Verification:** PASS (iteration 2)
+**Files changed:** 13
+**Tests added:** 49
+**ADRs written:** 0075-lifecycle-lock-mechanics-verbs-scoped-commit.md
+
+---
+
+## 2026-09-06 10:13 -- Verification failed: agentic-workflow-pt0gy - Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-pt0gy - Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free
+**Iteration:** 1 of 3
+**Reasons:** no test exercises log or index-add under a held lock (lock-timeout uncovered for both verbs), so the two new verbs' withLifecycleLock wrappers are asserted by nothing; stale test-file pointer in lifecycle-lock-integration.test.mjs
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker (iteration 2, same worktree)
+
+---
+
 ## 2026-09-06 09:53 -- Task verified and completed: agentic-workflow-bmn29 - Hidden dashboard tab pauses live re-sync and catches up once on return — closes the idle-waste umbrella (hub, memoization, keyframes shipped) with the before/after MacBook measurement
 
 **Type:** Work / Task completion

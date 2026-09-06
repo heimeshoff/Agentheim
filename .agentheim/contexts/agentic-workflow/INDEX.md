@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 2
-- **Doing:** 1
-- **Done:** 191
+- **Doing:** 0
+- **Done:** 192
 <!-- task-counts:end -->
 
 ### Todo
@@ -24,11 +24,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-pt0gy** — Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free (feature) — `doing/agentic-workflow-pt0gy-concurrent-modeling-sessions-conflict-free-bookkeeping.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-pt0gy** — Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free (feature) — `done/agentic-workflow-pt0gy-concurrent-modeling-sessions-conflict-free-bookkeeping.md`
 - **agentic-workflow-bmn29** — Hidden dashboard tab pauses live re-sync and catches up once on return — closes the idle-waste umbrella (hub, memoization, keyframes shipped) with the before/after MacBook measurement (bug) — `done/agentic-workflow-bmn29-dashboard-idle-resource-waste-four-sse-streams-fanout-refetch-unmemoized-board.md`
 - **agentic-workflow-r7dq3** — Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend (chore) — `done/agentic-workflow-r7dq3-post-ghcaj-doctrine-residuals-outside-bounded-sweep.md`
 - **agentic-workflow-ghcaj** — Worker branch carries source and tests only — the conductor applies README, ADR, and task-move bookkeeping on main from the worker's structured report (refactor) — `done/agentic-workflow-ghcaj-worker-branch-code-only-conductor-writes-bookkeeping.md`
@@ -49,6 +49,7 @@ research touching this BC, and concept synthesis pages.
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0075** — Lifecycle lock + `log` / `index-add` mechanics verbs + `scoped-commit`: serialize modeling-side bookkeeping instead of event-sourcing it (deferred to the rework's ReadModel port). One project-wide advisory lock (`lib/lifecycle-lock.mjs`, `openSync 'wx'`, dead-pid staleness) inside every capture-side writer; two opts-only verbs with a five-section deny-list; an index.lock-retrying scoped commit. Implements agentic-workflow-pt0gy — `knowledge/decisions/0075-lifecycle-lock-mechanics-verbs-scoped-commit.md`
 - **ADR-0074** — Worker branch carries source and tests only: the worker reports README_DELTA / ADRS / OUTCOME / BACKLOG_ITEMS blocks and the conductor materializes them on main at squash-merge (two-op README delta grammar with a monotone invariant, conductor-merges-prose rule, on-main task-file annotations, bookkeeping-path checkpoint refusal); amends ADR-0032 §3/§4/§6. Implements agentic-workflow-ghcaj — `knowledge/decisions/0074-worker-branch-source-and-tests-only-conductor-materializes-bookkeeping.md`
 - **ADR-0073** — capture/dismiss mechanization: `capture` registers a skill-authored task file (never authors it), backfilling a missing INDEX only on an empty BC; `dismiss` is two-phase plan/confirm, cascades `depends_on` edges only with exact frontmatter-id matching, guards cascade-drifted / cascade-in-flight, writes INDEX → unlink → strip → protocol. Amends ADR-0022 — `../../knowledge/decisions/0073-capture-dismiss-mechanization-registration-not-authoring-depends-on-only-cascade-exact-id-matching.md`
 - **ADR-0072** — Merge-back conflict ladder: on a real squash conflict the conductor salvages the loser diff, merges `main` INTO the loser worktree (real merge, never rebase or stash), dispatches the same worker to resolve the U-path allow-list with both intents surviving, re-verifies against the new base, and escalates to the builder only last; one-shot budget per worktree. Amends ADR-0032, ADR-0037 — `../../knowledge/decisions/0072-merge-back-conflict-ladder-in-worktree-merge-worker-resolved-one-shot-budget.md`

@@ -101,17 +101,20 @@ For each idea in the user's message:
    uses, targeting the same CLI's `capture` verb.) It performs the INDEX marker insert +
    count delta and prepends the `Capture / Captured` protocol entry, in one mechanized step
    (ADR-0038, ADR-0073) — not optional: the dashboard and the other skills find tasks through
-   the index, so a task that isn't registered is effectively invisible. It backfills a
-   missing BC `INDEX.md` from `references/index-template.md` when the BC holds nothing but
-   this task; otherwise a `{ok:false, code:'index-missing'}` rejection means something is off
-   (a mis-typed BC name is the usual cause) — fix it and re-run rather than hand-editing the
-   index.
+   the index, so a task that isn't registered is effectively invisible. It acquires the
+   lifecycle lock itself (agentic-workflow-pt0gy) — a concurrent `modeling` session's own
+   capture/promote/dismiss/log/index-add waits rather than racing it, so two quick-captures
+   (or a quick-capture and a modeling CAPTURE) landing on the same BC at the same moment both
+   still register. It backfills a missing BC `INDEX.md` from `references/index-template.md`
+   when the BC holds nothing but this task; otherwise a `{ok:false, code:'index-missing'}`
+   rejection means something is off (a mis-typed BC name is the usual cause) — fix it and
+   re-run rather than hand-editing the index.
 
-6. **Commit** — `git add` exactly the manifest's `changed` paths from step 5 plus the new
-   task file itself, then commit with the manifest's `message` (already
-   `chore(<bc>): capture <task-id> — <title> [<task-id>]`). Details in "Committing" below.
-   This is what keeps the working tree clean after a capture (ADR-0026) — the old behavior
-   left the new task file, INDEX, and protocol all uncommitted.
+6. **Commit** — via `scoped-commit` (see "Committing" below), with exactly the manifest's
+   `changed` paths from step 5 plus the new task file itself, under the manifest's `message`
+   (already `chore(<bc>): capture <task-id> — <title> [<task-id>]`). This is what keeps the
+   working tree clean after a capture (ADR-0026) — the old behavior left the new task file,
+   INDEX, and protocol all uncommitted.
 
 7. **Report and stop.** One line per task: `✓ <id> → backlog · "<title>" (<bc>)`. If you
    had to guess the BC, say so and invite a re-route in the same breath — e.g. *"routed to
@@ -209,18 +212,26 @@ entry) per task is correct — the protocol is a diary, not a transcript.
 
 ## Committing
 
-Quick-capture commits its own markdown so the working tree is clean after a capture. Commit doctrine lives in `references/commit-doctrine.md` (ADR-0026) — scoped `git add` is mandatory here too: `quick-capture` can run while a `work` or `modeling` session has its own in-flight files on the working tree, so a blanket add would bundle or race them. After writing the task file(s) and running `capture` for each:
+Quick-capture commits its own markdown so the working tree is clean after a capture, via the **`scoped-commit`** helper (`lib/scoped-commit.mjs`'s `runScopedCommit(cwd, paths, message)`), not a hand-composed `git add` + `git commit`. Commit doctrine lives in `references/commit-doctrine.md` (ADR-0026) — scoped add is mandatory here too, and `scoped-commit` now *enforces* the never-`-A`/`.`/glob half of it (`{ok:false, code:'invalid-path'}`) rather than leaving it prose-only: `quick-capture` can run while a `work` or `modeling` session has its own in-flight files on the working tree, so a blanket add would bundle or race them. After writing the task file(s) and running `capture` for each:
 
-1. `git add` an **explicit, enumerated** list of *only* this capture's artifacts: the new
+1. Call `scoped-commit` with an **explicit, enumerated** list of *only* this capture's artifacts: the new
    task file(s) plus each `capture` call's manifest `changed` paths (the target BC's
-   `INDEX.md` and `.agentheim/knowledge/protocol.md`). Never `git add -A` / `git add .`.
+   `INDEX.md` and `.agentheim/knowledge/protocol.md`).
 2. Commit silently (no confirmation prompt — capture's whole point is speed) with:
    ```
    chore(<bc>): capture <task-id> — <title> [<task-id>]
    ```
 3. **Multi-idea dump:** one commit **per task** keeps the per-task granularity (each carries
    its own `[<task-id>]` trailer), which the later refine/work passes rely on. Commit each
-   task with its own scoped add as you write it.
+   task with its own scoped `scoped-commit` call as you write it.
+
+`scoped-commit` retries `git add` and `git commit` independently, with a bounded backoff, when
+either step collides with a sibling session's own `.git/index.lock` (agentic-workflow-pt0gy) —
+never delete `.git/index.lock` by hand on a `{ok:false, code:'git-index-lock-exhausted'}`; a
+live sibling may still hold it. Runnable through the same env-free homedir→cache→semver-max
+bootstrap used above (targeting `lib/scoped-commit.mjs`'s `runScopedCommit` instead of the
+task-lifecycle CLI's `main`) — see `modeling/SKILL.md`'s "Committing" section for the full
+one-liner.
 
 If the project isn't a git repo, skip the commit silently — write the files as before and
 report; the working-tree-clean guarantee only applies under git.
@@ -232,10 +243,19 @@ file**: relocate `backlog/<id>-<slug>.md` to the new BC's `backlog/`, update the
 frontmatter field, remove the index line from the old BC's INDEX and add it to the new
 one's (fixing both Backlog counts), and append a one-line protocol note. Don't re-capture
 or renumber — it's the same task, only its home changed. (If the BC short-code is part of
-the id, keep the original id; ids are stable and renumbering breaks references.) Then
-**commit the re-route** with a scoped add of exactly those touched files (the moved task
-file's new and old paths, both BCs' `INDEX.md`, and `protocol.md`) — never `git add -A`,
-per `references/commit-doctrine.md` — under `chore(<new-bc>): re-route <task-id> → <new-bc> [<task-id>]` (ADR-0026).
+the id, keep the original id; ids are stable and renumbering breaks references.)
+
+**This cross-BC re-route is prose-only, unenforced (ADR-0059)** — it hand-edits *two* BCs'
+`backlog-list` blocks and both Backlog counts in one motion, the largest remaining
+count-coupled hand-edit this task's mechanization leaves standing. Neither `log` nor
+`index-add` may legally touch a task-list section (`task-list-section-forbidden`), and
+mechanizing a cross-BC move needs its own verb — tracked as `reroute` in
+`agentic-workflow-qd24q` (depends on this task). Until that verb lands, do this by hand,
+carefully, exactly as described above.
+
+Then **commit the re-route** via `scoped-commit` with exactly those touched files (the moved
+task file's new and old paths, both BCs' `INDEX.md`, and `protocol.md`) under
+`chore(<new-bc>): re-route <task-id> → <new-bc> [<task-id>]` (ADR-0026).
 
 ## Handoff to modeling — why "raw" is fine
 

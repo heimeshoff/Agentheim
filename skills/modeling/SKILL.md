@@ -138,7 +138,7 @@ PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + casca
 
 6. **Write the task file(s).** Include the user-confirmed `related_adrs`, `related_research`, `prior_art` from step 3 in the frontmatter. See task format below.
 
-7. **Register + commit.** CAPTURE's bookkeeping — the INDEX marker insert + count delta, and the protocol prepend — is mechanized (ADR-0038, ADR-0073): once per task file just written, run `lib/task-lifecycle-cli.mjs capture <task-id> '{"source":"modeling","summary":"<1-2 sentences>"}'` (the same env-free bootstrap as the PROMOTE flow's step 3, below). It validates the file's own frontmatter (id well-formed, `status`/`context` matching where it was written, required fields present), inserts the INDEX line + count delta, and prepends the `Modeling / Captured` protocol entry — or returns `{ok:false, code, reason}` if something about the just-written file is wrong, in which case fix the file and re-run rather than hand-editing the index. Then `git add` exactly the manifest's `changed` paths plus the new task file(s), and commit with the manifest's `message` (already `chore(<bc>): capture <task-id> — <title> [<task-id>]`). If a brand-new BC is being created during this CAPTURE (rare), insert its line under `<!-- bc-list:start -->` in `.agentheim/knowledge/index.md` by hand first — the CLI only ever touches the target BC's own index.
+7. **Register + commit.** CAPTURE's bookkeeping — the INDEX marker insert + count delta, and the protocol prepend — is mechanized (ADR-0038, ADR-0073): once per task file just written, run `lib/task-lifecycle-cli.mjs capture <task-id> '{"source":"modeling","summary":"<1-2 sentences>"}'` (the same env-free bootstrap as the PROMOTE flow's step 3, below). It validates the file's own frontmatter (id well-formed, `status`/`context` matching where it was written, required fields present), inserts the INDEX line + count delta, and prepends the `Modeling / Captured` protocol entry — or returns `{ok:false, code, reason}` if something about the just-written file is wrong, in which case fix the file and re-run rather than hand-editing the index. It acquires the lifecycle lock itself (agentic-workflow-pt0gy) — a concurrent sibling session's own capture/promote/dismiss/log/index-add waits, it never races. Then commit via `scoped-commit` (see "Committing" below) with exactly the manifest's `changed` paths plus the new task file(s), and the manifest's `message` (already `chore(<bc>): capture <task-id> — <title> [<task-id>]`). If a brand-new BC is being created during this CAPTURE (rare), insert its line under `<!-- bc-list:start -->` in `.agentheim/knowledge/index.md` via `lib/task-lifecycle-cli.mjs index-add '{"bc":null,"section":"bc-list","id":"<bc-name>","line":"- **<bc-name>** — <one-line purpose> — \`contexts/<bc-name>/INDEX.md\`"}'` first — the `capture` CLI call only ever touches the target BC's own index.
 
 ## REFINE flow
 
@@ -157,9 +157,11 @@ PROMOTE and DISMISS are mechanical (readiness check + file move; resolve + casca
 
 4. **Delegate to the `agentheim:orchestrator`** for depth. Give it the task and the BC context. It will route to specialists.
 
-5. **Update the task file** with refined content. If it splits, create child tasks and update `depends_on`. If a decision was made, write an ADR to `.agentheim/knowledge/decisions/`.
+5. **Update the task file** with refined content. If it splits, create child tasks and update `depends_on` — each child registers through `capture` (see "Updating indexes" below), never a hand-edited INDEX line. If a decision was made, write an ADR to `.agentheim/knowledge/decisions/`.
 
-6. **Commit the refinement** (after the index + protocol updates below). Scoped `git add` of just the touched files — the refined task file (and any child task files if it split), the BC `INDEX.md`, `protocol.md`, and any ADR written — then `model(<bc>): refine <task-id> — <title> [<task-id>]` (one trailer per task if the refinement split into several). See "Committing" below.
+5b. **Log the refinement.** Run `lib/task-lifecycle-cli.mjs log '{"title":"Modeling / Refined: <task-id> - <title>","body":"**Type:** Modeling / Refine\n**BC:** <bc-name>\n**Status after:** backlog | todo\n**Summary:** <what was clarified, added, or split>\n**Split into:** <new task ids, if split>\n**ADRs written:** <ADR ids, if any>"}'` (same bootstrap as PROMOTE's step 3, targeting `log` instead of `promote`). This prepends the protocol entry, locked, and returns `{changed:[protocolPath], message:null, verb:'log', timestamp}` — fold `protocolPath` into the commit below.
+
+6. **Commit the refinement.** Commit via `scoped-commit` (see "Committing" below) with exactly the touched files — the refined task file (and any child task files if it split, via their own `capture` manifests), the BC `INDEX.md` if a `capture` call touched it, `protocol.md` (from step 5b's `log` manifest), and any ADR written — under `model(<bc>): refine <task-id> — <title> [<task-id>]` (one trailer per task if the refinement split into several).
 
 7. **Auto-promote the moment it's ready — don't ask, just promote.** When refinement has carried a task over the readiness bar, promoting it is not a separate decision the builder needs to make — it's the natural completion of the refinement, so do it automatically rather than stopping to say "this looks ready, say `promote` to promote it". The builder asked you to refine; a task that is now workable belongs in `todo/`.
 
@@ -201,7 +203,7 @@ PROMOTE's mechanics — the `backlog → todo` move, the INDEX marker edit + cou
 
 4. If not ready (step 2's checklist fails, or the CLI rejects in step 3), tell the user what's missing and offer to switch to the REFINE action on this task.
 
-5. **Commit the promotion.** Scoped `git add` of exactly the manifest's `changed` paths from step 3 — then commit with the manifest's `message` (already the `model(<bc>): promote <task-id> — <title> [<task-id>]` convention — see `references/commit-doctrine.md`). Never `git add -A` / `git add .`. Nothing to commit if the task wasn't ready and stayed in `backlog/`.
+5. **Commit the promotion.** Commit via `scoped-commit` (see "Committing" below) with exactly the manifest's `changed` paths from step 3, under the manifest's `message` (already the `model(<bc>): promote <task-id> — <title> [<task-id>]` convention — see `references/commit-doctrine.md`). Nothing to commit if the task wasn't ready and stayed in `backlog/`.
 
 ## DISMISS flow
 
@@ -230,7 +232,7 @@ DISMISS's mechanics — cascade computation, the in-flight/shipped guard, the IN
 
 5. **IDs are gone, never reused.** For new token ids this holds **by construction** (ADR-0028 §5): the generator emits a random token and never consults history, so a dismissed token is simply one of ~23M points the generator will, with overwhelming probability, never emit again — there is no counter to advance or rewind. For legacy `<bc>-NNN` ids the original rule is retained verbatim: a dismissed number is retired, consistent with "never renumber" — a future capture takes the next free number, never a dismissed one.
 
-6. **Commit the dismissal.** `git add` exactly the manifest's `changed` paths from step 4 (every deleted path plus every edited file — a delete is staged with plain `git add`, no `git rm` special case needed), then commit with the manifest's `message` (already `chore(<bc>): dismiss <lead-id-or-set>`, per `references/commit-doctrine.md`/ADR-0026). Note that even though a DISMISS legitimately spans multiple BCs, `changed` stays an explicit enumeration of only the cascade's files — never `git add -A`.
+6. **Commit the dismissal.** Commit via `scoped-commit` (see "Committing" below) with exactly the manifest's `changed` paths from step 4 (every deleted path plus every edited file — `scoped-commit`'s plain `git add` stages a deletion the same as an edit, no `git rm` special case needed), under the manifest's `message` (already `chore(<bc>): dismiss <lead-id-or-set>`, per `references/commit-doctrine.md`/ADR-0026). Note that even though a DISMISS legitimately spans multiple BCs, `changed` stays an explicit enumeration of only the cascade's files.
 
 ## CONSOLIDATE flow
 
@@ -252,7 +254,9 @@ CONSOLIDATE rewrites a BC's `README.md` **in place** to bring it back under the 
 
 6. **Write the rewritten `README.md` in place.** No archive file, no rolled-out history.
 
-7. **Commit the consolidation** (after the protocol update below). Scoped `git add` of exactly the rewritten `README.md` and `protocol.md` — never the task files or `INDEX.md` — then `model(<bc>): consolidate <bc> README`. See "Committing" below.
+7. **Log the consolidation.** Run `lib/task-lifecycle-cli.mjs log '{"title":"Modeling / Consolidated: <bc> README","body":"**Type:** Modeling / Consolidate\n**BC:** <bc-name>\n**Before → After:** <N> lines → <M> lines\n**Summary:** <1-2 sentences on what was merged/folded; note anything dropped, with builder sign-off>"}'` (same bootstrap as PROMOTE's step 3, targeting `log`). No task ids, no `**Filed to**`/`**Status after**` — CONSOLIDATE never touches a task file or a lifecycle move.
+
+8. **Commit the consolidation.** Commit via `scoped-commit` (see "Committing" below) with exactly the rewritten `README.md` and `protocol.md` (from step 7's `log` manifest) — never the task files or `INDEX.md` — under `model(<bc>): consolidate <bc> README`.
 
 ## Task file format
 
@@ -413,7 +417,7 @@ After writing or moving a task file, update the BC's `INDEX.md` so other skills 
 
 - **CAPTURE (backlog/ or todo/):** mechanized (ADR-0038, ADR-0073) — `lib/task-lifecycle-cli.mjs capture <id> <json-opts>` performs the marker insert and count delta (a unified line format that always carries `(type)`) as part of its manifest; see CAPTURE step 7 above. Nothing to hand-edit here. It also backfills a missing `INDEX.md` from `references/index-template.md` when the BC holds nothing but the captured file.
 - **PROMOTE (backlog → todo):** mechanized (ADR-0038) — `lib/task-lifecycle-cli.mjs promote <id>` performs the marker edit and count delta as part of its manifest; see the PROMOTE flow above. Nothing to hand-edit here.
-- **REFINE that splits a task:** remove the parent line, insert child task lines. Update counts.
+- **REFINE that splits a task:** children register through `capture` (INDEX line + count together, mechanized — ADR-0038, ADR-0073), exactly like any newly captured task. **The parent's own INDEX line is left alone** — hand-removing it would desync the count from the folder (the parent file still sits in `backlog/` until something moves it). If the parent is superseded by its children, DISMISS it explicitly — its own cascade + bookkeeping, never a bare line removal here (agentic-workflow-pt0gy).
 - **DISMISS:** mechanized (ADR-0038, ADR-0073) — `lib/task-lifecycle-cli.mjs dismiss <id> <json-opts>` removes every cascade member's line from its BC `INDEX.md` and decrements the matching count from lines actually removed, as part of its manifest; see the DISMISS flow above. The set may span BCs — editing several BCs' indexes in one DISMISS is the sanctioned exception below.
 
 If a BC's `INDEX.md` doesn't exist yet: `capture` backfills it automatically (see above) when the BC is otherwise empty, and refuses `index-missing` otherwise — in the refusal case, or for any other index creation, build it from `references/index-template.md` with the BC name filled in by hand. Do not invent sections — only the templated markers are append targets.
@@ -425,56 +429,27 @@ If a BC's `INDEX.md` doesn't exist yet: `capture` backfills it automatically (se
 - Do not auto-rewrite the entire file — only insert/remove at the markers. Preserve any human-added prose elsewhere.
 - Do not append duplicate entries — if the line is already present (same task-id), skip.
 
-If a brand-new BC is being created during CAPTURE (rare — model normally does not create BCs; that's brainstorm's job), also insert under `<!-- bc-list:start -->` in `.agentheim/knowledge/index.md`.
+If a brand-new BC is being created during CAPTURE (rare — model normally does not create BCs; that's brainstorm's job), also insert under `<!-- bc-list:start -->` in `.agentheim/knowledge/index.md` via `index-add` (see CAPTURE step 7 above) — never a hand-edit.
 
 ## Protocol logging
 
-After each action — CAPTURE, REFINE, or PROMOTE — prepend an entry to `.agentheim/knowledge/protocol.md`. If `protocol.md` doesn't exist, create it with:
+Every action prepends one entry to `.agentheim/knowledge/protocol.md` — mechanized end to end (ADR-0038, ADR-0073, agentic-workflow-pt0gy). Nothing here hand-creates the file or hand-prepends an entry any more; every path below routes through a lifecycle-lock-held verb that already calls `readProtocolOrDefault` (seeding the standard header itself, once, the first time any verb ever touches a fresh project's `protocol.md`) and `prependProtocolEntry`.
 
-```markdown
-# Protocol
-
-Chronological log of everything that happens in this project.
-Newest entries on top.
-
----
-```
-
-Then prepend the appropriate entry right after the `---` on line 4:
-
-```markdown
-## YYYY-MM-DD HH:MM -- Modeling / Refined: <task-id> - [title]
-
-**Type:** Modeling / Refine
-**BC:** <bc-name>
-**Status after:** backlog | todo
-**Summary:** [what was clarified, added, or split]
-**Split into:** [list of new task ids, if split]
-**ADRs written:** [list of ADR ids, if any]
-
----
-
-## YYYY-MM-DD HH:MM -- Modeling / Consolidated: <bc> README
-
-**Type:** Modeling / Consolidate
-**BC:** <bc-name>
-**Before → After:** <N> lines → <M> lines
-**Summary:** [1-2 sentences on what was merged/folded; note anything dropped, with builder sign-off]
-
----
-```
-
-The **CAPTURE** entry (`Modeling / Captured: <task-id> - [title]`, `**Type:** Modeling / Capture`, `**BC:**`, `**Filed to:** backlog | todo`, `**Summary:**`) and the **PROMOTE** entry (`Modeling / Promoted: <task-id> - [title]`, `**Type:** Modeling / Promote`, `**BC:**`, `**From → To:** backlog → todo`) are no longer hand-formatted here — `lib/task-lifecycle-cli.mjs capture <id>` / `promote <id>` generate and prepend them as part of their manifests (ADR-0038, ADR-0073); see the CAPTURE and PROMOTE flows above. `capture`'s `{"protocolEntry": false}` opt skips the protocol write entirely (no entry at all) — `brainstorm`'s per-task foundation capture uses it, keeping its own single hand-formatted session entry instead (see `brainstorm/SKILL.md`).
-
-The **DISMISS** entry (`Modeling / Dismissed: <id-or-id-list>`, `**Type:** Modeling / Dismiss`, `**Dismissed:**` one line per cascade member — `<task-id> - <title> (<bc>)`) is likewise no longer hand-formatted — `lib/task-lifecycle-cli.mjs dismiss <id> '{"confirm":[...]}'` generates and prepends it as part of its manifest (ADR-0038, ADR-0073); see the DISMISS flow above. It is **bare** — no builder-typed reason. One entry per dismiss regardless of how many tasks the cascade removed.
-
-The CONSOLIDATE entry records the line-count delta and a short summary — no task ids (CONSOLIDATE never touches a task file), no `**Filed to**`/`**Status after**` (there is no lifecycle move).
+- **CAPTURE** (`Modeling / Captured: <task-id> - [title]`, `**Type:** Modeling / Capture`, `**BC:**`, `**Filed to:** backlog | todo`, `**Summary:**`) and **PROMOTE** (`Modeling / Promoted: <task-id> - [title]`, `**Type:** Modeling / Promote`, `**BC:**`, `**From → To:** backlog → todo`) — `lib/task-lifecycle-cli.mjs capture <id>` / `promote <id>` generate and prepend them as part of their manifests; see the CAPTURE and PROMOTE flows above. `capture`'s `{"protocolEntry": false}` opt skips the protocol write entirely (no entry at all) — `brainstorm`'s per-task foundation capture uses it, keeping its own single hand-formatted session entry instead (see `brainstorm/SKILL.md`).
+- **DISMISS** (`Modeling / Dismissed: <id-or-id-list>`, `**Type:** Modeling / Dismiss`, `**Dismissed:**` one line per cascade member — `<task-id> - <title> (<bc>)`) — `lib/task-lifecycle-cli.mjs dismiss <id> '{"confirm":[...]}'` generates and prepends it as part of its manifest; see the DISMISS flow above. It is **bare** — no builder-typed reason. One entry per dismiss regardless of how many tasks the cascade removed.
+- **REFINE** (`Modeling / Refined: <task-id> - [title]`, `**Type:** Modeling / Refine`, `**BC:**`, `**Status after:** backlog | todo`, `**Summary:**`, `**Split into:**` if split, `**ADRs written:**` if any) and **CONSOLIDATE** (`Modeling / Consolidated: <bc> README`, `**Type:** Modeling / Consolidate`, `**BC:**`, `**Before → After:** <N> lines → <M> lines`, `**Summary:**` — no task ids, no `**Filed to**`/`**Status after**`, since neither touches a task file or a lifecycle move) — these two carry judgment `title`/`body` text no CLI verb can synthesize, so REFINE step 5b and CONSOLIDATE step 7 above compose that text and hand it to the **`log`** mechanics verb (`lib/task-lifecycle-cli.mjs log '{"title":"...","body":"..."}'`), which renders the `## <timestamp> -- <title>` heading (the one mechanical part — a hand-typed clock reading is a fabricated measurement, ADR-0038 Ruling B) and prepends `title` + `body` verbatim. `log` never guesses a title or body; it only stamps the timestamp.
 
 If the action is non-trivial (multiple tasks created from one capture, refinement that produced ADRs, batch promotion), one entry per "thing the user asked for" is enough — don't prepend five entries for a single conversation turn.
 
 ## Committing
 
-Each action — CAPTURE, REFINE, PROMOTE, DISMISS, CONSOLIDATE — commits its own markdown at the end of the action, so the working tree is clean afterward. Commit doctrine (scoped `git add`, never `git add -A` / `git add .`, the `[<task-id>]` trailer, message convention per action) lives in `references/commit-doctrine.md` (ADR-0026). `modeling` sometimes runs concurrently with a `work` session and with `quick-capture`, so the scoped-add rule is load-bearing here, not a style choice: each action `git add`s an explicit, enumerated list of only the `.md` files it touched — the task file(s) it wrote or moved, the BC `INDEX.md`(es), `protocol.md`, and any ADR / vision / context-map it produced. CONSOLIDATE's scope is narrower than the rest: only the rewritten BC `README.md` and `protocol.md` — never a task file, never `INDEX.md` (a README rewrite touches no task's lifecycle).
+Each action — CAPTURE, REFINE, PROMOTE, DISMISS, CONSOLIDATE — commits its own markdown at the end of the action, so the working tree is clean afterward, via the **`scoped-commit`** helper (`lib/scoped-commit.mjs`'s `runScopedCommit(cwd, paths, message)`), not a hand-composed `git add` + `git commit`. Commit doctrine (scoped add, never `-A` / `.` / a glob, the `[<task-id>]` trailer, message convention per action) lives in `references/commit-doctrine.md` (ADR-0026) — `scoped-commit` now *enforces* the never-`-A`/`.`/glob half of that doctrine (`{ok:false, code:'invalid-path'}`) rather than leaving it prose-only. `modeling` sometimes runs concurrently with a `work` session and with `quick-capture`, so the scoped-add rule is load-bearing here, not a style choice: each action passes an explicit, enumerated list of only the `.md` files it touched — the task file(s) it wrote or moved, the BC `INDEX.md`(es), `protocol.md`, and any ADR / vision / context-map it produced. CONSOLIDATE's scope is narrower than the rest: only the rewritten BC `README.md` and `protocol.md` — never a task file, never `INDEX.md` (a README rewrite touches no task's lifecycle).
+
+`scoped-commit` retries `git add` and `git commit` independently, with a bounded backoff, when either step collides with a sibling session's own `.git/index.lock` — the git-side half of this task's concurrency fix (agentic-workflow-pt0gy), alongside the lifecycle lock that already serializes `capture`/`promote`/`dismiss`/`log`/`index-add` themselves. On `{ok:false, code:'git-index-lock-exhausted'}` (a sibling held the git lock for the whole retry window), tell the builder the commit didn't land and offer to retry — never delete `.git/index.lock` by hand; a live sibling may still hold it. Runnable through the same env-free homedir→cache→semver-max bootstrap already used above, targeting `lib/scoped-commit.mjs`'s `runScopedCommit` instead of the task-lifecycle CLI's `main`:
+
+```
+node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','scoped-commit.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','scoped-commit.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no scoped-commit module found under '+c+' (is the plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>m.runScopedCommit(process.argv[1], JSON.parse(process.argv[2]), process.argv[3])).then(res=>{console.log(JSON.stringify(res));process.exit(res.ok?0:1)}).catch(e=>{console.error(e.message);process.exit(1)});" "<repo-root>" '["<path1>","<path2>"]' "<commit message>"
+```
 
 `model` is a commit-message `<type>` prefix for modeling's markdown commits — it is **not** a task `type:` (those stay feature/bug/refactor/chore/spike/decision).
 
