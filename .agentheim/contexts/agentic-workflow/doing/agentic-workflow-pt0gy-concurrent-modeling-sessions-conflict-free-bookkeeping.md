@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-pt0gy
 title: Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-09-05

@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 09:40 -- Batch started: [agentic-workflow-r7dq3, agentic-workflow-pt0gy, agentic-workflow-bmn29]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-r7dq3 - Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend, agentic-workflow-pt0gy - Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free, agentic-workflow-bmn29 - Hidden dashboard tab pauses live re-sync and catches up once on return — closes the idle-waste umbrella (hub, memoization, keyframes shipped) with the before/after MacBook measurement
+**Parallel:** yes (3 workers — the whole ready set; MAX_PARALLEL=3 not exceeded). Merge-order advisory: pt0gy and r7dq3 both edit skills/modeling/SKILL.md (different regions) — squash-merge them one after another, never interleaved; bmn29 is dashboard-only and independent.
+
+---
+
 ## 2026-09-06 09:25 -- Modeling / Promoted: agentic-workflow-pt0gy - Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free
 
 **Type:** Modeling / Promote

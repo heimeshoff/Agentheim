@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-bmn29
 title: Hidden dashboard tab pauses live re-sync and catches up once on return — closes the idle-waste umbrella (hub, memoization, keyframes shipped) with the before/after MacBook measurement
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-09-05

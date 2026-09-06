@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-r7dq3
 title: Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend
-status: todo
+status: doing
 type: chore
 context: agentic-workflow
 created: 2026-09-06
