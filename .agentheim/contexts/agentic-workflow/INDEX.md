@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 6
-- **Todo:** 0
+- **Backlog:** 5
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 196
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-cj54k** — One path module for the two-root layout — `lib/task-system-paths.mjs` with `detectLayout` (legacy / board / mixed) — and every lifecycle verb, rotation, and live-tree lint re-pointed through it, resolving both layouts during the transition; ADR-0078 accepted (refactor) — `todo/agentic-workflow-cj54k-task-system-paths-module-dual-layout-repoint-lib.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -49,7 +50,6 @@ research touching this BC, and concept synthesis pages.
 - **agentic-workflow-hxq1g** — Dashboard reads the two-root layout — `tree.mjs` resolves through `task-system-paths`, BCs enumerate from `knowledge/contexts/` with orphan `board/` folders as warnings, the styleguide bundle and its 14 ESM imports re-point, and a legacy or mixed tree renders a "layout migration pending" notice; dist rebuilt (refactor) — `backlog/agentic-workflow-hxq1g-dashboard-two-root-layout-tree-styleguide-repoint-migration-notice.md`
 - **agentic-workflow-zgav8** — Prose sweep for the two-root layout — every skill, agent, and reference spells `board/` and `knowledge/contexts/`, the five entry skills run `migrate` as "Before acting" step 0, and a permanent live-tree lint fails on any reappearing legacy path literal (refactor) — `backlog/agentic-workflow-zgav8-skill-agent-reference-prose-sweep-step0-migrate-path-literal-lint.md`
 - **agentic-workflow-e896r** — The `migrate` verb — `lib/layout-migration.mjs` moves a legacy `.agentheim/` into the two-root layout under the lifecycle lock, splits every per-BC INDEX losslessly, rewrites every pointer, and is idempotent; refuses a mixed tree; never touches this repo's own tree (feature) — `backlog/agentic-workflow-e896r-migrate-verb-layout-migration-fixture-pointer-rewrite.md`
-- **agentic-workflow-cj54k** — One path module for the two-root layout — `lib/task-system-paths.mjs` with `detectLayout` (legacy / board / mixed) — and every lifecycle verb, rotation, and live-tree lint re-pointed through it, resolving both layouts during the transition; ADR-0078 accepted (refactor) — `backlog/agentic-workflow-cj54k-task-system-paths-module-dual-layout-repoint-lib.md`
 - **agentic-workflow-g5ez5** — Split the operational task system out of `contexts/` and `knowledge/` — every BC's lifecycle folders, `INDEX.md`, and the protocol log move to one dedicated folder, leaving BC READMEs in `contexts/` and durable knowledge in `knowledge/`, with an automatic on-upgrade migration of existing projects (refactor) — `backlog/agentic-workflow-g5ez5-split-task-system-folder-from-contexts-and-knowledge.md`
 <!-- backlog-list:end -->
 

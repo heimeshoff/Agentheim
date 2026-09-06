@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 13:48 -- Modeling / Promoted: agentic-workflow-cj54k - One path module for the two-root layout — `lib/task-system-paths.mjs` with `detectLayout` (legacy / board / mixed) — and every lifecycle verb, rotation, and live-tree lint re-pointed through it, resolving both layouts during the transition; ADR-0078 accepted
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-06 13:47 -- Modeling / Refined: agentic-workflow-g5ez5 - Third refinement: builder settled board/, INDEX.md for both halves, the migrate-verb trigger, and knowledge/contexts/ as the BC list; ADR-0078 written; split into five children plus the parent as closure
 
 **Type:** Modeling / Refine

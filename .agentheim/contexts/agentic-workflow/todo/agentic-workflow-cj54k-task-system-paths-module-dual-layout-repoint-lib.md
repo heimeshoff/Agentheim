@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-cj54k
 title: One path module for the two-root layout — `lib/task-system-paths.mjs` with `detectLayout` (legacy / board / mixed) — and every lifecycle verb, rotation, and live-tree lint re-pointed through it, resolving both layouts during the transition; ADR-0078 accepted
-status: backlog
+status: todo
 type: refactor
 context: agentic-workflow
 created: 2026-09-06
