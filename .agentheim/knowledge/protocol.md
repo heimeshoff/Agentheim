@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 02:10 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 18m (session start 01:52 → 02:10; no batch-start entry — a Phase 1 resume of the escalated ghcaj worktree with an empty todo, as the 01:55 refinement set up)
+**Completed:** 1 (first-try PASS: 0, re-dispatched: 1, skipped: 0) — agentic-workflow-ghcaj PASSed on iteration 6, the first verification under the refined bounded-sweep criterion
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** agentic-workflow-ghcaj: 1 (iteration 6 this session; 6 lifetime — the one dispatch carried both the ADR-0072 rung-4 resolve and the iteration-6 doctrine fixes)
+**Commits:** 3 (ghcaj integration dc1b15f, the r7dq3 follow-up capture 8e44fc7, this entry)
+**Vision-conformance:** none — batch aligns with vision. ghcaj serves "independent work runs in parallel … without two workers colliding on the same file" directly; the conductor-merges-prose rule keeps every disposition visible to the verifier and the protocol, so it does not pull toward the Not-autonomous non-goal.
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (1 task) — as rendered by formatBatchMixLine for a type: refactor task; in this repo lib/, skills/ and agents/ are the product, so the classification reads as intended
+**Conductor notes:** the ADR-0072 ladder was entered pre-emptively from the read-only merge-tree preview the 01:40 conductor note recorded, not from a failed squash on main — the same 3-way merge (ADR-0072 fact (b)), so no reset of main was needed; rungs 1–6 all ran (salvage patch cut from the merge-base, real merge of main into the worktree, one UU hunk in the BC README, same-worker resolve folded into the iteration-6 dispatch, fail-closed checkpoint with zero U paths and zero markers, two-dot re-verify). The worktree's own post-ghcaj checkpoint guard refused the README and the task-file move as bookkeeping-path, so the conductor staged those by hand as the two prior sessions did — the last time that is needed, since ADR-0074 is now on main. Provisional ADR-0073 finalized to ADR-0074 (ADR-0058). The verifier named five stale passages outside the bounded bar; captured as agentic-workflow-r7dq3 under the task's closure rule. Merged-main lib suite 493/493
+**Carry-over:** .agentheim/knowledge/protocol.md: committed (this session-end entry); .agentheim/salvage/agentic-workflow-ghcaj-escalated-iter5.patch and .agentheim/salvage/agentic-workflow-ghcaj-merge-conflict.patch: left behind (owner: ADR-0063 salvage convention, gitignored advisory artifacts — safe to delete now that ghcaj is integrated). No worktrees remain; working tree otherwise clean
+
+---
+
+
 ## 2026-09-06 02:09 -- Capture / Captured: agentic-workflow-r7dq3 - Post-ghcaj doctrine residuals the bounded sweep's closure rule set aside — five stale passages in verifier.md, work SKILL.md rung 2, commit-doctrine.md, verification-before-completion SKILL.md, and the modeling field legend
 
 **Type:** Capture
