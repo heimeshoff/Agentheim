@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 14:56 -- Modeling / Promoted: agentic-workflow-e896r - The `migrate` verb — `lib/layout-migration.mjs` moves a legacy `.agentheim/` into the two-root layout under the lifecycle lock, splits every per-BC INDEX losslessly, rewrites every pointer, and is idempotent; refuses a mixed tree; never touches this repo's own tree
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-06 14:56 -- Modeling / Refined: agentic-workflow-e896r + agentic-workflow-hxq1g - both g5ez5 children re-grounded against shipped cj54k
 
 **Type:** Modeling / Refine

@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 5
-- **Todo:** 0
+- **Backlog:** 4
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 197
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-e896r** — The `migrate` verb — `lib/layout-migration.mjs` moves a legacy `.agentheim/` into the two-root layout under the lifecycle lock, splits every per-BC INDEX losslessly, rewrites every pointer, and is idempotent; refuses a mixed tree; never touches this repo's own tree (feature) — `todo/agentic-workflow-e896r-migrate-verb-layout-migration-fixture-pointer-rewrite.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -49,7 +50,6 @@ research touching this BC, and concept synthesis pages.
 - **agentic-workflow-tgr31** — Dogfood the migration — run the `migrate` verb on this repo's own `.agentheim/` on `main`, commit it as one rename-detected scoped commit, and prove history, lints, and the dashboard survive; conductor-owned, never dispatched to a worker (chore) — `backlog/agentic-workflow-tgr31-dogfood-migrate-this-repo-agentheim-to-two-root-layout.md`
 - **agentic-workflow-hxq1g** — Dashboard reads the two-root layout — `tree.mjs` resolves through `task-system-paths`, BCs enumerate from `knowledge/contexts/` with orphan `board/` folders as warnings, the styleguide bundle and its 20 ESM imports re-point, and a legacy or mixed tree renders a "layout migration pending" notice; dist rebuilt (refactor) — `backlog/agentic-workflow-hxq1g-dashboard-two-root-layout-tree-styleguide-repoint-migration-notice.md`
 - **agentic-workflow-zgav8** — Prose sweep for the two-root layout — every skill, agent, and reference spells `board/` and `knowledge/contexts/`, the five entry skills run `migrate` as "Before acting" step 0, and a permanent live-tree lint fails on any reappearing legacy path literal (refactor) — `backlog/agentic-workflow-zgav8-skill-agent-reference-prose-sweep-step0-migrate-path-literal-lint.md`
-- **agentic-workflow-e896r** — The `migrate` verb — `lib/layout-migration.mjs` moves a legacy `.agentheim/` into the two-root layout under the lifecycle lock, splits every per-BC INDEX losslessly, rewrites every pointer, and is idempotent; refuses a mixed tree; never touches this repo's own tree (feature) — `backlog/agentic-workflow-e896r-migrate-verb-layout-migration-fixture-pointer-rewrite.md`
 - **agentic-workflow-g5ez5** — Split the operational task system out of `contexts/` and `knowledge/` — every BC's lifecycle folders, `INDEX.md`, and the protocol log move to one dedicated folder, leaving BC READMEs in `contexts/` and durable knowledge in `knowledge/`, with an automatic on-upgrade migration of existing projects (refactor) — `backlog/agentic-workflow-g5ez5-split-task-system-folder-from-contexts-and-knowledge.md`
 <!-- backlog-list:end -->
 
