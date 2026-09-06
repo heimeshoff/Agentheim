@@ -41,8 +41,19 @@ g5ez5's closure can refuse the legacy layout anywhere.
    carry step 0 or the new paths. Until a release refreshes it, conduct from the repo's own
    `skills/`; the repo-root-first bootstrap already resolves the repo's `lib/`.
 
-Out of scope: any code change. If the verb misbehaves on the real tree, bounce this task
-with the finding and fix it under e896r's follow-up, never hand-move files.
+5. **The one code change (added by zgav8's refinement, 2026-09-06):** the 20 literal
+   `../../.agentheim/contexts/design-system/styleguide/...` ESM import specifiers in
+   `dashboard/app/{app,board,main-pane-reader,slide-over}.js` must spell the on-disk path
+   (ten jsdom tests resolve them through node directly), so they can only move once the
+   tree has. Immediately after the migration commit, re-point all 20 to
+   `../../.agentheim/knowledge/contexts/design-system/styleguide/...`, run `npm run build`
+   in `dashboard/`, and commit the four files plus `dashboard/dist/` as a second scoped
+   commit under this task's trailer. zgav8's `legacy-path-literal-lint` tolerates those
+   lines only while `detectLayout` says `legacy`; on the migrated tree they are violations
+   until re-pointed, so the `npm test` criterion below cannot pass without this step.
+
+Out of scope: any other code change. If the verb misbehaves on the real tree, bounce this
+task with the finding and fix it under e896r's follow-up, never hand-move files.
 
 ## Acceptance criteria
 
@@ -61,6 +72,10 @@ with the finding and fix it under e896r's follow-up, never hand-move files.
 - [ ] The dashboard renders the migrated project with `migrationPending:false`, the same
       done count as before (196 in agentic-workflow at refinement time), and prior-art
       search still finds a `done-archive/` entry.
+- [ ] After the re-point commit, `dashboard/app/*.js` contains zero
+      `.agentheim/contexts/` specifiers, all 20 imports resolve to
+      `knowledge/contexts/design-system/styleguide/`, and `findLegacyPathViolations` on the
+      migrated tree returns `[]`.
 - [ ] Exactly one protocol entry records the migration (the verb's own entry; no second
       hand-written one) and the task's OUTCOME names the commit hash.
 - [ ] Board, rail, and library look unchanged to the builder apart from paths. [human-eye]

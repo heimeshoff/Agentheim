@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 15:53 -- Modeling / Refined: agentic-workflow-zgav8 - Prose sweep for the two-root layout — skills, agents, references spell `board/` and `knowledge/contexts/`, five entry skills run `migrate` as step 0, permanent legacy-path-literal lint
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Refined against the shipped cj54k/e896r/hxq1g code (one architect round). Four assumptions were wrong and are fixed: `references/index-template.md` must NOT shrink (it also holds the top-level `knowledge/index.md` template, and `captureTask`'s legacy backfill reads its fenced block at runtime until g5ez5); `skills/dashboard/SKILL.md` does not exist (the skill is `commands/dashboard.md`); bare `contexts/<bc>/INDEX.md` is a correct relative link from `knowledge/index.md`, so it is allowed, not forbidden; and the 20 `dashboard/app/*.js` styleguide import specifiers cannot move before tgr31, so the lint tolerates them only while `detectLayout` says `legacy`. Added: the migrate recipe lives once in `references/lib-bootstrap.md` §7 with five pointers (ADR-0068), a legacy-tree notice in the read-only `whats-next`/`inquire`, re-pointing `findMalformedTaskIds` (a fifth live-tree lint cj54k missed), an enumerated `{file,match,rationale}` allowlist mirroring `doctrine-line-pointer.mjs` plus a `legacy-path-ok` marker recognized only in BC READMEs, and deleting cj54k's temporary lint after porting its two regexes. Sibling amendment: tgr31 now carries the one code change (re-point the 20 specifiers + dist rebuild after the migration commit).
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-09-06 15:38 -- Work session ended
 
 **Type:** Work / Session end
