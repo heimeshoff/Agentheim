@@ -29,29 +29,74 @@ verb against fixtures only; the dogfood run on this repo is agentic-workflow-tgr
    `main` shape as the other verbs; git-free). Behaviour by `detectLayout`:
    - `board` → `{ok:true, verb:'migrate', noop:true, changed:[]}`, zero writes.
    - `mixed` → `{ok:false, code:'mixed-layout', reason}` naming the offending path, zero writes.
-   - `legacy` → under the lifecycle lock (ADR-0075): rename `contexts/<bc>/{backlog,todo,
-     doing,done,done-archive}` → `board/<bc>/…`; `knowledge/protocol.md` + `knowledge/protocol/`
-     → `board/`; `vision.md`, `context-map.md` → `knowledge/`; `contexts/<bc>/README.md` +
+   - `legacy` → under the lifecycle lock (`withLifecycleLock` from `lib/lifecycle-lock.mjs`,
+     ADR-0075): rename `contexts/<bc>/{backlog,todo,doing,done,done-archive}` →
+     `board/<bc>/…`; `knowledge/protocol.md` + `knowledge/protocol/` → `board/`;
+     `vision.md`, `context-map.md` → `knowledge/`; `contexts/<bc>/README.md` +
      `concepts/` → `knowledge/contexts/<bc>/`; `contexts/design-system/styleguide/` →
      `knowledge/contexts/design-system/styleguide/`; plain `fs.renameSync` so git records
-     renames. Then **split each per-BC INDEX** via a pure `splitIndexContent(text) →
-     {taskHalf, knowledgeHalf}` (header + `task-counts` + four task-status blocks vs
-     `adr-local` / `research-local` / `concepts`; every line verbatim except the ADR-local
-     relative-link depth rewrite `../../knowledge/decisions/…` → `../../decisions/…`);
-     write both halves through `writeFileAtomic` (ADR-0076); remove the emptied
-     `contexts/` tree; rewrite pointers (below); return `{ok:true, verb:'migrate',
+     renames. Then **split each per-BC INDEX** (item 2); write both halves through
+     `writeFileAtomic` (`lib/atomic-write.mjs`, ADR-0076); remove the emptied
+     `contexts/` tree; rewrite pointers (item 3); return `{ok:true, verb:'migrate',
      changed:['.agentheim'], moved:[…], message:'chore(agentheim): migrate .agentheim/ to
      the two-root layout (ADR-0078)'}`.
-2. **Pointer rewrite** (pure, tested helper): `knowledge/index.md` bc-list lines end in
-   `contexts/<bc>/README.md`; its Pointers section names `vision.md`, `context-map.md`,
-   `../board/protocol.md`; BC README lines spelling `contexts/<bc>/INDEX.md` or
-   `contexts/<bc>/<lifecycle>/`; README-relative links (`../../knowledge/…` → `../../…`)
-   now one level deeper. Historical protocol entries and ADR bodies are **not** rewritten
-   (ADR-0039 verbatim discipline).
-3. **Refusal guards:** refuse with `{ok:false, code:'worktree-active'}` when `git worktree
+
+   **Layout-override discipline (non-obvious, load-bearing).** Mid-move the tree is
+   transiently `mixed`, and every getter in `lib/task-system-paths.mjs` *throws* an
+   `Error` with `.code === 'mixed-layout'` on a mixed detect (that module's documented
+   structured-error convention). So `migrate` calls `detectLayout(rootDir)` **exactly
+   once**, up front, and thereafter passes an explicit `{layout:'legacy'}` (sources) or
+   `{layout:'board'}` (destinations) opt to every getter it uses — it never lets a getter
+   re-detect. A bare getter call inside the write phase is a bug, not a style choice.
+
+   **`board/` is created unconditionally, even with zero BCs.** `detectLayout` resolves an
+   `.agentheim/` that exists but has populated *neither* `contexts/` nor `board/` as
+   `'legacy'` (the pre-ADR-0078 shape). A project in that state — e.g. only
+   `knowledge/protocol.md` on disk — must still come out of `migrate` detecting as
+   `'board'`, or every skill re-runs the migration forever. `migrate` therefore always
+   `mkdir`s `board/` before returning, whether or not any BC directory moved into it.
+
+2. **INDEX split** — a pure, separately-tested `splitIndexContent(text) →
+   {taskHalf, knowledgeHalf}`:
+   - Task half keeps the file header, `## Tasks by status`, the `task-counts` block, the
+     four `todo-list` / `doing-list` / `done-list` / `backlog-list` blocks with their
+     `###` headings and the done-list's trailing rotation paragraph, and the Pointers
+     line naming `done-archive/`.
+   - Knowledge half keeps the `adr-local`, `research-local` and `concepts` blocks with
+     their `##` headings, and the Pointers line naming `README.md`.
+   - Every retained line is **byte-verbatim** except the relative-link depth rewrite,
+     which applies to **both** BC-local link families — `../../knowledge/decisions/…` →
+     `../../decisions/…` (adr-local) and `../../knowledge/research/…` → `../../research/…`
+     (research-local) — since the knowledge half sits one level deeper.
+   - **Each half additionally gains exactly one new Pointers line** routing to its sibling
+     (builder decision, 2026-09-06: the two split templates specify it, and a half with no
+     route back to its other half is a dead end). Task half gains the "Knowledge half
+     (ADRs / research / concepts / BC README) for this BC" line pointing at
+     `../../knowledge/contexts/<bc>/INDEX.md`; knowledge half gains the "Task board (tasks
+     by status) for this BC" line pointing at `../../../board/<bc>/INDEX.md`. Take the
+     exact wording from `references/task-index-template.md` and
+     `references/knowledge-index-template.md` — don't re-word it.
+   - A BC INDEX missing a marker block entirely (legal — an empty BC) splits with that
+     block simply absent from its half; never synthesize a block that wasn't there.
+
+3. **Pointer rewrite** (pure, tested helper):
+   - `knowledge/index.md`'s **Pointers** section: the `vision.md` and `context-map.md`
+     entries become correct-as-written once both files sit beside `index.md` — leave them
+     verbatim; `knowledge/protocol.md` → `../board/protocol.md`.
+   - `knowledge/index.md`'s **`bc-list` block is left verbatim.** Its lines already end in
+     `contexts/<bc>/INDEX.md`, which resolves relative to `index.md`'s own directory — i.e.
+     to `.agentheim/knowledge/contexts/<bc>/INDEX.md`, the knowledge half, exactly where
+     ADR-0078 §6 puts the authoritative BC list. Rewriting it would *break* it. (This
+     corrects the pre-cj54k assumption that these lines named `README.md` and needed an
+     edit — verified against the live file.)
+   - BC README lines spelling `contexts/<bc>/INDEX.md` or `contexts/<bc>/<lifecycle>/`, and
+     README-relative links (`../../knowledge/…` → `../../…`) now one level deeper.
+   - Historical protocol entries and ADR bodies are **not** rewritten (ADR-0039 verbatim
+     discipline).
+4. **Refusal guards:** refuse with `{ok:false, code:'worktree-active'}` when `git worktree
    list --porcelain` (read-only) shows an `aw/` worker worktree — a live worker would carry
    the old layout. Lock-timeout surfaces as the existing `lock-timeout` code.
-4. **Manifest for the caller:** `changed` is the single directory pathspec `.agentheim` —
+5. **Manifest for the caller:** `changed` is the single directory pathspec `.agentheim` —
    `runScopedCommit` accepts it (`isInvalidPath` refuses only `-A`, `.`, empty, glob
    chars; git is spawned with an argv array) and `git add -- .agentheim` stages renames
    and respects `.gitignore`.
@@ -66,17 +111,27 @@ the dashboard notice (hxq1g).
       INDEX each, tasks in all four folders, a `done-archive/`; one BC with a `styleguide/`
       subtree; `protocol.md` + one `protocol/YYYY-MM.md`) and asserts, after `migrate`:
       every moved file is byte-identical in content at its new path; the union of lines in
-      the two INDEX halves equals the old INDEX's lines modulo the ADR-link depth rewrite;
-      `detectLayout` returns `board`; `contexts/`, root `vision.md`, root `context-map.md`
-      no longer exist.
+      the two INDEX halves equals the old INDEX's lines modulo the adr-local /
+      research-local link-depth rewrite, **plus exactly one added cross-half Pointers line
+      per half**; `detectLayout` returns `board`; `contexts/`, root `vision.md`, root
+      `context-map.md` no longer exist.
+- [ ] A fixture whose `.agentheim/` holds **no `contexts/` at all** (only
+      `knowledge/protocol.md`) migrates its knowledge-half files and comes out with
+      `board/` on disk, so a second `detectLayout` returns `board` and a second `migrate`
+      is a `noop` — the re-migrate-forever trap is closed.
 - [ ] A second `migrate` on the migrated fixture returns `noop:true` with `changed:[]` and
       the fixture's mtimes are unchanged (zero writes).
 - [ ] A mixed fixture (both `contexts/` and `board/` present) returns
       `{ok:false, code:'mixed-layout'}` naming the path, with zero writes.
+- [ ] The write phase never calls a `task-system-paths` getter without an explicit
+      `{layout}` opt: a test that mid-migration snapshots a transiently-mixed tree and
+      re-runs the same resolution helpers asserts no `mixed-layout` throw escapes.
 - [ ] After migration a grep over the fixture's `knowledge/index.md` and every README
-      finds zero references to `.agentheim/contexts/`, `contexts/<bc>/INDEX.md`,
-      `contexts/<bc>/<lifecycle>/`, root-level `vision.md` / `context-map.md`, or
-      `knowledge/protocol`; every rewritten relative link resolves to an existing file.
+      finds zero references to `.agentheim/contexts/`, `contexts/<bc>/<lifecycle>/`,
+      root-level `vision.md` / `context-map.md`, or `knowledge/protocol` — **excluding
+      `knowledge/index.md`'s `bc-list` block, which legitimately keeps
+      `contexts/<bc>/INDEX.md` verbatim** (item 3). Every rewritten relative link, and
+      every `bc-list` link, resolves to an existing file.
 - [ ] `migrate` holds the lifecycle lock for its whole write phase (a concurrent `log`
       call blocks until it releases, asserted with the existing two-process harness from
       pt0gy/dpbjj) and every rewritten file goes through `writeFileAtomic` (a forced
@@ -97,4 +152,10 @@ the dashboard notice (hxq1g).
 - The stale plugin cache (0.9.3) will not carry zgav8's step-0 prose; a builder on this
   repo may run `node lib/task-lifecycle-cli.mjs migrate` by hand — the verb must be
   usable standalone with a clear one-line result.
+- **Refined 2026-09-06 against shipped cj54k.** Three assumptions written before the path
+  module existed were corrected here: the `mixed-layout` throw makes the `{layout}`
+  override mandatory mid-move; `detectLayout`'s "`.agentheim/` exists but unpopulated →
+  legacy" branch forces the unconditional `board/` mkdir; and `knowledge/index.md`'s
+  `bc-list` needs *no* rewrite (its links already resolve into the knowledge half). The
+  INDEX-split fork (verbatim vs. additive cross-half pointer) was settled additive.
 - Parent: agentic-workflow-g5ez5; decision record: ADR-0078.

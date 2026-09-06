@@ -5,6 +5,18 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 14:56 -- Modeling / Refined: agentic-workflow-e896r + agentic-workflow-hxq1g - both g5ez5 children re-grounded against shipped cj54k
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo (both auto-promoted)
+**Summary:** Both children were written before cj54k shipped, so this pass verified every assumption against the real `lib/task-system-paths.mjs`, the split INDEX templates, and the live dashboard source, and corrected seven of them. e896r: the getters *throw* `mixed-layout`, so `migrate` must detect once and pass an explicit `{layout}` opt through the whole write phase; `detectLayout` calls an existing-but-unpopulated `.agentheim/` legacy, so `migrate` must `mkdir` `board/` unconditionally or re-migrate forever; `knowledge/index.md`'s bc-list needs NO rewrite (its `contexts/<bc>/INDEX.md` links already resolve into the knowledge half) and the "zero references" grep criterion had to be scoped to exclude it; the link-depth rewrite covers research-local as well as adr-local; module names pinned (`withLifecycleLock`, `writeFileAtomic`). hxq1g: `buildTree` must short-circuit on mixed before touching any getter, or its own "mixed renders the notice" criterion is unsatisfiable; `projectContext(root, bcDir, bcName)` cannot survive the two-root split and is re-shaped to resolve each surface through its own getter; `tree.mjs` reads no protocol feed and no `done-archive/`, so that scope line was struck; the app-side styleguide import count is 20, not 14 (board.js 14 + app.js 1 + main-pane-reader.js 3 + slide-over.js 2), and the title + INDEX line were corrected to match; `project-name.mjs` carries a second independent `vision.md` literal that was missing from scope; `classifyFramePath`'s structural default confirmed on disk, so it stays an assertion to add.
+**Builder decisions:** (1) dashboard tree payload keeps `contexts[].index` as the task half and gains a sibling `knowledgeIndex` — under legacy both resolve to the same file, so existing app-side readers survive the transition; (2) the INDEX split is additive, not strictly verbatim — each half gains exactly one cross-half Pointers line from its template, so neither half is a dead end.
+**Split into:** none
+**ADRs written:** none (ADR-0078 already covers both)
+
+---
+
 ## 2026-09-06 14:33 -- Work session ended
 
 **Type:** Work / Session end
