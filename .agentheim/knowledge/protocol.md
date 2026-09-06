@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 12:32 -- Release shipped: v0.9.3
+
+**Type:** Release
+**Version:** 0.9.2 → 0.9.3 (patch — the bookkeeping-mechanization wave: locked lifecycle verbs project-wide, conflict-free parallel sessions, atomic writes, worker-branch/conductor split, merge-back ladder, scoped `/agentheim:work <id>`, dashboard live-tree hub; builder chose patch, RELEASE.md semver would read it as minor)
+**Dashboard dist:** rebuilt + `npm test` (984 pass) per RELEASE.md step 1 — bundle already matched sources, no dist commit needed
+**Manifest:** `.claude-plugin/plugin.json` bumped, committed `f271fde`
+**Changelog:** `CHANGELOG.md` `[Unreleased]` → `[0.9.3]` section rolled (same commit)
+**Pushed to main:** yes (`e1af384..f271fde` on `origin/main`)
+**Tag:** `v0.9.3` (annotated) → `f271fde`, pushed to origin
+**GitHub Release:** deferred (gh unavailable on this machine — `scripts/backfill-github-releases.ps1` will create it from the CHANGELOG after `gh auth login`)
+
+---
+
 ## 2026-09-06 12:28 -- Work session ended
 
 **Type:** Work / Session end
