@@ -11,19 +11,19 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 2
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 2
 - **Done:** 192
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-vhz69** — Atomic temp-file-plus-rename for every INDEX.md / protocol.md / archive write — a crash mid-write must never truncate a bookkeeping file (chore) — `todo/agentic-workflow-vhz69-atomic-tmp-rename-bookkeeping-writes.md`
-- **agentic-workflow-dpbjj** — Force overlap in pt0gy's two-process concurrency proof — a child-side hold inside the locked section so the lost-update assertion cannot pass by luck (chore) — `todo/agentic-workflow-dpbjj-forced-overlap-concurrency-proof.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-vhz69** — Atomic temp-file-plus-rename for every INDEX.md / protocol.md / archive write — a crash mid-write must never truncate a bookkeeping file (chore) — `doing/agentic-workflow-vhz69-atomic-tmp-rename-bookkeeping-writes.md`
+- **agentic-workflow-dpbjj** — Force overlap in pt0gy's two-process concurrency proof — a child-side hold inside the locked section so the lost-update assertion cannot pass by luck (chore) — `doing/agentic-workflow-dpbjj-forced-overlap-concurrency-proof.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

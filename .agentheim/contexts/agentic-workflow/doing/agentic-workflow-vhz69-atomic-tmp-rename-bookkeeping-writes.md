@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-vhz69
 title: Atomic temp-file-plus-rename for every INDEX.md / protocol.md / archive write — a crash mid-write must never truncate a bookkeeping file
-status: todo
+status: doing
 type: chore
 context: agentic-workflow
 created: 2026-09-06

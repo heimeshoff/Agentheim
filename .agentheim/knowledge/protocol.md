@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 10:18 -- Batch started: [agentic-workflow-dpbjj, agentic-workflow-vhz69]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-dpbjj - Force overlap in pt0gy's two-process concurrency proof — a child-side hold inside the locked section so the lost-update assertion cannot pass by luck, agentic-workflow-vhz69 - Atomic temp-file-plus-rename for every INDEX.md / protocol.md / archive write — a crash mid-write must never truncate a bookkeeping file
+**Parallel:** yes (2 workers — the whole ready set; both unblocked by pt0gy's integration at 29a3d2b this session). Merge-order advisory: dpbjj edits lib/lifecycle-lock.mjs + the concurrency test; vhz69 edits the four lib writer modules and may reuse dpbjj's hold in its kill test — squash-merge dpbjj first, then vhz69, never interleaved.
+
+---
+
 ## 2026-09-06 10:18 -- Task verified and completed: agentic-workflow-pt0gy - Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free
 
 **Type:** Work / Task completion

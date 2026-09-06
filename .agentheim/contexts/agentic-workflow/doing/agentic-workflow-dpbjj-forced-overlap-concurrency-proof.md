@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-dpbjj
 title: Force overlap in pt0gy's two-process concurrency proof — a child-side hold inside the locked section so the lost-update assertion cannot pass by luck
-status: todo
+status: doing
 type: chore
 context: agentic-workflow
 created: 2026-09-06
