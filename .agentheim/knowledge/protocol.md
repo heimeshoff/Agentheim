@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 09:25 -- Modeling / Promoted: agentic-workflow-pt0gy - Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-06 09:25 -- Modeling / Refined: agentic-workflow-pt0gy - Concurrent modeling sessions collide on protocol.md, INDEX.md, and the git index — make capture-side bookkeeping conflict-free
 
 **Type:** Modeling / Refine
