@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-06 13:51 -- Batch started: [agentic-workflow-cj54k]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-cj54k - One path module for the two-root layout — `lib/task-system-paths.mjs` with `detectLayout` (legacy / board / mixed) — and every lifecycle verb, rotation, and live-tree lint re-pointed through it, resolving both layouts during the transition; ADR-0078 accepted
+**Parallel:** no (1 worker — cj54k is the only ready task; e896r/hxq1g/zgav8/tgr31/g5ez5 blocked on it in backlog)
+
+---
+
 ## 2026-09-06 13:48 -- Modeling / Promoted: agentic-workflow-cj54k - One path module for the two-root layout — `lib/task-system-paths.mjs` with `detectLayout` (legacy / board / mixed) — and every lifecycle verb, rotation, and live-tree lint re-pointed through it, resolving both layouts during the transition; ADR-0078 accepted
 
 **Type:** Modeling / Promote
