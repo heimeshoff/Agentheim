@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 11:05 -- Modeling / Captured: infrastructure-k9t2v, infrastructure-r4mzp - /dashboard token cost
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo (k9t2v), backlog (r4mzp)
+**Summary:** Builder reported /dashboard costing ~60k tokens per launch. Transcript measurement showed 59,405 input on the launch turn plus 60,000 on the report-back turn, of which the command file is only ~1,450 tokens (~2.4%) — the rest is session baseline, and the second turn is structural to any tool call. Captured the honest fix (k9t2v: collapse the three verbatim-duplicated node -e bootstraps into one, move the $CLAUDE_PLUGIN_ROOT rationale to ADR-0002, ~1.2k/turn saving plus a re-duplication lint) separately from the real question (r4mzp: whether a slash command is the right surface at all, given a consumer install has no alternative while the repo has a zero-token CLI).
+
+---
+
 ## 2026-09-06 15:53 -- Modeling / Promoted: agentic-workflow-zgav8 - Prose sweep for the two-root layout — every skill, agent, and reference spells `board/` and `knowledge/contexts/`, the five entry skills run `migrate` as "Before acting" step 0, and a permanent live-tree lint fails on any reappearing legacy path literal
 
 **Type:** Modeling / Promote
