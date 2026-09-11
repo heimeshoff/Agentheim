@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 12:11 -- Batch started: [agentic-workflow-zgav8]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-zgav8 - Prose sweep for the two-root layout — every skill, agent, and reference spells `board/` and `knowledge/contexts/`, the five entry skills run `migrate` as "Before acting" step 0, and a permanent live-tree lint fails on any reappearing legacy path literal
+**Parallel:** no (1 worker — agentic-workflow-zgav8 is the only ready task across every BC; tgr31 and g5ez5 wait on it in backlog)
+
+---
+
 ## 2026-09-11 11:42 -- Work session ended
 
 **Type:** Work / Session end
