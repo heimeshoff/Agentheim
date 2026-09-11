@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 2
-- **Todo:** 1
+- **Backlog:** 1
+- **Todo:** 2
 - **Doing:** 0
 - **Done:** 200
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-tgr31** — Dogfood the migration — `migrate` already moved this repo's `.agentheim/` on `main` (commit 6fbaad2, 2026-09-11); finish it: re-point the 20 app specifiers and 5 test-side styleguide reads to `knowledge/contexts/`, flip the two live-tree tests still asserting `legacy`, and prove both suites, the rebuilt `dist/`, and the dashboard green on the migrated tree (chore) — `todo/agentic-workflow-tgr31-dogfood-migrate-this-repo-agentheim-to-two-root-layout.md`
 - **agentic-workflow-q8f3n** — `lib/vacuum-guard.mjs`'s `BOOKKEEPING_SEGMENT_RE` doesn't recognize `board/`/`knowledge/contexts/` INDEX paths (bug) — `todo/agentic-workflow-q8f3n-lib-vacuum-guard-mjs-s-bookkeeping-segment-re-doesn-t-recogn.md`
 <!-- todo-list:end -->
 
@@ -50,7 +51,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-tgr31** — Dogfood the migration — run the `migrate` verb on this repo's own `.agentheim/` on `main`, commit it as one rename-detected scoped commit, and prove history, lints, and the dashboard survive; conductor-owned, never dispatched to a worker (chore) — `backlog/agentic-workflow-tgr31-dogfood-migrate-this-repo-agentheim-to-two-root-layout.md`
 - **agentic-workflow-g5ez5** — Split the operational task system out of `contexts/` and `knowledge/` — every BC's lifecycle folders, `INDEX.md`, and the protocol log move to one dedicated folder, leaving BC READMEs in `contexts/` and durable knowledge in `knowledge/`, with an automatic on-upgrade migration of existing projects (refactor) — `backlog/agentic-workflow-g5ez5-split-task-system-folder-from-contexts-and-knowledge.md`
 <!-- backlog-list:end -->
 

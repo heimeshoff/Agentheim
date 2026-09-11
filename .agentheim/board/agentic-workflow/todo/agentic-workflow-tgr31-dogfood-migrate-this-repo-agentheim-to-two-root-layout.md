@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-tgr31
 title: Dogfood the migration — `migrate` already moved this repo's `.agentheim/` on `main` (commit 6fbaad2, 2026-09-11); finish it: re-point the 20 app specifiers and 5 test-side styleguide reads to `knowledge/contexts/`, flip the two live-tree tests still asserting `legacy`, and prove both suites, the rebuilt `dist/`, and the dashboard green on the migrated tree
-status: backlog
+status: todo
 type: chore
 context: agentic-workflow
 created: 2026-09-06

@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 14:03 -- Modeling / Promoted: agentic-workflow-tgr31 - Dogfood the migration — `migrate` already moved this repo's `.agentheim/` on `main` (commit 6fbaad2, 2026-09-11); finish it: re-point the 20 app specifiers and 5 test-side styleguide reads to `knowledge/contexts/`, flip the two live-tree tests still asserting `legacy`, and prove both suites, the rebuilt `dist/`, and the dashboard green on the migrated tree
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-11 14:03 -- Modeling / Refined: agentic-workflow-tgr31 - Dogfood the migration — finish the two-root move: re-point the 20 app specifiers and 5 test-side styleguide reads, flip the two live-tree tests still asserting legacy, prove both suites, dist/, and the dashboard green
 
 **Type:** Modeling / Refine
