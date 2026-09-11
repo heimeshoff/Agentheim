@@ -8,7 +8,7 @@ Newest entries on top.
 ## 2026-09-11 14:31 -- Work session ended
 
 **Type:** Work / Session end
-**Duration:** 25m (batch start 14:22 → 14:47)
+**Duration:** 11m (batch start 14:20 → 14:31)
 **Completed:** 2 (first-try PASS: 2, re-dispatched: 0, skipped: 0)
 **Bounced:** 0
 **Failed:** 0
@@ -30,7 +30,7 @@ Newest entries on top.
 **Type:** Work / Task completion
 **Task:** agentic-workflow-tgr31 - Dogfood the migration — `migrate` already moved this repo's `.agentheim/` on `main` (commit 6fbaad2, 2026-09-11); finish it: re-point the 20 app specifiers and 5 test-side styleguide reads to `knowledge/contexts/`, flip the two live-tree tests still asserting `legacy`, and prove both suites, the rebuilt `dist/`, and the dashboard green on the migrated tree
 **Summary:** Finished the two-root migration code residual on the tree 6fbaad2 already moved: 20 dashboard styleguide ESM specifiers and 6 test-side reads re-pointed to knowledge/contexts/, the two live-tree lib tests flipped to board, dist/ rebuilt on main; lib 648/648, dashboard green, /api/tree layout board with migrationPending false
-**Duration:** 18m
+**Duration:** 9m
 **Verification:** PASS (iteration 1)
 **Files changed:** 12
 **Tests added:** 0
@@ -43,7 +43,7 @@ Newest entries on top.
 **Type:** Work / Task completion
 **Task:** agentic-workflow-q8f3n - `lib/vacuum-guard.mjs`'s `BOOKKEEPING_SEGMENT_RE` doesn't recognize `board/`/`knowledge/contexts/` INDEX paths
 **Summary:** Widened lib/vacuum-guard.mjs BOOKKEEPING_SEGMENT_RE layout-agnostically so classifyTask buckets board-layout INDEX/protocol chores as bookkeeping (legacy shapes kept through the transition window); 7 TDD fixtures incl. a Windows board path; ADR-0078 Neutral consequences amended in place
-**Duration:** 11m
+**Duration:** 7m
 **Verification:** PASS (iteration 1)
 **Files changed:** 2
 **Tests added:** 7
