@@ -1,11 +1,11 @@
 ---
 id: infrastructure-k9t2v
 title: Slim `commands/dashboard.md` — one bootstrap instead of three pasted copies, and the `$CLAUDE_PLUGIN_ROOT` archaeology moved out to ADR-0002
-status: doing
+status: done
 type: chore
 context: infrastructure
 created: 2026-09-11
-completed:
+completed: 2026-09-11
 depends_on: []
 blocks: []
 tags: [dashboard, commands, context-budget]
@@ -81,3 +81,45 @@ should exist at all, given a zero-token CLI path, is infrastructure-r4mzp.
 The `node --test` invocation needs the explicit glob form —
 `node --test lib/test/*.test.mjs` — the bare-directory form finds nothing under
 Node 25 on this box.
+
+## Outcome
+
+Rewrote `commands/dashboard.md` to 19 lines: frontmatter, a two-sentence pointer to
+ADR-0002's infrastructure-010 addendum (no restated archaeology), and the resolver
+bootstrap exactly once with the verb forwarded via Claude Code's `$ARGUMENTS`
+placeholder instead of pasted three times per verb. Added an ADR-0002 addendum
+(`## Addendum — one command-card bootstrap, not three`) recording the collapse and
+the seam adaptation; the `$CLAUDE_PLUGIN_ROOT`-is-empty rationale already lived
+fully in ADR-0002's infrastructure-010 addendum, so no content was lost, only
+de-duplicated.
+
+The infrastructure-009/010 command-card test seam could not pass **unchanged**
+against a single-invocation card: its "at least three invocations, one verb each"
+assertions are structurally impossible to satisfy with one pass-through line. Per
+the task's own guidance, the seam was adapted rather than gutted —
+`dashboard/test/command-card.test.mjs` now asserts the bootstrap occurs exactly
+once and that it forwards `$ARGUMENTS` (not a hardcoded verb); the retired
+"three verbs present" static check is replaced in `foreign-launch.test.mjs`,
+which now substitutes each real verb into the card's single line
+(`substituteArguments`, new in `dashboard/test/helpers/card.mjs`) and runs it
+end-to-end against a foreign project — a strictly stronger per-verb guard than
+the static text check it replaces. All env-independent-resolver, no-`$CLAUDE_PLUGIN_ROOT`,
+no-`cd`, and no-bare-project-relative-hint guards are unchanged in spirit and pass.
+
+Added `lib/dashboard-command-bootstrap-dedup.mjs` (+ `lib/test/dashboard-command-bootstrap-dedup.test.mjs`),
+a stdlib-only, side-effect-free live-tree lint counting occurrences of the bootstrap
+literal in `commands/dashboard.md`; the live-tree gate asserts exactly 1, so a future
+re-duplication fails `node --test lib/test/*.test.mjs`.
+
+Updated the infrastructure BC README's "Launch / Stop" ubiquitous-language entry to
+describe the single-bootstrap + `$ARGUMENTS` shape and the new dedup lint.
+
+Full suites green: `node --test "dashboard/test/*.test.mjs"` 907/907 (one transient
+SSE-timing flake in `events.test.mjs` on the first run, confirmed pre-existing/flaky
+by an immediate all-green re-run — not touched by this task); `node --test lib/test/*.test.mjs`
+380/380.
+
+Key files: `commands/dashboard.md`, `.agentheim/knowledge/decisions/0002-dashboard-runtime-transport.md`,
+`dashboard/test/command-card.test.mjs`, `dashboard/test/foreign-launch.test.mjs`,
+`dashboard/test/helpers/card.mjs`, `lib/dashboard-command-bootstrap-dedup.mjs`,
+`lib/test/dashboard-command-bootstrap-dedup.test.mjs`, `.agentheim/contexts/infrastructure/README.md`.

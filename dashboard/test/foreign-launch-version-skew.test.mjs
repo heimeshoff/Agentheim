@@ -40,19 +40,21 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 import { runfilePath, readRunfile } from '../runfile.mjs';
-import { extractLauncherInvocations, verbOf } from './helpers/card.mjs';
+import { extractLauncherInvocations, substituteArguments } from './helpers/card.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const dashboardDir = path.join(here, '..');
 const repoRoot = path.join(dashboardDir, '..');
 const cardPath = path.join(repoRoot, 'commands', 'dashboard.md');
 
+// infrastructure-k9t2v: the card carries ONE invocation with `$ARGUMENTS`; substitute the verb
+// the way Claude Code does, so each verb is still exercised as a real, distinct shell command.
 function cardCommandFor(verb) {
   const card = readFileSync(cardPath, 'utf8');
-  const invocations = extractLauncherInvocations(card);
-  const match = invocations.find((line) => verbOf(line) === verb);
-  if (!match) throw new Error(`card has no "${verb}" invocation`);
-  return match;
+  const [invocation] = extractLauncherInvocations(card);
+  if (!invocation) throw new Error('card has no launcher invocation');
+  const verbArg = verb === 'launch' ? '' : verb;
+  return substituteArguments(invocation, verbArg);
 }
 
 function makeFakeCacheHome() {

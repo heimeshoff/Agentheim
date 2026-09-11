@@ -4,7 +4,7 @@ title: Dashboard runtime — Node-stdlib localhost transport with detached launc
 scope: infrastructure
 status: proposed
 date: 2026-06-05
-related_tasks: [infrastructure-001, agentic-workflow-001, agentic-workflow-002, agentic-workflow-003, infrastructure-010, infrastructure-018, infrastructure-019, infrastructure-rgknz]
+related_tasks: [infrastructure-001, agentic-workflow-001, agentic-workflow-002, agentic-workflow-003, infrastructure-010, infrastructure-018, infrastructure-019, infrastructure-rgknz, infrastructure-k9t2v]
 related_adrs: [ADR-0006, ADR-0018]
 superseded_in_part_by: [ADR-0006]
 ---
@@ -451,3 +451,51 @@ actually on disk" property this addendum is about.
   card-command seam, still asserting the runfile lands under the consumer project. A REAL installed
   plugin cache holds a full copy of `dashboard/` per version dir, not a symlink, so this collapse is
   a test-harness artifact only, not a production gap.
+
+## Addendum — one command-card bootstrap, not three (2026-09-11, infrastructure-k9t2v)
+
+> A prose/duplication cut over the infrastructure-010 addendum above. Reverses no clause: the
+> env-independent resolver contract (homedir→cache→semver-max, fail-loud, no
+> `$CLAUDE_PLUGIN_ROOT` dependency, cwd-in-project) stands unchanged. Not a new ADR number; it is
+> part of this transport decision.
+
+### Context
+
+`commands/dashboard.md` pasted the infrastructure-010 `node -e` bootstrap **three times**
+verbatim (no-arg / `stop` / `status`), differing only in the trailing argument, and carried ~40
+lines restating the `$CLAUDE_PLUGIN_ROOT`-is-empty history the infrastructure-010 addendum above
+already records. Three pasted copies meant a fourth resolver fix required editing three identical
+strings and hoping they stayed identical — the drift shape ADR-0068's rule targets — and the
+restated history was re-read by the model on every `/dashboard` invocation for no benefit, since
+it duplicated content already reachable from this ADR.
+
+### Decision
+
+`commands/dashboard.md` now carries the bootstrap **exactly once**, with the verb forwarded at
+runtime via the slash-command's own `$ARGUMENTS` placeholder (Claude Code substitutes it with
+whatever follows `/dashboard` — nothing, `stop`, or `status` — before the Bash tool ever sees the
+line), instead of three near-identical lines each hardcoding its own trailing verb. The command
+file carries a one-line pointer to this addendum instead of restating the archaeology. A live-tree
+lint (`lib/dashboard-command-bootstrap-dedup.mjs`) asserts the bootstrap literal occurs exactly
+once in `commands/dashboard.md`, so a re-duplication fails `node --test lib/test/*.test.mjs`.
+
+The infrastructure-009/010 command-card test seam (`dashboard/test/command-card.test.mjs`,
+`dashboard/test/foreign-launch.test.mjs`) could not pass **unchanged** against this shape: its
+"at least three invocations, one per named verb" assertions are structurally impossible to satisfy
+against a single pass-through line. The seam was adapted, not gutted — it now asserts exactly one
+invocation and that the invocation forwards `$ARGUMENTS` rather than a hardcoded verb; per-verb
+*behavioural* coverage (does `stop` actually stop the right process?) moved entirely into
+`foreign-launch.test.mjs`, which substitutes each real verb into the card's single line the way
+Claude Code would and runs it end-to-end against a foreign project — a strictly stronger guard
+than the static per-verb text check it replaces.
+
+### Consequences
+
+- ~1.2k tokens fewer per `/dashboard` invocation (the command file dropped from 77 lines / ~1,450
+  tokens to 19 lines); this is a modest, honest saving, not a fix for the much larger Claude Code
+  session-baseline cost a first `/dashboard` turn also pays (see infrastructure-k9t2v's task Notes
+  and the separate infrastructure-r4mzp question of whether a slash command is the right surface
+  at all).
+- A resolver-script edit is now a single-string change, closing the drift hazard.
+- The `$CLAUDE_PLUGIN_ROOT`-is-empty rationale has exactly one home (this ADR) instead of two
+  (this ADR and the command file); the command carries only a pointer.

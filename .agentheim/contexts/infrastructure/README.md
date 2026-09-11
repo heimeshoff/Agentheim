@@ -54,17 +54,23 @@ for an infrastructure BC.
   picks the newest version by **semver** (`0.8.10 > 0.8.9`), **fails loud** if none is found,
   and spawns `launch.mjs` with the consumer project as cwd so **project discovery** still
   resolves the foreign `.agentheim/`. Script-in-cache + cwd-in-project remains load-bearing.
-  (infrastructure-010, superseding 008's locator; ADR-0002 addendum.) The contract is guarded
-  by a committed test seam — a static guard over `commands/dashboard.md` (all three verbs use
-  the env-independent `node -e` resolver bootstrap, none depend on `$CLAUDE_PLUGIN_ROOT`, no
-  `cd`), resolver unit tests (semver-max incl. the `0.8.10` lexical trap, homedir derivation on
-  win32- and POSIX-shaped homes, fail-loud), and a foreign-project integration test that runs
-  the literal card form with `CLAUDE_PLUGIN_ROOT` **deleted** from the child env and asserts the
-  runfile lands under the consumer project (infrastructure-009, amended by 010). **Version-aware
-  reuse** (infrastructure-rgknz, ADR-0002 addendum): a live server is reused only when its
-  runfile's recorded plugin identity **matches** the launcher's own; any mismatch — including an
-  older runfile missing the fields, or one whose recorded root no longer exists on disk — is a
-  **replace**, not a reuse. See the **Runfile** entry below for the mechanics.
+  (infrastructure-010, superseding 008's locator; ADR-0002 addendum.) `commands/dashboard.md`
+  carries the resolver bootstrap **exactly once** — the verb (empty / `stop` / `status`) is
+  forwarded at runtime via `$ARGUMENTS` rather than pasted three times per verb, and the
+  `$CLAUDE_PLUGIN_ROOT`-is-empty archaeology lives in ADR-0002's infrastructure-010 addendum,
+  not in the command file (infrastructure-k9t2v). The contract is guarded by a committed test
+  seam — a static guard over `commands/dashboard.md` (the env-independent `node -e` resolver
+  bootstrap occurs once and forwards `$ARGUMENTS`, never depends on `$CLAUDE_PLUGIN_ROOT`, no
+  `cd`), a live-tree lint asserting the bootstrap literal is not re-duplicated
+  (`lib/dashboard-command-bootstrap-dedup.mjs`), resolver unit tests (semver-max incl. the
+  `0.8.10` lexical trap, homedir derivation on win32- and POSIX-shaped homes, fail-loud), and a
+  foreign-project integration test that substitutes each real verb into the card's single line
+  and runs it with `CLAUDE_PLUGIN_ROOT` **deleted** from the child env, asserting the runfile
+  lands under the consumer project (infrastructure-009, amended by 010 and k9t2v).
+  **Version-aware reuse** (infrastructure-rgknz, ADR-0002 addendum): a live server is reused
+  only when its runfile's recorded plugin identity **matches** the launcher's own; any mismatch —
+  including an older runfile missing the fields, or one whose recorded root no longer exists on
+  disk — is a **replace**, not a reuse. See the **Runfile** entry below for the mechanics.
 - **Project discovery** — how the running runtime locates and reads the current project's
   `.agentheim/` folder: **walk up from the invocation directory** until a `.agentheim/`
   folder is found (the way git finds `.git`), resolve an **absolute root once at startup**,

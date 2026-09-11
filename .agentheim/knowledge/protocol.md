@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 11:41 -- Task verified and completed: infrastructure-k9t2v - Slim `commands/dashboard.md` — one bootstrap instead of three pasted copies, and the `$CLAUDE_PLUGIN_ROOT` archaeology moved out to ADR-0002
+
+**Type:** Work / Task completion
+**Task:** infrastructure-k9t2v - Slim `commands/dashboard.md` — one bootstrap instead of three pasted copies, and the `$CLAUDE_PLUGIN_ROOT` archaeology moved out to ADR-0002
+**Summary:** Slimmed commands/dashboard.md to 19 lines — the resolver bootstrap occurs exactly once with the verb forwarded via $ARGUMENTS, the $CLAUDE_PLUGIN_ROOT rationale pointed at ADR-0002 (new addendum), the infrastructure-009/010 command-card seam adapted to run each real verb through bash against a foreign project, plus a live-tree lint that fails on re-duplication
+**Duration:** 11m
+**Verification:** PASS (iteration 1)
+**Files changed:** 8
+**Tests added:** 9
+**ADRs written:** 0002 (amended)
+
+---
+
 ## 2026-09-11 11:29 -- Batch started: [infrastructure-k9t2v]
 
 **Type:** Work / Batch start

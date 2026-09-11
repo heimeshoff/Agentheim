@@ -8,11 +8,23 @@
 //     the project path and reproduced the exact module-not-found error. The card now
 //     uses an env-INDEPENDENT `node -e` bootstrap that derives the launcher from
 //     os.homedir() via dashboard/resolve-launcher.mjs.
+//   - infrastructure-k9t2v: the card pasted that same bootstrap THREE times (one per
+//     verb, differing only in a trailing literal). Collapsed to ONE bootstrap line
+//     that forwards the verb at runtime via `$ARGUMENTS`. This is a **deliberate
+//     seam adaptation, not a silent gutting**: the old "at least three invocations,
+//     one per named verb" assertions are structurally impossible to satisfy with a
+//     single pass-through line, so they are replaced below by (a) an
+//     exactly-one-invocation assertion and (b) a $ARGUMENTS-forwarding assertion.
+//     Per-verb *behavioural* coverage (does `stop` actually stop?) now lives
+//     entirely in foreign-launch.test.mjs, which substitutes the real verb into the
+//     single line and runs it — a strictly stronger guard than the static per-verb
+//     text check it replaces.
 //
-// This test extracts the launcher invocations from the card and asserts the
+// This test extracts the launcher invocation(s) from the card and asserts the
 // env-independent resolver shape, so the next edit to the card can't silently
 // reintroduce either the project-relative-path OR the $CLAUDE_PLUGIN_ROOT-dependent
-// regression. It also guards the launcher's printed user-facing hint strings.
+// regression, and can't silently re-duplicate the bootstrap. It also guards the
+// launcher's printed user-facing hint strings.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -22,9 +34,9 @@ import { fileURLToPath } from 'node:url';
 
 import {
   extractLauncherInvocations,
-  verbOf,
   isPluginRooted,
   isEnvIndependentResolver,
+  forwardsArguments,
 } from './helpers/card.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -32,10 +44,29 @@ const repoRoot = path.join(here, '..', '..');
 const cardPath = path.join(repoRoot, 'commands', 'dashboard.md');
 const launchPath = path.join(here, '..', 'launch.mjs');
 
+test('the card contains exactly one launcher invocation (infrastructure-k9t2v: no re-duplication)', () => {
+  const card = readFileSync(cardPath, 'utf8');
+  const invocations = extractLauncherInvocations(card);
+  assert.equal(
+    invocations.length,
+    1,
+    `expected exactly one bootstrap invocation, found ${invocations.length}`
+  );
+});
+
+test('the single invocation forwards the verb via $ARGUMENTS, not a hardcoded verb', () => {
+  const card = readFileSync(cardPath, 'utf8');
+  const [line] = extractLauncherInvocations(card);
+  assert.ok(
+    forwardsArguments(line),
+    `card invocation must pass the verb through as $ARGUMENTS: ${line}`
+  );
+});
+
 test('every launcher invocation in the card is the env-independent resolver bootstrap', () => {
   const card = readFileSync(cardPath, 'utf8');
   const invocations = extractLauncherInvocations(card);
-  assert.ok(invocations.length >= 3, 'expected at least three launcher invocations in the card');
+  assert.ok(invocations.length >= 1, 'expected at least one launcher invocation in the card');
   for (const line of invocations) {
     assert.ok(
       isEnvIndependentResolver(line),
@@ -63,13 +94,11 @@ test('the card derives the cache path from os.homedir() (never raw env vars)', (
   }
 });
 
-test('the card carries all three verbs: launch, stop, status', () => {
-  const card = readFileSync(cardPath, 'utf8');
-  const verbs = new Set(extractLauncherInvocations(card).map(verbOf));
-  for (const verb of ['launch', 'stop', 'status']) {
-    assert.ok(verbs.has(verb), `card is missing the "${verb}" verb`);
-  }
-});
+// infrastructure-k9t2v: the old static "all three verbs textually present" check
+// cannot apply to a single $ARGUMENTS-forwarding line (there is no per-verb text
+// to enumerate). Per-verb coverage now lives in foreign-launch.test.mjs, which
+// substitutes each real verb into the one card line and runs it end-to-end
+// against a foreign project — see that file's `cardCommandFor`.
 
 test('the card issues no `cd` directive (launcher must run from the consumer cwd)', () => {
   const card = readFileSync(cardPath, 'utf8');
@@ -126,12 +155,19 @@ test('predicate REJECTS a $CLAUDE_PLUGIN_ROOT-dependent card (infrastructure-010
   );
 });
 
-test('verb-missing detection FAILS a card that drops the status verb (Red proof)', () => {
-  const goodLaunch =
+test('predicate REJECTS a re-duplicated card (infrastructure-k9t2v Red proof)', () => {
+  const line =
     "node -e \"const os=require('node:os');os.homedir();/*resolve-launcher.mjs*/\"";
-  const goodStop =
+  const badCard = ['```', line, '```', '```', `${line} stop`, '```'].join('\n');
+  const invocations = extractLauncherInvocations(badCard);
+  assert.equal(invocations.length, 2, 'extractor must find both pasted copies');
+});
+
+test('predicate REJECTS a card that hardcodes a verb instead of forwarding $ARGUMENTS (Red proof)', () => {
+  const badLine =
     "node -e \"const os=require('node:os');os.homedir();/*resolve-launcher.mjs*/\" stop";
-  const badCard = ['```', goodLaunch, '```', '```', goodStop, '```'].join('\n');
-  const verbs = new Set(extractLauncherInvocations(badCard).map(verbOf));
-  assert.ok(!verbs.has('status'), 'detection must notice the dropped status verb');
+  assert.ok(
+    !forwardsArguments(badLine),
+    'forwardsArguments must reject a line with a hardcoded verb and no $ARGUMENTS'
+  );
 });
