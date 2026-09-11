@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 11:42 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 12m (batch start 11:30 → 11:42)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0) — a second first-try PASS, agentic-workflow-jf6qz, was dropped when this session was rebased onto origin/main, which already carried that task's completion (a026cbe) from a parallel session
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** k9t2v: 1 (jf6qz: 1, dropped at rebase)
+**Commits:** 3 (1 batch-start, 1 task integration, this entry)
+**Vision-conformance:** none — batch aligns with vision. k9t2v removes a thrice-duplicated bootstrap from the /dashboard command card behind a re-duplication lint and moves its rationale into ADR-0002 — ADR-0068's drift rule. Neither pulls toward a non-goal.
+**Batch mix:** 0% product-facing / 100% harness / 0% bookkeeping (1 task)
+**Carry-over:** none — working tree clean. No orphan worktrees.
+
+---
+
 ## 2026-09-11 11:41 -- Task verified and completed: infrastructure-k9t2v - Slim `commands/dashboard.md` — one bootstrap instead of three pasted copies, and the `$CLAUDE_PLUGIN_ROOT` archaeology moved out to ADR-0002
 
 **Type:** Work / Task completion
