@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 14:20 -- Batch started: [agentic-workflow-q8f3n, agentic-workflow-tgr31]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-q8f3n - `lib/vacuum-guard.mjs`'s `BOOKKEEPING_SEGMENT_RE` doesn't recognize `board/`/`knowledge/contexts/` INDEX paths, agentic-workflow-tgr31 - Dogfood the migration — `migrate` already moved this repo's `.agentheim/` on `main` (commit 6fbaad2, 2026-09-11); finish it: re-point the 20 app specifiers and 5 test-side styleguide reads to `knowledge/contexts/`, flip the two live-tree tests still asserting `legacy`, and prove both suites, the rebuilt `dist/`, and the dashboard green on the migrated tree
+**Parallel:** yes (2 workers — the whole ready set; both agentic-workflow; no code-file overlap predicted: q8f3n touches lib/vacuum-guard.mjs + its test, tgr31 touches dashboard/app + dashboard/test + two lib/test files; merge order q8f3n first, then tgr31 with its ADR-0057 dist/ rebuild)
+**Planning advisory:** session-start churn: 6fbaad2 (modeling step-0 migrate) flagged as untrailed governed-surface commit — already covered by tgr31; no reordering
+
+---
+
 ## 2026-09-11 14:03 -- Modeling / Promoted: agentic-workflow-tgr31 - Dogfood the migration — `migrate` already moved this repo's `.agentheim/` on `main` (commit 6fbaad2, 2026-09-11); finish it: re-point the 20 app specifiers and 5 test-side styleguide reads to `knowledge/contexts/`, flip the two live-tree tests still asserting `legacy`, and prove both suites, the rebuilt `dist/`, and the dashboard green on the migrated tree
 
 **Type:** Modeling / Promote
