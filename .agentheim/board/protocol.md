@@ -5,6 +5,26 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 14:31 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 25m (batch start 14:22 → 14:47)
+**Completed:** 2 (first-try PASS: 2, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** q8f3n: 1, tgr31: 1
+**Commits:** 4 (1 batch-start, 2 task integrations, this entry)
+**Vision-conformance:** none — batch aligns with vision. q8f3n keeps the ADR-0064 batch-mix signal honest under the ADR-0078 layout and tgr31 finishes the two-root move so knowledge/ reads as the project description without lifecycle churn — both serve "Knowledge is durable"; neither touches a non-goal.
+**Batch mix:** 0% product-facing / 100% harness / 0% bookkeeping (2 tasks)
+**Carry-over:** dashboard/dist/app.js: left behind (EOL-only phantom modification after the ADR-0057 rebuild — `git diff --numstat` empty, only .build-stamp.json carried content and rode tgr31's integrating commit); no `.agentheim/`-owned strays; no non-main worktrees
+**Session-start churn (ADR-0066):** 0 recognized machine-shape commits, 1 human commit since the 12:57 boundary — 6fbaad2 (modeling step-0 `migrate`, touches the whole governed `.agentheim/` tree); already covered by tgr31, no new re-alignment task filed; advisory written to state/whats-next.md suggesting the step-0 migrate commit subject join recognizeMachineShape's set so it stops reading as human churn.
+**Vacuum guard:** ready set empty after the batch — open item surfaced: Brainstorm on existing code (next iteration). (open 98 days). agentic-workflow-g5ez5 (layout closure — refuse `legacy` everywhere) is now unblocked in backlog: both of its remaining deps (tgr31, q8f3n) are done — promote via `modeling` when ready.
+**Verifier advisory (tgr31, ADR-0062):** the refinement note's hand count of 342 R100 renames in 6fbaad2 is three high — the verifier's own `git show --find-renames` count is 339 R100 + 1 R099 + 1 R072 + 1 R063 + 4 A + 1 D + 1 M; the structural claim (every task file, README, protocol file and done-archive a pure rename; INDEX splits the only non-renames) holds exactly. Recorded in the task's Outcome.
+**Conductor note:** q8f3n's ADR-0078 amendment was applied in place on main by the conductor (existing ADR, not routed through finalizeAdrNumbering); the working-copy ADR was CRLF, so the edit LF-normalized it (a git no-op under autocrlf). The conductor's own `complete` call for q8f3n ran before the Outcome append because of a shell-chaining slip; both landed in the same integrating commit, so the on-disk result is identical to the doctrine order.
+
+---
+
 ## 2026-09-11 14:30 -- Task verified and completed: agentic-workflow-tgr31 - Dogfood the migration — `migrate` already moved this repo's `.agentheim/` on `main` (commit 6fbaad2, 2026-09-11); finish it: re-point the 20 app specifiers and 5 test-side styleguide reads to `knowledge/contexts/`, flip the two live-tree tests still asserting `legacy`, and prove both suites, the rebuilt `dist/`, and the dashboard green on the migrated tree
 
 **Type:** Work / Task completion
