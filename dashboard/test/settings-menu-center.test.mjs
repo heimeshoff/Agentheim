@@ -55,6 +55,6 @@ test('the fix is consumer-side: the shared Menu primitive is not forked', () => 
   // The styleguide Menu/MenuItem must keep importing unforked from the design-system
   // BC (ADR-0003) — the fix lives in board.js, not in a copied/edited menu.js.
   assert.match(boardSrc,
-    /import \{ Menu, MenuItem, MenuDivider \} from "\.\.\/\.\.\/\.agentheim\/contexts\/design-system\/styleguide\/app\/menu\.js"/,
+    /import \{ Menu, MenuItem, MenuDivider \} from "\.\.\/\.\.\/\.agentheim\/knowledge\/contexts\/design-system\/styleguide\/app\/menu\.js"/,
     'SettingsMenu must consume the shared Menu/MenuItem unforked');
 });

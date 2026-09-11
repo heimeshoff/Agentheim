@@ -12,6 +12,7 @@ import { readFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { styleguideDir } from '../../lib/task-system-paths.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DASHBOARD = path.resolve(__dirname, '..');
@@ -119,9 +120,7 @@ test('dist bundles the LIVE dashboard board, not the styleguide canvas (aw-006)'
 });
 
 test('token CSS in dist matches the styleguide source (single source of truth)', () => {
-  const src = path.resolve(
-    DASHBOARD, '..', '.agentheim', 'contexts', 'design-system', 'styleguide', 'styles',
-  );
+  const src = path.join(styleguideDir(path.resolve(DASHBOARD, '..')), 'styles');
   for (const css of ['colors_and_type.css', 'agentheim.css']) {
     const a = readFileSync(path.join(src, css), 'utf8');
     const b = readFileSync(path.join(DIST, css), 'utf8');

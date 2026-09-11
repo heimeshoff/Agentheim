@@ -25,8 +25,8 @@
    ============================================================ */
 import { useState, useEffect, useCallback } from "react";
 
-import { html } from "../../.agentheim/contexts/design-system/styleguide/app/html.js";
-import { Drawer } from "../../.agentheim/contexts/design-system/styleguide/app/drawer.js";
+import { html } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/html.js";
+import { Drawer } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/drawer.js";
 
 import { docUrl, intentToDrawerItem } from "./slide-over-data.js";
 import { withFrontmatterSection } from "./frontmatter.js";

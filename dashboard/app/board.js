@@ -38,20 +38,20 @@ import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo, mem
 // styleguide remains the one source of UI truth, the dashboard is a consumer.
 import confetti from "canvas-confetti";
 
-import { html } from "../../.agentheim/contexts/design-system/styleguide/app/html.js";
-import { Markdown } from "../../.agentheim/contexts/design-system/styleguide/app/primitives.js";
-import { ColumnHeader, TicketCard } from "../../.agentheim/contexts/design-system/styleguide/app/kanban.js";
-import { EmptyColumn } from "../../.agentheim/contexts/design-system/styleguide/app/empty.js";
-import { Icon } from "../../.agentheim/contexts/design-system/styleguide/app/icons.js";
-import { ModelSplitButton } from "../../.agentheim/contexts/design-system/styleguide/app/button.js";
-import { Glyph, ThemeCtx } from "../../.agentheim/contexts/design-system/styleguide/app/foundations.js";
-import { RailItem, TreeItem } from "../../.agentheim/contexts/design-system/styleguide/app/library.js";
-import { Collapsible } from "../../.agentheim/contexts/design-system/styleguide/app/collapsible.js";
-import { dependencyPresentClass, edgeBlinkClass } from "../../.agentheim/contexts/design-system/styleguide/app/motion.js";
-import { Menu, MenuItem, MenuDivider } from "../../.agentheim/contexts/design-system/styleguide/app/menu.js";
-import { ThemeToggle } from "../../.agentheim/contexts/design-system/styleguide/app/live.js";
-import { ConfirmDialog } from "../../.agentheim/contexts/design-system/styleguide/app/confirm-dialog.js";
-import { SearchField } from "../../.agentheim/contexts/design-system/styleguide/app/search.js";
+import { html } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/html.js";
+import { Markdown } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/primitives.js";
+import { ColumnHeader, TicketCard } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/kanban.js";
+import { EmptyColumn } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/empty.js";
+import { Icon } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/icons.js";
+import { ModelSplitButton } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/button.js";
+import { Glyph, ThemeCtx } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/foundations.js";
+import { RailItem, TreeItem } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/library.js";
+import { Collapsible } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/collapsible.js";
+import { dependencyPresentClass, edgeBlinkClass } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/motion.js";
+import { Menu, MenuItem, MenuDivider } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/menu.js";
+import { ThemeToggle } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/live.js";
+import { ConfirmDialog } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/confirm-dialog.js";
+import { SearchField } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/search.js";
 
 import { COLUMN_ORDER, treeToColumns } from "./board-data.js";
 import { resolveTheme, saveTheme } from "./theme-state.js";

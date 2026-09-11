@@ -47,7 +47,7 @@ const OPTIONS = ['Fable', 'Opus', 'Sonnet', 'Haiku'];
 
 async function mountOpenMenu(value = 'Opus') {
   const { ModelSplitButton } = await import(
-    '../../.agentheim/contexts/design-system/styleguide/app/button.js'
+    '../../.agentheim/knowledge/contexts/design-system/styleguide/app/button.js'
   );
   const selections = [];
   const { root, container } = await mount(ModelSplitButton, {
@@ -146,7 +146,7 @@ test('the open menu panel anchors ABOVE the button (bottom, not top) — design-
 
 test('disabled (design-system-me97j): the caret is clickable and the menu opens — a blank prompt must not block picking a model', async () => {
   const { ModelSplitButton } = await import(
-    '../../.agentheim/contexts/design-system/styleguide/app/button.js'
+    '../../.agentheim/knowledge/contexts/design-system/styleguide/app/button.js'
   );
   const { root, container } = await mount(ModelSplitButton, {
     label: 'Opus', options: OPTIONS, value: 'Opus', disabled: true, ariaLabel: 'Send',
@@ -163,7 +163,7 @@ test('disabled (design-system-me97j): the caret is clickable and the menu opens 
 
 test('disabled (design-system-me97j): the caret carries no disabled attribute, stays keyboard-reachable, and Enter/ArrowDown still selects', async () => {
   const { ModelSplitButton } = await import(
-    '../../.agentheim/contexts/design-system/styleguide/app/button.js'
+    '../../.agentheim/knowledge/contexts/design-system/styleguide/app/button.js'
   );
   const selections = [];
   const { root, container } = await mount(ModelSplitButton, {
@@ -188,7 +188,7 @@ test('disabled (design-system-me97j): the caret carries no disabled attribute, s
 
 test('disabled (design-system-me97j): the primary button is still genuinely disabled — attribute present, onClick never fires', async () => {
   const { ModelSplitButton } = await import(
-    '../../.agentheim/contexts/design-system/styleguide/app/button.js'
+    '../../.agentheim/knowledge/contexts/design-system/styleguide/app/button.js'
   );
   let fired = false;
   const { root, container } = await mount(ModelSplitButton, {
@@ -208,7 +208,7 @@ test('disabled (design-system-me97j): the primary button is still genuinely disa
 
 test('disabled (design-system-me97j): 0.55 opacity sits on the primary region only — the caret region renders at full opacity', async () => {
   const { ModelSplitButton } = await import(
-    '../../.agentheim/contexts/design-system/styleguide/app/button.js'
+    '../../.agentheim/knowledge/contexts/design-system/styleguide/app/button.js'
   );
   const { root, container } = await mount(ModelSplitButton, {
     label: 'Opus', options: OPTIONS, value: 'Opus', disabled: true, ariaLabel: 'Send',
@@ -225,7 +225,7 @@ test('disabled (design-system-me97j): 0.55 opacity sits on the primary region on
 
 test('locked still removes the caret region entirely, regardless of disabled (existing behaviour must not regress)', async () => {
   const { ModelSplitButton } = await import(
-    '../../.agentheim/contexts/design-system/styleguide/app/button.js'
+    '../../.agentheim/knowledge/contexts/design-system/styleguide/app/button.js'
   );
   const { root, container } = await mount(ModelSplitButton, {
     label: 'Opus', options: OPTIONS, value: 'Opus', locked: true, disabled: true, ariaLabel: 'Send',
@@ -239,7 +239,7 @@ test('locked still removes the caret region entirely, regardless of disabled (ex
 
 test('locked renders no caret and no menu at all — the keyboard contract above is simply unreachable, matching the Quick Capture pinned-model case', async () => {
   const { ModelSplitButton } = await import(
-    '../../.agentheim/contexts/design-system/styleguide/app/button.js'
+    '../../.agentheim/knowledge/contexts/design-system/styleguide/app/button.js'
   );
   const { root, container } = await mount(ModelSplitButton, {
     label: 'Haiku', options: OPTIONS, value: 'Haiku', locked: true, ariaLabel: 'Send',

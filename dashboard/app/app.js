@@ -13,7 +13,7 @@
    over /api/tree, not the design-system showcase.
    ============================================================ */
 import { createRoot } from "react-dom/client";
-import { html } from "../../.agentheim/contexts/design-system/styleguide/app/html.js";
+import { html } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/html.js";
 import { DashboardApp } from "./board.js";
 
 const rootEl = typeof document !== "undefined" && document.getElementById("root");

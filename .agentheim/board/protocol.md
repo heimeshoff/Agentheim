@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 14:30 -- Task verified and completed: agentic-workflow-tgr31 - Dogfood the migration — `migrate` already moved this repo's `.agentheim/` on `main` (commit 6fbaad2, 2026-09-11); finish it: re-point the 20 app specifiers and 5 test-side styleguide reads to `knowledge/contexts/`, flip the two live-tree tests still asserting `legacy`, and prove both suites, the rebuilt `dist/`, and the dashboard green on the migrated tree
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-tgr31 - Dogfood the migration — `migrate` already moved this repo's `.agentheim/` on `main` (commit 6fbaad2, 2026-09-11); finish it: re-point the 20 app specifiers and 5 test-side styleguide reads to `knowledge/contexts/`, flip the two live-tree tests still asserting `legacy`, and prove both suites, the rebuilt `dist/`, and the dashboard green on the migrated tree
+**Summary:** Finished the two-root migration code residual on the tree 6fbaad2 already moved: 20 dashboard styleguide ESM specifiers and 6 test-side reads re-pointed to knowledge/contexts/, the two live-tree lib tests flipped to board, dist/ rebuilt on main; lib 648/648, dashboard green, /api/tree layout board with migrationPending false
+**Duration:** 18m
+**Verification:** PASS (iteration 1)
+**Files changed:** 12
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-09-11 14:28 -- Task verified and completed: agentic-workflow-q8f3n - `lib/vacuum-guard.mjs`'s `BOOKKEEPING_SEGMENT_RE` doesn't recognize `board/`/`knowledge/contexts/` INDEX paths
 
 **Type:** Work / Task completion

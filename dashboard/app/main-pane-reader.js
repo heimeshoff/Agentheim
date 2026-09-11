@@ -21,9 +21,9 @@
    ============================================================ */
 import { useState, useEffect } from "react";
 
-import { html } from "../../.agentheim/contexts/design-system/styleguide/app/html.js";
-import { Markdown } from "../../.agentheim/contexts/design-system/styleguide/app/primitives.js";
-import { Icon } from "../../.agentheim/contexts/design-system/styleguide/app/icons.js";
+import { html } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/html.js";
+import { Markdown } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/primitives.js";
+import { Icon } from "../../.agentheim/knowledge/contexts/design-system/styleguide/app/icons.js";
 
 import { docUrl } from "./slide-over-data.js";
 import { withFrontmatterSection } from "./frontmatter.js";

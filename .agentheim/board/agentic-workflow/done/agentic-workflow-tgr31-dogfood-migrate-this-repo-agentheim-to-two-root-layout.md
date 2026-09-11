@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-tgr31
 title: Dogfood the migration — `migrate` already moved this repo's `.agentheim/` on `main` (commit 6fbaad2, 2026-09-11); finish it: re-point the 20 app specifiers and 5 test-side styleguide reads to `knowledge/contexts/`, flip the two live-tree tests still asserting `legacy`, and prove both suites, the rebuilt `dist/`, and the dashboard green on the migrated tree
-status: doing
+status: done
 type: chore
 context: agentic-workflow
 created: 2026-09-06
@@ -154,3 +154,52 @@ g5ez5's closure. Any other code change is out of scope too.
   from the repo's own `skills/` until a release refreshes it — the repo-root-first
   bootstrap already resolves the repo's `lib/`.
 - Parent: agentic-workflow-g5ez5 (its closure depends on this); decision record: ADR-0078.
+
+## Outcome
+
+Finished the code residual left over after `migrate` moved this repo's `.agentheim/` to
+the two-root layout on `main` (commit `6fbaad2`, 2026-09-11, 22 manifest entries; every
+task file, README, protocol file and done-archive a pure rename — the verifier's own count
+is 339 × R100 + 1 R099 + 1 R072 + 1 R063 + 4 A + 1 D + 1 M, three fewer R100 than the
+refinement note's hand count of 342; the structural claim holds exactly). The integrating
+commit of this task is the one carrying the `[agentic-workflow-tgr31]` trailer in
+`git log` (ADR-0026: the SHA is never written back). Layout-side criteria were re-checked,
+not redone: `detectLayout(<root>)` → `board`.
+
+**App-side (step 1):** re-pointed all 20 ESM specifiers in `dashboard/app/{app,board,
+main-pane-reader,slide-over}.js` (1/14/3/2) from
+`../../.agentheim/contexts/design-system/styleguide/…` to
+`../../.agentheim/knowledge/contexts/design-system/styleguide/…`.
+
+**Test-side on-disk reads (step 2):** re-pointed the 5 enumerated reads —
+`backlog-card-launch.test.mjs`, `dist-build.test.mjs` (token-CSS comparison),
+`model-split-button-dom.test.mjs` (7 dynamic-import strings), `settings-menu.test.mjs`,
+`shell-relayout.test.mjs` — via `styleguideDir(repoRoot)` from `lib/task-system-paths.mjs`
+for the `path.join` reads (mirroring `build.mjs` / `build-stamp.mjs`, agentic-workflow-hxq1g)
+and a literal `knowledge/contexts/…` path for the dynamic-import strings. One necessary
+fallout beyond the enumerated five: `dashboard/test/settings-menu-center.test.mjs` asserts a
+regex against `board.js`'s literal menu-import specifier, so its path segment followed the
+re-point. The `contexts/alpha`-style synthetic legacy fixtures, `build-layout.test.mjs`'s
+dual-layout ternary, and `resolve-hook.mjs`'s comment were left alone (out of scope).
+
+**Live-tree lib tests (step 3):** `lib/test/task-system-paths.test.mjs` — renamed to
+`detectLayout: the live repo root resolves "board" (migrated by 6fbaad2, ADR-0078)` and
+flipped to assert `'board'`; `lib/test/legacy-path-literal-lint.test.mjs` — retitled the
+already-layout-agnostic `[]` assertion.
+
+**Conductor at integration (step 4):** `dashboard/dist/` was never rebuilt on the branch
+(ADR-0057); the conductor ran `npm run build` in `dashboard/` on `main` after the squash-merge
+and committed the rebuilt `dist/` in this task's integrating commit.
+
+**Verified (iteration 1, ADR-0036 runtime drive included):** `node --test lib/test/*.test.mjs`
+648/648; `npm test` in `dashboard/` 998/999 with the sole failure `dist-staleness` (expected
+red on the branch, green after the conductor's rebuild); `findLegacyPathViolations(<root>)` →
+`[]`; the dashboard launched from the worktree on port 41846, `/healthz` and `/api/tree` green
+with `layout: "board"`, `migrationPending: false`, `warnings: []`, lifecycle counts matching
+the folders (agentic-workflow done 200 at dispatch, design-system 37, infrastructure 34), every
+BC's `done-archive/` present and named by its task-half INDEX `### Done` header; torn down via
+`stop`. The `[human-eye]` criterion (board, rail, library unchanged apart from paths) remains
+the builder's to confirm.
+
+Files touched (12): the 4 app files, 6 dashboard test files, 2 lib test files. No
+`.agentheim/` path written by the worker; no new ADR (ADR-0059: one-time operational action).

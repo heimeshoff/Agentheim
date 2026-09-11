@@ -21,12 +21,13 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { styleguideDir } from '../../lib/task-system-paths.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const dashboardDir = path.join(here, '..');
 const boardSrc = readFileSync(path.join(dashboardDir, 'app', 'board.js'), 'utf8');
 const styleguideRail = readFileSync(
-  path.join(dashboardDir, '..', '.agentheim', 'contexts', 'design-system', 'styleguide', 'app', 'library.js'),
+  path.join(styleguideDir(path.join(dashboardDir, '..')), 'app', 'library.js'),
   'utf8',
 );
 
