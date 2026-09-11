@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 12:56 -- Task verified and completed: agentic-workflow-zgav8 - Prose sweep for the two-root layout — every skill, agent, and reference spells `board/` and `knowledge/contexts/`, the five entry skills run `migrate` as "Before acting" step 0, and a permanent live-tree lint fails on any reappearing legacy path literal
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-zgav8 - Prose sweep for the two-root layout — every skill, agent, and reference spells `board/` and `knowledge/contexts/`, the five entry skills run `migrate` as "Before acting" step 0, and a permanent live-tree lint fails on any reappearing legacy path literal
+**Summary:** Swept every legacy .agentheim/contexts/-shaped path literal out of skills/, agents/, references/, lib/, and dashboard/ prose to the ADR-0078 board/ and knowledge/contexts/ forms; wired migrate as step 0 of the five writing skills via references/lib-bootstrap.md §7 plus a legacy-tree notice in whats-next/inquire; re-pointed findMalformedTaskIds through task-system-paths; shipped lib/legacy-path-literal-lint.mjs, a permanent tree-wide live-tree lint with an enumerated allowlist, a BC-README-only legacy-path-ok marker, and a layout-gated tolerance for the 20 styleguide import specifiers, retiring cj54k’s temporary lint
+**Duration:** 43m
+**Verification:** PASS (iteration 1)
+**Files changed:** 26
+**Tests added:** 17
+**ADRs written:** 0078 (amended)
+
+---
+
 ## 2026-09-11 12:11 -- Batch started: [agentic-workflow-zgav8]
 
 **Type:** Work / Batch start

@@ -1,6 +1,6 @@
 ---
 name: brainstorm
-description: Use whenever the user wants to start a new project, create a vision, do a Socratic modeling or discovery session, explore a problem space from scratch, or set up an initial context map and bounded contexts. Triggers on phrases like "let's brainstorm", "start a new project", "create a vision", "I want to build X", "model this out from scratch", "help me think through", "what should the shape of this be". Produces .agentheim/vision.md (and context-map.md if the domain is complex enough to warrant bounded contexts), and closes with an architecture foundation pass that unconditionally creates an `infrastructure/` BC (the standing home for globally-true tech concerns), emits decision tasks (globally-true → infrastructure BC, BC-local → originating BC), a walking-skeleton spike, and (when the vision implies frontend) a styleguide task. Deliberately produces no code — every output is markdown the user can review before `work` runs. Supports six switchable conversational modes (Interrogator [default], Suggestor, Challenger, Storyteller, Facilitator, Synthesizer) — see references/modes.md.
+description: Use whenever the user wants to start a new project, create a vision, do a Socratic modeling or discovery session, explore a problem space from scratch, or set up an initial context map and bounded contexts. Triggers on phrases like "let's brainstorm", "start a new project", "create a vision", "I want to build X", "model this out from scratch", "help me think through", "what should the shape of this be". Produces .agentheim/knowledge/vision.md (and context-map.md if the domain is complex enough to warrant bounded contexts), and closes with an architecture foundation pass that unconditionally creates an `infrastructure/` BC (the standing home for globally-true tech concerns), emits decision tasks (globally-true → infrastructure BC, BC-local → originating BC), a walking-skeleton spike, and (when the vision implies frontend) a styleguide task. Deliberately produces no code — every output is markdown the user can review before `work` runs. Supports six switchable conversational modes (Interrogator [default], Suggestor, Challenger, Storyteller, Facilitator, Synthesizer) — see references/modes.md.
 ---
 
 # Brainstorm — Socratic Vision Session
@@ -31,9 +31,11 @@ The hard "no code" constraint, the dimensions to cover, the architecture foundat
 
 ## Before you start
 
-Check if `.agentheim/vision.md` already exists in the target project:
+0. **Migrate first (ADR-0078 §4).** Run the `migrate` verb per `references/lib-bootstrap.md` §7 before any read below — it moves a legacy `.agentheim/` tree to the two-root layout (or is a zero-write noop on an already-`board` or brand-new tree). Stop and surface `reason` verbatim on `mixed-layout` / `worktree-active` / `lock-timeout`.
+
+Check if `.agentheim/knowledge/vision.md` already exists in the target project:
 - **Doesn't exist** → fresh session, create `.agentheim/` structure
-- **Exists** → ask the user: are we *revising* the vision (updating an existing one based on new learning) or *extending* it (adding a new dimension/subdomain)? Read the existing vision first so you don't re-ask what's already answered. Also read `.agentheim/knowledge/index.md` (top-level catalog) and the first ~100 lines of `.agentheim/knowledge/protocol.md` if they exist — recent activity context prevents you from re-litigating settled decisions during the revision/extension conversation.
+- **Exists** → ask the user: are we *revising* the vision (updating an existing one based on new learning) or *extending* it (adding a new dimension/subdomain)? Read the existing vision first so you don't re-ask what's already answered. Also read `.agentheim/knowledge/index.md` (top-level catalog) and the first ~100 lines of `.agentheim/board/protocol.md` if they exist — recent activity context prevents you from re-litigating settled decisions during the revision/extension conversation.
 
 ## The Socratic loop
 
@@ -126,7 +128,7 @@ Describe how contexts relate. Use DDD terms where they fit:
 Prefer plain description first; DDD label second, not the other way around.
 ```
 
-If you create a context-map, also scaffold the `contexts/<name>/` directories with a README.md each — use the template in `references/bc-readme-template.md` if present, otherwise a minimal README with BC name, purpose, and a placeholder for ubiquitous language.
+If you create a context-map, also scaffold each `knowledge/contexts/<name>/README.md` — use the template in `references/bc-readme-template.md` if present, otherwise a minimal README with BC name, purpose, and a placeholder for ubiquitous language.
 
 ## Delegating heavy lifting
 
@@ -142,7 +144,7 @@ Skip only if the user explicitly says no (e.g., adding agentheim to a mature pro
 
 ### Create the infrastructure BC (unconditional)
 
-Always emit `contexts/infrastructure/` with a README, even if the architect surfaces zero decisions to queue. The BC is the standing home for cross-cutting tech concerns — runtime, hosting, secrets, observability, CI/CD, shared transport, base persistence. Future infra-flavored captures land here (or in a domain BC, per the routing rule below); without a stable home BC, those captures fragment into ad-hoc `monitoring/`, `secrets/`, `deploy/` BCs that compete with domain BCs.
+Always emit `knowledge/contexts/infrastructure/README.md`, even if the architect surfaces zero decisions to queue. The BC is the standing home for cross-cutting tech concerns — runtime, hosting, secrets, observability, CI/CD, shared transport, base persistence. Future infra-flavored captures land here (or in a domain BC, per the routing rule below); without a stable home BC, those captures fragment into ad-hoc `monitoring/`, `secrets/`, `deploy/` BCs that compete with domain BCs.
 
 Use `references/bc-readme-template.md` if present. The README's `## Ubiquitous language` section will be thin (DNS, container, secret, queue, etc. — generic ops vocabulary, not project-specific terms) — that's expected. Note in the README's `## Purpose` section that this BC owns *globally-true* infra concerns; BC-local infra (adapters, repository implementations, this-BC's-own queue handler) stays inside the originating BC.
 
@@ -164,7 +166,7 @@ The architect returns recommendations + ADR drafts. **Do not commit those ADRs f
 
 For each significant area the architect surfaced, create a `type: decision` task. Routing follows the **global vs BC-local** rule:
 
-- **Globally true** (the decision applies across every BC — runtime, deployment, observability stack, shared transport) → `contexts/infrastructure/`. Eventual ADR scoped `global`.
+- **Globally true** (the decision applies across every BC — runtime, deployment, observability stack, shared transport) → the infrastructure BC's `board/infrastructure/todo/`. Eventual ADR scoped `global`.
 - **Only true for one BC** (this BC chose Postgres tsvector for its search; that BC retries via its own queue) → that BC's directory. ADR scoped to that BC.
 
 The test: *"if any single BC didn't exist, would this decision still need to be made?"* If yes, it's globally true. If no, it's BC-local.
@@ -179,7 +181,7 @@ Create one `type: spike` task that delivers a thin end-to-end slice through the 
 
 The walking skeleton is inherently globally true (it proves the *whole* stack runs), so it always lives in the infrastructure BC:
 
-- File: `contexts/infrastructure/todo/infrastructure-001-walking-skeleton.md` — the walking skeleton is a **reserved foundation id** (`infrastructure-001-walking-skeleton`), one of the closed set of deterministic ids `brainstorm` mints (ADR-0028 §7); it keeps a digit-tailed literal so downstream references resolve consistently with the styleguide gate. It is **not** a random token.
+- File: `board/infrastructure/todo/infrastructure-001-walking-skeleton.md` — the walking skeleton is a **reserved foundation id** (`infrastructure-001-walking-skeleton`), one of the closed set of deterministic ids `brainstorm` mints (ADR-0028 §7); it keeps a digit-tailed literal so downstream references resolve consistently with the styleguide gate. It is **not** a random token.
 - `depends_on:` every decision task you just emitted (both global and BC-local ones)
 - Acceptance criteria are observable, not architectural: "the app boots, hits its DB, returns a response from each BC's entry point", not "architecture works"
 - The task body must carry the stop-loss clause (ADR-0065): "if, mid-spike, the mitigation
@@ -191,8 +193,8 @@ The walking skeleton is inherently globally true (it proves the *whole* stack ru
 
 If the vision implies any UI — even a single admin dashboard — create a `type: feature` task for the design system before any BC builds its frontend.
 
-- Create `contexts/design-system/` with a README seeding its purpose: tokens, components, patterns, review process.
-- File: `contexts/design-system/todo/design-system-001-styleguide.md` — like the walking skeleton, this is a **reserved foundation id** (`design-system-001-styleguide`, ADR-0028 §7): a deterministic digit-tailed literal, not a random token, because the styleguide *gate* references it by hard-coded id from every frontend-bearing BC README and skill. The reserved set is closed at exactly these two foundation ids.
+- Create `knowledge/contexts/design-system/README.md` seeding its purpose: tokens, components, patterns, review process.
+- File: `board/design-system/todo/design-system-001-styleguide.md` — like the walking skeleton, this is a **reserved foundation id** (`design-system-001-styleguide`, ADR-0028 §7): a deterministic digit-tailed literal, not a random token, because the styleguide *gate* references it by hard-coded id from every frontend-bearing BC README and skill. The reserved set is closed at exactly these two foundation ids.
 - `depends_on:` the walking-skeleton task (so the styleguide is built on the running app, not in a vacuum)
 - Acceptance criteria includes a human-in-the-loop checkpoint: "user has reviewed and signed off on the design system before any frontend feature task is promoted". This is a gate, not just a deliverable.
 
@@ -204,7 +206,7 @@ If the vision implies any UI — even a single admin dashboard — create a `typ
 
 - No frontend in the vision → skip the styleguide task entirely.
 - Trivial single-process tool with no integration questions → the architect may return "boring stack X, no integration, no cross-cutting". Skip the decision tasks; still create the infrastructure BC (empty initial queue, populated later) and still emit the walking-skeleton spike there.
-- All foundations already exist (mature project) → skip task emission; still create `contexts/infrastructure/` if it doesn't exist so future infra captures have a home, and offer ADR backfill as noted above.
+- All foundations already exist (mature project) → skip task emission; still create `knowledge/contexts/infrastructure/README.md` if it doesn't exist so future infra captures have a home, and offer ADR backfill as noted above.
 
 ## Recording decisions made during brainstorm
 
@@ -257,7 +259,7 @@ happened, not one of several competing entries.
 ## Indexes
 
 For each BC created during this session:
-- Create `contexts/<bc>/INDEX.md` from `references/index-template.md` (per-BC index, mostly empty initially).
+- Create `knowledge/contexts/<bc>/INDEX.md` from `references/knowledge-index-template.md` (the knowledge half — ADRs, research, concepts — mostly empty initially, filed beside the BC's `README.md`). The task half (`board/<bc>/INDEX.md`) is created on demand by `capture`'s empty-BC backfill (ADR-0078 §6) the first time a task registers below — `brainstorm` never authors it directly.
 - Insert a line under `<!-- bc-list:start -->` in `.agentheim/knowledge/index.md` via the mechanized **`index-add`** verb (agentic-workflow-fn59c, ADR-0075) — never a hand-edit:
   ```
   node -e "<the same env-free bootstrap modeling/SKILL.md's PROMOTE flow uses, targeting lib/task-lifecycle-cli.mjs>" index-add '{"bc":null,"section":"bc-list","id":"<bc-name>","line":"- **<bc-name>** — <one-line purpose> — `contexts/<bc-name>/INDEX.md`"}'
@@ -281,7 +283,7 @@ the session's commit below.
 
 `brainstorm` commits the markdown it produced, so the working tree is clean after a session, via the **`scoped-commit`** helper (`lib/scoped-commit.mjs`'s `runScopedCommit(cwd, paths, message)`), not a hand-composed `git add` + `git commit` (agentic-workflow-fn59c). Commit doctrine lives in `references/commit-doctrine.md` (ADR-0026) — `scoped-commit` *enforces* the never-`-A`/`.`/glob half of that doctrine (`{ok:false, code:'invalid-path'}`) rather than leaving it prose-only, and retries `add`/`commit` independently, with a bounded backoff, on a sibling `modeling`/`quick-capture`/`work`/`research` session's own `.git/index.lock` (agentic-workflow-pt0gy) — never delete `.git/index.lock` by hand; a live sibling may still hold it. After the session's artifacts, indexes, and protocol entry are written:
 
-1. Call `scoped-commit` with an **explicit, enumerated** list of *only* the files this session wrote or changed: `.agentheim/vision.md`, `.agentheim/context-map.md` (if produced), each new `contexts/<bc>/README.md` + `contexts/<bc>/INDEX.md`, every foundation task file (decision / walking-skeleton spike / styleguide) plus every BC's `INDEX.md` any `capture`/`index-add` call named in `changed` (including a BC's INDEX that already existed before this session), `.agentheim/knowledge/index.md`, any **strategic** ADR written this session, and `.agentheim/knowledge/protocol.md` (from the "Protocol logging" `log` call's `changed`). Never `-A` / `.`, per `references/commit-doctrine.md` — `scoped-commit` refuses either outright.
+1. Call `scoped-commit` with an **explicit, enumerated** list of *only* the files this session wrote or changed: `.agentheim/knowledge/vision.md`, `.agentheim/knowledge/context-map.md` (if produced), each new `knowledge/contexts/<bc>/README.md` + `knowledge/contexts/<bc>/INDEX.md`, every foundation task file (decision / walking-skeleton spike / styleguide) plus every BC's `INDEX.md` any `capture`/`index-add` call named in `changed` (including a BC's INDEX that already existed before this session), `.agentheim/knowledge/index.md`, any **strategic** ADR written this session, and `.agentheim/board/protocol.md` (from the "Protocol logging" `log` call's `changed`). Never `-A` / `.`, per `references/commit-doctrine.md` — `scoped-commit` refuses either outright.
 2. Commit with a single message for the session:
    ```
    chore(<bc-or-global>): brainstorm <topic> — vision created | vision revised | vision extended
@@ -295,15 +297,15 @@ If the project isn't a git repo, skip the commit silently — the working-tree-c
 ## What you leave behind
 
 At the end of a successful brainstorm:
-- `.agentheim/vision.md` exists and is readable in under two minutes
-- `.agentheim/context-map.md` exists if warranted
-- `.agentheim/contexts/<name>/README.md` exists for each identified BC (frontend-bearing BCs note the styleguide-gate rule)
-- `.agentheim/contexts/<name>/INDEX.md` exists for each identified BC (per-BC catalog, mostly empty at this point)
-- `.agentheim/contexts/infrastructure/README.md` exists unconditionally (unless the user explicitly skipped the foundation step), with the note that it owns globally-true infra concerns and BC-local infra stays in the originating BC
+- `.agentheim/knowledge/vision.md` exists and is readable in under two minutes
+- `.agentheim/knowledge/context-map.md` exists if warranted
+- `.agentheim/knowledge/contexts/<name>/README.md` exists for each identified BC (frontend-bearing BCs note the styleguide-gate rule)
+- `.agentheim/knowledge/contexts/<name>/INDEX.md` (the knowledge half) exists for each identified BC (per-BC catalog, mostly empty at this point); its `board/<name>/` sibling (the task half) is created by `capture`'s empty-BC backfill the first time a task registers there
+- `.agentheim/knowledge/contexts/infrastructure/README.md` exists unconditionally (unless the user explicitly skipped the foundation step), with the note that it owns globally-true infra concerns and BC-local infra stays in the originating BC
 - `.agentheim/knowledge/index.md` exists with the BC list populated and global ADRs listed
 - `.agentheim/knowledge/decisions/` contains ADRs for any foundational *strategic* decisions made during the conversation (tech-foundation ADRs come later, via the decision tasks)
-- One `type: decision` task per area the architect surfaced — globally-true ones in `contexts/infrastructure/todo/`, BC-local ones in the originating BC's `todo/`, each with the ADR draft in Notes (or "foundation skipped" noted in the protocol entry)
-- A `type: spike` walking-skeleton task in `contexts/infrastructure/todo/`, depending on every decision task — the project's first prototype lives here
-- A `type: feature` styleguide task in `contexts/design-system/todo/` (only if the vision implies any frontend), depending on the walking-skeleton
-- `.agentheim/knowledge/protocol.md` has a new entry at the top, including the foundation tasks emitted
+- One `type: decision` task per area the architect surfaced — globally-true ones in `board/infrastructure/todo/`, BC-local ones in the originating BC's `board/<bc>/todo/`, each with the ADR draft in Notes (or "foundation skipped" noted in the protocol entry)
+- A `type: spike` walking-skeleton task in `board/infrastructure/todo/`, depending on every decision task — the project's first prototype lives here
+- A `type: feature` styleguide task in `board/design-system/todo/` (only if the vision implies any frontend), depending on the walking-skeleton
+- `.agentheim/board/protocol.md` has a new entry at the top, including the foundation tasks emitted
 - The user feels they discovered the shape of the thing, not that you told them what it is

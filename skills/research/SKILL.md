@@ -7,6 +7,10 @@ description: Use whenever the user or another skill needs external information g
 
 The `research` skill is how external knowledge enters the workflow. It runs WebFetch and WebSearch, synthesizes the findings, and produces a markdown report that other skills can cite.
 
+## Before acting
+
+Run the `migrate` verb per `references/lib-bootstrap.md` §7 before anything below — it moves a legacy `.agentheim/` tree to the two-root layout (or is a zero-write noop on an already-`board` tree). Stop and surface `reason` verbatim on `mixed-layout` / `worktree-active` / `lock-timeout`.
+
 ## Scope
 
 Research is about understanding, not decision-making. Produce a report; do not produce an ADR. Decisions come later — in `modeling` or `work` — and they cite research reports.
@@ -179,8 +183,9 @@ logging steps above:
 
 1. Call `scoped-commit` with an **explicit, enumerated** list of *only* this run's artifacts:
    the new report file (`.agentheim/knowledge/research/<slug>-<date>.md`), the `INDEX.md`
-   `index-add` named in its `changed` (the BC-local `contexts/<bc>/INDEX.md`, or the global
-   `.agentheim/knowledge/index.md`), and `.agentheim/knowledge/protocol.md` (from `log`'s
+   `index-add` named in its `changed` (the BC-local knowledge-half INDEX under
+   `.agentheim/knowledge/contexts/<bc>/`, or the global
+   `.agentheim/knowledge/index.md`), and `.agentheim/board/protocol.md` (from `log`'s
    `changed`). If a citing task/ADR's `related_research` or Notes were updated in the same
    pass, include that task/ADR file too. Never `-A` / `.` — `scoped-commit` refuses either
    outright.

@@ -32,9 +32,9 @@ Decide which action applies based on what the user said and the current state of
 
 This runs only when the user opened `modeling` without handing you a concrete new idea — they want to work the backlog, or they haven't decided yet. The point is to surface what's already pending before inviting new thought, so existing ideas get refined instead of quietly accumulating.
 
-1. **Gather the backlog.** After the "Before acting" reads, collect every task in `contexts/*/backlog/` across all BCs. Prefer the per-BC `INDEX.md` backlog lists (already loaded) over re-scanning directories.
+1. **Gather the backlog.** After the "Before acting" reads, collect every task in every BC's `backlog/` under `board/`. Prefer the per-BC `INDEX.md` backlog lists (already loaded) over re-scanning directories.
 
-2. **If the backlog is empty, the do-not-self-generate refusal applies unconditionally, before anything else runs.** No manufacturing a backlog item or task on your own initiative just because the backlog is empty (ADR-0064; refusal-placement fix agentic-workflow-f3wqm/ADR-0064 amendment) — an empty backlog always falls through to *inviting the user* to CAPTURE something new, never to modeling inventing it, whether or not the vacuum guard below turns up an open vision question to point at instead. Then run the vacuum guard (ADR-0064, agentic-workflow-qz1h7): read `.agentheim/vision.md`'s "## Open questions" section (already read in "Before acting") through `lib/vacuum-guard.mjs`'s `extractOpenQuestions` — it filters out already-resolved (struck-through) items and returns each remaining item with its `since` date. Runnable in a consumer install via the resolve-plugin-file-convention bootstrap in `references/lib-bootstrap.md` §3 (vacuum guard). If it returns **one or more** open items, surface them first — one line per item naming it and its age via `formatVacuumGuardLine` (e.g. "Brainstorm on existing code (next iteration). (open 46 days)") — framed as the single highest-leverage thing the builder could decide right now, ahead of capturing anything new. This is advisory, not a gate (vision non-goal 3, "Not autonomous") — after surfacing it, still fall straight through to inviting a new idea (CAPTURE) exactly as below; the guard only makes sure an unmade decision doesn't get buried under an empty backlog, it never blocks capture. If `extractOpenQuestions` returns nothing (no unresolved open questions, or vision.md is missing), the refusal above still holds — there's simply no open item to surface; say so in one line and go straight to inviting a new idea (CAPTURE). Don't show an empty table.
+2. **If the backlog is empty, the do-not-self-generate refusal applies unconditionally, before anything else runs.** No manufacturing a backlog item or task on your own initiative just because the backlog is empty (ADR-0064; refusal-placement fix agentic-workflow-f3wqm/ADR-0064 amendment) — an empty backlog always falls through to *inviting the user* to CAPTURE something new, never to modeling inventing it, whether or not the vacuum guard below turns up an open vision question to point at instead. Then run the vacuum guard (ADR-0064, agentic-workflow-qz1h7): read `.agentheim/knowledge/vision.md`'s "## Open questions" section (already read in "Before acting") through `lib/vacuum-guard.mjs`'s `extractOpenQuestions` — it filters out already-resolved (struck-through) items and returns each remaining item with its `since` date. Runnable in a consumer install via the resolve-plugin-file-convention bootstrap in `references/lib-bootstrap.md` §3 (vacuum guard). If it returns **one or more** open items, surface them first — one line per item naming it and its age via `formatVacuumGuardLine` (e.g. "Brainstorm on existing code (next iteration). (open 46 days)") — framed as the single highest-leverage thing the builder could decide right now, ahead of capturing anything new. This is advisory, not a gate (vision non-goal 3, "Not autonomous") — after surfacing it, still fall straight through to inviting a new idea (CAPTURE) exactly as below; the guard only makes sure an unmade decision doesn't get buried under an empty backlog, it never blocks capture. If `extractOpenQuestions` returns nothing (no unresolved open questions, or vision.md is missing), the refusal above still holds — there's simply no open item to surface; say so in one line and go straight to inviting a new idea (CAPTURE). Don't show an empty table.
 
 3. **If the backlog has tasks, present them as a table** and ask whether the user wants to refine any before capturing something new. Use this shape:
 
@@ -71,21 +71,23 @@ When there are multiple matches, show a compact summary (id, title, status, BC) 
 
 DISMISS resolves its target by the exact same rules (exact id / number / keyword, list-on-ambiguity). It additionally scans `doing/` and `done/` while resolving so it can refuse early with a clear message when the named task is already in flight or shipped — only `backlog/` and `todo/` tasks are dismissable.
 
-CONSOLIDATE targets a **bounded context**, not a task — resolve by BC name (exact or fuzzy against `contexts/*/`). If the name is ambiguous or missing, list every BC alongside its current README line count and let the user pick.
+CONSOLIDATE targets a **bounded context**, not a task — resolve by BC name (exact or fuzzy against the known BC list). If the name is ambiguous or missing, list every BC alongside its current README line count and let the user pick.
 
 ## Before acting
 
-Read the current state:
-1. `.agentheim/vision.md` (for context — if missing, offer to run `brainstorm` first)
-2. `.agentheim/context-map.md` (if exists)
-3. `.agentheim/contexts/*/README.md` (to know what BCs exist and their language)
-4. `.agentheim/knowledge/index.md` (top-level catalog — current BCs, recent ADRs, global state) — if missing, the project hasn't been indexed; surface this and continue
-5. `.agentheim/knowledge/protocol.md` — read the first ~100 lines (newest entries are on top, so this gives recent activity). Skip if it doesn't exist yet. The live file is capped (ADR-0039) — older months roll out verbatim to `.agentheim/knowledge/protocol/YYYY-MM.md`, so this read stays recent-activity-only regardless of the live file's age.
-6. **Check the planning advisory (read-only weight, never a directive).** If `.agentheim/state/whats-next.md` exists, read it and note its latest *recommended move* + age (`generated` timestamp) to the builder in **one line** before acting — e.g. `whats-next (2h ago): <recommended move>`. Compare `generated` against the newest `## … -- Work / …` entry in the protocol excerpt just read in step 5: newer than that entry → surface as **current**; older → surface as **stale — background context**, weighted less; no Work entries yet in the protocol → not stale. Let this weight which REFINE/CAPTURE questions you lean into (e.g. lean toward the recommended area when opening REFINE, or note alignment/drift during CAPTURE) — it **never** auto-picks a task to refine, auto-routes a capture, or overrides the user's explicit ask (ADR-0027 §4, ADR-0017). A missing artifact is silent — no line, no error. A malformed / partial / headingless artifact degrades gracefully: read whatever is parseable (at minimum the `generated` stamp or a recommended-move line, if either is present) and proceed without blocking the session; never throw.
-7. `.agentheim/contexts/*/backlog/*.md` (to understand what's pending)
-8. **For CAPTURE only:** once you've identified the candidate BC, scan `.agentheim/contexts/<bc>/done/` for prior art on keywords/tags from the user's idea. See the "Prior art lookup" section.
+0. **Migrate first (ADR-0078 §4).** Run the `migrate` verb per `references/lib-bootstrap.md` §7 before any read below — it moves a legacy `.agentheim/` tree to the two-root layout (or is a zero-write noop on an already-`board` tree). Stop and surface `reason` verbatim on `mixed-layout` / `worktree-active` / `lock-timeout`.
 
-If no bounded contexts exist yet, and the idea is non-trivial, propose running `brainstorm` first. Small ideas (bug fixes, copy changes) in a greenfield project can get a default `contexts/main/` until real structure emerges.
+Read the current state:
+1. `.agentheim/knowledge/vision.md` (for context — if missing, offer to run `brainstorm` first)
+2. `.agentheim/knowledge/context-map.md` (if exists)
+3. Every BC's `README.md` under `.agentheim/knowledge/contexts/` (to know what BCs exist and their language)
+4. `.agentheim/knowledge/index.md` (top-level catalog — current BCs, recent ADRs, global state) — if missing, the project hasn't been indexed; surface this and continue
+5. `.agentheim/board/protocol.md` — read the first ~100 lines (newest entries are on top, so this gives recent activity). Skip if it doesn't exist yet. The live file is capped (ADR-0039) — older months roll out verbatim to `.agentheim/board/protocol/YYYY-MM.md`, so this read stays recent-activity-only regardless of the live file's age.
+6. **Check the planning advisory (read-only weight, never a directive).** If `.agentheim/state/whats-next.md` exists, read it and note its latest *recommended move* + age (`generated` timestamp) to the builder in **one line** before acting — e.g. `whats-next (2h ago): <recommended move>`. Compare `generated` against the newest `## … -- Work / …` entry in the protocol excerpt just read in step 5: newer than that entry → surface as **current**; older → surface as **stale — background context**, weighted less; no Work entries yet in the protocol → not stale. Let this weight which REFINE/CAPTURE questions you lean into (e.g. lean toward the recommended area when opening REFINE, or note alignment/drift during CAPTURE) — it **never** auto-picks a task to refine, auto-routes a capture, or overrides the user's explicit ask (ADR-0027 §4, ADR-0017). A missing artifact is silent — no line, no error. A malformed / partial / headingless artifact degrades gracefully: read whatever is parseable (at minimum the `generated` stamp or a recommended-move line, if either is present) and proceed without blocking the session; never throw.
+7. Every BC's `backlog/*.md` under `.agentheim/board/` (to understand what's pending)
+8. **For CAPTURE only:** once you've identified the candidate BC, scan `.agentheim/board/<bc>/done/` for prior art on keywords/tags from the user's idea. See the "Prior art lookup" section.
+
+If no bounded contexts exist yet, and the idea is non-trivial, propose running `brainstorm` first. Small ideas (bug fixes, copy changes) in a greenfield project can get a default `main` BC until real structure emerges.
 
 ## Conversational modes
 
@@ -260,7 +262,7 @@ CONSOLIDATE rewrites a BC's `README.md` **in place** to bring it back under the 
 
 ## Task file format
 
-Files live as `contexts/<bc>/<status>/<id>-<slug>.md`. Example: `contexts/auth/backlog/auth-003-password-reset-flow.md`.
+Files live as `board/<bc>/<status>/<id>-<slug>.md`. Example: `board/auth/backlog/auth-003-password-reset-flow.md`.
 
 ```markdown
 ---
@@ -372,7 +374,7 @@ The point is to stop workers arriving in isolation. Whenever a task is being wri
 
 - The candidate task's `title`, `tags`, `What` body, and target BC.
 - The target BC's `INDEX.md` (already loaded in "Before acting") — has the per-BC ADR list, research list, done-task list.
-- If the BC's done-list has been rotated (ADR-0039's cap-and-roll convention applied to the INDEX done-list, agentic-workflow-c8j3w), it names its archive location in the `### Done (...)` header — check `contexts/<bc>/done-archive/*.md` too so a task rolled out of the live list is still findable by keyword. The archived line is byte-identical to its old live-list line, so the same slug/tag matcher applies unchanged.
+- If the BC's done-list has been rotated (ADR-0039's cap-and-roll convention applied to the INDEX done-list, agentic-workflow-c8j3w), it names its archive location in the `### Done (...)` header — check `board/<bc>/done-archive/*.md` too so a task rolled out of the live list is still findable by keyword. The archived line is byte-identical to its old live-list line, so the same slug/tag matcher applies unchanged.
 - The top-level `.agentheim/knowledge/index.md` — has the global ADR list and cross-BC research list.
 
 ### Matcher (cheap-first)
@@ -433,7 +435,7 @@ If a brand-new BC is being created during CAPTURE (rare — model normally does 
 
 ## Protocol logging
 
-Every action prepends one entry to `.agentheim/knowledge/protocol.md` — mechanized end to end (ADR-0038, ADR-0073, agentic-workflow-pt0gy). Nothing here hand-creates the file or hand-prepends an entry any more; every path below routes through a lifecycle-lock-held verb that already calls `readProtocolOrDefault` (seeding the standard header itself, once, the first time any verb ever touches a fresh project's `protocol.md`) and `prependProtocolEntry`.
+Every action prepends one entry to `.agentheim/board/protocol.md` — mechanized end to end (ADR-0038, ADR-0073, agentic-workflow-pt0gy). Nothing here hand-creates the file or hand-prepends an entry any more; every path below routes through a lifecycle-lock-held verb that already calls `readProtocolOrDefault` (seeding the standard header itself, once, the first time any verb ever touches a fresh project's `protocol.md`) and `prependProtocolEntry`.
 
 - **CAPTURE** (`Modeling / Captured: <task-id> - [title]`, `**Type:** Modeling / Capture`, `**BC:**`, `**Filed to:** backlog | todo`, `**Summary:**`) and **PROMOTE** (`Modeling / Promoted: <task-id> - [title]`, `**Type:** Modeling / Promote`, `**BC:**`, `**From → To:** backlog → todo`) — `lib/task-lifecycle-cli.mjs capture <id>` / `promote <id>` generate and prepend them as part of their manifests; see the CAPTURE and PROMOTE flows above. `capture`'s `{"protocolEntry": false}` opt skips the protocol write entirely (no entry at all) — `brainstorm`'s per-task foundation capture uses it, keeping its own single hand-formatted session entry instead (see `brainstorm/SKILL.md`).
 - **DISMISS** (`Modeling / Dismissed: <id-or-id-list>`, `**Type:** Modeling / Dismiss`, `**Dismissed:**` one line per cascade member — `<task-id> - <title> (<bc>)`) — `lib/task-lifecycle-cli.mjs dismiss <id> '{"confirm":[...]}'` generates and prepends it as part of its manifest; see the DISMISS flow above. It is **bare** — no builder-typed reason. One entry per dismiss regardless of how many tasks the cascade removed.

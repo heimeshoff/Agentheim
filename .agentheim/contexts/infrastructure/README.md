@@ -262,7 +262,7 @@ Apply write request.
     static asset not streamed verbatim: its `<title>` is rewritten server-side per request to
     `<ProjectName> — Dashboard`, so a dashboard pointed at any discovered project names *that*
     project (no flash of the baked default). `ProjectName` comes from the `# Vision: <Name>`
-    heading in the discovered project's `.agentheim/vision.md`, falling back to the root
+    heading in the discovered project's `.agentheim/knowledge/vision.md`, falling back to the root
     folder basename. Pure resolution lives in `dashboard/project-name.mjs`; the transform
     (`serveIndexHtml`) reuses the same in-root path resolver, so ADR-0002's traversal/validation
     guarantees are unchanged. Still zero-dep, stdlib-only, no install step.

@@ -1,6 +1,6 @@
 # Bounded context README template
 
-Every `.agentheim/contexts/<bc-name>/README.md` uses this shape. It's the home of the BC's ubiquitous language and the first thing any specialist or worker reads before touching the BC.
+Every `.agentheim/knowledge/contexts/<bc-name>/README.md` uses this shape. It's the home of the BC's ubiquitous language and the first thing any specialist or worker reads before touching the BC.
 
 ````markdown
 # [Context name]

@@ -13,6 +13,7 @@ An Agentheim project documents itself: a pointer **index**, a **README per bound
 
 ## The method
 
+0. If `.agentheim/contexts/` exists the tree has not been migrated; run any writing skill first (ADR-0078 §4) — `inquire` never runs `migrate` itself (it is read-only).
 1. **Orient on the pointer layer (cheap).** Read `.agentheim/knowledge/index.md` to find the relevant bounded context(s), then that BC's `README.md` and the ADRs/tasks it cites. This usually gives you the shape of the answer and names the exact source files to check. Skim `vision.md` only for framing (open questions, non-goals).
 2. **Verify against the code.** Open the specific files the README/ADR point at and confirm the load-bearing claims actually hold. The READMEs are dense and usually accurate, but they're documentation — when prose and code disagree, the code wins, and that gap is often the most valuable thing in your answer.
 3. **Place it on the lifecycle.** `done/` = shipped, `todo/`/`backlog/` = planned, `doing/` = in flight; an ADR is `accepted`, `proposed`, or `superseded`. State which.

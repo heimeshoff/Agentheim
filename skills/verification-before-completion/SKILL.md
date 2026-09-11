@@ -30,8 +30,8 @@ second copy drifting out of sync. That template supplies: the task file's absolu
 path, the iteration number, the diff, the worker's strict SUCCESS return block, the **parsed
 bookkeeping blocks** (`readmeDelta` / `adrs` / `outcome` / `backlogItems` — agentic-workflow-
 ghcaj; there is no README/ADR diff to read, since the worker never writes those files), a
-pre-resolved test command, a pre-resolved launch command, and pointers to `.agentheim/vision.md`,
-`.agentheim/context-map.md`, and `.agentheim/knowledge/decisions/` for on-demand reading.
+pre-resolved test command, a pre-resolved launch command, and pointers to `.agentheim/knowledge/vision.md`,
+`.agentheim/knowledge/context-map.md`, and `.agentheim/knowledge/decisions/` for on-demand reading.
 
 The verifier is explicitly NOT given:
 - The worker's reasoning, scratchpad, or any explanation beyond the strict SUCCESS block

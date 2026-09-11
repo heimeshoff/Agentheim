@@ -210,3 +210,35 @@ describes. Every getter and enumerator resolves correctly against whichever of `
 `'mixed'`, never guessing — the transition-window contract §5 describes. The `migrate` verb
 (§4), the dogfood tree move (§7's remaining child), and the `'legacy'`-refusal hardening
 (§5's second phase) remain separate, later tasks.
+
+**Addendum (agentic-workflow-zgav8): the prose sweep, the `migrate` step-0 wiring, and the
+permanent path-literal lint.** `lib/legacy-path-literal-lint.mjs` widens cj54k's temporary,
+nine-file `'contexts'`/`'knowledge','protocol'` grep (§ above, now deleted along with its
+test) into a permanent, tree-wide `node --test` lint (`lib/test/legacy-path-literal-lint.
+test.mjs`) walking `skills/`, `agents/`, `references/`, `commands/`, `lib/`, `dashboard/`,
+and every BC README (resolved through `detectLayout` + `listKnowledgeContexts` +
+`bcReadmePath`, so it finds READMEs under either layout). Seven named forbidden shapes,
+first-match-wins per line: the legacy root itself, a lifecycle folder under `contexts/`
+(unconditional, with or without the `.agentheim/` prefix), the bare wildcard `contexts/*/`,
+`.agentheim/vision.md`, `.agentheim/context-map.md`, `knowledge/protocol`, and the two
+`path.join`-segment shapes cj54k's lint ported forward — the last two scoped to `lib/` and
+`dashboard/` only. An enumerated `{file, match, rationale}` `ALLOWLIST` (mirroring
+`lib/doctrine-line-pointer.mjs`, ADR-0069) exempts every authoring-time-known occurrence —
+the layout module's and `migrate`'s own legacy-branch literals, the legacy combined INDEX
+template kept byte-verbatim for `captureTask`'s runtime backfill, historical/definitional
+quotes. A `<!-- legacy-path-ok -->` HTML-comment marker, recognized ONLY inside a BC README
+(the one dynamically-discovered surface no enumerated allowlist can cover ahead of time),
+suppresses a single line there and nowhere else. The 20 literal `dashboard/app/*.js`
+styleguide import specifiers (hxq1g) get a LAYOUT-GATED tolerance, not a permanent
+exemption: allowed while `detectLayout(repoRoot) === 'legacy'`, flagged once it is
+`'board'` — so tgr31's own "suite green" criterion forces the re-point instead of a stale
+exemption nobody removes. `lib/id-grammar.mjs`'s `findMalformedTaskIds` (a fifth live-tree
+lint cj54k's enforcement text above did not name) is re-pointed through
+`listBoardContexts`/`taskFolderPath` the same way. Every writing skill (`modeling`,
+`quick-capture`, `work`, `brainstorm`, `research`) now runs `migrate` as step 0 of its
+"Before acting" (§4), documented once in `references/lib-bootstrap.md` §7 and pointed at,
+never restated (ADR-0068); the two read-only skills (`whats-next`, `inquire`) instead carry
+a one-line legacy-tree notice and never invoke `migrate` themselves. The step-0 *ordering*
+itself ("migrate before any other read") stays prose-only, unenforced (ADR-0059) — a
+skill's own step order is not a lintable predicate; only the path-literal convention and the
+marker convention are mechanized here.

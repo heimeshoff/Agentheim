@@ -34,12 +34,14 @@ will tell you, and you can pick up the task in `modeling` from there.
 
 ## Before acting
 
+0. **Migrate first (ADR-0078 §4).** Run the `migrate` verb per `references/lib-bootstrap.md` §7 before the reads below — it moves a legacy `.agentheim/` tree to the two-root layout (or is a zero-write noop on an already-`board` tree). Stop and surface `reason` verbatim on `mixed-layout` / `worktree-active` / `lock-timeout`.
+
 You need just enough context to route. Read, in this order, and stop as soon as you can route:
 
-1. `.agentheim/contexts/*/README.md` — the BCs that exist and their ubiquitous language.
+1. Every BC's `README.md` under `.agentheim/knowledge/contexts/` — the BCs that exist and their ubiquitous language.
    This is the one read you always need. (Prefer the `## Purpose` and `## Ubiquitous
    language` sections.)
-2. `.agentheim/context-map.md` (if it exists) — only if routing is unclear from READMEs.
+2. `.agentheim/knowledge/context-map.md` (if it exists) — only if routing is unclear from READMEs.
 
 Do **not** read the whole backlog, every INDEX, or the protocol just to capture. Capture
 is meant to be cheap. You only touch the *target* BC's INDEX (to append) and the protocol
@@ -47,7 +49,7 @@ is meant to be cheap. You only touch the *target* BC's INDEX (to append) and the
 
 **If no bounded contexts exist yet:** the project hasn't been brainstormed. Don't invent a
 BC. Tell the user in one line and offer to run `brainstorm` first (or, for a throwaway
-one-liner in a greenfield repo, offer a default `contexts/main/`). Don't block on it
+one-liner in a greenfield repo, offer a default `main` BC). Don't block on it
 silently.
 
 ## The flow
@@ -123,7 +125,7 @@ For each idea in the user's message:
 
 ## Task file format
 
-Files live at `contexts/<bc>/backlog/<id>-<slug>.md`. Same shape every other skill reads:
+Files live at `board/<bc>/backlog/<id>-<slug>.md`. Same shape every other skill reads:
 
 ```markdown
 ---
@@ -216,7 +218,7 @@ Quick-capture commits its own markdown so the working tree is clean after a capt
 
 1. Call `scoped-commit` with an **explicit, enumerated** list of *only* this capture's artifacts: the new
    task file(s) plus each `capture` call's manifest `changed` paths (the target BC's
-   `INDEX.md` and `.agentheim/knowledge/protocol.md`).
+   `INDEX.md` and `.agentheim/board/protocol.md`).
 2. Commit silently (no confirmation prompt — capture's whole point is speed) with:
    ```
    chore(<bc>): capture <task-id> — <title> [<task-id>]

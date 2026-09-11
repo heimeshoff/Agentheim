@@ -152,7 +152,7 @@ Use judgment on the boundary. A test named `it_charges_the_card` introduces no n
 
 ### 5. BC README sync — judge the `README_DELTA` block, not a README diff (agentic-workflow-ghcaj)
 
-There is no README diff to read anymore — the worker never edits `.agentheim/contexts/<bc>/README.md`. Judge the parsed `readmeDelta` block directly against what the diff's code actually introduces:
+There is no README diff to read anymore — the worker never edits `.agentheim/knowledge/contexts/<bc>/README.md`. Judge the parsed `readmeDelta` block directly against what the diff's code actually introduces:
 
 - The diff introduces a new aggregate / entity / value object / domain event / command / invariant / ubiquitous-language term, and `readmeDelta` is empty (or has no op naming it) → FAIL — the README is about to go stale the moment this integrates.
 - `readmeDelta` is non-empty: confirm each op's `body` text actually matches what the diff introduced (an op whose wording doesn't correspond to any real change in the diff is itself a defect — either invented or misdescribed).
@@ -314,7 +314,7 @@ Use SKIP rarely. Examples: the task is `type: decision`, `FILES_CHANGED == 0`, a
 - No Write, no Edit, no NotebookEdit — your tools list is read-only on purpose
 - No fixing the code, even when the fix is obvious — the next worker fixes; you describe
 - No git operations of any kind (no `git add`, `git commit`, no branching) — `work` owns git
-- No modifying `.agentheim/knowledge/protocol.md` — `work` owns it
+- No modifying `.agentheim/board/protocol.md` — `work` owns it
 - No advising the user — you advise `work`, which advises the user only at end-of-batch
 - No taking on a second task — one verification per spawn
 - No reading the previous verifier's notes when this is iteration 2 or 3 — judge the current diff independently. **Narrow exception:** check 1b's metric-drift comparison, which reads prior `## Verifier note` blocks solely to compare the recorded measurement for a criterion whose text hasn't changed — never to bias re-judgment of a criterion that shows no drift.

@@ -175,3 +175,45 @@ discarded and re-minted exactly like `malformed`, no need to ask the user, since
 token is free and non-interactive. `legacy`-accept is a *reading* behaviour (tolerating an
 already-on-disk id, e.g. `deriveContext`'s resolver) — it does not apply when classifying a
 newly minted id here.
+
+## 7. `migrate` — step 0 of every writing skill
+
+Call site: the FIRST item of `modeling/SKILL.md`'s and `quick-capture/SKILL.md`'s "Before
+acting", `brainstorm/SKILL.md`'s "Before you start", `work/SKILL.md`'s Phase 1 "Recovery
+check", and `research/SKILL.md`'s "Before acting" (ADR-0078 §4) — every skill that writes
+under `.agentheim/` runs this before its own first read, so it never reads a mixed-shape
+tree mid-migration. Unlike §1-6 above, `migrate` is a verb on `lib/task-lifecycle-cli.mjs`
+(which ships its own CLI `main(argv)` entrypoint) rather than a plain function export, so
+its bootstrap mirrors the `claim`/`complete`/`log`/`index-add` invocation shape
+(`skills/work/SKILL.md`'s Phase 4 step 1), not the six-module `node -e` pattern above. No
+opts are needed for an ordinary run — `migrate` takes none.
+
+```
+node -e "const fs=require('node:fs'),os=require('node:os'),p=require('node:path'),u=require('node:url');const sv=/^(\d+)\.(\d+)\.(\d+)$/;const c=p.join(os.homedir(),'.claude','plugins','cache','agentheim','agentheim');const cand=[p.join(process.cwd(),'lib','task-lifecycle-cli.mjs')];let vs=[];try{vs=fs.readdirSync(c).filter(n=>sv.test(n)).sort((a,b)=>{const A=a.match(sv),B=b.match(sv);for(let i=1;i<4;i++){const d=+B[i]-+A[i];if(d)return d}return 0})}catch{}for(const v of vs)cand.push(p.join(c,v,'lib','task-lifecycle-cli.mjs'));const r=cand.find(fs.existsSync);if(!r){console.error('no task-lifecycle CLI found under '+c+' (is the plugin installed?)');process.exit(1)}import(u.pathToFileURL(r).href).then(m=>m.main(process.argv.slice(1))).catch(e=>{console.error(e.message);process.exit(1)});" migrate
+```
+
+(Same env-free homedir→cache→semver-max bootstrap as every verb above, targeting
+`lib/task-lifecycle-cli.mjs`'s opts-arity `migrate` verb — `runCli`'s `main` prints the
+manifest as JSON to stdout and exits 0/1 matching `output.ok`.) Four outcomes, by the
+manifest's shape:
+
+- **`{ok:true, verb:'migrate', noop:true, changed:[]}`** — already `board`-layout (or a
+  brand-new tree with nothing to migrate yet). Zero writes. **Say nothing** and continue
+  straight to the skill's own next step.
+- **`{ok:true, verb:'migrate', changed:['.agentheim'], moved:[{from,to}…], message}`** — a
+  `legacy` tree was moved. Commit it via `runScopedCommit(repoRoot, ['.agentheim'],
+  manifest.message)` (`lib/scoped-commit.mjs`, the SAME resolve-plugin-file bootstrap
+  targeting `runScopedCommit` instead — see `modeling/SKILL.md`'s "Committing" section for
+  the full one-liner shape), then say **one line** to the builder: "migrated `.agentheim/`
+  to the two-root layout — N entries moved" (`N = moved.length`). Continue to the skill's
+  own next step.
+- **`{ok:false, code:'mixed-layout', reason}`** / **`{ok:false, code:'worktree-active',
+  reason}`** / **`{ok:false, code:'lock-timeout', reason}`** — stop the skill entirely and
+  surface `reason` verbatim to the builder. None of these is a state the skill can safely
+  work around by itself (a `mixed` tree needs a human to resolve the ambiguity; a live
+  worker worktree still carries the legacy tree on disk; a lock timeout means a sibling
+  session is mid-write).
+
+`migrate` is git-free and holds the lifecycle lock for its own write phase only (ADR-0075)
+— it never conflicts with a concurrent read, only with another writer. Full mechanics:
+ADR-0078 §4, `lib/layout-migration.mjs` (agentic-workflow-e896r).

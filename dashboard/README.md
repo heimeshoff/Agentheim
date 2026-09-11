@@ -35,7 +35,7 @@ SSE consumer re-fetches on a `tree-changed` frame.
   parser, no YAML dependency).
 - **`GET /api/doc?path=<in-root path>`** → raw `text/markdown`. A validated file carrier for
   one artifact's body (rendering is client-side). `path` is project-root-relative
-  (e.g. `.agentheim/vision.md`); it is resolved against the root and an escaping path is
+  (e.g. `.agentheim/knowledge/vision.md`); it is resolved against the root and an escaping path is
   rejected **403** touching no file. Missing `path` → **400**; a non-existent or non-file
   in-root path → **404**.
 

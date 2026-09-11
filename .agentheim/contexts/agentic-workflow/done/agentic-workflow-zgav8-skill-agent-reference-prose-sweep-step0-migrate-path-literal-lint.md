@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-zgav8
 title: Prose sweep for the two-root layout — every skill, agent, and reference spells `board/` and `knowledge/contexts/`, the five entry skills run `migrate` as "Before acting" step 0, and a permanent live-tree lint fails on any reappearing legacy path literal
-status: doing
+status: done
 type: refactor
 context: agentic-workflow
 created: 2026-09-06
@@ -234,3 +234,107 @@ any other dashboard source edit.
   the one exception — re-pointing the 20 styleguide import specifiers and rebuilding
   `dashboard/dist/` — which the layout-gated lint tolerance forces there.
 - Parent: agentic-workflow-g5ez5; decision record: ADR-0078.
+
+## Outcome
+
+Swept every remaining legacy `.agentheim/contexts/`-shaped path literal out of doctrine
+prose and `lib`/`dashboard` source comments to their ADR-0078 `board/`/`knowledge/contexts/`
+equivalents, wired the `migrate` verb as step 0 of every writing skill, and shipped a
+permanent live-tree lint that keeps the old paths from creeping back.
+
+**Doctrine sweep.** `skills/{modeling,quick-capture,work,brainstorm,research}/SKILL.md` each
+gained a two-line item 0 ("Migrate first (ADR-0078 §4)") at the position item 1's table
+specifies — `work`'s sits ahead of the `doing/` scan, the worktree list, and the
+churn-reconciliation read; `research` gained a new "## Before acting" section above
+"## Scope". `skills/{whats-next,inquire}/SKILL.md` each gained the one-line legacy-tree
+notice instead (they never invoke `migrate`, being read-only). Every remaining legacy path
+in `skills/`, `agents/verifier.md`, `agents/worker.md`, `references/{bc-readme-template,
+concept-template,index-template,lib-bootstrap}.md` was rewritten to its `board/` or
+`knowledge/contexts/` form; `references/index-template.md`'s top-level Pointers block now
+names `../board/protocol.md`/`../board/protocol/YYYY-MM.md` (exactly what
+`rewriteTopIndexPointers` produces), while its "Per-BC (LEGACY combined shape)" fenced
+block stays byte-verbatim (`captureTask`'s runtime backfill still reads it under a
+`'legacy'` tree) and is allowlisted. `brainstorm/SKILL.md`'s foundation walk-through now
+names `knowledge/contexts/<bc>/README.md`, the knowledge-half INDEX beside it
+(`references/knowledge-index-template.md`), and `board/<bc>/` created by `capture`'s
+empty-BC backfill — no `contexts/<bc>/` lifecycle path remains anywhere in it.
+`references/lib-bootstrap.md` gained §7, the `migrate` bootstrap (mirroring the
+`claim`/`complete` invocation shape, since `migrate` lives on `lib/task-lifecycle-cli.mjs`'s
+own CLI entrypoint, not a plain function export like §1-6), naming its four outcome codes
+(`noop`, `mixed-layout`, `worktree-active`, `lock-timeout`) and the
+`runScopedCommit(repoRoot, ['.agentheim'], message)` commit line.
+
+**Code re-point.** `lib/id-grammar.mjs`'s `findMalformedTaskIds` — the fifth live-tree lint
+cj54k's original enforcement text didn't name — now resolves through
+`listBoardContexts`/`taskFolderPath` with a single `detectLayout` call threaded as
+`{layout}` (the cj54k discipline `lib/layout-migration.mjs` also follows), with a new
+board-layout fixture test (`lib/test/id-grammar.test.mjs`) proving a malformed id under
+`board/<bc>/todo/` is still found. Doc comments in `lib/{atomic-write,index-rotation,
+protocol-rotation,task-lifecycle,vacuum-guard}.mjs` and `dashboard/{app/live-frame-router.js,
+project-name.mjs}`/`dashboard/README.md` were swept to describe both layouts (or resolved
+through the path-module getters by name) instead of hardcoding the legacy shape.
+
+**The new lint.** `lib/legacy-path-literal-lint.mjs` (`findLegacyPathViolations`) mirrors
+`lib/doctrine-line-pointer.mjs`'s shape: stdlib-only, side-effect-free, loss-tolerant,
+walking `skills/ agents/ references/ commands/ lib/ dashboard/` plus every BC README
+(resolved through `detectLayout` + `listKnowledgeContexts` + `bcReadmePath`, so it works
+under either layout). Seven named forbidden shapes (a)-(g), first-match-wins per line; an
+enumerated `{file, match, rationale}` `ALLOWLIST` (13 entries, mostly the layout module's
+own legacy branches, the legacy INDEX template, and this lint's own header prose quoting
+the shapes it bans); a `<!-- legacy-path-ok -->` marker recognized only in BC READMEs; a
+layout-gated tolerance for the 20 `dashboard/app/*.js` styleguide import specifiers
+(tolerated under `'legacy'`, flagged under `'board'`, forcing tgr31's re-point rather than
+a stale permanent exemption). `lib/test/task-system-paths-literal-lint.test.mjs` (cj54k's
+temporary form) is deleted; its two regexes (`'contexts'` / `'knowledge', 'protocol` quoted
+`path.join` segments) live on as shape (g), scoped to `lib/`+`dashboard/` only.
+`lib/test/legacy-path-literal-lint.test.mjs` (16 tests) covers each shape in isolation, the
+allowlist, both marker cases, and the layout-gated styleguide tolerance, plus the recurring
+live-tree gate.
+
+**Closure verification (the sanctioned transient exception, briefing item 2).** This
+worktree's `.agentheim/` stays `legacy` and carries no diff — `git status --porcelain --
+.agentheim/` is empty at hand-off. To confirm the sweep's closure rule locally, the two BC
+READMEs (`.agentheim/contexts/agentic-workflow/README.md`, `.agentheim/contexts/
+infrastructure/README.md`) were TEMPORARILY patched in-place with exactly the `README_DELTA`
+ops reported above (6 `## Ubiquitous language` replace ops in the agentic-workflow README —
+one bullet, `Structural / advisory / runtime frame`, needed only its `.agentheim/contexts/**`
+→ `.agentheim/board/**` fixed; `rotateProtocol`/`rotateIndexDoneList`'s protocol/archive
+paths fixed; `rotateIndexDoneList`'s one historical "first real run against this repo
+(2026-07-04)" fact kept verbatim and marked `<!-- legacy-path-ok -->`, since it genuinely
+was legacy-shaped at that date; `writeFileAtomic`'s dashboard-frame-classification mention
+fixed; the `Layout` and `migrate verb` bullets kept their necessarily-legacy-literal prose
+and were marked `<!-- legacy-path-ok -->`; plus 1 replace op in the infrastructure README's
+`## Decisions` section for the `ADR-0002` bullet's `vision.md` mention), then
+`findLegacyPathViolations(repoRoot)` was confirmed `[]`, `node --test lib/test/*.test.mjs`
+648/648, and `node --test dashboard/test/*.test.mjs` (run from `dashboard/`) 996/996 — all
+with the delta applied. The two READMEs were then reverted via
+`git checkout -- .agentheim/contexts/agentic-workflow/README.md .agentheim/contexts/
+infrastructure/README.md` before returning, leaving this worktree's `.agentheim/` byte-
+identical to `main`. **`TESTS_PASSING: yes` reflects this transient, delta-applied run** —
+in the worktree's actual (reverted) state, `node --test lib/test/*.test.mjs` is 647/648 (the
+new live-tree test in `lib/test/legacy-path-literal-lint.test.mjs` is the sole, expected-red
+failure until the conductor applies the `README_DELTA` above on `main`); a second dashboard
+run without the delta was 995/996 or 996/996 depending on one observed flake (see below).
+An `ADRS` block amends ADR-0078's own Enforcement section (verbatim except the appended
+addendum paragraph) to name this lint, per the task's own Notes item 8.
+
+**Observed, unrelated flake.** One dashboard run hit `test\watcher.test.mjs`'s "a
+`.agentheim/` mutation pushes a tree-changed data frame" (a real-`fs.watch` timing test);
+it passed in isolation and on immediate re-run — a pre-existing timing flake, not a
+regression from this task, joining the two already-documented flakes (bridge fixed-port
+EADDRINUSE, foreign-launch EPERM teardown) neither of which appeared this run.
+
+**Out of scope (per this task, matches its own Notes):** running `migrate` against this
+repo's own tree (agentic-workflow-tgr31, the deliberate first real run); the 20
+`dashboard/app/*.js` styleguide import specifiers themselves (tgr31); flipping `'legacy'` to
+refused (g5ez5's closure). A functional gap noticed but left unfixed, since touching it
+would have been a behavior change outside this task's prose/doc-comment mandate for
+`lib/vacuum-guard.mjs`: `BOOKKEEPING_SEGMENT_RE` (batch-mix classification) only recognizes
+the legacy `contexts/<bc>/INDEX.md` shape, not `board/<bc>/INDEX.md` or
+`knowledge/contexts/<bc>/INDEX.md` — reported as a follow-up in `BACKLOG_ITEMS`
+(agentic-workflow-q8f3n).
+
+Key files: `lib/legacy-path-literal-lint.mjs`, `lib/test/legacy-path-literal-lint.test.mjs`,
+`lib/id-grammar.mjs`, `lib/test/id-grammar.test.mjs`, `references/lib-bootstrap.md` §7,
+`skills/{modeling,quick-capture,work,brainstorm,research,whats-next}/SKILL.md`,
+`skills/inquire/SKILL.md`.

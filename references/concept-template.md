@@ -1,7 +1,7 @@
 # Concept template
 
 Concept pages are the **opt-in** synthesis layer. They live at
-`.agentheim/contexts/<bc>/concepts/<concept>.md` and consolidate what a project knows
+`.agentheim/knowledge/contexts/<bc>/concepts/<concept>.md` and consolidate what a project knows
 about one cross-cutting topic inside a bounded context — pulling signal from
 ADRs, research reports, and done tasks into a single readable page.
 

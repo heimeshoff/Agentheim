@@ -8,9 +8,10 @@
    interpretation). The classified category is handed to the live-tree hub
    (live-tree-hub.js), which is the only consumer of this module.
 
-     - STRUCTURAL — `.agentheim/contexts/**`, `.agentheim/knowledge/**`, or any
-       path this module does not otherwise recognize. The board and rail
-       re-sync (one shared /api/tree fetch via the hub).
+     - STRUCTURAL — `.agentheim/board/**`, `.agentheim/knowledge/**`, or any
+       path this module does not otherwise recognize (ADR-0078: this covers
+       a still-`legacy` tree's task-system paths too, unchanged). The board
+       and rail re-sync (one shared /api/tree fetch via the hub).
      - ADVISORY   — `.agentheim/state/**`. Only the panel that reads that
        EXACT artifact re-syncs (`state/whats-next.md` → WhatsNextPanel,
        `state/in-flight.json` → InFlightLane). Never the board, never the

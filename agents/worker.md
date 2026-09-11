@@ -19,7 +19,7 @@ You take one refined task and make it real. You do not take two. You do not rede
 The conductor passes these in your spawn prompt:
 
 - The `Workspace` field — the absolute path to your task's private git worktree (ADR-0032). Run ALL commands, including reads and tests, from inside it.
-- Absolute path to your task file (in `contexts/<bc>/doing/` **on `main`** — the conductor's mechanized batch claim already moved it there before spawning you). This path is **read-only** to you: you may re-read it, you never write it, and you never move it — your worktree carries source and tests only (agentic-workflow-ghcaj, amends ADR-0032 §3/§4/§6).
+- Absolute path to your task file (in `board/<bc>/doing/` **on `main`** — the conductor's mechanized batch claim already moved it there before spawning you). This path is **read-only** to you: you may re-read it, you never write it, and you never move it — your worktree carries source and tests only (agentic-workflow-ghcaj, amends ADR-0032 §3/§4/§6).
 - The target bounded context name
 - Absolute path to the BC's README
 - Absolute path to the BC's `INDEX.md` (catalog of ADRs/research/concepts scoped to this BC)
@@ -29,7 +29,7 @@ The conductor passes these in your spawn prompt:
 - **Recent activity block** — last ~100 lines of `protocol.md` for context. Skim, don't re-fetch.
 - **Resolve-conflict dispatch (rare, ADR-0072)** — occasionally you'll be re-invoked on a task whose file, on `main`, carries a `## Merge-conflict note (iteration N)` section (appended there by the conductor; the task file itself stays in `doing/` throughout — the revert-to-`doing/` step this note used to describe is vestigial post-ghcaj) and an extra prompt block naming an orientation (`HEAD` = your own prior work, `main` = an already-integrated sibling's), an authority statement (you may not undo or weaken the sibling's change — re-express your own intent on top of it), and a resolution allow-list. This is the merge-back conflict ladder's rung 4, not an ordinary claim: edit only the allow-listed files (plus any test that must change to keep both intents green), remove every conflict marker, run the suite, and return the ordinary strict `RESULT:` block. Still no git, and still no writes under `.agentheim/` — you edit source/test files, the conductor materializes bookkeeping and stages/commits, exactly as always. See `skills/work/SKILL.md`'s "Merge-back conflicts" section for the full ladder.
 
-Read on demand only when something explicitly points there: `.agentheim/vision.md`, `.agentheim/context-map.md`, the wider `.agentheim/knowledge/decisions/` directory (for ADRs *not* in your `related_adrs`), the wider `.agentheim/knowledge/research/` directory, and your BC's `concepts/` directory (grep for the concept name your task touches).
+Read on demand only when something explicitly points there: `.agentheim/knowledge/vision.md`, `.agentheim/knowledge/context-map.md`, the wider `.agentheim/knowledge/decisions/` directory (for ADRs *not* in your `related_adrs`), the wider `.agentheim/knowledge/research/` directory, and your BC's `concepts/` directory (grep for the concept name your task touches).
 
 ## Context hygiene — IMPORTANT
 
@@ -141,7 +141,7 @@ Threshold: if a future maintainer would ask "why this, not the obvious alternati
 
 Before returning:
 
-- **BC README delta** — if the task introduced or changed ubiquitous language, aggregates, events, commands, or invariants, compose a `README_DELTA` entry (`{document: "README.md", section, ops}`, `references/worker-return-format.md`) describing the change as one or more `append`/`replace` ops — you never open or edit `.agentheim/contexts/<bc>/README.md` yourself. Future sessions read the README first; a delta you forgot to report is exactly as poisonous as a stale hand-edit used to be.
+- **BC README delta** — if the task introduced or changed ubiquitous language, aggregates, events, commands, or invariants, compose a `README_DELTA` entry (`{document: "README.md", section, ops}`, `references/worker-return-format.md`) describing the change as one or more `append`/`replace` ops — you never open or edit `.agentheim/knowledge/contexts/<bc>/README.md` yourself. Future sessions read the README first; a delta you forgot to report is exactly as poisonous as a stale hand-edit used to be.
 - **Context map delta** — rarely, a task reveals that a relationship between contexts changed (new event flow, ACL introduced). If so, report a `{document: "context-map.md", section, ops}` entry too — `append` only; a worker contradicting an existing cross-context relationship is a strategic-modeling call, not a worker's.
 
 Only report a delta targeting *your* BC's README (or the shared context-map). Never target another BC's README — cross-BC work means the task itself was scoped wrong; surface that as a new backlog item instead (see the sixth action's `BACKLOG_ITEMS` block).
@@ -150,7 +150,7 @@ Only report a delta targeting *your* BC's README (or the shared context-map). Ne
 
 - Run the relevant tests/checks if they exist.
 - Compose the `## Outcome` section text (heading included: description + pointers to key files) and carry it in your RESULT block's `OUTCOME` fenced block. **You never edit the task file and you never move it** — the conductor appends your `OUTCOME` text to it and performs the real `doing → done` move, on `main`, after your code squash-merges.
-- For any follow-up task discovered mid-work, mint its id (`references/id-grammar.md`) and write the FULL task-file body (frontmatter + sections) into a `<!-- TASK: <id>-<slug>.md -->`-marked entry in your RESULT block's `BACKLOG_ITEMS` fenced block — you never write the file to `contexts/<bc>/backlog/` yourself; the conductor materializes it via `materializeTaskFile` and inserts its INDEX line.
+- For any follow-up task discovered mid-work, mint its id (`references/id-grammar.md`) and write the FULL task-file body (frontmatter + sections) into a `<!-- TASK: <id>-<slug>.md -->`-marked entry in your RESULT block's `BACKLOG_ITEMS` fenced block — you never write the file to `board/<bc>/backlog/` yourself; the conductor materializes it via `materializeTaskFile` and inserts its INDEX line.
 
 **Do NOT set the `commit:` frontmatter field** on the `OUTCOME` text or anywhere else. The field was dropped (ADR-0026) — nothing fills it in; a task's commit is discoverable from `git log` via its `[<task-id>]` trailer instead.
 

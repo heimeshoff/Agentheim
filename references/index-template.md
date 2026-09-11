@@ -42,7 +42,7 @@ reports are listed in each BC's `INDEX.md`.
 
 - Vision: `vision.md`
 - Context map: `context-map.md` (if exists)
-- Protocol (chronological log): `knowledge/protocol.md` — newest entries on top; capped at ~1,000 lines, older months roll out verbatim to `knowledge/protocol/YYYY-MM.md` (ADR-0039)
+- Protocol (chronological log): `../board/protocol.md` — newest entries on top; capped at ~1,000 lines, older months roll out verbatim to `../board/protocol/YYYY-MM.md` (ADR-0039)
 - All ADRs: `knowledge/decisions/`
 - All research: `knowledge/research/`
 ```
@@ -146,9 +146,9 @@ When a skill creates an artifact, it inserts a new line **immediately after** th
 
 Examples:
 
-- `modeling` writes `contexts/auth/backlog/auth-003-password-reset.md` → inserts under `<!-- backlog-list:start -->` in `contexts/auth/INDEX.md`. Also increments the Backlog count under `<!-- task-counts:start -->`.
-- `work` writes `knowledge/decisions/0014-postgres-billing.md` with `scope: billing` → inserts under `<!-- adr-local:start -->` in `contexts/billing/INDEX.md`. If `scope: global`, inserts under `<!-- adr-global:start -->` in `knowledge/index.md` instead.
-- `research` writes `knowledge/research/auth-tokens-2026-05-13.md` with `related_tasks: [auth-007]` → inserts under `<!-- research-local:start -->` in `contexts/auth/INDEX.md`. If the report's `related_tasks` spans multiple BCs (or none yet), inserts under `<!-- research-global:start -->` in `knowledge/index.md`.
+- `modeling` writes `board/auth/backlog/auth-003-password-reset.md` → inserts under `<!-- backlog-list:start -->` in `board/auth/INDEX.md` (the task half — under a still-`legacy` tree, the same combined `contexts/auth/INDEX.md`). Also increments the Backlog count under `<!-- task-counts:start -->`.
+- `work` writes `knowledge/decisions/0014-postgres-billing.md` with `scope: billing` → inserts under `<!-- adr-local:start -->` in `knowledge/contexts/billing/INDEX.md` (the knowledge half). If `scope: global`, inserts under `<!-- adr-global:start -->` in `knowledge/index.md` instead.
+- `research` writes `knowledge/research/auth-tokens-2026-05-13.md` with `related_tasks: [auth-007]` → inserts under `<!-- research-local:start -->` in `knowledge/contexts/auth/INDEX.md`. If the report's `related_tasks` spans multiple BCs (or none yet), inserts under `<!-- research-global:start -->` in `knowledge/index.md`.
 
 ## When the index file doesn't exist yet
 
