@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 14:28 -- Task verified and completed: agentic-workflow-q8f3n - `lib/vacuum-guard.mjs`'s `BOOKKEEPING_SEGMENT_RE` doesn't recognize `board/`/`knowledge/contexts/` INDEX paths
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-q8f3n - `lib/vacuum-guard.mjs`'s `BOOKKEEPING_SEGMENT_RE` doesn't recognize `board/`/`knowledge/contexts/` INDEX paths
+**Summary:** Widened lib/vacuum-guard.mjs BOOKKEEPING_SEGMENT_RE layout-agnostically so classifyTask buckets board-layout INDEX/protocol chores as bookkeeping (legacy shapes kept through the transition window); 7 TDD fixtures incl. a Windows board path; ADR-0078 Neutral consequences amended in place
+**Duration:** 11m
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 7
+**ADRs written:** 0078 (amended)
+
+---
+
 ## 2026-09-11 14:20 -- Batch started: [agentic-workflow-q8f3n, agentic-workflow-tgr31]
 
 **Type:** Work / Batch start

@@ -4,7 +4,7 @@ title: Two-root layout — `knowledge/` and `board/` — retiring top-level `con
 scope: agentic-workflow
 status: accepted
 date: 2026-09-06
-related_tasks: [agentic-workflow-g5ez5, agentic-workflow-cj54k, agentic-workflow-e896r, agentic-workflow-zgav8, agentic-workflow-hxq1g, agentic-workflow-tgr31]
+related_tasks: [agentic-workflow-g5ez5, agentic-workflow-cj54k, agentic-workflow-e896r, agentic-workflow-zgav8, agentic-workflow-hxq1g, agentic-workflow-tgr31, agentic-workflow-q8f3n]
 related_adrs: [0017, 0026, 0038, 0039, 0043, 0047, 0057, 0059, 0073, 0074, 0075, 0076]
 ---
 
@@ -168,10 +168,13 @@ for `discoverRoot`). Historical protocol entries and ADR bodies keep spelling th
 paths verbatim (ADR-0039 discipline); the path-literal lint exempts them.
 
 **Neutral.** `dashboard/discovery.mjs`'s `discoverRoot` needs no change (it only checks
-that `.agentheim/` exists). `lib/vacuum-guard.mjs`, `lib/vision-conformance.mjs`, and
-`lib/session-start-churn.mjs` carry no path literals — their callers pass paths — so their
-fix is skill prose only. `dashboard/app/live-frame-router.js` needs no edit (unrecognized
-paths already classify as structural).
+that `.agentheim/` exists). `lib/vision-conformance.mjs` and `lib/session-start-churn.mjs`
+carry no path literals — their callers pass paths — so their fix is skill prose only;
+`lib/vacuum-guard.mjs` carries one path-shaped regex (`BOOKKEEPING_SEGMENT_RE`), widened
+layout-agnostically to both layouts' bookkeeping shapes rather than left to skill prose
+alone (fixed under agentic-workflow-q8f3n) — the no-literals claim holds for the other two
+modules only. `dashboard/app/live-frame-router.js` needs no edit (unrecognized paths
+already classify as structural).
 
 ## Alternatives considered
 

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-q8f3n
 title: `lib/vacuum-guard.mjs`'s `BOOKKEEPING_SEGMENT_RE` doesn't recognize `board/`/`knowledge/contexts/` INDEX paths
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-09-11
@@ -142,3 +142,51 @@ new number and never goes through `finalizeAdrNumbering`).
 - Discovered during agentic-workflow-zgav8 (out of its prose-only scope on purpose). The
   repo migrated under agentic-workflow-tgr31 the same day this was refined, which turned the
   gap from prospective to live.
+
+## Outcome
+
+Widened `lib/vacuum-guard.mjs`'s `BOOKKEEPING_SEGMENT_RE` (the `classifyTask` bucket-1
+predicate behind the session-end batch-mix line, ADR-0064) to a single layout-agnostic
+regex recognizing every bookkeeping shape of both the pre-ADR-0078 combined-`contexts/`
+layout and the two-root `board`/`knowledge` layout at once: `.agentheim/knowledge/
+protocol.md`, `.agentheim/board/protocol.md`, `.agentheim/contexts/<bc>/INDEX.md`,
+`.agentheim/board/<bc>/INDEX.md`, `.agentheim/knowledge/contexts/<bc>/INDEX.md`, and
+`.agentheim/state/…` (unchanged). A mixed legacy+board `FILE_LIST` still classifies
+`bookkeeping`. Negative fixtures (a knowledge-half BC README, a board backlog task file, a
+board done-archive rotation file) still classify `harness`, matching legacy-shape behaviour
+one-for-one. `classifyTask`'s signature and purity are unchanged — no `node:fs` /
+`task-system-paths` import, no new parameter; `HARNESS_SEGMENT_RE` / `ADR_SEGMENT_RE` were
+untouched (same path under both layouts, per the task's own note).
+
+Followed TDD: added 7 tests to `lib/test/vacuum-guard.test.mjs` (board protocol, board
+task-half INDEX with a Windows-path fixture, board knowledge-half INDEX, mixed
+legacy+board, and three negative fixtures — README/backlog/done-archive), confirmed red
+for the right reason (3 of the 7 failing pre-fix, actual `'harness'` vs expected
+`'bookkeeping'`), then widened the regex to green. All 41 tests in
+`lib/test/vacuum-guard.test.mjs` pass (34 pre-existing, unmodified, still green; 7 new).
+
+`node --test lib/test/legacy-path-literal-lint.test.mjs`: the new regex spelling evades the
+lint exactly as the old one did (no allowlist entry needed) — the live-tree violation list
+contains only the 20 pre-briefed `dashboard/app/*.js` styleguide specifiers (tgr31's job),
+zero violations naming `lib/vacuum-guard.mjs`.
+
+Full suite: `node --test lib/test/*.test.mjs` from the worktree root reports 655 tests,
+653 pass, 2 fail — both are the pre-briefed, pre-existing failures explicitly called out
+for this task (the legacy-path lint's live-tree test on the 20 dashboard specifiers and
+`detectLayout: the live repo root resolves "legacy" today`, both sibling task
+agentic-workflow-tgr31's responsibility, integrated in the same batch). No
+`bridge.test.mjs` EADDRINUSE or `lifecycle-lock.test.mjs` EPERM occurred on this run.
+
+ADR-0078's *Neutral* consequences paragraph is amended with a one-clause carve-out
+attributed to agentic-workflow-q8f3n (`lib/vacuum-guard.mjs` carries one path-shaped regex,
+now widened layout-agnostically, unlike `lib/vision-conformance.mjs` and
+`lib/session-start-churn.mjs` which remain literal-free), and `agentic-workflow-q8f3n` is
+appended to its `related_tasks` — an amendment of the existing ADR applied in place by the
+conductor on `main`, not a new ADR number.
+
+No README ubiquitous-language change — per the task's own Notes, `skills/work/SKILL.md`
+step 6 and the BC README already describe the surfaces prose-only, without a literal path,
+so nothing there needed re-pointing.
+
+Files touched: `lib/vacuum-guard.mjs` (regex + doc comment), `lib/test/vacuum-guard.test.mjs`
+(7 new tests). Verified PASS at iteration 1.
