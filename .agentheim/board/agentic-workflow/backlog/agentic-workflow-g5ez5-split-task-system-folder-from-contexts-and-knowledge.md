@@ -6,7 +6,7 @@ type: refactor
 context: agentic-workflow
 created: 2026-09-06
 completed:
-depends_on: [agentic-workflow-tgr31]
+depends_on: [agentic-workflow-tgr31, agentic-workflow-q8f3n]
 blocks: []
 tags: [layout, migration, lifecycle, protocol, index, dashboard, upgrade]
 related_adrs: [0078, 0038, 0039, 0047, 0017, 0059, 0073, 0075, 0076]

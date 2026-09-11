@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 14:00 -- Modeling / Refined: agentic-workflow-q8f3n - `lib/vacuum-guard.mjs`'s `BOOKKEEPING_SEGMENT_RE` doesn't recognize `board/`/`knowledge/contexts/` INDEX paths
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** Settled the regex-vs-path-getters either/or in favour of a layout-agnostic regex (classifyTask stays pure; the work call site passes no rootDir), enumerated all five bookkeeping shapes across both layouts, added negative fixtures pinning the INDEX/protocol/state boundary, a purity criterion, a legacy-path-lint criterion, and a one-clause ADR-0078 Neutral-consequences amendment. Re-framed Why as live rather than prospective: the repo migrated under tgr31 (6fbaad2) during this refinement. Added the reverse edge blocks: [g5ez5] and q8f3n to g5ez5's depends_on so the layout closure cannot ship with the board-layout gap. Noted the pre-existing lint red (tgr31 step 5 re-point) so the worker/verifier are briefed. No orchestrator round: a single-module targeted fix with the design question answered by the module's own purity contract.
+**Split into:** none
+**ADRs written:** none (ADR-0078 amendment deferred to the worker's ADRS block)
+
+---
+
 ## 2026-09-11 12:57 -- Work session ended
 
 **Type:** Work / Session end
