@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-q8f3n
 title: `lib/vacuum-guard.mjs`'s `BOOKKEEPING_SEGMENT_RE` doesn't recognize `board/`/`knowledge/contexts/` INDEX paths
-status: backlog
+status: todo
 type: bug
 context: agentic-workflow
 created: 2026-09-11

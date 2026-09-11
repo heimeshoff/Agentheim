@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 14:01 -- Modeling / Promoted: agentic-workflow-q8f3n - `lib/vacuum-guard.mjs`'s `BOOKKEEPING_SEGMENT_RE` doesn't recognize `board/`/`knowledge/contexts/` INDEX paths
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-11 14:00 -- Modeling / Refined: agentic-workflow-q8f3n - `lib/vacuum-guard.mjs`'s `BOOKKEEPING_SEGMENT_RE` doesn't recognize `board/`/`knowledge/contexts/` INDEX paths
 
 **Type:** Modeling / Refine
