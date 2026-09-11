@@ -1,7 +1,7 @@
 ---
 id: infrastructure-k9t2v
 title: Slim `commands/dashboard.md` — one bootstrap instead of three pasted copies, and the `$CLAUDE_PLUGIN_ROOT` archaeology moved out to ADR-0002
-status: todo
+status: doing
 type: chore
 context: infrastructure
 created: 2026-09-11

@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 11:29 -- Batch started: [infrastructure-k9t2v]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-k9t2v - Slim `commands/dashboard.md` — one bootstrap instead of three pasted copies, and the `$CLAUDE_PLUGIN_ROOT` archaeology moved out to ADR-0002
+**Parallel:** no (1 worker — a parallel agentic-workflow-jf6qz dispatch was dropped at rebase: origin/main already carried its completion, a026cbe)
+
+---
+
 ## 2026-09-11 11:05 -- Modeling / Captured: infrastructure-k9t2v, infrastructure-r4mzp - /dashboard token cost
 
 **Type:** Modeling / Capture
