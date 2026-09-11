@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 14:03 -- Modeling / Refined: agentic-workflow-tgr31 - Dogfood the migration — finish the two-root move: re-point the 20 app specifiers and 5 test-side styleguide reads, flip the two live-tree tests still asserting legacy, prove both suites, dist/, and the dashboard green
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** This refinement session ran the skill's step 0 `migrate` on the real tree first (all of tgr31's deps were done): 22 manifest entries moved, committed as 6fbaad2 via `runScopedCommit(root, ['.agentheim'])` — 342 pure renames, README R099, the three INDEX splits, `git log --follow` intact, `detectLayout` → board, every knowledge-half ADR link resolving, dashboard relaunched with `migrationPending:false` and unchanged lifecycle counts (agentic-workflow done 200). The task was then re-shaped from conductor-owned tree move to an ordinary worker task covering only the code half the move could not carry: the 20 app-side ESM specifiers, five test-side on-disk styleguide reads the lint does not flag (backlog-card-launch, dist-build, model-split-button-dom ×7, settings-menu, shell-relayout), and two live-tree tests that assert `legacy` (task-system-paths.test.mjs:147, the lint test's title). Criteria corrected: there is no root `npm test` (lib suite runs as `node --test lib/test/*.test.mjs`; dashboard `npm test` separately); the verb writes no protocol entry by design, so the record is the commit plus this entry plus the completion entry; done-archive discoverability is the INDEX header plus the board path, not dashboard search. Recorded the expected-red set on the migrated tree (lib 645/648, dashboard 931/965) and the known environmental flakes. dist/ rebuild stays with the conductor at integration (ADR-0057).
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-09-11 14:01 -- Modeling / Promoted: agentic-workflow-q8f3n - `lib/vacuum-guard.mjs`'s `BOOKKEEPING_SEGMENT_RE` doesn't recognize `board/`/`knowledge/contexts/` INDEX paths
 
 **Type:** Modeling / Promote
