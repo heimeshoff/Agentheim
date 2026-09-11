@@ -5,6 +5,27 @@ Newest entries on top.
 
 ---
 
+## 2026-09-11 12:57 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 12:11 batch start → 12:57
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** zgav8: 1
+**Commits:** 3 (1 batch-start, 1 task integration, this entry)
+**Vision-conformance:** none — batch aligns with vision. zgav8 is a doctrine/lint sweep serving "Knowledge is durable" (every skill now spells the ADR-0078 layout, and a live-tree lint keeps it so); it touches no non-goal.
+**Batch mix:** 0% product-facing / 100% harness / 0% bookkeeping (1 task)
+**Carry-over:** dashboard/dist/app.js: left behind (EOL-only phantom modification after the ADR-0057 rebuild — `git diff --numstat` empty, only .build-stamp.json carried content and rode the integrating commit); no `.agentheim/`-owned strays; no non-main worktrees
+**Vacuum guard:** ready set empty after the batch — open item surfaced: Brainstorm on existing code (next iteration). (open 98 days). agentic-workflow-tgr31 (dogfood `migrate` on this repo) is now unblocked in backlog — promote via `modeling` when ready for the tree move; g5ez5's closure waits on tgr31.
+**README length:** agentic-workflow README now 1398 lines (ADR-0041 trigger: ~600) — consider `modeling` CONSOLIDATE
+**Verifier advisory (zgav8, ADR-0062):** the worker's "dashboard 996/996" claim was not reproducible — the verifier's own run saw 999 tests with 1 failing (dist-staleness, expected-red until the conductor's rebuild); dist was rebuilt from merged source on main at integration and that test is green post-commit.
+**Backlog captured:** agentic-workflow-q8f3n (`lib/vacuum-guard.mjs` BOOKKEEPING_SEGMENT_RE board-layout gap) from the worker's BACKLOG_ITEMS, registered via `capture`.
+**Conductor note:** the worker's transcript output file was empty, so its RESULT block survived only in the completion notification with angle brackets HTML-escaped; the README_DELTA was rebuilt from the live README text plus the worker's stated substitutions (all 7 ops disposed `applied` on main), and the ADR-0078 addendum amends the existing file in place — not routed through `finalizeAdrNumbering`, which would have renumbered an existing ADR.
+
+---
+
 ## 2026-09-11 12:56 -- Task verified and completed: agentic-workflow-zgav8 - Prose sweep for the two-root layout — every skill, agent, and reference spells `board/` and `knowledge/contexts/`, the five entry skills run `migrate` as "Before acting" step 0, and a permanent live-tree lint fails on any reappearing legacy path literal
 
 **Type:** Work / Task completion
