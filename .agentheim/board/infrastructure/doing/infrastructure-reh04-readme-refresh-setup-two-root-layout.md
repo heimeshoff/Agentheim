@@ -1,7 +1,7 @@
 ---
 id: infrastructure-reh04
 title: Refresh the repo README so `/setup` is part of the install flow, the state-layout tree and every quoted path reflect the two-root layout (ADR-0078), and the skills table, repo layout, and status reflect what shipped since the June restructure (0.8.8 → 0.9.4) — concise, no walkthrough
-status: todo
+status: doing
 type: chore
 context: infrastructure
 created: 2026-09-13
