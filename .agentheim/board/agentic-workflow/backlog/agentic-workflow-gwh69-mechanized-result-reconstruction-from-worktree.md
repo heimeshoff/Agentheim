@@ -113,6 +113,18 @@ state this.
   not toward the gate. Re-check after the next few work batches; the `**Result source:**` line
   in every PASS/FAIL completion entry (`skills/work/SKILL.md` Protocol logging) is the measured
   input.
+- **Gate check 2026-09-13 (refine):** not met. Post-contract tally since `937b598`: 3 worker
+  dispatches (agentic-workflow-vsb06 ×1, infrastructure-hnv3d ×2), 2 completion entries, every
+  one `sidecar · layout both+sentinel · sidecar present`; 0 `**Result source:** re-dispatch`,
+  0 `sidecar missing`, 0 `layout leading`; "Lost-result re-dispatches: 0" at session end. Both
+  redundancy layers held 3/3 — evidence points *away* from building this, but 3 dispatches is
+  too small a sample to call the redundancy proven. Stays in `backlog/`.
+- **Closing rule (refined 2026-09-13)** so the next re-check is a count, not a judgment:
+  DISMISS this task once the post-`937b598` tally reaches **10 worker dispatches with zero**
+  `re-dispatch`, `sidecar missing`, or `layout leading` results — at that point the correlated-
+  non-compliance risk ADR-0080 §7 names has had ten independent chances to show and did not.
+  The promotion gate in Why is unchanged; whichever threshold is hit first decides the task.
+  Running tally: 3/10 clean as of 2026-09-13.
 - Provenance marker precedent: ADR-0038 Ruling B (never present a reconstruction as a
   measurement). Reconstruction is exactly the thing that rule was written to label.
 - ADR-0080 records the deferral and the gate; flip its "Deferred behind evidence" paragraph to

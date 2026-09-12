@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-13 00:03 -- Modeling / Refined: agentic-workflow-gwh69 - Mechanized RESULT reconstruction from the worktree
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Evidence-gate re-check, not met. Post-937b598 tally: 3 worker dispatches (vsb06 ×1, hnv3d ×2), 2 completions, all `sidecar · layout both+sentinel · sidecar present`; 0 re-dispatch, 0 sidecar-missing, 0 leading-only. Both redundancy layers held 3/3 — sample too small to prove it. Added a countable closing rule: DISMISS at 10 clean post-contract dispatches with zero gate signals; promotion gate unchanged. No orchestrator round — the task is fully specified and only the evidence is pending.
+
+---
+
 ## 2026-09-12 23:58 -- Release shipped: v0.9.4
 
 **Type:** Release
