@@ -43,34 +43,7 @@ for an infrastructure BC.
   install.
 - **Transport** — the mechanism that serves `.agentheim/` to the UI and carries writes
   back: static assets + a JSON API over localhost.
-- **Launch / Stop** — how the runtime is started from a terminal inside a Claude Code
-  plugin context, on a chosen host/port, and how it is torn down. The launcher
-  (`launch.mjs`) **ships with the plugin, not the consumer project**. The `/dashboard` command
-  locates it through an **environment-variable-independent resolver** (`resolve-launcher.mjs`):
-  `$CLAUDE_PLUGIN_ROOT` is **empty** in the command's Bash context for an installed plugin
-  (the v0.8.3 field failure that made infrastructure-008's `${CLAUDE_PLUGIN_ROOT:-.}` path
-  collapse to the broken project root), so correctness must never depend on it. The resolver
-  derives the plugin cache from `os.homedir()` (`<home>/.claude/plugins/cache/agentheim/agentheim`),
-  picks the newest version by **semver** (`0.8.10 > 0.8.9`), **fails loud** if none is found,
-  and spawns `launch.mjs` with the consumer project as cwd so **project discovery** still
-  resolves the foreign `.agentheim/`. Script-in-cache + cwd-in-project remains load-bearing.
-  (infrastructure-010, superseding 008's locator; ADR-0002 addendum.) `commands/dashboard.md`
-  carries the resolver bootstrap **exactly once** — the verb (empty / `stop` / `status`) is
-  forwarded at runtime via `$ARGUMENTS` rather than pasted three times per verb, and the
-  `$CLAUDE_PLUGIN_ROOT`-is-empty archaeology lives in ADR-0002's infrastructure-010 addendum,
-  not in the command file (infrastructure-k9t2v). The contract is guarded by a committed test
-  seam — a static guard over `commands/dashboard.md` (the env-independent `node -e` resolver
-  bootstrap occurs once and forwards `$ARGUMENTS`, never depends on `$CLAUDE_PLUGIN_ROOT`, no
-  `cd`), a live-tree lint asserting the bootstrap literal is not re-duplicated
-  (`lib/dashboard-command-bootstrap-dedup.mjs`), resolver unit tests (semver-max incl. the
-  `0.8.10` lexical trap, homedir derivation on win32- and POSIX-shaped homes, fail-loud), and a
-  foreign-project integration test that substitutes each real verb into the card's single line
-  and runs it with `CLAUDE_PLUGIN_ROOT` **deleted** from the child env, asserting the runfile
-  lands under the consumer project (infrastructure-009, amended by 010 and k9t2v).
-  **Version-aware reuse** (infrastructure-rgknz, ADR-0002 addendum): a live server is reused
-  only when its runfile's recorded plugin identity **matches** the launcher's own; any mismatch —
-  including an older runfile missing the fields, or one whose recorded root no longer exists on
-  disk — is a **replace**, not a reuse. See the **Runfile** entry below for the mechanics.
+- **Launch / Stop** — three surfaces reach the same launcher (`launch.mjs`, which **ships with the plugin, not the consumer project**): repo-local development (`node dashboard/launch.mjs` from inside the Agentheim repo), the `/dashboard` command (now a **pointer only**, ADR-0079 §3 — it prints `agentheim-dashboard` / `agentheim-dashboard stop` / `agentheim-dashboard status` and names `/setup` when not yet installed; it issues no `node` invocation itself), and the **installed CLI** (`agentheim-dashboard{.mjs,.cmd,<shim>}`, `/setup`'s install target, ADR-0079) — the surface a consumer actually uses daily, for zero model tokens. All three ultimately resolve the launcher through the same **environment-variable-independent resolver** (`resolve-launcher.mjs`): `$CLAUDE_PLUGIN_ROOT` is **empty** in an installed plugin's Bash/CLI context (the v0.8.3 field failure that made infrastructure-008's `${CLAUDE_PLUGIN_ROOT:-.}` path collapse to the broken project root), so correctness must never depend on it. The resolver derives the plugin cache from `os.homedir()` (`<home>/.claude/plugins/cache/agentheim/agentheim`), picks the newest version by **semver** (`0.8.10 > 0.8.9`), **fails loud** if none is found, and spawns `launch.mjs` with the consumer project as cwd so **project discovery** still resolves the foreign `.agentheim/`. Script-in-cache + cwd-in-project remains load-bearing. (infrastructure-010, superseding 008's locator; ADR-0002 addendum.) `commands/setup.md` carries the resolver bootstrap **exactly once**, targeting `lib/setup-cli.mjs` — the verb (`status` / `install cli` / `remove cli`) is forwarded at runtime via `$ARGUMENTS`; the shipped `dashboard/cli/agentheim-dashboard.mjs` independently implements the same env-independent walk (verbatim from the builder's own reference implementation, ADR-0079 §4) to reach `resolve-launcher.mjs` from a foreign project. The contract is guarded by a committed test seam — a static guard over `commands/setup.md` (resolver bootstrap occurs once, forwards `$ARGUMENTS`, never depends on `$CLAUDE_PLUGIN_ROOT`, no `cd`) plus a static guard that `commands/dashboard.md` carries **zero** `node` invocations, a live-tree lint asserting neither bootstrap is re-duplicated (`lib/command-bootstrap-dedup.mjs`, generalized infrastructure-x56qm: `setup.md → 1`, `dashboard.md → 0`), resolver unit tests (semver-max incl. the `0.8.10` lexical trap, homedir derivation on win32- and POSIX-shaped homes, fail-loud), and a foreign-project integration test that installs the CLI into a fake home via `lib/setup-cli.mjs`'s `installCli` and runs each real verb against the installed file, with `CLAUDE_PLUGIN_ROOT` **deleted** from the child env, asserting the runfile lands under the consumer project (infrastructure-009, amended by 010, k9t2v, and x56qm). **Version-aware reuse** (infrastructure-rgknz, ADR-0002 addendum): a live server is reused only when its runfile's recorded plugin identity **matches** the launcher's own; any mismatch — including an older runfile missing the fields, or one whose recorded root no longer exists on disk — is a **replace**, not a reuse. See the **Runfile** entry below for the mechanics.
 - **Project discovery** — how the running runtime locates and reads the current project's
   `.agentheim/` folder: **walk up from the invocation directory** until a `.agentheim/`
   folder is found (the way git finds `.git`), resolve an **absolute root once at startup**,
@@ -193,7 +166,7 @@ for an infrastructure BC.
   with a debounced stat-poll fallback where recursive watch is unreliable (Linux, some Windows
   / network-drive cases). The pointer is **raw transport** — what a change *means* (which task
   transitioned) is `agentic-workflow`'s job. (ADR-0006.)
-- **Install surface (`/setup`)** — a second process-launcher slash-command exception (ADR-0002, extended by ADR-0079), sibling to `/dashboard`. A one-time, re-runnable, per-machine install of the zero-token dashboard CLI (`agentheim-dashboard{.mjs,.cmd,<shim>}`, shipped verbatim from the plugin, copied into `<home>/.local/bin` — never the project tree) and/or the VS Code bridge `.vsix`. Shows each option's current install state and lets the user add or remove either; re-running upgrades an already-installed option to the newest cached version. `/dashboard` itself is demoted to a pointer (prints `run agentheim-dashboard; run /setup if it isn't installed`) rather than a working fallback — ADR-0079.
+- **Install surface (`/setup`)** — a second process-launcher slash-command exception (ADR-0002, extended by ADR-0079), sibling to `/dashboard`. A one-time, re-runnable, per-machine install of the zero-token dashboard CLI (`agentheim-dashboard{.mjs,.cmd,<shim>}`, shipped verbatim from the plugin at `dashboard/cli/`, plain-copied via `lib/setup-cli.mjs` into `<home>/.local/bin` — never the project tree) and, once infrastructure-js62b lands, the VS Code bridge `.vsix`. Three verbs today (`status` | `install cli` | `remove cli`; no `install both`, no default choice — the model issues one call per option so each fails loud independently). `status` is read-only and prints a single-line `schema: 1` JSON contract; install-state is a **byte-compare** against the resolved source (`installed-current` / `installed-stale` / `not-installed`), not a version stamp, since the shipped files carry no version constant. PATH handling is **print-only, never a write**: on win32 the verdict comes from the registry-backed user PATH (never `process.env.Path`), with a PowerShell `[Environment]::SetEnvironmentVariable(..., 'User')` remedy printed on request (never `setx`, which truncates at 1024 chars); on POSIX the remedy names the rc file derived from `basename($SHELL)` (zsh/bash/fish/unknown). A source guard over `lib/setup-cli.mjs` asserts no PATH-write call is ever executed. `/dashboard` itself is demoted to a pointer (prints `agentheim-dashboard` / `agentheim-dashboard stop` / `agentheim-dashboard status`, naming `/setup` if not yet installed) rather than a working fallback — ADR-0079, infrastructure-x56qm.
 
 ## Owned mechanisms
 

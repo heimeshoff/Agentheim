@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Git Bash (Windows) / macOS / Linux shim for agentheim-dashboard.mjs (same dir).
+# On macOS/Linux: chmod +x this file once, and ensure ~/.local/bin is on PATH.
+exec node "$(dirname "$0")/agentheim-dashboard.mjs" "$@"

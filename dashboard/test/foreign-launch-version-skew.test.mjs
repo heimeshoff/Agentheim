@@ -1,18 +1,19 @@
 // Foreign-project integration test for the version-aware reuse/replace decision
-// (ADR-0002 addendum, infrastructure-rgknz) — run at the SAME seam
-// infrastructure-009/010 established (foreign-launch.test.mjs): the literal
-// card form, `CLAUDE_PLUGIN_ROOT` deleted from the child env (the field
-// condition), `os.homedir()` redirected to a fake plugin cache linking THIS
-// repo's dashboard/, and the runfile asserted to land under the FOREIGN
-// project, never the cache/repo.
+// (ADR-0002 addendum, infrastructure-rgknz) — retargeted onto the installed CLI
+// by infrastructure-x56qm / ADR-0079, at the SAME seam infrastructure-009/010
+// established (foreign-launch.test.mjs): `CLAUDE_PLUGIN_ROOT` deleted from the
+// child env (the field condition), `os.homedir()` redirected to a fake home
+// that both doubles as a fake plugin cache (linking THIS repo's dashboard/) and
+// has the CLI actually installed into it via `installCli`, and the runfile
+// asserted to land under the FOREIGN project, never the cache/repo.
 //
 // The property under test here is different from foreign-launch.test.mjs's:
 // once a live server's runfile is made to claim an OLDER plugin version than
 // the one currently on disk (the field symptom — "I updated the plugin and the
-// dashboard didn't update"), a second `launch` through the SAME env-independent
-// resolver bootstrap must REPLACE it — stop the outgoing pid, launch a fresh
-// one, and land the new runfile under the SAME foreign project — rather than
-// reporting `already running` against the stale process.
+// dashboard didn't update"), a second `launch` through the SAME installed CLI
+// must REPLACE it — stop the outgoing pid, launch a fresh one, and land the new
+// runfile under the SAME foreign project — rather than reporting `already
+// running` against the stale process.
 //
 // (A real installed-plugin cache holds a full COPY of dashboard/ per version
 // dir, not a symlink, so two on-disk versions there differ for real. This
@@ -40,24 +41,13 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 import { runfilePath, readRunfile } from '../runfile.mjs';
-import { extractLauncherInvocations, substituteArguments } from './helpers/card.mjs';
+import { installCli } from '../../lib/setup-cli.mjs';
+import { cliCommandFor } from './helpers/card.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const dashboardDir = path.join(here, '..');
-const repoRoot = path.join(dashboardDir, '..');
-const cardPath = path.join(repoRoot, 'commands', 'dashboard.md');
 
-// infrastructure-k9t2v: the card carries ONE invocation with `$ARGUMENTS`; substitute the verb
-// the way Claude Code does, so each verb is still exercised as a real, distinct shell command.
-function cardCommandFor(verb) {
-  const card = readFileSync(cardPath, 'utf8');
-  const [invocation] = extractLauncherInvocations(card);
-  if (!invocation) throw new Error('card has no launcher invocation');
-  const verbArg = verb === 'launch' ? '' : verb;
-  return substituteArguments(invocation, verbArg);
-}
-
-function makeFakeCacheHome() {
+function makeFakeHome() {
   const home = mkdtempSync(path.join(tmpdir(), 'infra-rgknz-home-'));
   const versionDir = path.join(
     home,
@@ -70,30 +60,35 @@ function makeFakeCacheHome() {
   );
   mkdirSync(versionDir, { recursive: true });
   symlinkSync(dashboardDir, path.join(versionDir, 'dashboard'), 'junction');
+
+  const installResult = installCli({ homedir: home, platform: process.platform, env: process.env });
+  if (installResult.exitCode !== 0) {
+    throw new Error(`fixture setup: installCli failed: ${installResult.lines.join('\n')}`);
+  }
   return { home, cleanup: () => rmSync(home, { recursive: true, force: true }) };
 }
 
-function runCard(command, { cwd, home }) {
+function runCli(command, { cwd, home }) {
   const env = { ...process.env, HOME: home, USERPROFILE: home };
   delete env.CLAUDE_PLUGIN_ROOT;
   return spawnSync('bash', ['-c', command], { cwd, env, encoding: 'utf8' });
 }
 
-test('foreign + EMPTY CLAUDE_PLUGIN_ROOT: a version-mismatched live runfile is REPLACED on the next launch, runfile stays under the foreign project', async () => {
+test('installed CLI + EMPTY CLAUDE_PLUGIN_ROOT: a version-mismatched live runfile is REPLACED on the next launch, runfile stays under the foreign project', async () => {
   const bashProbe = spawnSync('bash', ['-c', 'exit 0']);
   if (bashProbe.error) return;
 
   const foreign = mkdtempSync(path.join(tmpdir(), 'infra-rgknz-foreign-'));
   mkdirSync(path.join(foreign, '.agentheim'));
-  const { home, cleanup } = makeFakeCacheHome();
+  const { home, cleanup } = makeFakeHome();
 
-  const launchCmd = cardCommandFor('launch');
-  const stopCmd = cardCommandFor('stop');
+  const launchCmd = cliCommandFor(home, 'launch');
+  const stopCmd = cliCommandFor(home, 'stop');
   const rfPath = runfilePath(foreign);
 
   try {
     // --- first launch: real plugin version/root recorded ---
-    const launched = runCard(launchCmd, { cwd: foreign, home });
+    const launched = runCli(launchCmd, { cwd: foreign, home });
     assert.equal(launched.status, 0, `first launch failed:\n${launched.stdout}\n${launched.stderr}`);
 
     let appeared = false;
@@ -118,8 +113,8 @@ test('foreign + EMPTY CLAUDE_PLUGIN_ROOT: a version-mismatched live runfile is R
       )
     );
 
-    // --- second launch through the SAME bootstrap: must REPLACE, not reuse ---
-    const relaunched = runCard(launchCmd, { cwd: foreign, home });
+    // --- second launch through the SAME installed CLI: must REPLACE, not reuse ---
+    const relaunched = runCli(launchCmd, { cwd: foreign, home });
     assert.equal(relaunched.status, 0, `relaunch failed:\n${relaunched.stdout}\n${relaunched.stderr}`);
     assert.match(
       relaunched.stdout,
@@ -139,7 +134,7 @@ test('foreign + EMPTY CLAUDE_PLUGIN_ROOT: a version-mismatched live runfile is R
     assert.equal(secondRf.pluginVersion, firstRf.pluginVersion, 'the replacement must record the real plugin version, not the forced one');
   } finally {
     try {
-      runCard(stopCmd, { cwd: foreign, home });
+      runCli(stopCmd, { cwd: foreign, home });
     } catch {
       /* swallow — teardown must not mask the real failure */
     }

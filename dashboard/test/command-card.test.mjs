@@ -1,4 +1,5 @@
-// Static guard for the /dashboard command card (ADR-0002 + infrastructure-010 addendum).
+// Static guard for the `/setup` command card (ADR-0002 + infrastructure-010
+// addendum, retargeted by infrastructure-x56qm / ADR-0079).
 //
 // History of the regression class this guards:
 //   - infrastructure-008: a bare `node dashboard/launch.mjs` broke in every foreign
@@ -7,24 +8,23 @@
 //     command's Bash context for an installed plugin, so ${VAR:-.} collapsed back to
 //     the project path and reproduced the exact module-not-found error. The card now
 //     uses an env-INDEPENDENT `node -e` bootstrap that derives the launcher from
-//     os.homedir() via dashboard/resolve-launcher.mjs.
-//   - infrastructure-k9t2v: the card pasted that same bootstrap THREE times (one per
-//     verb, differing only in a trailing literal). Collapsed to ONE bootstrap line
-//     that forwards the verb at runtime via `$ARGUMENTS`. This is a **deliberate
-//     seam adaptation, not a silent gutting**: the old "at least three invocations,
-//     one per named verb" assertions are structurally impossible to satisfy with a
-//     single pass-through line, so they are replaced below by (a) an
-//     exactly-one-invocation assertion and (b) a $ARGUMENTS-forwarding assertion.
-//     Per-verb *behavioural* coverage (does `stop` actually stop?) now lives
-//     entirely in foreign-launch.test.mjs, which substitutes the real verb into the
-//     single line and runs it — a strictly stronger guard than the static per-verb
-//     text check it replaces.
+//     os.homedir().
+//   - infrastructure-k9t2v: the (then `/dashboard`) card pasted that same bootstrap
+//     THREE times (one per verb, differing only in a trailing literal). Collapsed to
+//     ONE bootstrap line that forwards the verb at runtime via `$ARGUMENTS`.
+//   - infrastructure-x56qm (ADR-0079): `/dashboard` itself is demoted to a
+//     zero-`node`-invocation pointer; the resolver-bootstrap card these five
+//     resolver-shape assertions guard is now `/setup`, targeting
+//     `lib/setup-cli.mjs` instead of `dashboard/resolve-launcher.mjs`. This is a
+//     deliberate RETARGET, not a deletion — every assertion below is the SAME
+//     property the original five checked, now against the surviving bootstrap.
+//     `/dashboard`'s own zero-invocation contract gets its own dedicated tests
+//     further down.
 //
 // This test extracts the launcher invocation(s) from the card and asserts the
 // env-independent resolver shape, so the next edit to the card can't silently
 // reintroduce either the project-relative-path OR the $CLAUDE_PLUGIN_ROOT-dependent
-// regression, and can't silently re-duplicate the bootstrap. It also guards the
-// launcher's printed user-facing hint strings.
+// regression, and can't silently re-duplicate the bootstrap.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -41,12 +41,14 @@ import {
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.join(here, '..', '..');
-const cardPath = path.join(repoRoot, 'commands', 'dashboard.md');
+const cardPath = path.join(repoRoot, 'commands', 'setup.md');
+const dashboardCardPath = path.join(repoRoot, 'commands', 'dashboard.md');
 const launchPath = path.join(here, '..', 'launch.mjs');
+const SETUP_CLI_TARGET = /setup-cli\.mjs/;
 
 test('the card contains exactly one launcher invocation (infrastructure-k9t2v: no re-duplication)', () => {
   const card = readFileSync(cardPath, 'utf8');
-  const invocations = extractLauncherInvocations(card);
+  const invocations = extractLauncherInvocations(card, SETUP_CLI_TARGET);
   assert.equal(
     invocations.length,
     1,
@@ -56,7 +58,7 @@ test('the card contains exactly one launcher invocation (infrastructure-k9t2v: n
 
 test('the single invocation forwards the verb via $ARGUMENTS, not a hardcoded verb', () => {
   const card = readFileSync(cardPath, 'utf8');
-  const [line] = extractLauncherInvocations(card);
+  const [line] = extractLauncherInvocations(card, SETUP_CLI_TARGET);
   assert.ok(
     forwardsArguments(line),
     `card invocation must pass the verb through as $ARGUMENTS: ${line}`
@@ -65,11 +67,11 @@ test('the single invocation forwards the verb via $ARGUMENTS, not a hardcoded ve
 
 test('every launcher invocation in the card is the env-independent resolver bootstrap', () => {
   const card = readFileSync(cardPath, 'utf8');
-  const invocations = extractLauncherInvocations(card);
+  const invocations = extractLauncherInvocations(card, SETUP_CLI_TARGET);
   assert.ok(invocations.length >= 1, 'expected at least one launcher invocation in the card');
   for (const line of invocations) {
     assert.ok(
-      isEnvIndependentResolver(line),
+      isEnvIndependentResolver(line, SETUP_CLI_TARGET),
       `card invocation is not the env-independent resolver bootstrap ` +
         `(infrastructure-010 regression): ${line}`
     );
@@ -78,7 +80,7 @@ test('every launcher invocation in the card is the env-independent resolver boot
 
 test('no card invocation depends on $CLAUDE_PLUGIN_ROOT (infrastructure-010 field failure)', () => {
   const card = readFileSync(cardPath, 'utf8');
-  for (const line of extractLauncherInvocations(card)) {
+  for (const line of extractLauncherInvocations(card, SETUP_CLI_TARGET)) {
     assert.ok(
       !isPluginRooted(line),
       `card invocation depends on $CLAUDE_PLUGIN_ROOT, which is empty in installed ` +
@@ -89,18 +91,12 @@ test('no card invocation depends on $CLAUDE_PLUGIN_ROOT (infrastructure-010 fiel
 
 test('the card derives the cache path from os.homedir() (never raw env vars)', () => {
   const card = readFileSync(cardPath, 'utf8');
-  for (const line of extractLauncherInvocations(card)) {
+  for (const line of extractLauncherInvocations(card, SETUP_CLI_TARGET)) {
     assert.match(line, /os\.homedir\(\)/, `card invocation must derive the path from os.homedir(): ${line}`);
   }
 });
 
-// infrastructure-k9t2v: the old static "all three verbs textually present" check
-// cannot apply to a single $ARGUMENTS-forwarding line (there is no per-verb text
-// to enumerate). Per-verb coverage now lives in foreign-launch.test.mjs, which
-// substitutes each real verb into the one card line and runs it end-to-end
-// against a foreign project — see that file's `cardCommandFor`.
-
-test('the card issues no `cd` directive (launcher must run from the consumer cwd)', () => {
+test('the card issues no `cd` directive (the script must run from the invocation cwd)', () => {
   const card = readFileSync(cardPath, 'utf8');
   const offending = card
     .split(/\r?\n/)
@@ -120,6 +116,13 @@ test('the launcher prints no bare project-relative `node dashboard/launch.mjs` h
   }
 });
 
+test('the card inlines no install logic (copyFileSync / mkdir / chmod stay in lib/setup-cli.mjs)', () => {
+  const card = readFileSync(cardPath, 'utf8');
+  for (const forbidden of ['copyFileSync', 'mkdirSync', 'chmodSync']) {
+    assert.ok(!card.includes(forbidden), `card must not inline "${forbidden}" -- install logic belongs in lib/setup-cli.mjs`);
+  }
+});
+
 // --- Meta: prove the extractor/predicates actually CATCH the regression classes. ---
 // A passing guard against an already-correct card is worthless unless we show it
 // would fail against the bad forms (both the 008 bare-relative and the 010
@@ -129,45 +132,62 @@ test('predicate REJECTS a bare project-relative card (infrastructure-008 Red pro
   const badCard = [
     'No argument → launch:',
     '```',
-    'node dashboard/launch.mjs',
+    'node lib/setup-cli.mjs',
     '```',
   ].join('\n');
-  const invocations = extractLauncherInvocations(badCard);
+  const invocations = extractLauncherInvocations(badCard, SETUP_CLI_TARGET);
   assert.equal(invocations.length, 1, 'extractor must find the bad invocation');
   assert.ok(
-    !isEnvIndependentResolver(invocations[0]),
-    'the resolver predicate must reject a bare `node dashboard/launch.mjs`'
+    !isEnvIndependentResolver(invocations[0], SETUP_CLI_TARGET),
+    'the resolver predicate must reject a bare `node lib/setup-cli.mjs`'
   );
 });
 
 test('predicate REJECTS a $CLAUDE_PLUGIN_ROOT-dependent card (infrastructure-010 Red proof)', () => {
   const badCard = [
     '```',
-    'node "${CLAUDE_PLUGIN_ROOT:-.}/dashboard/launch.mjs"',
+    'node "${CLAUDE_PLUGIN_ROOT:-.}/lib/setup-cli.mjs"',
     '```',
   ].join('\n');
-  const invocations = extractLauncherInvocations(badCard);
+  const invocations = extractLauncherInvocations(badCard, SETUP_CLI_TARGET);
   assert.equal(invocations.length, 1, 'extractor must find the env-dependent invocation');
   assert.ok(isPluginRooted(invocations[0]), 'plugin-rooted predicate must flag it');
   assert.ok(
-    !isEnvIndependentResolver(invocations[0]),
+    !isEnvIndependentResolver(invocations[0], SETUP_CLI_TARGET),
     'the resolver predicate must reject a $CLAUDE_PLUGIN_ROOT-dependent invocation'
   );
 });
 
 test('predicate REJECTS a re-duplicated card (infrastructure-k9t2v Red proof)', () => {
   const line =
-    "node -e \"const os=require('node:os');os.homedir();/*resolve-launcher.mjs*/\"";
+    "node -e \"const os=require('node:os');os.homedir();/*setup-cli.mjs*/\"";
   const badCard = ['```', line, '```', '```', `${line} stop`, '```'].join('\n');
-  const invocations = extractLauncherInvocations(badCard);
+  const invocations = extractLauncherInvocations(badCard, SETUP_CLI_TARGET);
   assert.equal(invocations.length, 2, 'extractor must find both pasted copies');
 });
 
 test('predicate REJECTS a card that hardcodes a verb instead of forwarding $ARGUMENTS (Red proof)', () => {
   const badLine =
-    "node -e \"const os=require('node:os');os.homedir();/*resolve-launcher.mjs*/\" stop";
+    "node -e \"const os=require('node:os');os.homedir();/*setup-cli.mjs*/\" stop";
   assert.ok(
     !forwardsArguments(badLine),
     'forwardsArguments must reject a line with a hardcoded verb and no $ARGUMENTS'
   );
+});
+
+// --- /dashboard's pointer-only contract (ADR-0079 §3) ------------------------
+
+test('commands/dashboard.md contains zero `node` invocations (pointer-only, ADR-0079 §3)', () => {
+  const card = readFileSync(dashboardCardPath, 'utf8');
+  const nodeLines = card
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => /^node\b/.test(l));
+  assert.deepEqual(nodeLines, [], `commands/dashboard.md must issue no node invocation: ${nodeLines.join(' | ')}`);
+});
+
+test('commands/dashboard.md names both the literal `agentheim-dashboard` and the literal `/setup`', () => {
+  const card = readFileSync(dashboardCardPath, 'utf8');
+  assert.ok(card.includes('agentheim-dashboard'), 'commands/dashboard.md must name the literal agentheim-dashboard');
+  assert.ok(card.includes('/setup'), 'commands/dashboard.md must name the literal /setup');
 });

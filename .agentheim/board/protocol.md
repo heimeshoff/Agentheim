@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 17:30 -- Task verified and completed: infrastructure-x56qm - `/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn
+
+**Type:** Work / Task completion
+**Task:** infrastructure-x56qm - `/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn
+**Summary:** /setup installs the zero-token agentheim-dashboard CLI (three files shipped verbatim from dashboard/cli/, plain-copied by lib/setup-cli.mjs into <home>/.local/bin with print-only PATH remediation and byte-compare staleness) and /dashboard is demoted to a zero-node-invocation pointer
+**Duration:** 40m
+**Verification:** PASS (iteration 2)
+**Files changed:** 19
+**Tests added:** 42
+**ADRs written:** none
+
+---
+
+## 2026-09-12 17:22 -- Verification failed: infrastructure-x56qm - `/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-x56qm - `/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn
+**Iteration:** 1 of 3
+**Reasons:** out-of-scope undisclosed coverage deletion — the pre-existing `command-card.test.mjs` guard "the launcher prints no bare project-relative node dashboard/launch.mjs hint" was overwritten by the new install-logic test instead of kept alongside it (AC 6: retargeted, not deleted), leaving launch.mjs printed-literal regression class unguarded tree-wide; everything else verified clean (dashboard 1012/1012, lib 742/742)
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-09-12 17:06 -- Task verified and completed: infrastructure-j3rsn - Ship the VS Code bridge `.vsix` as a committed release artifact — un-ignore it, add a version-match lint and a `RELEASE.md` step, mirroring how `dashboard/dist/` reaches consumers
 
 **Type:** Work / Task completion

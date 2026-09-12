@@ -1,4 +1,5 @@
-// Foreign-project integration test (ADR-0002; infrastructure-009, amended by 010).
+// Foreign-project integration test (ADR-0002; infrastructure-009, amended by
+// 010, retargeted onto the installed CLI by infrastructure-x56qm / ADR-0079).
 //
 // THE FIELD-FAILURE CONDITION, made permanent.
 // infrastructure-009's original version ran the card form WITH CLAUDE_PLUGIN_ROOT
@@ -10,13 +11,19 @@
 //   - the launcher is reached ONLY through the env-independent resolver bootstrap,
 //     which derives the cache from os.homedir().
 //
-// To exercise THIS repo's resolver/launcher under that condition without depending
-// on whatever happens to be installed, we point os.homedir() (via HOME/USERPROFILE
-// in the child env) at a temp fake home whose plugin cache version dir links to the
-// repo's own dashboard/. The bootstrap then walks that cache, finds the resolver,
-// and spawns launch.mjs — with the FOREIGN project as cwd — exactly as it would in
-// the field. We assert: no module-not-found, runfile under the FOREIGN project,
-// status + stop work.
+// infrastructure-x56qm RETARGETS this seam: `/dashboard` no longer carries a
+// `node` invocation at all (ADR-0079 §3, pointer-only), so the daily launch
+// path this test must exercise is the INSTALLED CLI a consumer gets from
+// `/setup` — `<home>/.local/bin/agentheim-dashboard.mjs` — not the (now
+// nonexistent) card bootstrap line. This is a strictly stronger guard than the
+// card-line form it replaces: it runs `lib/setup-cli.mjs`'s real `installCli`
+// against a fake home, THEN exercises the literal file it produced.
+//
+// The fake home still doubles as a fake plugin cache (a version dir whose
+// `dashboard/` links to THIS repo's own dashboard/): the installed CLI's OWN
+// internal resolution (byte-identical to dashboard/resolve-launcher.mjs's
+// logic) walks os.homedir() -> cache -> newest semver to find
+// dashboard/resolve-launcher.mjs, exactly as it would for a real consumer.
 //
 // Teardown (ADR-0002: detached, unref'd process; Windows process.kill/taskkill) is
 // the risk area: launch spawns a detached server, so the test MUST stop it via the
@@ -38,39 +45,21 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 import { runfilePath } from '../runfile.mjs';
-import { extractLauncherInvocations, substituteArguments } from './helpers/card.mjs';
+import { installCli } from '../../lib/setup-cli.mjs';
+import { cliCommandFor } from './helpers/card.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const dashboardDir = path.join(here, '..');
-const repoRoot = path.join(dashboardDir, '..');
-const cardPath = path.join(repoRoot, 'commands', 'dashboard.md');
 
 /**
- * Build the launcher command for a given verb straight out of the card, so the
- * integration test runs the LITERAL card form (incl. the `node -e` bootstrap)
- * rather than a hand-retyped approximation that could drift.
- *
- * infrastructure-k9t2v: the card carries a SINGLE invocation that forwards the
- * verb at runtime via `$ARGUMENTS`. This simulates Claude Code's own
- * slash-command argument substitution — replacing the literal `$ARGUMENTS`
- * placeholder with the verb text — so each verb is still exercised as a real,
- * distinct shell command even though the card's source has only one line.
+ * Build a fake HOME whose plugin cache's newest version dir's dashboard/ links
+ * to THIS repo's dashboard/, AND has the CLI actually installed into
+ * `<home>/.local/bin` via the real `installCli` (from THIS repo's real
+ * `dashboard/cli/`, found repo-locally since this test runs inside the repo).
+ * Returns { home, cleanup }.
  */
-function cardCommandFor(verb) {
-  const card = readFileSync(cardPath, 'utf8');
-  const [invocation] = extractLauncherInvocations(card);
-  if (!invocation) throw new Error('card has no launcher invocation');
-  const verbArg = verb === 'launch' ? '' : verb;
-  return substituteArguments(invocation, verbArg);
-}
-
-/**
- * Build a fake plugin cache home whose newest version dir's dashboard/ links to
- * THIS repo's dashboard/. Returns { home, cleanup }. The bootstrap, run with
- * HOME/USERPROFILE pointed here, will discover this dir as the install.
- */
-function makeFakeCacheHome() {
-  const home = mkdtempSync(path.join(tmpdir(), 'infra010-home-'));
+function makeFakeHome() {
+  const home = mkdtempSync(path.join(tmpdir(), 'infra-x56qm-home-'));
   const versionDir = path.join(
     home,
     '.claude',
@@ -82,38 +71,45 @@ function makeFakeCacheHome() {
   );
   mkdirSync(versionDir, { recursive: true });
   // Link the version dir's dashboard/ to the repo dashboard so resolve-launcher.mjs
-  // and launch.mjs (with all their sibling imports) resolve from one place.
+  // and launch.mjs (with all their sibling imports) resolve from one place --
+  // this is what the INSTALLED agentheim-dashboard.mjs's own internal cache
+  // walk needs to find dashboard/resolve-launcher.mjs from a foreign project.
   symlinkSync(dashboardDir, path.join(versionDir, 'dashboard'), 'junction');
+
+  const installResult = installCli({ homedir: home, platform: process.platform, env: process.env });
+  if (installResult.exitCode !== 0) {
+    throw new Error(`fixture setup: installCli failed: ${installResult.lines.join('\n')}`);
+  }
   return { home, cleanup: () => rmSync(home, { recursive: true, force: true }) };
 }
 
 /**
- * Run a card command through bash (the card's `allowed-tools: Bash(node:*)`
- * execution context). CLAUDE_PLUGIN_ROOT is DELETED (the field condition); HOME and
- * USERPROFILE point at the fake cache home so os.homedir() resolves there.
+ * Run a CLI command through bash. CLAUDE_PLUGIN_ROOT is DELETED (the field
+ * condition); HOME and USERPROFILE point at the fake home so os.homedir()
+ * resolves there for BOTH the installed script's own cache walk.
  */
-function runCard(command, { cwd, home }) {
+function runCli(command, { cwd, home }) {
   const env = { ...process.env, HOME: home, USERPROFILE: home };
   delete env.CLAUDE_PLUGIN_ROOT; // reproduce the empty-var field condition
   return spawnSync('bash', ['-c', command], { cwd, env, encoding: 'utf8' });
 }
 
-test('foreign + EMPTY CLAUDE_PLUGIN_ROOT: resolver-bootstrap launch writes the runfile under the project, status + stop work', async () => {
-  // Guard: bash must be available (the card's execution context). Skip otherwise.
+test('installed CLI + EMPTY CLAUDE_PLUGIN_ROOT: launch writes the runfile under the project, status + stop work', async () => {
+  // Guard: bash must be available (the daily-path execution context). Skip otherwise.
   const bashProbe = spawnSync('bash', ['-c', 'exit 0']);
   if (bashProbe.error) return;
 
-  const foreign = mkdtempSync(path.join(tmpdir(), 'infra010-foreign-'));
+  const foreign = mkdtempSync(path.join(tmpdir(), 'infra-x56qm-foreign-'));
   mkdirSync(path.join(foreign, '.agentheim'));
-  const { home, cleanup } = makeFakeCacheHome();
+  const { home, cleanup } = makeFakeHome();
 
-  const launchCmd = cardCommandFor('launch');
-  const statusCmd = cardCommandFor('status');
-  const stopCmd = cardCommandFor('stop');
+  const launchCmd = cliCommandFor(home, 'launch');
+  const statusCmd = cliCommandFor(home, 'status');
+  const stopCmd = cliCommandFor(home, 'stop');
 
   try {
-    // --- launch via the literal card command, env-independent ---
-    const launched = runCard(launchCmd, { cwd: foreign, home });
+    // --- launch via the installed CLI, env-independent ---
+    const launched = runCli(launchCmd, { cwd: foreign, home });
     assert.equal(
       launched.status,
       0,
@@ -122,7 +118,7 @@ test('foreign + EMPTY CLAUDE_PLUGIN_ROOT: resolver-bootstrap launch writes the r
     assert.doesNotMatch(
       `${launched.stdout}${launched.stderr}`,
       /Cannot find module/,
-      'resolver-bootstrap launch must resolve launch.mjs (no module-not-found)'
+      'installed CLI launch must resolve launch.mjs (no module-not-found)'
     );
     assert.doesNotMatch(
       `${launched.stdout}${launched.stderr}`,
@@ -142,12 +138,12 @@ test('foreign + EMPTY CLAUDE_PLUGIN_ROOT: resolver-bootstrap launch writes the r
     assert.ok(rf.pid > 0 && rf.port > 0, 'runfile must carry a live pid + port');
 
     // --- status reports running ---
-    const status = runCard(statusCmd, { cwd: foreign, home });
+    const status = runCli(statusCmd, { cwd: foreign, home });
     assert.equal(status.status, 0, `status failed:\n${status.stderr}`);
     assert.match(status.stdout, /running/i, `status should report running:\n${status.stdout}`);
   } finally {
     try {
-      runCard(stopCmd, { cwd: foreign, home });
+      runCli(stopCmd, { cwd: foreign, home });
     } catch {
       /* swallow — teardown must not mask the real failure */
     }
@@ -156,23 +152,23 @@ test('foreign + EMPTY CLAUDE_PLUGIN_ROOT: resolver-bootstrap launch writes the r
   }
 });
 
-test('foreign + EMPTY CLAUDE_PLUGIN_ROOT: after card-form stop, the runfile is gone (no orphan)', async () => {
+test('installed CLI + EMPTY CLAUDE_PLUGIN_ROOT: after stop, the runfile is gone (no orphan)', async () => {
   const bashProbe = spawnSync('bash', ['-c', 'exit 0']);
   if (bashProbe.error) return;
 
-  const foreign = mkdtempSync(path.join(tmpdir(), 'infra010-stop-'));
+  const foreign = mkdtempSync(path.join(tmpdir(), 'infra-x56qm-stop-'));
   mkdirSync(path.join(foreign, '.agentheim'));
-  const { home, cleanup } = makeFakeCacheHome();
+  const { home, cleanup } = makeFakeHome();
 
-  const launchCmd = cardCommandFor('launch');
-  const stopCmd = cardCommandFor('stop');
+  const launchCmd = cliCommandFor(home, 'launch');
+  const stopCmd = cliCommandFor(home, 'stop');
   try {
-    runCard(launchCmd, { cwd: foreign, home });
+    runCli(launchCmd, { cwd: foreign, home });
     const rfPath = runfilePath(foreign);
     for (let i = 0; i < 100 && !existsSync(rfPath); i++) {
       await new Promise((r) => setTimeout(r, 50));
     }
-    const stopped = runCard(stopCmd, { cwd: foreign, home });
+    const stopped = runCli(stopCmd, { cwd: foreign, home });
     assert.equal(stopped.status, 0, `stop failed:\n${stopped.stderr}`);
 
     let gone = false;
@@ -183,7 +179,7 @@ test('foreign + EMPTY CLAUDE_PLUGIN_ROOT: after card-form stop, the runfile is g
     assert.ok(gone, 'stop must remove the runfile (no orphaned runtime state)');
   } finally {
     try {
-      runCard(stopCmd, { cwd: foreign, home });
+      runCli(stopCmd, { cwd: foreign, home });
     } catch {
       /* best effort */
     }

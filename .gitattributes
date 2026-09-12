@@ -1,0 +1,7 @@
+# infrastructure-x56qm: the shipped dashboard CLI (dashboard/cli/) is copied
+# verbatim into a consumer's <home>/.local/bin by `/setup` (ADR-0079). The repo
+# has core.autocrlf=true and no prior .gitattributes, so without this pin a
+# checkout on Windows would silently gain CRLF line endings — a CRLF shebang
+# breaks the bash shim on macOS/Linux with "bad interpreter: ^M". Pin these
+# three files to LF regardless of the checking-out platform.
+dashboard/cli/** text eol=lf

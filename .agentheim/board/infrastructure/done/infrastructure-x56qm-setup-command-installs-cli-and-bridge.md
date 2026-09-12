@@ -1,7 +1,7 @@
 ---
 id: infrastructure-x56qm
 title: `/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn
-status: doing
+status: done
 type: feature
 context: infrastructure
 created: 2026-09-12
@@ -202,3 +202,86 @@ builder's home directory. Reference implementation for the three files:
 Do **not** revive the in-project shim (`.agentheim/.dashboard/` script
 deployment, reverted 2026-07-09) — user-level only; ADR-0079 answers both
 plausible objections to it structurally.
+
+## Verifier note (iteration 1)
+
+**Verdict:** FAIL — likely-fixable
+
+**REASONS:**
+- Out-of-scope, undisclosed coverage deletion in `dashboard/test/command-card.test.mjs`: the pre-existing test `the launcher prints no bare project-relative \`node dashboard/launch.mjs\` hint` (line 112 of the file at `HEAD^`, plus its `launchPath` import) was overwritten in place by the new test `the card inlines no install logic (copyFileSync / mkdir / chmod stay in lib/setup-cli.mjs)`. No acceptance criterion authorizes that removal — AC 6 for this very file says the assertions are "retargeted ... not deleted" — and the deleted guard's subject (`dashboard/launch.mjs`'s printed string literals, the infrastructure-008 regression class) is untouched by this task and still applicable; if anything the installed CLI makes `launch.mjs`'s printed output more user-facing, not less. The worker's `## Outcome` does not mention the deletion.
+- The property is now unguarded tree-wide: `grep` across `dashboard/test/` finds no other assertion over `launch.mjs`'s string literals (only comment-level mentions in `command-card.test.mjs:5` and unrelated path assertions in `resolve-launcher.test.mjs`); `launch.mjs:6-8` still carries `node dashboard/launch.mjs` text in comments, which the deleted guard deliberately tolerated while blocking the same text in a printed literal — so a future edit promoting one of those comment lines into a printed hint would now land silently.
+
+**SUGGESTED_FIX:** Restore the deleted `the launcher prints no bare project-relative \`node dashboard/launch.mjs\` hint` test (and its `launchPath` const) in `dashboard/test/command-card.test.mjs`, keeping the new install-logic test alongside it rather than in its place; change nothing else. Everything else verified clean this iteration — both suites are green from the runner (`cd dashboard && npm test` → `tests 1012 / pass 1012 / fail 0`; `node --test lib/test/*.test.mjs` → `tests 742 / pass 742 / fail 0`, exit 0, worktree byte-identical to HEAD), the three committed `dashboard/cli/` blobs contain zero CR bytes and are md5-identical to the builder's reference copies, `.gitattributes` pins `dashboard/cli/** text eol=lf`, `commands/setup.md` carries the bootstrap exactly once with `$ARGUMENTS` and no `cd`/`mkdir`/`chmod`/`copyFileSync` literal, `commands/dashboard.md` has zero `node` invocations and names both literals, the diff touches no `.agentheim/` path and no `dashboard/dist/`, and the two `README_DELTA` replace ops match the diff and the current BC README anchors.
+
+**ITERATION_HINT:** likely-fixable
+
+## Outcome
+
+Built the CLI half of ADR-0079's "ship the dashboard CLI via `/setup`" decision:
+
+- **`dashboard/cli/`** — the three reference files (`agentheim-dashboard.mjs`, `.cmd`, and the
+  extensionless bash shim) copied byte-for-byte (`copyFileSync`, never read-as-text) from the
+  builder's `~/.local/bin/agentheim-dashboard{.mjs,.cmd,<shim>}`. All three were already LF-only
+  (no `\r` bytes), so no normalization was needed; `.gitattributes` (new) pins
+  `dashboard/cli/** text eol=lf` regardless, per the task's explicit requirement given the repo's
+  `core.autocrlf=true`.
+- **`lib/setup-cli.mjs`** (new) — the install logic, stdlib-only, git-free, injectable environment
+  (`homedir`, `platform`, `env`, `registryReader`, `shellPath`, `resolveOpts`) so every fixture is
+  hermetic. Three verbs: `status` (read-only, one-line `schema: 1` JSON, byte-compare install-state
+  — `not-installed` / `installed-current` / `installed-stale`, never a version stamp), `install cli`
+  (mkdir + raw-byte copy + `chmod 0755` on POSIX only via the pure `shouldChmod(platform)`
+  predicate, print-only PATH remedy), `remove cli` (deletes exactly the three filenames, never the
+  directory). PATH detection: win32 reads the registry-backed user PATH (never `process.env.Path`,
+  confirmed by a dedicated test forcing a process-scope-only match), POSIX derives the rc file from
+  `basename($SHELL)` (zsh/bash/fish/unknown, macOS vs. Linux bash). A source-scan test (mirroring
+  `vscode-extension/test/bridge.test.mjs`'s shape) proves no exec-call argument ever contains
+  `setx`, `SetEnvironmentVariable`, or `reg add` — the PowerShell remedy text is display-only and
+  lives outside any process-spawning call.
+- **`commands/setup.md`** (new) — the env-independent `node -e` bootstrap (homedir → cache →
+  semver-max, targeting `lib/setup-cli.mjs`, matching `references/lib-bootstrap.md`'s `migrate`
+  pattern), forwarding `$ARGUMENTS`, no `cd`, no inlined install logic.
+- **`commands/dashboard.md`** rewritten to a zero-`node`-invocation pointer naming both
+  `agentheim-dashboard` and `/setup` (ADR-0079 §3).
+- **`lib/command-bootstrap-dedup.mjs`** (renamed from `lib/dashboard-command-bootstrap-dedup.mjs`,
+  old file + its test deleted) — `countBootstrapOccurrences(root, cardName)` generalized to any
+  card; the live-tree gate now asserts `setup.md → 1` **and** `dashboard.md → 0`, mechanizing the
+  pointer-only contract (ADR-0068 single-source).
+- **Test retargeting**: `dashboard/test/helpers/card.mjs` gained `cliCommandFor` (drives the
+  installed CLI directly), a generalized `extractLauncherInvocations`/`isEnvIndependentResolver`
+  (optional target pattern), and `isEnvIndependentResolverSource` (whole-file variant, line-comment
+  tolerant so the reference file's own "we don't depend on this" documentation doesn't trip the
+  guard). `command-card.test.mjs`'s five resolver-shape assertions now target `commands/setup.md`;
+  new tests cover `/dashboard`'s zero-invocation and literal-naming contract.
+  `foreign-launch.test.mjs` and `foreign-launch-version-skew.test.mjs` now call `installCli` against
+  a fake home (still doubling as a fake plugin cache linking this repo's real `dashboard/`) and run
+  each verb against the literal installed file — strictly stronger than the retired card-line form.
+  `dashboard/test/cli-files.test.mjs` (new) covers the exactly-three-files / no-CR / gitattributes
+  ACs. `dashboard/test/readme-docs.test.mjs` (new) is the literal-substring doc guard.
+- **Docs**: root `README.md`'s dashboard section now leads with `/setup` + the
+  `agentheim-dashboard`/`stop`/`status` table and describes `/dashboard` as a pointer; the bridge
+  `<details>` block is untouched. Infrastructure BC README changes are reported in `README_DELTA`
+  (two `replace` ops: "Launch / Stop" now names all three launch surfaces and which one a consumer
+  uses daily; "Install surface" now reflects print-only PATH and byte-compare staleness).
+
+**Deferred**: the `[human-eye]` AC (confirming `/setup` → `status` against the builder's real
+`~/.local/bin` on his own machine) is explicitly the builder's post-release step, not performed
+here — no test or code in this task reads the builder's real home directory or registry.
+
+**Test results (iteration 2)**: `cd dashboard && npm test` — 1013/1013 green (1012 + the restored
+guard below). `node --test lib/test/*.test.mjs` — 742/742 green. No known-environmental failures
+were hit this run.
+
+**Iteration 2 fix**: the verifier flagged that iteration 1's retarget of
+`dashboard/test/command-card.test.mjs` had overwritten, rather than kept alongside, the
+pre-existing test `the launcher prints no bare project-relative \`node dashboard/launch.mjs\`
+hint` (and its `launchPath` const) when adding the new install-logic test. Restored the original
+test verbatim (sourced via `git show HEAD^:dashboard/test/command-card.test.mjs`) immediately
+before the install-logic test; both now coexist, and `launch.mjs`'s printed-string-literal guard
+is live again.
+
+Key files: `dashboard/cli/{agentheim-dashboard.mjs,.cmd,agentheim-dashboard}`, `.gitattributes`,
+`lib/setup-cli.mjs`, `lib/test/setup-cli.test.mjs`, `commands/setup.md`, `commands/dashboard.md`,
+`lib/command-bootstrap-dedup.mjs` (+ test, replacing the deleted `dashboard-command-bootstrap-dedup`
+pair), `dashboard/test/helpers/card.mjs`, `dashboard/test/command-card.test.mjs`,
+`dashboard/test/foreign-launch.test.mjs`, `dashboard/test/foreign-launch-version-skew.test.mjs`,
+`dashboard/test/cli-files.test.mjs`, `dashboard/test/readme-docs.test.mjs`, `README.md`.

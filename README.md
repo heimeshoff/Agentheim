@@ -73,15 +73,15 @@ The work itself flows through **five skills** (below). They auto-trigger from na
 
 A local, **read-only** web UI over the project's `.agentheim/` folder: a flat Kanban board pooling every BC's tasks across the four lifecycle columns, a universal slide-over that renders any artifact (tasks, BC READMEs, the vision, the context map, ADRs, research) as markdown, and live updates as skills move files on disk. It never writes to the project: the board carries no drag-to-promote or any other write-back — it is a total projection of disk ([ADR-0017](.agentheim/knowledge/decisions/0017-dashboard-read-only-skills-own-lifecycle.md)), and skills alone own the task lifecycle. Its action buttons (Refine, Promote, and the backlog launchers) don't mutate anything directly; they fire a seeded Claude session into a real terminal via the VS Code bridge ([ADR-0018](.agentheim/knowledge/decisions/0018-vscode-dashboard-terminal-bridge.md)) — e.g. Promote seeds `/agentheim:modeling promote <id>` — and degrade to copying that command to the clipboard when the bridge is absent.
 
-It is driven by **`/dashboard`** — the single, deliberate exception to the "phrasing, not slash commands" rule above (the dashboard is a process-launcher, not a Socratic dialogue):
+Launching it costs no model turn once you've installed the CLI. Run **`/setup`** once per machine — a second, named process-launcher/installer exception to the "phrasing, not slash commands" rule above ([ADR-0079](.agentheim/knowledge/decisions/0079-dashboard-cli-ships-via-setup-command.md)) — to install `agentheim-dashboard` into `<home>/.local/bin`, then use it directly from any terminal, forever after, for zero tokens:
 
 | Command | Does |
 |---|---|
-| `/dashboard` | Launch (or reuse) the detached server and auto-open the browser at `http://127.0.0.1:<port>/` |
-| `/dashboard stop` | Stop the server and remove the runfile |
-| `/dashboard status` | Report whether it's running, and on which port (read-only) |
+| `agentheim-dashboard` | Launch (or reuse) the detached server and auto-open the browser at `http://127.0.0.1:<port>/` |
+| `agentheim-dashboard stop` | Stop the server and remove the runfile |
+| `agentheim-dashboard status` | Report whether it's running, and on which port (read-only) |
 
-The command is a thin trigger over the one cross-platform launcher `dashboard/launch.mjs`; the server is Node-stdlib only — no framework, no `node_modules` install step, running on the Node that Claude Code already provides. See [`dashboard/README.md`](dashboard/README.md) for the runtime, endpoints, and verification status.
+`/dashboard` itself is now a **pointer**, not a launcher — it prints the two commands above and nothing else, so it never re-pays the ~120k-token cost of a slash-command launch. The CLI is a thin trigger over the one cross-platform launcher `dashboard/launch.mjs`; the server is Node-stdlib only — no framework, no `node_modules` install step, running on the Node that Claude Code already provides. See [`dashboard/README.md`](dashboard/README.md) for the runtime, endpoints, and verification status.
 
 <details>
 <summary><b>Optional: VS Code bridge — launch buttons that open a real terminal</b></summary>
@@ -151,7 +151,8 @@ Want Claude Code to speak its end-of-turn summaries and attention prompts aloud?
 .claude-plugin/plugin.json         # plugin manifest
 agents/                            # orchestrator + specialists (incl. verifier, research-reviewer)
 skills/                            # brainstorm, capture, modeling, research, work, test-driven-development, verification-before-completion, research-review
-commands/dashboard.md              # the one slash command — a thin trigger over the dashboard launcher
+commands/setup.md, commands/dashboard.md  # /setup (install), /dashboard (pointer) — the two process-launcher exceptions
+dashboard/cli/                     # the CLI /setup installs verbatim into <home>/.local/bin
 dashboard/                         # the local web-UI runtime (stdlib Node server + launcher + frontend app)
 scripts/backfill-indexes.ps1       # one-shot rebuild of .agentheim/ indexes for projects predating 0.6.0
 evals/                             # benchmarks against other harnesses

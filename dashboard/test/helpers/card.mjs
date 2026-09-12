@@ -17,11 +17,11 @@
  * bootstrap is a `node -e "..."` one-liner; we also still recognize the legacy
  * `node ...launch.mjs` form so the Red-proof meta-tests can feed it the old card.
  */
-export function extractLauncherInvocations(markdown) {
+export function extractLauncherInvocations(markdown, targetPattern = /(launch\.mjs|resolve-launcher\.mjs)/) {
   return markdown
     .split(/\r?\n/)
     .map((line) => line.trim())
-    .filter((line) => /^node\b/.test(line) && /(launch\.mjs|resolve-launcher\.mjs)/.test(line));
+    .filter((line) => /^node\b/.test(line) && targetPattern.test(line));
 }
 
 /**
@@ -50,17 +50,41 @@ export function isPluginRooted(line) {
  * one-liner that derives the cache path from os.homedir() and reaches the resolver
  * module — and does NOT depend on $CLAUDE_PLUGIN_ROOT for correctness.
  * This is the infrastructure-010 contract the card must satisfy.
+ *
+ * infrastructure-x56qm: generalized with an optional `targetPattern` so the SAME
+ * predicate covers both `/dashboard`'s original `resolve-launcher.mjs` target and
+ * `/setup`'s `lib/setup-cli.mjs` target — the shape (os.homedir()-derived, no
+ * $CLAUDE_PLUGIN_ROOT) is identical; only the resolved file differs. Default is
+ * unchanged for any existing call site that doesn't pass a second argument.
  */
-export function isEnvIndependentResolver(line) {
+export function isEnvIndependentResolver(line, targetPattern = /resolve-launcher\.mjs/) {
   if (!/^node\s+-e\b/.test(line)) return false;
   if (!/os\.homedir\(\)/.test(line)) return false;
-  if (!/resolve-launcher\.mjs/.test(line)) return false;
+  if (!targetPattern.test(line)) return false;
   // The bootstrap must not lean on $CLAUDE_PLUGIN_ROOT for correctness. Referencing
   // it ONLY as an optional fast-path would be acceptable, but the regression class we
   // guard against is a bare ${CLAUDE_PLUGIN_ROOT:-.} path with no env-free fallback —
   // reject any mention to keep the guard strict (the resolver, not the card, owns any
   // future fast-path).
   if (/CLAUDE_PLUGIN_ROOT/.test(line)) return false;
+  return true;
+}
+
+/**
+ * Source-shaped variant of `isEnvIndependentResolver`, for a file that IS a
+ * resolver (a full module, not a `node -e` one-liner) rather than a card
+ * invocation OF one — `dashboard/cli/agentheim-dashboard.mjs` (infrastructure-x56qm),
+ * shipped verbatim from the builder's own `~/.local/bin` reference. Same two
+ * checks, without the `node -e` one-liner shape assumption. Line comments are
+ * stripped before the $CLAUDE_PLUGIN_ROOT check: the reference file's own
+ * header PROSE documents, in a comment, that it never depends on that var —
+ * that documentation is the opposite of the regression this guards against,
+ * so only a live code reference (an actual read) fails the predicate.
+ */
+export function isEnvIndependentResolverSource(source) {
+  if (!/os\.homedir\(\)/.test(source)) return false;
+  const codeOnly = source.replace(/\/\/.*$/gm, '');
+  if (/CLAUDE_PLUGIN_ROOT/.test(codeOnly)) return false;
   return true;
 }
 
@@ -86,4 +110,23 @@ export function forwardsArguments(line) {
  */
 export function substituteArguments(line, verbArg) {
   return line.replace(/\$ARGUMENTS\b/, verbArg);
+}
+
+/**
+ * Build the daily-path shell command for a given verb, straight against the
+ * INSTALLED CLI under a fake home's `<home>/.local/bin` — infrastructure-x56qm's
+ * retarget of the foreign-launch integration seam onto `/setup`'s actual install
+ * target, now that `/dashboard` itself is a pointer with no `node` invocation of
+ * its own (ADR-0079 §3). This is a strictly stronger guard than sourcing the
+ * card's own bootstrap line: it exercises the real daily path a consumer who
+ * already ran `/setup` uses, end to end.
+ * @param {string} fakeHome  the fake `HOME`/`USERPROFILE` root the CLI was
+ *   installed under (its `.local/bin/agentheim-dashboard.mjs` must exist)
+ * @param {'launch'|'stop'|'status'} verb
+ * @returns {string} a shell command, quoted for `bash -c`
+ */
+export function cliCommandFor(fakeHome, verb) {
+  const cliPath = `${fakeHome}/.local/bin/agentheim-dashboard.mjs`.replace(/\\/g, '/');
+  const verbArg = verb === 'launch' ? '' : ` ${verb}`;
+  return `node "${cliPath}"${verbArg}`;
 }
