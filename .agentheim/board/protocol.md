@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 12:30 -- Modeling / Refined: agentic-workflow-g5ez5 - Close the two-root layout (ADR-0078): refuse legacy everywhere except migrate, flip the neither-root default to board, delete the transitional scaffolding, prove the end state
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** Fourth refinement, reconciled against the shipped children (cj54k, e896r, zgav8, hxq1g, tgr31, q8f3n — all done). Corrected four stale assumptions: cj54k's temporary grep lint is already deleted (zgav8); the getters' legacy branches must STAY (migrate reads through them with an explicit {layout:'legacy'} override) so refusal lives in resolveLayout keyed on detected-legacy-without-override; references/index-template.md is the only copy of the top-level knowledge/index.md template, so it is git-mv'd to top-index-template.md with the legacy per-BC section cut, not deleted; the sole-path-constructor and lint-exemption criteria were rewritten to enumerated allowlists (lock, in-flight signal, derived-artifact prefix, discoverRoot are legitimate constructors; the lint never walks decisions/ or protocol). Architect round settled two designs: throw-on-detected-legacy at the resolveLayout chokepoint (override intact), and flip detectLayout's neither-root default from legacy to board per ADR-0078 §5's own definition, with writers gaining mkdirSync-recursive for a not-yet-existing board/. Added: vacuum-guard legacy alternatives retired, layout-gated dashboard tolerance deleted, a no-dead-ALLOWLIST-entry test, and a static scan proving migrate is the only layout-override caller.
+**Split into:** none
+**ADRs written:** none (ADR-0078 addendum is a deliverable of the task itself)
+
+---
+
 ## 2026-09-11 14:31 -- Work session ended
 
 **Type:** Work / Session end
