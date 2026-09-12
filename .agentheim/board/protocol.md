@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 20:14 -- Task verified and completed: infrastructure-kr9pd - `/setup` bridge verbs fail on win32 when the `.vsix` or `code.cmd` path holds a cmd.exe metacharacter but no space — `quoteArgWindows` leaves such segments unquoted and `cmd.exe` splits them
+
+**Type:** Work / Task completion
+**Task:** infrastructure-kr9pd - `/setup` bridge verbs fail on win32 when the `.vsix` or `code.cmd` path holds a cmd.exe metacharacter but no space — `quoteArgWindows` leaves such segments unquoted and `cmd.exe` splits them
+**Summary:** quoteArgWindows now quotes every argument unconditionally under the win32 shell:true spawn in lib/setup-cli.mjs, closing the cmd.exe metacharacter layer above CommandLineToArgvW so a space-free path segment with & | ^ < > ( ) no longer breaks install bridge / remove bridge / bridge status; POSIX defaultExec untouched; %NAME% expansion recorded as the accepted residual
+**Duration:** 8m
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 2
+**ADRs written:** none
+
+---
+
 ## 2026-09-12 20:02 -- Batch started: [agentic-workflow-g2fgb, agentic-workflow-qwfq3, infrastructure-kr9pd]
 
 **Type:** Work / Batch start

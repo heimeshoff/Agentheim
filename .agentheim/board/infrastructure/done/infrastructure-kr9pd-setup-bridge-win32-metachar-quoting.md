@@ -1,7 +1,7 @@
 ---
 id: infrastructure-kr9pd
 title: `/setup` bridge verbs fail on win32 when the `.vsix` or `code.cmd` path holds a cmd.exe metacharacter but no space — `quoteArgWindows` leaves such segments unquoted and `cmd.exe` splits them
-status: doing
+status: done
 type: bug
 context: infrastructure
 created: 2026-09-12
@@ -143,3 +143,56 @@ POSIX `defaultExec` stays exactly as it is — no shell, no quoting.
   it fixed the same bug class by deleting the shell. That option is closed here (a `.cmd`
   cannot be spawned shell-less), which is why the answer is "quote everything", not
   "quote nothing".
+
+## Outcome
+
+`quoteArgWindows` in `lib/setup-cli.mjs` no longer has an early return for
+whitespace-free values — it now wraps every argument (including `execPath`)
+in double quotes unconditionally under the win32 `shell: true` spawn used by
+`defaultExec`, while keeping the existing `CommandLineToArgvW` backslash/quote
+escaping for the inner bytes and the `''` → `""` special case. This closes the
+`cmd.exe` metacharacter-parsing pass (`& | ^ < > ( )`) that sits above the
+`CommandLineToArgvW` decode: inside a double-quoted span those characters are
+literal, so a path segment like `C:\Users\Research&Dev\...` — which the
+js62b iteration-2 verifier flagged as a residual edge — now survives the
+round trip into `code`'s argv exactly like a spaced path already did.
+POSIX `defaultExec` is byte-for-byte untouched (`execFileSync(execPath, args,
+{ encoding: 'utf8' })`, no `shell`). The comment blocks on both
+`quoteArgWindows` and `defaultExec` now name the two stacked parsing layers,
+state that unconditional quoting is what closes the upper one, and record the
+`%NAME%`-expansion residual as accepted and explicitly out of scope, per the
+task's Decision.
+
+`quoteArgWindows` is now exported (it wasn't before) so
+`lib/test/setup-cli.test.mjs` can pin it directly with a unit test covering:
+a no-whitespace `&`-bearing value now quoted (`R&D^(x)` → `"R&D^(x)"`), an
+embedded `"` backslash-escaped, trailing backslashes doubled before the
+closing quote, and the empty-string special case.
+
+A second, hermetic default-seam test (`the default which/exec seam survives a
+cmd.exe metacharacter path segment with no whitespace...`) mirrors the
+existing spaced-path default-seam test's shape: it creates a fixture home
+directory named `R&D^(x)` beneath `os.tmpdir()` (never injected into
+`mkdtempSync`'s own prefix, per the task's Notes — that prefix itself must
+stay whitespace-free or it collides with the "no whitespace" premise), points
+both the fake plugin cache (and thus the resolved `.vsix` path) and the stub
+`code.cmd`'s directory under it, and — with no injected `which`/`exec`, so
+`defaultWhich`/`defaultExec` run for real — asserts `install bridge` exits 0
+with the logged argv containing the full resolved `.vsix` path verbatim
+(string `includes`, not a regex, since the fixture path itself contains regex
+metacharacters), `buildBridgeStatus` reports `state: "installed-current"` with
+`codeOnPath: true`, and `remove bridge` exits 0. The test has no
+platform-specific code of its own (`writeStubCode` already branches on
+`process.platform`), so it runs unmodified on POSIX too, exercising the
+unchanged no-shell path there per the task's AC.
+
+`node --test lib/test/setup-cli.test.mjs` is 37/37 green (35 pre-existing +
+2 new). `node --test lib/test/*.test.mjs` is 756/757 green; the one failure
+(`index-entry-length.test.mjs`'s live-tree INDEX-length scan, flagging
+`agentic-workflow-qwfq3`'s doing-list INDEX entry) is confirmed pre-existing
+on `main` itself (reproduced identically outside this worktree) and entirely
+unrelated to `lib/setup-cli.mjs` / this task's scope.
+
+Key files: `lib/setup-cli.mjs` (`quoteArgWindows`, `defaultExec`),
+`lib/test/setup-cli.test.mjs` (new tests appended after the existing
+"default which/exec seam" test, plus the `quoteArgWindows` import).

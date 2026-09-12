@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 38
+- **Doing:** 0
+- **Done:** 39
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **infrastructure-kr9pd** — `/setup` bridge verbs fail on win32 when the `.vsix` or `code.cmd` path holds a cmd.exe metacharacter but no space — `quoteArgWindows` leaves such segments unquoted and `cmd.exe` splits them (bug) — `doing/infrastructure-kr9pd-setup-bridge-win32-metachar-quoting.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **infrastructure-kr9pd** — `/setup` bridge verbs fail on win32 when the `.vsix` or `code.cmd` path holds a cmd.exe metacharacter but no space — `quoteArgWindows` leaves such segments unquoted and `cmd.exe` splits them (bug) — `done/infrastructure-kr9pd-setup-bridge-win32-metachar-quoting.md`
 - **infrastructure-js62b** — `/setup` installs, upgrades and removes the VS Code bridge from the shipped `.vsix`, reports its install state, and the dashboard's skew banner names `/setup` as the remedy (feature) — `done/infrastructure-js62b-setup-installs-and-removes-vscode-bridge.md`
 - **infrastructure-x56qm** — `/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn (feature) — `done/infrastructure-x56qm-setup-command-installs-cli-and-bridge.md`
 - **infrastructure-j3rsn** — Ship the VS Code bridge `.vsix` as a committed release artifact — un-ignore it, add a version-match lint and a `RELEASE.md` step, mirroring how `dashboard/dist/` reaches consumers (chore) — `done/infrastructure-j3rsn-ship-bridge-vsix-as-committed-release-artifact.md`
