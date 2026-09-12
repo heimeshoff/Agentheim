@@ -125,14 +125,18 @@ Every dispatch wave now runs each worker in its own **git worktree** on a privat
 
 4. **Set `git config core.longpaths true`** once per session (harness setup, not per-worktree) if not already set — worktrees nest `.agentheim/` and `dashboard/` trees deep enough to approach Windows `MAX_PATH`.
 
-5. **Spawn one subagent per task** using the Agent tool with `subagent_type: "agentheim:worker"`. Launch all subagents in **one message** (parallel tool calls). Use the Subagent Prompt Template below — its `## Your task` block now carries a `Workspace` field pointing at the task's worktree, and the BC README and BC index paths you pass also point **inside that worktree**; the task-file path is **`main`'s one copy**, read-only to the worker (agentic-workflow-ghcaj).
+5. **Spawn one subagent per task** using the Agent tool with `subagent_type: "agentheim:worker"`. Before each spawn, compute the absolute form of `resultSidecarRelativePath(taskId, 1)` (`lib/worker-result.mjs`, ADR-0080 §1) and delete any file already at that path — a stale sidecar from an earlier iteration or a crashed prior session must never be read as this dispatch's RESULT. Launch all subagents in **one message** (parallel tool calls). Use the Subagent Prompt Template below — its `## Your task` block now carries a `Workspace` field pointing at the task's worktree, a `Result file:` field naming the absolute sidecar path you just cleared, and the BC README and BC index paths you pass also point **inside that worktree**; the task-file path is **`main`'s one copy**, read-only to the worker (agentic-workflow-ghcaj).
 
-6. **Wait for all subagents to complete.** As each returns:
-   - Parse its strict return format (see template).
-   - For `RESULT: SUCCESS`: **verify the result** (see "Verification gate" below). Only integrate to `main` after verification passes.
-   - For `RESULT: BOUNCED`: see "BOUNCE integration" at the end of "Verification gate" below — a small, verifier-free squash-merge back to `main`, then worktree cleanup.
-   - For `RESULT: FAILED`: prepend "Task failed" via the `log` verb (see "Protocol logging" below for the exact call and shape) with the worker's error, on the **main** tree (there is no worktree content worth merging). Remove the worktree + branch (`git worktree remove --force` + `git branch -D aw/<task-id>`) — the task stays in `doing/` on `main` (from the batch-start commit) so it doesn't silently retry. Tell the user at the end.
-   - One failure does not block the batch — the other subagents continue and are processed normally.
+6. **Wait for all subagents to complete.** As each returns, gather the three possible copies of its RESULT — read the sidecar file if it now exists at the path you handed the worker, take the subagent's own transcript text, and take the harness's completion-notification text — and call `selectResultSource({taskId, sidecar, transcript, notification})` (`lib/worker-result.mjs`, ADR-0080 §4). **Never hand-parse and never choose among the three by judgment** — this call is the only source of truth for which copy is used.
+   - `{ok:true, source, parsed}` → record which `source` won (feeds the completion entry's `**Result source:**` line — see "Protocol logging" below) and proceed using `parsed` exactly as the strict return format always specified.
+   - `{ok:false, code:'no-valid-source'}` → the RESULT was lost in transit (empty transcript and an unusable/absent sidecar and notification). Call `onLostResult(state)` (`lib/merge-conflict-ladder.mjs`) against this worktree's ladder state:
+     - `dispatch-lost-result` → **re-dispatch the SAME worker into the SAME worktree** — the standard Subagent Prompt Template, with a paragraph prepended: "your prior RESULT was lost in transit; the worktree already holds your finished work; re-read the task, run the suite from the worktree, write the sidecar, return the RESULT." This re-runs the **same** iteration number — it never touches the ordinary FAIL-iteration counter, for the same reason ADR-0072's merge-conflict one-shot doesn't (a transport loss is not evidence about the diff). Re-clear and re-hand the same sidecar path (iteration unchanged). Tally this on its own "Lost-result re-dispatches" line at end-of-run (see End-of-run reporting), never folded into the ordinary dispatch tally's meaning as a verifier-spend signal.
+     - `escalate` → a **second** lost RESULT on this worktree — the one-shot budget is spent. Salvage the worktree's diff tagged `lost-result` (see "Salvaging a worktree's diff before abandonment" below), **keep the worktree**, append a `## Salvage note` to the task file on `main`, and report it on its own end-of-run "Lost-result escalations" line — never folded into "Escalated after verification", which is a distinct kind of event.
+   - Once a valid `parsed` is in hand, branch on `parsed.result`:
+     - `SUCCESS`: **verify the result** (see "Verification gate" below). Only integrate to `main` after verification passes.
+     - `BOUNCED`: see "BOUNCE integration" at the end of "Verification gate" below — a small, verifier-free squash-merge back to `main`, then worktree cleanup.
+     - `FAILED`: prepend "Task failed" via the `log` verb (see "Protocol logging" below for the exact call and shape) with the worker's error, on the **main** tree (there is no worktree content worth merging). Remove the worktree + branch (`git worktree remove --force` + `git branch -D aw/<task-id>`) — the task stays in `doing/` on `main` (from the batch-start commit) so it doesn't silently retry. Tell the user at the end.
+   - One failure (or one lost-result escalation) does not block the batch — the other subagents continue and are processed normally.
 
 7. **After the batch completes**, return to Phase 2 — re-scan. New tasks may have been promoted to todo (via parallel `modeling` invocations) or new dependencies may have unblocked. **Scoped run** (see "Argument grammar" above): skip the re-scan entirely. If any named ids remain undispatched (the cap held some back), dispatch the next wave directly from the remaining named ids — never re-scan `todo/` for newly promoted or newly-ready tasks. Once every named id has reached a terminal state (integrated, bounced, failed, or escalated), the run ends (see End-of-run reporting) — it does not loop back to Phase 2's full DAG scan at all.
 
@@ -192,7 +196,7 @@ For each SUCCESS that requires verification, in parallel where the workers ran i
 3. Prepend "Verification failed (iteration N)" via the `log` verb (agentic-workflow-fn59c — see "Protocol logging" below for the exact call and shape) — on the **main** tree (this prepend is not part of any task's eventual squash-merge; it accumulates on `main`, uncommitted, until the next commit that does land there — see "Reconciling stranded carry-over" for how a lone protocol edit is handled if the session ends before then). This is one `log` call for **this** iteration — the next FAIL iteration (or the escalation below) is its own, separate call.
 4. Decide re-dispatch:
    - If `ITERATION_HINT: task-under-specified` → do not re-dispatch even on iteration 1. Treat as iteration-3 below.
-   - Otherwise → **re-dispatch a worker into the SAME worktree** (the `Workspace` field points at the same `.worktrees/<task-id>/`, so its iteration context — files, the earlier `wip` commits still pending collapse — stays live). Use the standard Subagent Prompt Template, but prepend a paragraph telling the worker to read the task file's `## Verifier note` sections (on `main`, at the same absolute path it was already handed) and address them. Set `iteration = N + 1` for the next verification.
+   - Otherwise → **re-dispatch a worker into the SAME worktree** (the `Workspace` field points at the same `.worktrees/<task-id>/`, so its iteration context — files, the earlier `wip` commits still pending collapse — stays live). Use the standard Subagent Prompt Template, but prepend a paragraph telling the worker to read the task file's `## Verifier note` sections (on `main`, at the same absolute path it was already handed) and address them. Set `iteration = N + 1` for the next verification — clear any stale file at `resultSidecarRelativePath(taskId, N + 1)`'s absolute path (a fresh iteration number, a fresh sidecar) and hand that path as this dispatch's `Result file:` field, exactly as the first dispatch did (Phase 4 step 5).
 
 **`VERDICT: FAIL`, iteration 3 (or earlier with `ITERATION_HINT: task-under-specified`)**
 1. Do not merge to `main`. Do not re-dispatch.
@@ -222,7 +226,7 @@ pcwnn's rung 4 `done → doing` revert (the merge-back conflict ladder) is **ves
 
 ### Salvaging a worktree's diff before abandonment (ADR-0063)
 
-Every abandonment path — FAIL-iteration-3 escalation above, BOUNCE above, an orphaned worktree's "discard" disposition (see "Reconciling stranded carry-over" below), and rung 1 of the merge-back conflict ladder (see "Merge-back conflicts" above) — removes or eventually removes a worktree that may hold real, working changes the conductor never merged to `main`. **Before any of those four paths' `git worktree remove`, salvage the worktree's diff to a patch file** (ADR-0063; the merge-back-conflict case added by ADR-0072).
+Every abandonment path — FAIL-iteration-3 escalation above, BOUNCE above, an orphaned worktree's "discard" disposition (see "Reconciling stranded carry-over" below), rung 1 of the merge-back conflict ladder (see "Merge-back conflicts" above), and a second lost-result escalation (Phase 4 step 6 above, ADR-0080 §5) — removes or eventually removes a worktree that may hold real, working changes the conductor never merged to `main`. **Before any of those five paths' `git worktree remove`, salvage the worktree's diff to a patch file** (ADR-0063; the merge-back-conflict case added by ADR-0072; the lost-result case added by ADR-0080). A lost-result escalation is the one path here that does NOT then remove the worktree — it keeps it, exactly like a FAIL-iteration-3 escalation — but the capture still runs first, capture-before-risk (ADR-0063), in case a LATER session's reconciliation discards it.
 
 **Capture (conductor-only — never the worker, never a `lib/` module per ADR-0038's git-free boundary):**
 ```
@@ -231,7 +235,7 @@ git -C .worktrees/<task-id> diff <fork-point-from-above> > <patch-path>
 ```
 `git diff <fork-point>` (no `--cached`) reports the union of anything already committed on the branch (a conductor `wip` commit) **and** anything still sitting uncommitted in the worktree's working directory — one command covers both, so it is correct whether or not a `wip` checkpoint happened first for this particular abandonment.
 
-**Resolve `<patch-path>`** via `lib/worktree-salvage.mjs` — git-free, `node --test`-covered (ADR-0038): call `ensureSalvageDir(salvageRoot)` first (`salvageRoot` = `<repo-root>/.agentheim/salvage/`, which does not pre-exist until the first capture), then `salvagePatchPath(salvageRoot, taskId, tag)` where `tag` is one of `escalationTag(N)` (→ `escalated-iterN`), the exported `BOUNCE_TAG` (`bounced`), `DISCARD_TAG` (`discarded`), or `MERGE_CONFLICT_TAG` (`merge-conflict`, ADR-0072 — the merge-back conflict ladder's rung 1 capture) — whichever path triggered the capture. Runnable in a consumer install via the resolve-plugin-file-convention bootstrap in `references/lib-bootstrap.md` §4.
+**Resolve `<patch-path>`** via `lib/worktree-salvage.mjs` — git-free, `node --test`-covered (ADR-0038): call `ensureSalvageDir(salvageRoot)` first (`salvageRoot` = `<repo-root>/.agentheim/salvage/`, which does not pre-exist until the first capture), then `salvagePatchPath(salvageRoot, taskId, tag)` where `tag` is one of `escalationTag(N)` (→ `escalated-iterN`), the exported `BOUNCE_TAG` (`bounced`), `DISCARD_TAG` (`discarded`), `MERGE_CONFLICT_TAG` (`merge-conflict`, ADR-0072 — the merge-back conflict ladder's rung 1 capture), or `LOST_RESULT_TAG` (`lost-result`, ADR-0080 §5 — a second lost RESULT on the same worktree, its own abandonment kind, never folded into a FAIL-iteration-3 escalation or a merge-conflict) — whichever path triggered the capture. Runnable in a consumer install via the resolve-plugin-file-convention bootstrap in `references/lib-bootstrap.md` §4.
 
 **Skip on empty diff.** If the resulting patch is empty (the worktree never diverged from its fork point), don't write the file and don't reference one — there is nothing to salvage.
 
@@ -252,6 +256,7 @@ Bounded context: <BC-NAME>
 BC README: <ABSOLUTE-PATH-TO-BC-README>
 Worktree: <ABSOLUTE-PATH-TO-WORKTREE>   <!-- run the test command below FROM this directory, not the main repo root -->
 Iteration: <N> of max 3
+Result source: <sidecar|transcript|notification|re-dispatch>   <!-- informational only (ADR-0080 §6) — which copy of the worker's RESULT the conductor used; your verification behavior is unchanged by this line -->
 
 ## The worker's strict SUCCESS return
 <paste the worker's full RESULT: SUCCESS block verbatim>
@@ -368,6 +373,8 @@ Two same-BC workers both editing the BC README (the common case the Phase 3 advi
 
 **Budget — one shot per worktree lifetime.** Mechanized in `lib/merge-conflict-ladder.mjs`: `createLadderState()` / `onMergeBackConflict(state)` / `decideAfterVerifierVerdict(iteration, verdict)` / `onWorktreeTeardown()`. A resolve dispatch (rung 4) is **structurally separate** from the ordinary FAIL-iteration counter — `onMergeBackConflict` never sees or touches it, so a post-resolve FAIL (rung 6) continues the FAIL count from wherever it already was, with the same cap-3 rule as any other FAIL. Mixing the two counters would escalate the *healthiest* tasks (a PASS on iteration 3 that then hits a merge conflict). The one-shot flag resets only on worktree teardown (`onWorktreeTeardown`) — never silently across sessions on the same worktree.
 
+**A second, independent one-shot budget shares the same state object (ADR-0080 §5).** `createLadderState()` also carries `lostResultUsedThisWorktree`, decided by `onLostResult(state)` (see Phase 4 step 6 above) — structurally separate from BOTH `ladderUsedThisWorktree` and the FAIL-iteration counter, and reset at the same `onWorktreeTeardown()` call. A worktree can spend the merge-conflict budget and the lost-result budget independently: one being spent never affects the other's availability.
+
 **Excluded by construction.** `INDEX.md` and `protocol.md` never enter this conflict surface — they are conductor-direct writes on `main` the worker branch never touches (ADR-0032/ADR-0038) — so the allow-list can never contain them and the resolve dispatch is never over-scoped to bookkeeping.
 
 ### One commit per task — and the trivial-squash carve-out
@@ -458,6 +465,7 @@ Entry formats — the "Batch started", "Task verified and completed", and "Task 
 **Summary:** [worker's 1-line SUMMARY]
 **Duration:** [wall time from this worker's dispatch to its verifier verdict, e.g. 4m12s]
 **Verification:** PASS (iteration N)   <!-- iteration N is REQUIRED — never omit the count -->
+**Result source:** <sidecar|transcript|notification|re-dispatch> · layout <leading|trailing|both, "+sentinel" appended when RESULT_END was present> · sidecar <present|missing>   <!-- measured (ADR-0080 §6), never omitted — from selectResultSource's `source` and parseWorkerResult's `layout`, plus whether the sidecar file existed at the exact designated path with a matching TASK_ID -->
 **Files changed:** N
 **Tests added:** N
 **ADRs written:** [ids or "none"]
@@ -473,6 +481,7 @@ Entry formats — the "Batch started", "Task verified and completed", and "Task 
 **Summary:** [worker's 1-line SUMMARY]
 **Duration:** [wall time from this worker's dispatch to its SUCCESS return, e.g. 4m12s]
 **Verification:** SKIPPED — [reason: decision-only task | --no-verify | non-git project]
+**Result source:** <sidecar|transcript|notification|re-dispatch> · layout <leading|trailing|both, "+sentinel" appended when RESULT_END was present> · sidecar <present|missing>   <!-- measured (ADR-0080 §6), same shape as the PASS entry above -->
 **Files changed:** N
 
 ---
@@ -527,6 +536,7 @@ You are a worker agent executing one refined task. Stay strictly within its scop
 ## Your task
 Workspace (this task's private git worktree — run all commands, including tests, from inside it): <ABSOLUTE-PATH-TO-WORKTREE>
 Task file (currently in doing/, on `main` — read-only to you; you never write or move it, agentic-workflow-ghcaj): <ABSOLUTE-PATH>
+Result file: <ABSOLUTE-PATH>  <!-- resultSidecarRelativePath(taskId, iteration), made absolute — ADR-0080. Your literal final action, for every RESULT kind, is to write your exact RESULT text here with the Write tool, then return the same text. -->
 Bounded context: <BC-NAME>
 BC README: <ABSOLUTE-PATH-TO-BC-README>
 BC index: <ABSOLUTE-PATH-TO-CONTEXTS-BC-INDEX-MD>  # catalog of ADRs/research/concepts scoped to this BC
@@ -581,6 +591,8 @@ Your context window is finite. Respect it:
 ## Return format — STRICT
 When done, the worker returns ONLY a `RESULT: SUCCESS | BOUNCED | FAILED` block, nothing else — no prose, no preamble, no "here's what I did". The exact fields (SUCCESS's `SUMMARY` / `FILE_LIST` / `TESTS_ADDED` / `TESTS_PASSING` / `TDD_SKIPPED` / `CONCEPT_CANDIDATE` / etc., plus BOUNCED's and FAILED's shapes) are the single source in `references/worker-return-format.md` — paste that file's content into the spawn prompt here so the worker has it inline without a read hop.
 
+**Your literal final action, for every RESULT kind, is to write your exact RESULT text to the `Result file:` path above with the Write tool, then return the same text (ADR-0080).** SUCCESS also repeats its header block after the last fenced block, then ends with a line reading exactly `RESULT_END`; BOUNCED and FAILED end with `RESULT_END` alone — the exact shape is in the pasted reference content, not restated here.
+
 If `TESTS_PASSING: no`, do NOT return SUCCESS — that's a FAIL or a BOUNCE, not a success.
 ```
 
@@ -612,6 +624,8 @@ When `todo/` is empty and all `doing/` is resolved (or the user interrupts) — 
    **Bounced:** M
    **Failed:** K
    **Escalated after verification:** E
+   **Lost-result re-dispatches:** [count of `dispatch-lost-result` decisions this session (ADR-0080 §5) — `0` when none fired. Distinct from the ordinary dispatch tally below: a lost-result re-dispatch never consumed a FAIL iteration, so it must not silently inflate that count's meaning as a verifier-spend signal.]
+   **Lost-result escalations:** [count of second-lost-result escalations this session (ADR-0080 §5) — `0` when none fired. Never folded into "Escalated after verification" above, which is a distinct kind of event (a verifier FAIL cap, not a transport loss).]
    **Dispatches:** [per-task tally, one entry per task as `<task-id>: D` where D = 1 + its re-dispatch count, e.g. "b8x2v: 1, j4m6r: 2"]
    **Commits:** <count>
    **Vision-conformance:** [flag list from the session-end vision-conformance pass, `lib/vision-conformance.mjs`'s `formatConformanceLine` — one entry per flagged task as `<task-id>: diverges from <success criterion|non-goal> "<label>" — <note>`; or `none — batch aligns with vision` when the pass raises nothing. Never a gate — a note only (ADR-0027 advisory-write family, ADR-0040).]
@@ -621,7 +635,7 @@ When `todo/` is empty and all `doing/` is resolved (or the user interrupts) — 
    ---
    ```
    ```
-   node -e "<same env-free bootstrap as Phase 4 step 1's claim call>" log '{"title":"Work session ended","body":"**Type:** Work / Session end\n**Duration:** <...>\n**Completed:** <...>\n**Bounced:** <...>\n**Failed:** <...>\n**Escalated after verification:** <...>\n**Dispatches:** <...>\n**Commits:** <...>\n**Vision-conformance:** <...>\n**Batch mix:** <...>\n**Carry-over:** <...>"}'
+   node -e "<same env-free bootstrap as Phase 4 step 1's claim call>" log '{"title":"Work session ended","body":"**Type:** Work / Session end\n**Duration:** <...>\n**Completed:** <...>\n**Bounced:** <...>\n**Failed:** <...>\n**Escalated after verification:** <...>\n**Lost-result re-dispatches:** <...>\n**Lost-result escalations:** <...>\n**Dispatches:** <...>\n**Commits:** <...>\n**Vision-conformance:** <...>\n**Batch mix:** <...>\n**Carry-over:** <...>"}'
    ```
    It returns `{changed:[protocolPath], message:null, verb:'log', timestamp}`. This is the one `work` protocol line written *after* a commit (it summarizes the session). To honor the "clean working tree" rule (`references/commit-doctrine.md`, ADR-0026), **commit it** via `scoped-commit` (see "Git authority" → "Committing (scoped-commit)"): `["<protocolPath>"]`, message `chore(<bc>): work session end bookkeeping [<last-task-id>]` (reuse the last completed task's id as the trailer, or `chore: work session end bookkeeping` if the session committed nothing). This is the *only* bookkeeping-after-commit `work` performs, and it is a single line — every per-task INDEX/protocol edit already rode in its own task commit (the old trailing "record SHAs + INDEX/protocol" commit is gone). (Any *deliberately-committed* stranded file from step 7 rode in its own scoped reconciliation commit *before* this entry — see below.)
 9. **Protocol rotation check (session-end)** (see the dedicated section below). Run this immediately after step 8's session-end protocol entry has been committed — the file has just grown, making this the natural, self-firing checkpoint that closes ADR-0039's deferred "who invokes it" non-decision (ADR-0045, ADR-0041's cap-and-roll doctrine).
@@ -667,6 +681,15 @@ Run this alongside the working-tree carry-over above, at the same point in the s
    - **Everything else** (no matching `doing/` task on `main`, or the matching task is already `done/`/`backlog/`) → an **orphan**. Ask the user, per worktree, the same two dispositions as the working-tree case: **discard** it (**salvage its diff first — tag `discarded`, see "Salvaging a worktree's diff before abandonment"** — then unlink any `dashboard/node_modules` link — `unlinkDashboardNodeModules` — then `git worktree remove --force` + `git branch -D aw/<task-id>`) or **keep** it for inspection. Never guess: a live concurrent session's worktree is byte-indistinguishable from an interrupted one's, same caution as the working-tree carry-over above.
 3. **Record the disposition** on the same `**Carry-over:**` line as the working-tree entries (step 7 above) — e.g. `.worktrees/agentic-workflow-f6m2q: kept (owner: agentic-workflow-f6m2q, escalated at iteration 3, salvaged: .agentheim/salvage/agentic-workflow-f6m2q-escalated-iter3.patch)` or `.worktrees/agentic-workflow-old1: discarded (orphan, no matching doing/ task, salvaged: .agentheim/salvage/agentic-workflow-old1-discarded.patch)` — or, when the capture found an empty diff and skipped writing a file, `...discarded (orphan, no matching doing/ task, nothing to salvage)`.
 4. **Feeds Phase 1 recovery.** An orphan or a kept escalation that survives to the *next* session is exactly the signal Phase 1's `git worktree list --porcelain` check picks up — the two mechanisms are one continuous thread across sessions, not independent.
+
+### Sidecar carry-over (RESULT sidecars — ADR-0080 §1)
+
+Run this once per session, alongside the worktree carry-over above (after the last integration, before the session-end protocol entry). Unlike the working-tree and worktree carry-over above, this is a **single sweep, never a per-file ask** — a stranded RESULT sidecar carries no judgment call, only a liveness check against the worktree it belongs to.
+
+1. **Detect.** List every `.md` file directly under `.worktrees/.results/` (skip if the directory doesn't exist — nothing has ever been written there yet). Each filename is `<task-id>.iter-<N>.md`.
+2. **Liveness check.** For each sidecar file, extract its `<task-id>` and check it against `git worktree list --porcelain`'s output (already gathered for the worktree carry-over step above — no second git call needed). A `<task-id>` with a live worktree entry is kept — the worktree may still be an escalated keep that legitimately wants its last RESULT on hand. A `<task-id>` with NO live worktree entry is stranded: its worktree was already torn down (the sidecar's per-teardown deletion was deliberately never built — ADR-0080 §1 — precisely so this one sweep is the only place that has to get this right) or never existed under this session's view.
+3. **Delete every stranded sidecar file.** No salvage, no `## Salvage note` — a RESULT sidecar is harness scratch, not project bookkeeping or working code (it never entered any worker's branch), so there is nothing here worth keeping once its worktree is gone.
+4. **Report the count.** One line: `<N> stranded RESULT sidecar(s) removed` (or omit the line entirely when `N` is `0`) — this does not ride the `**Carry-over:**` line above (that line is reserved for `.agentheim/`-owned and working-tree entries); mention it in the plain-prose summary (step 1 of End-of-run reporting) instead.
 
 ## Protocol rotation check (session-end)
 

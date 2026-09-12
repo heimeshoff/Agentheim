@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 20:35 -- Task verified and completed: agentic-workflow-qwfq3 - Worker RESULT survives a lost transcript — the worker writes its RESULT to a conductor-designated sidecar under `.worktrees/.results/`, repeats the header block after the four fenced blocks behind a `RESULT_END` sentinel, and the conductor reads it through a mechanized sidecar → transcript → unescaped-notification ladder whose floor is a lost-result re-dispatch into the same worktree under its own one-shot budget (ADR-0080)
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-qwfq3 - Worker RESULT survives a lost transcript — the worker writes its RESULT to a conductor-designated sidecar under `.worktrees/.results/`, repeats the header block after the four fenced blocks behind a `RESULT_END` sentinel, and the conductor reads it through a mechanized sidecar → transcript → unescaped-notification ladder whose floor is a lost-result re-dispatch into the same worktree under its own one-shot budget (ADR-0080)
+**Summary:** A worker RESULT now survives a lost transcript: parseWorkerResult tolerates a leading and/or trailing header copy behind a RESULT_END sentinel, selectResultSource and unescapeNotificationCopy mechanize the sidecar → transcript → notification ladder, onLostResult gives the lost-result re-dispatch its own one-shot budget, and lib/worker-result-contract.mjs lints every restatement of the contract; ADR-0080 accepted
+**Duration:** 30m
+**Verification:** PASS (iteration 1)
+**Files changed:** 12
+**Tests added:** 47
+**ADRs written:** none
+
+---
+
 ## 2026-09-12 20:16 -- Task verified and completed: agentic-workflow-g2fgb - `lib/readme-delta.mjs`'s `replace` op anchors a bold term head that wraps onto a continuation line — `termHeadOf` matches on the whitespace-collapsed bullet text, guarded by a wrapped-head test fixture, and a missing anchor disposes distinctly from an `expected` collision
 
 **Type:** Work / Task completion

@@ -2,7 +2,7 @@
 id: ADR-0080
 title: Worker RESULT redundancy — a conductor-designated sidecar, a trailing header repeat behind `RESULT_END`, and a mechanized source ladder whose floor is a lost-result re-dispatch under its own one-shot budget
 scope: agentic-workflow
-status: proposed
+status: accepted
 date: 2026-09-12
 related_tasks: [agentic-workflow-qwfq3, agentic-workflow-gwh69]
 related_adrs: [0032, 0038, 0059, 0062, 0063, 0068, 0072, 0074]

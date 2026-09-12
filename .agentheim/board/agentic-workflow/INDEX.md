@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 204
+- **Doing:** 0
+- **Done:** 205
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-qwfq3** — Worker RESULT survives a lost transcript — the worker writes its RESULT to a conductor-designated sidecar under `.worktrees/.results/`, repeats the header block after the four fenced blocks behind a `RESULT_END` sentinel, and the conductor reads it through a mechanized sidecar → transcript → unescaped-notification ladder whose floor is a lost-result re-dispatch into the same worktree under its own one-shot budget (ADR-0080) (bug) — `doing/agentic-workflow-qwfq3-worker-result-survives-lost-transcript.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-qwfq3** — Worker RESULT survives a lost transcript — the worker writes its RESULT to a conductor-designated sidecar under `.worktrees/.results/`, repeats the header block after the four fenced blocks behind a `RESULT_END` sentinel, and the conductor reads it through a mechanized sidecar → transcript → unescaped-notification ladder whose floor is a lost-result re-dispatch into the same worktree under its own one-shot budget (ADR-0080) (bug) — `done/agentic-workflow-qwfq3-worker-result-survives-lost-transcript.md`
 - **agentic-workflow-g2fgb** — `lib/readme-delta.mjs`'s `replace` op anchors a bold term head that wraps onto a continuation line — `termHeadOf` matches on the whitespace-collapsed bullet text, guarded by a wrapped-head test fixture, and a missing anchor disposes distinctly from an `expected` collision (bug) — `done/agentic-workflow-g2fgb-readme-delta-replace-anchors-wrapped-term-head.md`
 - **agentic-workflow-g5ez5** — Close the two-root layout (ADR-0078) — every consumer except `migrate` refuses a legacy tree with `legacy-layout`, `detectLayout`'s neither-root default flips to `board`, the legacy combined INDEX template and every transitional dual-layout branch are deleted, and a fresh-project walk-through plus the tree-wide lint prove `.agentheim/` holds exactly `knowledge/` and `board/` (refactor) — `done/agentic-workflow-g5ez5-split-task-system-folder-from-contexts-and-knowledge.md`
 - **agentic-workflow-tgr31** — Dogfood the migration — `migrate` already moved this repo's `.agentheim/` on `main` (commit 6fbaad2, 2026-09-11); finish it: re-point the 20 app specifiers and 5 test-side styleguide reads to `knowledge/contexts/`, flip the two live-tree tests still asserting `legacy`, and prove both suites, the rebuilt `dist/`, and the dashboard green on the migrated tree (chore) — `done/agentic-workflow-tgr31-dogfood-migrate-this-repo-agentheim-to-two-root-layout.md`

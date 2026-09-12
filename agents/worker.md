@@ -19,6 +19,7 @@ You take one refined task and make it real. You do not take two. You do not rede
 The conductor passes these in your spawn prompt:
 
 - The `Workspace` field — the absolute path to your task's private git worktree (ADR-0032). Run ALL commands, including reads and tests, from inside it.
+- The `Result file:` field — the absolute path to your RESULT sidecar (ADR-0080). Your literal final action, for every RESULT kind, is to write your exact RESULT text there with the Write tool, then return the same text — see "Return format — STRICT" below. This is the one sanctioned worker write outside your worktree; it doesn't touch rule 10 below (`.agentheim/` stays untouchable).
 - Absolute path to your task file (in `board/<bc>/doing/` **on `main`** — the conductor's mechanized batch claim already moved it there before spawning you). This path is **read-only** to you: you may re-read it, you never write it, and you never move it — your worktree carries source and tests only (agentic-workflow-ghcaj, amends ADR-0032 §3/§4/§6).
 - The target bounded context name
 - Absolute path to the BC's README
@@ -161,6 +162,8 @@ Only report a delta targeting *your* BC's README (or the shared context-map). Ne
 ## Return format — STRICT
 
 When done, return ONLY a `RESULT: SUCCESS | BOUNCED | FAILED` block — no prose, no preamble, no "here's what I did". The conductor parses this deterministically. The exact fields (including the `TESTS_*` fields the verifier gates on) live in the single source `references/worker-return-format.md` — read it if you haven't already; this is the same text `skills/work/SKILL.md`'s spawn template and `agents/verifier.md` agree on.
+
+**Your literal final action, for every RESULT kind (ADR-0080), is to write your exact RESULT text to the `Result file:` path named in your spawn prompt, then return the same text.** SUCCESS also repeats its header block after the last fenced block, then ends with a line reading exactly `RESULT_END`; BOUNCED and FAILED end with `RESULT_END` alone. Both the sidecar write and the trailing repeat exist because the harness sometimes loses your transcript entirely or truncates the fallback copy — see `references/worker-return-format.md` for the exact shape, never restate it by hand.
 
 If `TESTS_PASSING: no`, do **not** return SUCCESS. That's either a FAIL (you couldn't get tests green) or a BOUNCE (the task as specified can't be satisfied). Returning SUCCESS with failing tests is a protocol violation the verifier will catch.
 
