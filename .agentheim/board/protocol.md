@@ -5,6 +5,44 @@ Newest entries on top.
 
 ---
 
+## 2026-09-13 01:44 -- Modeling / Refined: infrastructure-g6h1m - Herdr bridge — the dashboard launch buttons open a Claude session in Herdr; /setup selects the active bridge
+
+**Type:** Modeling / Refine
+**BC:** infrastructure
+**Status after:** backlog (superseded — pending DISMISS once the builder confirms)
+**Summary:** Orchestrator → architect settled all seven open questions: per-machine selection lives in <home>/.config/agentheim/config.json; server-mediated Herdr launch is a fourth write category (MEDIATED LAUNCH) behind a per-process token with no Origin check (ADR-0018 bar applies, not ADR-0053); topology reuses the workspace whose panes cwd matches the project root via api snapshot; agent start runs after an immediate 202; HERDR_ENV is policy, not a gate; the clipboard floor is unchanged; a shared lib/resolve-herdr.mjs walks PATH, the semver-max release dir, and the Windows Programs dir. Verified on this machine that herdr is absent from a fresh process PATH, so the fallback resolver is required. Work re-filed as three chained todo tasks; the parent carries a superseded pointer.
+**Split into:** infrastructure-e8h9f (foundation), infrastructure-xh8tw (server), infrastructure-vpbks (frontend)
+**ADRs written:** ADR-0082
+
+---
+
+## 2026-09-13 01:44 -- Modeling / Captured: infrastructure-vpbks - Herdr bridge frontend — `launchOrCopy`/`probeBridge` dispatch on `/api/bridge`'s `kind`, call the mediated-launch endpoint when Herdr is selected, keep the VS Code path unmodified otherwise, and document the three-way selection in the repo README
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** Frontend third of the Herdr bridge (split from infrastructure-g6h1m, ADR-0082): bridge-launch.js dispatches on the kind field of GET /api/bridge, calls the mediated-launch endpoint when Herdr is selected, goes straight to clipboard on none, leaves the VS Code path unmodified otherwise, and the repo README documents the three-way selection. Filed to todo: depends on infrastructure-xh8tw and the done styleguide.
+
+---
+
+## 2026-09-13 01:44 -- Modeling / Captured: infrastructure-xh8tw - Herdr bridge server — `POST /api/bridge/launch` opens a Claude session in Herdr behind a per-process token; `GET /api/bridge` grows `kind`/`live`; workspace reuse by project cwd via `api snapshot`; agent start is fire-and-forget behind an immediate 202
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** Server third of the Herdr bridge (split from infrastructure-g6h1m, ADR-0082): POST /api/bridge/launch behind a per-process token opens a Claude session in Herdr with the ADR-0018 raw argv, GET /api/bridge grows kind and live, topology reuses the workspace whose panes cwd matches the project root via api snapshot, and agent start runs after an immediate 202. Filed to todo: depends on infrastructure-e8h9f, contract frozen.
+
+---
+
+## 2026-09-13 01:44 -- Modeling / Captured: infrastructure-e8h9f - Herdr bridge foundation — `/setup use bridge <vscode|herdr|none>` persists the selection to a per-machine config file, `status` reports Herdr install/liveness, and a shared `lib/resolve-herdr.mjs` finds the binary for both `/setup` and the dashboard server
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** Foundation third of the Herdr bridge (split from infrastructure-g6h1m, ADR-0082): /setup gains use bridge <vscode|herdr|none> writing <home>/.config/agentheim/config.json, status reports Herdr install and liveness, and lib/resolve-herdr.mjs finds the binary (PATH, then the semver-max release dir, then the Windows Programs dir) for /setup and the dashboard server alike. Filed to todo: contract frozen by ADR-0082, no UI surface, no open questions.
+
+---
+
 ## 2026-09-13 01:21 -- Modeling / Captured: infrastructure-g6h1m - Herdr bridge — the dashboard's launch buttons open a Claude session in Herdr; `/setup` selects the active bridge (VS Code, Herdr, or none) and reports it; clipboard fallback whenever the selected bridge is not live
 
 **Type:** Modeling / Capture

@@ -9,7 +9,7 @@ completed:
 depends_on: [design-system-001]
 blocks: []
 tags: [dashboard, bridge, herdr, setup, launch, clipboard]
-related_adrs: [0018, 0079]
+related_adrs: [0018, 0079, 0082]
 related_research: [vscode-dashboard-terminal-bridge-2026-06-09, claude-code-terminal-session-naming-2026-06-15]
 prior_art: [infrastructure-c6fzb, infrastructure-js62b, infrastructure-x56qm, infrastructure-kr9pd, infrastructure-w6p4k]
 ---
@@ -86,6 +86,12 @@ is where the builder says which bridge the dashboard should use.
 - [ ] The repo README's bridge section explains the three-way selection and the clipboard fallback in a few lines. [human-eye]
 
 ## Notes
+
+**Superseded (2026-09-13 REFINE).** The seven open questions below were settled by ADR-0082 and
+the work re-filed as three chained tasks in `todo/`: infrastructure-e8h9f (foundation: `/setup`
+selection, config file, binary resolver), infrastructure-xh8tw (server: `POST /api/bridge/launch`,
+token, topology), infrastructure-vpbks (frontend: `kind` dispatch, README). This parent stays only
+until it is DISMISSed; the questions are kept below as the record of what was open.
 
 **Filed to backlog** — the mechanism is clear, the design has open choices a REFINE
 round (orchestrator → architect) should settle before a worker picks it up:
