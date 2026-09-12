@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-13 00:48 -- Task verified and completed: infrastructure-reh04 - Refresh the repo README so `/setup` is part of the install flow, the state-layout tree and every quoted path reflect the two-root layout (ADR-0078), and the skills table, repo layout, and status reflect what shipped since the June restructure (0.8.8 → 0.9.4) — concise, no walkthrough
+
+**Type:** Work / Task completion
+**Task:** infrastructure-reh04 - Refresh the repo README so `/setup` is part of the install flow, the state-layout tree and every quoted path reflect the two-root layout (ADR-0078), and the skills table, repo layout, and status reflect what shipped since the June restructure (0.8.8 → 0.9.4) — concise, no walkthrough
+**Summary:** repo README refreshed for 0.9.4 — /setup in the install flow, two-root state layout, seven-skill table, since-0.8.8 highlights
+**Duration:** 11m45s
+**Verification:** PASS (iteration 1)
+**Files changed:** 1
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-09-13 00:35 -- Batch started: [infrastructure-reh04]
 
 **Type:** Work / Batch start
