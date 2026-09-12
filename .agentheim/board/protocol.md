@@ -5,6 +5,16 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 23:15 -- Modeling / Refined: infrastructure-hnv3d - Marketplace serves unreleased main mid-rollout snapshot
+
+**Type:** Modeling / Refine
+**BC:** infrastructure
+**Status after:** todo
+**Summary:** Docs recon: a relative-path plugin source (`./`) cannot pin a ref and serves the consumer's marketplace clone of main; a `github` source supports `ref`. Builder decision: pin `marketplace.json` to `ref: vX.Y.Z`, bumped in the release commit, tagged, and pushed with `git push --atomic`, with a live-tree lint checking ref === v+plugin.json version. `/release` gains a todo/doing mid-rollout preflight advisory. Release-per-batch rejected; the release-branch alternative rejected because existing clones stay on main; builder accepts that local dogfooding now installs releases only. Worker writes the ADR, the ADR-0013 amendment, the lint, RELEASE.md, the release command and the README sentence in one task.
+**ADRs written:** none (the ADR is the task's deliverable)
+
+---
+
 ## 2026-09-12 23:07 -- Modeling / Promoted: agentic-workflow-vsb06 - The `migrate` verb reports the legacy `.agentheim/contexts/` references it does not rewrite — project files outside `.agentheim/` such as `CLAUDE.md` and `.claude/commands/` — as a read-only manifest field the step-0 notice names, so a consumer learns what still points at the old layout instead of finding out when a command breaks
 
 **Type:** Modeling / Promote

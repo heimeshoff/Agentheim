@@ -49,8 +49,55 @@ cj54k / e896r / hxq1g / zgav8 / tgr31), and it will recur for any future split.
 
 ## What
 
-A decision (ADR) on how the marketplace stops serving unreleased `main`, plus whatever
-minimal change implements it. Candidate directions, to be weighed in refinement:
+A decision (ADR) on how the marketplace stops serving unreleased `main`, plus the minimal
+change that implements it. The worker writes both the ADR and its artifacts, as in
+infrastructure-006; no follow-up implementation task is spawned.
+
+### Decided direction (refine pass, 2026-09-12, builder)
+
+**Direction 1, by pinning the tag in the marketplace manifest.** `.claude-plugin/marketplace.json`'s
+plugin entry changes from `"source": "./"` to a `github` source pinned to the release tag:
+
+```json
+"source": { "source": "github", "repo": "heimeshoff/Agentheim", "ref": "vX.Y.Z" }
+```
+
+- **Why this and not a `release` default branch.** Consumers' marketplace clones track
+  `main` and re-read `marketplace.json` from it on every update, so a pinned `ref` reaches
+  every existing consumer (Roman included) without anyone re-adding the marketplace. Changing
+  the GitHub default branch would most likely leave existing clones on `main`.
+- **Recon (docs, `code.claude.com/docs/en/plugin-marketplaces`, 2026-09-12).** A relative-path
+  source has no `ref`/`sha` pin and serves whatever ref the marketplace clone is on. That is the
+  leak's mechanism, and it supersedes infrastructure-006's recon, which only covered version fields. The `github`
+  source supports `ref` (branch or tag) and `sha`. `plugin.json` `version`, when set, is the
+  update-detection key for every git source.
+- **One release commit, one atomic push.** The `ref` is a name, not a SHA, so the
+  `chore(release): vX.Y.Z` commit bumps `plugin.json` `version`, rolls `CHANGELOG.md`, **and**
+  sets the `marketplace.json` `ref` to `vX.Y.Z` together. That commit is tagged, then
+  `git push --atomic origin main vX.Y.Z` pushes both. The order matters: `main` naming a tag
+  the remote doesn't have yet would break every install in between. Today's `/release` pushes
+  `main` (Step 4) *before* tagging (Step 5), so those steps must be reordered.
+- **Invariant, enforced.** On every commit of `main`, the `marketplace.json` plugin `ref`
+  equals `"v" + plugin.json.version`. A live-tree `node --test` lint checks it (ADR-0059).
+- **Safe to land any time.** Landing this with `ref: v0.9.3` makes new installs get the
+  consistent `v0.9.3` tag tree. Installs already on a `main` snapshot labelled 0.9.3 see the
+  same version string and don't move; they move at the next release, which they needed anyway.
+- **Dogfooding consequence, accepted.** The builder's local `directory` marketplace reads the
+  same `marketplace.json`, so other projects on this machine get the released tag, not the
+  working tree. This repo itself keeps running its own `lib/` through the cwd-first bootstraps.
+  No dev channel is wanted; the ADR records this as accepted.
+
+**Direction 2 as a `/release` preflight advisory, not a modeling lint.** Pinning closes the
+window between releases, but a release cut mid-rollout would still ship a promise ahead of
+its fulfilment. So `.claude/commands/release.md` gains a step before the release commit. It
+lists every task in any BC's `todo/` and `doing/` (id + title), asks the builder whether
+`main` is mid-rollout, and proceeds or stops on the answer. It is advisory, not a gate, and
+runs at the one moment the hazard matters. No prose rule is added to `skills/modeling/SKILL.md`.
+
+**Direction 3 (release per integrated batch): not adopted.** It would make every session end
+a release act, against ADR-0013's "deliberate act" framing, and pinning already closes the leak.
+
+### Original candidate directions (as captured)
 
 1. **Serve the last release, not `main`.** Make what the marketplace clones move only at
    tag time — e.g. a `release` branch that `RELEASE.md` fast-forwards to the tag as its
@@ -67,28 +114,49 @@ minimal change implements it. Candidate directions, to be weighed in refinement:
    session end a release act — against ADR-0013's "deliberate act" framing.
 
 These are not mutually exclusive; 1 fixes the leak, 2 removes the hazard even inside a
-release, 3 shrinks the window. Refinement decides which combination, writes the ADR, and
-spawns the implementation task(s).
+release, 3 shrinks the window. The refine pass above chose 1 (pinned tag) + 2 (as a
+`/release` preflight advisory) and rejected 3.
 
 Out of scope for this task: cutting 0.9.4 itself. That is the immediate remedy for Roman
-and runs through the `release` skill now; this task is about the recurrence.
+and runs through `/release`; this task is about the recurrence. Either order works: 0.9.4
+can be cut before or after this lands (see "Safe to land any time").
 
 ## Acceptance criteria
 
-- [ ] An ADR in `.agentheim/knowledge/decisions/` records the chosen direction(s), amends
-      ADR-0013's "lag is harmless" residual, and names the 2026-09-06 → 2026-09-11 window
-      as the triggering incident.
-- [ ] `RELEASE.md` is updated so that following it end to end leaves the marketplace
-      serving exactly the tagged tree (direction 1), or the ADR records why the leak is
-      accepted and which of 2 / 3 mitigates it instead.
-- [ ] If direction 1 is chosen: after the change, the tree the marketplace clones equals
-      the tree of the newest `vX.Y.Z` tag, checked by a test or a documented one-line
-      `git` command in `RELEASE.md`.
-- [ ] If direction 2 is chosen: `skills/modeling/SKILL.md` names the rule at the point
-      where a split writes `depends_on`, with either an enforcement criterion or an explicit
-      "prose-only, unenforced" marker (ADR-0059).
-- [ ] The infrastructure BC README's release entry (ADR-0013 paragraph) reflects the new
-      state in one settled current-state sentence.
+- [ ] A new ADR in `.agentheim/knowledge/decisions/` records: the pinned-`ref` mechanism
+      (with the docs recon on relative-path vs `github` sources); the release-branch
+      alternative and why it was rejected (existing clones stay on `main`); direction 2 as
+      the `/release` preflight advisory; direction 3 as rejected; the accepted dogfooding
+      consequence. It names the 2026-09-06 → 2026-09-11 window as the triggering incident.
+- [ ] ADR-0013 gains a short amendment pointing at the new ADR. It retires the "manifest
+      legitimately lagging `main` is harmless" residual, and notes that the infrastructure-w45ce
+      and infrastructure-j3rsn "fresh on `main`, because the marketplace copies `main`" rationale
+      is now "fresh at the tag", which the release commit makes the same tree.
+- [ ] `.claude-plugin/marketplace.json`'s `agentheim` plugin entry is a
+      `{"source": "github", "repo": "heimeshoff/Agentheim", "ref": "v<plugin.json version>"}`
+      source (currently `v0.9.3`); no `version` field is added to `marketplace.json`
+      (`plugin.json` stays the sole version source).
+- [ ] A live-tree lint (a `lib/` module + `lib/test/*.test.mjs`, stdlib-only, no network)
+      fails when the `marketplace.json` `agentheim` entry is not a `github` source, has no
+      `ref`, or its `ref` differs from `"v" + plugin.json.version`. It carries fixture tests for
+      each red case plus the green case, and passes on the live tree.
+- [ ] `RELEASE.md` is updated so that following it end to end leaves the marketplace serving
+      exactly the tagged tree. The bump step also sets the `marketplace.json` `ref`, the
+      commit step stages `.claude-plugin/marketplace.json`, and the tag is created locally before
+      a single `git push --atomic origin main vX.Y.Z`. The "Why this matters" section and the
+      Step 1/2 "the marketplace copies `main`" rationale are rewritten for the pinned model, and
+      the docs mention the one-line post-push check
+      `git ls-remote origin refs/tags/vX.Y.Z`.
+- [ ] `.claude/commands/release.md` matches `RELEASE.md`: Step 1 also sets the `ref`, Step 3
+      stages `marketplace.json`, and the tag is created before one atomic push of `main` + tag
+      (no step pushes `main` without the tag). It also gains a preflight step before the
+      release commit that lists every `todo/` and `doing/` task across all BCs under
+      `.agentheim/board/` and asks the builder whether `main` is mid-rollout before continuing.
+- [ ] The infrastructure BC README's ADR-0013 entry reflects the new state in one settled
+      current-state sentence (the marketplace installs the pinned release tag, not `main`),
+      with the new ADR's id cited. The w45ce/j3rsn amendment bullets no longer claim the
+      marketplace copies `main`.
+- [ ] `node --test lib/test/*.test.mjs` is no redder than on `main` before the change.
 
 ## Notes
 
@@ -102,5 +170,15 @@ and runs through the `release` skill now; this task is about the recurrence.
 - ADR-0013 semver: ADR-0078 changes the `.agentheim/` layout; with the automatic
   on-upgrade migration it is arguably additive, but "when in doubt prefer major" is the
   ADR's own rule. The `release` skill run for 0.9.4 should make that call explicitly.
-- Type is `decision` because the direction changes the work materially; the ADR is the
-  deliverable, implementation tasks are spawned from it.
+- Type is `decision` because the ADR is the primary deliverable. The direction was settled in
+  refinement and its artifacts are small (a manifest edit, one lint, two release docs, and a
+  README sentence), so the worker ships them in the same task rather than spawning follow-ups.
+- **Post-release confirmation (builder, not verifiable by the worker, needs a real
+  marketplace):** after the first release under the pinned model, a fresh `/plugin update`
+  in a consumer project records a `gitCommitSha` in `~/.claude/plugins/installed_plugins.json`
+  equal to `git rev-parse vX.Y.Z^{commit}`.
+- **Pre-existing reds to brief the worker/verifier on:** `index-entry-length.test.mjs` is red
+  on `main` (qwfq3). Bridge fixed-port tests fail EADDRINUSE while the builder's bridge runs,
+  and `foreign-launch.test.mjs` flakes EPERM in teardown on Windows.
+- The `repo` casing follows the `origin` remote (`heimeshoff/Agentheim`); GitHub resolves
+  either casing.
