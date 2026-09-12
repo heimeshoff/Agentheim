@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 20:46 -- Modeling / Refined: agentic-workflow-gwh69 - Mechanized RESULT reconstruction from the worktree
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Evidence gate checked and not met: no completion entries dated after qwfq3 (the only post-contract datum, qwfq3 itself, read from a present sidecar with a trailing header copy, which counts for the redundancy holding). Gate sharpened: condition (b) now names `layout leading` explicitly, and only tasks dispatched after qwfq3 integration commit 937b598 count, so pre-contract notification-sourced results such as kr9pd and g2fgb are not evidence. Stays in backlog.
+
+---
+
 ## 2026-09-12 20:37 -- Work session ended
 
 **Type:** Work / Session end

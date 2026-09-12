@@ -40,8 +40,11 @@ a block.
 **Promotion gate (evidence, not detail):** promote only when `protocol.md` or its rolled
 archives, dated after qwfq3's completion, show **either** (a) at least one
 `**Result source:** re-dispatch` line, **or** (b) two or more completion entries with
-`sidecar missing` or a `layout` lacking the trailing header — the correlated-non-compliance
-signal ADR-0080 names. A refine that finds neither leaves this in `backlog/`. If the evidence
+`sidecar missing` or `layout leading` (no `trailing`/`both`) — the correlated-non-compliance
+signal ADR-0080 names. Count only tasks *dispatched* after qwfq3's integration commit
+(`937b598`): a worker spawned before the sidecar/trailing-repeat contract existed cannot be
+non-compliant with it (kr9pd and g2fgb in qwfq3's own batch are the example — their
+notification-sourced results predate the contract and are not evidence). A refine that finds neither leaves this in `backlog/`. If the evidence
 instead shows every lost copy still carried its trailing headers, DISMISS this task rather
 than build it.
 
@@ -103,6 +106,13 @@ state this.
 ## Notes
 
 - The promotion gate in Why is the blocker; nothing here is under-specified.
+- **Gate check 2026-09-12 (refine):** not met. Zero completion entries dated after qwfq3's
+  completion (20:35). The only post-contract datum is qwfq3 itself: `sidecar · layout
+  leading/trailing/sentinel · sidecar present` — its notification copy was top-truncated and
+  re-escaped, and the sidecar rescued it on day one. That counts *for* the redundancy holding,
+  not toward the gate. Re-check after the next few work batches; the `**Result source:**` line
+  in every PASS/FAIL completion entry (`skills/work/SKILL.md` Protocol logging) is the measured
+  input.
 - Provenance marker precedent: ADR-0038 Ruling B (never present a reconstruction as a
   measurement). Reconstruction is exactly the thing that rule was written to label.
 - ADR-0080 records the deferral and the gate; flip its "Deferred behind evidence" paragraph to
