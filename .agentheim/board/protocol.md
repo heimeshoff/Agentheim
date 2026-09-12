@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-09-13 00:49 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 13m38s (batch start to session end)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** infrastructure-reh04: 1
+**Commits:** 2
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 0% product-facing / 100% harness / 0% bookkeeping (1 task) — heuristic reads a type:chore README rewrite as harness; it is a consumer-facing doc refresh
+**Carry-over:** left behind (user WIP, 2 files)
+
+---
+
 ## 2026-09-13 00:48 -- Task verified and completed: infrastructure-reh04 - Refresh the repo README so `/setup` is part of the install flow, the state-layout tree and every quoted path reflect the two-root layout (ADR-0078), and the skills table, repo layout, and status reflect what shipped since the June restructure (0.8.8 → 0.9.4) — concise, no walkthrough
 
 **Type:** Work / Task completion
