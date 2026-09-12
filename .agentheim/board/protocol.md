@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-13 01:21 -- Modeling / Captured: infrastructure-g6h1m - Herdr bridge — the dashboard's launch buttons open a Claude session in Herdr; `/setup` selects the active bridge (VS Code, Herdr, or none) and reports it; clipboard fallback whenever the selected bridge is not live
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** backlog
+**Summary:** A second bridge kind: the dashboard server launches a Claude session in Herdr (tab with project cwd, agent start --kind claude with the ADR-0018 raw argv), /setup gains a per-machine bridge selection (vscode | herdr | none) and reports Herdr state, and the clipboard stays the silent floor whenever the selected bridge is not live. Filed to backlog: config location, the server-mediated launch category, the CSRF defense, and Herdr topology need an architect round.
+
+---
+
 ## 2026-09-13 00:49 -- Work session ended
 
 **Type:** Work / Session end
