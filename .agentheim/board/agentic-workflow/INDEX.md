@@ -11,19 +11,19 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 2
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 2
 - **Done:** 203
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-qwfq3** — Worker RESULT survives a lost transcript — the worker writes its RESULT to a conductor-designated sidecar under `.worktrees/.results/`, repeats the header block after the four fenced blocks behind a `RESULT_END` sentinel, and the conductor reads it through a mechanized sidecar → transcript → unescaped-notification ladder whose floor is a lost-result re-dispatch into the same worktree under its own one-shot budget (ADR-0080) (bug) — `todo/agentic-workflow-qwfq3-worker-result-survives-lost-transcript.md`
-- **agentic-workflow-g2fgb** — `lib/readme-delta.mjs`'s `replace` op anchors a bold term head that wraps onto a continuation line — `termHeadOf` matches on the whitespace-collapsed bullet text, guarded by a wrapped-head test fixture, and a missing anchor disposes distinctly from an `expected` collision (bug) — `todo/agentic-workflow-g2fgb-readme-delta-replace-anchors-wrapped-term-head.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-qwfq3** — Worker RESULT survives a lost transcript — the worker writes its RESULT to a conductor-designated sidecar under `.worktrees/.results/`, repeats the header block after the four fenced blocks behind a `RESULT_END` sentinel, and the conductor reads it through a mechanized sidecar → transcript → unescaped-notification ladder whose floor is a lost-result re-dispatch into the same worktree under its own one-shot budget (ADR-0080) (bug) — `doing/agentic-workflow-qwfq3-worker-result-survives-lost-transcript.md`
+- **agentic-workflow-g2fgb** — `lib/readme-delta.mjs`'s `replace` op anchors a bold term head that wraps onto a continuation line — `termHeadOf` matches on the whitespace-collapsed bullet text, guarded by a wrapped-head test fixture, and a missing anchor disposes distinctly from an `expected` collision (bug) — `doing/agentic-workflow-g2fgb-readme-delta-replace-anchors-wrapped-term-head.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

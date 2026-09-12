@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 20:02 -- Batch started: [agentic-workflow-g2fgb, agentic-workflow-qwfq3, infrastructure-kr9pd]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-g2fgb - `lib/readme-delta.mjs`'s `replace` op anchors a bold term head that wraps onto a continuation line — `termHeadOf` matches on the whitespace-collapsed bullet text, guarded by a wrapped-head test fixture, and a missing anchor disposes distinctly from an `expected` collision, agentic-workflow-qwfq3 - Worker RESULT survives a lost transcript — the worker writes its RESULT to a conductor-designated sidecar under `.worktrees/.results/`, repeats the header block after the four fenced blocks behind a `RESULT_END` sentinel, and the conductor reads it through a mechanized sidecar → transcript → unescaped-notification ladder whose floor is a lost-result re-dispatch into the same worktree under its own one-shot budget (ADR-0080), infrastructure-kr9pd - `/setup` bridge verbs fail on win32 when the `.vsix` or `code.cmd` path holds a cmd.exe metacharacter but no space — `quoteArgWindows` leaves such segments unquoted and `cmd.exe` splits them
+**Parallel:** yes (3 workers — the full ready set; g2fgb and qwfq3 both edit skills/work/SKILL.md, merge-ordered g2fgb → qwfq3; kr9pd independent)
+
+---
+
 ## 2026-09-12 19:49 -- Modeling / Promoted: agentic-workflow-qwfq3 - Worker RESULT survives a lost transcript — the worker writes its RESULT to a conductor-designated sidecar under `.worktrees/.results/`, repeats the header block after the four fenced blocks behind a `RESULT_END` sentinel, and the conductor reads it through a mechanized sidecar → transcript → unescaped-notification ladder whose floor is a lost-result re-dispatch into the same worktree under its own one-shot budget (ADR-0080)
 
 **Type:** Modeling / Promote

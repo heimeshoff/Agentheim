@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-g2fgb
 title: `lib/readme-delta.mjs`'s `replace` op anchors a bold term head that wraps onto a continuation line — `termHeadOf` matches on the whitespace-collapsed bullet text, guarded by a wrapped-head test fixture, and a missing anchor disposes distinctly from an `expected` collision
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-09-12

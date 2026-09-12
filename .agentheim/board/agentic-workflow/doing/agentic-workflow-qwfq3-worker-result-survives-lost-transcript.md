@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-qwfq3
 title: Worker RESULT survives a lost transcript — the worker writes its RESULT to a conductor-designated sidecar under `.worktrees/.results/`, repeats the header block after the four fenced blocks behind a `RESULT_END` sentinel, and the conductor reads it through a mechanized sidecar → transcript → unescaped-notification ladder whose floor is a lost-result re-dispatch into the same worktree under its own one-shot budget (ADR-0080)
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-09-12

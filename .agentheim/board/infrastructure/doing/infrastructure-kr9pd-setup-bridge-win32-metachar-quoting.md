@@ -1,7 +1,7 @@
 ---
 id: infrastructure-kr9pd
 title: `/setup` bridge verbs fail on win32 when the `.vsix` or `code.cmd` path holds a cmd.exe metacharacter but no space — `quoteArgWindows` leaves such segments unquoted and `cmd.exe` splits them
-status: todo
+status: doing
 type: bug
 context: infrastructure
 created: 2026-09-12
