@@ -5,6 +5,25 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 18:07 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 1h17m (batch start 16:50 → 18:07)
+**Completed:** 3 (first-try PASS: 1, re-dispatched: 2, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** j3rsn: 1, x56qm: 2, js62b: 2
+**Commits:** 6 (2 batch-start, 3 task integrations, this entry)
+**Vision-conformance:** none — batch aligns with vision. j3rsn ships a second committed derived artifact under the existing ADR-0013 release discipline (knowledge durable, nothing autonomous); x56qm and js62b remove the model from a launcher path the builder invokes explicitly via /setup (extends ADR-0053/ADR-0079 precedent), keep every gate human-triggered (non-goal 3 holds), and place tooling in the user home rather than project state, matching the plugin-cache precedent rather than non-goal 5.
+**Batch mix:** 67% product-facing / 33% harness / 0% bookkeeping (3 tasks)
+**Carry-over:** none — working tree clean (the long-standing dashboard/dist/app.js EOL phantom is gone: js62b integration rebuilt dist/ from merged source and committed it); no .agentheim/-owned strays; no non-main worktrees (all three aw/ worktrees torn down after integration)
+**Session-start churn (ADR-0066):** 0 recognized machine-shape commits, 0 human commits since the 2026-09-12 16:20 boundary; nothing flagged, whats-next.md not written.
+**Conductor notes:** (1) two of five worker transcripts were empty again (j3rsn iter 1, js62b iter 1); RESULT headers were reconstructed from each worktree git status, which matched the Outcome key-files list exactly. (2) j3rsn README delta: the Decisions replace op on the ADR-0013 bullet disposed merged — lib/readme-delta.mjs termHeadOf cannot anchor a bold term head that wraps a line — which would have duplicated the whole bullet; the j3rsn amendment sub-bullet was hand-spliced in place after the w45ce sub-bullet instead (verifier independently confirmed the limitation). Candidate modeling capture, not auto-filed. (3) x56qm iter 1 FAIL: worker overwrote a pre-existing command-card guard instead of adding alongside; restored in iter 2. (4) js62b iter 1 FAIL: the default exec seam spawned code.cmd without a shell (EINVAL on win32) and status swallowed it into not-installed; fixed in iter 2 with quoted shell spawn, a default-seam test, and unknown-on-exec-failure. Verifier noted a residual edge — an & in a space-free path segment is left unquoted — as a backlog candidate, not auto-filed. (5) j3rsn: the builder two stale local vsix builds (0.2.1, 0.4.0) were deleted from the main working tree per the task Notes, never committed; the ADR-0013 addendum was applied by hand from the worker extra block (related_tasks updated). (6) dist/ was rebuilt from merged source on main for js62b (ADR-0057); dist-staleness passes on main.
+**Vacuum guard:** ready set empty after the batch — todo/ is empty in every BC. Open item surfaced: Brainstorm on existing code (next iteration). (open 99 days). No work was self-generated.
+
+---
+
 ## 2026-09-12 18:06 -- Task verified and completed: infrastructure-js62b - `/setup` installs, upgrades and removes the VS Code bridge from the shipped `.vsix`, reports its install state, and the dashboard's skew banner names `/setup` as the remedy
 
 **Type:** Work / Task completion
