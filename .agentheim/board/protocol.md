@@ -5,6 +5,26 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 15:08 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 1h36m (batch start 13:36 → 15:12)
+**Completed:** 1 (first-try PASS: 0, re-dispatched: 1, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** g5ez5: 2
+**Commits:** 3 (1 batch-start, 1 task integration, this entry)
+**Vision-conformance:** none — batch aligns with vision. g5ez5 closes ADR-0078 so knowledge/ reads as the project description with no lifecycle churn and every consumer refuses a stale legacy tree by structure rather than luck — both serve "Knowledge is durable" and "Wrong work is caught by structure"; the refusal is a fail-closed read, migrate stays a skill step-0 the builder runs, so "Not autonomous" holds.
+**Batch mix:** 0% product-facing / 100% harness / 0% bookkeeping (1 task)
+**Carry-over:** left behind (user WIP, 1 file — dashboard/dist/app.js, EOL-only phantom modification after the ADR-0057 rebuild; `git diff --numstat` empty, .build-stamp.json and index.html carried the content and rode the integrating commit); no `.agentheim/`-owned strays; no non-main worktrees (aw/agentic-workflow-g5ez5 torn down after integration)
+**Session-start churn (ADR-0066):** 0 recognized machine-shape commits, 0 human commits since the 2026-09-11 14:31 boundary; nothing flagged, whats-next.md not rewritten.
+**Verifier iteration note:** iteration 1 FAIL caught a real pre-existing defect — `rotateAllIndexDoneLists` swallowed `listBoardContexts` structured throw so the index-rotation CLI silently no-opped on a legacy tree — plus the missing CLI-verb half of criterion 1; iteration 2 fixed both (`lib/test/cli-layout-refusal.test.mjs`). Verifier corrected TESTS_ADDED to a net +28 (worker reported 34 then 27).
+**Conductor note:** ADR-0078 addendum applied in place on main (existing ADR, not routed through finalizeAdrNumbering), placed at the end of Enforcement after the zgav8 addendum per the in-file precedent; the README Layout bullet delta needed the trailing `<!-- legacy-path-ok -->` marker added to both `expected` and `body` before it applied cleanly (`applied`, one bullet). README is 1399 lines, past the ADR-0041 ~600-line trigger (pre-existing) — consider `modeling` CONSOLIDATE.
+**Vacuum guard:** ready set empty after the batch — todo/ is empty in every BC. Open item surfaced: Brainstorm on existing code (next iteration). (open 99 days). Resolving it is the highest-leverage move; no work was self-generated.
+
+---
+
 ## 2026-09-12 15:06 -- Task verified and completed: agentic-workflow-g5ez5 - Close the two-root layout (ADR-0078) — every consumer except `migrate` refuses a legacy tree with `legacy-layout`, `detectLayout`'s neither-root default flips to `board`, the legacy combined INDEX template and every transitional dual-layout branch are deleted, and a fresh-project walk-through plus the tree-wide lint prove `.agentheim/` holds exactly `knowledge/` and `board/`
 
 **Type:** Work / Task completion
