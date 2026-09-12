@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 2
-- **Todo:** 1
+- **Backlog:** 1
+- **Todo:** 2
 - **Doing:** 0
 - **Done:** 203
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-qwfq3** — Worker RESULT survives a lost transcript — the worker writes its RESULT to a conductor-designated sidecar under `.worktrees/.results/`, repeats the header block after the four fenced blocks behind a `RESULT_END` sentinel, and the conductor reads it through a mechanized sidecar → transcript → unescaped-notification ladder whose floor is a lost-result re-dispatch into the same worktree under its own one-shot budget (ADR-0080) (bug) — `todo/agentic-workflow-qwfq3-worker-result-survives-lost-transcript.md`
 - **agentic-workflow-g2fgb** — `lib/readme-delta.mjs`'s `replace` op anchors a bold term head that wraps onto a continuation line — `termHeadOf` matches on the whitespace-collapsed bullet text, guarded by a wrapped-head test fixture, and a missing anchor disposes distinctly from an `expected` collision (bug) — `todo/agentic-workflow-g2fgb-readme-delta-replace-anchors-wrapped-term-head.md`
 <!-- todo-list:end -->
 
@@ -54,7 +55,6 @@ research touching this BC, and concept synthesis pages.
 ### Backlog
 <!-- backlog-list:start -->
 - **agentic-workflow-gwh69** — Mechanized RESULT reconstruction from the worktree — `lib/worker-result.mjs` gains `reconstructResultFromWorktree`, rebuilding a top-truncated SUCCESS's headers from the conductor-gathered changed-path list and the surviving blocks with explicit `reconstructed` provenance, as a ladder rung ahead of the lost-result re-dispatch — built only once ADR-0080's compliance or re-dispatch evidence says the redundancy is not enough (feature) — `backlog/agentic-workflow-gwh69-mechanized-result-reconstruction-from-worktree.md`
-- **agentic-workflow-qwfq3** — Worker RESULT survives a lost transcript — the worker also writes its RESULT to a conductor-designated sidecar file, repeats the header fields after the four blocks, and lib/worker-result.mjs gains a mechanized unescape-and-reconstruct fallback so the conductor never hand-rebuilds FILE_LIST from a truncated notification (bug) — `backlog/agentic-workflow-qwfq3-worker-result-survives-lost-transcript.md`
 <!-- backlog-list:end -->
 
 

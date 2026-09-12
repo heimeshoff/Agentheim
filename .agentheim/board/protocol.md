@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 19:49 -- Modeling / Promoted: agentic-workflow-qwfq3 - Worker RESULT survives a lost transcript — the worker writes its RESULT to a conductor-designated sidecar under `.worktrees/.results/`, repeats the header block after the four fenced blocks behind a `RESULT_END` sentinel, and the conductor reads it through a mechanized sidecar → transcript → unescaped-notification ladder whose floor is a lost-result re-dispatch into the same worktree under its own one-shot budget (ADR-0080)
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-12 19:48 -- Modeling / Refined: agentic-workflow-qwfq3 - Worker RESULT survives a lost transcript
 
 **Type:** Modeling / Refine
