@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-13 00:09 -- Modeling / Captured: infrastructure-reh04 - Refresh the repo README so `/setup` is part of the install flow, the state-layout tree and every quoted path reflect the two-root layout (ADR-0078), and the skills table, repo layout, and status reflect what shipped since the June restructure (0.8.8 → 0.9.4) — concise, no walkthrough
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** README refresh: /setup joins the install flow, the state-layout tree and paths move to the two-root layout (ADR-0078), and the skills, repo-layout, and status sections catch up with 0.8.9 to 0.9.4. Filed straight to todo: scope is fully enumerated from the CHANGELOG and ADRs already on disk.
+
+---
+
 ## 2026-09-13 00:03 -- Modeling / Refined: agentic-workflow-gwh69 - Mechanized RESULT reconstruction from the worktree
 
 **Type:** Modeling / Refine
