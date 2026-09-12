@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 17:31 -- Batch started: [infrastructure-js62b]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-js62b - `/setup` installs, upgrades and removes the VS Code bridge from the shipped `.vsix`, reports its install state, and the dashboard's skew banner names `/setup` as the remedy
+**Parallel:** no (1 worker — js62b was the only blocked task; unblocked by x56qm and j3rsn integrating this session; todo/ otherwise empty across every BC)
+
+---
+
 ## 2026-09-12 17:30 -- Task verified and completed: infrastructure-x56qm - `/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn
 
 **Type:** Work / Task completion

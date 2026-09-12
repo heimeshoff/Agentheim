@@ -1,7 +1,7 @@
 ---
 id: infrastructure-js62b
 title: `/setup` installs, upgrades and removes the VS Code bridge from the shipped `.vsix`, reports its install state, and the dashboard's skew banner names `/setup` as the remedy
-status: todo
+status: doing
 type: feature
 context: infrastructure
 created: 2026-09-12
