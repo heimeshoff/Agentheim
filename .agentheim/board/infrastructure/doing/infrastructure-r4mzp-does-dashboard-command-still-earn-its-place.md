@@ -1,7 +1,7 @@
 ---
 id: infrastructure-r4mzp
 title: Does `/dashboard` still earn its place as a slash command, now that launching the dashboard costs ~120k tokens across two turns while a shell invocation costs zero?
-status: todo
+status: doing
 type: decision
 context: infrastructure
 created: 2026-09-11

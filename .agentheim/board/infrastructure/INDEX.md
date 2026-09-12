@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 34
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **infrastructure-r4mzp** — Does `/dashboard` still earn its place as a slash command, now that launching the dashboard costs ~120k tokens across two turns while a shell invocation costs zero? (decision) — `todo/infrastructure-r4mzp-does-dashboard-command-still-earn-its-place.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **infrastructure-r4mzp** — Does `/dashboard` still earn its place as a slash command, now that launching the dashboard costs ~120k tokens across two turns while a shell invocation costs zero? (decision) — `doing/infrastructure-r4mzp-does-dashboard-command-still-earn-its-place.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 16:11 -- Batch started: [infrastructure-r4mzp]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-r4mzp - Does `/dashboard` still earn its place as a slash command, now that launching the dashboard costs ~120k tokens across two turns while a shell invocation costs zero?
+**Parallel:** no (1 worker — the whole ready set; infrastructure-r4mzp is the only todo task across every BC; x56qm stays in backlog, blocked on this decision)
+
+---
+
 ## 2026-09-12 16:09 -- Modeling / Refined: infrastructure-x56qm - A `/setup` command — one-time, per-machine install of the zero-token dashboard CLI and/or the VS Code bridge
 
 **Type:** Modeling / Refine
