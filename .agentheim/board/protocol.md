@@ -5,6 +5,16 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 23:07 -- Modeling / Refined: agentic-workflow-vsb06 - migrate reports residual legacy-path references outside .agentheim/
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** Builder decision: the residual-reference scan runs automatically only on the migrating (moved) run. A plain noop stays zero-cost with no field, and a new `scanResiduals` opt runs the scan on demand. Added criteria for the noop not scanning (spied walker), the opt-in noop and mixed refusal, and the scan running outside the lifecycle lock. Noted the lint allowlist entry and the reds already failing on main.
+**ADRs written:** none
+
+---
+
 ## 2026-09-12 21:10 -- Modeling / Captured: agentic-workflow-vsb06 - The `migrate` verb reports the legacy `.agentheim/contexts/` references it does not rewrite — project files outside `.agentheim/` such as `CLAUDE.md` and `.claude/commands/` — as a read-only manifest field the step-0 notice names, so a consumer learns what still points at the old layout instead of finding out when a command breaks
 
 **Type:** Modeling / Capture
