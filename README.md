@@ -88,7 +88,9 @@ Launching it costs no model turn once you've installed the CLI. Run **`/setup`**
 
 The backlog column's **Quick Capture** and **Modeling** buttons start a seeded Claude session directly (`claude "/agentheim:quick-capture"` / `claude "/agentheim:modeling"`) instead of just copying the command. Because the dashboard runs inside VS Code's sandboxed Simple Browser, the only way to reach a real, visible terminal is a tiny local **VS Code bridge extension** — a `127.0.0.1`-only listener the dashboard talks to (see [ADR-0018](.agentheim/knowledge/decisions/0018-vscode-dashboard-terminal-bridge.md)). Without it, the buttons **silently fall back to copying the command to the clipboard** — that's a normal mode, not an error, so installing the bridge is optional.
 
-To enable the launch buttons, package and install the extension (it isn't on the Marketplace):
+**Install it via `/setup`** — the primary install path. The same one-time, per-machine installer that ships the dashboard CLI ([ADR-0079](.agentheim/knowledge/decisions/0079-dashboard-cli-ships-via-setup-command.md)) also installs (or upgrades in place) the bridge from the `.vsix` already shipped with the plugin — choose the bridge option and there is no packaging step to run yourself.
+
+**From-source alternative** — only needed if you're developing the extension itself (it isn't on the Marketplace, so this is how the shipped `.vsix` gets built in the first place):
 
 ```sh
 cd vscode-extension
@@ -105,9 +107,9 @@ Then **activate** it:
 2. Reload the window — `Ctrl/Cmd+Shift+P` → **Developer: Reload Window**. On startup the extension walks up to find `.agentheim/`, binds `127.0.0.1:31425` (falling back to `31426`/`31427`), and writes the discovery file `.agentheim/.dashboard/bridge.json`.
 3. Click **Quick Capture** or **Modeling** — a `Claude` terminal opens and runs the seeded command. No dashboard refresh is needed; each click re-probes the bridge, and it works from an external browser too (the bridge echoes your origin in the CORS preflight; both ends are loopback).
 
-**Upgrading (and the "older version" banner).** VS Code runs the *installed* extension, never the source in this repo — editing `vscode-extension/src/` changes nothing until you re-package and re-install. If the dashboard shows *"Your VS Code bridge is running an older version. Some launch options are unavailable…"*, your installed build predates a capability the dashboard now sends (it advertises what it honours via `GET /health`; see [ADR-0018](.agentheim/knowledge/decisions/0018-vscode-dashboard-terminal-bridge.md)). Re-run the two commands above with `--force`, **then** reload the window — a reload alone re-activates the same stale build and the banner will persist.
+**Upgrading (and the "older version" banner).** VS Code runs the *installed* extension, never the source in this repo — editing `vscode-extension/src/` (or re-running `/setup` without reloading) changes nothing until the window reloads. If the dashboard shows *"Your VS Code bridge is running an older version. Some launch options are unavailable. Run `/setup` to upgrade it, then reload the window."*, run `/setup` (or the from-source sequence above), **then** reload the window — a reload alone re-activates the same stale build and the banner will persist.
 
-The terminal keeps Claude's **normal permission prompts intact** — the bridge never hard-wires `--dangerously-skip-permissions`. Trust boundary is loopback-only binding plus a per-activation shared-secret token, fine for a single-user dev box but not for any networked deployment. Uninstall with `code --uninstall-extension agentheim.agentheim-bridge` (it removes `bridge.json` on deactivation). See [`vscode-extension/README.md`](vscode-extension/README.md) for the full HTTP contract and architecture.
+The terminal keeps Claude's **normal permission prompts intact** — the bridge never hard-wires `--dangerously-skip-permissions`. Trust boundary is loopback-only binding plus a per-activation shared-secret token, fine for a single-user dev box but not for any networked deployment. Uninstall via `/setup` (remove the bridge option), or manually with `code --uninstall-extension agentheim.agentheim-bridge` (it removes `bridge.json` on deactivation). See [`vscode-extension/README.md`](vscode-extension/README.md) for the full HTTP contract and architecture.
 
 </details>
 

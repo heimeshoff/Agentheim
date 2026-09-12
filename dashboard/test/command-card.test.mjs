@@ -123,6 +123,13 @@ test('the card inlines no install logic (copyFileSync / mkdir / chmod stay in li
   }
 });
 
+test('the card inlines no `code --install-extension` / `code --uninstall-extension` literal (bridge install logic stays in lib/setup-cli.mjs, infrastructure-js62b)', () => {
+  const card = readFileSync(cardPath, 'utf8');
+  for (const forbidden of ['code --install-extension', 'code --uninstall-extension']) {
+    assert.ok(!card.includes(forbidden), `card must not inline "${forbidden}" -- bridge install logic belongs in lib/setup-cli.mjs`);
+  }
+});
+
 // --- Meta: prove the extractor/predicates actually CATCH the regression classes. ---
 // A passing guard against an already-correct card is worthless unless we show it
 // would fail against the bad forms (both the 008 bare-relative and the 010

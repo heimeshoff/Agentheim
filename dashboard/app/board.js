@@ -645,9 +645,14 @@ const PROMPT_FIELD_MAX_PX = 168;
 // capability arrives and a bridge advertises everything today's
 // KNOWN_CAPABILITIES names but still lacks that one (builder's ruling, see
 // the task's Notes: the banner fires on ANY missing capability, not on
-// 'model' specifically).
+// 'model' specifically). infrastructure-js62b names /setup as the remedy
+// (ADR-0079 §5) now that it can actually install the upgrade: the banner
+// structurally cannot distinguish "upgraded via /setup, window not yet
+// reloaded" from "never upgraded" (it fires off the running listener's own
+// advertised capabilities), so the copy is worded to be safe under both
+// readings -- merely redundant in the first, not wrong.
 const BRIDGE_SKEW_BANNER_TEXT =
-  "Your VS Code bridge is running an older version. Some launch options are unavailable until you reload the window.";
+  "Your VS Code bridge is running an older version. Some launch options are unavailable. Run `/setup` to upgrade it, then reload the window.";
 
 // A board-local PROMPT-MODE TAB (agentic-workflow-bz3az — rebuilds aw-065/aw-068's
 // PromptLaunchCard into the ADR-0050 docked console's top row of four mode tabs;

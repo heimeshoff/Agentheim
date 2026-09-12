@@ -1,8 +1,10 @@
 // Literal-substring doc guard over the root README's dashboard section
 // (ADR-0079, infrastructure-x56qm): the old `/dashboard` launch/stop/status
 // table must be replaced by the pointer description plus an
-// `agentheim-dashboard` table naming `/setup` as the install path, and the
-// bridge <details> block must be left untouched (js62b owns it).
+// `agentheim-dashboard` table naming `/setup` as the install path. The bridge
+// <details> block is infrastructure-js62b's: `/setup` becomes the primary
+// bridge install path, and the four-command `vsce package` sequence survives
+// below it, relabelled the from-source alternative.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -32,10 +34,15 @@ test('README describes /dashboard as a pointer', () => {
   assert.match(readme, /`\/dashboard`.*pointer/s, 'README must describe /dashboard as a pointer');
 });
 
-test('the bridge <details> block is unchanged (js62b owns it)', () => {
-  assert.ok(readme.includes('<summary><b>Optional: VS Code bridge'), 'the bridge <details> block must still be present verbatim');
+test('the bridge <details> block names /setup as the primary install path and keeps the vsce sequence as the from-source alternative (infrastructure-js62b)', () => {
+  assert.ok(readme.includes('<summary><b>Optional: VS Code bridge'), 'the bridge <details> block must still be present');
+  const [bridgeBlock] = readme.match(/<summary><b>Optional: VS Code bridge[\s\S]*?<\/details>/) || [];
+  assert.ok(bridgeBlock, 'the bridge <details> block must be extractable');
+  assert.match(bridgeBlock, /`\/setup`/, 'the bridge block must name /setup');
+  assert.match(bridgeBlock, /primary install path/i, 'the bridge block must call /setup the primary install path');
+  assert.match(bridgeBlock, /from-source alternative/i, 'the vsce package sequence must be labelled the from-source alternative');
   assert.ok(
-    readme.includes('npx vsce package --allow-missing-repository    # → agentheim-bridge-<version>.vsix'),
-    'the bridge install snippet must be unchanged'
+    bridgeBlock.includes('npx vsce package --allow-missing-repository    # → agentheim-bridge-<version>.vsix'),
+    'the from-source vsce sequence must still be present'
   );
 });

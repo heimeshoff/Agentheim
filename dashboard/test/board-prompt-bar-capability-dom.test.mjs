@@ -163,8 +163,8 @@ test('legacy/skewed bridge (present, /health omits capabilities): the banner ren
     assert.ok(banner, 'a present-but-skewed bridge must raise the dismissible banner');
     assert.match(
       banner.textContent,
-      /Your VS Code bridge is running an older version\. Some launch options are unavailable until you reload the window\./,
-      'the banner copy must be the generic, field-naming-nothing text (builder\'s ruling: it fires on ANY missing capability)',
+      /Your VS Code bridge is running an older version\. Some launch options are unavailable\. Run `\/setup` to upgrade it, then reload the window\./,
+      'the banner copy must be the generic, field-naming-nothing text naming /setup as the remedy (builder\'s ruling: it fires on ANY missing capability)',
     );
 
     assert.equal(

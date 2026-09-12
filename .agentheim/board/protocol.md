@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 18:06 -- Task verified and completed: infrastructure-js62b - `/setup` installs, upgrades and removes the VS Code bridge from the shipped `.vsix`, reports its install state, and the dashboard's skew banner names `/setup` as the remedy
+
+**Type:** Work / Task completion
+**Task:** infrastructure-js62b - `/setup` installs, upgrades and removes the VS Code bridge from the shipped `.vsix`, reports its install state, and the dashboard's skew banner names `/setup` as the remedy
+**Summary:** /setup gains install bridge / remove bridge from the shipped .vsix via an injectable which/exec seam (win32 shell spawn with per-argument quoting), status gains a version-compared bridge key that reports unknown when code is absent or fails, the dashboard skew banner names /setup as the remedy, and README names /setup as the primary bridge install path
+**Duration:** 34m
+**Verification:** PASS (iteration 2)
+**Files changed:** 9
+**Tests added:** 15
+**ADRs written:** none
+
+---
+
+## 2026-09-12 17:52 -- Verification failed: infrastructure-js62b - `/setup` installs, upgrades and removes the VS Code bridge from the shipped `.vsix`, reports its install state, and the dashboard's skew banner names `/setup` as the remedy
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-js62b - `/setup` installs, upgrades and removes the VS Code bridge from the shipped `.vsix`, reports its install state, and the dashboard's skew banner names `/setup` as the remedy
+**Iteration:** 1 of 3
+**Reasons:** the shipped default exec seam spawns `code.cmd` via execFileSync without `shell`, which Node refuses on win32 (EINVAL) — every real install/remove bridge would exit 1 and buildBridgeStatus swallows the error into `not-installed` while codeOnPath is true (the exact conflation AC 3 forbids); all six bridge tests inject exec so none exercises the default seam; everything else clean (lib 753/753, dashboard 1014/1015 with only the expected dist-staleness artifact, banner text byte-exact, bootstrap-once intact)
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-09-12 17:31 -- Batch started: [infrastructure-js62b]
 
 **Type:** Work / Batch start

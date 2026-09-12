@@ -575,6 +575,16 @@ test('bridgeSupportsModel and bridgeSkewed are derived separately from the one p
   );
 });
 
+test('BRIDGE_SKEW_BANNER_TEXT names /setup as the remedy (infrastructure-js62b, ADR-0079 §5)', () => {
+  // BRIDGE_SKEW_BANNER_TEXT is a module-level const, declared OUTSIDE the
+  // BoardPromptBar function body -- pinned against the whole file, not barSrc().
+  assert.match(
+    boardSrc,
+    /const BRIDGE_SKEW_BANNER_TEXT =\s*\n\s*"Your VS Code bridge is running an older version\. Some launch options are unavailable\. Run `\/setup` to upgrade it, then reload the window\."/,
+    'BRIDGE_SKEW_BANNER_TEXT must equal the ADR-0079 §5 remedy text verbatim',
+  );
+});
+
 test('modelLocked is true when the bridge cannot support a model choice (absent OR present-but-too-old) OR the highlighted mode is Quick Capture', () => {
   const bar = barSrc();
   assert.match(bar, /const modelLocked = !bridgeSupportsModel \|\| isModelLockedForMode\(highlightedMode\)/,
