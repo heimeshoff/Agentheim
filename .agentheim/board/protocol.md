@@ -5,6 +5,26 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 19:48 -- Modeling / Refined: agentic-workflow-qwfq3 - Worker RESULT survives a lost transcript
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo (auto-promoted on readiness)
+**Summary:** Resolved the capture three open choices against the live code and an orchestrator critique (architect + tactical-modeler): sidecar at .worktrees/.results/<id>.iter-<N>.md with a session-end sweep instead of per-teardown deletion; both header copies plus RESULT_END; structural fence boundaries, complete-copy-only header detection, whitespace-normalized comparison with a mechanical/prose split, a self-referential spoof test; a pure selectResultSource replaces the prose ladder; the lost-result re-dispatch gets its own one-shot budget in lib/merge-conflict-ladder.mjs, separate from the FAIL cap-3 and the merge-conflict one-shot; verifier.md nine-field restatement deleted per ADR-0068; lint lib/worker-result-contract.mjs. The mechanical reconstruction rung is split out and gated on evidence.
+**Split into:** agentic-workflow-gwh69 (backlog, depends_on qwfq3, evidence-gated)
+**ADRs written:** ADR-0080 (proposed; amends ADR-0032 section 3, ADR-0074, ADR-0072 Budget, ADR-0068)
+
+---
+
+## 2026-09-12 19:48 -- Modeling / Captured: agentic-workflow-gwh69 - Mechanized RESULT reconstruction from the worktree — `lib/worker-result.mjs` gains `reconstructResultFromWorktree`, rebuilding a top-truncated SUCCESS's headers from the conductor-gathered changed-path list and the surviving blocks with explicit `reconstructed` provenance, as a ladder rung ahead of the lost-result re-dispatch — built only once ADR-0080's compliance or re-dispatch evidence says the redundancy is not enough
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Split out of agentic-workflow-qwfq3 at refinement: the mechanized reconstructResultFromWorktree rung is fully specified here but deferred behind evidence (ADR-0080 section 7) - promote only once the protocol shows a fired lost-result re-dispatch or repeated sidecar/trailing-header non-compliance after qwfq3 ships.
+
+---
+
 ## 2026-09-12 19:27 -- Modeling / Captured: agentic-workflow-qwfq3 - Worker RESULT survives a lost transcript — the worker also writes its RESULT to a conductor-designated sidecar file, repeats the header fields after the four blocks, and lib/worker-result.mjs gains a mechanized unescape-and-reconstruct fallback so the conductor never hand-rebuilds FILE_LIST from a truncated notification
 
 **Type:** Modeling / Capture

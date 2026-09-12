@@ -1,15 +1,15 @@
 ---
 id: agentic-workflow-qwfq3
-title: Worker RESULT survives a lost transcript — the worker also writes its RESULT to a conductor-designated sidecar file, repeats the header fields after the four blocks, and lib/worker-result.mjs gains a mechanized unescape-and-reconstruct fallback so the conductor never hand-rebuilds FILE_LIST from a truncated notification
+title: Worker RESULT survives a lost transcript — the worker writes its RESULT to a conductor-designated sidecar under `.worktrees/.results/`, repeats the header block after the four fenced blocks behind a `RESULT_END` sentinel, and the conductor reads it through a mechanized sidecar → transcript → unescaped-notification ladder whose floor is a lost-result re-dispatch into the same worktree under its own one-shot budget (ADR-0080)
 status: backlog
 type: bug
 context: agentic-workflow
 created: 2026-09-12
 completed:
 depends_on: []
-blocks: []
+blocks: [agentic-workflow-gwh69]
 tags: [captured, worker-contract, worker-result, mechanization, work-skill, transcript-loss, harness]
-related_adrs: [0074, 0059, 0038, 0057, 0032]
+related_adrs: [0080, 0074, 0032, 0072, 0059]
 related_research: []
 prior_art: [agentic-workflow-ghcaj, agentic-workflow-q7v3k, agentic-workflow-r7dq3]
 ---
@@ -47,94 +47,176 @@ mechanized, tested step or be dropped. The verifier, meanwhile, was handed a RES
 conductor had partly authored, which ADR-0062's runner-first doctrine never contemplated.
 
 The root cause (the harness's transcript loss and notification escaping/truncation) is outside
-the project's control and is **not** this task's target — ADR-0065 prefers a known-cheap
-remediation over further diagnosis. What IS under the project's control: the worker's return
-format, the conductor prose in `skills/work/SKILL.md`, the parser in `lib/worker-result.mjs`,
-and the verifier's inputs.
+the project's control and is **not** this task's target. What IS under the project's control:
+the worker's return format, the conductor prose in `skills/work/SKILL.md`, the parser in
+`lib/worker-result.mjs`, the iteration budget in `lib/merge-conflict-ladder.mjs`, and the
+verifier's inputs.
 
 ## What
 
-Make the RESULT contract robust to loss of its primary copy, in three layers, all inside
-`agentic-workflow`:
+Implement **ADR-0080** (written at refinement, 2026-09-12 — read it first; it records every
+design call below with the alternatives rejected). Six pieces, all inside `agentic-workflow`:
 
-1. **A belt-and-braces sidecar copy the worker writes.** The conductor's spawn prompt gains a
-   `Result file:` field naming an absolute path the worker writes its byte-identical RESULT
-   text to (via the Write tool) as its final action before returning it. Proposed location:
-   `<repo-root>/.worktrees/<task-id>.result.md` — outside the worktree but inside the already
-   git-ignored `.worktrees/` directory, so it never appears in the worktree's `git status`,
-   never reaches the checkpoint guard, and is deleted with the worktree at teardown. This does
-   not weaken the worker's "never write under `.agentheim/`" rule (ADR-0074): the sidecar is
-   harness scratch, like the worktree itself.
+**1. Sidecar copy — the primary fix.** The Subagent Prompt Template's `## Your task` block gains
+`Result file: <ABSOLUTE-PATH>`, the absolute form of
+`resultSidecarRelativePath(taskId, iteration)` (a new pure export of `lib/worker-result.mjs`
+returning `.worktrees/.results/<task-id>.iter-<N>.md`; `<N>` is the verification iteration
+this dispatch is judged at). The worker's final action, for every RESULT kind, is to write its
+exact RESULT text there with the Write tool and then return the same text. This is the **one
+sanctioned worker write outside its worktree** — a narrowing of ADR-0032 §3's workspace
+confinement, not of rule 10 (`.agentheim/` stays untouchable; the checkpoint guard still
+refuses anything there). The conductor deletes any file at that path before spawning, and after
+the worker returns records whether the sidecar was present with a matching `TASK_ID`
+(`sidecar: present | missing` — the compliance signal `agentic-workflow-gwh69`'s gate reads).
+No per-teardown deletion anywhere: a single **session-end sweep** in "Reconciling stranded
+carry-over" deletes every `.worktrees/.results/*.md` whose `<task-id>` has no live worktree in
+`git worktree list --porcelain` and reports the count; a kept (escalated) worktree keeps its
+sidecars because the worktree is still listed.
 
-2. **A truncation-tolerant layout.** The worker repeats the nine header fields **after** the
-   `BACKLOG_ITEMS` block (a trailing header repeat, terminated by a `RESULT_END` sentinel line),
-   so a top-truncated copy still carries every header. `parseWorkerResult` accepts the header
-   block in either or both positions and rejects `header-mismatch` when both are present and
-   disagree. (Today's `extractBlocks` already skips non-fence lines after the last block, so
-   the trailing repeat is backward-compatible with the current parser.)
+**2. Truncation-tolerant layout.** On SUCCESS, after the closing fence of the last fenced block,
+the worker repeats the header block verbatim — the `RESULT: SUCCESS` line plus the nine fields —
+then a final line reading exactly `RESULT_END`. BOUNCED and FAILED end with `RESULT_END` alone.
+Both copies are kept: a top-truncation keeps the trailing headers, a bottom-truncation keeps the
+leading ones, `RESULT_END` proves the tail is intact. Honest recovery window: the trailing copy
+rescues only a top-truncation that lands at or before the first opening fence; a cut inside a
+block loses that block and no rung short of re-dispatch recovers it.
 
-3. **A mechanized, tested fallback ladder in `lib/worker-result.mjs`** the conductor runs
-   instead of hand-recovering: `unescapeNotificationCopy(text)` (entity decode + stray
-   closing-tag line drop) and `reconstructResultFromWorktree({partialText, changedPaths,
-   worktreeRoot, taskId})` (rebuild the missing headers from the conductor-supplied changed
-   path list and the surviving `OUTCOME` / `ADRS` blocks, marking every rebuilt field with
-   explicit `reconstructed` provenance and never fabricating `TESTS_PASSING`). The module stays
-   stdlib-free, git-free and side-effect-free — the conductor gathers the path list with git and
-   passes it in.
+**3. Parser grammar** (`parseWorkerResult`), settled rules:
+- Fence boundaries come from `extractBlocks`'s own scan (it returns the index after the last
+  closing fence it consumed) — never a raw re-scan for `````. A top-level four-backtick line
+  that is not a well-formed opening fence (`^````[A-Z_]+\s*$`) or the closing fence of an open
+  block is rejected `stray-fence`, never silently skipped.
+- Leading region = lines before the first opening fence; trailing region = lines after the last
+  closing fence. A header copy counts only when **complete** (the `RESULT:` line plus every
+  required field for that value); an incomplete fragment is discarded, never compared.
+- The text's first non-blank line must still be either `RESULT:` or an opening fence — no
+  preamble is tolerated; anything else is `missing-result-line` exactly as today.
+- Both copies present: values compared trimmed and whitespace-collapsed. A difference in a
+  mechanically consumed field (`RESULT`, `TASK_ID`, `FILES_CHANGED`, `FILE_LIST`,
+  `ADRS_WRITTEN`, `TESTS_ADDED`, `TESTS_PASSING`, `TDD_SKIPPED`) rejects
+  `{ok:false, code:'header-mismatch', field}`; a difference in a prose field (`SUMMARY`,
+  `CONCEPT_CANDIDATE`) is reported in `layout.softMismatch` and the leading copy wins.
+- A trailing-only copy whose value is BOUNCED or FAILED with fenced blocks above it rejects
+  `layout-conflict`.
+- `RESULT` never lands in `fields` (`Object.keys(fields)` equals `SUCCESS_FIELDS` regardless of
+  source). Every `ok:true` result — SUCCESS, BOUNCED, FAILED — carries
+  `layout: {leadingHeader, trailingHeader, endSentinel, softMismatch}`.
+- A `RESULT:` / `RESULT_END` line inside a fenced block is content. This task's own worker will
+  quote the format inside `OUTCOME`, so the spoof case is exercised on day one.
+- Backward-compatible: a leading-only RESULT without `RESULT_END` parses to identical `fields`
+  and `blocks`; the existing extra-fenced-block tolerance (r4mzp shape) survives.
 
-The conductor's order of preference becomes: sidecar file → transcript `.output` →
-unescaped notification copy → reconstruct from worktree; whichever source actually produced
-the parsed RESULT is recorded as a measured `**Result source:**` line on the task's completion
-protocol entry (ADR-0038 Ruling B — never a fabricated "parsed cleanly"). The verifier is handed
-only a `parseWorkerResult`-valid RESULT plus the list of reconstructed fields; a RESULT that
-still fails to parse after the whole ladder is a `FAILED` dispatch, never a hand-parse.
+**4. Unescape + mechanized source selection** — two new pure exports of `lib/worker-result.mjs`:
+`unescapeNotificationCopy(text)` (single left-to-right pass over `&lt; &gt; &amp; &quot;
+&#39;` and numeric `&#NNN;` / `&#xHH;`, so `&amp;lt;` becomes `&lt;` never `<`; drops any line
+that is solely `</NAME>` for one of the four block names; plain text returns byte-identical),
+and `selectResultSource({taskId, sidecar, transcript, notification})` — tries sidecar, then
+transcript, then `unescapeNotificationCopy(notification)`; a candidate counts only if it
+parses and its `TASK_ID` equals `taskId`; returns `{ok:true, source, parsed, attempts}` or
+`{ok:false, code:'no-valid-source', attempts}` with `attempts` as `[{source, code}]`. The
+conductor gathers the three strings and calls this; it never chooses in prose.
+
+**5. Lost-result re-dispatch under its own one-shot budget.** `no-valid-source` → re-dispatch
+the worker into the SAME worktree with the standard template plus a prepended paragraph ("your
+prior RESULT was lost in transit; the worktree already holds your finished work; re-read the
+task, run the suite from the worktree, write the sidecar, return the RESULT"). Mechanized in
+`lib/merge-conflict-ladder.mjs`: `createLadderState()` gains `lostResultUsedThisWorktree`,
+`onLostResult(state)` returns `dispatch-lost-result` once per worktree lifetime and `escalate`
+thereafter, never touches `decideAfterVerifierVerdict`'s iteration count (the re-dispatch
+re-runs the **same** iteration number), and `onWorktreeTeardown()` resets it — mirroring
+ADR-0072's merge-conflict one-shot, and for ADR-0072's own reason: a transport loss is not
+evidence about the diff, so it must not consume a verifier-FAIL iteration. A second loss on
+the same worktree escalates as its own kind: salvage patch tagged `lost-result`, worktree kept,
+`## Salvage note` appended, reported on its own End-of-run line ("Lost-result escalations"),
+never in "Escalated after verification". Lost-result re-dispatches are tallied on their own
+line, so `PASS (iteration N)` and the dispatch tally keep their meaning. A lost RESULT never
+tears the worktree down and is never hand-parsed or hand-completed.
+
+**6. Observability + docs + lint.** The completion protocol entries gain
+`**Result source:** <sidecar|transcript|notification|re-dispatch> · layout <leading/trailing/
+sentinel> · sidecar <present|missing>` (measured, ADR-0038 Ruling B). `references/worker-
+return-format.md` is the single source for the new shape; `agents/worker.md` and the template
+point at it. `agents/verifier.md`'s parenthetical restatement of the nine field names — already
+drifted once (f7k2d) — is **deleted and replaced by a pointer** (ADR-0068 second-drift rule), and
+the new lint `lib/worker-result-contract.mjs` keeps every restatement site honest.
+
+**Deferred behind evidence — `reconstructResultFromWorktree`** (split to
+`agentic-workflow-gwh69`). Honest tradeoff: reconstruction *preserves* the worker's authored
+`ADRS` / `README_DELTA` / `OUTCOME` / `BACKLOG_ITEMS` blocks while a re-dispatch *re-authors*
+them; but reconstruction can only ever fabricate `TESTS_*` as `unknown`, and pieces 1 and 2
+cover every incident seen so far. Pieces 1 and 2 are **correlated** defences (both are prose
+instructions to the same worker in the same prompt; one bout of non-compliance can drop both),
+which is why the completion entry measures `sidecar` and `layout` on every task — that
+compliance signal, not only a fired re-dispatch, opens gwh69's gate.
 
 ## Acceptance criteria
 
-- [ ] `parseWorkerResult` accepts a SUCCESS text whose nine header fields appear after the
-      `BACKLOG_ITEMS` block (trailing repeat, followed by a `RESULT_END` line) as well as
-      before the blocks; when both copies are present and any field differs it returns
-      `{ok:false, code:'header-mismatch', field}`. `lib/test/worker-result.test.mjs` covers
-      leading-only, trailing-only, both-equal, and mismatch, and every pre-existing test in
-      that file still passes unchanged.
-- [ ] `lib/worker-result.mjs` exports `unescapeNotificationCopy(text)`: decodes `&lt;`
-      `&gt;` `&amp;` `&quot;` `&#39;` and numeric entities in one pass, drops stray lines that
-      are solely a closing tag of a block name (`</ADRS>`, `</OUTCOME>`), and is a no-op on
-      already-plain text. Tests: an escaped fixture shaped like the 2026-09-12 16:20 incident
-      round-trips to a `parseWorkerResult`-valid text; a plain RESULT is returned byte-identical.
-- [ ] `lib/worker-result.mjs` exports `reconstructResultFromWorktree({partialText,
-      changedPaths, worktreeRoot, taskId})`: given a top-truncated text whose first non-blank
-      line is a ````-fence and a conductor-gathered list of worktree-relative changed paths
-      (from `git status --porcelain` UNION `git diff --name-only <fork-point>...HEAD`, because a
-      wip-checkpointed iteration leaves porcelain empty), it returns `{ok:true, text, fields,
-      reconstructed:[...]}` where `FILE_LIST` is the absolute paths of every changed path that
-      `partitionCheckpointFiles` would stage (derived artifacts and `.agentheim/` paths
-      excluded), `FILES_CHANGED` is that count, `TASK_ID` is `taskId`, `ADRS_WRITTEN` is derived
-      from the `ADRS` block's `<!-- ADR: -->` markers, `SUMMARY` is the first sentence of the
-      `OUTCOME` body, `TESTS_ADDED` / `TESTS_PASSING` / `TDD_SKIPPED` are `unknown` (never
-      guessed), and `text` parses cleanly through `parseWorkerResult`. Rejects `not-truncated`
-      when the input already has a `RESULT:` line. Tests use a fixture built from the
-      infrastructure-js62b iteration-1 shape. The module remains stdlib-free, git-free and
-      side-effect-free (ADR-0038).
-- [ ] `references/worker-return-format.md` and `agents/worker.md` document the `Result file:`
-      spawn field, the worker's write-then-return final action, the trailing header repeat and
-      the `RESULT_END` sentinel; `skills/work/SKILL.md`'s Subagent Prompt Template carries the
-      `Result file:` line, and its Phase 4 step 6 replaces "Parse its strict return format"
-      with the four-rung source ladder above, the measured `**Result source:**` completion-entry
-      line, and the rule that a RESULT still unparseable after the ladder is a `FAILED` dispatch.
-      Worktree teardown (PASS/SKIP step 10, BOUNCE, FAILED, salvage paths) deletes the sidecar.
-- [ ] `agents/verifier.md` and the Verifier Prompt Template state that the verifier receives
-      only a `parseWorkerResult`-valid RESULT plus the `reconstructed` field list, and that a
-      non-empty `reconstructed` list (or `TESTS_PASSING: unknown`) makes the runner-first suite
-      run mandatory regardless of `TESTS_ADDED` (ADR-0062).
-- [ ] Enforcement (ADR-0059): a live-tree `node --test` lint in `lib/` (its own module plus
-      test, in the pattern of `lib/agent-spawn-namespace.mjs`) fails if `SUCCESS_FIELDS` in
-      `lib/worker-result.mjs` differs from the field list stated in
-      `references/worker-return-format.md`, or if any of `references/worker-return-format.md`,
-      `agents/worker.md`, or `skills/work/SKILL.md`'s Subagent Prompt Template omits the
-      `Result file:` field or the `RESULT_END` sentinel — closing the return-format restatement
-      drift class (agentic-workflow-f7k2d) mechanically.
-- [ ] `node --test lib/test/*.test.mjs` is green on the live tree after the change.
+- [ ] `lib/worker-result.mjs` exports `resultSidecarRelativePath(taskId, iteration)` returning
+      `.worktrees/.results/<task-id>.iter-<N>.md` (forward slashes; throws on a non-positive
+      integer iteration); a test pins the string.
+- [ ] `parseWorkerResult` accepts a SUCCESS header copy before the first fence, after the last
+      closing fence, or both, per the grammar in What §3. `lib/test/worker-result.test.mjs`
+      covers, and every pre-existing test there passes unchanged: leading-only without sentinel
+      (identical `fields`/`blocks` to today); leading+sentinel; trailing-only (text begins at a
+      ````README_DELTA fence); both-equal; mechanical mismatch (`FILE_LIST`, returns `field`);
+      prose-only mismatch (`SUMMARY`, ok with `layout.softMismatch`, leading value wins);
+      whitespace-only difference (ok, no soft mismatch); incomplete trailing fragment (ignored,
+      `layout.trailingHeader === false`); `stray-fence`; `layout-conflict`; preamble before the
+      leading `RESULT:` line still `missing-result-line`; BOUNCED and FAILED with `RESULT_END`
+      (`layout.endSentinel === true`); `RESULT` absent from `fields` in every case.
+- [ ] Spoof test: a SUCCESS text whose `OUTCOME` and `BACKLOG_ITEMS` content each contain the
+      literal lines `RESULT: SUCCESS` and `RESULT_END` parses with those lines as block content
+      and `layout.trailingHeader === false`.
+- [ ] Tolerance test: two extra ````NAME blocks between `BACKLOG_ITEMS` and the trailing copy
+      parse with the four `blocks` intact and `layout.trailingHeader === true`.
+- [ ] `unescapeNotificationCopy` per What §4: tests pin `&amp;lt;` → `&lt;`, the 2026-09-12
+      16:20 incident fixture (entities + two stray closing-tag lines) round-tripping to a
+      `parseWorkerResult`-valid text, and byte-identity on plain input.
+- [ ] `selectResultSource` per What §4: tests cover sidecar valid (source `sidecar`); sidecar
+      empty + transcript valid (`transcript`); sidecar with wrong `TASK_ID` + transcript valid
+      (`transcript`, attempts records the sidecar's `task-id-mismatch`); sidecar unparseable +
+      transcript empty + escaped top-truncated notification with trailing headers
+      (`notification`); all three dead (`no-valid-source`, three attempts). `lib/worker-result.mjs`
+      stays stdlib-free, git-free and side-effect-free (ADR-0038).
+- [ ] `lib/merge-conflict-ladder.mjs`: `createLadderState()` carries
+      `lostResultUsedThisWorktree: false`; `onLostResult(state)` returns
+      `{decision:'dispatch-lost-result', state}` on first use and `{decision:'escalate', state}`
+      on the second; it never changes `ladderUsedThisWorktree`; `onWorktreeTeardown()` resets
+      both flags; `onMergeBackConflict` is unchanged. Tests in `lib/test/merge-conflict-ladder.test.mjs`
+      cover all four and the independence of the two one-shots (a spent merge-conflict budget
+      leaves the lost-result budget available, and vice versa).
+- [ ] `references/worker-return-format.md` documents the `Result file:` field, the
+      write-then-return final action for every RESULT kind, the trailing header repeat (SUCCESS
+      only, verbatim including the `RESULT: SUCCESS` line), the `RESULT_END` sentinel (every
+      kind), and the sidecar path convention; its three code samples show the new shape.
+      `agents/worker.md`'s return-format section names `Result file:` and the final action,
+      states it is the one sanctioned write outside the worktree, and points at the reference
+      for the format (no restated field list).
+- [ ] `skills/work/SKILL.md`: the Subagent Prompt Template's `## Your task` block carries
+      `Result file: <ABSOLUTE-PATH>`; Phase 4 step 6 replaces "Parse its strict return format"
+      with: pre-spawn sidecar deletion, gather the three strings, call `selectResultSource`,
+      the lost-result re-dispatch via `onLostResult` with its prepended paragraph and same-
+      iteration rule, the never-hand-parse rule; the "Task verified and completed" and "Task
+      completed (verification skipped)" entry shapes carry the `**Result source:**` line;
+      "Salvaging a worktree's diff" names the `lost-result` tag; End-of-run reporting gains
+      "Lost-result re-dispatches" and "Lost-result escalations" lines; "Reconciling stranded
+      carry-over" gains the sidecar sweep step and its session-end count.
+- [ ] The Verifier Prompt Template carries the `Result source:` line (informational; verifier
+      behaviour unchanged) and `agents/verifier.md`'s inputs list names it; the parenthetical
+      nine-field restatement in `agents/verifier.md` is deleted in favour of a pointer to
+      `references/worker-return-format.md`.
+- [ ] Enforcement (ADR-0059): `lib/worker-result-contract.mjs` + `lib/test/worker-result-contract.test.mjs`
+      (stdlib-only, side-effect-free, loss-tolerant, in the shape of `lib/agent-spawn-namespace.mjs`)
+      fail on the live tree if (a) the SUCCESS code block in `references/worker-return-format.md`
+      does not list exactly `SUCCESS_FIELDS` in order; (b) that reference lacks the literal
+      `RESULT_END`, `Result file:`, or `.worktrees/.results/`; (c) `agents/worker.md` or the
+      Subagent Prompt Template in `skills/work/SKILL.md` lacks `Result file:`; (d) any `.md`
+      under `agents/` or `skills/` other than the reference carries all nine field names on one
+      line (a restated field list — the ADR-0068 second-drift guard).
+- [ ] ADR-0080's `status:` is flipped from `proposed` to `accepted` (reported via the `ADRS`
+      block's existing-ADR-amendment path, or noted in `OUTCOME` for the conductor to apply).
+- [ ] `node --test lib/test/*.test.mjs` is green on the live tree after the change, excluding
+      the two known pre-existing environmental flakes named in Notes.
 
 ## Notes
 
@@ -147,30 +229,34 @@ still fails to parse after the whole ladder is a `FAILED` dispatch, never a hand
   `FILE_LIST` matched the Outcome's key-files list exactly, so no fidelity loss was observed —
   but nothing measured that, and nothing would have caught a mismatch.
 - **Type call:** `bug`, not `spike` — the failure is reproducible and the remediation is
-  already known and cheap (ADR-0065 remediation-over-diagnosis). Diagnosing *why* the harness
-  drops the transcript or escapes/truncates the notification is out of scope; the contract is
-  being made robust to a lossy channel it was designed assuming lossless.
-- **Open design choices for REFINE:** (1) sidecar location — `.worktrees/<id>.result.md`
-  (proposed; already git-ignored, outside the worktree, torn down with it) versus the
-  conductor's session scratchpad (session-specific, but the worker would need the absolute
-  path passed anyway) versus a git-ignored path *inside* the worktree (simplest for the worker
-  but then it shows in porcelain and must be excluded from reconstruction); (2) replace the
-  leading headers with the trailing ones outright, or keep both (proposed: both — a
-  bottom-truncated copy then still has the leading ones); (3) whether `unescapeNotificationCopy`
-  can ever double-decode a legitimately escaped `&amp;amp;` inside an ADR body — the harness
-  escapes the whole text once, so a single pass is exact, but a test should pin that.
-- **ADR-0068 (drift-twice):** the return format was already found drifted once
-  (agentic-workflow-f7k2d, archived under `done-archive/2026-07.md`). Restate nothing in
-  `skills/work/SKILL.md`'s template by hand — paste `references/worker-return-format.md`'s
-  content as it already instructs, and let the new lint be the guard.
-- **Parser tolerance already relied on:** the r4mzp worker returned two extra fenced blocks
-  after `BACKLOG_ITEMS` (an existing-ADR addendum and another task's Notes) and the parser
-  tolerated them; the trailing header repeat must not break that tolerance.
+  known and cheap. Diagnosing *why* the harness drops the transcript or escapes/truncates the
+  notification is out of scope; the contract is being made robust to a lossy channel it was
+  designed assuming lossless.
+- **Refinement (2026-09-12):** the capture's three open choices and an orchestrator critique
+  (architect + tactical-modeler) are resolved in ADR-0080 — sidecar location with the three
+  rejected alternatives, both-copies layout, single-pass unescape, structural fence
+  boundaries, normalized header comparison, the separate lost-result budget, the session-end
+  sweep instead of per-teardown deletion, and the evidence-gated deferral of reconstruction.
+  Don't relitigate them in the worker; implement them.
+- **For the worker and the verifier — known environmental flakes on the builder's machine,
+  not regressions:** `lib/test/bridge.test.mjs` fails `EADDRINUSE` on :31425 while the real
+  VS Code bridge is running, and `lib/test/foreign-launch.test.mjs` can fail `EPERM` in its
+  `rmSync` teardown. Neither touches this task's files; report them as pre-existing.
+- **ADR-0068 (drift-twice):** paste `references/worker-return-format.md`'s content into the
+  spawn prompt as the template already instructs; restate nothing by hand. The lint's (d)
+  predicate is what keeps the verifier's deleted parenthetical from creeping back.
+- **Existing ladder tests:** `lib/test/merge-conflict-ladder.test.mjs` may deep-equal the
+  state shape — extend those assertions for the new flag; that file is not under the
+  "unchanged" rule (only `worker-result.test.mjs` is).
+- **Why `.worktrees/.results/` and not beside the worktree directory:** `git worktree list
+  --porcelain` enumerates worktree directories only and `git status --porcelain` never lists
+  ignored `/.worktrees/` content, so a sidecar dropped beside its worktree is invisible to
+  both halves of session-end reconciliation; a dedicated subfolder is enumerable with one
+  `readdir` and gives the sweep a single place to look.
 - **Prior art:** agentic-workflow-ghcaj (the report-carried contract and `parseWorkerResult`),
   agentic-workflow-q7v3k (guard the conductor's stage from the worker's self-reported
-  `FILE_LIST` — the same `partitionCheckpointFiles` the reconstruction must feed through),
-  agentic-workflow-r7dq3 (the post-ghcaj doctrine sweep across the same four files this task
-  edits). ADR-0063's salvage patch under `.agentheim/salvage/` is the closest precedent for a
-  conductor-side, git-ignored recovery artifact.
-- Related ADRs beyond the frontmatter cap: ADR-0062 (runner-first — why `TESTS_PASSING` is
-  never reconstructed), ADR-0065 (remediation over diagnosis), ADR-0068 (drift-twice).
+  `FILE_LIST`), agentic-workflow-r7dq3 (the post-ghcaj doctrine sweep across the same files
+  this task edits).
+- Related ADRs beyond the frontmatter cap: ADR-0038 (git-free lib, Ruling B), ADR-0057
+  (checkpoint guard), ADR-0062 (runner-first — why rung 4 re-runs the suite rather than
+  reconstructing `TESTS_PASSING`), ADR-0063 (salvage tag precedent), ADR-0068 (drift-twice).
