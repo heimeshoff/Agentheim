@@ -8,6 +8,40 @@ its **plugin contract** (skills, commands, `.agentheim/` layout) with
 
 ## [Unreleased]
 
+## [0.9.4] - 2026-09-12
+
+**`.agentheim/` splits into two roots, the dashboard costs zero tokens to launch, and the
+marketplace stops leaking `main`.** Durable knowledge now lives under `knowledge/` and the
+operational task system under `board/` (ADR-0078); a `migrate` verb moves an existing project
+across automatically the first time any writing skill runs. A new one-time `/setup` command
+installs the zero-token `agentheim-dashboard` CLI and the VS Code bridge on your machine, so
+`/dashboard` shrinks to a pointer. And the marketplace entry is pinned to the release tag
+(ADR-0081), so a consumer only ever installs a complete, tagged release — never a mid-rollout
+snapshot of `main` labelled with the last released version.
+
+### Added
+- **Two-root `.agentheim/` layout (ADR-0078)** — `knowledge/` holds the vision, context map, decisions, research, and every BC README under `knowledge/contexts/<bc>/`; `board/` holds every BC's `backlog/ todo/ doing/ done/` folders, `INDEX.md`, and `protocol.md`. One path module (`lib/task-system-paths.mjs`) resolves every path for every lifecycle verb, rotation, live-tree lint, and the dashboard; the INDEX template is split into a task half and a knowledge half.
+- **`migrate` verb** — `lib/layout-migration.mjs` on the lifecycle CLI moves a legacy tree into the two-root layout under the lifecycle lock: splits every per-BC INDEX losslessly, rewrites every stale pointer, refuses a mixed tree or a live worker worktree, and is idempotent. `work`, `modeling`, `brainstorm`, `research`, and quick-capture run it as "Before acting" step 0; `whats-next` and `inquire` show a legacy-tree notice. It also reports the legacy `.agentheim/contexts/` references it does *not* rewrite — project files outside `.agentheim/` such as `CLAUDE.md` and `.claude/commands/` — as a read-only manifest field the step-0 notice names, so you learn what still points at the old layout before a command breaks.
+- **`/setup` command (ADR-0079)** — one-time, per-machine, re-runnable. Installs the zero-token `agentheim-dashboard` CLI (three files shipped verbatim from `dashboard/cli/`, plain-copied into `<home>/.local/bin`, with print-only PATH remediation and byte-compare staleness), and `install bridge` / `remove bridge` / `status` for the VS Code bridge from the shipped `.vsix`, with a version-compared bridge key that reports `unknown` when `code` is absent.
+- **The VS Code bridge `.vsix` ships as a committed release artifact** (0.5.0), un-ignored and guarded by a compare-only version-match lint plus a `RELEASE.md` packaging step, mirroring how `dashboard/dist/` reaches consumers.
+- **Marketplace pins the release tag (ADR-0081)** — `.claude-plugin/marketplace.json` is a `github` source with `ref: "v<plugin.json version>"`, moved in lockstep with the version bump; `lib/marketplace-ref-lint.mjs` fails the suite whenever the two disagree. `/release` gains a mid-rollout advisory that lists in-flight tasks before freezing a tree into a tag.
+- **A worker RESULT survives a lost transcript (ADR-0080)** — the worker writes its RESULT to a conductor-designated sidecar under `.worktrees/.results/` and repeats the header block behind a `RESULT_END` sentinel; the conductor reads it through a mechanized sidecar → transcript → unescaped-notification ladder whose floor is a lost-result re-dispatch into the same worktree under its own one-shot budget. `lib/worker-result-contract.mjs` lints every restatement of the contract.
+- **Permanent legacy-path-literal lint** — `lib/legacy-path-literal-lint.mjs` fails tree-wide on any reappearing `.agentheim/contexts/`-shaped literal, with an enumerated allowlist and a BC-README-only `legacy-path-ok` marker.
+- **Dashboard reads the two-root layout** — `tree.mjs`, `project-name.mjs`, `build.mjs`, and `build-stamp.mjs` resolve through `lib/task-system-paths.mjs`; BCs enumerate from `knowledge/contexts/` with orphan `board/` folders surfaced as warnings; a legacy or mixed tree renders a "layout migration pending" notice with zero task columns.
+
+### Changed
+- **The two-root layout is closed** — every consumer except `migrate` refuses a legacy tree with a structured `legacy-layout` error (mixed still refused), `detectLayout`'s neither-root default is `board`, and the legacy combined INDEX template and every transitional dual-layout branch are deleted. A fresh-project walk-through proves `.agentheim/` holds exactly `knowledge/` and `board/`. This repo's own tree is migrated.
+- **`/dashboard` is a pointer** (ADR-0079) — run `/setup` once, then `agentheim-dashboard` from a shell. Launching the dashboard through the slash command used to cost ~120k tokens across two turns; the shell path costs none. `commands/dashboard.md` shrinks to 19 lines with a single bootstrap, guarded by a lint against re-duplication; the `$CLAUDE_PLUGIN_ROOT` rationale moves to an ADR-0002 addendum.
+- The dashboard's version-skew banner names `/setup` as the remedy, and the README names `/setup` as the primary bridge install path.
+
+### Fixed
+- `/setup` bridge verbs on Windows — `quoteArgWindows` quotes every argument unconditionally under the `shell: true` spawn, so a `.vsix` or `code.cmd` path holding a cmd.exe metacharacter (`& | ^ < > ( )`) but no space no longer breaks `install bridge` / `remove bridge` / `bridge status`.
+- README delta `replace` ops anchor a bold term head that wraps onto a continuation line — `termHeadOf` matches on whitespace-collapsed bullet text — and a replace whose anchor matches no bullet disposes `anchor-missing` instead of reporting `merged`.
+- `lib/vacuum-guard.mjs` recognizes board-layout INDEX and protocol paths as bookkeeping, so the batch-mix report stops counting them as product drift.
+
+### Docs
+- ADR-0002 (process-launcher exception, now a two-member allowlist), ADR-0074, and ADR-0078 carry addenda; `RELEASE.md` documents the `.vsix` packaging step and the tag-pin rationale.
+
 ## [0.9.3] - 2026-09-06
 
 **Bookkeeping is mechanized end-to-end, and parallel sessions stop colliding.** Every
@@ -292,7 +326,8 @@ palette and the board grows a docked prompt console you drive from the keyboard.
 ### Added
 - Initial plugin design.
 
-[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.3...HEAD
+[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.4...HEAD
+[0.9.4]: https://github.com/heimeshoff/Agentheim/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/heimeshoff/Agentheim/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/heimeshoff/Agentheim/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/heimeshoff/Agentheim/compare/v0.9.0...v0.9.1
