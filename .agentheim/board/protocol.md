@@ -5,6 +5,26 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 15:53 -- Modeling / Refined: infrastructure-r4mzp - Does `/dashboard` still earn its place as a slash command, now that launching the dashboard costs ~120k tokens across two turns while a shell invocation costs zero?
+
+**Type:** Modeling / Refine
+**BC:** infrastructure
+**Status after:** todo
+**Summary:** Interrogated the decision task with the builder and pinned the three judgment inputs the ADR is written from: (1) the ~/.local/bin launcher is not a personal convenience — ship it to consumers; (2) the 2026-07-09 in-project shim revert has no recorded reasoning (builder: "I don't remember anymore"; the revert was never committed, the only surviving note is "first-launch chicken-and-egg trade-off") — criterion 3 rewritten so the ADR records that gap and argues on the merits, never citing a rationale that is not on record; (3) the install surface is a new /setup command offering the CLI and/or the VS Code bridge (.vsix already ships in the plugin cache; today a four-command manual install). The task now starts from disposition 3 and lists what the ADR must still settle inside it (pointer-only vs fallback /dashboard, ship-verbatim vs generate-at-install, the rule bounding a two-member slash-command allowlist). Added the ADR-0053 precedent (model already removed from the stop path), the plugin-cannot-touch-PATH fact, the k9t2v transcript-sourced cost table as the evidence base, and a prose-only/unenforced ADR-0059 marker for the widened ADR-0002 exception. Split off the implementation as infrastructure-x56qm (backlog, depends on r4mzp; r4mzp blocks it). No orchestrator pass — the deliverable is the ADR itself and the builder supplied the inputs; an architect round now would pre-write the worker's output.
+**Split into:** infrastructure-x56qm
+**ADRs written:** none — the ADR is the task's deliverable
+
+---
+
+## 2026-09-12 15:53 -- Modeling / Captured: infrastructure-x56qm - A `/setup` command — one-time, per-machine install of the zero-token dashboard CLI and/or the VS Code bridge, so a consumer never pays a model turn to launch the dashboard again
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** backlog
+**Summary:** Split off from the r4mzp refinement: the builder chose to ship the zero-token dashboard CLI to consumers via a one-time, per-machine /setup command that also offers the VS Code bridge install. Under-refined (Windows PATH handling, default choice, brainstorm hand-off open); blocked on r4mzp ADR.
+
+---
+
 ## 2026-09-12 15:08 -- Work session ended
 
 **Type:** Work / Session end

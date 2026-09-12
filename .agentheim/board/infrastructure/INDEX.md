@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
+- **Backlog:** 2
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 34
@@ -44,6 +44,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **infrastructure-x56qm** — A `/setup` command — one-time, per-machine install of the zero-token dashboard CLI and/or the VS Code bridge, so a consumer never pays a model turn to launch the dashboard again (feature) — `backlog/infrastructure-x56qm-setup-command-installs-cli-and-bridge.md`
 - **infrastructure-r4mzp** — Does `/dashboard` still earn its place as a slash command, now that launching the dashboard costs ~120k tokens across two turns while a shell invocation costs zero? (decision) — `backlog/infrastructure-r4mzp-does-dashboard-command-still-earn-its-place.md`
 <!-- backlog-list:end -->
 
