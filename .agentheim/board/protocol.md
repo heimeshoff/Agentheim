@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 13:36 -- Batch started: [agentic-workflow-g5ez5]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-g5ez5 - Close the two-root layout (ADR-0078) — every consumer except `migrate` refuses a legacy tree with `legacy-layout`, `detectLayout`'s neither-root default flips to `board`, the legacy combined INDEX template and every transitional dual-layout branch are deleted, and a fresh-project walk-through plus the tree-wide lint prove `.agentheim/` holds exactly `knowledge/` and `board/`
+**Parallel:** no (1 worker — the whole ready set; g5ez5 is the only todo task across every BC, unblocked since tgr31 and q8f3n completed 2026-09-11)
+**Planning advisory:** state/whats-next.md (2026-09-11 14:20, stale — predates the 14:31 session end) recommends a session-start-churn recognizeMachineShape follow-up; unrelated to this batch, no reordering
+
+---
+
 ## 2026-09-12 12:30 -- Modeling / Promoted: agentic-workflow-g5ez5 - Close the two-root layout (ADR-0078) — every consumer except `migrate` refuses a legacy tree with `legacy-layout`, `detectLayout`'s neither-root default flips to `board`, the legacy combined INDEX template and every transitional dual-layout branch are deleted, and a fresh-project walk-through plus the tree-wide lint prove `.agentheim/` holds exactly `knowledge/` and `board/`
 
 **Type:** Modeling / Promote
