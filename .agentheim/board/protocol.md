@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 23:41 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 25m (23:18 batch start to 23:43)
+**Completed:** 2 (first-try PASS: 1, re-dispatched: 1, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** agentic-workflow-vsb06: 1, infrastructure-hnv3d: 2
+**Commits:** 3
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (2 tasks)
+**Carry-over:** left behind (user WIP, 2 files)
+
+---
+
 ## 2026-09-12 23:40 -- Task verified and completed: infrastructure-hnv3d - The marketplace installs `main`, not the tag, under the last released version string — a consumer who installs between a tag and the next bump gets an unreleased mid-rollout snapshot and cannot update out of it; decide how releases stop leaking (Roman's 0.9.3 stuck on a dashboard migration notice no skill in his copy fulfils)
 
 **Type:** Work / Task completion
