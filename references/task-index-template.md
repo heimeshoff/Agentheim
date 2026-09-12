@@ -1,15 +1,8 @@
 # Task-half index template
 
-The task-status half of a bounded context's per-BC index (ADR-0078). Under the `board/`
-layout this is the WHOLE of `board/<bc>/INDEX.md` — tasks by status only, nothing else;
-the knowledge half (ADRs / research / concepts) lives in a separate file, see
-`references/knowledge-index-template.md`.
-
-Under the (transitional, `'legacy'`-layout) shape there is no separate task-half file on
-disk — the two halves are still the SAME `.agentheim/contexts/<bc>/INDEX.md`, rendered from
-the LEGACY combined template kept in `references/index-template.md`'s "Per-BC (LEGACY
-combined shape)" section. This file is read only once `lib/task-system-paths.mjs`'s
-`detectLayout` resolves `'board'`.
+The task-status half of a bounded context's per-BC index (ADR-0078). This is the WHOLE of
+`board/<bc>/INDEX.md` — tasks by status only, nothing else; the knowledge half (ADRs /
+research / concepts) lives in a separate file, see `references/knowledge-index-template.md`.
 
 ## Per-BC (task half): `.agentheim/board/<bc>/INDEX.md`
 

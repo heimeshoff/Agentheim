@@ -1,17 +1,19 @@
-// ADR-0078 two-root layout — `npm run build` must succeed regardless of
-// whether the styleguide it consumes sits at the legacy
-// `.agentheim/contexts/design-system/styleguide/` or the board-layout
-// `.agentheim/knowledge/contexts/design-system/styleguide/` (agentic-workflow-hxq1g).
+// ADR-0078 two-root layout — `npm run build` must succeed against the
+// board-layout styleguide location
+// (`.agentheim/knowledge/contexts/design-system/styleguide/`,
+// agentic-workflow-hxq1g), and a DETECTED legacy styleguide root is refused
+// with `legacy-layout` rather than silently falling back
+// (agentic-workflow-g5ez5, ADR-0078 §5 second phase).
 //
 // `runBuild({ repoRoot })` (build.mjs) resolves the styleguide via
 // `styleguideDir(repoRoot)` and a build-time esbuild plugin redirects every
 // one of the 20 literal `design-system/styleguide/app/*.js` import specifiers
 // across dashboard/app/{app,board,main-pane-reader,slide-over}.js to that
-// resolved directory — proven here by driving a REAL build against fixture
-// roots that mirror this repo's own real styleguide source at each of the
-// two possible locations. A resolution miss on ANY of the 20 imports would
-// throw out of `runBuild` (esbuild's own module-not-found error), so build
-// SUCCESS is itself the proof "all 20 app-side import paths resolve".
+// resolved directory — proven here by driving a REAL build against a fixture
+// root that mirrors this repo's own real styleguide source. A resolution
+// miss on ANY of the 20 imports would throw out of `runBuild` (esbuild's own
+// module-not-found error), so build SUCCESS is itself the proof "all 20
+// app-side import paths resolve".
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -26,9 +28,8 @@ import { styleguideDir } from '../../lib/task-system-paths.mjs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DASHBOARD = path.resolve(__dirname, '..');
 const REPO_ROOT = path.resolve(DASHBOARD, '..');
-// This repo's OWN tree is still legacy-shaped (the dogfood migration,
-// agentic-workflow-tgr31, is a separate later task) — the real styleguide
-// source to mirror into each fixture.
+// This repo's OWN tree is board-shaped (migrated by agentic-workflow-tgr31,
+// commit 6fbaad2) — the real styleguide source to mirror into each fixture.
 const REAL_STYLEGUIDE = styleguideDir(REPO_ROOT);
 
 function makeFixtureRoot(kind) {
@@ -65,12 +66,17 @@ async function assertBuildSucceeds(fixtureRoot) {
   }
 }
 
-test('npm run build succeeds against this repo\'s current legacy styleguide location; all 20 app-side imports resolve', async () => {
+test('runBuild against a detected legacy styleguide root is refused with legacy-layout, not a silent fallback (agentic-workflow-g5ez5)', async () => {
   const fixtureRoot = makeFixtureRoot('legacy');
+  const scratchDist = mkdtempSync(path.join(tmpdir(), 'hxq1g-build-dist-'));
   try {
-    await assertBuildSucceeds(fixtureRoot);
+    await assert.rejects(
+      () => runBuild({ repoRoot: fixtureRoot, outDir: scratchDist }),
+      (err) => err.code === 'legacy-layout'
+    );
   } finally {
     rmSync(fixtureRoot, { recursive: true, force: true });
+    rmSync(scratchDist, { recursive: true, force: true });
   }
 });
 
@@ -78,6 +84,19 @@ test('npm run build succeeds against a board-layout fixture (knowledge/contexts/
   const fixtureRoot = makeFixtureRoot('board');
   try {
     await assertBuildSucceeds(fixtureRoot);
+  } finally {
+    rmSync(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('declaredInputRoots (build-stamp.mjs) against a detected legacy fixture is refused with legacy-layout too (agentic-workflow-g5ez5)', async () => {
+  const { declaredInputRoots } = await import('../build-stamp.mjs');
+  const fixtureRoot = makeFixtureRoot('legacy');
+  try {
+    assert.throws(
+      () => declaredInputRoots({ dashboardDir: DASHBOARD, repoRoot: fixtureRoot }),
+      (err) => err.code === 'legacy-layout'
+    );
   } finally {
     rmSync(fixtureRoot, { recursive: true, force: true });
   }

@@ -23,8 +23,8 @@
     Pre-bundled dashboard assets (infrastructure-002 + agentic-workflow-006,
     ADR-0003 / ADR-0002 / ADR-0009). The dashboard frontend app
     (dashboard/app/*.js), which consumes the styleguide ES-module source
-    (.agentheim/contexts/design-system/styleguide/app/*.js), is bundled by
-    esbuild into ./app.js with React (production) / ReactDOM / marked /
+    (.agentheim/knowledge/contexts/design-system/styleguide/app/*.js), is
+    bundled by esbuild into ./app.js with React (production) / ReactDOM / marked /
     htm bundled IN. No import map and no remote framework script: the UI loads
     offline from this committed dist/.
     Regenerate with:  cd dashboard && npm install && npm run build

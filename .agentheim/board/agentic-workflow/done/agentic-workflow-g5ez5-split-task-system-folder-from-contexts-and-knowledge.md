@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-g5ez5
 title: Close the two-root layout (ADR-0078) — every consumer except `migrate` refuses a legacy tree with `legacy-layout`, `detectLayout`'s neither-root default flips to `board`, the legacy combined INDEX template and every transitional dual-layout branch are deleted, and a fresh-project walk-through plus the tree-wide lint prove `.agentheim/` holds exactly `knowledge/` and `board/`
-status: doing
+status: done
 type: refactor
 context: agentic-workflow
 created: 2026-09-06
@@ -302,3 +302,96 @@ modeling step-0 `chore(agentheim): migrate .agentheim/ …` commit subject to
 **Convention check (ADR-0059):** enforced — the tree-wide `legacy-path-literal-lint` (plus its
 new no-dead-entry test), the parametrized refusal test, and the sole-path-constructor /
 override-scan test. No `[human-eye]` criteria.
+
+## Verifier note (iteration 1)
+
+**Verdict:** FAIL
+
+**Reasons:**
+- Acceptance criterion 1 ("every CLI verb except `migrate` returns `{ok:false, code:'legacy-layout'}`" on a legacy fixture) is FUNCTIONALLY violated for the `index-rotation` verb, which What item 1 explicitly names ("the mover verbs, `log`, `index-add`, and both rotations surface the throw"). Empirically verified in the worktree against a legacy fixture (`.agentheim/contexts/widgets/...`, `detectLayout === 'legacy'`): `lib/index-rotation.mjs`'s `runCli` returns `{"ok":true,"rotated":false,"healed":false,"changed":[],"contexts":{}}` — a silent no-op, precisely the "silent `[]`" the task forbids. Cause: the pre-existing bare `catch { bcNames = []; }` at `lib/index-rotation.mjs:460-464` (worktree) swallows `listBoardContexts`' structured `legacy-layout` throw, so the catch the worker added to `runCli` (same file, ~line 511-521) is unreachable dead code for this case. `protocol-rotation`'s equivalent catch DOES work (`{"ok":false,"code":"legacy-layout",...}`), which makes the asymmetry a defect, not a design choice. The same swallow also defeats the criterion's mixed-fixture half for this verb.
+- The worker's `## Outcome` claim "`index-rotation`/`protocol-rotation` `runCli` gained the equivalent catch" is true of the source but false of the behavior — the index-rotation half never fires.
+- No test in the diff covers the CLI-verb half of criterion 1 at all, so the defect above shipped undetected. `grep legacy-layout` across `lib/test/` and `dashboard/test/` finds coverage only for the six live-tree lints, the 16 getters/enumerators (`lib/test/task-system-paths.test.mjs`), `buildTree`, `resolveProjectName`, `runBuild`/`declaredInputRoots`, and `captureTask` — nothing for `promote`/`claim`/`complete`/`bounce`/`log`/`index-add`/`dismiss`/`reroute` or either rotation CLI, on a legacy OR a mixed fixture. The new `runVerbHandler` (`lib/task-lifecycle-cli.mjs:560`, plus its two call sites at 600 and 623) and both rotation `runCli` catches have zero assertions: deleting them outright would leave the suite green, so criterion 1 has no test that would fail if the production change were absent.
+
+**Suggested fix:** In `rotateAllIndexDoneLists`, re-throw (or otherwise surface) a structured error whose `.code` is `legacy-layout`/`mixed-layout` instead of swallowing it into `bcNames = []`, so `runCli`'s new catch is actually reachable; then add the parametrized legacy+mixed `node --test` criterion 1 asks for, covering every CLI verb except `migrate` (both rotations included) and asserting `{ok:false, code:'legacy-layout'}` / `'mixed-layout'` — the rest of the criterion's surfaces (lints, getters, `buildTree`, build/build-stamp, `project-name`) are already covered and need no rework.
+
+**Iteration hint:** likely-fixable
+
+## Outcome
+
+Closed ADR-0078 §5's second phase: every consumer of `lib/task-system-paths.mjs` except
+the `migrate` verb now refuses a detected-`'legacy'` `.agentheim/` tree outright, and the
+transitional dual-layout scaffolding the five earlier children (cj54k, e896r, zgav8,
+hxq1g, tgr31, q8f3n) deliberately left in place is deleted now that it is safe to do so.
+
+**Legacy refusal.** `resolveLayout` (`lib/task-system-paths.mjs`) throws a structured
+`Error` with `.code === 'legacy-layout'` (mirroring the existing `mixedLayoutError`)
+whenever the *detected* layout is `'legacy'` and the caller passed no `opts.layout`
+override; an explicit `{layout:'legacy'}` override still resolves — `lib/layout-migration.
+mjs`'s `migrateLayout` needs zero code change and remains the one permanent legacy-reading
+path. Every mechanized lifecycle verb except `migrate` (`promote`, `claim`, `complete`,
+`checkpoint`, `capture`, `dismiss`, `bounce`, `reroute`, `log`, `index-add`) surfaces the
+throw as `{ok:false, code:'legacy-layout', reason}` via `lib/task-lifecycle-cli.mjs`'s
+`runVerbHandler` (the same shape `mixed-layout` already used); `lib/index-rotation.mjs`
+and `lib/protocol-rotation.mjs`'s parameterless `runCli`s gained the matching catch.
+`dashboard/tree.mjs`'s `buildTree` short-circuits `'legacy'` before any getter call,
+exactly like its existing `'mixed'` short-circuit, returning `migrationPending:true` with
+empty `contexts`. The five live-tree lints (`legacy-path-literal-lint`, `id-grammar`'s
+`findMalformedTaskIds`, `human-eye-criteria`, `spike-stop-loss`, `duplicate-id-check`,
+`index-entry-length`) let the throw propagate instead of reporting an empty/silent result.
+
+**Neither-root default flip.** `detectLayout` now resolves `'board'` (not `'legacy'`) for
+an `.agentheim/` holding neither `contexts/` nor `board/` — ADR-0078 §5's own definition of
+`'legacy'` requires `contexts/` to exist. This makes a fresh project's first write, and
+every test fixture that builds only a `knowledge/`-shaped tree, board-detected rather than
+refused; `migrate` on such a tree now returns its idempotent `{ok:true, noop:true}`.
+
+**Scaffolding deleted.** The legacy combined per-BC `references/index-template.md` is
+gone; `references/top-index-template.md` (new) carries the surviving top-level
+`knowledge/index.md` template, byte-identical to the old file's "Top-level" section;
+`task-index-template.md` / `knowledge-index-template.md` remain the only per-BC templates.
+`legacy-path-literal-lint`'s `ALLOWLIST` no longer carries the `references/*index-template.
+md` entries nor the layout-gated dashboard-specifier tolerance (tgr31 already re-pointed
+those 20 specifiers to `'board'`).
+
+**Proof of the end state.** `lib/test/fresh-project-layout.test.mjs` (new) walks an empty
+`.agentheim/` through the brainstorm-shaped writes plus one `capture` and asserts no
+top-level `contexts/`/`vision.md`/`context-map.md`, every knowledge file under `knowledge/`,
+every task-system file under `board/`, and `detectLayout === 'board'` throughout.
+`lib/test/sole-path-constructor.test.mjs` (new) enumerates every remaining `opts.layout`
+override call site (only `lib/layout-migration.mjs` and its test). `BOOKKEEPING_SEGMENT_RE`
+(`lib/vacuum-guard.mjs`) no longer matches either legacy path shape; q8f3n's board-shape
+fixtures still match.
+
+**Iteration 2 (after the iteration-1 verifier FAIL).** The FAIL named a real production
+defect independent of test coverage: `lib/index-rotation.mjs`'s `rotateAllIndexDoneLists`
+swallowed `listBoardContexts`'s structured `legacy-layout`/`mixed-layout` throw into a bare
+`bcNames = []`, which made the `index-rotation` `runCli` catch added above unreachable dead
+code — against a legacy or mixed fixture it silently returned `{ok:true, rotated:false,
+..., contexts:{}}` instead of refusing. Fixed by letting the structured throw propagate
+uncaught out of `rotateAllIndexDoneLists` (the function's only other possible throw source,
+`readSubdirNames`, never throws — a missing directory resolves to `[]`); `protocol-rotation`'s
+equivalent path needed no change, since it already let its throw propagate. Verified
+manually against a scratch legacy fixture (now correctly returns `{ok:false, code:
+'legacy-layout', reason:...}`) and via the new test below, plus by temporarily reverting
+the fix and confirming the new test catches the regression.
+
+Also added, this iteration, the CLI-verb half of acceptance criterion 1 that was missing
+entirely: `lib/test/cli-layout-refusal.test.mjs` (new), a parametrized `node --test` that
+builds minimal legacy and mixed fixtures and drives every mechanized lifecycle verb except
+`migrate` (via `lib/task-lifecycle-cli.mjs`'s `runCli`, in-process, mirroring
+`lib/test/lifecycle-lock-integration.test.mjs`'s and `lib/test/task-lifecycle-cli-mechanics.
+test.mjs`'s driving pattern) plus both rotation CLIs' `runCli`, asserting
+`{ok:false, code:'legacy-layout'}` / `'mixed-layout'` and a byte-for-byte-unchanged tree
+snapshot (proving zero writes) for each; separately proves `migrate` is NOT refused on
+legacy (that is its whole job) and IS refused on mixed like every other verb; and a minimal
+board-fixture smoke pass (`migrate` noops, `log` and both rotations operate normally) for
+the criterion's board-fixture half. Confirmed empirically (by temporarily reverting first
+`runVerbHandler`'s catch, then `index-rotation`'s `runCli` catch, and re-running) that the
+test fails without either production fix and passes with both restored.
+
+Key files: `lib/task-system-paths.mjs` (`resolveLayout`, `detectLayout`), `lib/task-lifecycle-cli.mjs`
+(`runVerbHandler`), `lib/index-rotation.mjs` (`rotateAllIndexDoneLists`, `runCli`),
+`lib/protocol-rotation.mjs` (`runCli`), `dashboard/tree.mjs` (`buildTree`),
+`lib/legacy-path-literal-lint.mjs`, `references/top-index-template.md` (new),
+`lib/test/fresh-project-layout.test.mjs` (new), `lib/test/sole-path-constructor.test.mjs`
+(new), `lib/test/cli-layout-refusal.test.mjs` (new).

@@ -41,9 +41,9 @@ test('parseVisionName returns null when there is no `# Vision:` heading', () => 
 function makeProject(folderName, visionContents) {
   const base = mkdtempSync(path.join(tmpdir(), 'agentheim-pn-'));
   const root = path.join(base, folderName);
-  mkdirSync(path.join(root, '.agentheim'), { recursive: true });
+  mkdirSync(path.join(root, '.agentheim', 'knowledge'), { recursive: true });
   if (visionContents !== undefined) {
-    writeFileSync(path.join(root, '.agentheim', 'vision.md'), visionContents, 'utf8');
+    writeFileSync(path.join(root, '.agentheim', 'knowledge', 'vision.md'), visionContents, 'utf8');
   }
   return { root, cleanup: () => rmSync(base, { recursive: true, force: true }) };
 }
@@ -114,6 +114,18 @@ test('resolveProjectName falls back to the folder basename on a mixed layout (vi
   mkdirSync(path.join(root, '.agentheim', 'board'), { recursive: true });
   try {
     assert.equal(resolveProjectName(root), 'mixed-folder');
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('resolveProjectName falls back to the folder basename on a DETECTED legacy tree (visionPath throws legacy-layout, never surfaces — agentic-workflow-g5ez5)', () => {
+  const base = mkdtempSync(path.join(tmpdir(), 'agentheim-pn-legacy-'));
+  const root = path.join(base, 'legacy-folder');
+  mkdirSync(path.join(root, '.agentheim', 'contexts'), { recursive: true });
+  writeFileSync(path.join(root, '.agentheim', 'vision.md'), '# Vision: Should Never Surface\n', 'utf8');
+  try {
+    assert.equal(resolveProjectName(root), 'legacy-folder');
   } finally {
     rmSync(base, { recursive: true, force: true });
   }

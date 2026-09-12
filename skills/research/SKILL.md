@@ -134,12 +134,12 @@ This bidirectional linking is how knowledge stays findable.
 
 ## Updating indexes
 
-After the researcher writes the report, register it via the mechanized **`index-add`** verb (agentic-workflow-fn59c, ADR-0075) — never a hand-edit — so the report is discoverable. Index template lives at `references/index-template.md`. The report's `<slug>-<date>` (the filename's identifying portion, e.g. `auth-tokens-2026-05-13`) is the `id` `index-add` dedupes on:
+After the researcher writes the report, register it via the mechanized **`index-add`** verb (agentic-workflow-fn59c, ADR-0075) — never a hand-edit — so the report is discoverable. Templates: `references/knowledge-index-template.md` (a BC's knowledge-half `INDEX.md`) or `references/top-index-template.md` (`knowledge/index.md`, for a cross-BC report). The report's `<slug>-<date>` (the filename's identifying portion, e.g. `auth-tokens-2026-05-13`) is the `id` `index-add` dedupes on:
 
 - If the report's `related_tasks` are all in **one BC**, or the topic is clearly scoped to one BC → `node -e "<the same env-free bootstrap modeling/SKILL.md's PROMOTE flow uses, targeting lib/task-lifecycle-cli.mjs>" index-add '{"bc":"<bc-name>","section":"research-local","id":"<slug>-<date>","line":"<the composed one-line entry>"}'`.
 - If the report spans multiple BCs, has no tasks yet, or is project-level → the same call with `{"bc":null,"section":"research-global",...}`.
 
-It returns `{ok:true, changed:[indexPath], skipped, verb:'index-add', id, message:null}` — fold `changed` into this run's commit (see "Committing" below) — or a structured rejection: `index-missing` (the target `INDEX.md` doesn't exist yet — `index-add` never backfills a fresh template over what may be a live index; build it from `references/index-template.md` by hand first, then re-run) or `duplicate-id-conflict` (this report already has a *different* line in the block). A byte-identical re-run is a silent no-op (`skipped:true`).
+It returns `{ok:true, changed:[indexPath], skipped, verb:'index-add', id, message:null}` — fold `changed` into this run's commit (see "Committing" below) — or a structured rejection: `index-missing` (the target `INDEX.md` doesn't exist yet — `index-add` never backfills a fresh template over what may be a live index; build it by hand first from `references/knowledge-index-template.md` or `references/top-index-template.md`, then re-run) or `duplicate-id-conflict` (this report already has a *different* line in the block). A byte-identical re-run is a silent no-op (`skipped:true`).
 
 A later task or ADR that adopts this report should update the inserted line's BC scope if it migrates from global to BC-local (rare) — this stays a hand-edit, since `index-add` only ever inserts, it never rewrites an existing line.
 

@@ -35,20 +35,20 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // dashboard/ -> repo root. The styleguide source itself is resolved PER BUILD
 // via `styleguideDir(repoRoot)` (ADR-0078, agentic-workflow-hxq1g) — it lives
-// at `.agentheim/contexts/design-system/styleguide/` under the legacy layout
-// or `.agentheim/knowledge/contexts/design-system/styleguide/` under `board`,
+// at `.agentheim/knowledge/contexts/design-system/styleguide/` (the `board`
+// layout; a DETECTED `'legacy'` repoRoot is refused post-agentic-workflow-g5ez5),
 // and `repoRoot` is itself overridable (see `runBuild` below) so a test can
-// prove the build succeeds against either shape without touching this repo's
-// own (still-legacy) tree.
+// prove the build succeeds against a fixture root without touching this
+// repo's own real tree.
 const REPO_ROOT = path.resolve(__dirname, '..');
 // ENTRY is the LIVE dashboard frontend app (agentic-workflow-006, ADR-0009),
 // which imports the styleguide components across the BC boundary via 20
 // literal relative specifiers ending in `design-system/styleguide/app/*.js`
 // (unchanged text — ADR-0003/ADR-0009 precedent, no fork). `styleguideRedirectPlugin`
 // below intercepts every such specifier at BUILD time and resolves it against
-// the CORRECT physical directory for whichever `repoRoot` this build targets,
-// so the bundle works from either layout during the transition without a
-// single import statement changing.
+// the CORRECT physical directory for whichever `repoRoot` this build targets
+// (the real repo, or a test fixture), so the bundle works without a single
+// import statement changing.
 const ENTRY = path.join(__dirname, 'app', 'app.js');
 // Static binary assets owned by the dashboard app (agentic-workflow-062): the About
 // page's profile photo. These live in dashboard/assets/ (the build's SOURCE), copied
@@ -64,11 +64,11 @@ const ASSETS_DIR = path.join(__dirname, 'assets');
 const DIST = process.argv[2] ? path.resolve(process.argv[2]) : path.join(__dirname, 'dist');
 
 // Any literal ESM import ending in `design-system/styleguide/app/<file>.js` —
-// regardless of which root prefix precedes it (`.agentheim/contexts/...` or
-// `.agentheim/knowledge/contexts/...`) — is redirected to `<styleguideAppDir>/
-// <file>.js`. esbuild's own `alias` option only accepts package-name-shaped
-// keys (proven empirically: a relative-looking alias key throws "Invalid
-// alias name"), so a plugin `onResolve` filter is the mechanism, not `alias`.
+// regardless of which root prefix precedes it — is redirected to
+// `<styleguideAppDir>/<file>.js`. esbuild's own `alias` option only accepts
+// package-name-shaped keys (proven empirically: a relative-looking alias key
+// throws "Invalid alias name"), so a plugin `onResolve` filter is the
+// mechanism, not `alias`.
 const STYLEGUIDE_IMPORT_FILTER = /\/design-system\/styleguide\/app\/[^/]+\.js$/;
 
 function styleguideRedirectPlugin(styleguideAppDir) {
@@ -115,8 +115,8 @@ function indexHtml() {
     Pre-bundled dashboard assets (infrastructure-002 + agentic-workflow-006,
     ADR-0003 / ADR-0002 / ADR-0009). The dashboard frontend app
     (dashboard/app/*.js), which consumes the styleguide ES-module source
-    (.agentheim/contexts/design-system/styleguide/app/*.js), is bundled by
-    esbuild into ./${BUNDLE_NAME} with React (production) / ReactDOM / marked /
+    (.agentheim/knowledge/contexts/design-system/styleguide/app/*.js), is
+    bundled by esbuild into ./${BUNDLE_NAME} with React (production) / ReactDOM / marked /
     htm bundled IN. No import map and no remote framework script: the UI loads
     offline from this committed dist/.
     Regenerate with:  cd dashboard && npm install && npm run build

@@ -1,16 +1,10 @@
 # Knowledge-half index template
 
 The knowledge half of a bounded context's per-BC index (ADR-0078): ADRs, research, and
-concept synthesis pages scoped to this BC. Under the `board/` layout this file's rendering
-becomes `.agentheim/knowledge/contexts/<bc>/INDEX.md`, filed beside the BC's `README.md` —
-the durable, per-BC catalog. The task-status half (tasks by status) lives in a separate
-file, see `references/task-index-template.md`.
-
-Under the (transitional, `'legacy'`-layout) shape there is no separate knowledge-half file
-on disk — the two halves are still the SAME `.agentheim/contexts/<bc>/INDEX.md`, rendered
-from the LEGACY combined template kept in `references/index-template.md`'s "Per-BC (LEGACY
-combined shape)" section. This file is read only once `lib/task-system-paths.mjs`'s
-`detectLayout` resolves `'board'`.
+concept synthesis pages scoped to this BC. This file's rendering is
+`.agentheim/knowledge/contexts/<bc>/INDEX.md`, filed beside the BC's `README.md` — the
+durable, per-BC catalog. The task-status half (tasks by status) lives in a separate file,
+see `references/task-index-template.md`.
 
 `capture`'s empty-BC backfill never renders this half on its own — a BC's knowledge half is
 created alongside its `README.md` by `modeling` / `brainstorm` (ADR-0078 §6: a BC exists

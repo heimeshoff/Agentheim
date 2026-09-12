@@ -264,7 +264,7 @@ For each BC created during this session:
   ```
   node -e "<the same env-free bootstrap modeling/SKILL.md's PROMOTE flow uses, targeting lib/task-lifecycle-cli.mjs>" index-add '{"bc":null,"section":"bc-list","id":"<bc-name>","line":"- **<bc-name>** — <one-line purpose> — `contexts/<bc-name>/INDEX.md`"}'
   ```
-  It returns `{ok:true, changed:[indexPath], skipped, verb:'index-add', id, message:null}` — fold `changed` into the session's commit (see "Committing" below) — or `{ok:false, code:'index-missing', ...}` on a fresh project whose `.agentheim/knowledge/index.md` doesn't exist yet: `index-add` never backfills a fresh template over what may be a live index, so build it from `references/index-template.md` by hand first, then re-run.
+  It returns `{ok:true, changed:[indexPath], skipped, verb:'index-add', id, message:null}` — fold `changed` into the session's commit (see "Committing" below) — or `{ok:false, code:'index-missing', ...}` on a fresh project whose `.agentheim/knowledge/index.md` doesn't exist yet: `index-add` never backfills a fresh template over what may be a live index, so build it from `references/top-index-template.md` by hand first, then re-run.
 
 For any global ADR written during the strategic phase (vision-level decisions), insert under `<!-- adr-global:start -->` in the top-level index the same way: `index-add '{"bc":null,"section":"adr-global","id":"<ADR-id>","line":"<the composed one-line entry>"}'` — same `index-missing` recovery as above.
 

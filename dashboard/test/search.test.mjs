@@ -23,10 +23,11 @@ function makeProject() {
   const base = mkdtempSync(path.join(tmpdir(), 'aw050-search-'));
   const ah = path.join(base, '.agentheim');
   mkdirSync(ah);
-  writeFileSync(path.join(ah, 'vision.md'), '# Vision: Acme');
-  writeFileSync(path.join(ah, 'context-map.md'), '# Context map');
 
   const knowledge = path.join(ah, 'knowledge');
+  mkdirSync(knowledge, { recursive: true });
+  writeFileSync(path.join(knowledge, 'vision.md'), '# Vision: Acme');
+  writeFileSync(path.join(knowledge, 'context-map.md'), '# Context map');
   mkdirSync(path.join(knowledge, 'decisions'), { recursive: true });
   mkdirSync(path.join(knowledge, 'research'), { recursive: true });
 
@@ -47,17 +48,19 @@ function makeProject() {
   );
 
   // BC "alpha": README body matches; tasks.
-  const alpha = path.join(ah, 'contexts', 'alpha');
+  const alphaKnowledge = path.join(knowledge, 'contexts', 'alpha');
+  mkdirSync(alphaKnowledge, { recursive: true });
+  writeFileSync(path.join(alphaKnowledge, 'README.md'), '# Alpha\n\nWe deploy via Falcon here.');
+  // Concept page (per-BC, under concepts/) whose BODY matches (body tier, Concepts).
+  mkdirSync(path.join(alphaKnowledge, 'concepts'), { recursive: true });
+  writeFileSync(
+    path.join(alphaKnowledge, 'concepts', 'deployment.md'),
+    '# Deployment\n\nThe Falcon rollout strategy lives here.'
+  );
+  const alpha = path.join(ah, 'board', 'alpha');
   for (const f of ['backlog', 'todo', 'doing', 'done']) {
     mkdirSync(path.join(alpha, f), { recursive: true });
   }
-  writeFileSync(path.join(alpha, 'README.md'), '# Alpha\n\nWe deploy via Falcon here.');
-  // Concept page (per-BC, under concepts/) whose BODY matches (body tier, Concepts).
-  mkdirSync(path.join(alpha, 'concepts'), { recursive: true });
-  writeFileSync(
-    path.join(alpha, 'concepts', 'deployment.md'),
-    '# Deployment\n\nThe Falcon rollout strategy lives here.'
-  );
   writeFileSync(
     path.join(alpha, 'backlog', 'alpha-001-falcon-thing.md'),
     '---\nid: alpha-001\ntitle: Falcon migration\nstatus: backlog\ntype: feature\ncontext: alpha\n---\n\nbody only'
@@ -68,11 +71,13 @@ function makeProject() {
   );
 
   // BC "falcon-bc": its NAME matches (title tier, Bounded contexts).
-  const fbc = path.join(ah, 'contexts', 'falcon-bc');
+  const fbcKnowledge = path.join(knowledge, 'contexts', 'falcon-bc');
+  mkdirSync(fbcKnowledge, { recursive: true });
+  writeFileSync(path.join(fbcKnowledge, 'README.md'), '# Falcon BC\n\nno extra hit body');
+  const fbc = path.join(ah, 'board', 'falcon-bc');
   for (const f of ['backlog', 'todo', 'doing', 'done']) {
     mkdirSync(path.join(fbc, f), { recursive: true });
   }
-  writeFileSync(path.join(fbc, 'README.md'), '# Falcon BC\n\nno extra hit body');
 
   return { base };
 }

@@ -1,8 +1,10 @@
-// ADR-0078 two-root layout — dashboard/tree.mjs resolves both layouts through
-// `lib/task-system-paths.mjs` (agentic-workflow-hxq1g). This suite covers what
-// tree.test.mjs's plain legacy fixture does not: the `board` layout's split
-// index pointer, the `orphan-task-folder` warning, and `migrationPending`
-// across all three `detectLayout` outcomes.
+// ADR-0078 two-root layout — dashboard/tree.mjs resolves the `board` layout
+// through `lib/task-system-paths.mjs` (agentic-workflow-hxq1g), and refuses a
+// DETECTED `'legacy'` or `'mixed'` root before touching any getter
+// (agentic-workflow-g5ez5, ADR-0078 §5 second phase). This suite covers the
+// `board` layout's split index pointer, the `orphan-task-folder` warning,
+// the one legacy-refusal case, and `migrationPending` across all three
+// `detectLayout` outcomes.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -76,57 +78,17 @@ function makeLayoutFixture(kind) {
   return base;
 }
 
-// Strip each layout's own root-segment vocabulary so a legacy and a board
-// projection of IDENTICAL content compare equal.
-function normalizePath(p) {
-  if (p == null) return p;
-  return p
-    .replace(/^\.agentheim\/contexts\//, '.agentheim/BC/')
-    .replace(/^\.agentheim\/board\//, '.agentheim/BC/')
-    .replace(/^\.agentheim\/knowledge\/contexts\//, '.agentheim/BC/')
-    .replace(/^\.agentheim\/vision\.md$/, '.agentheim/VISION.md')
-    .replace(/^\.agentheim\/knowledge\/vision\.md$/, '.agentheim/VISION.md')
-    .replace(/^\.agentheim\/context-map\.md$/, '.agentheim/CONTEXTMAP.md')
-    .replace(/^\.agentheim\/knowledge\/context-map\.md$/, '.agentheim/CONTEXTMAP.md');
-}
-
-function normalizeForDiff(tree) {
-  return {
-    project: tree.project,
-    locations: {
-      vision: normalizePath(tree.locations.vision),
-      contextMap: normalizePath(tree.locations.contextMap),
-      adrs: tree.locations.adrs.map(normalizePath),
-      research: tree.locations.research.map(normalizePath),
-    },
-    contexts: tree.contexts.map((c) => ({
-      name: c.name,
-      readme: normalizePath(c.readme),
-      index: normalizePath(c.index),
-      knowledgeIndex: normalizePath(c.knowledgeIndex),
-      concepts: c.concepts.map(normalizePath),
-      lifecycle: Object.fromEntries(
-        Object.entries(c.lifecycle).map(([folder, tasks]) => [
-          folder,
-          tasks.map(({ mtimeMs, path: p, ...rest }) => ({ ...rest, path: normalizePath(p) })),
-        ])
-      ),
-    })),
-  };
-}
-
-test('buildTree on a legacy fixture and an identically-shaped board fixture agree modulo path prefixes', () => {
+test('buildTree on a detected legacy fixture refuses before any getter — migrationPending, empty contexts/locations, no throw (agentic-workflow-g5ez5)', () => {
   const legacyRoot = makeLayoutFixture('legacy');
-  const boardRoot = makeLayoutFixture('board');
   try {
     const legacyTree = buildTree(legacyRoot);
-    const boardTree = buildTree(boardRoot);
     assert.equal(legacyTree.layout, 'legacy');
-    assert.equal(boardTree.layout, 'board');
-    assert.deepEqual(normalizeForDiff(legacyTree), normalizeForDiff(boardTree));
+    assert.equal(legacyTree.migrationPending, true);
+    assert.deepEqual(legacyTree.contexts, []);
+    assert.deepEqual(legacyTree.locations, {});
+    assert.deepEqual(legacyTree.project, { name: null });
   } finally {
     rmSync(legacyRoot, { recursive: true, force: true });
-    rmSync(boardRoot, { recursive: true, force: true });
   }
 });
 
@@ -142,17 +104,6 @@ test('on a board fixture, index points at board/<bc>/INDEX.md and knowledgeIndex
   }
 });
 
-test('on a legacy fixture, index and knowledgeIndex both point at the same contexts/<bc>/INDEX.md', () => {
-  const legacyRoot = makeLayoutFixture('legacy');
-  try {
-    const tree = buildTree(legacyRoot);
-    const alpha = tree.contexts.find((c) => c.name === 'alpha');
-    assert.equal(alpha.index, '.agentheim/contexts/alpha/INDEX.md');
-    assert.equal(alpha.knowledgeIndex, '.agentheim/contexts/alpha/INDEX.md');
-  } finally {
-    rmSync(legacyRoot, { recursive: true, force: true });
-  }
-});
 
 test('a board/<bc>/ with no matching knowledge/contexts/<bc>/ yields an orphan-task-folder warning; other BCs render normally', () => {
   const base = mkdtempSync(path.join(tmpdir(), 'hxq1g-tree-orphan-'));

@@ -127,7 +127,8 @@ test('GET / injects the discovered project name into the served <title> (vision 
     path.join(dist, 'index.html'),
     '<!doctype html><head><title>Agentheim — Dashboard</title></head>',
   );
-  writeFileSync(path.join(base, '.agentheim', 'vision.md'), '# Vision: Books\n\n## Purpose\n');
+  mkdirSync(path.join(base, '.agentheim', 'knowledge'), { recursive: true });
+  writeFileSync(path.join(base, '.agentheim', 'knowledge', 'vision.md'), '# Vision: Books\n\n## Purpose\n');
   const server = createDashboardServer({ root: base, assetRoot: dist });
   try {
     const { port } = await start(server);

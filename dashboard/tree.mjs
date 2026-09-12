@@ -212,13 +212,12 @@ export function projectTask(root, absFile, folder, bcName) {
 }
 
 /**
- * Project one bounded context. Under `'board'` a BC's surfaces are split
- * across two roots (ADR-0078 §3): the four lifecycle folders + the task-half
- * `INDEX.md` live under `board/<bc>/`, while `README.md` + the knowledge-half
- * `INDEX.md` + `concepts/` live under `knowledge/contexts/<bc>/`. Under
- * `'legacy'` every getter below resolves into the SAME shared `contexts/<bc>/`
- * directory, so `index` and `knowledgeIndex` point at the identical file —
- * every existing app-side reader of `.index` keeps working unchanged.
+ * Project one bounded context. `layout` is always `'board'` here — `buildTree`
+ * refuses `'legacy'` and `'mixed'` before this function is ever reached
+ * (agentic-workflow-g5ez5, ADR-0078 §5 second phase). A BC's surfaces are
+ * split across two roots (ADR-0078 §3): the four lifecycle folders + the
+ * task-half `INDEX.md` live under `board/<bc>/`, while `README.md` + the
+ * knowledge-half `INDEX.md` + `concepts/` live under `knowledge/contexts/<bc>/`.
  */
 function projectContext(root, bcName, layout) {
   const lifecycle = {};
@@ -256,9 +255,13 @@ export function buildTree(root) {
   const absRoot = path.resolve(root);
   const layout = detectLayout(absRoot);
 
-  if (layout === 'mixed') {
-    // A half-migrated tree renders the "layout migration pending" notice, not
-    // a 500 and not a guess at which root to trust (ADR-0078 §5).
+  if (layout === 'mixed' || layout === 'legacy') {
+    // A half-migrated ('mixed') OR not-yet-migrated ('legacy') tree renders
+    // the "layout migration pending" notice, not a 500 and not a guess at
+    // which root to trust (ADR-0078 §5 second phase, agentic-workflow-g5ez5:
+    // the dashboard never migrates and never overrides, so a DETECTED
+    // 'legacy' layout is refused here before any getter is touched, exactly
+    // like 'mixed' always was).
     return {
       root: absRoot,
       layout,
@@ -307,9 +310,9 @@ export function buildTree(root) {
   return {
     root: absRoot,
     layout,
-    // 'legacy' still needs migrating; 'board' is the target shape. 'mixed' is
-    // handled above, before this point is ever reached.
-    migrationPending: layout === 'legacy',
+    // Only 'board' ever reaches this point — 'legacy' and 'mixed' are both
+    // handled above, before any getter is touched.
+    migrationPending: false,
     project: { name: projectName },
     locations: {
       vision: existsSync(visionFile) ? relPointer(absRoot, visionFile) : null,

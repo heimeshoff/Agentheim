@@ -43,8 +43,8 @@ export function parseVisionName(visionText) {
  * Resolve the discovered project's name. Reads vision.md (layout-resolved via
  * `visionPath`) and uses its `# Vision:` heading; falls back to the root
  * folder basename when the file is missing, carries no heading, or the layout
- * is `'mixed'` (a `visionPath` throw — ADR-0017: the dashboard never guesses,
- * it degrades). Never throws.
+ * is `'mixed'` or a detected, unoverridden `'legacy'` (either is a `visionPath`
+ * throw — ADR-0017: the dashboard never guesses, it degrades). Never throws.
  */
 export function resolveProjectName(root) {
   try {
@@ -52,8 +52,8 @@ export function resolveProjectName(root) {
     const name = parseVisionName(text);
     if (name) return name;
   } catch {
-    // vision.md absent/unreadable, or the layout is 'mixed' (visionPath
-    // throws) — fall through to the folder name either way.
+    // vision.md absent/unreadable, or the layout is 'mixed'/'legacy'
+    // (visionPath throws) — fall through to the folder name either way.
   }
   return path.basename(path.resolve(root));
 }

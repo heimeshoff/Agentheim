@@ -16,23 +16,28 @@ function makeProject() {
   const base = mkdtempSync(path.join(tmpdir(), 'aw005-tree-'));
   const ah = path.join(base, '.agentheim');
   mkdirSync(ah);
-  writeFileSync(path.join(ah, 'vision.md'), '# Vision: Acme Platform\n\nsome body');
-  writeFileSync(path.join(ah, 'context-map.md'), '# Context map');
 
   const knowledge = path.join(ah, 'knowledge');
+  mkdirSync(knowledge, { recursive: true });
+  writeFileSync(path.join(knowledge, 'vision.md'), '# Vision: Acme Platform\n\nsome body');
+  writeFileSync(path.join(knowledge, 'context-map.md'), '# Context map');
   mkdirSync(path.join(knowledge, 'decisions'), { recursive: true });
   mkdirSync(path.join(knowledge, 'research'), { recursive: true });
   writeFileSync(path.join(knowledge, 'decisions', '0001-foo.md'), '# ADR 0001');
   writeFileSync(path.join(knowledge, 'research', 'spike-bar.md'), '# Research');
 
-  const bc = path.join(ah, 'contexts', 'alpha');
+  const knowledgeBc = path.join(knowledge, 'contexts', 'alpha');
+  mkdirSync(knowledgeBc, { recursive: true });
+  writeFileSync(path.join(knowledgeBc, 'README.md'), '# Alpha');
+  writeFileSync(path.join(knowledgeBc, 'INDEX.md'), '# Alpha knowledge index');
+  mkdirSync(path.join(knowledgeBc, 'concepts'), { recursive: true });
+  writeFileSync(path.join(knowledgeBc, 'concepts', 'thing.md'), '# Thing');
+
+  const bc = path.join(ah, 'board', 'alpha');
   for (const f of ['backlog', 'todo', 'doing', 'done']) {
     mkdirSync(path.join(bc, f), { recursive: true });
   }
-  writeFileSync(path.join(bc, 'README.md'), '# Alpha');
-  writeFileSync(path.join(bc, 'INDEX.md'), '# Alpha index');
-  mkdirSync(path.join(bc, 'concepts'), { recursive: true });
-  writeFileSync(path.join(bc, 'concepts', 'thing.md'), '# Thing');
+  writeFileSync(path.join(bc, 'INDEX.md'), '# Alpha task index');
 
   writeFileSync(
     path.join(bc, 'backlog', 'alpha-001-do-a-thing.md'),
@@ -91,7 +96,7 @@ test('tasks carry id/title/status/type/context/path from frontmatter, no body', 
     assert.equal(t.type, 'feature');
     assert.equal(t.context, 'alpha');
     // path is project-relative, forward-slashed, points at the file
-    assert.equal(t.path, '.agentheim/contexts/alpha/backlog/alpha-001-do-a-thing.md');
+    assert.equal(t.path, '.agentheim/board/alpha/backlog/alpha-001-do-a-thing.md');
     // no document body leaks into the projection
     assert.equal(JSON.stringify(t).includes('must not appear'), false);
   } finally {
@@ -120,14 +125,14 @@ test('artifact LOCATIONS are projected as pointers, not bodies', () => {
   const { base } = makeProject();
   try {
     const tree = buildTree(base);
-    assert.equal(tree.locations.vision, '.agentheim/vision.md');
-    assert.equal(tree.locations.contextMap, '.agentheim/context-map.md');
+    assert.equal(tree.locations.vision, '.agentheim/knowledge/vision.md');
+    assert.equal(tree.locations.contextMap, '.agentheim/knowledge/context-map.md');
     assert.deepEqual(tree.locations.adrs, ['.agentheim/knowledge/decisions/0001-foo.md']);
     assert.deepEqual(tree.locations.research, ['.agentheim/knowledge/research/spike-bar.md']);
     const alpha = tree.contexts[0];
-    assert.equal(alpha.readme, '.agentheim/contexts/alpha/README.md');
-    assert.equal(alpha.index, '.agentheim/contexts/alpha/INDEX.md');
-    assert.deepEqual(alpha.concepts, ['.agentheim/contexts/alpha/concepts/thing.md']);
+    assert.equal(alpha.readme, '.agentheim/knowledge/contexts/alpha/README.md');
+    assert.equal(alpha.index, '.agentheim/board/alpha/INDEX.md');
+    assert.deepEqual(alpha.concepts, ['.agentheim/knowledge/contexts/alpha/concepts/thing.md']);
   } finally {
     rmSync(base, { recursive: true, force: true });
   }
@@ -192,7 +197,8 @@ test('metaMap degrades an unstattable path to { mtimeMs: null } without throwing
 test('absent vision/context-map/research degrade to null/empty, walk does not abort', () => {
   const base = mkdtempSync(path.join(tmpdir(), 'aw005-bare-'));
   try {
-    mkdirSync(path.join(base, '.agentheim', 'contexts', 'beta', 'todo'), { recursive: true });
+    mkdirSync(path.join(base, '.agentheim', 'board', 'beta', 'todo'), { recursive: true });
+    mkdirSync(path.join(base, '.agentheim', 'knowledge', 'contexts', 'beta'), { recursive: true });
     const tree = buildTree(base);
     assert.equal(tree.locations.vision, null);
     assert.equal(tree.locations.contextMap, null);
@@ -272,12 +278,14 @@ test('buildTree projects project.name from the vision.md "# Vision:" heading (aw
 test('buildTree project.name is null when vision.md is missing or headingless (aw-015)', () => {
   const base = mkdtempSync(path.join(tmpdir(), 'aw015-novis-'));
   try {
-    mkdirSync(path.join(base, '.agentheim', 'contexts', 'beta', 'todo'), { recursive: true });
+    mkdirSync(path.join(base, '.agentheim', 'board', 'beta', 'todo'), { recursive: true });
+    mkdirSync(path.join(base, '.agentheim', 'knowledge', 'contexts', 'beta'), { recursive: true });
     // no vision.md at all
     let tree = buildTree(base);
     assert.deepEqual(tree.project, { name: null });
     // vision.md present but without a "# Vision:" heading
-    writeFileSync(path.join(base, '.agentheim', 'vision.md'), '# Goals\n\nno vision heading');
+    mkdirSync(path.join(base, '.agentheim', 'knowledge'), { recursive: true });
+    writeFileSync(path.join(base, '.agentheim', 'knowledge', 'vision.md'), '# Goals\n\nno vision heading');
     tree = buildTree(base);
     assert.deepEqual(tree.project, { name: null });
   } finally {
@@ -288,8 +296,9 @@ test('buildTree project.name is null when vision.md is missing or headingless (a
 test('a task with depends_on/blocks projects raw unresolved id arrays (aw-d8q3n)', () => {
   const base = mkdtempSync(path.join(tmpdir(), 'awd8q3n-deps-'));
   try {
-    const bl = path.join(base, '.agentheim', 'contexts', 'z', 'backlog');
+    const bl = path.join(base, '.agentheim', 'board', 'z', 'backlog');
     mkdirSync(bl, { recursive: true });
+    mkdirSync(path.join(base, '.agentheim', 'knowledge', 'contexts', 'z'), { recursive: true });
     writeFileSync(
       path.join(bl, 'z-001-deps.md'),
       [
@@ -318,8 +327,9 @@ test('a task with depends_on/blocks projects raw unresolved id arrays (aw-d8q3n)
 test('a task with neither depends_on nor blocks projects both as [] (aw-d8q3n)', () => {
   const base = mkdtempSync(path.join(tmpdir(), 'awd8q3n-none-'));
   try {
-    const bl = path.join(base, '.agentheim', 'contexts', 'z', 'backlog');
+    const bl = path.join(base, '.agentheim', 'board', 'z', 'backlog');
     mkdirSync(bl, { recursive: true });
+    mkdirSync(path.join(base, '.agentheim', 'knowledge', 'contexts', 'z'), { recursive: true });
     writeFileSync(
       path.join(bl, 'z-001-nodeps.md'),
       ['---', 'id: z-001', 'title: No deps', 'status: backlog', 'type: feature', 'context: z', '---'].join('\n')
@@ -336,8 +346,9 @@ test('a task with neither depends_on nor blocks projects both as [] (aw-d8q3n)',
 test('blocks: [] projects task.blocks as [] (aw-d8q3n)', () => {
   const base = mkdtempSync(path.join(tmpdir(), 'awd8q3n-empty-'));
   try {
-    const bl = path.join(base, '.agentheim', 'contexts', 'z', 'backlog');
+    const bl = path.join(base, '.agentheim', 'board', 'z', 'backlog');
     mkdirSync(bl, { recursive: true });
+    mkdirSync(path.join(base, '.agentheim', 'knowledge', 'contexts', 'z'), { recursive: true });
     writeFileSync(
       path.join(bl, 'z-001-emptyblocks.md'),
       [
@@ -362,8 +373,9 @@ test('blocks: [] projects task.blocks as [] (aw-d8q3n)', () => {
 test('a malformed/scalar depends_on (no brackets) projects [] — never throws, never a bare string (aw-d8q3n)', () => {
   const base = mkdtempSync(path.join(tmpdir(), 'awd8q3n-scalar-'));
   try {
-    const bl = path.join(base, '.agentheim', 'contexts', 'z', 'backlog');
+    const bl = path.join(base, '.agentheim', 'board', 'z', 'backlog');
     mkdirSync(bl, { recursive: true });
+    mkdirSync(path.join(base, '.agentheim', 'knowledge', 'contexts', 'z'), { recursive: true });
     writeFileSync(
       path.join(bl, 'z-001-scalar.md'),
       [
@@ -389,8 +401,9 @@ test('a malformed/scalar depends_on (no brackets) projects [] — never throws, 
 test('duplicate ids in depends_on are preserved, no server-side dedupe (aw-d8q3n)', () => {
   const base = mkdtempSync(path.join(tmpdir(), 'awd8q3n-dup-'));
   try {
-    const bl = path.join(base, '.agentheim', 'contexts', 'z', 'backlog');
+    const bl = path.join(base, '.agentheim', 'board', 'z', 'backlog');
     mkdirSync(bl, { recursive: true });
+    mkdirSync(path.join(base, '.agentheim', 'knowledge', 'contexts', 'z'), { recursive: true });
     writeFileSync(
       path.join(bl, 'z-001-dup.md'),
       [
@@ -427,8 +440,9 @@ test('an unreadable/frontmatter-less task file still produces a card with depend
 test('malformed / missing frontmatter degrades gracefully — task still listed', () => {
   const base = mkdtempSync(path.join(tmpdir(), 'aw005-bad-'));
   try {
-    const bl = path.join(base, '.agentheim', 'contexts', 'g', 'backlog');
+    const bl = path.join(base, '.agentheim', 'board', 'g', 'backlog');
     mkdirSync(bl, { recursive: true });
+    mkdirSync(path.join(base, '.agentheim', 'knowledge', 'contexts', 'g'), { recursive: true });
     // no frontmatter fence at all
     writeFileSync(path.join(bl, 'g-001-nofm.md'), '# Just a heading, no frontmatter');
     // unterminated frontmatter

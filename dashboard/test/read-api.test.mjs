@@ -10,13 +10,17 @@ function makeProject() {
   const base = mkdtempSync(path.join(tmpdir(), 'aw005-api-'));
   const ah = path.join(base, '.agentheim');
   mkdirSync(ah);
-  writeFileSync(path.join(ah, 'vision.md'), '# Vision body');
+  mkdirSync(path.join(ah, 'knowledge'), { recursive: true });
+  writeFileSync(path.join(ah, 'knowledge', 'vision.md'), '# Vision body');
 
-  const bc = path.join(ah, 'contexts', 'alpha');
+  const knowledgeBc = path.join(ah, 'knowledge', 'contexts', 'alpha');
+  mkdirSync(knowledgeBc, { recursive: true });
+  writeFileSync(path.join(knowledgeBc, 'README.md'), '# Alpha');
+
+  const bc = path.join(ah, 'board', 'alpha');
   for (const f of ['backlog', 'todo', 'doing', 'done']) {
     mkdirSync(path.join(bc, f), { recursive: true });
   }
-  writeFileSync(path.join(bc, 'README.md'), '# Alpha');
   writeFileSync(
     path.join(bc, 'backlog', 'alpha-001-thing.md'),
     '---\nid: alpha-001\ntitle: Thing\nstatus: backlog\ntype: feature\ncontext: alpha\n---\n\nbody'
@@ -43,7 +47,7 @@ test('GET /api/tree returns the BC × lifecycle × task projection as JSON', asy
     assert.equal(task.id, 'alpha-001');
     assert.equal(task.context, 'alpha');
     assert.equal(task.status, 'backlog');
-    assert.equal(tree.locations.vision, '.agentheim/vision.md');
+    assert.equal(tree.locations.vision, '.agentheim/knowledge/vision.md');
     // no document body in the tree response
     assert.equal(JSON.stringify(tree).includes('Vision body'), false);
   } finally {
@@ -58,7 +62,7 @@ test('GET /api/doc returns raw markdown for a valid in-root path', async () => {
   try {
     const port = await start(server);
     const res = await fetch(
-      `http://127.0.0.1:${port}/api/doc?path=${encodeURIComponent('.agentheim/vision.md')}`
+      `http://127.0.0.1:${port}/api/doc?path=${encodeURIComponent('.agentheim/knowledge/vision.md')}`
     );
     assert.equal(res.status, 200);
     assert.match(res.headers.get('content-type'), /text\/markdown|text\/plain/);

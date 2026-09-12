@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 15:06 -- Task verified and completed: agentic-workflow-g5ez5 - Close the two-root layout (ADR-0078) — every consumer except `migrate` refuses a legacy tree with `legacy-layout`, `detectLayout`'s neither-root default flips to `board`, the legacy combined INDEX template and every transitional dual-layout branch are deleted, and a fresh-project walk-through plus the tree-wide lint prove `.agentheim/` holds exactly `knowledge/` and `board/`
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-g5ez5 - Close the two-root layout (ADR-0078) — every consumer except `migrate` refuses a legacy tree with `legacy-layout`, `detectLayout`'s neither-root default flips to `board`, the legacy combined INDEX template and every transitional dual-layout branch are deleted, and a fresh-project walk-through plus the tree-wide lint prove `.agentheim/` holds exactly `knowledge/` and `board/`
+**Summary:** Closed the two-root layout (ADR-0078): every consumer except migrate now refuses a detected legacy tree with a structured legacy-layout error (mixed still refused), detectLayout neither-root default flips to board, the legacy combined INDEX template and every transitional dual-layout branch are deleted, and a fresh-project walk-through plus a sole-path-constructor scan prove .agentheim/ holds exactly knowledge/ and board/; iteration 2 fixed index-rotation swallowing the structured throw and added the parametrized CLI-verb refusal test; lib 718/718, dashboard 999/1000 (dist-staleness only), dist rebuilt on main
+**Duration:** 1h28m
+**Verification:** PASS (iteration 2)
+**Files changed:** 54
+**Tests added:** 28
+**ADRs written:** 0078 (amended in place)
+
+---
+
+## 2026-09-12 14:47 -- Verification failed: agentic-workflow-g5ez5 - Close the two-root layout (ADR-0078)
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-g5ez5 - Close the two-root layout (ADR-0078) — refuse legacy everywhere except migrate, flip the neither-root default to board, delete the transitional scaffolding
+**Iteration:** 1 of 3
+**Reasons:** index-rotation CLI silently no-ops on a legacy/mixed fixture (pre-existing bare catch in rotateAllIndexDoneLists swallows listBoardContexts structured throw, making the new runCli catch unreachable), Outcome claim of the equivalent catch is true of the source but false of the behavior, no test covers the CLI-verb half of criterion 1 (runVerbHandler and both rotation runCli catches have zero assertions)
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-09-12 13:36 -- Batch started: [agentic-workflow-g5ez5]
 
 **Type:** Work / Batch start

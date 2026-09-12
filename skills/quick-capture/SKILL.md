@@ -107,7 +107,7 @@ For each idea in the user's message:
    lifecycle lock itself (agentic-workflow-pt0gy) — a concurrent `modeling` session's own
    capture/promote/dismiss/log/index-add waits rather than racing it, so two quick-captures
    (or a quick-capture and a modeling CAPTURE) landing on the same BC at the same moment both
-   still register. It backfills a missing BC `INDEX.md` from `references/index-template.md`
+   still register. It backfills a missing BC task-half `INDEX.md` from `references/task-index-template.md`
    when the BC holds nothing but this task; otherwise a `{ok:false, code:'index-missing'}`
    rejection means something is off (a mis-typed BC name is the usual cause) — fix it and
    re-run rather than hand-editing the index.
@@ -187,7 +187,7 @@ nothing to hand-edit here. Its line format always carries `(type)`:
 ```
 
 (This retires the older, `(type)`-less line format quick-capture used to hand-type.) If
-the BC has no `INDEX.md` yet, `capture` backfills one from `references/index-template.md`
+the BC has no `INDEX.md` yet, `capture` backfills one from `references/task-index-template.md`
 automatically, but only when the BC holds nothing but the task just captured — otherwise it
 refuses `index-missing` rather than seed a template's zero counts over real pre-existing
 tasks; build the index by hand from the template in that case.
