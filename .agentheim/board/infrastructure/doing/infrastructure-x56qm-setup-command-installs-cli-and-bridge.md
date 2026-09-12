@@ -1,7 +1,7 @@
 ---
 id: infrastructure-x56qm
 title: `/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn
-status: todo
+status: doing
 type: feature
 context: infrastructure
 created: 2026-09-12

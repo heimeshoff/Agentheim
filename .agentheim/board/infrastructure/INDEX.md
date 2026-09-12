@@ -11,20 +11,20 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 3
-- **Doing:** 0
+- **Todo:** 1
+- **Doing:** 2
 - **Done:** 35
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **infrastructure-x56qm** — `/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn (feature) — `todo/infrastructure-x56qm-setup-command-installs-cli-and-bridge.md`
 - **infrastructure-js62b** — `/setup` installs, upgrades and removes the VS Code bridge from the shipped `.vsix`, reports its install state, and the dashboard's skew banner names `/setup` as the remedy (feature) — `todo/infrastructure-js62b-setup-installs-and-removes-vscode-bridge.md`
-- **infrastructure-j3rsn** — Ship the VS Code bridge `.vsix` as a committed release artifact — un-ignore it, add a version-match lint and a `RELEASE.md` step, mirroring how `dashboard/dist/` reaches consumers (chore) — `todo/infrastructure-j3rsn-ship-bridge-vsix-as-committed-release-artifact.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **infrastructure-x56qm** — `/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn (feature) — `doing/infrastructure-x56qm-setup-command-installs-cli-and-bridge.md`
+- **infrastructure-j3rsn** — Ship the VS Code bridge `.vsix` as a committed release artifact — un-ignore it, add a version-match lint and a `RELEASE.md` step, mirroring how `dashboard/dist/` reaches consumers (chore) — `doing/infrastructure-j3rsn-ship-bridge-vsix-as-committed-release-artifact.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)

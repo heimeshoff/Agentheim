@@ -1,7 +1,7 @@
 ---
 id: infrastructure-j3rsn
 title: Ship the VS Code bridge `.vsix` as a committed release artifact — un-ignore it, add a version-match lint and a `RELEASE.md` step, mirroring how `dashboard/dist/` reaches consumers
-status: todo
+status: doing
 type: chore
 context: infrastructure
 created: 2026-09-12

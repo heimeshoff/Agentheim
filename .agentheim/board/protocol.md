@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 16:48 -- Batch started: [infrastructure-j3rsn, infrastructure-x56qm]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-j3rsn - Ship the VS Code bridge `.vsix` as a committed release artifact — un-ignore it, add a version-match lint and a `RELEASE.md` step, mirroring how `dashboard/dist/` reaches consumers, infrastructure-x56qm - `/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn
+**Parallel:** yes (2 workers — j3rsn and x56qm touch disjoint files per both tasks Notes; js62b blocked on both, not ready)
+
+---
+
 ## 2026-09-12 16:41 -- Modeling / Promoted: infrastructure-x56qm - "`/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn"
 
 **Type:** Modeling / Promote
