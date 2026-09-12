@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 12:30 -- Modeling / Promoted: agentic-workflow-g5ez5 - Close the two-root layout (ADR-0078) — every consumer except `migrate` refuses a legacy tree with `legacy-layout`, `detectLayout`'s neither-root default flips to `board`, the legacy combined INDEX template and every transitional dual-layout branch are deleted, and a fresh-project walk-through plus the tree-wide lint prove `.agentheim/` holds exactly `knowledge/` and `board/`
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-12 12:30 -- Modeling / Refined: agentic-workflow-g5ez5 - Close the two-root layout (ADR-0078): refuse legacy everywhere except migrate, flip the neither-root default to board, delete the transitional scaffolding, prove the end state
 
 **Type:** Modeling / Refine

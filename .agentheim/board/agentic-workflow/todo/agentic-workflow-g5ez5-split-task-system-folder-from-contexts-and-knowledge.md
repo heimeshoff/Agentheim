@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-g5ez5
 title: Close the two-root layout (ADR-0078) — every consumer except `migrate` refuses a legacy tree with `legacy-layout`, `detectLayout`'s neither-root default flips to `board`, the legacy combined INDEX template and every transitional dual-layout branch are deleted, and a fresh-project walk-through plus the tree-wide lint prove `.agentheim/` holds exactly `knowledge/` and `board/`
-status: backlog
+status: todo
 type: refactor
 context: agentic-workflow
 created: 2026-09-06
