@@ -5,6 +5,28 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 20:37 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 34m (batch start 20:02 → 20:36)
+**Completed:** 3 (first-try PASS: 3, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** g2fgb: 1, qwfq3: 1, kr9pd: 1
+**Commits:** 5 (1 batch-start, 3 task integrations, this entry)
+**Vision-conformance:** none — batch aligns with vision. All three are harness bug fixes: kr9pd keeps /setup a builder-invoked install path (ADR-0079, non-goal 3 holds); g2fgb removes a silent README-duplication defect in the mechanized delta path (knowledge stays durable, ADR-0041 noise valve); qwfq3 makes the verifier gate robust to a lossy transport and escalates a second loss to the builder rather than hand-reconstructing (wrong work caught by structure, not luck; human stays in the loop).
+**Batch mix:** 0% product-facing / 100% harness / 0% bookkeeping (3 tasks)
+**Carry-over:** none — working tree clean; no non-main worktrees (all three aw/ worktrees torn down after integration); sidecar sweep: 1 orphan RESULT sidecar removed from .worktrees/.results/ (agentic-workflow-qwfq3.iter-1.md, no live worktree)
+**Result source:** kr9pd: notification (HTML-escaped, complete; unescaped by hand — pre-ADR-0080 dispatch) · g2fgb: notification (complete; header block delivered after the fenced blocks) · qwfq3: sidecar · layout leading/trailing/sentinel · sidecar present (read via the worktree new selectResultSource; the notification copy was top-truncated and escaped again — the incident family this task closes, rescued on day one)
+**Session-start churn (ADR-0066):** 0 recognized machine-shape commits, 0 human commits since the 2026-09-12 18:07 boundary; nothing flagged, whats-next.md not written.
+**Conductor notes:** (1) lib/test/index-entry-length.test.mjs is RED on main: agentic-workflow-qwfq3 INDEX done-list entry is 62 words (ADR-0060 cap ~60), authored at capture/refine — every worker and verifier this session reported 756/757 or 801/802 with only this failure; needs a modeling-side title shortening, not auto-fixed by work. (2) Pre-loaded ADRs and prior art were handed to workers as absolute paths to read rather than pasted inline (conductor context hygiene); no worker reported missing context. (3) g2fgb README delta applied against the ghcaj bullet — whose own bold head wraps a line — disposed applied only because the squash-merge landed the fixed termHeadOf first; the dry run on the pre-fix module disposed merged and would have duplicated the 40-line bullet. (4) aw README is 1400 lines, well past the ADR-0041 ~600-line trigger — consider modeling CONSOLIDATE. (5) qwfq3 merge-back was clean against g2fgb SKILL.md edits (merge-tree dry run before the squash).
+**Vacuum guard:** ready set empty after the batch — todo/ is empty in every BC. Open item surfaced: Brainstorm on existing code (next iteration). (open 99 days). No work was self-generated.
+
+---
+
 ## 2026-09-12 20:35 -- Task verified and completed: agentic-workflow-qwfq3 - Worker RESULT survives a lost transcript — the worker writes its RESULT to a conductor-designated sidecar under `.worktrees/.results/`, repeats the header block after the four fenced blocks behind a `RESULT_END` sentinel, and the conductor reads it through a mechanized sidecar → transcript → unescaped-notification ladder whose floor is a lost-result re-dispatch into the same worktree under its own one-shot budget (ADR-0080)
 
 **Type:** Work / Task completion
