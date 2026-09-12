@@ -11,13 +11,15 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 0
+- **Todo:** 2
 - **Doing:** 0
 - **Done:** 35
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **infrastructure-js62b** — `/setup` installs, upgrades and removes the VS Code bridge from the shipped `.vsix`, reports its install state, and the dashboard's skew banner names `/setup` as the remedy (feature) — `todo/infrastructure-js62b-setup-installs-and-removes-vscode-bridge.md`
+- **infrastructure-j3rsn** — Ship the VS Code bridge `.vsix` as a committed release artifact — un-ignore it, add a version-match lint and a `RELEASE.md` step, mirroring how `dashboard/dist/` reaches consumers (chore) — `todo/infrastructure-j3rsn-ship-bridge-vsix-as-committed-release-artifact.md`
 <!-- todo-list:end -->
 
 ### Doing

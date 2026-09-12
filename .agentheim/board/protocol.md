@@ -5,6 +5,35 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 16:41 -- Modeling / Refined: infrastructure-x56qm - /setup installs the zero-token dashboard CLI into <home>/.local/bin and /dashboard becomes a pointer
+
+**Type:** Modeling / Refine
+**BC:** infrastructure
+**Status after:** backlog (promoted in the next step); children infrastructure-j3rsn and infrastructure-js62b captured directly to todo
+**Summary:** Refined from ADR-0079 settlements via the orchestrator (architect). Settled: install logic in lib/setup-cli.mjs (dashboard/cli/ stays exactly the three shipped files); non-interactive verb surface (status / install cli / remove cli) with a schema:1 status JSON; byte-compare staleness, not a version stamp; PATH detect-and-print only, never write, backed by a source guard; /dashboard demotion retargets four card-reading test files onto the installed CLI; bootstrap-dedup lint generalized and renamed to guard setup.md->1 and dashboard.md->0; .gitattributes eol=lf on dashboard/cli/; brainstorm does not point at /setup. Found the task premise wrong: the bridge .vsix is gitignored and never packaged, so no consumer cache contains one — the builder ruled to commit the built artifact (mirroring dashboard/dist/). Split accordingly: x56qm narrowed to the CLI half; j3rsn ships the .vsix (chore, independent files); js62b adds the bridge verbs, status.bridge, the skew-banner copy naming /setup, and the README bridge block, depending on both.
+**Split into:** infrastructure-j3rsn, infrastructure-js62b
+**ADRs written:** none
+
+---
+
+## 2026-09-12 16:41 -- Modeling / Captured: infrastructure-js62b - "`/setup` installs, upgrades and removes the VS Code bridge from the shipped `.vsix`, reports its install state, and the dashboard's skew banner names `/setup` as the remedy"
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** Split out of infrastructure-x56qm at refinement: the bridge half of /setup (install/upgrade/remove from the shipped .vsix, status.bridge, skew-banner copy naming /setup, README bridge block). Depends on x56qm and on j3rsn shipping the .vsix.
+
+---
+
+## 2026-09-12 16:41 -- Modeling / Captured: infrastructure-j3rsn - Ship the VS Code bridge `.vsix` as a committed release artifact — un-ignore it, add a version-match lint and a `RELEASE.md` step, mirroring how `dashboard/dist/` reaches consumers
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** Split out of infrastructure-x56qm at refinement: the bridge .vsix is gitignored and never packaged, so no consumer cache holds one. Builder ruled: commit the built artifact (mirroring dashboard/dist/) with a compare-only version-match lint and a RELEASE.md step.
+
+---
+
 ## 2026-09-12 16:20 -- Work session ended
 
 **Type:** Work / Session end
