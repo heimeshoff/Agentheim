@@ -1,7 +1,7 @@
 ---
 id: infrastructure-hnv3d
 title: The marketplace installs `main`, not the tag, under the last released version string — a consumer who installs between a tag and the next bump gets an unreleased mid-rollout snapshot and cannot update out of it; decide how releases stop leaking (Roman's 0.9.3 stuck on a dashboard migration notice no skill in his copy fulfils)
-status: todo
+status: doing
 type: decision
 context: infrastructure
 created: 2026-09-12

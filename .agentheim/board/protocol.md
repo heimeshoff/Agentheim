@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 23:18 -- Batch started: [agentic-workflow-vsb06, infrastructure-hnv3d]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-vsb06 - The `migrate` verb reports the legacy `.agentheim/contexts/` references it does not rewrite — project files outside `.agentheim/` such as `CLAUDE.md` and `.claude/commands/` — as a read-only manifest field the step-0 notice names, so a consumer learns what still points at the old layout instead of finding out when a command breaks, infrastructure-hnv3d - The marketplace installs `main`, not the tag, under the last released version string — a consumer who installs between a tag and the next bump gets an unreleased mid-rollout snapshot and cannot update out of it; decide how releases stop leaking (Roman's 0.9.3 stuck on a dashboard migration notice no skill in his copy fulfils)
+**Parallel:** yes (2 workers — the whole ready set; different BCs, no shared source files)
+
+---
+
 ## 2026-09-12 23:15 -- Modeling / Promoted: infrastructure-hnv3d - The marketplace installs `main`, not the tag, under the last released version string — a consumer who installs between a tag and the next bump gets an unreleased mid-rollout snapshot and cannot update out of it; decide how releases stop leaking (Roman's 0.9.3 stuck on a dashboard migration notice no skill in his copy fulfils)
 
 **Type:** Modeling / Promote
