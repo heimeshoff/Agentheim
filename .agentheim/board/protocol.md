@@ -5,6 +5,25 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 16:20 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 12m (batch start 16:11 → 16:23)
+**Completed:** 1 (first-try PASS: 0, re-dispatched: 0, skipped: 1 — decision-only auto-SKIP)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Dispatches:** r4mzp: 1
+**Commits:** 3 (1 batch-start, 1 task integration, this entry)
+**Vision-conformance:** none — batch aligns with vision. ADR-0079 removes the model from a launcher path where it contributes nothing (extends the ADR-0053 precedent) and the builder invokes /setup explicitly, so "Not autonomous" holds; the CLI files land in the user home, tooling rather than project state, matching the existing plugin-cache precedent rather than non-goal 5.
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (1 task)
+**Carry-over:** left behind (user WIP, 1 file — dashboard/dist/app.js, EOL-only phantom modification, `git diff --numstat` empty); no `.agentheim/`-owned strays; no non-main worktrees (aw/infrastructure-r4mzp torn down after integration)
+**Session-start churn (ADR-0066):** 0 recognized machine-shape commits, 0 human commits since the 2026-09-12 15:08 boundary; nothing flagged, whats-next.md not written.
+**Conductor note:** the worker transcript file was empty again; the RESULT was reconstructed from the HTML-escaped notification copy (entities unescaped, two stray `</ADRS>`/`</OUTCOME>` lines dropped). The worker reported the ADR-0002 addendum and the x56qm Notes update as two extra fenced blocks after BACKLOG_ITEMS, which the parser tolerates; both were applied on main by hand. finalizeAdrNumbering kept 0079 (no renumber). Infrastructure README delta disposed `applied` (451 lines, under the ADR-0041 trigger).
+**Vacuum guard:** ready set empty after the batch — todo/ is empty in every BC (x56qm stays in backlog, now unblocked by ADR-0079 but not yet refined). Open item surfaced: Brainstorm on existing code (next iteration). (open 99 days). No work was self-generated.
+
+---
+
 ## 2026-09-12 16:20 -- Task completed (verification skipped): infrastructure-r4mzp - Does `/dashboard` still earn its place as a slash command, now that launching the dashboard costs ~120k tokens across two turns while a shell invocation costs zero?
 
 **Type:** Work / Task completion
