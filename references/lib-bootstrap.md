@@ -199,20 +199,33 @@ manifest's shape:
 
 - **`{ok:true, verb:'migrate', noop:true, changed:[]}`** — already `board`-layout (or a
   brand-new tree with nothing to migrate yet). Zero writes. **Say nothing** and continue
-  straight to the skill's own next step.
-- **`{ok:true, verb:'migrate', changed:['.agentheim'], moved:[{from,to}…], message}`** — a
-  `legacy` tree was moved. Commit it via `runScopedCommit(repoRoot, ['.agentheim'],
+  straight to the skill's own next step. (A plain noop never scans for residual references
+  either — see below; nothing to say there means no `residualReferences` field to check.)
+- **`{ok:true, verb:'migrate', changed:['.agentheim'], moved:[{from,to}…], message,
+  residualReferences:[{file,count}…], residualReferencesTruncated?:true}`** — a `legacy`
+  tree was moved. Commit it via `runScopedCommit(repoRoot, ['.agentheim'],
   manifest.message)` (`lib/scoped-commit.mjs`, the SAME resolve-plugin-file bootstrap
   targeting `runScopedCommit` instead — see `modeling/SKILL.md`'s "Committing" section for
   the full one-liner shape), then say **one line** to the builder: "migrated `.agentheim/`
-  to the two-root layout — N entries moved" (`N = moved.length`). Continue to the skill's
-  own next step.
+  to the two-root layout — N entries moved" (`N = moved.length`). When `residualReferences`
+  is non-empty, append one more sentence to that same line: "N file(s) outside
+  `.agentheim/` still name the old layout: a, b, c" (the first three `file` values, then
+  "…and K more" if there are more than three). When `residualReferences` is empty, say
+  nothing extra. Continue to the skill's own next step either way.
 - **`{ok:false, code:'mixed-layout', reason}`** / **`{ok:false, code:'worktree-active',
   reason}`** / **`{ok:false, code:'lock-timeout', reason}`** — stop the skill entirely and
   surface `reason` verbatim to the builder. None of these is a state the skill can safely
   work around by itself (a `mixed` tree needs a human to resolve the ambiguity; a live
   worker worktree still carries the legacy tree on disk; a lock timeout means a sibling
   session is mid-write).
+
+On-demand re-check: a builder who migrated before this shipped, or who fixed some of the
+files a moved-run flagged and wants to confirm, can run `migrate '{"scanResiduals":true}'`
+on an already-`board` tree. It returns the ordinary noop manifest (`ok:true, noop:true,
+changed:[]`) plus the same `residualReferences` (and `residualReferencesTruncated` when it
+applies) the moved path always returns — outside a writing skill's own step-0 call, by hand.
+The opt is ignored on the moved path (which always scans, whether asked or not) and on a
+refusal (`mixed-layout` etc — those return unchanged).
 
 `migrate` is git-free and holds the lifecycle lock for its own write phase only (ADR-0075)
 — it never conflicts with a concurrent read, only with another writer. Full mechanics:

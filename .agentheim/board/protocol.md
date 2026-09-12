@@ -5,6 +5,21 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 23:30 -- Task verified and completed: agentic-workflow-vsb06 - The `migrate` verb reports the legacy `.agentheim/contexts/` references it does not rewrite — project files outside `.agentheim/` such as `CLAUDE.md` and `.claude/commands/` — as a read-only manifest field the step-0 notice names, so a consumer learns what still points at the old layout instead of finding out when a command breaks
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-vsb06 - The `migrate` verb reports the legacy `.agentheim/contexts/` references it does not rewrite — project files outside `.agentheim/` such as `CLAUDE.md` and `.claude/commands/` — as a read-only manifest field the step-0 notice names, so a consumer learns what still points at the old layout instead of finding out when a command breaks
+**Summary:** migrate reports residual .agentheim/contexts/ references outside its rewrite scope
+**Duration:** 11m01s
+**Verification:** PASS (iteration 1)
+**Files changed:** 4
+**Tests added:** 6
+**ADRs written:** none
+**Result source:** sidecar · layout both+sentinel · sidecar present
+**README length:** agentic-workflow README now 1400 lines (ADR-0041 trigger: ~600) — consider `modeling` CONSOLIDATE
+
+---
+
 ## 2026-09-12 23:18 -- Batch started: [agentic-workflow-vsb06, infrastructure-hnv3d]
 
 **Type:** Work / Batch start

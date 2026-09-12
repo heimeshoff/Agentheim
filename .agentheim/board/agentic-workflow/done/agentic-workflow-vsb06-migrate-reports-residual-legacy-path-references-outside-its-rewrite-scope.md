@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-vsb06
 title: The `migrate` verb reports the legacy `.agentheim/contexts/` references it does not rewrite — project files outside `.agentheim/` such as `CLAUDE.md` and `.claude/commands/` — as a read-only manifest field the step-0 notice names, so a consumer learns what still points at the old layout instead of finding out when a command breaks
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-09-12
@@ -104,3 +104,46 @@ a project-local command is not ours to edit). Telling them is cheap and right.
   62-word INDEX entry), and two `bridge.test.mjs` fixed-port tests EADDRINUSE while a live
   bridge runs — the "suite green" criterion means no new failures beyond those.
 - Not a convention-establishing task (ADR-0059 check n/a); no `[human-eye]` criteria.
+
+## Outcome
+
+`migrateLayout` (`lib/layout-migration.mjs`) gained a read-only, lock-free residual-reference
+scan (`scanResidualReferences`, exported for tests): after the `legacy`→`board` write phase
+releases the lifecycle lock, it walks the project root — skipping `.git/`, `node_modules/`,
+`.worktrees/`, and the whole `.agentheim/` tree — counting occurrences of the literal
+`.agentheim/contexts/` in eligible text files (a small extension allowlist plus an
+extension-less UTF-8/no-NUL sniff). The manifest gains `residualReferences: [{file, count}]`
+(project-relative, forward-slash, sorted) automatically on every moved run; a plain `noop`
+run stays exactly as cheap as before (no scan, no field, walker never invoked — asserted via
+an injected spy) unless the caller opts in with `migrate '{"scanResiduals":true}'`, which
+re-runs the same scan on an already-`board` tree on demand (ignored on `mixed-layout` and
+other refusals, which return unchanged). The scan is bounded at 5000 files or 2 seconds,
+marking `residualReferencesTruncated: true` rather than slowing a huge tree, and is
+loss-tolerant (an unreadable file/dir is skipped, never thrown).
+
+`lib/legacy-path-literal-lint.mjs`'s ALLOWLIST gained one new entry for the new
+`.agentheim/contexts/` literal inside `lib/layout-migration.mjs` (the scan's own match
+target), with its own rationale.
+
+`references/lib-bootstrap.md` §7's "moved" outcome bullet now names the new manifest fields
+and documents the one-sentence notice a skill appends when `residualReferences` is
+non-empty (first three files, then "…and K more"); a new paragraph documents the
+`scanResiduals` on-demand re-check and its scope (ignored on the moved path and on
+refusals).
+
+Tests: `lib/test/layout-migration.test.mjs` gained 6 new tests covering the comprehensive
+AC #1 fixture (exact two-file, count-1/count-2 result; binary file and `node_modules/`
+skipped; `.agentheim/`-internal occurrences never reported), the plain-noop no-scan
+guarantee (injected walker spy never invoked, output shape exactly the bare noop), the
+`scanResiduals:true` on-demand re-check (same result as the moved run; ignored on
+`mixed-layout`), the scan running outside the lifecycle lock (injected walker observes the
+lock file already released), and the file-count and time bounds both triggering
+`residualReferencesTruncated: true` without throwing, via injected synthetic walkers.
+
+Full suite: `node --test lib/test/*.test.mjs` — 811/812 passing; the one failure
+(`index-entry-length.test.mjs`, qwfq3's 62-word INDEX entry) is the documented
+pre-existing red, not a regression.
+
+Key files: `lib/layout-migration.mjs` (`scanResidualReferences`, `migrateLayout`),
+`lib/legacy-path-literal-lint.mjs` (ALLOWLIST entry), `lib/test/layout-migration.test.mjs`,
+`references/lib-bootstrap.md` §7.
