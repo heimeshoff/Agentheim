@@ -5,6 +5,33 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 19:27 -- Modeling / Captured: agentic-workflow-qwfq3 - Worker RESULT survives a lost transcript — the worker also writes its RESULT to a conductor-designated sidecar file, repeats the header fields after the four blocks, and lib/worker-result.mjs gains a mechanized unescape-and-reconstruct fallback so the conductor never hand-rebuilds FILE_LIST from a truncated notification
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Recurring loss of the worker RESULT block (empty transcript .output plus an HTML-escaped, top-truncated notification copy; r4mzp, j3rsn and js62b on 2026-09-12) forced three hand-recoveries of FILE_LIST and the header fields. Remediate inside the contract: a conductor-designated sidecar RESULT file the worker also writes, a trailing header repeat with a RESULT_END sentinel, and a mechanized unescape-and-reconstruct fallback in lib/worker-result.mjs with an ADR-0059 lint, so the verifier is only ever handed a parser-valid RESULT.
+
+---
+
+## 2026-09-12 19:26 -- Modeling / Captured: agentic-workflow-g2fgb - `lib/readme-delta.mjs`'s `replace` op anchors a bold term head that wraps onto a continuation line — `termHeadOf` matches on the whitespace-collapsed bullet text, guarded by a wrapped-head test fixture, and a missing anchor disposes distinctly from an `expected` collision
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** lib/readme-delta.mjs termHeadOf runs its bold-lead-in regex without the s flag, so a replace op cannot anchor a bullet whose **head** wraps onto a second line and falls into the missing-anchor branch (merged, appended at section end), duplicating the whole bullet. Observed live 2026-09-12 integrating infrastructure-j3rsn (ADR-0013 bullet) and hand-worked-around. Fix: anchor on the whitespace-collapsed bullet text, add a wrapped-head node --test fixture, and give a missing anchor its own disposition so the conductor can tell an anchoring failure from an expected collision. Filed straight to todo/: root cause located, fix local, test shape concrete.
+
+---
+
+## 2026-09-12 19:25 -- Modeling / Captured: infrastructure-kr9pd - `/setup` bridge verbs fail on win32 when the `.vsix` or `code.cmd` path holds a cmd.exe metacharacter but no space — `quoteArgWindows` leaves such segments unquoted and `cmd.exe` splits them
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** quoteArgWindows only quotes whitespace-bearing values, so a cmd.exe metacharacter (& | ^ < > ( )) in a space-free segment of the .vsix or code.cmd path is split by cmd.exe and every install bridge / remove bridge / bridge status fails loud on that machine. Decision at capture: always quote every argument under win32 shell:true (cmd.exe treats those characters literally inside double quotes), plus a hermetic default-seam test on an R&D^(x)-style prefix; %NAME% expansion is the documented accepted residual. Found by the js62b iteration-2 verifier.
+
+---
+
 ## 2026-09-12 18:07 -- Work session ended
 
 **Type:** Work / Session end
