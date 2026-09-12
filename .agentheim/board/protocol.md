@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 17:06 -- Task verified and completed: infrastructure-j3rsn - Ship the VS Code bridge `.vsix` as a committed release artifact — un-ignore it, add a version-match lint and a `RELEASE.md` step, mirroring how `dashboard/dist/` reaches consumers
+
+**Type:** Work / Task completion
+**Task:** infrastructure-j3rsn - Ship the VS Code bridge `.vsix` as a committed release artifact — un-ignore it, add a version-match lint and a `RELEASE.md` step, mirroring how `dashboard/dist/` reaches consumers
+**Summary:** The VS Code bridge .vsix ships as a committed release artifact (0.5.0), un-ignored, guarded by a compare-only vsix lint and a RELEASE.md packaging step, mirroring dashboard/dist/
+**Duration:** 15m
+**Verification:** PASS (iteration 1)
+**Files changed:** 8
+**Tests added:** 11
+**ADRs written:** none (ADR-0013 addendum)
+
+---
+
 ## 2026-09-12 16:48 -- Batch started: [infrastructure-j3rsn, infrastructure-x56qm]
 
 **Type:** Work / Batch start

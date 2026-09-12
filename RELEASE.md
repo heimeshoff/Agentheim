@@ -60,37 +60,60 @@ Run these in order. The tag is the last step and the point of no return.
    after a build, but this is the same check that protects `main` between releases (see the
    infrastructure BC README's "Dist freshness" note). Skip this step and the release ships
    whatever bundle happened to already be committed, stale or not.
-2. **Bump the version.** Edit `.claude-plugin/plugin.json` → set `version` to the new
+2. **Package, verify, and stage the VS Code bridge `.vsix`** (only if `vscode-extension/`
+   changed). Like `dashboard/dist/`, the packaged `.vsix` is a committed derived artifact
+   (ADR-0013's infrastructure-j3rsn addendum) — the marketplace copies `main`, not the tag, so
+   the artifact must be fresh **on `main`**, not merely at some tag. Delete any stale local
+   `.vsix` from an older version before packaging; never commit more than one.
+   ```
+   cd vscode-extension
+   npm install
+   npx vsce package --allow-missing-repository
+   npm test
+   cd ..
+   git add vscode-extension/agentheim-bridge-*.vsix
+   git commit -m "chore(bridge): package vsix"
+   ```
+   `npm test` runs `vscode-extension/test/vsix-artifact.test.mjs` (infrastructure-j3rsn),
+   which fails unless exactly one `agentheim-bridge-*.vsix` is present under
+   `vscode-extension/` and its version segment matches `vscode-extension/package.json`'s
+   `version`. This check is **compare-only** — it never rebuilds or repackages, unlike
+   `dist-staleness.test.mjs`; a `.vsix` is a zip and is not byte-reproducible across builds
+   (it embeds a timestamp), so there is no content-hash stamp to compare against instead.
+   Skip this step and the release ships whatever `.vsix` (or none) happened to already be
+   committed, stale or not.
+3. **Bump the version.** Edit `.claude-plugin/plugin.json` → set `version` to the new
    `X.Y.Z` chosen above. This is the single field that matters; touch nothing else in the
    manifest unless that's part of the release.
-3. **Roll the CHANGELOG.** In [`CHANGELOG.md`](CHANGELOG.md), turn the top `## [Unreleased]`
+4. **Roll the CHANGELOG.** In [`CHANGELOG.md`](CHANGELOG.md), turn the top `## [Unreleased]`
    heading into a dated `## [X.Y.Z] - YYYY-MM-DD` section (leaving a fresh empty
    `## [Unreleased]` above it), fill it with what shipped grouped under Keep-a-Changelog
    subheads (`### Added` / `### Changed` / `### Fixed` / `### Docs`), and update the
    link-reference block at the bottom (`[Unreleased]` → `vX.Y.Z...HEAD`, plus a new
    `[X.Y.Z]: …/compare/vOLD...vX.Y.Z`). **This section is the single source of the release
-   notes** — Step 7 publishes it verbatim, so compose it once, here. Omit bookkeeping noise
+   notes** — Step 8 publishes it verbatim, so compose it once, here. Omit bookkeeping noise
    (`chore(release)`/`chore(protocol)`/SHA-stamp/session-end commits).
-4. **Commit the bump + changelog.** A focused, scoped commit — never `git add -A`:
+5. **Commit the bump + changelog.** A focused, scoped commit — never `git add -A`:
    ```
    git add .claude-plugin/plugin.json CHANGELOG.md
    git commit -m "chore(release): vX.Y.Z"
    ```
-5. **Push to `main`.** `git push origin main`. **This is the step that actually reaches
+6. **Push to `main`.** `git push origin main`. **This is the step that actually reaches
    marketplace users** — until the bumped manifest is on `main`'s remote, the marketplace
    cache keeps serving "already at latest" and the release has changed nothing for anyone.
-   By this point `dashboard/dist/` is on `main` too (Step 1), so this push is also the moment
-   the fresh dashboard reaches every consumer that updates.
-6. **Tag the release, matching the manifest exactly.** The tag string must equal the manifest
+   By this point `dashboard/dist/` (Step 1) and, if changed, the bridge `.vsix` (Step 2) are
+   on `main` too, so this push is also the moment the fresh dashboard and bridge reach every
+   consumer that updates.
+7. **Tag the release, matching the manifest exactly.** The tag string must equal the manifest
    version with a `v` prefix — `plugin.json` `"version": "X.Y.Z"` ⇔ tag `vX.Y.Z`. The tag now
    captures the CHANGELOG entry, so its compare links resolve:
    ```
    git tag -a vX.Y.Z -m "vX.Y.Z"
    git push origin vX.Y.Z
    ```
-7. **Publish release notes on GitHub.** Create a GitHub Release on the tag so the change has a
+8. **Publish release notes on GitHub.** Create a GitHub Release on the tag so the change has a
    human-readable description under `/releases`. The notes are the **body of the `[X.Y.Z]`
-   CHANGELOG section** from Step 3 — copy it verbatim, do not recompose. **Do not** use
+   CHANGELOG section** from Step 4 — copy it verbatim, do not recompose. **Do not** use
    `--generate-notes`, which dumps every raw `chore`/protocol commit since the last tag (we
    commit straight to `main`):
    ```

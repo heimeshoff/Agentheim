@@ -26,10 +26,12 @@ $RECYCLE.BIN/
 dashboard/node_modules/
 
 ### Agentheim VS Code bridge extension (infrastructure-013, ADR-0018)
-# @vscode/vsce is a PACKAGING-TIME-only dep; the runtime is stdlib + the vscode
-# host API. node_modules and built .vsix artifacts are never committed.
+# @vscode/vsce is a PACKAGING-TIME-only dep; node_modules is never committed.
+# The packaged .vsix IS a committed release artifact as of infrastructure-j3rsn
+# (mirrors dashboard/dist/, ADR-0013's addendum) — do not ignore it here. Stale
+# local builds of an old version are deleted by hand before packaging, not
+# gitignored away.
 vscode-extension/node_modules/
-vscode-extension/*.vsix
 
 ### Agentheim per-worker git worktrees (ADR-0032)
 # Each parallel `work` worker gets a private worktree at <repo-root>/.worktrees/<task-id>/

@@ -4,7 +4,7 @@ title: Plugin release discipline — manifest bump bound to a versioned git tag,
 scope: infrastructure
 status: accepted
 date: 2026-06-08
-related_tasks: [infrastructure-005, infrastructure-006, infrastructure-w45ce]
+related_tasks: [infrastructure-005, infrastructure-006, infrastructure-w45ce, infrastructure-j3rsn]
 related_adrs: [0003, 0057]
 ---
 
@@ -151,3 +151,45 @@ ADR's original scope missed.
 guard, rejected for cost) now also covers "assert `dashboard/dist/` matches a fresh build" —
 still not adopted; `dist-staleness.test.mjs` under the existing test suite is the interim,
 already-adopted equivalent of that backstop (see ADR-0057's amendment).
+
+## Amendment (infrastructure-j3rsn): the VS Code bridge `.vsix` is a second committed derived artifact, guarded compare-only
+
+**Finding.** ADR-0079 assumed `/setup` could install the VS Code bridge from "the cached
+`.vsix`", but no consumer cache ever contained one: `vscode-extension/*.vsix` was
+gitignored, `@vscode/vsce` is a packaging-only devDependency, and `RELEASE.md` never
+packaged it. The builder's own cache happened to hold `.vsix` files only because their
+marketplace is a local *directory* source that copies untracked files — a
+GitHub-installed consumer got nothing. Building at install time was considered and
+rejected (builder ruling, 2026-09-12): it would put npm, network, and a `node_modules`
+write into the consumer's plugin-cache directory, contradicting ADR-0002's no-install-step
+charter for a launch/discovery surface.
+
+**Decision.** The packaged `.vsix` joins `dashboard/dist/` as a second committed release
+artifact, for the identical reason the infrastructure-w45ce amendment already established
+for the dashboard bundle: the marketplace copies `main`, not the tag, so the artifact must
+be fresh **on `main`** whenever a release is cut. `.gitignore` no longer blanket-ignores
+`vscode-extension/*.vsix`; exactly one `vscode-extension/agentheim-bridge-<version>.vsix`
+is tracked, matching `vscode-extension/package.json`'s `version`. `vscode-extension/.vscodeignore`
+gained `*.vsix` so a previously committed artifact never nests inside the next packaged one.
+
+**The guard is compare-only, not the `dist-staleness` content-hash pattern — a deliberate
+divergence, not an oversight.** A `.vsix` is a zip archive and embeds a build timestamp, so
+it is **not byte-reproducible** across builds of identical source; a `.build-stamp.json`
+content-hash comparison (`dashboard/build-stamp.mjs`'s pattern) does not transfer.
+`vscode-extension/vsix-lint.mjs` + `vscode-extension/test/vsix-artifact.test.mjs` instead
+assert a structural invariant against the live tree only — exactly one
+`agentheim-bridge-*.vsix` exists, and its filename's version segment equals
+`package.json`'s `version` — and never invoke `vsce` or `npm`. This mirrors the spirit of
+`dist-staleness.test.mjs` (an in-suite, `main`-scoped freshness backstop) without
+attempting its mechanism, which is structurally inapplicable here.
+
+**`RELEASE.md`** gained a packaging/verify/stage step immediately after the existing
+dashboard rebuild step (package via `vsce`, run `npm test`, stage
+`vscode-extension/agentheim-bridge-*.vsix`), run only when `vscode-extension/` changed;
+all later steps renumbered and their internal step-number cross-references updated to
+match.
+
+**Consequence.** The escalation-path note already in this ADR's Consequences section (a CI
+guard, rejected for cost) and the interim in-suite backstop this ADR's infrastructure-w45ce
+amendment established now both cover a second artifact, at no new mechanism cost: the same
+doc-only checklist discipline, plus one more compare-only `node --test` check.

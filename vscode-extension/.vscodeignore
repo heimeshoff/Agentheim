@@ -5,3 +5,8 @@ test/**
 .vscode/**
 .gitignore
 node_modules/**
+# A previously committed .vsix must never nest inside the next packaged one
+# (infrastructure-j3rsn: the .vsix is now itself a committed release artifact).
+*.vsix
+# The live-tree lint is release tooling, not extension runtime.
+vsix-lint.mjs

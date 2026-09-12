@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 1
-- **Doing:** 2
-- **Done:** 35
+- **Doing:** 1
+- **Done:** 36
 <!-- task-counts:end -->
 
 ### Todo
@@ -24,11 +24,11 @@ research touching this BC, and concept synthesis pages.
 ### Doing
 <!-- doing-list:start -->
 - **infrastructure-x56qm** — `/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn (feature) — `doing/infrastructure-x56qm-setup-command-installs-cli-and-bridge.md`
-- **infrastructure-j3rsn** — Ship the VS Code bridge `.vsix` as a committed release artifact — un-ignore it, add a version-match lint and a `RELEASE.md` step, mirroring how `dashboard/dist/` reaches consumers (chore) — `doing/infrastructure-j3rsn-ship-bridge-vsix-as-committed-release-artifact.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **infrastructure-j3rsn** — Ship the VS Code bridge `.vsix` as a committed release artifact — un-ignore it, add a version-match lint and a `RELEASE.md` step, mirroring how `dashboard/dist/` reaches consumers (chore) — `done/infrastructure-j3rsn-ship-bridge-vsix-as-committed-release-artifact.md`
 - **infrastructure-r4mzp** — Does `/dashboard` still earn its place as a slash command, now that launching the dashboard costs ~120k tokens across two turns while a shell invocation costs zero? (decision) — `done/infrastructure-r4mzp-does-dashboard-command-still-earn-its-place.md`
 - **infrastructure-k9t2v** — Slim `commands/dashboard.md` — one bootstrap instead of three pasted copies, and the `$CLAUDE_PLUGIN_ROOT` archaeology moved out to ADR-0002 (chore) — `done/infrastructure-k9t2v-slim-dashboard-command-file.md`
 - **infrastructure-rgknz** — The dashboard runtime notices a plugin update — replace a live server that serves an older plugin version instead of reusing it (bug) — `done/infrastructure-rgknz-dashboard-runtime-notices-plugin-update.md`

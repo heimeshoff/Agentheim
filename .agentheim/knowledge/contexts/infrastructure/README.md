@@ -309,6 +309,15 @@ Apply write request.
     step, ahead of the version-bump commit, to rebuild + verify + stage `dashboard/dist/`.
     See "Dist freshness" under Testing below for the durable, in-suite half of this
     discipline.
+  - **Amendment (infrastructure-j3rsn) — the VS Code bridge `.vsix` joined the release contract
+    as a second committed derived artifact.** Like `dashboard/dist/`, the packaged `.vsix` under
+    `vscode-extension/` is committed (`.gitignore` no longer blanket-ignores it) because the
+    marketplace copies `main`, not the tag. Unlike `dashboard/dist/`, a `.vsix` is a zip and is
+    NOT byte-reproducible across builds (it embeds a timestamp), so the guarding check is
+    **compare-only**, never a rebuild: `vscode-extension/test/vsix-artifact.test.mjs` asserts
+    exactly one `agentheim-bridge-*.vsix` exists under `vscode-extension/` and its version
+    segment matches `package.json`'s `version`. `RELEASE.md` gained a packaging/verify/stage
+    step adjacent to the dashboard rebuild step, run only when `vscode-extension/` changed.
 
 - **ADR-0018 — VS Code dashboard→terminal bridge (fixed-port localhost extension).** Agentheim's
   first deployable VS Code component (`vscode-extension/`): a `127.0.0.1`-only `node:http` listener
@@ -442,6 +451,7 @@ Apply write request.
   is detective and `main`-scoped. `dist-build.test.mjs`'s own fresh-build assertions now build
   into a scratch directory instead of `dashboard/dist/` in place, precisely so this check keeps
   reading the real, honest, committed `dist/` rather than one a sibling test just refreshed.
+- **Vsix freshness, compare-only (`vscode-extension/vsix-lint.mjs` + `vsix-artifact.test.mjs`, infrastructure-j3rsn, ADR-0013 addendum).** A stdlib-only, `node --test` check mirroring "Dist freshness" in spirit only: it asserts exactly one `agentheim-bridge-*.vsix` exists under `vscode-extension/` and its filename's version segment equals `vscode-extension/package.json`'s `version`. It does NOT rebuild or repackage, unlike the dist check — a `.vsix` is a zip and embeds a build timestamp, so it is not byte-reproducible across builds and has no content-hash stamp to compare against. Goes red on `main` whenever `vscode-extension/package.json`'s version moves without a matching repackage-and-commit of the `.vsix` (the `RELEASE.md` step above).
 
 ## Open questions
 
