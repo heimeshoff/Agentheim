@@ -5,6 +5,31 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 23:40 -- Task verified and completed: infrastructure-hnv3d - The marketplace installs `main`, not the tag, under the last released version string — a consumer who installs between a tag and the next bump gets an unreleased mid-rollout snapshot and cannot update out of it; decide how releases stop leaking (Roman's 0.9.3 stuck on a dashboard migration notice no skill in his copy fulfils)
+
+**Type:** Work / Task completion
+**Task:** infrastructure-hnv3d - The marketplace installs `main`, not the tag, under the last released version string — a consumer who installs between a tag and the next bump gets an unreleased mid-rollout snapshot and cannot update out of it; decide how releases stop leaking (Roman's 0.9.3 stuck on a dashboard migration notice no skill in his copy fulfils)
+**Summary:** marketplace pins the release tag instead of serving main
+**Duration:** 21m20s
+**Verification:** PASS (iteration 2)
+**Files changed:** 5
+**Tests added:** 6
+**ADRs written:** ADR-0081
+**Result source:** sidecar · layout both+sentinel · sidecar present (iteration 2; iteration 1 also sidecar)
+
+---
+
+## 2026-09-12 23:34 -- Verification failed: infrastructure-hnv3d - Marketplace serves unreleased main mid-rollout snapshot
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-hnv3d - Marketplace serves unreleased main mid-rollout snapshot
+**Iteration:** 1 of 3
+**Reasons:** RELEASE.md Step 7 wrongly says dist/vsix rebuilds ride the release commit, RELEASE.md preamble still calls the tag the point of no return, ADR-0013 amendment repeats the same-commit claim, README delta w45ce bullet misdescribes the diff, README change is a five-sentence amendment paragraph instead of one current-state sentence, /release description still lists push-then-tag
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-09-12 23:30 -- Task verified and completed: agentic-workflow-vsb06 - The `migrate` verb reports the legacy `.agentheim/contexts/` references it does not rewrite — project files outside `.agentheim/` such as `CLAUDE.md` and `.claude/commands/` — as a read-only manifest field the step-0 notice names, so a consumer learns what still points at the old layout instead of finding out when a command breaks
 
 **Type:** Work / Task completion

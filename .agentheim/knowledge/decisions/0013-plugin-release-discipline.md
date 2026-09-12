@@ -4,8 +4,8 @@ title: Plugin release discipline — manifest bump bound to a versioned git tag,
 scope: infrastructure
 status: accepted
 date: 2026-06-08
-related_tasks: [infrastructure-005, infrastructure-006, infrastructure-w45ce, infrastructure-j3rsn]
-related_adrs: [0003, 0057]
+related_tasks: [infrastructure-005, infrastructure-006, infrastructure-w45ce, infrastructure-j3rsn, infrastructure-hnv3d]
+related_adrs: [0003, 0057, 0081]
 ---
 
 # ADR-0013: Plugin release discipline — manifest bump bound to a versioned git tag, by checklist
@@ -193,3 +193,33 @@ match.
 guard, rejected for cost) and the interim in-suite backstop this ADR's infrastructure-w45ce
 amendment established now both cover a second artifact, at no new mechanism cost: the same
 doc-only checklist discipline, plus one more compare-only `node --test` check.
+
+## Amendment (infrastructure-hnv3d): the marketplace now installs the pinned release tag, not `main`
+
+**Finding.** A consumer (Roman, "Souls") installed a `main` snapshot labelled `0.9.3` between
+two commits of an in-flight, multi-task rollout (ADR-0078's split): the snapshot carried a
+consumer-visible promise (a migration-pending notice) five days ahead of the task that
+fulfilled it, and — because `plugin.json` `version` never moved during that window — the same
+consumer could not then pull the completed rollout either. This ADR's own "the manifest
+legitimately lagging `main` between releases" residual (Consequences, above) is retired as a
+harmless assumption: it is not harmless whenever `main` carries a rollout whose parts are
+individually shippable but jointly user-visible, and this incident shows it recurring by
+construction whenever a split like ADR-0078's lands piecewise.
+
+**Decision.** See [ADR-0081](0081-marketplace-pins-release-tag-not-main.md). `.claude-plugin/marketplace.json`'s
+`agentheim` plugin entry is now a `github` source pinned to `ref: "v<plugin.json version>"`,
+set in the same release commit as the version bump, rather than the relative-path source that
+always resolved to `main`. A live-tree lint enforces the ref-equals-version invariant on every
+commit, and `RELEASE.md`/`.claude/commands/release.md` reorder tagging ahead of a single
+atomic push so the tag is always on `origin` before `main` can name it.
+
+**Consequence for the infrastructure-w45ce and infrastructure-j3rsn amendments above.** Both
+amendments justified "the artifact must be fresh on `main`" by observing that "the marketplace
+copies `main`, not the tag." That rationale is now **"fresh at the tag."** The dashboard
+rebuild and the packaged `.vsix` each land in their own commit *before* the release commit
+(`RELEASE.md` Steps 1/2, ahead of Step 5's `chore(release): vX.Y.Z`) — not in the release
+commit itself — so by the time the release commit is tagged, both artifacts are already
+ancestors of it and therefore part of the tree the tag names. "Fresh at the tag" holds because
+of that ancestry, which the release commit's tag makes the same tree as `main` at the moment
+it is cut. The rebuild-and-stage steps those amendments introduced are unchanged in mechanism;
+only the reason they must happen *before* the release commit is updated.

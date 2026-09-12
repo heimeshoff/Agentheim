@@ -1,5 +1,5 @@
 ---
-description: Release Agentheim itself (maintainer-only, run from the Agentheim source repo) — bump the manifest, roll the CHANGELOG, push main, tag, and publish GitHub release notes for vX.Y.Z. Refuses in projects that merely use Agentheim as a plugin.
+description: Release Agentheim itself (maintainer-only, run from the Agentheim source repo) — bump the manifest, pin the marketplace ref, roll the CHANGELOG, tag, push main and the tag atomically, and publish GitHub release notes for vX.Y.Z. Refuses in projects that merely use Agentheim as a plugin.
 argument-hint: "x.y.z"
 allowed-tools: Bash(git:*), Bash(gh:*), Read, Edit, Grep
 ---
@@ -78,15 +78,39 @@ The requested version is: `$ARGUMENTS`
 If all five pass, state the transition plainly: `OLD → X.Y.Z` and the semver
 level it implies (patch / minor / major), then proceed.
 
-## Step 1 — bump the manifest
+## Step 1 — mid-rollout advisory (read-only; advisory, not a gate)
+
+Before touching anything, check whether `main` is mid-rollout of a change that shouldn't
+ship yet — a consumer-visible promise (a notice, a pointer, a command that names a step)
+that outruns its own fulfilment across several still-in-flight tasks. This is exactly the
+hazard [ADR-0081](.agentheim/knowledge/decisions/0081-marketplace-pins-release-tag-not-main.md)
+records: pinning the marketplace `ref` stops it leaking a `main` snapshot *between* releases,
+but a release cut mid-rollout still ships that snapshot, deliberately, at the tag.
+
+1. List every task file under every `.agentheim/board/*/todo/` and `.agentheim/board/*/doing/`
+   directory across all bounded contexts (id + title from frontmatter).
+2. If that list is non-empty, show it to the builder and ask plainly: *"Is `main` mid-rollout
+   of a change that shouldn't ship as this release?"* Wait for an explicit answer.
+3. If the builder says yes, or is unsure → **stop**; do not proceed until they say it's safe.
+4. If the builder says no, or the list is empty → proceed to Step 2.
+
+This is advisory, not a gate: it surfaces the question at the one moment a release freezes a
+tree into a tag, and leaves the judgment call to the builder, who has context a static check
+does not.
+
+## Step 2 — bump the manifest and pin the marketplace ref
 
 Edit `.claude-plugin/plugin.json` → set `version` to `X.Y.Z`. Touch nothing else
-in the manifest.
+in that manifest.
 
-## Step 2 — roll the CHANGELOG
+Edit `.claude-plugin/marketplace.json` → set the `agentheim` plugin entry's `source.ref` to
+`vX.Y.Z` — the exact tag string Step 5 below will cut. `lib/marketplace-ref-lint.mjs` fails
+the suite if these two ever disagree.
+
+## Step 3 — roll the CHANGELOG
 
 `CHANGELOG.md` is the **single source of the release notes** — the GitHub Release
-in Step 6 is published *from* it, so compose the notes here, once.
+in Step 7 is published *from* it, so compose the notes here, once.
 
 1. Find the previous release tag and read what landed since it. The `vX.Y.Z` tag
    does **not** exist yet at this step, so diff against `HEAD`:
@@ -115,40 +139,48 @@ in Step 6 is published *from* it, so compose the notes here, once.
 4. Update the link-reference block at the bottom of the file: point `[Unreleased]`
    at `vX.Y.Z...HEAD`, and add a new `[X.Y.Z]: …/compare/vOLD...vX.Y.Z` line.
 
-## Step 3 — commit the bump + changelog (scoped add only)
+## Step 4 — commit the bump + changelog + ref (scoped add only)
 
 ```
-git add .claude-plugin/plugin.json CHANGELOG.md
+git add .claude-plugin/plugin.json .claude-plugin/marketplace.json CHANGELOG.md
 git commit -m "chore(release): vX.Y.Z"
 ```
 
 Use **only** that pathspec — never `git add -A`/`.` (the working tree may carry
 unrelated edits from a parallel session, per the Step 0.5 snapshot).
 
-## Step 4 — push main (the step that reaches users)
-
-```
-git push origin main
-```
-
-If this fails (rejected / non-fast-forward / auth) → stop and report verbatim. Do
-**not** force-push. The release has changed nothing for users until this succeeds.
-
-## Step 5 — tag and push the tag
+## Step 5 — tag the release locally
 
 ```
 git tag -a vX.Y.Z -m "vX.Y.Z"
-git push origin vX.Y.Z
 ```
 
-The tag string must equal the manifest version with a `v` prefix. The tag now
-captures the CHANGELOG entry, so its compare links resolve.
+The tag string must equal the manifest version with a `v` prefix — and it's also the exact
+`ref` string Step 2 just wrote into `marketplace.json`. The tag now captures the CHANGELOG
+entry, so its compare links resolve. **Do not push yet** — pushing `main` naming a tag the
+remote doesn't have (or vice versa) would leave the marketplace's pinned `ref` dangling for
+anyone who updates in between; both reach `origin` together in Step 6.
 
-## Step 6 — publish the GitHub Release (from the CHANGELOG)
+## Step 6 — push main and the tag together, atomically
+
+```
+git push --atomic origin main vX.Y.Z
+```
+
+If this fails (rejected / non-fast-forward / auth) → stop and report verbatim. Do **not**
+force-push, and do not fall back to two separate pushes — `--atomic` is what guarantees no
+consumer's marketplace clone ever reads a `ref` for a tag `origin` doesn't have yet. The
+release has changed nothing for users until this succeeds. Verify with a one-line check:
+
+```
+git ls-remote origin refs/tags/vX.Y.Z
+```
+
+## Step 7 — publish the GitHub Release (from the CHANGELOG)
 
 First check the CLI is available and authenticated: `gh auth status`.
 
-The release notes are the **body of the `## [X.Y.Z]` section you wrote in Step 2** —
+The release notes are the **body of the `## [X.Y.Z]` section you wrote in Step 3** —
 do not recompose them; copy that section verbatim (minus its heading line).
 
 - **If `gh` works** → create the release on the tag with those notes. For
@@ -166,7 +198,7 @@ do not recompose them; copy that section verbatim (minus its heading line).
   (*Releases → Draft a new release → pick tag `vX.Y.Z` → paste the section →
   Publish*).
 
-## Step 7 — log to the protocol
+## Step 8 — log to the protocol
 
 Prepend a `Release shipped` entry to `.agentheim/knowledge/protocol.md` (newest on
 top, right after the `---` on line 4). Use today's date and this shape:
@@ -177,8 +209,9 @@ top, right after the `---` on line 4). Use today's date and this shape:
 **Type:** Release
 **Version:** OLD → X.Y.Z (<patch|minor|major> — <one-line what & why>)
 **Manifest:** `.claude-plugin/plugin.json` bumped, committed `<short-sha>`
+**Marketplace ref:** `.claude-plugin/marketplace.json` pinned to `vX.Y.Z` (same commit)
 **Changelog:** `CHANGELOG.md` `[Unreleased]` → `[X.Y.Z]` section rolled (same commit)
-**Pushed to main:** yes (`<range>` on `origin/main`)
+**Pushed:** yes — `main` + `vX.Y.Z` atomically (`<range>` on `origin/main`)
 **Tag:** `vX.Y.Z` (annotated) → `<short-sha>`, pushed to origin
 **GitHub Release:** created via `gh` (from CHANGELOG) | deferred (gh unavailable — backfill script will create it)
 
@@ -193,9 +226,10 @@ git commit -m "chore(protocol): record vX.Y.Z release shipped [work]"
 git push origin main
 ```
 
-## Step 8 — report
+## Step 9 — report
 
-Tell the builder, in plain prose: `OLD → X.Y.Z` shipped; manifest on `origin/main`
-(this is what clears the marketplace "already at latest" cache); CHANGELOG rolled;
-tag pushed; the GitHub Release status (created from the CHANGELOG, or the backfill
-script / web-UI fallback if deferred). Surface anything that needed a fallback.
+Tell the builder, in plain prose: `OLD → X.Y.Z` shipped; `main` and the `vX.Y.Z` tag pushed
+atomically, with the marketplace `ref` pinned to it (this is what clears the marketplace
+"already at latest" cache and stops it serving `main` in between releases); CHANGELOG
+rolled; the GitHub Release status (created from the CHANGELOG, or the backfill script /
+web-UI fallback if deferred). Surface anything that needed a fallback.

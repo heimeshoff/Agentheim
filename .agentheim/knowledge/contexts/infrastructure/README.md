@@ -269,28 +269,33 @@ Apply write request.
   stuck on *"already at latest"*. A **release** is therefore one deliberate act: cutting a
   `vX.Y.Z` git tag that matches the manifest. Enforced by a **documented checklist**, not CI
   or git hooks (both weighed and rejected as first-CI cost / fresh-clone-unprotected); the
-  bump → commit → **push to `main`** → tag steps live in the discoverable top-level
-  **[`RELEASE.md`](../../../RELEASE.md)**. Semver is defined against the plugin *contract*
-  (patch = doc/copy fixes; minor = new skill/command/capability; major = a breaking change to
-  the skill or command surface). Accepted residual risk: a checklist run from memory is the
-  same failure class as the original drift, mitigated by binding the bump to the tag act; CI
-  is the documented escalation path if drift recurs.
+  bump → commit → **tag** → **one atomic push of `main` + the tag** steps live in the
+  discoverable top-level **[`RELEASE.md`](../../../RELEASE.md)**. Semver is defined against
+  the plugin *contract* (patch = doc/copy fixes; minor = new skill/command/capability; major =
+  a breaking change to the skill or command surface). Accepted residual risk: a checklist run
+  from memory is the same failure class as the original drift, mitigated by binding the bump
+  to the tag act; CI is the documented escalation path if drift recurs. As of ADR-0081, the
+  marketplace installs the pinned release tag `marketplace.json`'s `ref` points to, not
+  `main`.
   - **Amendment (infrastructure-w45ce) — the dashboard bundle joined the release contract.**
-    The marketplace copies the marketplace clone of **`main`**, not the tag (verified against
-    a live installed cache), so `dashboard/dist/` must be fresh on `main` whenever a release
-    is cut — the tag alone was never the right freshness invariant. `RELEASE.md` gained a
-    step, ahead of the version-bump commit, to rebuild + verify + stage `dashboard/dist/`.
-    See "Dist freshness" under Testing below for the durable, in-suite half of this
-    discipline.
+    Originally the marketplace copied the marketplace clone of **`main`**, not the tag
+    (verified against a live installed cache); ADR-0081 now pins the marketplace to the
+    release tag, so `dashboard/dist/` must be fresh **at the tag** — its own rebuild commit
+    lands ahead of the release commit, so it is already part of the tree the release commit
+    tags. `RELEASE.md` gained a step, ahead of the version-bump commit, to rebuild + verify +
+    stage `dashboard/dist/`. See "Dist freshness" under Testing below for the durable,
+    in-suite half of this discipline.
   - **Amendment (infrastructure-j3rsn) — the VS Code bridge `.vsix` joined the release contract
     as a second committed derived artifact.** Like `dashboard/dist/`, the packaged `.vsix` under
     `vscode-extension/` is committed (`.gitignore` no longer blanket-ignores it) because the
-    marketplace copies `main`, not the tag. Unlike `dashboard/dist/`, a `.vsix` is a zip and is
-    NOT byte-reproducible across builds (it embeds a timestamp), so the guarding check is
-    **compare-only**, never a rebuild: `vscode-extension/test/vsix-artifact.test.mjs` asserts
-    exactly one `agentheim-bridge-*.vsix` exists under `vscode-extension/` and its version
-    segment matches `package.json`'s `version`. `RELEASE.md` gained a packaging/verify/stage
-    step adjacent to the dashboard rebuild step, run only when `vscode-extension/` changed.
+    marketplace installs the pinned release tag (ADR-0081), and this artifact's own packaging
+    commit lands ahead of the release commit, so it too is already part of the tagged tree.
+    Unlike `dashboard/dist/`, a `.vsix` is a zip and is NOT byte-reproducible across builds (it
+    embeds a timestamp), so the guarding check is **compare-only**, never a rebuild:
+    `vscode-extension/test/vsix-artifact.test.mjs` asserts exactly one
+    `agentheim-bridge-*.vsix` exists under `vscode-extension/` and its version segment matches
+    `package.json`'s `version`. `RELEASE.md` gained a packaging/verify/stage step adjacent to
+    the dashboard rebuild step, run only when `vscode-extension/` changed.
 
 - **ADR-0018 — VS Code dashboard→terminal bridge (fixed-port localhost extension).** Agentheim's
   first deployable VS Code component (`vscode-extension/`): a `127.0.0.1`-only `node:http` listener

@@ -1,7 +1,7 @@
 ---
 id: infrastructure-hnv3d
 title: The marketplace installs `main`, not the tag, under the last released version string — a consumer who installs between a tag and the next bump gets an unreleased mid-rollout snapshot and cannot update out of it; decide how releases stop leaking (Roman's 0.9.3 stuck on a dashboard migration notice no skill in his copy fulfils)
-status: doing
+status: done
 type: decision
 context: infrastructure
 created: 2026-09-12
@@ -9,7 +9,7 @@ completed:
 depends_on: []
 blocks: []
 tags: [release, marketplace, versioning, upgrade, rollout, plugin-contract]
-related_adrs: [0013, 0078, 0002, 0057]
+related_adrs: [0013, 0078, 0002, 0057, 0081]
 related_research: []
 prior_art: [infrastructure-005, infrastructure-006, infrastructure-w45ce, infrastructure-j3rsn, infrastructure-rgknz]
 ---
@@ -182,3 +182,80 @@ can be cut before or after this lands (see "Safe to land any time").
   and `foreign-launch.test.mjs` flakes EPERM in teardown on Windows.
 - The `repo` casing follows the `origin` remote (`heimeshoff/Agentheim`); GitHub resolves
   either casing.
+
+## Verifier note (iteration 1)
+
+**VERDICT:** FAIL
+
+**REASONS:**
+- Check 1 (RELEASE.md criterion): Step 7 (`RELEASE.md:129-130`) claims "`dashboard/dist/` (Step 1) and, if changed, the bridge `.vsix` (Step 2) are in the same commit" — contradicted by the same file: Step 1 makes its own `chore(dashboard): rebuild dist` commit (line 69) and Step 2 its own `chore(bridge): package vsix` commit (line 89); both are ancestors of the tagged release commit, not part of it.
+- Check 1 (RELEASE.md criterion): line 54 still says "The tag is the last step and the point of no return." Under the new flow the tag is created locally at Step 6 ("Do not push yet"); the Step 7 atomic push is what reaches users. Preamble not rewritten for the pinned model.
+- Check 1 (ADR-0013 amendment criterion): the `ADR_AMENDMENT` block says the release commit is "the same commit that stages the dashboard rebuild / packaged `.vsix`, bumps the version, and sets the new pinned `ref`" — false per RELEASE.md Steps 1/2/5 (three separate commits). The criterion only asked for "fresh at the tag, which the release commit makes the same tree" (true, since the tag's tree includes the earlier rebuild commits).
+- Check 5 (readmeDelta misdescribes the diff): the replaced w45ce sub-bullet says "the release commit (bump + rebuild, staged together)"; the diff keeps the rebuild as its own commit ahead of `chore(release)`.
+- Check 1 (README criterion, secondary): the criterion asks for "one settled current-state sentence"; the delta adds a five-sentence "**Amendment (infrastructure-hnv3d, ADR-0081)**" paragraph inside the ADR-0013 entry — amendment history, not one settled current-state sentence. (Anchor/expected match; w45ce/j3rsn bullets no longer claim the marketplace copies `main`.)
+- Minor: `.claude/commands/release.md` frontmatter `description` (line 2) still lists the old order "push main, tag".
+- Everything else passes: suite 811/812 (only the known index-entry-length red), all 6 marketplace-ref-lint tests incl. live-tree; marketplace.json pin; atomic-push reorder; ls-remote check; preflight advisory; ADR-0081 well-formed.
+
+**SUGGESTED_FIX:** Wording-only fix. In RELEASE.md Step 7, the ADR_AMENDMENT block, and the README_DELTA w45ce bullet, state that the rebuild/`.vsix` commits precede the release commit and are therefore part of the tagged tree (not "the same commit"). Rewrite RELEASE.md line 54 so the atomic push, not the tag, is the point of no return. Replace the README Amendment paragraph with one current-state sentence citing ADR-0081. Update the `/release` command description's step order.
+
+**ITERATION_HINT:** likely-fixable
+
+## Outcome
+
+The marketplace no longer serves an unreleased `main` snapshot under a released version
+string. `.claude-plugin/marketplace.json`'s `agentheim` entry is now a `github` source pinned
+to `ref: "v0.9.3"` (matching `plugin.json`'s current version) instead of the relative-path
+`"./"` that always resolved to whatever `main` happened to be. A new stdlib-only, live-tree
+lint, `lib/marketplace-ref-lint.mjs` (tested by `lib/test/marketplace-ref-lint.test.mjs`),
+fails whenever the entry isn't a `github` source, has no `ref`, or the `ref` disagrees with
+`"v" + plugin.json.version` — it passes on the live tree today and carries fixture tests for
+each red case plus the green case.
+
+`RELEASE.md` and `.claude/commands/release.md` were both updated so following either end to
+end leaves the marketplace serving exactly the tagged tree: the bump step now also sets the
+`ref`, the commit step stages `marketplace.json`, the tag is created locally, and a single
+`git push --atomic origin main vX.Y.Z` replaces the previous push-then-tag order (which could
+have left a tag-naming `main` on the remote before the tag itself existed). Both docs mention
+the one-line post-push check `git ls-remote origin refs/tags/vX.Y.Z`. `.claude/commands/release.md`
+also gained a new Step 1: a mid-rollout preflight advisory that lists every `todo/`/`doing/`
+task across all bounded contexts and asks the builder whether `main` is mid-rollout before
+proceeding — advisory, not a gate. Its frontmatter `description` was updated to name the new
+step order (bump + pin ref, roll changelog, tag, atomic push) instead of the old "push main,
+tag" order.
+
+**Iteration 2 correction.** The iteration-1 diff twice implied the dashboard-rebuild and
+`.vsix`-packaging commits (`RELEASE.md` Steps 1/2) land *in the same commit* as the release
+commit (`chore(release): vX.Y.Z`). They do not: each is its own earlier commit, and because
+they are ancestors of the release commit, they are already part of the tree the release
+commit's tag names — "fresh at the tag" holds through ancestry, not co-location. `RELEASE.md`
+Step 7 and the `ADR_AMENDMENT`/`ADRS` text below now say this precisely. `RELEASE.md`'s
+"Run these in order" preamble (line 54) is also rewritten: the tag is created locally
+partway through (Step 6) and changes nothing for users by itself; the atomic push (Step 7)
+is the actual point of no return. The `README_DELTA`'s w45ce sub-bullet is corrected the same
+way, and the multi-sentence "Amendment (infrastructure-hnv3d, ADR-0081)" paragraph inside the
+ADR-0013 README entry is replaced with one settled current-state sentence citing ADR-0081, per
+the acceptance criterion's "one settled current-state sentence" wording.
+
+ADR-0081 (`.agentheim/knowledge/decisions/0081-marketplace-pins-release-tag-not-main.md`,
+provisional number) records the pinned-`ref` mechanism, the docs recon on relative-path vs.
+`github` sources, the rejected release-branch alternative, direction 2 as the `/release`
+preflight advisory, direction 3 (release-per-batch) as rejected, and the accepted dogfooding
+consequence, naming the 2026-09-06 → 2026-09-11 window as the triggering incident; its
+"one release commit" paragraph now explicitly distinguishes the release commit itself from
+the earlier ancestor commits it depends on. ADR-0013 is amended (see the reported
+`ADR_AMENDMENT` block) to retire its "manifest lagging `main` is harmless" residual and to
+correctly attribute "fresh at the tag" to ancestry rather than co-commit. The infrastructure
+BC README's ADR-0013 entry is updated via the reported `README_DELTA` to reflect the new state
+with one settled current-state sentence citing ADR-0081, and the w45ce/j3rsn amendment
+bullets no longer claim the marketplace copies `main`.
+
+`node --test lib/test/*.test.mjs` is no redder than on `main` before this change: 811/812
+passing after this iteration's wording fixes too, with only the pre-existing
+`index-entry-length.test.mjs` red (qwfq3's over-length INDEX entry, unrelated to this task).
+An earlier, isolated `lifecycle-lock.test.mjs` EPERM failure seen during one iteration-1
+full-suite run was confirmed a Windows-concurrency flake (passed cleanly in isolation and on
+a full-suite rerun) and did not recur in iteration 2's run.
+
+Key files (unchanged across both iterations): `.claude-plugin/marketplace.json`,
+`RELEASE.md`, `.claude/commands/release.md`, `lib/marketplace-ref-lint.mjs`,
+`lib/test/marketplace-ref-lint.test.mjs`.

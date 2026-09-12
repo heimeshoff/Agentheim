@@ -12,7 +12,7 @@ deliberately cut a release.
 
 > Policy of record: [ADR-0013 — Plugin release discipline](.agentheim/knowledge/decisions/0013-plugin-release-discipline.md).
 
-## Why this matters — the marketplace cache
+## Why this matters — the marketplace cache, now pinned to the release tag
 
 The marketplace caches the last version it saw. Until `plugin.json` `version` actually
 **moves** *and* the move is **pushed to `main`**, `/plugin` keeps telling every marketplace
@@ -21,6 +21,17 @@ stall on stale code (this happened: the manifest drifted ~30 commits behind, and
 contributor on a fresh clone had to mirror the cache by hand). A release exists to move users
 **off** "already at latest" — not just to change a number in a file. A bump that is never
 pushed changes nothing.
+
+`.claude-plugin/marketplace.json`'s `agentheim` entry is a `github` source pinned to
+`ref: "v<plugin.json version>"` (see
+[ADR-0081](.agentheim/knowledge/decisions/0081-marketplace-pins-release-tag-not-main.md)).
+A relative-path `source` (what this repo shipped before ADR-0081) has no ref/sha pin, so it
+always serves whatever ref the marketplace's clone of this repo happens to be on — `main` —
+which can be a mid-rollout snapshot ahead of the promises it makes, labelled with a released
+version string a consumer cannot then update out of. Pinning the ref means a consumer's
+marketplace clone only ever installs a tagged, complete release, never a `main` snapshot
+between releases. The ref moves in lockstep with the version bump (Step 3 below), and a
+live-tree lint (`lib/marketplace-ref-lint.mjs`) fails on every commit where it doesn't.
 
 ## Choosing the new version (semver)
 
@@ -40,12 +51,15 @@ pick **major**.
 
 ## Release checklist
 
-Run these in order. The tag is the last step and the point of no return.
+Run these in order. The tag is created locally partway through, but changes nothing for
+users by itself; the single atomic push in Step 7 is the point of no return.
 
-1. **Rebuild and verify the dashboard bundle, then stage it.** The marketplace does not
-   install the tag — it copies the marketplace clone of `main` at update time (see
-   [ADR-0013](.agentheim/knowledge/decisions/0013-plugin-release-discipline.md)'s dashboard
-   amendment), so `dashboard/dist/` must be fresh **on `main`**, not merely at some tag.
+1. **Rebuild and verify the dashboard bundle, then stage it.** The marketplace installs the
+   pinned release tag (see
+   [ADR-0081](.agentheim/knowledge/decisions/0081-marketplace-pins-release-tag-not-main.md)),
+   and Step 6 below tags exactly the commit this checklist is building — so `dashboard/dist/`
+   has to be fresh **at the tag**, which is the same tree as `main` only because you rebuild
+   and stage it here, *before* the version-bump commit.
    ```
    cd dashboard
    npm ci
@@ -62,9 +76,10 @@ Run these in order. The tag is the last step and the point of no return.
    whatever bundle happened to already be committed, stale or not.
 2. **Package, verify, and stage the VS Code bridge `.vsix`** (only if `vscode-extension/`
    changed). Like `dashboard/dist/`, the packaged `.vsix` is a committed derived artifact
-   (ADR-0013's infrastructure-j3rsn addendum) — the marketplace copies `main`, not the tag, so
-   the artifact must be fresh **on `main`**, not merely at some tag. Delete any stale local
-   `.vsix` from an older version before packaging; never commit more than one.
+   (ADR-0013's infrastructure-j3rsn addendum) — the marketplace installs the pinned release
+   tag (ADR-0081), so the artifact must be fresh **at the tag**, same reasoning as Step 1.
+   Delete any stale local `.vsix` from an older version before packaging; never commit more
+   than one.
    ```
    cd vscode-extension
    npm install
@@ -82,9 +97,11 @@ Run these in order. The tag is the last step and the point of no return.
    (it embeds a timestamp), so there is no content-hash stamp to compare against instead.
    Skip this step and the release ships whatever `.vsix` (or none) happened to already be
    committed, stale or not.
-3. **Bump the version.** Edit `.claude-plugin/plugin.json` → set `version` to the new
-   `X.Y.Z` chosen above. This is the single field that matters; touch nothing else in the
-   manifest unless that's part of the release.
+3. **Bump the version and pin the marketplace ref.** Edit `.claude-plugin/plugin.json` → set
+   `version` to the new `X.Y.Z` chosen above; touch nothing else in that manifest unless
+   that's part of the release. Also edit `.claude-plugin/marketplace.json` → set the
+   `agentheim` plugin entry's `source.ref` to `vX.Y.Z` — the exact tag string Step 6 below
+   will cut. `lib/marketplace-ref-lint.mjs` fails the suite if these two ever disagree.
 4. **Roll the CHANGELOG.** In [`CHANGELOG.md`](CHANGELOG.md), turn the top `## [Unreleased]`
    heading into a dated `## [X.Y.Z] - YYYY-MM-DD` section (leaving a fresh empty
    `## [Unreleased]` above it), fill it with what shipped grouped under Keep-a-Changelog
@@ -93,23 +110,36 @@ Run these in order. The tag is the last step and the point of no return.
    `[X.Y.Z]: …/compare/vOLD...vX.Y.Z`). **This section is the single source of the release
    notes** — Step 8 publishes it verbatim, so compose it once, here. Omit bookkeeping noise
    (`chore(release)`/`chore(protocol)`/SHA-stamp/session-end commits).
-5. **Commit the bump + changelog.** A focused, scoped commit — never `git add -A`:
+5. **Commit the bump + changelog + ref.** A focused, scoped commit — never `git add -A`:
    ```
-   git add .claude-plugin/plugin.json CHANGELOG.md
+   git add .claude-plugin/plugin.json .claude-plugin/marketplace.json CHANGELOG.md
    git commit -m "chore(release): vX.Y.Z"
    ```
-6. **Push to `main`.** `git push origin main`. **This is the step that actually reaches
-   marketplace users** — until the bumped manifest is on `main`'s remote, the marketplace
-   cache keeps serving "already at latest" and the release has changed nothing for anyone.
-   By this point `dashboard/dist/` (Step 1) and, if changed, the bridge `.vsix` (Step 2) are
-   on `main` too, so this push is also the moment the fresh dashboard and bridge reach every
-   consumer that updates.
-7. **Tag the release, matching the manifest exactly.** The tag string must equal the manifest
-   version with a `v` prefix — `plugin.json` `"version": "X.Y.Z"` ⇔ tag `vX.Y.Z`. The tag now
-   captures the CHANGELOG entry, so its compare links resolve:
+6. **Tag the release locally, matching the manifest exactly.** The tag string must equal the
+   manifest version with a `v` prefix — `plugin.json` `"version": "X.Y.Z"` ⇔ tag `vX.Y.Z` ⇔
+   the `ref` Step 3 just wrote into `marketplace.json`. The tag now captures the CHANGELOG
+   entry, so its compare links resolve. **Do not push yet** — pushing `main` naming a tag
+   the remote doesn't have (or vice versa) would leave the marketplace's pinned `ref`
+   dangling for anyone who updates in between; both reach `origin` together in Step 7:
    ```
    git tag -a vX.Y.Z -m "vX.Y.Z"
-   git push origin vX.Y.Z
+   ```
+7. **Push `main` and the tag together, atomically.** This is the step that actually reaches
+   marketplace users — until both are on `origin`, the marketplace keeps installing whatever
+   the pinned `ref` named before, and the release has changed nothing for anyone. `dashboard/dist/`
+   (Step 1) and, if changed, the bridge `.vsix` (Step 2) are each their own earlier commit, so
+   they are already ancestors of the tagged release commit — part of the tree this tag names —
+   so this push is also the moment the fresh dashboard and bridge reach every consumer that
+   updates:
+   ```
+   git push --atomic origin main vX.Y.Z
+   ```
+   If this fails (rejected / non-fast-forward / auth) → stop and report verbatim; do not
+   force-push, and do not fall back to two separate pushes — `--atomic` is what guarantees no
+   consumer's marketplace clone ever reads a `ref` for a tag `origin` doesn't have yet. Verify
+   with a one-line post-push check:
+   ```
+   git ls-remote origin refs/tags/vX.Y.Z
    ```
 8. **Publish release notes on GitHub.** Create a GitHub Release on the tag so the change has a
    human-readable description under `/releases`. The notes are the **body of the `[X.Y.Z]`
