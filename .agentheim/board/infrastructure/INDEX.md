@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 2
+- **Backlog:** 0
+- **Todo:** 3
 - **Doing:** 0
 - **Done:** 35
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **infrastructure-x56qm** — `/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn (feature) — `todo/infrastructure-x56qm-setup-command-installs-cli-and-bridge.md`
 - **infrastructure-js62b** — `/setup` installs, upgrades and removes the VS Code bridge from the shipped `.vsix`, reports its install state, and the dashboard's skew banner names `/setup` as the remedy (feature) — `todo/infrastructure-js62b-setup-installs-and-removes-vscode-bridge.md`
 - **infrastructure-j3rsn** — Ship the VS Code bridge `.vsix` as a committed release artifact — un-ignore it, add a version-match lint and a `RELEASE.md` step, mirroring how `dashboard/dist/` reaches consumers (chore) — `todo/infrastructure-j3rsn-ship-bridge-vsix-as-committed-release-artifact.md`
 <!-- todo-list:end -->
@@ -47,7 +48,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **infrastructure-x56qm** — A `/setup` command — one-time, per-machine install of the zero-token dashboard CLI and/or the VS Code bridge, so a consumer never pays a model turn to launch the dashboard again (feature) — `backlog/infrastructure-x56qm-setup-command-installs-cli-and-bridge.md`
 <!-- backlog-list:end -->
 
 

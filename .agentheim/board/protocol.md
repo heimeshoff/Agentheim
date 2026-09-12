@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 16:41 -- Modeling / Promoted: infrastructure-x56qm - "`/setup` installs the zero-token dashboard CLI into `<home>/.local/bin` and `/dashboard` becomes a pointer, so a consumer's daily dashboard launch costs no model turn"
+
+**Type:** Modeling / Promote
+**BC:** infrastructure
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-12 16:41 -- Modeling / Refined: infrastructure-x56qm - /setup installs the zero-token dashboard CLI into <home>/.local/bin and /dashboard becomes a pointer
 
 **Type:** Modeling / Refine
