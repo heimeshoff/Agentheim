@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 16:09 -- Modeling / Refined: infrastructure-x56qm - A `/setup` command — one-time, per-machine install of the zero-token dashboard CLI and/or the VS Code bridge
+
+**Type:** Modeling / Refine
+**BC:** infrastructure
+**Status after:** backlog (x56qm); infrastructure-r4mzp stays in todo, edited in place
+**Summary:** Builder added two requirements. (1) /setup is never one-shot: the user can say /setup at any time and change the options — it shows each option's install state and lets the user add or remove the CLI and the bridge. (2) A plugin update must reach what /setup installed: the CLI re-resolves the newest cached semver per run but its copied .mjs can drift on a resolver-interface change, and the bridge is a fixed installed .vsix VS Code never refreshes from the cache. Three acceptance criteria added to x56qm (re-run shows state and removes cleanly; re-run after a simulated cache update upgrades both; the skew banner and the /dashboard card name /setup as the remedy). The update trigger — user re-runs on a prompt vs the launch path detecting a newer cached version — is added to r4mzp's list of what its ADR must settle, and to x56qm's blocked-on list as item (d).
+**Split into:** none
+**ADRs written:** none
+
+---
+
 ## 2026-09-12 15:53 -- Modeling / Promoted: infrastructure-r4mzp - Does `/dashboard` still earn its place as a slash command, now that launching the dashboard costs ~120k tokens across two turns while a shell invocation costs zero?
 
 **Type:** Modeling / Promote

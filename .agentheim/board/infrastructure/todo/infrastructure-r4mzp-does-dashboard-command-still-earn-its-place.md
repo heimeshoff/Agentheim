@@ -90,6 +90,16 @@ Candidate dispositions:
      implementation (three files: `.mjs` logic, `.cmd` for Windows, bash shim for
      Git Bash / macOS / Linux). The ADR states whether the plugin ships them
      as-is from the cache or generates them at install time.
+   - *`/setup` is re-runnable, and a plugin update must reach what it
+     installed (builder, 2026-09-12):* the user can say `/setup` at any time
+     and change the options (add or remove the CLI, add or remove the bridge).
+     When the plugin updates, the installed CLI and/or bridge need updating
+     too — the CLI re-resolves the newest cached semver per run but its copied
+     `.mjs` can drift if the resolver interface changes, and the bridge is a
+     fixed installed `.vsix` that VS Code never refreshes from the cache. The
+     ADR settles the trigger: the user re-runs `/setup` when prompted (the
+     dashboard's existing skew banner, the `/dashboard` card), or the launch
+     path detects a newer cached version and offers the refresh itself.
 4. **Retire the command.** Only viable if consumers get a shipped alternative;
    with disposition 3 this collapses into the "fate of `/dashboard`" bullet.
 
