@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 15:53 -- Modeling / Promoted: infrastructure-r4mzp - Does `/dashboard` still earn its place as a slash command, now that launching the dashboard costs ~120k tokens across two turns while a shell invocation costs zero?
+
+**Type:** Modeling / Promote
+**BC:** infrastructure
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-12 15:53 -- Modeling / Refined: infrastructure-r4mzp - Does `/dashboard` still earn its place as a slash command, now that launching the dashboard costs ~120k tokens across two turns while a shell invocation costs zero?
 
 **Type:** Modeling / Refine
