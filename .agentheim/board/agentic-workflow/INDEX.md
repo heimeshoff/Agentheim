@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 2
-- **Todo:** 0
+- **Backlog:** 1
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 205
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-vsb06** — The `migrate` verb reports the legacy `.agentheim/contexts/` references it does not rewrite — project files outside `.agentheim/` such as `CLAUDE.md` and `.claude/commands/` — as a read-only manifest field the step-0 notice names, so a consumer learns what still points at the old layout instead of finding out when a command breaks (feature) — `todo/agentic-workflow-vsb06-migrate-reports-residual-legacy-path-references-outside-its-rewrite-scope.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -54,7 +55,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-vsb06** — The `migrate` verb reports the legacy `.agentheim/contexts/` references it does not rewrite — project files outside `.agentheim/` such as `CLAUDE.md` and `.claude/commands/` — as a read-only manifest field the step-0 notice names, so a consumer learns what still points at the old layout instead of finding out when a command breaks (feature) — `backlog/agentic-workflow-vsb06-migrate-reports-residual-legacy-path-references-outside-its-rewrite-scope.md`
 - **agentic-workflow-gwh69** — Mechanized RESULT reconstruction from the worktree — `lib/worker-result.mjs` gains `reconstructResultFromWorktree`, rebuilding a top-truncated SUCCESS's headers from the conductor-gathered changed-path list and the surviving blocks with explicit `reconstructed` provenance, as a ladder rung ahead of the lost-result re-dispatch — built only once ADR-0080's compliance or re-dispatch evidence says the redundancy is not enough (feature) — `backlog/agentic-workflow-gwh69-mechanized-result-reconstruction-from-worktree.md`
 <!-- backlog-list:end -->
 

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-vsb06
 title: The `migrate` verb reports the legacy `.agentheim/contexts/` references it does not rewrite — project files outside `.agentheim/` such as `CLAUDE.md` and `.claude/commands/` — as a read-only manifest field the step-0 notice names, so a consumer learns what still points at the old layout instead of finding out when a command breaks
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-09-12
