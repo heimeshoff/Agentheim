@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 21:09 -- Modeling / Captured: infrastructure-hnv3d - The marketplace installs `main`, not the tag, under the last released version string — a consumer who installs between a tag and the next bump gets an unreleased mid-rollout snapshot and cannot update out of it; decide how releases stop leaking (Roman's 0.9.3 stuck on a dashboard migration notice no skill in his copy fulfils)
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** backlog
+**Summary:** Roman installed a mid-rollout main snapshot labelled 0.9.3 (dashboard migration notice landed 2026-09-06, the skill-side migrate step only on 2026-09-11) and cannot update out of it because the version string never moved. Decision task: how the marketplace stops serving unreleased main (release branch / pinned ref, promise-depends-on-fulfilment ordering, or release-per-batch); ADR is the deliverable.
+
+---
+
 ## 2026-09-12 20:46 -- Modeling / Refined: agentic-workflow-gwh69 - Mechanized RESULT reconstruction from the worktree
 
 **Type:** Modeling / Refine

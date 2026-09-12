@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 39
@@ -49,6 +49,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **infrastructure-hnv3d** — The marketplace installs `main`, not the tag, under the last released version string — a consumer who installs between a tag and the next bump gets an unreleased mid-rollout snapshot and cannot update out of it; decide how releases stop leaking (Roman's 0.9.3 stuck on a dashboard migration notice no skill in his copy fulfils) (decision) — `backlog/infrastructure-hnv3d-marketplace-serves-unreleased-main-mid-rollout-snapshot.md`
 <!-- backlog-list:end -->
 
 
