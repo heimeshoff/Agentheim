@@ -1,7 +1,7 @@
 ---
 id: infrastructure-r4mzp
 title: Does `/dashboard` still earn its place as a slash command, now that launching the dashboard costs ~120k tokens across two turns while a shell invocation costs zero?
-status: doing
+status: done
 type: decision
 context: infrastructure
 created: 2026-09-11
@@ -9,7 +9,7 @@ completed:
 depends_on: []
 blocks: [infrastructure-x56qm]
 tags: [dashboard, commands, context-budget, surface]
-related_adrs: [0002, 0018, 0053]
+related_adrs: [0002, 0018, 0053, 0079]
 related_research: []
 prior_art: [infrastructure-008, infrastructure-010, infrastructure-k9t2v]
 ---
@@ -154,3 +154,33 @@ turn every tool call costs.
 **What the worker delivers:** the ADR (type: decision — output is markdown, not
 code), the ADR-0002 backlink, this task's `related_adrs` update, and the Notes
 update on infrastructure-x56qm. It does **not** implement `/setup`.
+
+## Outcome
+
+Recorded ADR-0079 (`.agentheim/knowledge/decisions/0079-dashboard-cli-ships-via-setup-command.md`,
+provisional numbering via `nextAdrNumber` against this worktree's `decisions/` — final number
+assigned by the conductor's `finalizeAdrNumbering`). It confirms disposition 3 (ship the CLI to
+consumers via a one-time, user-level `/setup` install; demote `/dashboard`) and settles every item
+the task left open inside it: `/setup` as a second, ADR-0059-marked (prose-only, unenforced)
+process-launcher exception to ADR-0002; install target `<home>/.local/bin` on every platform
+(never a project tree), naming the POSIX/Windows equivalents explicitly; `/dashboard` demoted to
+a static pointer (not a working fallback), reasoned against the ADR's own motivating problem; the
+CLI's three files shipped verbatim from the plugin rather than generated at install time, because
+the reference implementation already resolves everything at run time; and the update trigger left
+as a user-prompted re-run (existing skew banner + the pointer card) rather than launch-path
+self-detection, mirroring ADR-0053's minimal-machinery precedent. The reverted 2026-07-09
+in-project shim is engaged on the merits only — confirmed via repo-wide grep that no rationale for
+the revert survives anywhere beyond the one "chicken-and-egg" phrase already in the task's Notes —
+never citing an undocumented rationale as settled. The k9t2v transcript-sourced token table is
+carried verbatim as the evidence base, with an explicit note that the k9t2v card-slimming did not
+and could not address this cost (the card is ~2.4% of turn 1).
+
+`related_adrs` on this task should gain the new ADR id (0079, pending finalization) — the
+conductor applies that frontmatter edit per the task instructions.
+
+Also produced: an `ADR_0002_ADDENDUM` block (append-only addition to ADR-0002 recording the
+`/setup` extension) and an `X56QM_NOTES_UPDATE` block (the settled answers appended to
+infrastructure-x56qm's Notes so its own refinement starts from this decision) — both applied by
+the conductor on `main`.
+
+No source or test files were touched; this is a decision-only task.

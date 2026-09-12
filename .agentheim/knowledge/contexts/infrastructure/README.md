@@ -193,6 +193,7 @@ for an infrastructure BC.
   with a debounced stat-poll fallback where recursive watch is unreliable (Linux, some Windows
   / network-drive cases). The pointer is **raw transport** — what a change *means* (which task
   transitioned) is `agentic-workflow`'s job. (ADR-0006.)
+- **Install surface (`/setup`)** — a second process-launcher slash-command exception (ADR-0002, extended by ADR-0079), sibling to `/dashboard`. A one-time, re-runnable, per-machine install of the zero-token dashboard CLI (`agentheim-dashboard{.mjs,.cmd,<shim>}`, shipped verbatim from the plugin, copied into `<home>/.local/bin` — never the project tree) and/or the VS Code bridge `.vsix`. Shows each option's current install state and lets the user add or remove either; re-running upgrades an already-installed option to the newest cached version. `/dashboard` itself is demoted to a pointer (prints `run agentheim-dashboard; run /setup if it isn't installed`) rather than a working fallback — ADR-0079.
 
 ## Owned mechanisms
 

@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 16:20 -- Task completed (verification skipped): infrastructure-r4mzp - Does `/dashboard` still earn its place as a slash command, now that launching the dashboard costs ~120k tokens across two turns while a shell invocation costs zero?
+
+**Type:** Work / Task completion
+**Task:** infrastructure-r4mzp - Does `/dashboard` still earn its place as a slash command, now that launching the dashboard costs ~120k tokens across two turns while a shell invocation costs zero?
+**Summary:** Recorded ADR-0079: /dashboard is demoted to a pointer-only card and the zero-token dashboard CLI ships to consumers via a new one-time, re-runnable, user-level /setup command, extending ADR-0002 process-launcher slash-command exception to a two-member allowlist (ADR-0059, prose-only/unenforced) and ADR-0053 precedent of removing the model from a lifecycle path; ADR-0002 addendum and x56qm Notes updated on main
+**Duration:** 4m06s
+**Verification:** SKIPPED — decision-only task (type: decision, 0 files changed, exactly one ADR)
+**Files changed:** 0
+
+---
+
 ## 2026-09-12 16:11 -- Batch started: [infrastructure-r4mzp]
 
 **Type:** Work / Batch start

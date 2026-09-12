@@ -113,3 +113,25 @@ Open questions for this task's refinement: Windows `PATH` handling (is
 `~/.local/bin` on `PATH` for a PowerShell user, or should `/setup` offer to add
 it?); whether "both" should be the default choice; whether `/setup` should also
 be what `brainstorm`'s first run points a fresh consumer at.
+
+**Settled by ADR-0079 (infrastructure-r4mzp, 2026-09-12):**
+
+- **Install surface:** `/setup`, a second process-launcher slash-command exception to ADR-0002
+  (allowlist `{ /dashboard, /setup }`), bounded prose-only/unenforced per ADR-0059 — no lint
+  warranted for a two-member list.
+- **Install target:** `<home>/.local/bin` on every platform — POSIX `~/.local/bin`, Windows
+  `%USERPROFILE%\.local\bin` (same relative path under home, not a Windows-idiomatic location) —
+  computed via `os.homedir()`, never into any project tree. Windows `PATH`-remediation UX is left
+  open for this task's own refinement.
+- **Fate of `/dashboard`:** pointer-only — prints `run agentheim-dashboard; run /setup if it
+  isn't installed`, no launch attempt of its own. A consumer is never stranded: `/setup` never
+  depends on the CLI already being installed.
+- **What "the CLI" is:** the three files (`.mjs`, `.cmd`, bash shim) ship **verbatim** from the
+  plugin (mirroring the builder's `~/.local/bin/agentheim-dashboard*` reference implementation)
+  and `/setup` plain-copies them (+ `chmod +x` on POSIX) — no generation, no templating, since
+  everything the scripts need is already resolved at run time (`os.homedir()`, cache semver-max
+  walk, `process.cwd()`).
+- **Update trigger:** user-prompted re-run, not launch-path self-detection — the existing
+  bridge "older version" skew banner and the (now pointer-only) `/dashboard` card both name
+  `/setup` as the remedy. No active auto-refresh mechanism; this matches this task's own draft
+  acceptance criterion naming the banner/card as the remedy path, so no change needed there.

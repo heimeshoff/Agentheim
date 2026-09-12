@@ -499,3 +499,14 @@ than the static per-verb text check it replaces.
 - A resolver-script edit is now a single-string change, closing the drift hazard.
 - The `$CLAUDE_PLUGIN_ROOT`-is-empty rationale has exactly one home (this ADR) instead of two
   (this ADR and the command file); the command carries only a pointer.
+
+## Addendum (2026-09-12, infrastructure-r4mzp)
+
+> Extends the "process-launcher slash-command exception" this ADR's opening Context/Decision
+> already carved out for `/dashboard`. Reverses no clause; not a new ADR number for *this*
+> extension — but see the full reasoning in the separate ADR it points to.
+
+infrastructure-r4mzp's ADR (**ADR-0079**) extends this ADR's process-launcher slash-command exception to a second
+command, `/setup` (a one-time, per-machine install of the CLI and/or VS Code bridge), and demotes
+`/dashboard` itself to a pointer. The bounding rule — the allowlist is now `{ /dashboard, /setup }`
+— is recorded as prose-only, unenforced (ADR-0059). See ADR-0079 for the full reasoning.
