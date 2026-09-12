@@ -5,6 +5,22 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 23:58 -- Release shipped: v0.9.4
+
+**Type:** Release
+**Version:** 0.9.3 → 0.9.4 (patch — the two-root `.agentheim/` layout (ADR-0078) with the `migrate` verb as step 0 of every writing skill, `/setup` installing the zero-token dashboard CLI and the VS Code bridge with `/dashboard` demoted to a pointer (ADR-0079), the committed bridge `.vsix`, the lost-transcript RESULT ladder (ADR-0080), and the marketplace pinned to the release tag (ADR-0081); builder chose patch, RELEASE.md semver would read the layout change and the `/dashboard` surface change as major)
+**Mid-rollout advisory:** board had no todo/ or doing/ tasks across all BCs — nothing in flight, proceeded without asking
+**Dashboard dist:** rebuilt + `npm test` (1015 pass) per RELEASE.md step 1 — bundle byte-identical to HEAD, no dist commit needed
+**Bridge .vsix:** unchanged since v0.9.3 (only its lint/test files and the committed 0.5.0 artifact landed); compare-only vsix lint green, no repackage. The 2 fixed-port `bridge.test.mjs` failures are the known live-bridge EADDRINUSE collision, not a regression
+**Manifest:** `.claude-plugin/plugin.json` bumped, committed `e9433eb`
+**Marketplace ref:** `.claude-plugin/marketplace.json` pinned to `v0.9.4` (same commit); `marketplace-ref-lint` 6/6 green
+**Changelog:** `CHANGELOG.md` `[Unreleased]` → `[0.9.4]` section rolled (same commit)
+**Pushed:** yes — `main` + `v0.9.4` atomically (`be7acf7..e9433eb` on `origin/main`; the range also carried the previously unpushed 09-11/09-12 batch commits)
+**Tag:** `v0.9.4` (annotated) → `e9433eb`, pushed to origin
+**GitHub Release:** created via `gh` (from CHANGELOG) — https://github.com/heimeshoff/Agentheim/releases/tag/v0.9.4
+
+---
+
 ## 2026-09-12 23:41 -- Work session ended
 
 **Type:** Work / Session end
