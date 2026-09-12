@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-12 20:16 -- Task verified and completed: agentic-workflow-g2fgb - `lib/readme-delta.mjs`'s `replace` op anchors a bold term head that wraps onto a continuation line — `termHeadOf` matches on the whitespace-collapsed bullet text, guarded by a wrapped-head test fixture, and a missing anchor disposes distinctly from an `expected` collision
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-g2fgb - `lib/readme-delta.mjs`'s `replace` op anchors a bold term head that wraps onto a continuation line — `termHeadOf` matches on the whitespace-collapsed bullet text, guarded by a wrapped-head test fixture, and a missing anchor disposes distinctly from an `expected` collision
+**Summary:** termHeadOf anchors on whitespace-collapsed bullet text so a bold lead-in that wraps onto a continuation line resolves to the same anchor key as its single-line equivalent, and a replace whose anchor matches no bullet disposes its own anchor-missing label instead of merged; wrapped-head fixtures added, SKILL.md step (a) and the README delta line, the aw README ghcaj bullet and an ADR-0074 addendum name the new disposition
+**Duration:** 10m
+**Verification:** PASS (iteration 1)
+**Files changed:** 3
+**Tests added:** 3
+**ADRs written:** none
+
+---
+
 ## 2026-09-12 20:14 -- Task verified and completed: infrastructure-kr9pd - `/setup` bridge verbs fail on win32 when the `.vsix` or `code.cmd` path holds a cmd.exe metacharacter but no space — `quoteArgWindows` leaves such segments unquoted and `cmd.exe` splits them
 
 **Type:** Work / Task completion

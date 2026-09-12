@@ -4,7 +4,7 @@ title: Worker branch carries source and tests only — the conductor materialize
 scope: agentic-workflow
 status: accepted
 date: 2026-09-06
-related_tasks: [agentic-workflow-ghcaj]
+related_tasks: [agentic-workflow-ghcaj, agentic-workflow-g2fgb]
 related_adrs: [0032, 0037, 0057, 0058, 0026, 0038, 0063, 0059, 0041, 0042, 0061, 0072]
 ---
 
@@ -216,3 +216,28 @@ Two different mechanizability postures, stated explicitly:
 ## Note on ADR numbering
 
 Minted provisionally as ADR-0073 in its worker worktree. A sibling task's ADR already claimed that number (or the guess overshot the true count) by the time this task's conductor finalized numbering at squash-merge integration (`lib/adr-allocation.mjs`'s `finalizeAdrNumbering`, ADR-0058) — this ADR was renumbered to **ADR-0074**, the true next-free number on `main` at that moment. No content besides this identity changed.
+
+## Addendum (agentic-workflow-g2fgb): a distinct `anchor-missing` disposition
+
+The "anchor gone" branch of `applyReplace` (§ "The collision rule, and why ADR-0032's
+no-auto-guess clause survives it" above) originally returned the SAME disposition, `merged`, as
+a genuine `expected`-mismatch collision. Observed live 2026-09-12 integrating
+infrastructure-j3rsn: a `replace` targeting a bullet whose bold lead-in wraps onto a
+continuation line always missed its anchor (a `termHeadOf` bug, fixed alongside this addendum —
+see agentic-workflow-g2fgb) and disposed `merged`, indistinguishable in the integration log from
+a real sibling-landed-first collision. The two need different reactions: a missing anchor means
+every retry against the same base fails identically (a grammar or anchor-authoring bug to
+surface), while a genuine collision means pcwnn's authority rule applies and both intents
+legitimately survive.
+
+`applyReplace`'s no-target branch now returns `anchor-missing` instead of `merged`. Behaviour is
+UNCHANGED — the body is still appended at the end of the section's bullet list, never dropped,
+never refused — only the label differs. This is still inside the existing two-op grammar
+(`append` / `replace`): no new op, no removal, still monotone per this ADR's own invariant and
+ADR-0041's. The disposition vocabulary a worker or the conductor may see from `applyReadmeDelta`
+is now: `applied`, `noop-already`, `merged`, `anchor-missing`, `appended-fallback`.
+
+See agentic-workflow-g2fgb for the `termHeadOf` whitespace-collapse fix, the wrapped-head test
+fixture, and the corresponding `skills/work/SKILL.md` updates (integration step (a), the
+session-end "README delta:" line) and the aw README's ghcaj bullet amendment (reported as this
+same task's `README_DELTA`).

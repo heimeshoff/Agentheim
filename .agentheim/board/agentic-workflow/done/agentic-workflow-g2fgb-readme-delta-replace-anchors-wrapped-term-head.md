@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-g2fgb
 title: `lib/readme-delta.mjs`'s `replace` op anchors a bold term head that wraps onto a continuation line — `termHeadOf` matches on the whitespace-collapsed bullet text, guarded by a wrapped-head test fixture, and a missing anchor disposes distinctly from an `expected` collision
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-09-12
@@ -136,3 +136,62 @@ whitespace-collapsed rule in `references/worker-return-format.md` stays as is).
 - Convention check (ADR-0059): the only convention-shaped element is the new disposition
   name, and it is enforced by the updated test case plus the grep criterion above — no
   "prose-only, unenforced" marker needed.
+
+## Outcome
+
+Fixed `lib/readme-delta.mjs`'s `termHeadOf` to compute the anchor key against the
+whitespace-collapsed bullet text (`collapseWs(text)`) instead of the raw multi-line text, so a
+bold lead-in whose closing `**` sits on a continuation line (the shape of most hand-wrapped ADR
+bullets, e.g. the infrastructure README's ADR-0013 bullet observed live 2026-09-12) now anchors
+identically to its single-line equivalent — a `replace` targeting it disposes `applied` and
+replaces the bullet in place instead of falling into the missing-anchor branch and duplicating
+the whole bullet at section end.
+
+Also split the "anchor gone" disposition away from the genuine-collision one: `applyReplace`'s
+no-target branch now returns `anchor-missing` (placement unchanged — still appended at the
+section's end, never dropped, never refused) instead of `merged`, so the conductor's integration
+log can distinguish a grammar/anchor-authoring bug (every retry fails identically) from a real
+collision where a sibling landed first and pcwnn's authority rule applies.
+
+Added two `node --test` fixtures in `lib/test/readme-delta.test.mjs` shaped like the live
+ADR-0013 bullet (bold head spans two lines, contains a `(` before its closing `**`): one asserts
+`applied` + in-place replacement + exactly one `^- **ADR-0013` line when `expected` matches; the
+other asserts `merged` + splice-immediately-after-the-anchor (not section end) when `expected`
+does not match. Updated the existing "a missing anchor (gone)" test to assert the new
+`anchor-missing` label with the same append-at-end placement. Every other existing case
+(single-line heads, tail-only multi-line extent, section isolation, `noop-already`,
+`appended-fallback`, sequential replaces) passes unchanged.
+
+Updated `skills/work/SKILL.md`'s integration step (a) (~line 322) and its session-end "README
+delta:" line (~line 464) to name `anchor-missing` alongside `merged`/`appended-fallback`, with
+the distinct-reaction guidance the task calls for (grammar bug to surface, not a collision to
+accept).
+
+`lib/readme-delta.mjs` still has zero `import` statements (stdlib-free, git-free, ADR-0038 layer
+2 — confirmed via `grep -n "^import"` returning nothing).
+
+Per the task's explicit scoping note, the aw README's ghcaj "two-op grammar" bullet
+(`.agentheim/knowledge/contexts/agentic-workflow/README.md`) and the ADR-0074 addendum are
+`.agentheim/` bookkeeping this worker never writes directly — the README amendment travels as
+the `README_DELTA` `replace` op above (anchor `Worker branch carries source and tests only —
+report-carried bookkeeping`, the bullet's bold lead-in truncated at its first `(`), and the
+ADR-0074 addendum travels as the extra `ADR_0074_ADDENDUM` fenced block below, for the conductor
+to apply by hand at integration. `grep -rl "anchor-missing" skills/ lib/` (the disk-resident
+half, before the conductor's bookkeeping application) already returns exactly
+`skills/work/SKILL.md`, `lib/readme-delta.mjs`, and `lib/test/readme-delta.test.mjs` — the
+`.agentheim/knowledge/` half is satisfied once the conductor applies the delta and addendum
+above.
+
+One unrelated, pre-existing test failure was observed in the full suite run
+(`lib/test/index-entry-length.test.mjs`, "the live .agentheim/ tree has NO non-grandfathered
+over-length INDEX entries"): it flags `agentic-workflow-qwfq3`'s doing-list entry in
+`.agentheim/board/agentic-workflow/INDEX.md` at 62 words. This is caused by a sibling task in
+this same batch (per the conductor's own recent-activity note: qwfq3 is being worked
+concurrently) and this worker's worktree carries no changes at all under `.agentheim/` — `git
+status --porcelain -- .agentheim/` is empty in this worktree. Not this task's scope to fix (an
+INDEX line belongs to the conductor's bookkeeping, not a worker's source/test edit) and unrelated
+to the readme-delta fix; scoping `node --test` to `lib/test/readme-delta.test.mjs` alone shows
+all 14 cases green, and the full-suite run shows 756/757 passing with only this one, unrelated
+failure.
+
+Key files: `lib/readme-delta.mjs`, `lib/test/readme-delta.test.mjs`, `skills/work/SKILL.md`.

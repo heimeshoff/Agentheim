@@ -173,7 +173,7 @@ separate BC, but today the whole tool lives in this one.
   is ever auto-guessed" clause stays intact: there is no git conflict here to auto-resolve,
   only a prose merge the conductor — already the sole `main` writer and judgment layer — was
   always going to make. A delta naming a missing section lands as `appended-fallback` into
-  `## Ubiquitous language`, never a silent drop. The checkpoint guard gained a second frozen
+  `## Ubiquitous language`, never a silent drop. A `replace` whose `anchor` matches no bullet in the section at all disposes distinctly, `anchor-missing` (agentic-workflow-g2fgb) — same placement as `merged`, appended at the section's end, but a different signal: every retry against the same base fails identically (a grammar or anchor-authoring bug to surface), never a collision to accept the way `merged` is. The checkpoint guard gained a second frozen
   prefix, `.agentheim/` (`lib/derived-artifact-guard.mjs`'s `BOOKKEEPING_PATH_PREFIXES`,
   reason `bookkeeping-path`), so a worker that still writes there is rendered inert, not
   failed — ADR-0057's posture, extended. `checkpointFiles`'s moved-from-`doing/` detection
