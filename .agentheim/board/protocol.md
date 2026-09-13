@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-13 09:48 -- Batch started: [infrastructure-e8h9f]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-e8h9f - Herdr bridge foundation — `/setup use bridge <vscode|herdr|none>` persists the selection to a per-machine config file, `status` reports Herdr install/liveness, and a shared `lib/resolve-herdr.mjs` finds the binary for both `/setup` and the dashboard server
+**Parallel:** no (1 worker — only ready task across every BC; infrastructure-xh8tw and infrastructure-vpbks are chained behind it via depends_on)
+
+---
+
 ## 2026-09-13 09:45 -- Modeling / Dismissed: infrastructure-g6h1m
 
 **Type:** Modeling / Dismiss

@@ -1,7 +1,7 @@
 ---
 id: infrastructure-e8h9f
 title: Herdr bridge foundation — `/setup use bridge <vscode|herdr|none>` persists the selection to a per-machine config file, `status` reports Herdr install/liveness, and a shared `lib/resolve-herdr.mjs` finds the binary for both `/setup` and the dashboard server
-status: todo
+status: doing
 type: feature
 context: infrastructure
 created: 2026-09-13
