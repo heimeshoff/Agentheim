@@ -45,3 +45,7 @@ hand-guessed one) if any field name is wrong.
       (or corrected) against real invocations.
 - [ ] If either differs from `dashboard/bridge-launch-api.mjs`'s current assumption, the code
       is fixed and at least one `node --test` fixture is rebuilt from real captured JSON.
+
+## Notes
+
+**Stop-loss (ADR-0065):** if, mid-spike, the mitigation is already known and cheap — the field names are confirmed wrong and the fix is a one-line key rename plus a fixture rebuilt from the captured JSON — record it and stop; do the fix as this task's own remediation rather than filing a further diagnosis spike.
