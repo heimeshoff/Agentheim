@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 2
-- **Doing:** 1
-- **Done:** 41
+- **Doing:** 0
+- **Done:** 42
 <!-- task-counts:end -->
 
 ### Todo
@@ -24,11 +24,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **infrastructure-e8h9f** — Herdr bridge foundation — `/setup use bridge <vscode|herdr|none>` persists the selection to a per-machine config file, `status` reports Herdr install/liveness, and a shared `lib/resolve-herdr.mjs` finds the binary for both `/setup` and the dashboard server (feature) — `doing/infrastructure-e8h9f-herdr-bridge-foundation-setup-selection-and-resolver.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **infrastructure-e8h9f** — Herdr bridge foundation — `/setup use bridge <vscode|herdr|none>` persists the selection to a per-machine config file, `status` reports Herdr install/liveness, and a shared `lib/resolve-herdr.mjs` finds the binary for both `/setup` and the dashboard server (feature) — `done/infrastructure-e8h9f-herdr-bridge-foundation-setup-selection-and-resolver.md`
 - **infrastructure-reh04** — Refresh the repo README so `/setup` is part of the install flow, the state-layout tree and every quoted path reflect the two-root layout (ADR-0078), and the skills table, repo layout, and status reflect what shipped since the June restructure (0.8.8 → 0.9.4) — concise, no walkthrough (chore) — `done/infrastructure-reh04-readme-refresh-setup-two-root-layout.md`
 - **infrastructure-hnv3d** — The marketplace installs `main`, not the tag, under the last released version string — a consumer who installs between a tag and the next bump gets an unreleased mid-rollout snapshot and cannot update out of it; decide how releases stop leaking (Roman's 0.9.3 stuck on a dashboard migration notice no skill in his copy fulfils) (decision) — `done/infrastructure-hnv3d-marketplace-serves-unreleased-main-mid-rollout-snapshot.md`
 - **infrastructure-kr9pd** — `/setup` bridge verbs fail on win32 when the `.vsix` or `code.cmd` path holds a cmd.exe metacharacter but no space — `quoteArgWindows` leaves such segments unquoted and `cmd.exe` splits them (bug) — `done/infrastructure-kr9pd-setup-bridge-win32-metachar-quoting.md`

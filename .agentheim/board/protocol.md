@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-13 10:11 -- Task verified and completed: infrastructure-e8h9f - Herdr bridge foundation — `/setup use bridge <vscode|herdr|none>` persists the selection to a per-machine config file, `status` reports Herdr install/liveness, and a shared `lib/resolve-herdr.mjs` finds the binary for both `/setup` and the dashboard server
+
+**Type:** Work / Task completion
+**Task:** infrastructure-e8h9f - Herdr bridge foundation — `/setup use bridge <vscode|herdr|none>` persists the selection to a per-machine config file, `status` reports Herdr install/liveness, and a shared `lib/resolve-herdr.mjs` finds the binary for both `/setup` and the dashboard server
+**Summary:** Herdr bridge foundation — lib/bridge-selection.mjs persists the per-machine bridge choice, lib/resolve-herdr.mjs finds the binary and checks liveness, /setup gains use bridge <kind> plus activeBridge/herdr status fields
+**Duration:** 20m30s
+**Verification:** PASS (iteration 1)
+**Files changed:** 7
+**Tests added:** 41
+**ADRs written:** none
+
+---
+
 ## 2026-09-13 09:48 -- Batch started: [infrastructure-e8h9f]
 
 **Type:** Work / Batch start

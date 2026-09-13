@@ -1,7 +1,7 @@
 ---
 id: infrastructure-e8h9f
 title: Herdr bridge foundation — `/setup use bridge <vscode|herdr|none>` persists the selection to a per-machine config file, `status` reports Herdr install/liveness, and a shared `lib/resolve-herdr.mjs` finds the binary for both `/setup` and the dashboard server
-status: doing
+status: done
 type: feature
 context: infrastructure
 created: 2026-09-13
@@ -87,3 +87,14 @@ the pattern this task's `herdr` status key mirrors), infrastructure-x56qm (`/set
 CLI to a per-machine, outside-project-tree location — the same property this task's config file
 needs), infrastructure-kr9pd (`/setup` bridge-verb argument handling on win32 — relevant to the
 new `use bridge` verb's argument parsing).
+
+## Outcome
+
+Built the Herdr-bridge foundation frozen by ADR-0082, with no UI surface of its own:
+
+- **`lib/bridge-selection.mjs`** — `bridgeConfigPath`, `readBridgeSelection(homedir)`, `writeBridgeSelection(homedir, kind)` against `<home>/.config/agentheim/config.json` (`{schema:1, bridge}`). Read never throws (absence / unreadable file / invalid JSON / non-object shape / unrecognized `bridge` value all collapse to `{bridge:null}`); write validates `kind` against the exported `BRIDGE_KINDS` list and creates the directory as needed. Covered by `lib/test/bridge-selection.test.mjs` (12 tests).
+- **`lib/resolve-herdr.mjs`** — `resolveHerdrBinary(deps)` (PATH via injectable `which`, else newest-semver walk of `<home>/.herdr/packages/standalone/releases/<semver>-<triple>/herdr(.exe)`, else win32 `<home>/AppData/Local/Programs/Herdr/bin/herdr.exe`) and `checkHerdrLiveness(deps)` (socket-file gate + short-TTL-cached injectable `herdr status` spawn). Every derived environment input (`homedir`, `platform`, `env`, `which`, `exec`, `localAppData`, `appData`, `existsSync`, `now`, `cache`) is an injected parameter with a real default; critically, `localAppData`/`appData` defaults are derived purely from `homedir` (never from `env.LOCALAPPDATA`/`env.APPDATA`) so a faked `homedir` can never resolve or spawn the builder's real, currently-running Herdr install — this was discovered and fixed mid-task when a pre-existing `setup-cli.test.mjs` test (which fakes `homedir` but passes real `env`/`platform` through to `runCli`) was found to genuinely spawn the builder's real `herdr.exe` and pollute the module-level liveness cache across tests. Covered by `lib/test/resolve-herdr.test.mjs` (19 tests: PATH-found, both known-root variants — standalone-release-dir and win32-Programs-dir — not-found, and the liveness TTL cache).
+- **`lib/setup-cli.mjs`** — new `useBridge(deps, kind)` / `use bridge <vscode|herdr|none>` verb (validates against `BRIDGE_KINDS`, calls `writeBridgeSelection`, fails loud with no write on an unrecognized kind); new `buildHerdrStatus(deps)` building the `herdr: {onPath, version, serverRunning}` status key (`onPath` true only for a literal PATH hit, never a known-root fallback find); `buildStatus` gains `activeBridge` (via `readBridgeSelection`) and `herdr`. `USAGE` updated. Covered by 10 new tests appended to `lib/test/setup-cli.test.mjs` (all three `use bridge` kind values, the invalid-kind path, the direct `useBridge` call, `activeBridge` unset/set, and `herdr` onPath/absent/known-root cases); the full pre-existing 37-test suite for this file still passes unchanged (47/47 total).
+- **`commands/setup.md`** — verb table gains `use bridge <vscode|herdr|none>`; the `status`-summary bullet now names `activeBridge` and `herdr`; `argument-hint`/`description` updated. `lib/test/command-bootstrap-dedup.test.mjs` and `dashboard/test/command-card.test.mjs` still pass (the resolver bootstrap block is untouched, appearing exactly once).
+
+Full `node --test lib/test/*.test.mjs` run: 858/859 pass — the one failure is the pre-existing, out-of-scope `lib/test/index-entry-length.test.mjs` red on `main` (agentic-workflow-qwfq3's over-long INDEX entry, named in the conductor's briefing). `dashboard/test/command-card.test.mjs` and `dashboard/test/readme-docs.test.mjs` pass directly (20/20); the broader `dashboard && npm test` run could not execute in this worktree because it never links `dashboard/node_modules` (the lazy per-worktree link keys off a FILE_LIST touching `dashboard/`, which this task's FILE_LIST does not — no dashboard source or build output was touched), a pre-existing environmental gap unrelated to this change.

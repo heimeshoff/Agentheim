@@ -1,6 +1,6 @@
 ---
-description: One-time, per-machine install of the zero-token Agentheim dashboard CLI and the VS Code bridge. Re-runnable at any time.
-argument-hint: "[status|install cli|remove cli|install bridge|remove bridge]"
+description: One-time, per-machine install of the zero-token Agentheim dashboard CLI and the VS Code bridge, and the choice of which bridge kind the dashboard uses. Re-runnable at any time.
+argument-hint: "[status|install cli|remove cli|install bridge|remove bridge|use bridge <vscode|herdr|none>]"
 allowed-tools: Bash(node:*)
 ---
 
@@ -22,14 +22,20 @@ Then act on the model side, conversationally — the script never presents a men
 
 - **No argument** — run with `status`, read its one-line JSON, and summarize
   plainly: whether `agentheim-dashboard` is installed (current/stale/not-
-  installed) and the VS Code bridge's install state (`bridge.state`:
+  installed), the VS Code bridge's install state (`bridge.state`:
   not-installed / installed-current / installed-stale / unknown — "unknown"
-  means `code` itself isn't on PATH, distinct from "not-installed"). Ask the
-  builder which they want installed/updated/removed, then re-run this Bash
-  command once per choice with the explicit verb (e.g. `install cli`,
-  `install bridge`, `remove cli`, `remove bridge`) — there is no `install both`
-  and no default choice, so issue one call per option so each fails loud
-  independently.
+  means `code` itself isn't on PATH, distinct from "not-installed"), which
+  bridge kind the dashboard is currently set to use (`activeBridge`:
+  `"vscode"` / `"herdr"` / `"none"` / `null` when never chosen — `null`
+  behaves identically to `"vscode"`), and Herdr's own install/liveness
+  (`herdr`: `{onPath, version, serverRunning}` — `onPath` is true only when
+  `herdr` resolves on the process's actual PATH, distinct from being found via
+  a known-install-root fallback). Ask the builder which they want
+  installed/updated/removed/selected, then re-run this Bash command once per
+  choice with the explicit verb (e.g. `install cli`, `install bridge`,
+  `remove cli`, `remove bridge`, `use bridge <kind>`) — there is no
+  `install both` and no default choice, so issue one call per option so each
+  fails loud independently.
 - **`status`** — print the JSON and summarize it plainly; make no writes.
 - **`install cli`** — installs (or upgrades in place) the CLI into
   `<home>/.local/bin`. If the printed output names a PATH remedy, show it to
@@ -42,6 +48,10 @@ Then act on the model side, conversationally — the script never presents a men
   reload is what actually activates the new build.
 - **`remove bridge`** — uninstalls the VS Code bridge extension. Same reload
   note applies.
+- **`use bridge <vscode|herdr|none>`** — records which bridge kind the
+  dashboard should use, persisted per-machine (never a write to PATH, never a
+  project-tree file). Takes effect immediately; no reload needed. An
+  unrecognized kind fails loud and writes nothing.
 
 After a successful `install cli`, the daily launch path is `agentheim-dashboard`
 (`agentheim-dashboard stop` / `agentheim-dashboard status`) run directly from a
