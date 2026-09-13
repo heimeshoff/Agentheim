@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-09-13 11:07 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 1h19m (batch start 09:48 to session end)
+**Completed:** 3 (first-try PASS: 1, re-dispatched: 2, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 1 (infrastructure-xh8tw iteration 1 — sidecar rejected `truncated-block`, the BACKLOG_ITEMS fence was never closed; same worker rewrote the sidecar, no code changed)
+**Lost-result escalations:** 0
+**Dispatches:** infrastructure-e8h9f: 1, infrastructure-xh8tw: 2, infrastructure-vpbks: 2
+**Commits:** 7
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (3 tasks)
+**Carry-over:** none — working tree clean
+
+---
+
 ## 2026-09-13 11:06 -- Task verified and completed: infrastructure-vpbks - Herdr bridge frontend — `launchOrCopy`/`probeBridge` dispatch on `/api/bridge`'s `kind`, call the mediated-launch endpoint when Herdr is selected, keep the VS Code path unmodified otherwise, and document the three-way selection in the repo README
 
 **Type:** Work / Task completion
