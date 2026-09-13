@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-13 09:45 -- Modeling / Dismissed: infrastructure-g6h1m
+
+**Type:** Modeling / Dismiss
+**Dismissed:**
+- infrastructure-g6h1m - Herdr bridge — the dashboard's launch buttons open a Claude session in Herdr; `/setup` selects the active bridge (VS Code, Herdr, or none) and reports it; clipboard fallback whenever the selected bridge is not live (infrastructure)
+
+---
+
 ## 2026-09-13 01:44 -- Modeling / Refined: infrastructure-g6h1m - Herdr bridge — the dashboard launch buttons open a Claude session in Herdr; /setup selects the active bridge
 
 **Type:** Modeling / Refine

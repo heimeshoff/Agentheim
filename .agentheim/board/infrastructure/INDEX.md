@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
+- **Backlog:** 0
 - **Todo:** 3
 - **Doing:** 0
 - **Done:** 41
@@ -54,7 +54,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **infrastructure-g6h1m** — Herdr bridge — the dashboard's launch buttons open a Claude session in Herdr; `/setup` selects the active bridge (VS Code, Herdr, or none) and reports it; clipboard fallback whenever the selected bridge is not live (feature) — `backlog/infrastructure-g6h1m-herdr-bridge-setup-selects-active-bridge.md`
 <!-- backlog-list:end -->
 
 

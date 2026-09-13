@@ -4,7 +4,7 @@ title: Herdr joins the dashboard bridge family — a second bridge kind, a fourt
 scope: infrastructure
 status: proposed
 date: 2026-09-13
-related_tasks: [infrastructure-g6h1m, infrastructure-e8h9f, infrastructure-xh8tw, infrastructure-vpbks]
+related_tasks: [infrastructure-e8h9f, infrastructure-xh8tw, infrastructure-vpbks]
 related_adrs: [0017, 0018, 0053, 0079]
 ---
 
