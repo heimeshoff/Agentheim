@@ -1,7 +1,7 @@
 ---
 id: infrastructure-vpbks
 title: Herdr bridge frontend — `launchOrCopy`/`probeBridge` dispatch on `/api/bridge`'s `kind`, call the mediated-launch endpoint when Herdr is selected, keep the VS Code path unmodified otherwise, and document the three-way selection in the repo README
-status: todo
+status: doing
 type: feature
 context: infrastructure
 created: 2026-09-13

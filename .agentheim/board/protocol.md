@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-13 10:43 -- Batch started: [infrastructure-vpbks]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-vpbks - Herdr bridge frontend — `launchOrCopy`/`probeBridge` dispatch on `/api/bridge`'s `kind`, call the mediated-launch endpoint when Herdr is selected, keep the VS Code path unmodified otherwise, and document the three-way selection in the repo README
+**Parallel:** no (1 worker — only ready task across every BC after infrastructure-xh8tw integrated; last of the three chained Herdr-bridge tasks)
+
+---
+
 ## 2026-09-13 10:42 -- Task verified and completed: infrastructure-xh8tw - Herdr bridge server — `POST /api/bridge/launch` opens a Claude session in Herdr behind a per-process token; `GET /api/bridge` grows `kind`/`live`; workspace reuse by project cwd via `api snapshot`; agent start is fire-and-forget behind an immediate 202
 
 **Type:** Work / Task completion
