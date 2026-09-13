@@ -17,8 +17,15 @@
 // process and removes its own runfile on an explicit builder command from
 // the UI (stop-api.mjs). No client-supplied path (there is none to supply);
 // also dispatched before the method gate below.
+//
+// ADR-0082 carves a FOURTH, distinct exception — MEDIATED LAUNCH — for
+// POST /api/bridge/launch: the server runs the `herdr` CLI on the builder's
+// explicit request to open an external Claude session (bridge-launch-api.mjs).
+// No task-lifecycle truth is touched. Also dispatched before the method gate.
 
+import crypto from 'node:crypto';
 import http from 'node:http';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { serveStatic, serveIndexHtml } from './static.mjs';
@@ -26,6 +33,7 @@ import { handleEvents } from './events.mjs';
 import { handleTree, handleDoc, handleSearch, handleBridge } from './read-api.mjs';
 import { handleWhatsNextDelete } from './whats-next-delete.mjs';
 import { handleStop } from './stop-api.mjs';
+import { handleBridgeLaunch } from './bridge-launch-api.mjs';
 import { resolvePluginRoot, readPluginVersion } from './plugin-version.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -59,7 +67,22 @@ export function defaultAssetRoot(_root) {
  *   sse       — options forwarded to the SSE handler (heartbeatMs, debounceMs,
  *               pollMs); see events.mjs / watcher.mjs.
  */
-export function createDashboardServer({ root, assetRoot = defaultAssetRoot(root), sse = {}, stop = {} }) {
+export function createDashboardServer({
+  root,
+  assetRoot = defaultAssetRoot(root),
+  sse = {},
+  stop = {},
+  homedir = os.homedir(),
+  herdr = {},
+  bridgeLaunch = {},
+}) {
+  // Per-process bridge token (ADR-0082 §4): minted ONCE per server instance,
+  // in memory only — no disk write, since producer (this handler) and
+  // consumer (the frontend, via GET /api/bridge) are the same process.
+  // Stable for the life of this server instance; a fresh instance mints a
+  // fresh token.
+  const bridgeToken = crypto.randomBytes(16).toString('hex');
+
   return http.createServer((req, res) => {
     const pathname = (req.url || '/').split('?')[0];
 
@@ -100,6 +123,27 @@ export function createDashboardServer({ root, assetRoot = defaultAssetRoot(root)
       return;
     }
 
+    // The one scoped MEDIATED LAUNCH write (ADR-0082): runs the `herdr` CLI
+    // to open an external Claude session on an explicit builder request.
+    // Token-gated (no Origin check, ADR-0082 §4). Dispatched before the
+    // method gate below, same as the three routes above.
+    //
+    // `handleBridgeLaunch` is async; its own internals already turn every
+    // expected failure mode into a non-2xx response, but `.catch()` here is
+    // the last-resort backstop against an UNEXPECTED throw (e.g. a broken
+    // `resolveHerdrBinaryFn`/`exec` test double) becoming an unhandled
+    // rejection that kills the whole server process instead of a 500 to
+    // this one request (verifier iteration 1, AC6 "never a 5xx crash").
+    if (pathname === '/api/bridge/launch' && req.method === 'POST') {
+      handleBridgeLaunch(req, res, root, { token: bridgeToken, homedir, ...bridgeLaunch }).catch((err) => {
+        if (!res.headersSent) {
+          res.writeHead(500, { 'content-type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ error: 'internal error', detail: String(err && err.message) }));
+        }
+      });
+      return;
+    }
+
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       res.writeHead(405, { 'content-type': 'text/plain; charset=utf-8' });
       res.end('Method Not Allowed');
@@ -135,8 +179,10 @@ export function createDashboardServer({ root, assetRoot = defaultAssetRoot(root)
     // .agentheim/.dashboard/bridge.json (written by the VS Code extension) via
     // the same in-root validator and serves the { port, token, v } subset, or
     // 200 { present: false } when absent/unreadable/malformed — never a 5xx.
+    // Grows an additive `kind` field, plus a wholly distinct Herdr shape when
+    // the recorded selection is `'herdr'` (ADR-0082 §1/§3, read-api.mjs).
     if (pathname === '/api/bridge') {
-      handleBridge(req, res, root);
+      handleBridge(req, res, root, { homedir, herdr, token: bridgeToken });
       return;
     }
 

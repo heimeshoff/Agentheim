@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-09-13 10:42 -- Task verified and completed: infrastructure-xh8tw - Herdr bridge server — `POST /api/bridge/launch` opens a Claude session in Herdr behind a per-process token; `GET /api/bridge` grows `kind`/`live`; workspace reuse by project cwd via `api snapshot`; agent start is fire-and-forget behind an immediate 202
+
+**Type:** Work / Task completion
+**Task:** infrastructure-xh8tw - Herdr bridge server — `POST /api/bridge/launch` opens a Claude session in Herdr behind a per-process token; `GET /api/bridge` grows `kind`/`live`; workspace reuse by project cwd via `api snapshot`; agent start is fire-and-forget behind an immediate 202
+**Summary:** Herdr bridge server — POST /api/bridge/launch behind a per-process token (api snapshot → tab/workspace create awaited, 202, then agent start unawaited with ADR-0018 argv parity), GET /api/bridge grows kind/token/capabilities/live
+**Duration:** 30m10s
+**Verification:** PASS (iteration 2)
+**Files changed:** 5
+**Tests added:** 47
+**ADRs written:** none
+
+---
+
+## 2026-09-13 10:33 -- Verification failed: infrastructure-xh8tw - Herdr bridge server — `POST /api/bridge/launch` opens a Claude session in Herdr behind a per-process token; `GET /api/bridge` grows `kind`/`live`; workspace reuse by project cwd via `api snapshot`; agent start is fire-and-forget behind an immediate 202
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-xh8tw - Herdr bridge server — `POST /api/bridge/launch` opens a Claude session in Herdr behind a per-process token; `GET /api/bridge` grows `kind`/`live`; workspace reuse by project cwd via `api snapshot`; agent start is fire-and-forget behind an immediate 202
+**Iteration:** 1 of 3
+**Reasons:** AC3 `server.mjs` wiring of `POST /api/bridge/launch` has zero executable coverage (removing the dispatch block leaves 1057/1057 green), the GET-token-equals-POST-token integration claim is unproven, the house ahead-of-405-gate test pair (stop-api / whats-next-delete) was not mirrored, and an un-awaited `handleBridgeLaunch` with `resolveHerdrBinary` outside any try can become an unhandled rejection instead of a non-2xx
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-09-13 10:12 -- Batch started: [infrastructure-xh8tw]
 
 **Type:** Work / Batch start

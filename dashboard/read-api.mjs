@@ -7,10 +7,14 @@
 // path.resolve + startsWith(root)) so no request escapes the project.
 
 import { createReadStream, existsSync, statSync, readFileSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { resolveInRoot } from './discovery.mjs';
 import { buildTree } from './tree.mjs';
 import { searchCorpus } from './search.mjs';
+import { readBridgeSelection } from '../lib/bridge-selection.mjs';
+import { resolveHerdrBinary, checkHerdrLiveness } from '../lib/resolve-herdr.mjs';
+import { HERDR_CAPABILITIES } from './bridge-launch-api.mjs';
 
 /** GET /api/tree — serialize the read projection of the discovered root. */
 export function handleTree(req, res, root) {
@@ -91,28 +95,73 @@ export function handleSearch(req, res, root, requestUrl) {
 }
 
 /**
- * GET /api/bridge (infrastructure-014, ADR-0018) — server-mediated discovery of
- * the VS Code bridge listener for the sandboxed (filesystem-blind) frontend.
+ * GET /api/bridge (infrastructure-014, ADR-0018; grown a `kind` field and a
+ * distinct Herdr shape by ADR-0082 §1/§3, infrastructure-xh8tw) —
+ * server-mediated bridge discovery for the sandboxed (filesystem-blind)
+ * frontend.
  *
- * Reads `.agentheim/.dashboard/bridge.json` (written by the extension,
- * infrastructure-013) through the same in-root path validator as /api/doc, and
- * returns the discovery subset `{ port, token, v, capabilities }` — never
- * pid/startedAt. `capabilities` (infrastructure-v8r3q) is belt-and-braces
- * only: bridge.json is written by a separate process on its own activation
- * lifecycle and can lag or race the listener it describes, so a caller that
- * needs a trustworthy answer probes the live `GET /health` instead. A
- * bridge.json written by a pre-handshake bridge simply has no `capabilities`
- * field, which is passed through unchanged (JSON.stringify drops it).
+ * Every response additively carries `kind` — the per-machine bridge
+ * selection recorded by `/setup use bridge <kind>`
+ * (`readBridgeSelection(homedir)`), verbatim, `null` when unset.
  *
- * Pure transport: it carries the published contract, invents no rule, runs no
- * `claude`. When the file is absent, unreadable, or malformed, it returns
- * `200 { present: false }` so the frontend degrades silently to clipboard —
+ * When the recorded selection is `'herdr'`, this endpoint takes a WHOLLY
+ * DIFFERENT branch — it never reads `bridge.json` (Herdr writes none; the
+ * launch is server-mediated, not browser-mediated) — and returns
+ * `{ present: true, kind: 'herdr', token, capabilities, live }`: `token` is
+ * the per-process token minted once at server start (server.mjs), the only
+ * way the frontend can ever learn it; `capabilities` is
+ * `HERDR_CAPABILITIES` (bridge-launch-api.mjs); `live` is a bounded,
+ * short-TTL-cached `checkHerdrLiveness` call (socket-file check + a bounded
+ * `herdr status` spawn — no second network hop, producer and consumer are
+ * the same process).
+ *
+ * Otherwise (kind is `'vscode'`, `'none'`, or `null`) — UNCHANGED from
+ * ADR-0018: reads `.agentheim/.dashboard/bridge.json` (written by the VS
+ * Code extension, infrastructure-013) through the same in-root path
+ * validator as /api/doc, and returns the discovery subset
+ * `{ port, token, v, capabilities }` — never pid/startedAt — plus the new
+ * additive `kind`. `capabilities` here (infrastructure-v8r3q) is
+ * belt-and-braces only: bridge.json is written by a separate process on its
+ * own activation lifecycle and can lag or race the listener it describes, so
+ * a caller that needs a trustworthy answer probes the live `GET /health`
+ * instead. A bridge.json written by a pre-handshake bridge simply has no
+ * `capabilities` field, passed through unchanged (JSON.stringify drops it).
+ * Absent/unreadable/malformed bridge.json → `200 { present: false, kind }` —
  * NEVER a 5xx for normal absence.
+ *
+ * @param {import('node:http').IncomingMessage} req
+ * @param {import('node:http').ServerResponse} res
+ * @param {string} root
+ * @param {object} [opts]
+ * @param {string} [opts.homedir] — defaults to `os.homedir()`.
+ * @param {string} [opts.token] — the per-process bridge token; only surfaced when `kind === 'herdr'`.
+ * @param {{resolve?: object, liveness?: object}} [opts.herdr] — deps forwarded to `resolveHerdrBinary`/`checkHerdrLiveness`.
  */
-export function handleBridge(req, res, root) {
+export function handleBridge(req, res, root, opts = {}) {
+  const homedir = opts.homedir ?? os.homedir();
+  const { bridge: kind } = readBridgeSelection(homedir);
+
+  if (kind === 'herdr') {
+    const resolveDeps = opts.herdr?.resolve ?? {};
+    const livenessDeps = opts.herdr?.liveness ?? {};
+    const resolved = resolveHerdrBinary({ homedir, ...resolveDeps });
+    const live = checkHerdrLiveness({ homedir, binaryPath: resolved.path ?? undefined, ...livenessDeps });
+    res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+    res.end(
+      JSON.stringify({
+        present: true,
+        kind: 'herdr',
+        token: opts.token,
+        capabilities: HERDR_CAPABILITIES,
+        live,
+      }),
+    );
+    return;
+  }
+
   const absent = () => {
     res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ present: false }));
+    res.end(JSON.stringify({ present: false, kind }));
   };
 
   let bridge;
@@ -132,5 +181,5 @@ export function handleBridge(req, res, root) {
 
   const { port, token, v, capabilities } = bridge;
   res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-  res.end(JSON.stringify({ port, token, v, capabilities }));
+  res.end(JSON.stringify({ port, token, v, capabilities, kind }));
 }
