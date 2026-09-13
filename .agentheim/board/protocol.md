@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-09-13 11:06 -- Task verified and completed: infrastructure-vpbks - Herdr bridge frontend — `launchOrCopy`/`probeBridge` dispatch on `/api/bridge`'s `kind`, call the mediated-launch endpoint when Herdr is selected, keep the VS Code path unmodified otherwise, and document the three-way selection in the repo README
+
+**Type:** Work / Task completion
+**Task:** infrastructure-vpbks - Herdr bridge frontend — `launchOrCopy`/`probeBridge` dispatch on `/api/bridge`'s `kind`, call the mediated-launch endpoint when Herdr is selected, keep the VS Code path unmodified otherwise, and document the three-way selection in the repo README
+**Summary:** Herdr bridge frontend — bridge-launch.js dispatches on GET /api/bridge kind (herdr → POST /api/bridge/launch via a shared buildLaunchBody, none → clipboard, vscode/absent unmodified), all three kinds DOM-tested; repo README documents the three-way selection
+**Duration:** 22m00s
+**Verification:** PASS (iteration 2)
+**Files changed:** 5
+**Tests added:** 23
+**ADRs written:** none
+
+---
+
+## 2026-09-13 10:59 -- Verification failed: infrastructure-vpbks - Herdr bridge frontend — `launchOrCopy`/`probeBridge` dispatch on `/api/bridge`'s `kind`, call the mediated-launch endpoint when Herdr is selected, keep the VS Code path unmodified otherwise, and document the three-way selection in the repo README
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-vpbks - Herdr bridge frontend — `launchOrCopy`/`probeBridge` dispatch on `/api/bridge`'s `kind`, call the mediated-launch endpoint when Herdr is selected, keep the VS Code path unmodified otherwise, and document the three-way selection in the repo README
+**Iteration:** 1 of 3
+**Reasons:** AC1 requires the kind dispatch DOM-tested for all three kinds; `kind:none` has only `node --test` unit coverage and no DOM case through a real mounted board (herdr is DOM-covered by the new parity file, vscode/absent by the pre-existing capability-DOM fixtures)
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-09-13 10:43 -- Batch started: [infrastructure-vpbks]
 
 **Type:** Work / Batch start

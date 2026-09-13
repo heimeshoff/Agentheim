@@ -760,6 +760,204 @@ test('against a real 0.2.0-shaped listener: probeBridge resolves LEGACY_CAPABILI
 // a general static-analysis pass — if a future field is read via different
 // syntax, widen the guard then, not now.
 
+// ---- kind dispatch (ADR-0082, infrastructure-vpbks) -------------------------
+//
+// infrastructure-xh8tw taught `GET /api/bridge` to grow an additive `kind`
+// field: `'herdr'` (a mediated launch through `POST /api/bridge/launch`),
+// `'none'` (straight to clipboard, no VS Code discovery attempted), or
+// `'vscode'`/absent/`null` (today's unmodified path, exercised by every test
+// above this section — none of those fixtures carry a `kind` field at all).
+
+const HERDR_LAUNCH_PATH = '/api/bridge/launch';
+
+test('kind:"herdr" + live:true + POST /api/bridge/launch accepted -> launches via the mediated endpoint, does NOT copy, and never touches the VS Code /health or /run routes', async () => {
+  let launchCall = null;
+  const fetchImpl = makeFetch([
+    [HERDR_LAUNCH_PATH, (url, opts) => { launchCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
+    ['/api/bridge', () => jsonResponse(200, { present: true, kind: 'herdr', token: 'herdr-tok', capabilities: FULL_CAPABILITIES, live: true })],
+  ]);
+  const copy = makeCopy();
+
+  const result = await launchOrCopy({ prompt: PROMPT, fetchImpl, copy });
+
+  assert.equal(result.via, 'bridge');
+  assert.equal(copy.copied.length, 0, 'must not fall back to clipboard when the herdr launch succeeded');
+  assert.ok(launchCall, 'POST /api/bridge/launch must have fired');
+  assert.equal(launchCall.opts.method, 'POST');
+  assert.match(String(launchCall.url), /\/api\/bridge\/launch$/);
+  const headers = launchCall.opts.headers || {};
+  const tokenVal = headers[BRIDGE_TOKEN_HEADER] ?? headers[BRIDGE_TOKEN_HEADER.toLowerCase()];
+  assert.equal(tokenVal, 'herdr-tok');
+  assert.match(String(headers['Content-Type'] ?? headers['content-type']), /application\/json/);
+  assert.deepEqual(JSON.parse(launchCall.opts.body), { prompt: PROMPT });
+  // Never called any VS Code path route.
+  assert.ok(!fetchImpl.calls.some((c) => c.url.includes('/health')), 'the VS Code /health route must never be reached when kind is herdr');
+  assert.ok(!fetchImpl.calls.some((c) => c.url.includes('/run')), 'the VS Code /run route must never be reached when kind is herdr');
+});
+
+test('kind:"herdr" + skipPermissions/name/model thread through POST /api/bridge/launch, gated by the response\'s own capabilities — byte-identical body shape to the VS Code path', async () => {
+  let launchCall = null;
+  const fetchImpl = makeFetch([
+    [HERDR_LAUNCH_PATH, (url, opts) => { launchCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
+    ['/api/bridge', () => jsonResponse(200, { present: true, kind: 'herdr', token: 'herdr-tok2', capabilities: FULL_CAPABILITIES, live: true })],
+  ]);
+
+  await launchOrCopy({
+    prompt: PROMPT,
+    fetchImpl,
+    copy: makeCopy(),
+    skipPermissions: true,
+    name: 'Armed Launch',
+    model: 'opus',
+  });
+
+  assert.deepEqual(JSON.parse(launchCall.opts.body), {
+    prompt: PROMPT,
+    skipPermissions: true,
+    name: 'Armed Launch',
+    model: 'opus',
+  });
+});
+
+test('kind:"herdr" whose response omits capabilities -> name/model are OMITTED at the wire level even though the caller passed both', async () => {
+  let launchCall = null;
+  const fetchImpl = makeFetch([
+    [HERDR_LAUNCH_PATH, (url, opts) => { launchCall = { url, opts }; return jsonResponse(202, { ok: true }); }],
+    ['/api/bridge', () => jsonResponse(200, { present: true, kind: 'herdr', token: 'herdr-tok3', live: true })],
+  ]);
+
+  const result = await launchOrCopy({ prompt: PROMPT, fetchImpl, copy: makeCopy(), name: 'Dropped', model: 'sonnet' });
+
+  assert.equal(result.via, 'bridge');
+  const body = JSON.parse(launchCall.opts.body);
+  assert.deepEqual(body, { prompt: PROMPT });
+  assert.equal('model' in body, false);
+  assert.equal('name' in body, false);
+});
+
+test('kind:"herdr" + live:false -> collapses SILENTLY to clipboard, never attempts POST /api/bridge/launch', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { present: true, kind: 'herdr', token: 'herdr-tok4', capabilities: FULL_CAPABILITIES, live: false })],
+  ]);
+  const copy = makeCopy();
+
+  const result = await launchOrCopy({ prompt: PROMPT, fetchImpl, copy });
+
+  assert.equal(result.via, 'clipboard');
+  assert.deepEqual(copy.copied, [PROMPT]);
+  assert.ok(!fetchImpl.calls.some((c) => c.url.includes(HERDR_LAUNCH_PATH)), 'a not-live herdr bridge must never be POSTed to');
+});
+
+test('kind:"herdr" + live:true but POST /api/bridge/launch returns non-2xx -> collapses silently to clipboard', async () => {
+  const fetchImpl = makeFetch([
+    [HERDR_LAUNCH_PATH, () => jsonResponse(500, { error: 'boom' })],
+    ['/api/bridge', () => jsonResponse(200, { present: true, kind: 'herdr', token: 'herdr-tok5', capabilities: FULL_CAPABILITIES, live: true })],
+  ]);
+  const copy = makeCopy();
+
+  const result = await launchOrCopy({ prompt: PROMPT, fetchImpl, copy });
+
+  assert.equal(result.via, 'clipboard');
+  assert.deepEqual(copy.copied, [PROMPT]);
+});
+
+test('kind:"herdr" + live:true but the launch fetch itself throws -> collapses silently to clipboard, never rejects', async () => {
+  const fetchImpl = makeFetch([
+    [HERDR_LAUNCH_PATH, () => { throw new Error('ECONNRESET'); }],
+    ['/api/bridge', () => jsonResponse(200, { present: true, kind: 'herdr', token: 'herdr-tok6', capabilities: FULL_CAPABILITIES, live: true })],
+  ]);
+  const copy = makeCopy();
+
+  const result = await launchOrCopy({ prompt: PROMPT, fetchImpl, copy });
+
+  assert.equal(result.via, 'clipboard');
+  assert.deepEqual(copy.copied, [PROMPT]);
+});
+
+test('kind:"none" -> straight to clipboard, no VS Code discovery attempted at all (no /health, no /run)', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { present: false, kind: 'none' })],
+  ]);
+  const copy = makeCopy();
+
+  const result = await launchOrCopy({ prompt: PROMPT, fetchImpl, copy });
+
+  assert.equal(result.via, 'clipboard');
+  assert.deepEqual(copy.copied, [PROMPT]);
+  assert.ok(!fetchImpl.calls.some((c) => c.url.includes('/health')), 'kind:none must never probe /health');
+  assert.ok(!fetchImpl.calls.some((c) => c.url.includes('/run')), 'kind:none must never attempt /run');
+});
+
+test('kind:"vscode" explicit -> today\'s VS Code code path runs unmodified', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31490, token: 'vs-tok', kind: 'vscode' })],
+    ['/health', () => jsonResponse(200, { ok: true })],
+    ['/run', () => jsonResponse(202, { ok: true })],
+  ]);
+  const copy = makeCopy();
+
+  const result = await launchOrCopy({ prompt: PROMPT, fetchImpl, copy });
+
+  assert.equal(result.via, 'bridge');
+  assert.equal(copy.copied.length, 0);
+});
+
+test('kind:null (recorded absence) -> today\'s VS Code code path runs unmodified', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31491, token: 'vs-tok2', kind: null })],
+    ['/health', () => jsonResponse(200, { ok: true })],
+    ['/run', () => jsonResponse(202, { ok: true })],
+  ]);
+
+  const result = await launchOrCopy({ prompt: PROMPT, fetchImpl, copy: makeCopy() });
+
+  assert.equal(result.via, 'bridge');
+});
+
+// ---- probeBridge dual-kind (ADR-0082, infrastructure-vpbks) -----------------
+
+test('probeBridge resolves {present:true, capabilities} for a live herdr bridge', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { present: true, kind: 'herdr', token: 'p-herdr', capabilities: FULL_CAPABILITIES, live: true })],
+  ]);
+
+  const result = await probeBridge(fetchImpl);
+
+  assert.deepEqual(result, { present: true, capabilities: FULL_CAPABILITIES });
+});
+
+test('probeBridge resolves {present:false, capabilities:[]} for a not-live herdr bridge', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { present: true, kind: 'herdr', token: 'p-herdr2', capabilities: FULL_CAPABILITIES, live: false })],
+  ]);
+
+  const result = await probeBridge(fetchImpl);
+
+  assert.deepEqual(result, { present: false, capabilities: [] });
+});
+
+test('probeBridge resolves {present:false, capabilities:[]} for kind:"none", without probing /health', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { present: false, kind: 'none' })],
+  ]);
+
+  const result = await probeBridge(fetchImpl);
+
+  assert.deepEqual(result, { present: false, capabilities: [] });
+  assert.ok(!fetchImpl.calls.some((c) => c.url.includes('/health')));
+});
+
+test('probeBridge still resolves the VS Code path for kind:"vscode"/absent, unmodified', async () => {
+  const fetchImpl = makeFetch([
+    ['/api/bridge', () => jsonResponse(200, { port: 31492, token: 'p-vs', kind: 'vscode' })],
+    ['/health', () => jsonResponse(200, { ok: true, capabilities: FULL_CAPABILITIES })],
+  ]);
+
+  const result = await probeBridge(fetchImpl);
+
+  assert.deepEqual(result, { present: true, capabilities: FULL_CAPABILITIES });
+});
+
 test('structural guard: every `caps.includes(\'<x>\')` gate in bridge-launch.js names a field declared in KNOWN_CAPABILITIES, and every declared capability beyond the always-sent baseline is actually gated that way', () => {
   const srcPath = fileURLToPath(new URL('../app/bridge-launch.js', import.meta.url));
   const source = readFileSync(srcPath, 'utf8');

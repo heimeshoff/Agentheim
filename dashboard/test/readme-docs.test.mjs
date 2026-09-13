@@ -46,3 +46,17 @@ test('the bridge <details> block names /setup as the primary install path and ke
     'the from-source vsce sequence must still be present'
   );
 });
+
+// infrastructure-vpbks (ADR-0082): the bridge <details> block now explains
+// there are THREE selectable bridge kinds, not just the VS Code extension
+// documented in the rest of the block, and that the clipboard fallback is
+// the floor regardless of which one is chosen.
+test('the bridge <details> block explains the three-way bridge selection (vscode/herdr/none) and the clipboard floor (ADR-0082, infrastructure-vpbks)', () => {
+  const [bridgeBlock] = readme.match(/<summary><b>Optional: VS Code bridge[\s\S]*?<\/details>/) || [];
+  assert.ok(bridgeBlock, 'the bridge <details> block must be extractable');
+  assert.match(bridgeBlock, /`\/setup use bridge <kind>`/, 'the block must name the literal /setup use bridge <kind> command');
+  assert.match(bridgeBlock, /`vscode`/, 'the block must name the vscode kind');
+  assert.match(bridgeBlock, /`herdr`/, 'the block must name the herdr kind');
+  assert.match(bridgeBlock, /`none`/, 'the block must name the none kind');
+  assert.match(bridgeBlock, /clipboard fallback is always the floor/i, 'the block must state the clipboard-floor guarantee, independent of the selected kind');
+});

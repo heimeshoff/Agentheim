@@ -43,6 +43,12 @@ export const BRIDGE_TOKEN_HEADER = 'X-Agentheim-Bridge-Token';
 // the sandboxed frame can reach it; it carries the on-disk bridge contract out.
 const DISCOVERY_URL = '/api/bridge';
 
+// The mediated-launch sibling endpoint (ADR-0082 §2-§3, infrastructure-xh8tw):
+// reached ONLY when `GET /api/bridge` reports `kind === 'herdr'`. Same origin
+// as the dashboard itself (the browser cannot reach Herdr's own socket
+// directly) — never the VS Code extension's 127.0.0.1:<port>.
+const HERDR_LAUNCH_URL = '/api/bridge/launch';
+
 // ADR-0018's liveness-probe budget. A bridge that does not answer /health within
 // this window is treated as absent and we fall back to clipboard.
 const DEFAULT_HEALTH_TIMEOUT_MS = 800;
@@ -89,24 +95,42 @@ function fetchWithTimeout(fetchImpl, url, opts, timeoutMs) {
 }
 
 /**
- * Discover the live bridge via the dashboard-origin `GET /api/bridge`.
- * @returns {Promise<{port:number, token:string}|null>} the advertised port+token,
- *   or null for ANY absence/failure (present:false, missing fields, non-200, throw).
- *   Never throws.
+ * Discover the live bridge via the dashboard-origin `GET /api/bridge`. Returns
+ * the RAW parsed response body (whatever shape it is), or null for ANY
+ * transport-level failure (non-200, malformed JSON, throw). Never throws.
+ *
+ * The body's own `kind` field (additive, ADR-0082 §3 — `'herdr'`, `'none'`,
+ * `'vscode'`, or absent/`null`) is read by the callers below to decide WHICH
+ * shape to expect out of the rest of the body; this function itself makes no
+ * kind-specific judgement.
+ * @returns {Promise<object|null>}
  */
 async function discoverBridge(fetchImpl) {
   try {
     const res = await fetchImpl(DISCOVERY_URL, { headers: { Accept: "application/json" } });
     if (!res || !res.ok) return null;
     const body = await res.json();
-    if (!body || body.present === false) return null;
-    const { port, token } = body;
-    if (typeof port !== "number" || !port || typeof token !== "string" || !token) return null;
-    return { port, token };
+    if (!body || typeof body !== "object") return null;
+    return body;
   } catch {
-    // present:false is normal; so is "not in Simple Browser" (fetch throws). Quiet.
+    // non-200, malformed JSON, or "not in Simple Browser" (fetch throws). Quiet.
     return null;
   }
+}
+
+/**
+ * Extract the VS Code bridge's `{port, token}` target out of a discovery
+ * body — EXACTLY the check `discoverBridge` used to perform inline, before
+ * this module also had to route `kind:'herdr'`/`kind:'none'` bodies that
+ * carry no port/token at all. `present === false` (the VS Code absence
+ * signal) and any missing/malformed port or token both collapse to null.
+ * @returns {{port:number, token:string}|null}
+ */
+function extractVscodeTarget(body) {
+  if (!body || body.present === false) return null;
+  const { port, token } = body;
+  if (typeof port !== "number" || !port || typeof token !== "string" || !token) return null;
+  return { port, token };
 }
 
 /**
@@ -143,36 +167,79 @@ async function probeHealth(fetchImpl, { port, token }, timeoutMs) {
 }
 
 /**
- * Launch the seeded session via `POST /run` (token header). The body is
- * `{ prompt }`, plus `skipPermissions: true` ONLY when strictly armed — when OFF
- * the field is OMITTED (never sent `false`), so the OFF body is byte-identical to
- * today and matches the contract's strict-`true` activation (amended ADR-0018;
- * honoured by the bridge in infrastructure-016, which prepends
- * `--dangerously-skip-permissions` as its own raw argv element before the
- * prompt, only on strict-`true`; no shell wrap, per infrastructure-020), and
- * `name` ONLY when a real (non-blank) string was supplied — omitted otherwise
- * so the bridge falls back to its own prompt-derived name (infrastructure-c6fzb).
- * The custom header makes this a CORS-preflighted request — the extension answers
- * the preflight (ADR-0018); a CORS rejection here just throws and we fall back.
- * `capabilities` is the live-probed set `probeHealth` just read off THIS
- * listener's own `/health` response (ADR-0018, infrastructure-v8r3q) —
- * `model`/`name` are omitted from the body whenever the listener didn't just
- * advertise them, even if the caller passed a value for either. This is a
- * hard wire-level guarantee, not merely a UI-layer courtesy: a stale UI gate
- * cannot make this module claim a capability the listener, at this moment,
- * doesn't have. Mirrors the bridge's own allowlist-degrades-quietly
+ * Build the `POST /run` / `POST /api/bridge/launch` request body — ONE shared
+ * implementation, deliberately, so the VS Code path (`runOnBridge`) and the
+ * Herdr path (`runOnHerdr`) can never drift into producing a different body
+ * shape for the same inputs (infrastructure-vpbks's parity requirement: every
+ * board launch button must POST a byte-identical `prompt`, on either bridge
+ * kind). `{ prompt }`, plus `skipPermissions: true` ONLY when strictly armed —
+ * when OFF the field is OMITTED (never sent `false`), so the OFF body is
+ * byte-identical to today and matches the contract's strict-`true` activation
+ * (amended ADR-0018; honoured by the bridge in infrastructure-016, which
+ * prepends `--dangerously-skip-permissions` as its own raw argv element
+ * before the prompt, only on strict-`true`; no shell wrap, per
+ * infrastructure-020), and `name` ONLY when a real (non-blank) string was
+ * supplied — omitted otherwise so the bridge falls back to its own
+ * prompt-derived name (infrastructure-c6fzb). `capabilities` is the
+ * live-probed/discovery-reported set (ADR-0018/ADR-0082, infrastructure-v8r3q)
+ * — `model`/`name` are omitted from the body whenever the listener didn't
+ * just advertise them, even if the caller passed a value for either. This is
+ * a hard wire-level guarantee, not merely a UI-layer courtesy: a stale UI
+ * gate cannot make this module claim a capability the listener, at this
+ * moment, doesn't have. Mirrors the bridge's own allowlist-degrades-quietly
  * discipline (infrastructure-h5wnq) — omit the field, never reject, never 500.
+ * @returns {{prompt:string, skipPermissions?:true, name?:string, model?:string}}
+ */
+function buildLaunchBody({ prompt, skipPermissions, name, model, capabilities }) {
+  const caps = Array.isArray(capabilities) ? capabilities : LEGACY_CAPABILITIES;
+  // Strict-`true` only: a truthy-but-not-true value must never arm the bypass,
+  // and OFF must OMIT the field rather than serialize `false`.
+  const body = skipPermissions === true ? { prompt, skipPermissions: true } : { prompt };
+  if (caps.includes('name') && typeof name === 'string' && name.trim()) body.name = name;
+  if (caps.includes('model') && typeof model === 'string' && model.trim()) body.model = model;
+  return body;
+}
+
+/**
+ * Launch the seeded session via `POST /run` (token header), against the VS
+ * Code bridge (ADR-0018). The custom header makes this a CORS-preflighted
+ * request — the extension answers the preflight (ADR-0018); a CORS rejection
+ * here just throws and we fall back. See `buildLaunchBody` for the body
+ * shape and the capability-gating guarantee.
  * @returns {Promise<boolean>} Never throws.
  */
 async function runOnBridge(fetchImpl, { port, token, prompt, skipPermissions, name, model, capabilities }) {
   try {
-    const caps = Array.isArray(capabilities) ? capabilities : LEGACY_CAPABILITIES;
-    // Strict-`true` only: a truthy-but-not-true value must never arm the bypass,
-    // and OFF must OMIT the field rather than serialize `false`.
-    const body = skipPermissions === true ? { prompt, skipPermissions: true } : { prompt };
-    if (caps.includes('name') && typeof name === 'string' && name.trim()) body.name = name;
-    if (caps.includes('model') && typeof model === 'string' && model.trim()) body.model = model;
+    const body = buildLaunchBody({ prompt, skipPermissions, name, model, capabilities });
     const res = await fetchImpl(`http://127.0.0.1:${port}/run`, {
+      method: "POST",
+      headers: {
+        [BRIDGE_TOKEN_HEADER]: token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    return !!(res && res.ok);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Launch the seeded session via the Herdr mediated-launch endpoint (`POST
+ * /api/bridge/launch`, same origin as the dashboard itself — ADR-0082 §2-§3,
+ * infrastructure-xh8tw), token-header-gated exactly like the VS Code path.
+ * Identical body-building to `runOnBridge` (`buildLaunchBody`), so a Herdr
+ * launch's `prompt` is byte-identical to what the VS Code path would have
+ * POSTed for the same call. Any non-2xx response or thrown fetch (e.g. the
+ * dashboard's own server 502/503-ing a `herdr` CLI failure) collapses
+ * silently to `false` — the caller falls back to clipboard.
+ * @returns {Promise<boolean>} Never throws.
+ */
+async function runOnHerdr(fetchImpl, { token, prompt, skipPermissions, name, model, capabilities }) {
+  try {
+    const body = buildLaunchBody({ prompt, skipPermissions, name, model, capabilities });
+    const res = await fetchImpl(HERDR_LAUNCH_URL, {
       method: "POST",
       headers: {
         [BRIDGE_TOKEN_HEADER]: token,
@@ -234,13 +301,30 @@ async function runOnBridge(fetchImpl, { port, token, prompt, skipPermissions, na
 export async function launchOrCopy({ prompt, fetchImpl, copy, healthTimeoutMs = DEFAULT_HEALTH_TIMEOUT_MS, skipPermissions, name, model }) {
   // Try the bridge only when we actually have a fetch to reach it with.
   if (typeof fetchImpl === "function") {
-    const bridge = await discoverBridge(fetchImpl);
-    if (bridge) {
-      const { live, capabilities } = await probeHealth(fetchImpl, bridge, healthTimeoutMs);
-      if (live) {
-        const launched = await runOnBridge(fetchImpl, { ...bridge, prompt, skipPermissions, name, model, capabilities });
-        if (launched) return { via: "bridge" };
+    const body = await discoverBridge(fetchImpl);
+    if (body) {
+      if (body.kind === "herdr") {
+        // Mediated launch (ADR-0082): `live` off the discovery response IS the
+        // liveness signal — there is no separate health probe (single process,
+        // no version-skew concept). live:false collapses silently, exactly
+        // like the VS Code path's absence contract.
+        if (body.live === true && typeof body.token === "string" && body.token) {
+          const capabilities = Array.isArray(body.capabilities) ? body.capabilities : [];
+          const launched = await runOnHerdr(fetchImpl, { token: body.token, prompt, skipPermissions, name, model, capabilities });
+          if (launched) return { via: "bridge" };
+        }
+      } else if (body.kind !== "none") {
+        // kind === 'vscode' or absent/null: today's code path, unmodified.
+        const target = extractVscodeTarget(body);
+        if (target) {
+          const { live, capabilities } = await probeHealth(fetchImpl, target, healthTimeoutMs);
+          if (live) {
+            const launched = await runOnBridge(fetchImpl, { ...target, prompt, skipPermissions, name, model, capabilities });
+            if (launched) return { via: "bridge" };
+          }
+        }
       }
+      // kind === 'none': straight to clipboard, no VS Code discovery attempted.
     }
   }
 
@@ -288,9 +372,20 @@ export async function launchOrCopy({ prompt, fetchImpl, copy, healthTimeoutMs = 
 export async function probeBridge(fetchImpl) {
   if (typeof fetchImpl !== "function") return { present: false, capabilities: [] };
   try {
-    const bridge = await discoverBridge(fetchImpl);
-    if (!bridge) return { present: false, capabilities: [] };
-    const { live, capabilities } = await probeHealth(fetchImpl, bridge, DEFAULT_HEALTH_TIMEOUT_MS);
+    const body = await discoverBridge(fetchImpl);
+    if (!body) return { present: false, capabilities: [] };
+    if (body.kind === "herdr") {
+      if (body.live === true) {
+        const capabilities = Array.isArray(body.capabilities) ? body.capabilities : [];
+        return { present: true, capabilities };
+      }
+      return { present: false, capabilities: [] };
+    }
+    if (body.kind === "none") return { present: false, capabilities: [] };
+    // kind === 'vscode' or absent/null: today's code path, unmodified.
+    const target = extractVscodeTarget(body);
+    if (!target) return { present: false, capabilities: [] };
+    const { live, capabilities } = await probeHealth(fetchImpl, target, DEFAULT_HEALTH_TIMEOUT_MS);
     return live ? { present: true, capabilities } : { present: false, capabilities: [] };
   } catch {
     // discoverBridge/probeHealth already swallow their own failures; this
