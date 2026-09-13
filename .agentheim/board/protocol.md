@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-13 10:12 -- Batch started: [infrastructure-xh8tw]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-xh8tw - Herdr bridge server — `POST /api/bridge/launch` opens a Claude session in Herdr behind a per-process token; `GET /api/bridge` grows `kind`/`live`; workspace reuse by project cwd via `api snapshot`; agent start is fire-and-forget behind an immediate 202
+**Parallel:** no (1 worker — only ready task across every BC after infrastructure-e8h9f integrated; infrastructure-vpbks is chained behind it via depends_on)
+
+---
+
 ## 2026-09-13 10:11 -- Task verified and completed: infrastructure-e8h9f - Herdr bridge foundation — `/setup use bridge <vscode|herdr|none>` persists the selection to a per-machine config file, `status` reports Herdr install/liveness, and a shared `lib/resolve-herdr.mjs` finds the binary for both `/setup` and the dashboard server
 
 **Type:** Work / Task completion

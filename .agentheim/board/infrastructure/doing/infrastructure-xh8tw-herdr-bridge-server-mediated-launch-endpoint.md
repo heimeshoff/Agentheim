@@ -1,7 +1,7 @@
 ---
 id: infrastructure-xh8tw
 title: Herdr bridge server — `POST /api/bridge/launch` opens a Claude session in Herdr behind a per-process token; `GET /api/bridge` grows `kind`/`live`; workspace reuse by project cwd via `api snapshot`; agent start is fire-and-forget behind an immediate 202
-status: todo
+status: doing
 type: feature
 context: infrastructure
 created: 2026-09-13
