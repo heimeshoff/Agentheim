@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 44
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **infrastructure-p3k9r** — Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install (spike) — `todo/infrastructure-p3k9r-verify-herdr-cli-json-field-names-api-snapshot-pane-workspac.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -54,7 +55,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **infrastructure-p3k9r** — Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install (spike) — `backlog/infrastructure-p3k9r-verify-herdr-cli-json-field-names-api-snapshot-pane-workspac.md`
 <!-- backlog-list:end -->
 
 

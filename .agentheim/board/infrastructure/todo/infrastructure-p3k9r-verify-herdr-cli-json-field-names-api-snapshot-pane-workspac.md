@@ -1,7 +1,7 @@
 ---
 id: infrastructure-p3k9r
 title: Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install
-status: backlog
+status: todo
 type: spike
 context: infrastructure
 created: 2026-09-13

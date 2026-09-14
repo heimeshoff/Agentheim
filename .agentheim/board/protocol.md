@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 11:46 -- Modeling / Promoted: infrastructure-p3k9r - Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install
+
+**Type:** Modeling / Promote
+**BC:** infrastructure
+**From → To:** backlog → todo
+
+---
+
 ## 2026-09-14 11:46 -- Modeling / Refined: infrastructure-p3k9r - Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install
 
 **Type:** Modeling / Refine
