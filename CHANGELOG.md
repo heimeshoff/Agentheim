@@ -8,6 +8,30 @@ its **plugin contract** (skills, commands, `.agentheim/` layout) with
 
 ## [Unreleased]
 
+## [0.9.5] - 2026-09-14
+
+**The dashboard can open Claude sessions in Herdr.** The VS Code extension is no longer the only
+way a dashboard launch button reaches a terminal: `/setup use bridge herdr` selects a locally running
+[Herdr](https://herdr.dev) session, and the dashboard's own server process drives the `herdr` CLI
+on your behalf (ADR-0082), so no browser-reachable listener or extension install is needed. `vscode`
+stays the default, `none` skips bridge discovery, and the clipboard fallback remains the floor for
+every kind. Alongside that, the conductor stops losing a worker's RESULT to two small sidecar-shape
+slips.
+
+### Added
+- **Herdr bridge (ADR-0082)** — a second bridge kind next to VS Code. `lib/bridge-selection.mjs` persists the per-machine choice, `lib/resolve-herdr.mjs` finds the binary and checks liveness, and `/setup status` reports the active bridge plus Herdr's install/liveness. The dashboard server gains `POST /api/bridge/launch` behind a per-process token — `api snapshot` → workspace/tab create awaited (reusing a workspace by project cwd), an immediate `202`, then the agent start unawaited with ADR-0018 argv parity — and `GET /api/bridge` grows `kind`/`token`/`capabilities`/`live`. The frontend dispatches on that `kind`: `herdr` posts to the mediated-launch endpoint, `none` copies to the clipboard, and the `vscode` path is unmodified. The repo README documents the three-way selection.
+- **`/setup use bridge <vscode|herdr|none>`** — records which bridge kind the dashboard launches through; `null` (never chosen) behaves as `vscode`.
+
+### Changed
+- **`parseWorkerResult` absorbs two sidecar shape slips (ADR-0080 §3)** — an unclosed last SUCCESS block is implicitly closed at a trailing `RESULT_END` sentinel when no four-backtick line appears anywhere in the unclosed region, recorded in `layout.repairs` rather than fixed silently; and block names may carry digits (`[A-Z][A-Z0-9_]*`). Both slips had cost lost-result re-dispatches.
+
+### Fixed
+- A Herdr-mediated launch now passes `--focus` to both the workspace-create and tab-create calls, so the builder's own launch gesture reveals the new session in the TUI instead of landing in an unfocused workspace on the bare home shell — parity with the VS Code bridge's `terminal.show()` (ADR-0082 §5).
+- The Herdr launch path reads the workspace/tab create result as `.result.root_pane.pane_id`, confirmed against a live Herdr 0.9.0 capture; the dead `?? pane.workspace` fallback is gone and the fixtures are rebuilt from captured JSON.
+
+### Docs
+- Repo README refreshed for 0.9.4 — `/setup` is part of the install flow, the state-layout tree and every quoted path reflect the two-root layout (ADR-0078), and the skills table, repo layout, and status reflect what shipped since the June restructure.
+
 ## [0.9.4] - 2026-09-12
 
 **`.agentheim/` splits into two roots, the dashboard costs zero tokens to launch, and the
@@ -326,7 +350,8 @@ palette and the board grows a docked prompt console you drive from the keyboard.
 ### Added
 - Initial plugin design.
 
-[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.4...HEAD
+[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.5...HEAD
+[0.9.5]: https://github.com/heimeshoff/Agentheim/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/heimeshoff/Agentheim/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/heimeshoff/Agentheim/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/heimeshoff/Agentheim/compare/v0.9.1...v0.9.2
