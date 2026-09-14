@@ -5,6 +5,42 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 15:50 -- Task verified and completed: infrastructure-vw66n - Make the README present the dashboard's three launch modes — VS Code bridge, Herdr bridge, or plain copy-to-clipboard — as equal, switchable-anytime choices via /setup use bridge, instead of burying Herdr inside the VS Code bridge section
+
+**Type:** Work / Task completion
+**Task:** infrastructure-vw66n - Make the README present the dashboard's three launch modes — VS Code bridge, Herdr bridge, or plain copy-to-clipboard — as equal, switchable-anytime choices via /setup use bridge, instead of burying Herdr inside the VS Code bridge section
+**Summary:** Restructured README.md's dashboard launch-mode documentation around the three-way /setup use bridge <vscode|herdr|none> choice (ADR-0082) instead of framing VS Code as the default with Herdr buried as a footnote inside its collapsed block
+**Duration:** 13m48s
+**Verification:** PASS (iteration 2)
+**Result source:** sidecar · layout both+sentinel · sidecar present
+**Files changed:** 1
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
+## 2026-09-14 15:49 -- Verification failed: infrastructure-nz2e8 - A Herdr-mediated launch opens a new terminal window on Windows even though a Herdr session is already running
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-nz2e8 - A Herdr-mediated launch opens a new terminal window on Windows even though a Herdr session is already running — hide the console of every herdr child the dashboard server spawns and harden the workspace-reuse cwd match
+**Iteration:** 1 of 3
+**Reasons:** criterion 1 coverage gap — the `tab create` exec call site (the branch the builder's own repro takes) has no test asserting `windowsHide: true`; the one windowsHide test feeds `panes: []` so only the `workspace create` branch fires, and the four reuse tests discard the `options` argument; deleting the option from the tab-create arm leaves the suite green; production code itself is correct
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
+## 2026-09-14 15:45 -- Verification failed: infrastructure-vw66n - Make the README present the dashboard's three launch modes as equal, switchable-anytime choices
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-vw66n - Make the README present the dashboard's three launch modes — VS Code bridge, Herdr bridge, or plain copy-to-clipboard — as equal, switchable-anytime choices via /setup use bridge
+**Iteration:** 1 of 3
+**Reasons:** criterion 6 second conjunct unmet — the VS Code <details> opening paragraph (README.md:104) still says the extension is "the only way to reach a real, visible terminal" and that "without it" buttons fall back to clipboard, both implying VS Code is the only bridge; criteria 1-5, 7, 8 hold
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-09-14 15:35 -- Batch started: [infrastructure-nz2e8, infrastructure-vw66n]
 
 **Type:** Work / Batch start
