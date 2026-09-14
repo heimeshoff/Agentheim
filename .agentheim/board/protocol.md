@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 13:57 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 33m (batch start 13:23 to session end 13:56)
+**Completed:** 1 (first-try PASS: 0, re-dispatched: 1, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** agentic-workflow-nm16k: 3 (iteration 1 FAIL — implicit-close condition 2 not enforced for malformed four-backtick lines; iteration 2 FAIL — README delta missing for the changed layout contract; iteration 3 PASS)
+**Commits:** 3
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (1 task)
+**Carry-over:** none — working tree clean (protocol.md carried only this session's own hand-inserted **Result source:** line on the 13:56 completion entry, the `complete` verb having no option for it; committed with this entry); no non-main worktrees; 3 stranded RESULT sidecars removed
+
+---
+
 ## 2026-09-14 13:56 -- Task verified and completed: agentic-workflow-nm16k - parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3
 
 **Type:** Work / Task completion
@@ -12,6 +30,7 @@ Newest entries on top.
 **Summary:** parseWorkerResult now implicitly closes the last unclosed SUCCESS block at a trailing RESULT_END sentinel only when no four-backtick-prefixed line appears anywhere in the unclosed region (recorded in layout.repairs, never a silent fix) and accepts digit-bearing block names via a widened [A-Z][A-Z0-9_]* grammar, absorbing the two syntax slips that cost lost-result re-dispatches on infrastructure-xh8tw and infrastructure-w506e; amends ADR-0080 §3
 **Duration:** 32m02s
 **Verification:** PASS (iteration 3)
+**Result source:** sidecar · layout both+sentinel · sidecar present   <!-- iteration 3 dispatch; iterations 1 and 2 were also sidecar · both+sentinel · present; no repairs -->
 **Files changed:** 4
 **Tests added:** 9
 **ADRs written:** none
