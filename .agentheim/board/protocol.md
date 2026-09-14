@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 13:18 -- Modeling / Captured: agentic-workflow-nm16k - parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** Captured from gwh69 fourth gate-check evidence: 2 of 11 post-contract dispatches (xh8tw truncated-block, w506e stray-fence) cost a lost-result re-dispatch on a sidecar that was present and complete in substance. The parser implicitly closes an unclosed last block at the RESULT_END sentinel (three conditions, repair provenance on the Result-source line) and admits digits in block names; amends ADR-0080 section 3. Straight to todo: two bounded parser changes, fixtures from both incidents, contract text.
+
+---
+
 ## 2026-09-14 13:07 -- Modeling / Refined: agentic-workflow-gwh69 - Mechanized RESULT reconstruction from the worktree (gate check)
 
 **Type:** Modeling / Refine
