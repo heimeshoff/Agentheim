@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 15:19 -- Modeling / Captured: infrastructure-vw66n - Make the README present the dashboard's three launch modes — VS Code bridge, Herdr bridge, or plain copy-to-clipboard — as equal, switchable-anytime choices via /setup use bridge, instead of burying Herdr inside the VS Code bridge section
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** README restructure so the dashboard launch modes (VS Code bridge, Herdr bridge, copy-to-clipboard) are presented as equal choices switchable via /setup use bridge, instead of Herdr being a footnote inside the VS Code bridge block.
+
+---
+
 ## 2026-09-14 15:14 -- Release shipped: v0.9.5
 
 **Type:** Release

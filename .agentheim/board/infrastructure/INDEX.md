@@ -11,13 +11,14 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 46
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **infrastructure-vw66n** — Make the README present the dashboard's three launch modes — VS Code bridge, Herdr bridge, or plain copy-to-clipboard — as equal, switchable-anytime choices via /setup use bridge, instead of burying Herdr inside the VS Code bridge section (chore) — `todo/infrastructure-vw66n-readme-three-bridge-choices.md`
 <!-- todo-list:end -->
 
 ### Doing
