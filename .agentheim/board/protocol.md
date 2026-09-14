@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 11:50 -- Batch started: [infrastructure-p3k9r]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-p3k9r - Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install
+**Parallel:** no (1 worker — only ready task across every BC; spike with an ADR-0065 stop-loss clause, expected to remediate in-task)
+
+---
+
 ## 2026-09-14 11:46 -- Modeling / Promoted: infrastructure-p3k9r - Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install
 
 **Type:** Modeling / Promote

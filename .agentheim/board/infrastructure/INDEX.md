@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 44
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **infrastructure-p3k9r** — Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install (spike) — `todo/infrastructure-p3k9r-verify-herdr-cli-json-field-names-api-snapshot-pane-workspac.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **infrastructure-p3k9r** — Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install (spike) — `doing/infrastructure-p3k9r-verify-herdr-cli-json-field-names-api-snapshot-pane-workspac.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
