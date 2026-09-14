@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 12:05 -- Modeling / Refined: agentic-workflow-qwfq3 - Worker RESULT survives a lost transcript (title shortened)
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** done
+**Summary:** Title shortened from 62 to 34 words in both the task frontmatter and its INDEX done-list line, clearing the ADR-0060 entry-length lint (lib/test/index-entry-length.test.mjs) that had been red on main since 2026-09-12. Body, criteria, and Outcome untouched.
+
+---
+
 ## 2026-09-14 12:02 -- Work session ended
 
 **Type:** Work / Session end
