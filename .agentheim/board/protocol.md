@@ -5,6 +5,41 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 13:56 -- Task verified and completed: agentic-workflow-nm16k - parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-nm16k - parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3
+**Summary:** parseWorkerResult now implicitly closes the last unclosed SUCCESS block at a trailing RESULT_END sentinel only when no four-backtick-prefixed line appears anywhere in the unclosed region (recorded in layout.repairs, never a silent fix) and accepts digit-bearing block names via a widened [A-Z][A-Z0-9_]* grammar, absorbing the two syntax slips that cost lost-result re-dispatches on infrastructure-xh8tw and infrastructure-w506e; amends ADR-0080 §3
+**Duration:** 32m02s
+**Verification:** PASS (iteration 3)
+**Files changed:** 4
+**Tests added:** 9
+**ADRs written:** none
+
+---
+
+## 2026-09-14 13:48 -- Verification failed: agentic-workflow-nm16k - parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-nm16k - parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3
+**Iteration:** 2 of 3
+**Reasons:** iteration-1 gap confirmed closed; check 5 BC README sync — README_DELTA is empty but the ADR-0080 bullet in the agentic-workflow README enumerates layout as four fields and the diff adds repairs plus the implicit-close and widened-grammar behaviours (no code change needed, README delta only); non-blocking note that AC5 clause the block appearing in blocks by that name is unsatisfiable as worded — extra blocks were never surfaced by name
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
+## 2026-09-14 13:39 -- Verification failed: agentic-workflow-nm16k - parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-nm16k - parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3
+**Iteration:** 1 of 3
+**Reasons:** AC3 not met — a malformed four-backtick line (not an opener, not a bare close) inside the unclosed region is treated as content so the implicit-close repair fires where the spec says truncated-block (conditions 1 and 2 collapsed); the condition-2 test uses a well-formed opener so it does not falsify the gap; doc comment, inline comment and ADR_AMENDMENT text state the unimplemented rule
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-09-14 13:23 -- Batch started: [agentic-workflow-nm16k]
 
 **Type:** Work / Batch start

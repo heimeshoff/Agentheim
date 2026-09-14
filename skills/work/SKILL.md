@@ -465,7 +465,7 @@ Entry formats — the "Batch started", "Task verified and completed", and "Task 
 **Summary:** [worker's 1-line SUMMARY]
 **Duration:** [wall time from this worker's dispatch to its verifier verdict, e.g. 4m12s]
 **Verification:** PASS (iteration N)   <!-- iteration N is REQUIRED — never omit the count -->
-**Result source:** <sidecar|transcript|notification|re-dispatch> · layout <leading|trailing|both, "+sentinel" appended when RESULT_END was present> · sidecar <present|missing>   <!-- measured (ADR-0080 §6), never omitted — from selectResultSource's `source` and parseWorkerResult's `layout`, plus whether the sidecar file existed at the exact designated path with a matching TASK_ID -->
+**Result source:** <sidecar|transcript|notification|re-dispatch> · layout <leading|trailing|both, "+sentinel" appended when RESULT_END was present> · sidecar <present|missing>[ · repaired <repairs>]   <!-- measured (ADR-0080 §6), never omitted — from selectResultSource's `source` and parseWorkerResult's `layout`, plus whether the sidecar file existed at the exact designated path with a matching TASK_ID. The trailing "· repaired <repairs>" segment (ADR-0080 §3 amendment, agentic-workflow-nm16k) is appended only when `layout.repairs` is non-empty — e.g. "· repaired implicit-close:BACKLOG_ITEMS" — a repaired read is labelled, never passed off as a clean measurement (ADR-0038 Ruling B); omitted entirely when `layout.repairs` is `[]` -->
 **Files changed:** N
 **Tests added:** N
 **ADRs written:** [ids or "none"]
@@ -481,7 +481,7 @@ Entry formats — the "Batch started", "Task verified and completed", and "Task 
 **Summary:** [worker's 1-line SUMMARY]
 **Duration:** [wall time from this worker's dispatch to its SUCCESS return, e.g. 4m12s]
 **Verification:** SKIPPED — [reason: decision-only task | --no-verify | non-git project]
-**Result source:** <sidecar|transcript|notification|re-dispatch> · layout <leading|trailing|both, "+sentinel" appended when RESULT_END was present> · sidecar <present|missing>   <!-- measured (ADR-0080 §6), same shape as the PASS entry above -->
+**Result source:** <sidecar|transcript|notification|re-dispatch> · layout <leading|trailing|both, "+sentinel" appended when RESULT_END was present> · sidecar <present|missing>[ · repaired <repairs>]   <!-- measured (ADR-0080 §6), same shape as the PASS entry above -->
 **Files changed:** N
 
 ---

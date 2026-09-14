@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 206
+- **Doing:** 0
+- **Done:** 207
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-nm16k** — parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3 (feature) — `doing/agentic-workflow-nm16k-parser-fence-tolerance-implicit-close-and-digit-block-names.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-nm16k** — parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3 (feature) — `done/agentic-workflow-nm16k-parser-fence-tolerance-implicit-close-and-digit-block-names.md`
 - **agentic-workflow-vsb06** — The `migrate` verb reports the legacy `.agentheim/contexts/` references it does not rewrite — project files outside `.agentheim/` such as `CLAUDE.md` and `.claude/commands/` — as a read-only manifest field the step-0 notice names, so a consumer learns what still points at the old layout instead of finding out when a command breaks (feature) — `done/agentic-workflow-vsb06-migrate-reports-residual-legacy-path-references-outside-its-rewrite-scope.md`
 - **agentic-workflow-qwfq3** — Worker RESULT survives a lost transcript — sidecar under `.worktrees/.results/`, trailing header repeat behind a `RESULT_END` sentinel, and a mechanized sidecar → transcript → notification source ladder whose floor is a lost-result re-dispatch (ADR-0080) (bug) — `done/agentic-workflow-qwfq3-worker-result-survives-lost-transcript.md`
 - **agentic-workflow-g2fgb** — `lib/readme-delta.mjs`'s `replace` op anchors a bold term head that wraps onto a continuation line — `termHeadOf` matches on the whitespace-collapsed bullet text, guarded by a wrapped-head test fixture, and a missing anchor disposes distinctly from an `expected` collision (bug) — `done/agentic-workflow-g2fgb-readme-delta-replace-anchors-wrapped-term-head.md`

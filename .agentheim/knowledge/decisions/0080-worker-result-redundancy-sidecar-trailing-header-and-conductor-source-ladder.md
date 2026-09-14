@@ -4,7 +4,7 @@ title: Worker RESULT redundancy — a conductor-designated sidecar, a trailing h
 scope: agentic-workflow
 status: accepted
 date: 2026-09-12
-related_tasks: [agentic-workflow-qwfq3]
+related_tasks: [agentic-workflow-qwfq3, agentic-workflow-nm16k]
 related_adrs: [0032, 0038, 0059, 0062, 0063, 0068, 0072, 0074]
 ---
 
@@ -217,3 +217,9 @@ audit trail.
 - agentic-workflow-qwfq3 (implements §1–§6), agentic-workflow-gwh69 (§7, gated).
 - `lib/worker-result.mjs`, `lib/merge-conflict-ladder.mjs`, `references/worker-return-format.md`,
   `agents/worker.md`, `agents/verifier.md`, `skills/work/SKILL.md`.
+
+## Amendments received` heading at the end of `0080-worker-result-redundancy-sidecar-trailing-header-and-conductor-source-ladder.md` (judged cleaner than folding into the existing "## Amendments to prior ADRs" section, which is specifically the list of amendments ADR-0080 itself makes to OTHER ADRs — not the right place for an amendment ADR-0080 receives):
+
+## Amendments received
+
+- **2026-09-14 (agentic-workflow-nm16k):** §3's opening-fence name grammar widens from `[A-Z_]+` to `[A-Z][A-Z0-9_]*` — a leading uppercase letter, then any mix of uppercase letters, digits, and underscores; lowercase, leading-digit, or space-bearing names still reject `stray-fence`. §3's `truncated-block` rule gains a narrow implicit-close tolerance, applied only when all three hold: (1) the unclosed block is the LAST opening fence in the text; (2) no four-backtick-prefixed line — a bare close, a well-formed opener, or a malformed one (wrong case, leading digit, embedded space, trailing text, five-plus backticks) — appears anywhere in the unclosed region; (3) the text's last non-blank line is exactly `RESULT_END`. When all three hold, the block is implicitly closed at the sentinel instead of rejected. `layout` gains `repairs` (`[]` on a clean parse, `['implicit-close:<BLOCK>']` here). Within the unclosed region, the last line matching `RESULT: SUCCESS|BOUNCED|FAILED` (if present) splits the region into the block's content and a recovered trailing header copy; if absent, the block's content runs to the sentinel and the trailing region holds the sentinel alone. A malformed four-backtick line inside a block that closes normally stays ordinary content, unchanged. Any of the three conditions failing still rejects `truncated-block` unchanged — the repair only turns a rejection into a parse; a text that parsed before parses identically today. Motivated by two lost-result re-dispatches (infrastructure-xh8tw `truncated-block`, infrastructure-w506e `stray-fence`) that each cost a second worker turn re-typing a report the conductor already had, on syntax the parser can now absorb deterministically without guessing at any value. See `lib/worker-result.mjs`, `lib/test/worker-result.test.mjs`.
