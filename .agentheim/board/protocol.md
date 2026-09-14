@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 15:35 -- Batch started: [infrastructure-nz2e8, infrastructure-vw66n]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-nz2e8 - A Herdr-mediated launch opens a new terminal window on Windows even though a Herdr session is already running — the session should land as a tab in the existing Herdr view with no extra OS window; hide the console of every herdr child the dashboard server spawns and harden the workspace-reuse cwd match, infrastructure-vw66n - Make the README present the dashboard's three launch modes — VS Code bridge, Herdr bridge, or plain copy-to-clipboard — as equal, switchable-anytime choices via /setup use bridge, instead of burying Herdr inside the VS Code bridge section
+**Parallel:** yes (2 workers — the whole ready set; no source-file overlap: nz2e8 touches dashboard/bridge-launch-api.mjs + lib/resolve-herdr.mjs and their tests, vw66n touches README.md only)
+
+---
+
 ## 2026-09-14 15:31 -- Modeling / Captured: infrastructure-nz2e8 - A Herdr-mediated launch opens a new terminal window on Windows even though a Herdr session is already running — the session should land as a tab in the existing Herdr view with no extra OS window; hide the console of every herdr child the dashboard server spawns and harden the workspace-reuse cwd match
 
 **Type:** Modeling / Capture

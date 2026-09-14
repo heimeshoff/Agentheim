@@ -1,7 +1,7 @@
 ---
 id: infrastructure-nz2e8
 title: A Herdr-mediated launch opens a new terminal window on Windows even though a Herdr session is already running — the session should land as a tab in the existing Herdr view with no extra OS window; hide the console of every herdr child the dashboard server spawns and harden the workspace-reuse cwd match
-status: todo
+status: doing
 type: bug
 context: infrastructure
 created: 2026-09-14
