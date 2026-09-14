@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 12:44 -- Batch started: [infrastructure-w506e]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-w506e - Herdr launch leaves the new session unfocused — a dashboard launch into a cold Herdr lands in an unfocused workspace, so the TUI opens on the bare home shell; pass --focus on workspace/tab create for parity with the VS Code bridge's terminal.show(), amending ADR-0082 §5
+**Parallel:** scoped — builder named infrastructure-w506e; 0 other ready tasks not dispatched (todo/ is otherwise empty across every BC)
+
+---
+
 ## 2026-09-14 12:34 -- Modeling / Captured: infrastructure-w506e - Herdr launch leaves the new session unfocused — a dashboard launch into a cold Herdr lands in an unfocused workspace, so the TUI opens on the bare home shell; pass --focus on workspace/tab create for parity with the VS Code bridge's terminal.show(), amending ADR-0082 §5
 
 **Type:** Modeling / Capture

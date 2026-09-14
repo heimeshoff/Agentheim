@@ -1,7 +1,7 @@
 ---
 id: infrastructure-w506e
 title: Herdr launch leaves the new session unfocused — a dashboard launch into a cold Herdr lands in an unfocused workspace, so the TUI opens on the bare home shell; pass --focus on workspace/tab create for parity with the VS Code bridge's terminal.show(), amending ADR-0082 §5
-status: todo
+status: doing
 type: bug
 context: infrastructure
 created: 2026-09-14
