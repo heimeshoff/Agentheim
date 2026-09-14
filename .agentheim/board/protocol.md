@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 16:29 -- Release shipped: v0.9.6
+
+**Type:** Release
+**Version:** 0.9.5 → 0.9.6 (patch — Herdr-mediated launches on Windows no longer open a stray console window, workspace reuse normalises the cwd comparison, and the README presents the three launch modes as equal choices)
+**Manifest:** `.claude-plugin/plugin.json` bumped, committed `ddf2436`
+**Marketplace ref:** `.claude-plugin/marketplace.json` pinned to `v0.9.6` (same commit)
+**Changelog:** `CHANGELOG.md` `[Unreleased]` → `[0.9.6]` section rolled (same commit)
+**Pushed:** yes — `main` + `v0.9.6` atomically (`748fe96..ddf2436` on `origin/main`)
+**Tag:** `v0.9.6` (annotated) → `ddf2436`, pushed to origin
+**GitHub Release:** created via `gh` (from CHANGELOG)
+
+---
+
 ## 2026-09-14 15:58 -- Work session ended
 
 **Type:** Work / Session end
