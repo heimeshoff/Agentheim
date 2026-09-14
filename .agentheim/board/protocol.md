@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 15:14 -- Release shipped: v0.9.5
+
+**Type:** Release
+**Version:** 0.9.4 → 0.9.5 (patch — Herdr joins the dashboard bridge family (ADR-0082: `/setup use bridge herdr`, mediated `POST /api/bridge/launch`, `--focus` on create, live-verified CLI shape) and `parseWorkerResult` absorbs the two sidecar shape slips that cost lost-result re-dispatches (ADR-0080 §3))
+**Manifest:** `.claude-plugin/plugin.json` bumped, committed `a680ae9`
+**Marketplace ref:** `.claude-plugin/marketplace.json` pinned to `v0.9.5` (same commit)
+**Changelog:** `CHANGELOG.md` `[Unreleased]` → `[0.9.5]` section rolled (same commit)
+**Pushed:** yes — `main` + `v0.9.5` atomically (`7b6c173..a680ae9` on `origin/main`)
+**Tag:** `v0.9.5` (annotated) → `a680ae9`, pushed to origin
+**GitHub Release:** created via `gh` (from CHANGELOG) — https://github.com/heimeshoff/Agentheim/releases/tag/v0.9.5
+
+---
+
 ## 2026-09-14 13:57 -- Work session ended
 
 **Type:** Work / Session end
