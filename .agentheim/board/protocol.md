@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 13:23 -- Batch started: [agentic-workflow-nm16k]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-nm16k - parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3
+**Parallel:** no (1 worker) — the whole ready set; agentic-workflow-nm16k is the only todo task across every BC
+
+---
+
 ## 2026-09-14 13:19 -- Modeling / Dismissed: agentic-workflow-gwh69
 
 **Type:** Modeling / Dismiss

@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-nm16k
 title: parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-09-14

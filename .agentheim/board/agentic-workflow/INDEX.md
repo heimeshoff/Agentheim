@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 206
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **agentic-workflow-nm16k** — parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3 (feature) — `todo/agentic-workflow-nm16k-parser-fence-tolerance-implicit-close-and-digit-block-names.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **agentic-workflow-nm16k** — parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3 (feature) — `doing/agentic-workflow-nm16k-parser-fence-tolerance-implicit-close-and-digit-block-names.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
