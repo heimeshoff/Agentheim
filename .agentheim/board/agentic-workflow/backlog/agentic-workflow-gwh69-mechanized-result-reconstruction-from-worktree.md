@@ -154,6 +154,31 @@ state this.
   measured input is under-recorded; the tally above falls back to the session-end
   `**Lost-result re-dispatches:**` line, which every session did carry. Whether xh8tw's
   iteration-1 copy also had its trailing header repeat is therefore unrecorded.
+  Update 2026-09-14 (12:59 session): infrastructure-w506e's completion entry carried the line
+  and named its re-dispatch inline; 3 of 8 post-contract completion entries now do.
+- **Gate check 2026-09-14, second (refine):** promotion gate not met; closing rule exceeded.
+  Post-`937b598` tally: **11 worker dispatches** across six sessions (the ten above plus
+  infrastructure-w506e ×1), 8 completion entries. **Second lost-result re-dispatch** (session
+  end 2026-09-14 12:59): infrastructure-w506e iteration 1 — sidecar present, rejected
+  `stray-fence` because the task Notes mandated an extra block named `ADR_0082_AMENDMENT` and
+  `scanBlocks`' opening-fence grammar is `[A-Z_]+` (`lib/worker-result.mjs:124`), so the
+  digit-bearing name read as a stray fence line; the same worker rewrote it as
+  `ADR_AMENDMENT`, no code changed. Like xh8tw this is a block-shape defect, neutral under the
+  amended closing rule (`What` rejects `unrecoverable` on `stray-fence`). Tally: **11/11
+  clean** — 0 re-dispatches reconstruction could have rescued, 0 `sidecar missing`, 0 `layout
+  leading`. Header loss, the one failure this task rescues, has not occurred since the
+  sidecar + trailing-repeat contract shipped; the sidecar was present in all 8 completions.
+- **What the evidence points at instead (2026-09-14):** 2 of 11 post-contract dispatches cost a
+  full lost-result re-dispatch, both on block-shape defects the parser could tolerate without
+  guessing: (a) an unclosed block (xh8tw) — `scanBlocks` could treat the `RESULT_END`
+  sentinel, which can never legitimately sit inside a block, as an implicit close of a still-
+  open block, provided the sentinel was present in that copy (for xh8tw's iteration 1 that is
+  unrecorded); (b) a digit-bearing block name (w506e) — widen the grammar to
+  `[A-Z][A-Z0-9_]*`, or lint task Notes and the worker prompt for mandated block names outside
+  it. Both are deterministic syntax repairs, not the header reconstruction this task specifies.
+  If the builder wants that work it is a fresh capture, or a wholesale re-scope of this id —
+  never a promotion of this task as written, and modeling does not self-generate it
+  (ADR-0064). The task's own closing rule now says DISMISS; that gesture stays the builder's.
 - Provenance marker precedent: ADR-0038 Ruling B (never present a reconstruction as a
   measurement). Reconstruction is exactly the thing that rule was written to label.
 - ADR-0080 records the deferral and the gate; flip its "Deferred behind evidence" paragraph to

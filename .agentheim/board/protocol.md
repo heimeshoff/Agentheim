@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 13:07 -- Modeling / Refined: agentic-workflow-gwh69 - Mechanized RESULT reconstruction from the worktree (gate check)
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Fourth evidence-gate check. Post-937b598 tally is 11 worker dispatches / 8 completions; 0 sidecar-missing, 0 layout-leading, 2 lost-result re-dispatches (xh8tw `truncated-block`, w506e `stray-fence` from a digit-bearing block name) — both block-shape defects reconstruction rejects `unrecoverable`, so both are neutral. 11/11 clean under the amended closing rule; header loss has not occurred once since the sidecar contract shipped. Recorded that the live defect is parser fence tolerance (RESULT_END as implicit close, digits in block names), a separate capture or re-scope for the builder. DISMISS threshold exceeded; task left in backlog/ pending the builder's gesture.
+
+---
+
 ## 2026-09-14 12:59 -- Work session ended
 
 **Type:** Work / Session end
