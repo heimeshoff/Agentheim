@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 15:31 -- Modeling / Captured: infrastructure-nz2e8 - A Herdr-mediated launch opens a new terminal window on Windows even though a Herdr session is already running — the session should land as a tab in the existing Herdr view with no extra OS window; hide the console of every herdr child the dashboard server spawns and harden the workspace-reuse cwd match
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** Herdr-mediated launch on Windows opens an extra OS terminal window although a Herdr session is already running; captured as a bug: hide the console of every herdr child the dashboard server spawns (the server itself owns no console) and harden the workspace-reuse cwd match, so the session lands as a tab in the existing Herdr view. Filed straight to todo.
+
+---
+
 ## 2026-09-14 15:19 -- Modeling / Captured: infrastructure-vw66n - Make the README present the dashboard's three launch modes — VS Code bridge, Herdr bridge, or plain copy-to-clipboard — as equal, switchable-anytime choices via /setup use bridge, instead of burying Herdr inside the VS Code bridge section
 
 **Type:** Modeling / Capture
