@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 12:02 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 12m (batch start 11:50 to session end 12:02)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** infrastructure-p3k9r: 1
+**Commits:** 3
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 0% product-facing / 100% harness / 0% bookkeeping (1 task) — the classifier reads `type: spike` as harness unconditionally; the task remediated a real Herdr-launch bug in dashboard/bridge-launch-api.mjs
+**Carry-over:** none — working tree clean; no non-main worktrees; 1 stranded RESULT sidecar removed
+
+---
+
 ## 2026-09-14 12:01 -- Task verified and completed: infrastructure-p3k9r - Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install
 
 **Type:** Work / Task completion
