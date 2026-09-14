@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 12:59 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 15m (batch start 12:44 to session end 12:59)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 1 (infrastructure-w506e iteration 1 — sidecar rejected `stray-fence`: the task Notes mandated an extra block named `ADR_0082_AMENDMENT`, but `parseWorkerResult`'s opening-fence grammar is `[A-Z_]+` (no digits); same worker rewrote the sidecar as `ADR_AMENDMENT`, no code changed)
+**Lost-result escalations:** 0
+**Dispatches:** infrastructure-w506e: 1
+**Commits:** 3
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (1 task)
+**Carry-over:** none — working tree clean; no non-main worktrees; 1 stranded RESULT sidecar removed
+
+---
+
 ## 2026-09-14 12:58 -- Task verified and completed: infrastructure-w506e - Herdr launch leaves the new session unfocused — a dashboard launch into a cold Herdr lands in an unfocused workspace, so the TUI opens on the bare home shell; pass --focus on workspace/tab create for parity with the VS Code bridge's terminal.show(), amending ADR-0082 §5
 
 **Type:** Work / Task completion
