@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 15:58 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 24m (batch start 15:35 to session end 15:59)
+**Completed:** 2 (first-try PASS: 0, re-dispatched: 2, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** infrastructure-vw66n: 2 (iteration 1 FAIL — VS Code <details> opening paragraph still claimed the extension was the only way to a terminal; iteration 2 PASS), infrastructure-nz2e8: 2 (iteration 1 FAIL — tab-create exec call site had no windowsHide assertion; iteration 2 PASS)
+**Commits:** 4
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 0% product-facing / 100% harness / 0% bookkeeping (2 tasks)
+**Carry-over:** none — working tree clean; no non-main worktrees; 4 stranded RESULT sidecars removed; full suite on merged main 1968/1968
+
+---
+
 ## 2026-09-14 15:57 -- Task verified and completed: infrastructure-nz2e8 - A Herdr-mediated launch opens a new terminal window on Windows even though a Herdr session is already running — the session should land as a tab in the existing Herdr view with no extra OS window; hide the console of every herdr child the dashboard server spawns and harden the workspace-reuse cwd match
 
 **Type:** Work / Task completion
