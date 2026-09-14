@@ -8,6 +8,20 @@ its **plugin contract** (skills, commands, `.agentheim/` layout) with
 
 ## [Unreleased]
 
+## [0.9.6] - 2026-09-14
+
+**Herdr launches on Windows open a tab, not a new window.** A patch that polishes the Herdr bridge
+shipped in 0.9.5: a dashboard launch into a running Herdr session no longer flashes up a stray OS
+console window, and the workspace-reuse check stops missing a matching workspace because of path
+spelling. The README now presents the three launch modes as equal choices.
+
+### Fixed
+- **No extra terminal window on Windows for a Herdr-mediated launch** — every `herdr` child the dashboard server spawns now carries `windowsHide: true` through one shared `HERDR_CHILD_OPTIONS` constant threaded through the exec/spawn seams, so the session lands as a tab in the existing Herdr view without opening a new console window (ADR-0082 §5/§6 amended).
+- **Workspace reuse matches the project cwd reliably** — the pane-cwd comparison goes through a pure `cwdsMatch` / `normalizeCwdForComparison` normaliser instead of a bare `===`, so a separator style, a trailing separator, or (on Windows) letter case no longer pushes a launch into creating a duplicate workspace.
+
+### Docs
+- The repo README restructures the dashboard's launch-mode documentation around the three-way `/setup use bridge <vscode|herdr|none>` choice (ADR-0082): VS Code bridge, Herdr bridge, and plain copy-to-clipboard are presented as equal options you can switch between at any time, instead of Herdr being a footnote inside the VS Code section.
+
 ## [0.9.5] - 2026-09-14
 
 **The dashboard can open Claude sessions in Herdr.** The VS Code extension is no longer the only
@@ -350,7 +364,8 @@ palette and the board grows a docked prompt console you drive from the keyboard.
 ### Added
 - Initial plugin design.
 
-[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.5...HEAD
+[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.6...HEAD
+[0.9.6]: https://github.com/heimeshoff/Agentheim/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/heimeshoff/Agentheim/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/heimeshoff/Agentheim/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/heimeshoff/Agentheim/compare/v0.9.2...v0.9.3
