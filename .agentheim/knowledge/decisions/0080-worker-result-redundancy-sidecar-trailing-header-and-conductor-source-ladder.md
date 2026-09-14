@@ -4,7 +4,7 @@ title: Worker RESULT redundancy — a conductor-designated sidecar, a trailing h
 scope: agentic-workflow
 status: accepted
 date: 2026-09-12
-related_tasks: [agentic-workflow-qwfq3, agentic-workflow-gwh69]
+related_tasks: [agentic-workflow-qwfq3]
 related_adrs: [0032, 0038, 0059, 0062, 0063, 0068, 0072, 0074]
 ---
 

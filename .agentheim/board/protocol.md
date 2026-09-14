@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 13:19 -- Modeling / Dismissed: agentic-workflow-gwh69
+
+**Type:** Modeling / Dismiss
+**Dismissed:**
+- agentic-workflow-gwh69 - Mechanized RESULT reconstruction from the worktree — `lib/worker-result.mjs` gains `reconstructResultFromWorktree`, rebuilding a top-truncated SUCCESS's headers from the conductor-gathered changed-path list and the surviving blocks with explicit `reconstructed` provenance, as a ladder rung ahead of the lost-result re-dispatch — built only once ADR-0080's compliance or re-dispatch evidence says the redundancy is not enough (agentic-workflow)
+
+---
+
 ## 2026-09-14 13:18 -- Modeling / Captured: agentic-workflow-nm16k - parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3
 
 **Type:** Modeling / Capture

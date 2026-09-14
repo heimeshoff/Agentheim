@@ -7,7 +7,7 @@ context: agentic-workflow
 created: 2026-09-12
 completed:
 depends_on: []
-blocks: [agentic-workflow-gwh69]
+blocks: []
 tags: [captured, worker-contract, worker-result, mechanization, work-skill, transcript-loss, harness]
 related_adrs: [0080, 0074, 0032, 0072, 0059]
 related_research: []
