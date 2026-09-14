@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 12:29 -- Modeling / Refined: agentic-workflow-gwh69 - Mechanized RESULT reconstruction from the worktree (gate check)
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** backlog
+**Summary:** Third evidence-gate check. Post-937b598 tally is 10 worker dispatches / 7 completions; 0 sidecar-missing, 0 layout-leading, 1 lost-result re-dispatch (infrastructure-xh8tw iteration 1, `truncated-block` from an unclosed BACKLOG_ITEMS fence) — outside reconstruction's own recovery window, so it neither promotes nor resets the count. Closing rule amended to exclude block-defect re-dispatches; under it the tally is 10/10 clean and the DISMISS threshold is reached — builder's call, task left in backlog/. Also noted: 5 of 7 post-contract completion entries omit the mandated **Result source:** line.
+
+---
+
 ## 2026-09-14 12:05 -- Modeling / Refined: agentic-workflow-qwfq3 - Worker RESULT survives a lost transcript (title shortened)
 
 **Type:** Modeling / Refine

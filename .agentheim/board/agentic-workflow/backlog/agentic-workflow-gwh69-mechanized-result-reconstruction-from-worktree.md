@@ -125,6 +125,35 @@ state this.
   non-compliance risk ADR-0080 §7 names has had ten independent chances to show and did not.
   The promotion gate in Why is unchanged; whichever threshold is hit first decides the task.
   Running tally: 3/10 clean as of 2026-09-13.
+- **Gate check 2026-09-14 (refine):** neither threshold hit on its letter; the closing rule is
+  hit on its purpose. Post-`937b598` tally: **10 worker dispatches** across five sessions
+  (agentic-workflow-vsb06 ×1, infrastructure-hnv3d ×2, infrastructure-reh04 ×1,
+  infrastructure-e8h9f ×1, infrastructure-xh8tw ×2, infrastructure-vpbks ×2,
+  infrastructure-p3k9r ×1), 7 completion entries. Recorded `**Result source:**` lines: 2
+  (vsb06, hnv3d), both `sidecar · layout both+sentinel · sidecar present`; 0 `re-dispatch`,
+  0 `sidecar missing`, 0 `layout leading`. **One lost-result re-dispatch** (session end
+  2026-09-13 11:07): infrastructure-xh8tw iteration 1 — the sidecar was present and its
+  leading header parsed, but the BACKLOG_ITEMS fence was never closed, so `parseWorkerResult`
+  rejected `truncated-block`; the same worker rewrote the sidecar, no code changed. That
+  incident is **outside this task's recovery window by its own contract**: `What` rejects
+  `unrecoverable` on any block that is not intact, and `Why` already concedes "nothing rescues
+  a cut inside a block". Reconstruction would not have fired. It is evidence for worker fence
+  hygiene (a closing-fence lint on the sidecar, or a parser that treats a `RESULT_END` sentinel
+  as closing an open block), not for header reconstruction — a separate capture if the builder
+  wants one.
+- **Closing rule amended 2026-09-14:** a lost-result re-dispatch counts against the tally only
+  when reconstruction could have rescued it — headers lost, all four blocks intact. A
+  `truncated-block` / `stray-fence` re-dispatch is neutral: it neither promotes (the gate in
+  `Why` measures redundancy failure, not worker typos) nor resets the clean count. Under that
+  reading the tally stands at **10/10 clean** — the DISMISS threshold is reached. DISMISS is
+  the builder's call, not the refiner's (modeling never infers a hard delete); this refine
+  records the count and leaves the task in `backlog/` until the builder says dismiss.
+- **Measurement drift, noted 2026-09-14:** 5 of the 7 post-contract completion entries
+  (reh04, e8h9f, xh8tw, vpbks, p3k9r) omit the `**Result source:**` line that
+  `skills/work/SKILL.md`'s Protocol logging marks "measured, never omitted". The gate's
+  measured input is under-recorded; the tally above falls back to the session-end
+  `**Lost-result re-dispatches:**` line, which every session did carry. Whether xh8tw's
+  iteration-1 copy also had its trailing header repeat is therefore unrecorded.
 - Provenance marker precedent: ADR-0038 Ruling B (never present a reconstruction as a
   measurement). Reconstruction is exactly the thing that rule was written to label.
 - ADR-0080 records the deferral and the gate; flip its "Deferred behind evidence" paragraph to
