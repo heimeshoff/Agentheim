@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 11:46 -- Modeling / Refined: infrastructure-p3k9r - Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install
+
+**Type:** Modeling / Refine
+**BC:** infrastructure
+**Status after:** todo
+**Summary:** Read-only probe of the live Herdr 0.9.0 install (api snapshot, api schema --json, --skill, create --help) confirmed the per-pane key is workspace_id and showed root_pane is typed as a PaneInfo object (id at .pane_id), not the string the implementation and every fixture assume — so agent start likely receives --pane [object Object] after the 202. Criteria rewritten around one live capture in a disposable workspace, fixtures rebuilt from captured JSON, the dead ?? pane.workspace fallback removed, a native-path cwd comparison check, and probe cleanup. Evidence, binary path and read-only vs mutating verbs recorded in Notes.
+
+---
+
 ## 2026-09-13 11:07 -- Work session ended
 
 **Type:** Work / Session end
