@@ -292,7 +292,7 @@ export async function handleBridgeLaunch(req, res, root, opts = {}) {
 
   const panes = snapshot?.result?.snapshot?.panes;
   const matchingPane = Array.isArray(panes) ? panes.find((p) => p && p.cwd === root) : undefined;
-  const workspaceId = matchingPane ? matchingPane.workspace_id ?? matchingPane.workspace : undefined;
+  const workspaceId = matchingPane ? matchingPane.workspace_id : undefined;
 
   let topology;
   try {
@@ -316,7 +316,11 @@ export async function handleBridgeLaunch(req, res, root, opts = {}) {
     return;
   }
 
-  const paneId = topology?.result?.root_pane;
+  // `root_pane` is a PaneInfo OBJECT (herdr 0.9.0, protocol 22, `api schema
+  // --json` + a live `workspace create`/`tab create` capture,
+  // infrastructure-p3k9r) — its id lives at `.pane_id`, it is never a bare
+  // string.
+  const paneId = topology?.result?.root_pane?.pane_id;
   if (!paneId) {
     send(res, 502, { error: 'herdr did not report a pane id' });
     return;

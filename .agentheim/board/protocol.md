@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 12:01 -- Task verified and completed: infrastructure-p3k9r - Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install
+
+**Type:** Work / Task completion
+**Task:** infrastructure-p3k9r - Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install
+**Summary:** Live herdr 0.9.0 capture confirmed workspace/tab create root_pane is a PaneInfo object — bridge-launch-api.mjs now reads .result.root_pane.pane_id, the dead ?? pane.workspace fallback is gone, fixtures rebuilt from captured JSON, cwd comparison verified to match as-is
+**Duration:** 9m30s
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 5
+**ADRs written:** none
+
+---
+
 ## 2026-09-14 11:50 -- Batch started: [infrastructure-p3k9r]
 
 **Type:** Work / Batch start

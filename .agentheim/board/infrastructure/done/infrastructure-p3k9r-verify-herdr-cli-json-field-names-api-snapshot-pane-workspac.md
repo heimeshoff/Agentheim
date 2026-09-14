@@ -1,7 +1,7 @@
 ---
 id: infrastructure-p3k9r
 title: Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install
-status: doing
+status: done
 type: spike
 context: infrastructure
 created: 2026-09-13
@@ -113,3 +113,77 @@ its workspace id from the printed JSON, `tab create --workspace <id> --cwd <scra
 hand-guessed fixtures; they are out of scope here unless the live capture happens to show them
 wrong too — if so, record it in the Outcome and file a follow-up backlog item rather than widening
 this spike.
+
+## Outcome
+
+Ran the real Herdr 0.9.0 (protocol 22) binary once, in a disposable
+`p3k9r-probe` workspace/tab, and captured the verbatim JSON `bridge-launch-api.mjs`
+was guessing at:
+
+- `workspace create --cwd <probe> --label p3k9r-probe --no-focus` →
+  `.result.root_pane` = `{"pane_id":"w7:p1", "cwd":"...\\p3k9r-probe\\", "workspace_id":"w7", "tab_id":"w7:t1", ...}` — a
+  **PaneInfo object**, confirming the 2026-09-14 refinement finding: the id lives at
+  `.pane_id`, never a bare string.
+- `tab create --workspace w7 --cwd <probe> --label p3k9r-probe --no-focus` →
+  same shape, `.result.root_pane.pane_id` = `"w7:p2"`.
+- `api snapshot` panes carry `workspace_id` only (Shape 1, already confirmed in
+  refinement) — no live pane ever carries a `workspace` key, so the
+  `?? pane.workspace` fallback was dead code.
+
+Remediation (this task, per the ADR-0065 stop-loss — the mitigation was already
+known and cheap after the one capture):
+
+- `dashboard/bridge-launch-api.mjs`: `paneId` is now
+  `topology?.result?.root_pane?.pane_id` (was `topology?.result?.root_pane`); a
+  missing/malformed `root_pane` (absent entirely, or an object without
+  `.pane_id`) still falls through to the existing 502
+  `herdr did not report a pane id` — both shapes covered by new `node --test`
+  cases.
+- `workspaceId` is now `matchingPane.workspace_id` only — the
+  `?? matchingPane.workspace` fallback is removed, with a new test proving a
+  pane carrying the old `workspace` key (no `workspace_id`) now yields
+  `--workspace undefined` rather than silently reading the wrong field.
+- `dashboard/test/bridge-launch-api.test.mjs`: every hand-guessed
+  `root_pane: 'w1:p1'` string fixture became `root_pane: { pane_id: 'w1:p1' }`;
+  three new module-level constants (`CAPTURED_API_SNAPSHOT_RESULT`,
+  `CAPTURED_WORKSPACE_CREATE_RESULT`, `CAPTURED_TAB_CREATE_RESULT`) hold the
+  verbatim captured `.result` subtrees (sibling panes trimmed), each annotated
+  `herdr 0.9.0, protocol 22`, exercised end-to-end through `handleBridgeLaunch`
+  in two new tests (fresh-workspace path and matching-pane/tab-reuse path).
+
+**Workspace-reuse comparison (AC4) — matches as-is, no code change.** The
+comparison the handler actually performs (`pane.cwd === root`) reads only from
+`api snapshot`'s `panes[]`, never from a create response's `root_pane.cwd` (which
+carries a Herdr-side trailing `\` the snapshot read does not — a quirk of the
+create response only, confirmed by capturing the SAME pane both ways). Both
+strings observed:
+
+- `root` as this project produces it (`discoverRoot()` → `path.resolve()`, no
+  trailing separator): `C:\src\heimeshoff\agentic\agentheim\.worktrees\infrastructure-p3k9r`
+- the matching `api snapshot` pane's `cwd` for a workspace created with that same
+  no-trailing-separator input (captured verbatim, `--cwd` echoed back exactly):
+  `C:\Users\marco\AppData\Local\Temp\claude\C--src-heimeshoff-agentic-agentheim\9490a32c-3ddd-474b-b91c-b4b34e409415\scratchpad\p3k9r-probe`
+
+Same native-Windows-backslash format, same casing, no trailing separator on
+either side — `pane.cwd === root` matches character-for-character with no
+`path.resolve`/case-fold normalization needed. The new "captured herdr 0.9.0
+… matching pane" test exercises this exact comparison end-to-end with the
+captured native-path fixture.
+
+**Probe cleanup.** The disposable workspace (`w7`) was closed with
+`herdr workspace close w7`; a fresh `herdr api snapshot` afterwards has zero
+matches for `p3k9r` (`grep -c p3k9r` on the post-close snapshot = 0).
+
+**Downstream** (`listAgentNames` / `agent start` JSON parsing): out of scope
+per the task's own Notes — the live capture never exercised `agent list` or
+`agent start` (Notes restrict mutating calls to exactly `workspace create`,
+`tab create`, and the cleanup `workspace close`), so nothing was observed to
+widen this spike's scope for.
+
+`node --test dashboard/test/*.test.mjs lib/test/*.test.mjs`: 1945/1946 passing.
+The one failure, `lib/test/index-entry-length.test.mjs` (`agentic-workflow-qwfq3`
+INDEX entry, 62 words), is the pre-existing red noted in the conductor briefing —
+unrelated to this task, not touched.
+
+Key files: `dashboard/bridge-launch-api.mjs`,
+`dashboard/test/bridge-launch-api.test.mjs`.

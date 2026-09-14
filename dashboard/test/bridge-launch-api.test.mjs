@@ -328,7 +328,8 @@ test('no matching-cwd pane -> workspace create (not tab create)', async () => {
   const exec = (bin, args) => {
     calls.push(args);
     if (args[0] === 'api') return JSON.stringify({ result: { snapshot: { panes: [{ cwd: '/other' }] } } });
-    if (args[0] === 'workspace') return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: 'w1:p1' } });
+    if (args[0] === 'workspace')
+      return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: { pane_id: 'w1:p1' } } });
     if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
     throw new Error(`unexpected exec call: ${args.join(' ')}`);
   };
@@ -360,7 +361,7 @@ test('matching-cwd pane -> tab create --workspace <id> (not workspace create)', 
     calls.push(args);
     if (args[0] === 'api')
       return JSON.stringify({ result: { snapshot: { panes: [{ cwd: '/proj', workspace_id: 'w7' }] } } });
-    if (args[0] === 'tab') return JSON.stringify({ result: { tab: 't2', root_pane: 'w7:p2' } });
+    if (args[0] === 'tab') return JSON.stringify({ result: { tab: 't2', root_pane: { pane_id: 'w7:p2' } } });
     if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
     throw new Error(`unexpected exec call: ${args.join(' ')}`);
   };
@@ -378,12 +379,250 @@ test('matching-cwd pane -> tab create --workspace <id> (not workspace create)', 
   assert.equal(tabCall[tabCall.indexOf('--workspace') + 1], 'w7');
 });
 
+test('the pane-to-workspace read only trusts workspace_id — a matching pane carrying the old `workspace` key (no `workspace_id`) yields `--workspace undefined`, proving the `?? pane.workspace` fallback is gone (infrastructure-p3k9r Shape 1)', async () => {
+  const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
+  const res = makeRes();
+  const calls = [];
+  const exec = (bin, args) => {
+    calls.push(args);
+    // `workspace` (no trailing `_id`) is the shape the OLD `?? pane.workspace`
+    // fallback used to read; a live install never emits it (infrastructure-
+    // p3k9r's live capture: only `workspace_id` is present).
+    if (args[0] === 'api') return JSON.stringify({ result: { snapshot: { panes: [{ cwd: '/proj', workspace: 'w7' }] } } });
+    if (args[0] === 'tab') return JSON.stringify({ result: { tab: 't2', root_pane: { pane_id: 'w7:p2' } } });
+    if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
+    throw new Error(`unexpected exec call: ${args.join(' ')}`);
+  };
+  const spawnFn = () => {};
+  await handleBridgeLaunch(req, res, '/proj', {
+    token: VALID_TOKEN,
+    resolveHerdrBinaryFn: () => ({ path: '/fake/herdr', source: 'path', version: null }),
+    exec,
+    spawnFn,
+  });
+  assert.equal(res.statusCode, 202);
+  const tabCall = calls.find((a) => a[0] === 'tab' && a[1] === 'create');
+  assert.ok(tabCall);
+  assert.equal(tabCall[tabCall.indexOf('--workspace') + 1], 'undefined');
+});
+
+test('topology result.root_pane missing entirely -> 502 "herdr did not report a pane id" (never a spawn)', async () => {
+  const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
+  const res = makeRes();
+  const exec = (bin, args) => {
+    if (args[0] === 'api') return JSON.stringify({ result: { snapshot: { panes: [] } } });
+    if (args[0] === 'workspace') return JSON.stringify({ result: { workspace: 'w1', tab: 't1' } }); // no root_pane at all
+    throw new Error(`unexpected exec call: ${args.join(' ')}`);
+  };
+  const spawnCalls = [];
+  const spawnFn = (bin, args) => spawnCalls.push({ bin, args });
+  await handleBridgeLaunch(req, res, '/proj', {
+    token: VALID_TOKEN,
+    resolveHerdrBinaryFn: () => ({ path: '/fake/herdr', source: 'path', version: null }),
+    exec,
+    spawnFn,
+  });
+  assert.equal(res.statusCode, 502);
+  assert.equal(JSON.parse(res.body).error, 'herdr did not report a pane id');
+  assert.equal(spawnCalls.length, 0);
+});
+
+test('topology result.root_pane present as an OBJECT with no `.pane_id` -> 502 "herdr did not report a pane id" (the object-without-id case a bare-string read would have missed)', async () => {
+  const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
+  const res = makeRes();
+  const exec = (bin, args) => {
+    if (args[0] === 'api') return JSON.stringify({ result: { snapshot: { panes: [] } } });
+    if (args[0] === 'workspace') return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: { tab_id: 'w1:t1' } } });
+    throw new Error(`unexpected exec call: ${args.join(' ')}`);
+  };
+  const spawnCalls = [];
+  const spawnFn = (bin, args) => spawnCalls.push({ bin, args });
+  await handleBridgeLaunch(req, res, '/proj', {
+    token: VALID_TOKEN,
+    resolveHerdrBinaryFn: () => ({ path: '/fake/herdr', source: 'path', version: null }),
+    exec,
+    spawnFn,
+  });
+  assert.equal(res.statusCode, 502);
+  assert.equal(JSON.parse(res.body).error, 'herdr did not report a pane id');
+  assert.equal(spawnCalls.length, 0);
+});
+
+// ---------------------------------------------------------------------------
+// Captured-JSON fixtures (infrastructure-p3k9r, 2026-09-14) — verbatim
+// `.result` subtrees from a REAL `herdr 0.9.0` install (protocol 22),
+// captured in a disposable `p3k9r-probe` workspace/tab and closed
+// immediately after. Sibling panes trimmed; ids/paths otherwise as
+// captured. These pin the two shapes the handler actually has to parse:
+// `api snapshot`'s panes[] key the owning workspace as `workspace_id`
+// (Shape 1, confirmed — no `workspace` fallback exists on a live install),
+// and `workspace create`/`tab create` type `.result.root_pane` as a
+// PaneInfo OBJECT whose id lives at `.pane_id`, never a bare string
+// (Shape 2, corrected by this task).
+// ---------------------------------------------------------------------------
+
+const CAPTURED_HERDR_VERSION = '0.9.0';
+const CAPTURED_HERDR_PROTOCOL = 22;
+const CAPTURED_PROBE_CWD =
+  'C:\\Users\\marco\\AppData\\Local\\Temp\\claude\\C--src-heimeshoff-agentic-agentheim\\9490a32c-3ddd-474b-b91c-b4b34e409415\\scratchpad\\p3k9r-probe';
+
+// `herdr api snapshot` (herdr 0.9.0, protocol 22) — verbatim `.result`
+// subtree for the probe's own pane, other live panes trimmed.
+const CAPTURED_API_SNAPSHOT_RESULT = {
+  snapshot: {
+    panes: [
+      {
+        agent_status: 'unknown',
+        cwd: CAPTURED_PROBE_CWD,
+        focused: false,
+        pane_id: 'w7:p1',
+        revision: 0,
+        scroll: { max_offset_from_bottom: 0, offset_from_bottom: 0, viewport_rows: 40 },
+        tab_id: 'w7:t1',
+        terminal_id: 'term_65b6e6452612ba',
+        workspace_id: 'w7',
+      },
+    ],
+    protocol: CAPTURED_HERDR_PROTOCOL,
+    version: CAPTURED_HERDR_VERSION,
+  },
+  type: 'session_snapshot',
+};
+
+// `herdr workspace create --cwd <probe> --label p3k9r-probe --no-focus`
+// (herdr 0.9.0, protocol 22) — verbatim `.result`. Note `root_pane.cwd`
+// carries a trailing `\` that the LATER `api snapshot` read above does not
+// for the identical pane — a Herdr-side quirk of the create response, not
+// something the workspace-reuse comparison (which only ever reads
+// `api snapshot`'s panes[]) is exposed to.
+const CAPTURED_WORKSPACE_CREATE_RESULT = {
+  type: 'workspace_created',
+  workspace: {
+    active_tab_id: 'w7:t1',
+    agent_status: 'unknown',
+    focused: false,
+    label: 'p3k9r-probe',
+    number: 2,
+    pane_count: 1,
+    tab_count: 1,
+    workspace_id: 'w7',
+  },
+  tab: {
+    agent_status: 'unknown',
+    focused: false,
+    label: '1',
+    number: 1,
+    pane_count: 1,
+    tab_id: 'w7:t1',
+    workspace_id: 'w7',
+  },
+  root_pane: {
+    agent_status: 'unknown',
+    cwd: `${CAPTURED_PROBE_CWD}\\`,
+    focused: false,
+    pane_id: 'w7:p1',
+    revision: 0,
+    scroll: { max_offset_from_bottom: 0, offset_from_bottom: 0, viewport_rows: 40 },
+    tab_id: 'w7:t1',
+    terminal_id: 'term_65b6e6452612ba',
+    workspace_id: 'w7',
+  },
+};
+
+// `herdr tab create --workspace w7 --cwd <probe> --label p3k9r-probe
+// --no-focus` (herdr 0.9.0, protocol 22) — verbatim `.result`, captured
+// immediately after the `workspace create` above, reusing its workspace.
+const CAPTURED_TAB_CREATE_RESULT = {
+  type: 'tab_created',
+  tab: {
+    agent_status: 'unknown',
+    focused: false,
+    label: 'p3k9r-probe',
+    number: 2,
+    pane_count: 1,
+    tab_id: 'w7:t2',
+    workspace_id: 'w7',
+  },
+  root_pane: {
+    agent_status: 'unknown',
+    cwd: `${CAPTURED_PROBE_CWD}\\`,
+    focused: false,
+    pane_id: 'w7:p2',
+    revision: 0,
+    scroll: { max_offset_from_bottom: 0, offset_from_bottom: 0, viewport_rows: 40 },
+    tab_id: 'w7:t2',
+    terminal_id: 'term_65b6e649002e6b',
+    workspace_id: 'w7',
+  },
+};
+
+test('captured herdr 0.9.0 (protocol 22): no matching pane -> workspace create, pane id derived from the verbatim .result.root_pane.pane_id (an OBJECT, not a string)', async () => {
+  const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
+  const res = makeRes();
+  const exec = (bin, args) => {
+    if (args[0] === 'api') return JSON.stringify({ result: CAPTURED_API_SNAPSHOT_RESULT });
+    if (args[0] === 'workspace' && args[1] === 'create') return JSON.stringify({ result: CAPTURED_WORKSPACE_CREATE_RESULT });
+    if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
+    throw new Error(`unexpected exec call: ${args.join(' ')}`);
+  };
+  let spawnedArgs = null;
+  const spawnFn = (bin, args) => {
+    spawnedArgs = args;
+  };
+  // No pane in the captured snapshot has this cwd, so `workspace create` is used.
+  await handleBridgeLaunch(req, res, '/no/pane/has/this/cwd', {
+    token: VALID_TOKEN,
+    resolveHerdrBinaryFn: () => ({ path: '/fake/herdr', source: 'path', version: null }),
+    exec,
+    spawnFn,
+  });
+  assert.equal(res.statusCode, 202);
+  await new Promise((resolve) => process.nextTick(resolve));
+  assert.ok(spawnedArgs, 'agent start must have been spawned');
+  assert.equal(spawnedArgs[spawnedArgs.indexOf('--pane') + 1], 'w7:p1');
+});
+
+test('captured herdr 0.9.0 (protocol 22): matching pane -> tab create reusing its workspace_id, pane id derived from the verbatim .result.root_pane.pane_id', async () => {
+  const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
+  const res = makeRes();
+  const calls = [];
+  const exec = (bin, args) => {
+    calls.push(args);
+    if (args[0] === 'api') return JSON.stringify({ result: CAPTURED_API_SNAPSHOT_RESULT });
+    if (args[0] === 'tab' && args[1] === 'create') return JSON.stringify({ result: CAPTURED_TAB_CREATE_RESULT });
+    if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
+    throw new Error(`unexpected exec call: ${args.join(' ')}`);
+  };
+  let spawnedArgs = null;
+  const spawnFn = (bin, args) => {
+    spawnedArgs = args;
+  };
+  // `root` is the EXACT captured pane cwd — the workspace-reuse comparison
+  // (`pane.cwd === root`) matches as-is (infrastructure-p3k9r AC4): the
+  // `api snapshot` pane cwd this comparison actually reads carries no
+  // trailing separator, matching `discoverRoot()`'s `path.resolve()` output.
+  await handleBridgeLaunch(req, res, CAPTURED_PROBE_CWD, {
+    token: VALID_TOKEN,
+    resolveHerdrBinaryFn: () => ({ path: '/fake/herdr', source: 'path', version: null }),
+    exec,
+    spawnFn,
+  });
+  assert.equal(res.statusCode, 202);
+  const tabCall = calls.find((a) => a[0] === 'tab' && a[1] === 'create');
+  assert.ok(tabCall);
+  assert.equal(tabCall[tabCall.indexOf('--workspace') + 1], 'w7');
+  await new Promise((resolve) => process.nextTick(resolve));
+  assert.ok(spawnedArgs, 'agent start must have been spawned');
+  assert.equal(spawnedArgs[spawnedArgs.indexOf('--pane') + 1], 'w7:p2');
+});
+
 test('202 fires BEFORE agent start is spawned, and agent start failure is never surfaced', async () => {
   const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
   const res = makeRes();
   const exec = (bin, args) => {
     if (args[0] === 'api') return JSON.stringify({ result: { snapshot: { panes: [] } } });
-    if (args[0] === 'workspace') return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: 'w1:p1' } });
+    if (args[0] === 'workspace')
+      return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: { pane_id: 'w1:p1' } } });
     if (args[0] === 'agent' && args[1] === 'list') throw new Error('agent list failed');
     throw new Error(`unexpected exec call: ${args.join(' ')}`);
   };
@@ -407,7 +646,8 @@ test('name/model/skipPermissions ride the spawned agent-start argv in ADR-0018 e
   const res = makeRes();
   const exec = (bin, args) => {
     if (args[0] === 'api') return JSON.stringify({ result: { snapshot: { panes: [] } } });
-    if (args[0] === 'workspace') return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: 'w1:p1' } });
+    if (args[0] === 'workspace')
+      return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: { pane_id: 'w1:p1' } } });
     if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
     throw new Error(`unexpected exec call: ${args.join(' ')}`);
   };
@@ -443,7 +683,8 @@ test('name field: present only when armed — bare prompt still gets a prompt-de
   const res = makeRes();
   const exec = (bin, args) => {
     if (args[0] === 'api') return JSON.stringify({ result: { snapshot: { panes: [] } } });
-    if (args[0] === 'workspace') return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: 'w1:p1' } });
+    if (args[0] === 'workspace')
+      return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: { pane_id: 'w1:p1' } } });
     if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
     throw new Error(`unexpected exec call: ${args.join(' ')}`);
   };
@@ -470,7 +711,8 @@ test('model field: rejected value -> no --model flag (never a rejection)', async
   const res = makeRes();
   const exec = (bin, args) => {
     if (args[0] === 'api') return JSON.stringify({ result: { snapshot: { panes: [] } } });
-    if (args[0] === 'workspace') return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: 'w1:p1' } });
+    if (args[0] === 'workspace')
+      return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: { pane_id: 'w1:p1' } } });
     if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
     throw new Error(`unexpected exec call: ${args.join(' ')}`);
   };
@@ -498,7 +740,8 @@ test('skipPermissions field: present only when strictly true', async () => {
   const res = makeRes();
   const exec = (bin, args) => {
     if (args[0] === 'api') return JSON.stringify({ result: { snapshot: { panes: [] } } });
-    if (args[0] === 'workspace') return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: 'w1:p1' } });
+    if (args[0] === 'workspace')
+      return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: { pane_id: 'w1:p1' } } });
     if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
     throw new Error(`unexpected exec call: ${args.join(' ')}`);
   };
@@ -550,7 +793,8 @@ test('POST /api/bridge/launch is dispatched BEFORE the 405 gate (reachable via P
   const exec = (bin, args) => {
     calls.push(args);
     if (args[0] === 'api') return JSON.stringify({ result: { snapshot: { panes: [] } } });
-    if (args[0] === 'workspace') return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: 'w1:p1' } });
+    if (args[0] === 'workspace')
+      return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: { pane_id: 'w1:p1' } } });
     if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
     throw new Error(`unexpected exec call: ${args.join(' ')}`);
   };
