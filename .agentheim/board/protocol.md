@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 12:34 -- Modeling / Captured: infrastructure-w506e - Herdr launch leaves the new session unfocused — a dashboard launch into a cold Herdr lands in an unfocused workspace, so the TUI opens on the bare home shell; pass --focus on workspace/tab create for parity with the VS Code bridge's terminal.show(), amending ADR-0082 §5
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** Reproduced against the live Herdr 0.9.0 install: a dashboard launch into a cold Herdr creates the session workspace with --no-focus, focus stays on the bare marco home-shell workspace, so the TUI opens on an empty screen while the session runs one workspace over. Fix: --focus on both topology calls (parity with ADR-0018 terminal.show()), amend ADR-0082 §5. Captured straight to todo — scope is two argv flags plus fixtures and one cold-start confirmation.
+
+---
+
 ## 2026-09-14 12:29 -- Modeling / Refined: agentic-workflow-gwh69 - Mechanized RESULT reconstruction from the worktree (gate check)
 
 **Type:** Modeling / Refine
