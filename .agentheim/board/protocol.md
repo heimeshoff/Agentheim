@@ -5,6 +5,21 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 15:57 -- Task verified and completed: infrastructure-nz2e8 - A Herdr-mediated launch opens a new terminal window on Windows even though a Herdr session is already running — the session should land as a tab in the existing Herdr view with no extra OS window; hide the console of every herdr child the dashboard server spawns and harden the workspace-reuse cwd match
+
+**Type:** Work / Task completion
+**Task:** infrastructure-nz2e8 - A Herdr-mediated launch opens a new terminal window on Windows even though a Herdr session is already running — the session should land as a tab in the existing Herdr view with no extra OS window; hide the console of every herdr child the dashboard server spawns and harden the workspace-reuse cwd match
+**Summary:** Every herdr child the dashboard server spawns now carries windowsHide: true via a shared HERDR_CHILD_OPTIONS constant threaded through the exec/spawnFn seams, and the workspace-reuse pane-cwd comparison goes through a pure cwdsMatch/normalizeCwdForComparison normaliser instead of a bare ===
+**Duration:** 19m48s
+**Verification:** PASS (iteration 2)
+**Result source:** sidecar · layout both+sentinel · sidecar present
+**Files changed:** 4
+**Tests added:** 13
+**ADRs written:** none (ADR-0082 amended §5/§6)
+**README delta:** README.md §Ubiquitous language anchor "Herdr-mediated launch — the fourth write category": applied (the worker's iteration-1 report named §Owned mechanisms, corrected to the section the bullet actually lives in; iteration 2 reported it correctly)
+
+---
+
 ## 2026-09-14 15:50 -- Task verified and completed: infrastructure-vw66n - Make the README present the dashboard's three launch modes — VS Code bridge, Herdr bridge, or plain copy-to-clipboard — as equal, switchable-anytime choices via /setup use bridge, instead of burying Herdr inside the VS Code bridge section
 
 **Type:** Work / Task completion

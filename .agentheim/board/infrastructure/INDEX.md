@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 47
+- **Doing:** 0
+- **Done:** 48
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **infrastructure-nz2e8** — A Herdr-mediated launch opens a new terminal window on Windows even though a Herdr session is already running — the session should land as a tab in the existing Herdr view with no extra OS window; hide the console of every herdr child the dashboard server spawns and harden the workspace-reuse cwd match (bug) — `doing/infrastructure-nz2e8-herdr-launch-no-extra-terminal-window.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **infrastructure-nz2e8** — A Herdr-mediated launch opens a new terminal window on Windows even though a Herdr session is already running — the session should land as a tab in the existing Herdr view with no extra OS window; hide the console of every herdr child the dashboard server spawns and harden the workspace-reuse cwd match (bug) — `done/infrastructure-nz2e8-herdr-launch-no-extra-terminal-window.md`
 - **infrastructure-vw66n** — Make the README present the dashboard's three launch modes — VS Code bridge, Herdr bridge, or plain copy-to-clipboard — as equal, switchable-anytime choices via /setup use bridge, instead of burying Herdr inside the VS Code bridge section (chore) — `done/infrastructure-vw66n-readme-three-bridge-choices.md`
 - **infrastructure-w506e** — Herdr launch leaves the new session unfocused — a dashboard launch into a cold Herdr lands in an unfocused workspace, so the TUI opens on the bare home shell; pass --focus on workspace/tab create for parity with the VS Code bridge's terminal.show(), amending ADR-0082 §5 (bug) — `done/infrastructure-w506e-herdr-launch-focus-new-workspace.md`
 - **infrastructure-p3k9r** — Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install (spike) — `done/infrastructure-p3k9r-verify-herdr-cli-json-field-names-api-snapshot-pane-workspac.md`

@@ -31,8 +31,9 @@
 import { execFileSync, spawn as nodeSpawn } from 'node:child_process';
 import crypto from 'node:crypto';
 import os from 'node:os';
+import path from 'node:path';
 
-import { resolveHerdrBinary } from '../lib/resolve-herdr.mjs';
+import { resolveHerdrBinary, HERDR_CHILD_OPTIONS } from '../lib/resolve-herdr.mjs';
 
 // Same header name as ADR-0018's VS Code bridge — reused, not reinvented.
 export const BRIDGE_TOKEN_HEADER = 'X-Agentheim-Bridge-Token';
@@ -155,6 +156,47 @@ export function deriveHerdrAgentName(displayName, liveAgentNames = []) {
 }
 
 // ---------------------------------------------------------------------------
+// normalizeCwdForComparison / cwdsMatch (infrastructure-nz2e8) -- the
+// workspace-reuse decision below must never be pushed onto the
+// `workspace create` branch by a path-FORM difference alone (forward vs
+// backslash separators, a trailing separator, or -- on win32 -- letter
+// case) when the pane really is the same directory `root` names. Pure,
+// platform-injectable (mirrors lib/resolve-herdr.mjs's own hermetic-fixture
+// discipline) so a test can force win32 behaviour on any host OS.
+// ---------------------------------------------------------------------------
+
+/**
+ * @param {*} raw
+ * @param {string} [platform] defaults to `process.platform`
+ * @returns {string} '' for a non-string/empty input
+ */
+export function normalizeCwdForComparison(raw, platform = process.platform) {
+  if (typeof raw !== 'string' || raw === '') return '';
+  const impl = platform === 'win32' ? path.win32 : path.posix;
+  let normalized = impl.resolve(raw);
+  // `path.*.resolve` keeps a trailing separator only for a bare drive/root
+  // (e.g. 'C:\\' or '/'); strip any OTHER trailing separator so
+  // 'C:\\proj\\' and 'C:\\proj' compare equal.
+  if (normalized.length > 1) {
+    const stripped = normalized.replace(/[\\/]+$/, '');
+    normalized = stripped === '' ? normalized[0] : stripped;
+  }
+  return platform === 'win32' ? normalized.toLowerCase() : normalized;
+}
+
+/**
+ * @param {*} root
+ * @param {*} cwd
+ * @param {string} [platform] defaults to `process.platform`
+ * @returns {boolean} true only when both normalize to the same non-empty string
+ */
+export function cwdsMatch(root, cwd, platform = process.platform) {
+  const a = normalizeCwdForComparison(root, platform);
+  const b = normalizeCwdForComparison(cwd, platform);
+  return a !== '' && a === b;
+}
+
+// ---------------------------------------------------------------------------
 // HTTP plumbing
 // ---------------------------------------------------------------------------
 
@@ -193,15 +235,19 @@ function tokensMatch(a, b) {
 // production, never under `node --test` (tests always supply their own).
 // ---------------------------------------------------------------------------
 
-/** Default synchronous `herdr <args>` invoker: returns stdout, throws on any failure. */
-function defaultExec(binaryPath, args) {
-  return execFileSync(binaryPath, args, { encoding: 'utf8', timeout: 10000 });
+/**
+ * Default synchronous `herdr <args>` invoker: returns stdout, throws on any
+ * failure. `options` (`HERDR_CHILD_OPTIONS` by default -- infrastructure-
+ * nz2e8) is spread last so a caller-supplied override always wins.
+ */
+function defaultExec(binaryPath, args, options) {
+  return execFileSync(binaryPath, args, { encoding: 'utf8', timeout: 10000, ...options });
 }
 
 /** Best-effort live agent names via `herdr agent list`; `[]` on ANY failure (never throws). */
 function defaultListAgentNames(binaryPath, exec) {
   try {
-    const parsed = JSON.parse(exec(binaryPath, ['agent', 'list']));
+    const parsed = JSON.parse(exec(binaryPath, ['agent', 'list'], HERDR_CHILD_OPTIONS));
     const agents = parsed?.result?.agents;
     return Array.isArray(agents) ? agents.map((a) => a && a.name).filter((n) => typeof n === 'string') : [];
   } catch {
@@ -220,10 +266,11 @@ const DEFAULT_TIMEOUT_MS = 30000;
  * @param {string} opts.token — the per-process bridge token (server.mjs mints it).
  * @param {string} [opts.homedir] — defaults to `os.homedir()`.
  * @param {object} [opts.resolveDeps] — forwarded to `resolveHerdrBinary`.
- * @param {(binaryPath: string, args: string[]) => string} [opts.exec] — injectable `herdr <args>` invoker; throws = failure.
+ * @param {(binaryPath: string, args: string[], options?: object) => string} [opts.exec] — injectable `herdr <args>` invoker (receives `HERDR_CHILD_OPTIONS` as its third argument — infrastructure-nz2e8); throws = failure.
  * @param {(binaryPath: string, args: string[], spawnOpts: object) => object} [opts.spawnFn] — injectable `child_process.spawn`.
  * @param {(binaryPath: string, exec: Function) => string[]} [opts.listAgentNames] — injectable live-agent-name lookup.
  * @param {number} [opts.timeoutMs] — `agent start --timeout`; defaults to 30000.
+ * @param {string} [opts.platform] — injectable for the workspace-reuse cwd comparison; defaults to `process.platform`.
  */
 export async function handleBridgeLaunch(req, res, root, opts = {}) {
   const homedir = opts.homedir ?? os.homedir();
@@ -232,6 +279,7 @@ export async function handleBridgeLaunch(req, res, root, opts = {}) {
   const spawnFn = opts.spawnFn ?? nodeSpawn;
   const listAgentNames = opts.listAgentNames ?? defaultListAgentNames;
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const platform = opts.platform ?? process.platform;
 
   // Token gate FIRST (ADR-0082 §4: token-only, no Origin check).
   const presented = req.headers[BRIDGE_TOKEN_HEADER_LC];
@@ -284,32 +332,34 @@ export async function handleBridgeLaunch(req, res, root, opts = {}) {
   // Fast path: awaited (ADR-0082 §6). `api snapshot` first.
   let snapshot;
   try {
-    snapshot = JSON.parse(exec(binaryPath, ['api', 'snapshot']));
+    snapshot = JSON.parse(exec(binaryPath, ['api', 'snapshot'], HERDR_CHILD_OPTIONS));
   } catch (err) {
     send(res, 502, { error: 'herdr api snapshot failed', detail: String(err && err.message) });
     return;
   }
 
   const panes = snapshot?.result?.snapshot?.panes;
-  const matchingPane = Array.isArray(panes) ? panes.find((p) => p && p.cwd === root) : undefined;
+  // Compared through a normaliser (infrastructure-nz2e8), never a bare
+  // `===`: a path-FORM difference alone (separator style, trailing
+  // separator, win32 case) must never push a launch onto the
+  // `workspace create` branch when the pane really is the same directory.
+  const matchingPane = Array.isArray(panes) ? panes.find((p) => p && cwdsMatch(root, p.cwd, platform)) : undefined;
   const workspaceId = matchingPane ? matchingPane.workspace_id : undefined;
 
   let topology;
   try {
     const raw2 =
       matchingPane !== undefined
-        ? exec(binaryPath, [
-            'tab',
-            'create',
-            '--workspace',
-            String(workspaceId),
-            '--cwd',
-            root,
-            '--label',
-            displayName,
-            '--focus',
-          ])
-        : exec(binaryPath, ['workspace', 'create', '--cwd', root, '--label', displayName, '--focus']);
+        ? exec(
+            binaryPath,
+            ['tab', 'create', '--workspace', String(workspaceId), '--cwd', root, '--label', displayName, '--focus'],
+            HERDR_CHILD_OPTIONS,
+          )
+        : exec(
+            binaryPath,
+            ['workspace', 'create', '--cwd', root, '--label', displayName, '--focus'],
+            HERDR_CHILD_OPTIONS,
+          );
     topology = JSON.parse(raw2);
   } catch (err) {
     send(res, 502, { error: 'herdr tab/workspace create failed', detail: String(err && err.message) });
@@ -347,7 +397,7 @@ export async function handleBridgeLaunch(req, res, root, opts = {}) {
       '--',
       ...claudeArgv,
     ];
-    spawnFn(binaryPath, args, { stdio: 'ignore' });
+    spawnFn(binaryPath, args, { stdio: 'ignore', ...HERDR_CHILD_OPTIONS });
   } catch {
     // Deliberately swallowed (ADR-0082 §6): the pane is already open, and a
     // post-202 failure (agent_not_ready, spawn error, agent-list failure) is

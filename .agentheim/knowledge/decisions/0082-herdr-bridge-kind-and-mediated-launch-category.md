@@ -4,7 +4,7 @@ title: Herdr joins the dashboard bridge family — a second bridge kind, a fourt
 scope: infrastructure
 status: proposed
 date: 2026-09-13
-related_tasks: [infrastructure-e8h9f, infrastructure-xh8tw, infrastructure-vpbks, infrastructure-w506e]
+related_tasks: [infrastructure-e8h9f, infrastructure-xh8tw, infrastructure-vpbks, infrastructure-w506e, infrastructure-nz2e8]
 related_adrs: [0017, 0018, 0053, 0079]
 ---
 
@@ -97,6 +97,32 @@ one.
 a non-2xx before any response commits). `agent start … --timeout …` (up to 30 s, and whose
 `agent_not_ready` still counts as launched — the pane is open) runs **after** a `202 {ok:true}` has
 already been sent, unawaited by the handler — fire-and-report, mirroring VS Code's `/run`.
+
+> **Amended 2026-09-14 (infrastructure-nz2e8).** §5's `execFileSync`/`spawn` calls, and
+> `checkHerdrLiveness`'s own `herdr status` probe (§9's resolver's sibling liveness check,
+> `lib/resolve-herdr.mjs`), did not set `windowsHide`. Reproduced against the live install: the
+> dashboard server itself is spawned `detached`/`windowsHide`/`stdio:'ignore'`
+> (`dashboard/launch.mjs`) and so owns no console of its own on Windows; a console-subsystem
+> child of a console-less parent is handed a fresh, VISIBLE console unless `windowsHide` is set
+> on the child spawn itself — the mechanism behind both this task's "new terminal window"
+> builder report and infrastructure-w506e's earlier "fading in and out" observation. Every
+> `herdr` child this server spawns — the awaited `api snapshot`/`agent list`/`tab create`/
+> `workspace create` calls (§5/§6) and the fire-and-forget `agent start` spawn (§6) — now
+> carries `windowsHide: true` via a shared `HERDR_CHILD_OPTIONS` constant
+> (`lib/resolve-herdr.mjs`), threaded through the `exec`/`spawnFn` seams themselves so it is
+> directly test-asserted, not just baked into a default implementation's internals. Harmless on
+> POSIX, so unconditional, never platform-gated — the same discipline §8's clipboard-floor
+> asymmetry and §9's resolver already apply uniformly across platforms.
+
+> **Amended 2026-09-14 (infrastructure-nz2e8).** §5's workspace-reuse pane match
+> (`p.cwd === root`) was a bare string `===`, so a path-FORM difference alone — separator style,
+> a trailing separator, or (win32) letter case — between the `api snapshot` pane's `cwd` and the
+> discovered `root` could push a launch onto the `workspace create` branch instead of reusing
+> the existing one, even when the two name the same directory. The comparison now goes through a
+> pure, platform-injectable normaliser (`normalizeCwdForComparison`/`cwdsMatch`,
+> `dashboard/bridge-launch-api.mjs`): each side resolved via `path.win32.resolve`/
+> `path.posix.resolve`, a trailing separator stripped, and (win32 only) lower-cased, before
+> comparing for equality.
 
 ### 7. HERDR_ENV
 

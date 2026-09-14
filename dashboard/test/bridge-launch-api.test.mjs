@@ -23,6 +23,8 @@ import {
   resolveSessionName,
   buildClaudeArgv,
   deriveHerdrAgentName,
+  normalizeCwdForComparison,
+  cwdsMatch,
   handleBridgeLaunch,
 } from '../bridge-launch-api.mjs';
 import { createDashboardServer } from '../server.mjs';
@@ -192,6 +194,44 @@ test('deriveHerdrAgentName stays unique even when the base name is already at th
   assert.notEqual(unique, base);
   assert.match(unique, AGENT_NAME_RE);
   assert.ok(unique.length <= 32);
+});
+
+// ---------------------------------------------------------------------------
+// normalizeCwdForComparison / cwdsMatch (infrastructure-nz2e8) — pure,
+// platform-injectable so win32 behaviour (backslash separators,
+// case-insensitivity) is testable on any host OS.
+// ---------------------------------------------------------------------------
+
+test('normalizeCwdForComparison: non-string/empty input -> ""', () => {
+  assert.equal(normalizeCwdForComparison(undefined, 'win32'), '');
+  assert.equal(normalizeCwdForComparison(null, 'win32'), '');
+  assert.equal(normalizeCwdForComparison(42, 'win32'), '');
+  assert.equal(normalizeCwdForComparison('', 'win32'), '');
+});
+
+test('normalizeCwdForComparison (win32): forward-slash and backslash forms of the same path normalize equal', () => {
+  assert.equal(normalizeCwdForComparison('C:\\src\\proj', 'win32'), normalizeCwdForComparison('C:/src/proj', 'win32'));
+});
+
+test('normalizeCwdForComparison (win32): a trailing separator does not change the result', () => {
+  assert.equal(normalizeCwdForComparison('C:\\src\\proj\\', 'win32'), normalizeCwdForComparison('C:\\src\\proj', 'win32'));
+  assert.equal(normalizeCwdForComparison('C:/src/proj/', 'win32'), normalizeCwdForComparison('C:/src/proj', 'win32'));
+});
+
+test('normalizeCwdForComparison (win32): case-insensitive', () => {
+  assert.equal(normalizeCwdForComparison('C:\\src\\proj', 'win32'), normalizeCwdForComparison('C:\\SRC\\PROJ', 'win32'));
+});
+
+test('cwdsMatch (win32): mixed separator forms, the reverse, and a trailing-separator variant all match', () => {
+  assert.equal(cwdsMatch('C:\\src\\proj', 'C:/src/proj', 'win32'), true); // pane backslash-like root, root forward
+  assert.equal(cwdsMatch('C:/src/proj', 'C:\\src\\proj', 'win32'), true); // the reverse
+  assert.equal(cwdsMatch('C:\\src\\proj\\', 'C:\\src\\proj', 'win32'), true); // trailing separator
+  assert.equal(cwdsMatch('C:\\src\\proj', 'C:\\SRC\\PROJ', 'win32'), true); // case-insensitive
+});
+
+test('cwdsMatch: a genuinely different directory never matches', () => {
+  assert.equal(cwdsMatch('C:\\src\\proj', 'C:\\src\\other', 'win32'), false);
+  assert.equal(cwdsMatch('/src/proj', '/src/other', 'linux'), false);
 });
 
 // ---------------------------------------------------------------------------
@@ -404,6 +444,154 @@ test('the pane-to-workspace read only trusts workspace_id — a matching pane ca
   const tabCall = calls.find((a) => a[0] === 'tab' && a[1] === 'create');
   assert.ok(tabCall);
   assert.equal(tabCall[tabCall.indexOf('--workspace') + 1], 'undefined');
+});
+
+test('every awaited exec call (api snapshot, workspace create, agent list) AND the fire-and-forget spawn receive windowsHide:true — the dashboard server owns no console (infrastructure-nz2e8)', async () => {
+  const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
+  const res = makeRes();
+  const execCalls = [];
+  const exec = (bin, args, options) => {
+    execCalls.push({ args, options });
+    if (args[0] === 'api') return JSON.stringify({ result: { snapshot: { panes: [] } } });
+    if (args[0] === 'workspace')
+      return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: { pane_id: 'w1:p1' } } });
+    if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
+    throw new Error(`unexpected exec call: ${args.join(' ')}`);
+  };
+  let spawnOptions = null;
+  const spawnFn = (bin, args, options) => {
+    spawnOptions = options;
+  };
+  await handleBridgeLaunch(req, res, '/proj', {
+    token: VALID_TOKEN,
+    resolveHerdrBinaryFn: () => ({ path: '/fake/herdr', source: 'path', version: null }),
+    exec,
+    spawnFn,
+  });
+  assert.equal(res.statusCode, 202);
+  await new Promise((resolve) => process.nextTick(resolve));
+  // api snapshot + workspace create must both have fired (awaited path).
+  assert.ok(execCalls.some((c) => c.args[0] === 'api' && c.args[1] === 'snapshot'));
+  assert.ok(execCalls.some((c) => c.args[0] === 'workspace' && c.args[1] === 'create'));
+  assert.ok(execCalls.some((c) => c.args[0] === 'agent' && c.args[1] === 'list'));
+  for (const { args, options } of execCalls) {
+    assert.equal(options && options.windowsHide, true, `exec(${args.join(' ')}) must receive windowsHide:true`);
+  }
+  assert.ok(spawnOptions, 'agent start must have been spawned');
+  assert.equal(spawnOptions.windowsHide, true);
+});
+
+test('workspace-reuse: a path-FORM difference alone (backslash pane cwd vs forward-slash root) still takes tab-create, never workspace-create, and the tab-create exec receives windowsHide:true (win32) (infrastructure-nz2e8)', async () => {
+  const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
+  const res = makeRes();
+  const calls = [];
+  const exec = (bin, args, options) => {
+    calls.push({ args, options });
+    if (args[0] === 'api')
+      return JSON.stringify({ result: { snapshot: { panes: [{ cwd: 'C:\\src\\proj', workspace_id: 'w9' }] } } });
+    if (args[0] === 'tab') return JSON.stringify({ result: { tab: 't2', root_pane: { pane_id: 'w9:p2' } } });
+    if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
+    throw new Error(`unexpected exec call: ${args.join(' ')}`);
+  };
+  const spawnFn = () => {};
+  await handleBridgeLaunch(req, res, 'C:/src/proj', {
+    token: VALID_TOKEN,
+    resolveHerdrBinaryFn: () => ({ path: '/fake/herdr', source: 'path', version: null }),
+    exec,
+    spawnFn,
+    platform: 'win32',
+  });
+  assert.equal(res.statusCode, 202);
+  assert.ok(calls.some((c) => c.args[0] === 'tab' && c.args[1] === 'create'));
+  assert.equal(calls.some((c) => c.args[0] === 'workspace' && c.args[1] === 'create'), false);
+  const tabCall = calls.find((c) => c.args[0] === 'tab' && c.args[1] === 'create');
+  assert.equal(tabCall.options && tabCall.options.windowsHide, true, 'tab create exec must receive windowsHide:true');
+});
+
+test('workspace-reuse: the reverse form (backslash root vs forward-slash pane cwd) still takes tab-create, and the tab-create exec receives windowsHide:true (win32) (infrastructure-nz2e8)', async () => {
+  const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
+  const res = makeRes();
+  const calls = [];
+  const exec = (bin, args, options) => {
+    calls.push({ args, options });
+    if (args[0] === 'api')
+      return JSON.stringify({ result: { snapshot: { panes: [{ cwd: 'C:/src/proj', workspace_id: 'w9' }] } } });
+    if (args[0] === 'tab') return JSON.stringify({ result: { tab: 't2', root_pane: { pane_id: 'w9:p2' } } });
+    if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
+    throw new Error(`unexpected exec call: ${args.join(' ')}`);
+  };
+  const spawnFn = () => {};
+  await handleBridgeLaunch(req, res, 'C:\\src\\proj', {
+    token: VALID_TOKEN,
+    resolveHerdrBinaryFn: () => ({ path: '/fake/herdr', source: 'path', version: null }),
+    exec,
+    spawnFn,
+    platform: 'win32',
+  });
+  assert.equal(res.statusCode, 202);
+  assert.ok(calls.some((c) => c.args[0] === 'tab' && c.args[1] === 'create'));
+  assert.equal(calls.some((c) => c.args[0] === 'workspace' && c.args[1] === 'create'), false);
+  const tabCall = calls.find((c) => c.args[0] === 'tab' && c.args[1] === 'create');
+  assert.equal(tabCall.options && tabCall.options.windowsHide, true, 'tab create exec must receive windowsHide:true');
+});
+
+test('workspace-reuse: a trailing-separator variant still takes tab-create, and the tab-create exec receives windowsHide:true (win32) (infrastructure-nz2e8)', async () => {
+  const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
+  const res = makeRes();
+  const calls = [];
+  const exec = (bin, args, options) => {
+    calls.push({ args, options });
+    if (args[0] === 'api')
+      return JSON.stringify({ result: { snapshot: { panes: [{ cwd: 'C:\\src\\proj\\', workspace_id: 'w9' }] } } });
+    if (args[0] === 'tab') return JSON.stringify({ result: { tab: 't2', root_pane: { pane_id: 'w9:p2' } } });
+    if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
+    throw new Error(`unexpected exec call: ${args.join(' ')}`);
+  };
+  const spawnFn = () => {};
+  await handleBridgeLaunch(req, res, 'C:\\src\\proj', {
+    token: VALID_TOKEN,
+    resolveHerdrBinaryFn: () => ({ path: '/fake/herdr', source: 'path', version: null }),
+    exec,
+    spawnFn,
+    platform: 'win32',
+  });
+  assert.equal(res.statusCode, 202);
+  assert.ok(calls.some((c) => c.args[0] === 'tab' && c.args[1] === 'create'));
+  assert.equal(calls.some((c) => c.args[0] === 'workspace' && c.args[1] === 'create'), false);
+  const tabCall = calls.find((c) => c.args[0] === 'tab' && c.args[1] === 'create');
+  assert.equal(tabCall.options && tabCall.options.windowsHide, true, 'tab create exec must receive windowsHide:true');
+});
+
+test('workspace-reuse: a genuinely different directory still takes workspace-create, never tab-create, and the workspace-create exec receives windowsHide:true (win32) (infrastructure-nz2e8)', async () => {
+  const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
+  const res = makeRes();
+  const calls = [];
+  const exec = (bin, args, options) => {
+    calls.push({ args, options });
+    if (args[0] === 'api')
+      return JSON.stringify({ result: { snapshot: { panes: [{ cwd: 'C:\\src\\other', workspace_id: 'w9' }] } } });
+    if (args[0] === 'workspace')
+      return JSON.stringify({ result: { workspace: 'w1', tab: 't1', root_pane: { pane_id: 'w1:p1' } } });
+    if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
+    throw new Error(`unexpected exec call: ${args.join(' ')}`);
+  };
+  const spawnFn = () => {};
+  await handleBridgeLaunch(req, res, 'C:/src/proj', {
+    token: VALID_TOKEN,
+    resolveHerdrBinaryFn: () => ({ path: '/fake/herdr', source: 'path', version: null }),
+    exec,
+    spawnFn,
+    platform: 'win32',
+  });
+  assert.equal(res.statusCode, 202);
+  assert.ok(calls.some((c) => c.args[0] === 'workspace' && c.args[1] === 'create'));
+  assert.equal(calls.some((c) => c.args[0] === 'tab' && c.args[1] === 'create'), false);
+  const workspaceCall = calls.find((c) => c.args[0] === 'workspace' && c.args[1] === 'create');
+  assert.equal(
+    workspaceCall.options && workspaceCall.options.windowsHide,
+    true,
+    'workspace create exec must receive windowsHide:true',
+  );
 });
 
 test('topology result.root_pane missing entirely -> 502 "herdr did not report a pane id" (never a spawn)', async () => {
