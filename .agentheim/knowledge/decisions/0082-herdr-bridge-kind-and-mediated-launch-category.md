@@ -4,7 +4,7 @@ title: Herdr joins the dashboard bridge family — a second bridge kind, a fourt
 scope: infrastructure
 status: proposed
 date: 2026-09-13
-related_tasks: [infrastructure-e8h9f, infrastructure-xh8tw, infrastructure-vpbks]
+related_tasks: [infrastructure-e8h9f, infrastructure-xh8tw, infrastructure-vpbks, infrastructure-w506e]
 related_adrs: [0017, 0018, 0053, 0079]
 ---
 
@@ -72,10 +72,24 @@ This ADR inherits ADR-0018's bar exactly: token only, nothing more.
 ### 5. Topology
 
 `herdr api snapshot` first; reuse the workspace whose panes' `cwd` equals the project root
-(`tab create --workspace <id> --cwd <root> --label <name> --no-focus`); else
-`workspace create --cwd <root> --label <name> --no-focus`. Never steals focus. `<name>` is the
-same resolved session name the VS Code path already derives (`-n <name>`) — one naming source.
-No `--env` is set; nothing in this task needs one.
+(`tab create --workspace <id> --cwd <root> --label <name> --focus`); else
+`workspace create --cwd <root> --label <name> --focus`. Focuses the created workspace/tab — a
+board launch is the builder's explicit gesture, Herdr focus is intra-Herdr not OS focus, and this
+mirrors ADR-0018's `terminal.show()`. `<name>` is the same resolved session name the VS Code path
+already derives (`-n <name>`) — one naming source. No `--env` is set; nothing in this task needs
+one.
+
+> **Amended 2026-09-14 (infrastructure-w506e).** Originally read "`--no-focus` … Never steals
+> focus", protecting a builder mid-conversation in another Herdr pane. Reproduced against the
+> live install: a cold Herdr launch created the session but left focus on the pre-existing
+> workspace, so the TUI rendered an empty/unrelated pane while the new session ran one workspace
+> over — the "empty screen" in the original builder report. The rule was wrong for this caller:
+> a board launch is the builder's own explicit gesture (they just asked for a session), and Herdr
+> focus is intra-Herdr (which workspace the TUI renders), not OS window focus, so focusing it
+> pulls the builder out of nothing. `workspace create --focus` was confirmed to work with no TUI
+> client attached (no `no_foreground_client` error). This ADR now matches ADR-0018's own
+> `terminal.show()`, which is unconditional. A future "launch in the background" need is a
+> body-field opt-in (`focus: false`), not the default — not built here.
 
 ### 6. Request-path budget
 

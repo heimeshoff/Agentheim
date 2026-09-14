@@ -1,7 +1,7 @@
 ---
 id: infrastructure-w506e
 title: Herdr launch leaves the new session unfocused — a dashboard launch into a cold Herdr lands in an unfocused workspace, so the TUI opens on the bare home shell; pass --focus on workspace/tab create for parity with the VS Code bridge's terminal.show(), amending ADR-0082 §5
-status: doing
+status: done
 type: bug
 context: infrastructure
 created: 2026-09-14
@@ -109,3 +109,54 @@ any workspace you did not create.
 **Where the evidence came from.** Snapshots T0/T1/T2 and the `--focus` probe are in the
 2026-09-14 modeling session that captured this task; the probe workspaces `w9` (kink-repro)
 and `wA` (kink-probe) were closed and `api snapshot` confirmed zero residue.
+
+## Outcome
+
+`handleBridgeLaunch` (`dashboard/bridge-launch-api.mjs`) now passes `--focus` — never
+`--no-focus` — to both Herdr topology calls: the `workspace create` branch (no matching-cwd
+pane) and the `tab create --workspace <id>` branch (a reused workspace). A board launch is the
+builder's own explicit gesture; Herdr focus is intra-Herdr (which workspace the TUI renders),
+not OS window focus, so nothing pulls the builder out of the browser — this brings the Herdr
+bridge to parity with the VS Code bridge's unconditional `terminal.show()` (ADR-0018).
+
+`dashboard/test/bridge-launch-api.test.mjs`'s two infrastructure-p3k9r "captured herdr 0.9.0
+(protocol 22)" tests (one per branch) now additionally assert the exact `workspace create` /
+`tab create` argv via `assert.deepEqual`, confirming `--focus` and the absence of `--no-focus`.
+Verified red-without-the-fix: temporarily reverting only the production file made exactly these
+two assertions fail (`assert.deepEqual` on the `--no-focus` vs `--focus` element), nothing else.
+No other test that referenced `--no-focus` pinned it as an expected *argv* value (only two code
+comments describing the historical p3k9r capture's literal invocation remain — those describe
+what was actually run to produce that fixture, not current behavior, and are left as an accurate
+historical record). The ADR-0018 argv-parity test and the `MODEL_ALLOWLIST` pin are untouched.
+
+**Live cold-start confirmation (2026-09-14, herdr 0.9.0, protocol 22).** Machine bridge selection
+was already `herdr` in `~/.config/agentheim/config.json` (untouched). Started a second dashboard
+instance from this worktree (`node dashboard/launch.mjs`, port 42005, its own git-ignored
+`.agentheim/.dashboard/runtime.json` inside the worktree — removed by `POST /api/stop` at the
+end). `GET /api/bridge` supplied the per-process token. `herdr api snapshot` before the launch
+showed `focused_workspace_id: "wB"` (this worker's own live pane; the only other workspace
+present on this machine at check time — no separate bare "marco" workspace was live). A real
+`POST /api/bridge/launch {"prompt":"echo focus check","name":"w506e-focus-check"}` returned
+`202 {"ok":true}`; since the launch's cwd (the worktree root) matched no existing pane, it took
+the `workspace create --focus` branch, creating workspace `wC`. A fresh `api snapshot` afterwards
+showed `focused_workspace_id: "wC"` and the new agent entry (`name: "w506e-focus-check"`) with
+`"focused": true` — the created workspace became the focused one, and the previously-focused `wB`
+flipped to `"focused": false`. `herdr workspace close wC` removed it; a fresh `api snapshot`
+confirmed zero residue (only `wB` remained). The "fading in and out" half of the original
+builder report was not observed or chased further (out of scope per the task).
+
+`dashboard/bridge-launch-api.mjs`'s comments above the topology `try` block were left unchanged
+(they describe ADR-0082 §6's fire-and-report budget, not the focus flag). ADR-0082 §5's "Never
+steals focus" text is superseded via the `ADR_0082_AMENDMENT` block in this task's RESULT — the
+conductor applies it to the existing ADR file on `main`. The infrastructure README's
+"Herdr-mediated launch — the fourth write category" bullet is updated via `README_DELTA` to read
+`--focus` in both quoted argv fragments and to note the amendment.
+
+`node --test dashboard/test/*.test.mjs lib/test/*.test.mjs` passes (1946/1946) on a clean final
+run. One unrelated, pre-existing flake was observed during earlier runs and is NOT part of this
+task's change: `lib/test/layout-migration.test.mjs`'s "migrate holds the lifecycle lock for its
+whole write phase" test failed once out of four runs with a lock-contention timing race
+(`legacy-layout` refusal racing a concurrent `log` call); it passed in isolation on every other
+attempt (3/3) and touches code this task never modified (`lib/`, not `dashboard/bridge-launch-api.mjs`).
+Neither of the two documented pre-existing Windows flakes (`bridge.test.mjs` EADDRINUSE,
+`foreign-launch.test.mjs` EPERM) was observed in this run.

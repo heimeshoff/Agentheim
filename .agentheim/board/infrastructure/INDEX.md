@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 45
+- **Doing:** 0
+- **Done:** 46
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **infrastructure-w506e** — Herdr launch leaves the new session unfocused — a dashboard launch into a cold Herdr lands in an unfocused workspace, so the TUI opens on the bare home shell; pass --focus on workspace/tab create for parity with the VS Code bridge's terminal.show(), amending ADR-0082 §5 (bug) — `doing/infrastructure-w506e-herdr-launch-focus-new-workspace.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **infrastructure-w506e** — Herdr launch leaves the new session unfocused — a dashboard launch into a cold Herdr lands in an unfocused workspace, so the TUI opens on the bare home shell; pass --focus on workspace/tab create for parity with the VS Code bridge's terminal.show(), amending ADR-0082 §5 (bug) — `done/infrastructure-w506e-herdr-launch-focus-new-workspace.md`
 - **infrastructure-p3k9r** — Verify Herdr CLI JSON field names (api snapshot pane workspace id, tab/workspace create result shape) against a live install (spike) — `done/infrastructure-p3k9r-verify-herdr-cli-json-field-names-api-snapshot-pane-workspac.md`
 - **infrastructure-vpbks** — Herdr bridge frontend — `launchOrCopy`/`probeBridge` dispatch on `/api/bridge`'s `kind`, call the mediated-launch endpoint when Herdr is selected, keep the VS Code path unmodified otherwise, and document the three-way selection in the repo README (feature) — `done/infrastructure-vpbks-herdr-bridge-frontend-kind-dispatch.md`
 - **infrastructure-xh8tw** — Herdr bridge server — `POST /api/bridge/launch` opens a Claude session in Herdr behind a per-process token; `GET /api/bridge` grows `kind`/`live`; workspace reuse by project cwd via `api snapshot`; agent start is fire-and-forget behind an immediate 202 (feature) — `done/infrastructure-xh8tw-herdr-bridge-server-mediated-launch-endpoint.md`

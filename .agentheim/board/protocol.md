@@ -5,6 +5,20 @@ Newest entries on top.
 
 ---
 
+## 2026-09-14 12:58 -- Task verified and completed: infrastructure-w506e - Herdr launch leaves the new session unfocused — a dashboard launch into a cold Herdr lands in an unfocused workspace, so the TUI opens on the bare home shell; pass --focus on workspace/tab create for parity with the VS Code bridge's terminal.show(), amending ADR-0082 §5
+
+**Type:** Work / Task completion
+**Task:** infrastructure-w506e - Herdr launch leaves the new session unfocused — a dashboard launch into a cold Herdr lands in an unfocused workspace, so the TUI opens on the bare home shell; pass --focus on workspace/tab create for parity with the VS Code bridge's terminal.show(), amending ADR-0082 §5
+**Summary:** A Herdr-mediated launch now passes --focus (never --no-focus) to both the workspace-create and tab-create topology calls in handleBridgeLaunch, so the builder's own explicit launch gesture reveals the new session in the TUI, mirroring the VS Code bridge's terminal.show(); confirmed live against a cold Herdr install
+**Duration:** 12m46s
+**Verification:** PASS (iteration 1)
+**Result source:** sidecar (after one lost-result re-dispatch — first sidecar rejected stray-fence) · layout both+sentinel · sidecar present
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-09-14 12:44 -- Batch started: [infrastructure-w506e]
 
 **Type:** Work / Batch start

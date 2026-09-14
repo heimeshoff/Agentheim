@@ -559,7 +559,9 @@ const CAPTURED_TAB_CREATE_RESULT = {
 test('captured herdr 0.9.0 (protocol 22): no matching pane -> workspace create, pane id derived from the verbatim .result.root_pane.pane_id (an OBJECT, not a string)', async () => {
   const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
   const res = makeRes();
+  const calls = [];
   const exec = (bin, args) => {
+    calls.push(args);
     if (args[0] === 'api') return JSON.stringify({ result: CAPTURED_API_SNAPSHOT_RESULT });
     if (args[0] === 'workspace' && args[1] === 'create') return JSON.stringify({ result: CAPTURED_WORKSPACE_CREATE_RESULT });
     if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
@@ -577,6 +579,19 @@ test('captured herdr 0.9.0 (protocol 22): no matching pane -> workspace create, 
     spawnFn,
   });
   assert.equal(res.statusCode, 202);
+  // infrastructure-w506e: a board launch is the builder's own explicit
+  // gesture, so the created workspace must be focused — parity with
+  // ADR-0018's terminal.show(). `--no-focus` must never appear.
+  const workspaceCreateCall = calls.find((a) => a[0] === 'workspace' && a[1] === 'create');
+  assert.deepEqual(workspaceCreateCall, [
+    'workspace',
+    'create',
+    '--cwd',
+    '/no/pane/has/this/cwd',
+    '--label',
+    'do it',
+    '--focus',
+  ]);
   await new Promise((resolve) => process.nextTick(resolve));
   assert.ok(spawnedArgs, 'agent start must have been spawned');
   assert.equal(spawnedArgs[spawnedArgs.indexOf('--pane') + 1], 'w7:p1');
@@ -611,6 +626,19 @@ test('captured herdr 0.9.0 (protocol 22): matching pane -> tab create reusing it
   const tabCall = calls.find((a) => a[0] === 'tab' && a[1] === 'create');
   assert.ok(tabCall);
   assert.equal(tabCall[tabCall.indexOf('--workspace') + 1], 'w7');
+  // infrastructure-w506e: parity with the workspace-create branch — the
+  // reused-workspace tab must also be focused, never `--no-focus`.
+  assert.deepEqual(tabCall, [
+    'tab',
+    'create',
+    '--workspace',
+    'w7',
+    '--cwd',
+    CAPTURED_PROBE_CWD,
+    '--label',
+    'do it',
+    '--focus',
+  ]);
   await new Promise((resolve) => process.nextTick(resolve));
   assert.ok(spawnedArgs, 'agent start must have been spawned');
   assert.equal(spawnedArgs[spawnedArgs.indexOf('--pane') + 1], 'w7:p2');

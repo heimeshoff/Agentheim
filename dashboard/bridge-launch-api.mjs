@@ -307,9 +307,9 @@ export async function handleBridgeLaunch(req, res, root, opts = {}) {
             root,
             '--label',
             displayName,
-            '--no-focus',
+            '--focus',
           ])
-        : exec(binaryPath, ['workspace', 'create', '--cwd', root, '--label', displayName, '--no-focus']);
+        : exec(binaryPath, ['workspace', 'create', '--cwd', root, '--label', displayName, '--focus']);
     topology = JSON.parse(raw2);
   } catch (err) {
     send(res, 502, { error: 'herdr tab/workspace create failed', detail: String(err && err.message) });
