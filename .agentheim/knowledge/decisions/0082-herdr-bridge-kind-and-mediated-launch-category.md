@@ -4,7 +4,7 @@ title: Herdr joins the dashboard bridge family — a second bridge kind, a fourt
 scope: infrastructure
 status: proposed
 date: 2026-09-13
-related_tasks: [infrastructure-e8h9f, infrastructure-xh8tw, infrastructure-vpbks, infrastructure-w506e, infrastructure-nz2e8]
+related_tasks: [infrastructure-e8h9f, infrastructure-xh8tw, infrastructure-vpbks, infrastructure-w506e, infrastructure-nz2e8, infrastructure-cztns]
 related_adrs: [0017, 0018, 0053, 0079]
 ---
 
@@ -90,6 +90,24 @@ one.
 > client attached (no `no_foreground_client` error). This ADR now matches ADR-0018's own
 > `terminal.show()`, which is unconditional. A future "launch in the background" need is a
 > body-field opt-in (`focus: false`), not the default — not built here.
+
+> **Amended 2026-11-01 (infrastructure-cztns).** §5's warm-workspace branch no longer opens a new
+> tab. When a pane in `api snapshot` matches the project root (`cwdsMatch`), the handler now runs
+> `herdr pane split --pane <target> --direction right --cwd <root> --focus` and launches Claude
+> with `agent start --pane <id>` in the pane that `pane split` returns (live-verified on Herdr
+> 0.9.0: `result.pane.pane_id`, a PaneInfo; `workspace create` still answers
+> `result.root_pane.pane_id`). The split target is the focused pane of the project workspace's
+> active tab, read from the snapshot as the `layouts[]` entry whose `tab_id` equals that
+> workspace's `active_tab_id` (and whose `workspace_id` matches), taking its `focused_pane_id`
+> provided that pane is in `panes[]` with the same `workspace_id`; if none resolves, the
+> cwd-matched pane is split instead. The top-level `focused_pane_id`/`focused_workspace_id` and
+> per-pane `focused` are global rather than per-workspace, so they are not used; this also
+> guarantees the split never lands in a foreign workspace. Direction is always `right`. The cold
+> branch (`workspace create --cwd <root> --label <name> --focus`) is unchanged. Label: `pane
+> split` has no `--label`, and no `pane rename` is issued, so on the warm path the session name
+> shows only through the agent name and `claude -n` (not as a Herdr tab label). The split is
+> awaited before the 202, a failure is a non-2xx naming the pane split, and the child carries
+> `HERDR_CHILD_OPTIONS`.
 
 ### 6. Request-path budget
 

@@ -18,7 +18,7 @@
 // CSRF POST arrives token-less and gets 401.
 //
 // REQUEST-PATH BUDGET (ADR-0082 §6): `api snapshot` + the matching
-// `tab create`/`workspace create` are AWAITED — a failure there is a non-2xx
+// `pane split`/`workspace create` are AWAITED — a failure there is a non-2xx
 // before any response commits. Once topology succeeds, the handler responds
 // `202 {ok:true}` IMMEDIATELY, then resolves live agent names and spawns
 // `agent start … --timeout … -- <argv>` UNAWAITED — a subsequent
@@ -255,6 +255,27 @@ function defaultListAgentNames(binaryPath, exec) {
   }
 }
 
+/**
+ * Pick the pane to split inside the project's workspace (infrastructure-cztns):
+ * the focused pane of that workspace's ACTIVE tab, read from the snapshot's
+ * `layouts[]` entry for that tab (per-tab, so it is correct even when the
+ * builder's global focus sits in another workspace). Falls back to the
+ * cwd-matched pane, which is always present. A layout pane that is not in the
+ * project's workspace is never used.
+ */
+export function resolveSplitTarget(snap, matchingPane) {
+  const wsId = matchingPane.workspace_id;
+  const ws = Array.isArray(snap?.workspaces) ? snap.workspaces.find((w) => w && w.workspace_id === wsId) : undefined;
+  const layout =
+    ws && Array.isArray(snap?.layouts)
+      ? snap.layouts.find((l) => l && l.tab_id === ws.active_tab_id && l.workspace_id === wsId)
+      : undefined;
+  const focusedId = layout?.focused_pane_id;
+  const inWorkspace =
+    focusedId && Array.isArray(snap?.panes) && snap.panes.some((p) => p && p.pane_id === focusedId && p.workspace_id === wsId);
+  return inWorkspace ? focusedId : matchingPane.pane_id;
+}
+
 const DEFAULT_TIMEOUT_MS = 30000;
 
 /**
@@ -344,15 +365,23 @@ export async function handleBridgeLaunch(req, res, root, opts = {}) {
   // separator, win32 case) must never push a launch onto the
   // `workspace create` branch when the pane really is the same directory.
   const matchingPane = Array.isArray(panes) ? panes.find((p) => p && cwdsMatch(root, p.cwd, platform)) : undefined;
-  const workspaceId = matchingPane ? matchingPane.workspace_id : undefined;
-
-  let topology;
+    let topology;
   try {
     const raw2 =
       matchingPane !== undefined
         ? exec(
             binaryPath,
-            ['tab', 'create', '--workspace', String(workspaceId), '--cwd', root, '--label', displayName, '--focus'],
+            [
+              'pane',
+              'split',
+              '--pane',
+              String(resolveSplitTarget(snapshot?.result?.snapshot, matchingPane)),
+              '--direction',
+              'right',
+              '--cwd',
+              root,
+              '--focus',
+            ],
             HERDR_CHILD_OPTIONS,
           )
         : exec(
@@ -362,15 +391,15 @@ export async function handleBridgeLaunch(req, res, root, opts = {}) {
           );
     topology = JSON.parse(raw2);
   } catch (err) {
-    send(res, 502, { error: 'herdr tab/workspace create failed', detail: String(err && err.message) });
+    send(res, 502, { error: 'herdr pane split/workspace create failed', detail: String(err && err.message) });
     return;
   }
 
-  // `root_pane` is a PaneInfo OBJECT (herdr 0.9.0, protocol 22, `api schema
-  // --json` + a live `workspace create`/`tab create` capture,
-  // infrastructure-p3k9r) — its id lives at `.pane_id`, it is never a bare
-  // string.
-  const paneId = topology?.result?.root_pane?.pane_id;
+  // The new pane's id: `pane split` answers `.result.pane` (a PaneInfo, live
+  // capture herdr 0.9.0, infrastructure-cztns); `workspace create` answers
+  // `.result.root_pane` (infrastructure-p3k9r). Both are OBJECTS keyed
+  // `.pane_id`, never bare strings.
+  const paneId = (matchingPane !== undefined ? topology?.result?.pane : topology?.result?.root_pane)?.pane_id;
   if (!paneId) {
     send(res, 502, { error: 'herdr did not report a pane id' });
     return;

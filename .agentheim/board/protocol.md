@@ -5,6 +5,20 @@ Newest entries on top.
 
 ---
 
+## 2026-11-01 15:22 -- Task verified and completed: infrastructure-cztns - A Herdr-mediated launch into an existing project workspace should open the new session in a new pane, split right off the focused pane, instead of a new tab; amends ADR-0082 §5
+
+**Type:** Work / Task completion
+**Task:** infrastructure-cztns - A Herdr-mediated launch into an existing project workspace should open the new session in a new pane, split right off the focused pane, instead of a new tab; amends ADR-0082 §5
+**Summary:** Herdr-mediated launch into an existing project workspace now splits the focused pane of its active tab to the right (pane split) instead of opening a new tab; cold workspace-create path unchanged
+**Duration:** 5m
+**Verification:** PASS (iteration 1)
+**Result source:** sidecar · layout both+sentinel · sidecar present
+**Files changed:** 2
+**Tests added:** 7
+**ADRs written:** none (ADR-0082 amended §5)
+
+---
+
 ## 2026-11-01 15:15 -- Batch started: [infrastructure-cztns]
 
 **Type:** Work / Batch start

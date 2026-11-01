@@ -361,7 +361,7 @@ test('herdr tab/workspace create failure -> non-2xx before any 202', async () =>
   assert.ok(calls.some((a) => a[0] === 'workspace' && a[1] === 'create'));
 });
 
-test('no matching-cwd pane -> workspace create (not tab create)', async () => {
+test('no matching-cwd pane -> workspace create (not pane split)', async () => {
   const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
   const res = makeRes();
   const calls = [];
@@ -385,7 +385,7 @@ test('no matching-cwd pane -> workspace create (not tab create)', async () => {
   assert.deepEqual(JSON.parse(res.body), { ok: true });
   assert.ok(calls.some((a) => a[0] === 'workspace' && a[1] === 'create'));
   assert.equal(
-    calls.some((a) => a[0] === 'tab' && a[1] === 'create'),
+    calls.some((a) => a[0] === 'pane' && a[1] === 'split'),
     false,
   );
   assert.equal(spawnCalls.length, 1);
@@ -393,57 +393,105 @@ test('no matching-cwd pane -> workspace create (not tab create)', async () => {
   assert.equal(spawnCalls[0].args[1], 'start');
 });
 
-test('matching-cwd pane -> tab create --workspace <id> (not workspace create)', async () => {
-  const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
-  const res = makeRes();
+function splitHarness(snap, { splitResult, splitThrows } = {}) {
   const calls = [];
-  const exec = (bin, args) => {
-    calls.push(args);
-    if (args[0] === 'api')
-      return JSON.stringify({ result: { snapshot: { panes: [{ cwd: '/proj', workspace_id: 'w7' }] } } });
-    if (args[0] === 'tab') return JSON.stringify({ result: { tab: 't2', root_pane: { pane_id: 'w7:p2' } } });
+  const exec = (bin, args, options) => {
+    calls.push({ args, options });
+    if (args[0] === 'api') return JSON.stringify({ result: { snapshot: snap } });
+    if (args[0] === 'pane' && args[1] === 'split') {
+      if (splitThrows) throw new Error('herdr: pane split failed');
+      return JSON.stringify(splitResult ?? { result: { type: 'pane_info', pane: { pane_id: 'w7:p9' } } });
+    }
     if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
     throw new Error(`unexpected exec call: ${args.join(' ')}`);
   };
-  const spawnFn = () => {};
-  await handleBridgeLaunch(req, res, '/proj', {
-    token: VALID_TOKEN,
-    resolveHerdrBinaryFn: () => ({ path: '/fake/herdr', source: 'path', version: null }),
-    exec,
-    spawnFn,
-  });
+  const spawned = [];
+  const spawnFn = (bin, args) => spawned.push(args);
+  const run = async (root = '/proj') => {
+    const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
+    const res = makeRes();
+    await handleBridgeLaunch(req, res, root, {
+      token: VALID_TOKEN,
+      resolveHerdrBinaryFn: () => ({ path: '/fake/herdr', source: 'path', version: null }),
+      exec,
+      spawnFn,
+    });
+    await new Promise((resolve) => process.nextTick(resolve));
+    return res;
+  };
+  return { calls, spawned, run };
+}
+
+const SPLIT_SNAP = {
+  workspaces: [
+    { workspace_id: 'w7', active_tab_id: 'w7:t2' },
+    { workspace_id: 'w3', active_tab_id: 'w3:t1' },
+  ],
+  panes: [
+    { pane_id: 'w7:p1', cwd: '/proj', workspace_id: 'w7', tab_id: 'w7:t1' },
+    { pane_id: 'w7:p5', cwd: '/proj/sub', workspace_id: 'w7', tab_id: 'w7:t2' },
+    { pane_id: 'w3:p2', cwd: '/other', workspace_id: 'w3', tab_id: 'w3:t1' },
+  ],
+  layouts: [
+    { tab_id: 'w7:t1', workspace_id: 'w7', focused_pane_id: 'w7:p1' },
+    { tab_id: 'w7:t2', workspace_id: 'w7', focused_pane_id: 'w7:p5' },
+    { tab_id: 'w3:t1', workspace_id: 'w3', focused_pane_id: 'w3:p2' },
+  ],
+  focused_pane_id: 'w3:p2',
+  focused_workspace_id: 'w3',
+};
+
+test('matching-cwd pane -> pane split --pane <focused pane of the active tab> --direction right --cwd <root> --focus; no tab create, no workspace create (infrastructure-cztns)', async () => {
+  const h = splitHarness(SPLIT_SNAP);
+  const res = await h.run('/proj');
   assert.equal(res.statusCode, 202);
-  const tabCall = calls.find((a) => a[0] === 'tab' && a[1] === 'create');
-  assert.ok(tabCall);
-  assert.ok(tabCall.includes('--workspace'));
-  assert.equal(tabCall[tabCall.indexOf('--workspace') + 1], 'w7');
+  const split = h.calls.find((c) => c.args[0] === 'pane' && c.args[1] === 'split');
+  assert.deepEqual(split.args, ['pane', 'split', '--pane', 'w7:p5', '--direction', 'right', '--cwd', '/proj', '--focus']);
+  assert.equal(h.calls.some((c) => c.args[0] === 'tab'), false);
+  assert.equal(h.calls.some((c) => c.args[0] === 'workspace'), false);
+  assert.equal(split.options && split.options.windowsHide, true, 'pane split exec must receive windowsHide:true');
+  assert.equal(h.spawned[0][h.spawned[0].indexOf('--pane') + 1], 'w7:p9');
 });
 
-test('the pane-to-workspace read only trusts workspace_id — a matching pane carrying the old `workspace` key (no `workspace_id`) yields `--workspace undefined`, proving the `?? pane.workspace` fallback is gone (infrastructure-p3k9r Shape 1)', async () => {
-  const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
-  const res = makeRes();
-  const calls = [];
-  const exec = (bin, args) => {
-    calls.push(args);
-    // `workspace` (no trailing `_id`) is the shape the OLD `?? pane.workspace`
-    // fallback used to read; a live install never emits it (infrastructure-
-    // p3k9r's live capture: only `workspace_id` is present).
-    if (args[0] === 'api') return JSON.stringify({ result: { snapshot: { panes: [{ cwd: '/proj', workspace: 'w7' }] } } });
-    if (args[0] === 'tab') return JSON.stringify({ result: { tab: 't2', root_pane: { pane_id: 'w7:p2' } } });
-    if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
-    throw new Error(`unexpected exec call: ${args.join(' ')}`);
-  };
-  const spawnFn = () => {};
-  await handleBridgeLaunch(req, res, '/proj', {
-    token: VALID_TOKEN,
-    resolveHerdrBinaryFn: () => ({ path: '/fake/herdr', source: 'path', version: null }),
-    exec,
-    spawnFn,
-  });
+test('no focused pane resolvable in the project workspace -> pane split targets the cwd-matched pane (infrastructure-cztns)', async () => {
+  const h = splitHarness({ ...SPLIT_SNAP, layouts: [] });
+  const res = await h.run('/proj');
   assert.equal(res.statusCode, 202);
-  const tabCall = calls.find((a) => a[0] === 'tab' && a[1] === 'create');
-  assert.ok(tabCall);
-  assert.equal(tabCall[tabCall.indexOf('--workspace') + 1], 'undefined');
+  const split = h.calls.find((c) => c.args[0] === 'pane' && c.args[1] === 'split');
+  assert.equal(split.args[split.args.indexOf('--pane') + 1], 'w7:p1');
+});
+
+test('a layout focused pane that belongs to a FOREIGN workspace is never the split target (infrastructure-cztns)', async () => {
+  const h = splitHarness({
+    ...SPLIT_SNAP,
+    layouts: [{ tab_id: 'w7:t2', workspace_id: 'w7', focused_pane_id: 'w3:p2' }],
+  });
+  await h.run('/proj');
+  const split = h.calls.find((c) => c.args[0] === 'pane' && c.args[1] === 'split');
+  assert.equal(split.args[split.args.indexOf('--pane') + 1], 'w7:p1');
+});
+
+test('global focus in a different workspace does not redirect the split: it lands in the project workspace (infrastructure-cztns)', async () => {
+  const h = splitHarness(SPLIT_SNAP); // top-level focused_pane_id is w3:p2 (foreign)
+  await h.run('/proj');
+  const split = h.calls.find((c) => c.args[0] === 'pane' && c.args[1] === 'split');
+  assert.ok(split.args[split.args.indexOf('--pane') + 1].startsWith('w7:'));
+});
+
+test('pane split failure -> non-2xx before any 202, error names the pane split (infrastructure-cztns)', async () => {
+  const h = splitHarness(SPLIT_SNAP, { splitThrows: true });
+  const res = await h.run('/proj');
+  assert.ok(res.statusCode >= 400 && res.statusCode < 600);
+  assert.match(res.body, /pane split/);
+  assert.equal(h.spawned.length, 0);
+});
+
+test('pane split result without result.pane.pane_id -> 502 "herdr did not report a pane id" (infrastructure-cztns)', async () => {
+  const h = splitHarness(SPLIT_SNAP, { splitResult: { result: { root_pane: { pane_id: 'w7:p1' } } } });
+  const res = await h.run('/proj');
+  assert.equal(res.statusCode, 502);
+  assert.match(res.body, /did not report a pane id/);
+  assert.equal(h.spawned.length, 0);
 });
 
 test('every awaited exec call (api snapshot, workspace create, agent list) AND the fire-and-forget spawn receive windowsHide:true — the dashboard server owns no console (infrastructure-nz2e8)', async () => {
@@ -481,7 +529,7 @@ test('every awaited exec call (api snapshot, workspace create, agent list) AND t
   assert.equal(spawnOptions.windowsHide, true);
 });
 
-test('workspace-reuse: a path-FORM difference alone (backslash pane cwd vs forward-slash root) still takes tab-create, never workspace-create, and the tab-create exec receives windowsHide:true (win32) (infrastructure-nz2e8)', async () => {
+test('workspace-reuse: a path-FORM difference alone (backslash pane cwd vs forward-slash root) still takes pane-split, never workspace-create, and the tab-create exec receives windowsHide:true (win32) (infrastructure-nz2e8)', async () => {
   const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
   const res = makeRes();
   const calls = [];
@@ -489,7 +537,7 @@ test('workspace-reuse: a path-FORM difference alone (backslash pane cwd vs forwa
     calls.push({ args, options });
     if (args[0] === 'api')
       return JSON.stringify({ result: { snapshot: { panes: [{ cwd: 'C:\\src\\proj', workspace_id: 'w9' }] } } });
-    if (args[0] === 'tab') return JSON.stringify({ result: { tab: 't2', root_pane: { pane_id: 'w9:p2' } } });
+    if (args[0] === 'pane') return JSON.stringify({ result: { pane: { pane_id: 'w9:p2' } } });
     if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
     throw new Error(`unexpected exec call: ${args.join(' ')}`);
   };
@@ -502,13 +550,13 @@ test('workspace-reuse: a path-FORM difference alone (backslash pane cwd vs forwa
     platform: 'win32',
   });
   assert.equal(res.statusCode, 202);
-  assert.ok(calls.some((c) => c.args[0] === 'tab' && c.args[1] === 'create'));
+  assert.ok(calls.some((c) => c.args[0] === 'pane' && c.args[1] === 'split'));
   assert.equal(calls.some((c) => c.args[0] === 'workspace' && c.args[1] === 'create'), false);
-  const tabCall = calls.find((c) => c.args[0] === 'tab' && c.args[1] === 'create');
-  assert.equal(tabCall.options && tabCall.options.windowsHide, true, 'tab create exec must receive windowsHide:true');
+  const tabCall = calls.find((c) => c.args[0] === 'pane' && c.args[1] === 'split');
+  assert.equal(tabCall.options && tabCall.options.windowsHide, true, 'pane split exec must receive windowsHide:true');
 });
 
-test('workspace-reuse: the reverse form (backslash root vs forward-slash pane cwd) still takes tab-create, and the tab-create exec receives windowsHide:true (win32) (infrastructure-nz2e8)', async () => {
+test('workspace-reuse: the reverse form (backslash root vs forward-slash pane cwd) still takes pane-split, and the tab-create exec receives windowsHide:true (win32) (infrastructure-nz2e8)', async () => {
   const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
   const res = makeRes();
   const calls = [];
@@ -516,7 +564,7 @@ test('workspace-reuse: the reverse form (backslash root vs forward-slash pane cw
     calls.push({ args, options });
     if (args[0] === 'api')
       return JSON.stringify({ result: { snapshot: { panes: [{ cwd: 'C:/src/proj', workspace_id: 'w9' }] } } });
-    if (args[0] === 'tab') return JSON.stringify({ result: { tab: 't2', root_pane: { pane_id: 'w9:p2' } } });
+    if (args[0] === 'pane') return JSON.stringify({ result: { pane: { pane_id: 'w9:p2' } } });
     if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
     throw new Error(`unexpected exec call: ${args.join(' ')}`);
   };
@@ -529,13 +577,13 @@ test('workspace-reuse: the reverse form (backslash root vs forward-slash pane cw
     platform: 'win32',
   });
   assert.equal(res.statusCode, 202);
-  assert.ok(calls.some((c) => c.args[0] === 'tab' && c.args[1] === 'create'));
+  assert.ok(calls.some((c) => c.args[0] === 'pane' && c.args[1] === 'split'));
   assert.equal(calls.some((c) => c.args[0] === 'workspace' && c.args[1] === 'create'), false);
-  const tabCall = calls.find((c) => c.args[0] === 'tab' && c.args[1] === 'create');
-  assert.equal(tabCall.options && tabCall.options.windowsHide, true, 'tab create exec must receive windowsHide:true');
+  const tabCall = calls.find((c) => c.args[0] === 'pane' && c.args[1] === 'split');
+  assert.equal(tabCall.options && tabCall.options.windowsHide, true, 'pane split exec must receive windowsHide:true');
 });
 
-test('workspace-reuse: a trailing-separator variant still takes tab-create, and the tab-create exec receives windowsHide:true (win32) (infrastructure-nz2e8)', async () => {
+test('workspace-reuse: a trailing-separator variant still takes pane-split, and the tab-create exec receives windowsHide:true (win32) (infrastructure-nz2e8)', async () => {
   const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
   const res = makeRes();
   const calls = [];
@@ -543,7 +591,7 @@ test('workspace-reuse: a trailing-separator variant still takes tab-create, and 
     calls.push({ args, options });
     if (args[0] === 'api')
       return JSON.stringify({ result: { snapshot: { panes: [{ cwd: 'C:\\src\\proj\\', workspace_id: 'w9' }] } } });
-    if (args[0] === 'tab') return JSON.stringify({ result: { tab: 't2', root_pane: { pane_id: 'w9:p2' } } });
+    if (args[0] === 'pane') return JSON.stringify({ result: { pane: { pane_id: 'w9:p2' } } });
     if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
     throw new Error(`unexpected exec call: ${args.join(' ')}`);
   };
@@ -556,13 +604,13 @@ test('workspace-reuse: a trailing-separator variant still takes tab-create, and 
     platform: 'win32',
   });
   assert.equal(res.statusCode, 202);
-  assert.ok(calls.some((c) => c.args[0] === 'tab' && c.args[1] === 'create'));
+  assert.ok(calls.some((c) => c.args[0] === 'pane' && c.args[1] === 'split'));
   assert.equal(calls.some((c) => c.args[0] === 'workspace' && c.args[1] === 'create'), false);
-  const tabCall = calls.find((c) => c.args[0] === 'tab' && c.args[1] === 'create');
-  assert.equal(tabCall.options && tabCall.options.windowsHide, true, 'tab create exec must receive windowsHide:true');
+  const tabCall = calls.find((c) => c.args[0] === 'pane' && c.args[1] === 'split');
+  assert.equal(tabCall.options && tabCall.options.windowsHide, true, 'pane split exec must receive windowsHide:true');
 });
 
-test('workspace-reuse: a genuinely different directory still takes workspace-create, never tab-create, and the workspace-create exec receives windowsHide:true (win32) (infrastructure-nz2e8)', async () => {
+test('workspace-reuse: a genuinely different directory still takes workspace-create, never pane-split, and the workspace-create exec receives windowsHide:true (win32) (infrastructure-nz2e8)', async () => {
   const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
   const res = makeRes();
   const calls = [];
@@ -585,7 +633,7 @@ test('workspace-reuse: a genuinely different directory still takes workspace-cre
   });
   assert.equal(res.statusCode, 202);
   assert.ok(calls.some((c) => c.args[0] === 'workspace' && c.args[1] === 'create'));
-  assert.equal(calls.some((c) => c.args[0] === 'tab' && c.args[1] === 'create'), false);
+  assert.equal(calls.some((c) => c.args[0] === 'pane' && c.args[1] === 'split'), false);
   const workspaceCall = calls.find((c) => c.args[0] === 'workspace' && c.args[1] === 'create');
   assert.equal(
     workspaceCall.options && workspaceCall.options.windowsHide,
@@ -785,14 +833,32 @@ test('captured herdr 0.9.0 (protocol 22): no matching pane -> workspace create, 
   assert.equal(spawnedArgs[spawnedArgs.indexOf('--pane') + 1], 'w7:p1');
 });
 
-test('captured herdr 0.9.0 (protocol 22): matching pane -> tab create reusing its workspace_id, pane id derived from the verbatim .result.root_pane.pane_id', async () => {
+// `herdr pane split --pane w18:p1 --direction right --cwd <probe> --no-focus`
+// (herdr 0.9.0, protocol 22) -- verbatim `.result`, captured live on a
+// disposable workspace (infrastructure-cztns), closed afterwards.
+const CAPTURED_PANE_SPLIT_RESULT = {
+  type: 'pane_info',
+  pane: {
+    agent_status: 'unknown',
+    cwd: `${CAPTURED_PROBE_CWD}\\`,
+    focused: false,
+    pane_id: 'w7:p2',
+    revision: 0,
+    scroll: { max_offset_from_bottom: 0, offset_from_bottom: 0, viewport_rows: 40 },
+    tab_id: 'w7:t1',
+    terminal_id: 'term_65f37aee7f67210',
+    workspace_id: 'w7',
+  },
+};
+
+test('captured herdr 0.9.0 (protocol 22): matching pane -> pane split in its workspace, pane id derived from the verbatim .result.pane.pane_id (infrastructure-cztns)', async () => {
   const req = makeReq({ headers: tokenHeaders(), body: JSON.stringify({ prompt: 'do it' }) });
   const res = makeRes();
   const calls = [];
   const exec = (bin, args) => {
     calls.push(args);
     if (args[0] === 'api') return JSON.stringify({ result: CAPTURED_API_SNAPSHOT_RESULT });
-    if (args[0] === 'tab' && args[1] === 'create') return JSON.stringify({ result: CAPTURED_TAB_CREATE_RESULT });
+    if (args[0] === 'pane' && args[1] === 'split') return JSON.stringify({ result: CAPTURED_PANE_SPLIT_RESULT });
     if (args[0] === 'agent' && args[1] === 'list') return JSON.stringify({ result: { agents: [] } });
     throw new Error(`unexpected exec call: ${args.join(' ')}`);
   };
@@ -800,10 +866,6 @@ test('captured herdr 0.9.0 (protocol 22): matching pane -> tab create reusing it
   const spawnFn = (bin, args) => {
     spawnedArgs = args;
   };
-  // `root` is the EXACT captured pane cwd — the workspace-reuse comparison
-  // (`pane.cwd === root`) matches as-is (infrastructure-p3k9r AC4): the
-  // `api snapshot` pane cwd this comparison actually reads carries no
-  // trailing separator, matching `discoverRoot()`'s `path.resolve()` output.
   await handleBridgeLaunch(req, res, CAPTURED_PROBE_CWD, {
     token: VALID_TOKEN,
     resolveHerdrBinaryFn: () => ({ path: '/fake/herdr', source: 'path', version: null }),
@@ -811,22 +873,11 @@ test('captured herdr 0.9.0 (protocol 22): matching pane -> tab create reusing it
     spawnFn,
   });
   assert.equal(res.statusCode, 202);
-  const tabCall = calls.find((a) => a[0] === 'tab' && a[1] === 'create');
-  assert.ok(tabCall);
-  assert.equal(tabCall[tabCall.indexOf('--workspace') + 1], 'w7');
-  // infrastructure-w506e: parity with the workspace-create branch — the
-  // reused-workspace tab must also be focused, never `--no-focus`.
-  assert.deepEqual(tabCall, [
-    'tab',
-    'create',
-    '--workspace',
-    'w7',
-    '--cwd',
-    CAPTURED_PROBE_CWD,
-    '--label',
-    'do it',
-    '--focus',
-  ]);
+  const splitCall = calls.find((a) => a[0] === 'pane' && a[1] === 'split');
+  assert.ok(splitCall);
+  assert.equal(splitCall[splitCall.indexOf('--direction') + 1], 'right');
+  assert.ok(splitCall.includes('--focus'));
+  assert.equal(calls.some((a) => a[0] === 'tab'), false);
   await new Promise((resolve) => process.nextTick(resolve));
   assert.ok(spawnedArgs, 'agent start must have been spawned');
   assert.equal(spawnedArgs[spawnedArgs.indexOf('--pane') + 1], 'w7:p2');
