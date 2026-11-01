@@ -1,7 +1,7 @@
 ---
 id: infrastructure-cztns
 title: A Herdr-mediated launch into an existing project workspace should open the new session in a new pane, split right off the focused pane, instead of a new tab; amends ADR-0082 §5
-status: todo
+status: doing
 type: feature
 context: infrastructure
 created: 2026-11-01

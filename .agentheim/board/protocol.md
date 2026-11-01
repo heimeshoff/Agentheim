@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-01 15:15 -- Batch started: [infrastructure-cztns]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-cztns - A Herdr-mediated launch into an existing project workspace should open the new session in a new pane, split right off the focused pane, instead of a new tab; amends ADR-0082 §5
+**Parallel:** no (1 worker — the only ready task across all contexts)
+
+---
+
 ## 2026-11-01 15:12 -- Modeling / Captured: infrastructure-cztns - A Herdr-mediated launch into an existing project workspace should open the new session in a new pane, split right off the focused pane, instead of a new tab; amends ADR-0082 §5
 
 **Type:** Modeling / Capture
