@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-11-01 15:23 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** ~12m (batch start 15:15 to session end)
+**Completed:** 1 (first-try PASS: 1, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** infrastructure-cztns: 1
+**Commits:** 3
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (1 task)
+**Carry-over:** none — working tree clean; no non-main worktrees; 1 stranded RESULT sidecar removed; full suite in worktree 1972/1972
+
+---
+
 ## 2026-11-01 15:22 -- Task verified and completed: infrastructure-cztns - A Herdr-mediated launch into an existing project workspace should open the new session in a new pane, split right off the focused pane, instead of a new tab; amends ADR-0082 §5
 
 **Type:** Work / Task completion
