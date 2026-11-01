@@ -8,6 +8,15 @@ its **plugin contract** (skills, commands, `.agentheim/` layout) with
 
 ## [Unreleased]
 
+## [0.9.7] - 2026-11-01
+
+**Herdr launches open a split pane next to you, not a new tab.** A patch to the Herdr bridge:
+when Herdr already has a workspace for the project, a dashboard launch now opens the new Claude
+session as a right-hand split of the pane you're focused on, in the same tab, with focus on it.
+
+### Changed
+- **Warm Herdr launch splits the focused pane** — when a pane in `herdr api snapshot` matches the project root, the dashboard server runs `herdr pane split --pane <target> --direction right --cwd <root> --focus` instead of `tab create`, and starts Claude in the pane the split returns. The split target is the focused pane of the project workspace's active tab, falling back to the cwd-matched pane; it never lands in another workspace. The cold path (`workspace create … --focus`) is unchanged. Because a split pane carries no label, on this path the session name shows through the agent name and `claude -n`, not a Herdr tab label (ADR-0082 §5 amended).
+
 ## [0.9.6] - 2026-09-14
 
 **Herdr launches on Windows open a tab, not a new window.** A patch that polishes the Herdr bridge
@@ -364,7 +373,8 @@ palette and the board grows a docked prompt console you drive from the keyboard.
 ### Added
 - Initial plugin design.
 
-[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.6...HEAD
+[Unreleased]: https://github.com/heimeshoff/Agentheim/compare/v0.9.7...HEAD
+[0.9.7]: https://github.com/heimeshoff/Agentheim/compare/v0.9.6...v0.9.7
 [0.9.6]: https://github.com/heimeshoff/Agentheim/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/heimeshoff/Agentheim/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/heimeshoff/Agentheim/compare/v0.9.3...v0.9.4
