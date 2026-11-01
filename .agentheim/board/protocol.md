@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-11-01 15:32 -- Release shipped: v0.9.7
+
+**Type:** Release
+**Version:** 0.9.6 → 0.9.7 (patch — a Herdr-mediated launch into an existing project workspace now opens the session as a right-hand split of the focused pane instead of a new tab)
+**Manifest:** `.claude-plugin/plugin.json` bumped, committed `6d64bee`
+**Marketplace ref:** `.claude-plugin/marketplace.json` pinned to `v0.9.7` (same commit)
+**Changelog:** `CHANGELOG.md` `[Unreleased]` → `[0.9.7]` section rolled (same commit)
+**Pushed:** yes — `main` + `v0.9.7` atomically (`4222dbd..6d64bee` on `origin/main`)
+**Tag:** `v0.9.7` (annotated) → `6d64bee`, pushed to origin
+**GitHub Release:** created via `gh` (from CHANGELOG)
+
+---
+
 ## 2026-11-01 15:23 -- Work session ended
 
 **Type:** Work / Session end
