@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-01 15:12 -- Modeling / Captured: infrastructure-cztns - A Herdr-mediated launch into an existing project workspace should open the new session in a new pane, split right off the focused pane, instead of a new tab; amends ADR-0082 §5
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** A Herdr-mediated launch into an existing project workspace now splits the focused pane to the right (pane split --focus) instead of opening a new tab; the cold workspace-create path is unchanged. Amends ADR-0082 §5.
+
+---
+
 ## 2026-09-14 16:29 -- Release shipped: v0.9.6
 
 **Type:** Release
