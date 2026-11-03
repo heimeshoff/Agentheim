@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 15:24 -- Task verified and completed: infrastructure-yaajt - Dashboard build emits lazily-loaded code-split chunks (dist/app.js + dist/chunks/), dependency pins become build-stamp inputs
+
+**Type:** Work / Task completion
+**Task:** infrastructure-yaajt - Dashboard build emits lazily-loaded code-split chunks (dist/app.js + dist/chunks/), dependency pins become build-stamp inputs
+**Summary:** dashboard build emits app.js + content-hashed lazy chunks (esbuild splitting, ADR-0083); mermaid pinned 11.17.2; package.json/lock become build-stamp inputs
+**Duration:** 4m10s
+**Verification:** PASS (iteration 1)
+**Files changed:** 8
+**Tests added:** 6
+**ADRs written:** none
+
+---
+
 ## 2026-11-03 15:19 -- Batch started: [infrastructure-yaajt]
 
 **Type:** Work / Batch start

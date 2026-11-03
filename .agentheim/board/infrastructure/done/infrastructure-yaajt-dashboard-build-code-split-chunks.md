@@ -1,7 +1,7 @@
 ---
 id: infrastructure-yaajt
 title: Dashboard build emits lazily-loaded code-split chunks (dist/app.js + dist/chunks/), dependency pins become build-stamp inputs
-status: doing
+status: done
 type: feature
 context: infrastructure
 created: 2026-11-03
@@ -67,3 +67,20 @@ dependency bump never marks `dist/` stale.
 - If esbuild cannot bundle mermaid cleanly, the fallback is ADR-0083's (b′) path: vendor mermaid's
   prebuilt ESM build into `dist/vendor/`. Bounce the task back to the architect rather than
   improvising.
+
+## Outcome
+
+Implemented ADR-0083's build shape. `dashboard/build.mjs` now uses `outdir: outDir` with `splitting: true`, `entryNames: '[name]'` and `chunkNames: 'chunks/[name]-[hash]'`. All other options are unchanged, including `target: es2020`. `dashboard/build-stamp.mjs` declares `dashboard/package.json` and `dashboard/package-lock.json` as inputs. `mermaid` is pinned to `11.17.2` as a devDependency with the lockfile updated in lockfile-only mode. Top-level versions of esbuild, react, marked, jsdom and htm are unchanged. The static handler needed no change, and tests were added for it.
+
+Tests added or extended:
+- `dashboard/test/build-layout.test.mjs`: a fixture styleguide module with `import("./lazy-fixture.js")` yields `chunks/*.js`, and `app.js` contains `import("./chunks/`. It also checks that `index.html` still references `./app.js` and that two builds into two scratch dirs are byte-identical.
+- `dashboard/test/dist-build.test.mjs`: the CDN and `jsdom` scans cover every `.js` under dist. A planted `chunks/x.js` containing `esm.sh` is caught. A new test asserts that mermaid is pinned to an exact version.
+- `dashboard/test/static.test.mjs`: `/chunks/<file>.js` returns 200 with `text/javascript; charset=utf-8` and `no-cache`. A plain and an encoded traversal both return 403, and a missing chunk returns 404.
+- `dashboard/test/dist-staleness.test.mjs`: `declaredInputRoots` lists both pin files, and changing only a fixture `package.json` changes `computeSourceHash`.
+
+Measured sizes:
+- `app.js` is 328,694 bytes before and 328,694 bytes after. It is byte-identical in size because nothing in the entry graph imports mermaid yet. kw15t adds the dynamic import.
+- `dist/chunks/` is absent today.
+- A probe build (a scratch entry doing `import("mermaid")` with the project's exact esbuild options) bundled cleanly at `target: es2020` with no warnings. It produced a 93-byte entry plus 106 chunks, about 3.6 MB on disk. Two builds were byte-identical. `target` therefore stays `es2020`, and the ADR-0083 (b') fallback is not needed.
+
+Test status: `cd dashboard && node --test` has the same 5 pre-existing failures as the baseline on main and no new ones. The "committed dashboard/dist/ matches current declared sources" failure was already red on main in the worktree. It is also expected from this task, because the pin files now join the stamp and the conductor rebuilds `dist/` at integration (ADR-0057).

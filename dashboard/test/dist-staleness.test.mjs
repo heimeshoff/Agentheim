@@ -90,3 +90,29 @@ test('checkDistFreshness passes once the stamp matches current sources (mirrors 
     rmSync(scratch, { recursive: true, force: true });
   }
 });
+
+// infrastructure-yaajt / ADR-0083: dependency pins are build inputs.
+test('declaredInputRoots lists package.json and package-lock.json; changing only package.json changes the source hash', async () => {
+  const { declaredInputRoots, computeSourceHash } = await import('../build-stamp.mjs');
+  const { cpSync, readFileSync } = await import('node:fs');
+  const dashboardDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const repoRoot = path.resolve(dashboardDir, '..');
+  const labels = declaredInputRoots({ dashboardDir, repoRoot }).map((r) => r.label);
+  assert.ok(labels.includes('dashboard/package.json'));
+  assert.ok(labels.includes('dashboard/package-lock.json'));
+
+  const scratch = mkdtempSync(path.join(os.tmpdir(), 'yaajt-stamp-'));
+  try {
+    const fixDash = path.join(scratch, 'dashboard');
+    cpSync(path.join(dashboardDir, 'app'), path.join(fixDash, 'app'), { recursive: true });
+    cpSync(path.join(dashboardDir, 'assets'), path.join(fixDash, 'assets'), { recursive: true });
+    for (const f of ['build.mjs', 'package.json', 'package-lock.json']) {
+      cpSync(path.join(dashboardDir, f), path.join(fixDash, f));
+    }
+    const before = computeSourceHash({ dashboardDir: fixDash, repoRoot });
+    writeFileSync(path.join(fixDash, 'package.json'), readFileSync(path.join(fixDash, 'package.json'), 'utf8').replace('"mermaid": "11.17.2"', '"mermaid": "11.17.3"'));
+    assert.notEqual(computeSourceHash({ dashboardDir: fixDash, repoRoot }), before);
+  } finally {
+    rmSync(scratch, { recursive: true, force: true });
+  }
+});
