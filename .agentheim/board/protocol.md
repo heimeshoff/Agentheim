@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 20:59 -- Batch started: [agentic-workflow-es288]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-es288 - Open doc readers (slide-over + main-pane reader) re-fetch when the tree changes, follow a moved task by id, and never flicker on unchanged text
+**Parallel:** scoped — builder named agentic-workflow-es288; 0 other ready tasks not dispatched
+
+---
+
 ## 2026-11-03 20:58 -- Modeling / Promoted: agentic-workflow-es288 - Open doc readers (slide-over + main-pane reader) re-fetch when the tree changes, follow a moved task by id, and never flicker on unchanged text
 
 **Type:** Modeling / Promote
