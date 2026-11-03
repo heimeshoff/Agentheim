@@ -143,7 +143,7 @@ Threshold: if a future maintainer would ask "why this, not the obvious alternati
 Before returning:
 
 - **BC README delta** — if the task introduced or changed ubiquitous language, aggregates, events, commands, or invariants, compose a `README_DELTA` entry (`{document: "README.md", section, ops}`, `references/worker-return-format.md`) describing the change as one or more `append`/`replace` ops — you never open or edit `.agentheim/knowledge/contexts/<bc>/README.md` yourself. Future sessions read the README first; a delta you forgot to report is exactly as poisonous as a stale hand-edit used to be.
-- **Context map delta** — rarely, a task reveals that a relationship between contexts changed (new event flow, ACL introduced). If so, report a `{document: "context-map.md", section, ops}` entry too — `append` only; a worker contradicting an existing cross-context relationship is a strategic-modeling call, not a worker's.
+- **Context map delta** — rarely, a task reveals that a relationship between contexts changed (new event flow, ACL introduced). If so, report a `{document: "context-map.md", section, ops}` entry too — `append` only; a worker contradicting an existing cross-context relationship is a strategic-modeling call, not a worker's. Workers never edit the context map's `## Diagram` fence — report the prose relationship only, and the strategic-modeler reconciles the diagram (`references/context-map-notation.md`).
 
 Only report a delta targeting *your* BC's README (or the shared context-map). Never target another BC's README — cross-BC work means the task itself was scoped wrong; surface that as a new backlog item instead (see the sixth action's `BACKLOG_ITEMS` block).
 

@@ -116,6 +116,15 @@ Only create this if the domain has more than one clear area of concern. A single
 - **Classification:** core / supporting / generic
 - **Key actors:** who lives here
 
+## Diagram
+```mermaid
+flowchart LR
+  a-context["A context<br/><small>core</small>"]:::core
+  b-context["B context<br/><small>supporting</small>"]:::supporting
+  a-context -->|customer-supplier| b-context
+```
+(Notation: `references/context-map-notation.md`. Always write the diagram when you write a context map; the prose below stays the source of truth.)
+
 ## Relationships
 Describe how contexts relate. Use DDD terms where they fit:
 - Partnership / Shared kernel

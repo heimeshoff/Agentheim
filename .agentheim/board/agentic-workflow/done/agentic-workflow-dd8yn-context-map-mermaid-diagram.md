@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-dd8yn
 title: context-map.md carries an authored ```mermaid relationship diagram alongside its prose — brainstorm's template and the strategic-modeler's output emit and maintain it
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-11-03
@@ -9,7 +9,7 @@ completed:
 depends_on: []
 blocks: []
 tags: [context-map, mermaid, diagram, brainstorm, strategic-modeler]
-related_adrs: [ADR-0059, ADR-0068]
+related_adrs: [ADR-0059, ADR-0068, ADR-0084]
 related_research: []
 prior_art: [agentic-workflow-060]
 ---
@@ -100,3 +100,29 @@ dashboard instead of reading prose only. Decided with the builder on 2026-11-03:
 - Mermaid syntax notes for the worker: `<br/>` in quoted labels works in flowcharts, and edge
   labels with spaces need `|...|` (quotes optional). Validate the example against mermaid's
   flowchart grammar by eye, or with mermaid's parser if kw15t has already vendored it.
+
+## Verifier note (iteration 1)
+
+**REASONS:**
+- Checks 1–3 pass. Every criterion maps to a diff artifact or a lint test, the new test file passes 8/8, and the full-suite failures are pre-existing or flaky (the checkpoint real-invocation test fails on main; the layout-migration lock test is flaky). The scope is clean and no `.agentheim/` paths were touched.
+- Check 4/5 (ubiquitous language and README sync) FAILS. `README_DELTA` is `[]`, but the diff introduces a new BC convention/invariant and new vocabulary:
+  - the context-map `## Diagram` (an authored mermaid fence; prose is the source of truth);
+  - only the strategic-modeler and brainstorm edit the diagram; workers never edit the fence;
+  - backfill when next touched;
+  - the canonical `references/context-map-notation.md`;
+  - a new mechanized live-tree lint, `lib/context-map-notation-lint.mjs`.
+
+  The README records every comparable convention as a ubiquitous-language bullet naming its ADR and lint. Its "Test command" paragraph also lists the live-tree lints ("the three live-tree lints (human-eye-criteria, index-entry-length, spike-stop-loss)"). Both go stale on merge with an empty delta.
+- Advisory: no ADR covers the authored-not-derived / prose-wins decision, which has a downstream consequence for design-system-kw15t. Consider a short ADR, or record why none is needed.
+
+**SUGGESTED_FIX:** Report a `README_DELTA` for `.agentheim/knowledge/contexts/agentic-workflow/README.md` that does two things:
+- Appends a ubiquitous-language bullet for the context-map diagram notation: the authored `## Diagram` mermaid fence, prose wins, modeler/brainstorm-only edits, workers never edit it, backfill when next touched, a pointer to `references/context-map-notation.md`, and enforcement by `lib/context-map-notation-lint.mjs` (ADR-0059, ADR-0068).
+- Updates the Test command paragraph's list of live-tree lints (a `replace` op anchored on that paragraph if it is a bullet; otherwise an append that names the new lint).
+
+Consider an ADR for the authored-not-derived, prose-wins decision.
+
+**ITERATION_HINT:** likely-fixable
+
+## Outcome
+
+The context map carries an authored mermaid `## Diagram`. The notation is canonical in `references/context-map-notation.md` and enforced by `lib/context-map-notation-lint.mjs`, with 8 tests in `lib/test/context-map-notation-lint.test.mjs`. The strategic-modeler and brainstorm instructions own the fence, and `agents/worker.md` forbids workers from editing it. The authored-not-derived, prose-wins decision is recorded in ADR-0084, and the BC README is updated through a delta in iteration 2.

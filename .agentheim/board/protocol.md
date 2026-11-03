@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 15:08 -- Task verified and completed: agentic-workflow-dd8yn - context-map.md carries an authored ```mermaid relationship diagram alongside its prose — brainstorm's template and the strategic-modeler's output emit and maintain it
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-dd8yn - context-map.md carries an authored ```mermaid relationship diagram alongside its prose — brainstorm's template and the strategic-modeler's output emit and maintain it
+**Summary:** context-map.md gains an authored mermaid relationship diagram — notation reference, brainstorm/strategic-modeler/worker wiring, live-tree lint
+**Duration:** 19m10s
+**Verification:** PASS (iteration 2)
+**Files changed:** 6
+**Tests added:** 8
+**ADRs written:** ADR-0084
+
+---
+
+## 2026-11-03 15:04 -- Verification failed: agentic-workflow-dd8yn - context-map.md carries an authored mermaid relationship diagram
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-dd8yn - context-map.md carries an authored mermaid relationship diagram
+**Iteration:** 1 of 3
+**Reasons:** README_DELTA empty despite a new BC convention/lint (ubiquitous language + Test command lint list go stale), advisory: no ADR for authored-not-derived/prose-wins
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-03 15:04 -- Modeling / Promoted: infrastructure-yaajt - Dashboard build emits lazily-loaded code-split chunks (dist/app.js + dist/chunks/), dependency pins become build-stamp inputs
 
 **Type:** Modeling / Promote

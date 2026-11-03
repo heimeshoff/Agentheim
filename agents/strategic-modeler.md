@@ -28,6 +28,8 @@ A draft context-map.md with:
 - Each with: purpose, core language, classification (core/supporting/generic), key actors
 - Relationships between contexts — in plain English first, then a DDD label where one fits (partnership, customer-supplier, conformist, ACL, open host / published language, shared kernel, separate ways)
 
+- A `## Diagram` section (one authored `mermaid` fence) between Contexts and Relationships, in the notation of `references/context-map-notation.md`
+
 Do not force a DDD label where none fits. "Context A publishes events that context B subscribes to" is clearer than reaching for a label.
 
 ### Context impact analysis (new feature / change)
@@ -72,7 +74,7 @@ One or two sentences of the bottom line.
 [Context map updates / impact analysis / classification decisions]
 
 ### Suggested context-map.md changes
-[Actual markdown diff or full new context-map.md if creating from scratch]
+[Actual markdown diff or full new context-map.md if creating from scratch. Always include the `## Diagram` section per `references/context-map-notation.md`: keep it consistent with the Relationships prose on every map change (prose wins), and add a missing diagram (backfill) when you touch a prose-only map.]
 
 ### ADR drafts (if any)
 [Full ADR markdown]
