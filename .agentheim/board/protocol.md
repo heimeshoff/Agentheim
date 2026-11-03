@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 19:48 -- Modeling / Refined: agentic-workflow-e3zby - Checkpoint guard compares real paths on both sides
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** Confirmed root cause (macOS /var → /private/var vs un-normalised path.relative in lib/derived-artifact-guard.mjs). Builder widened scope: fix the guard (real paths on both sides, deleted-file ancestor fallback, caller paths preserved in the manifest) so symlinked project paths no longer silently refuse worker files; plus symlink regression tests.
+
+---
+
 ## 2026-11-03 19:36 -- Capture / Captured: agentic-workflow-e3zby - Fix the red "real checkpoint invocation" lib test — realpath its mkdtemp fixture root (macOS /var vs /private/var mismatch)
 
 **Type:** Capture
