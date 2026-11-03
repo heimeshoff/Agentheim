@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 2
-- **Todo:** 0
+- **Backlog:** 1
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 209
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-e3zby** — Checkpoint guard compares real paths on both sides, so symlinked project paths (incl. macOS /var → /private/var) no longer silently refuse worker files; fixes the red "real checkpoint invocation" lib test (bug) — `todo/agentic-workflow-e3zby-fix-checkpoint-cli-test-macos-var-realpath.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -58,7 +59,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-e3zby** — Fix the red "real checkpoint invocation" lib test — realpath its mkdtemp fixture root (macOS /var vs /private/var mismatch) (bug) — `backlog/agentic-workflow-e3zby-fix-checkpoint-cli-test-macos-var-realpath.md`
 - **agentic-workflow-es288** — Open doc readers (slide-over + main-pane reader) re-fetch when their file changes on disk (feature) — `backlog/agentic-workflow-es288-open-doc-readers-refetch-on-change.md`
 <!-- backlog-list:end -->
 

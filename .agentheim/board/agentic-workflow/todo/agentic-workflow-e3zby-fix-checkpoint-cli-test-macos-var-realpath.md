@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-e3zby
 title: Checkpoint guard compares real paths on both sides, so symlinked project paths (incl. macOS /var → /private/var) no longer silently refuse worker files; fixes the red "real checkpoint invocation" lib test
-status: backlog
+status: todo
 type: bug
 context: agentic-workflow
 created: 2026-11-03
