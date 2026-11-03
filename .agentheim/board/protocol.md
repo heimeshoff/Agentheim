@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 14:51 -- Modeling / Captured: agentic-workflow-dd8yn - context-map.md carries an authored ```mermaid relationship diagram alongside its prose — brainstorm's template and the strategic-modeler's output emit and maintain it
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** context-map.md gains an authored mermaid relationship diagram alongside the prose, emitted by brainstorm and maintained by strategic-modeler.
+
+---
+
+## 2026-11-03 14:51 -- Modeling / Captured: design-system-kw15t - Markdown primitive renders ```mermaid fenced blocks as diagrams, in every doc the dashboard shows (context map, ADRs, READMEs, research)
+
+**Type:** Modeling / Capture
+**BC:** design-system
+**Filed to:** backlog
+**Summary:** Dashboard Markdown renders mermaid fences as diagrams in every doc; offline bundling (lazy chunk) to be decided in refinement.
+
+---
+
 ## 2026-11-01 15:32 -- Release shipped: v0.9.7
 
 **Type:** Release
