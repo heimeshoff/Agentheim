@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 20:58 -- Modeling / Refined: agentic-workflow-es288 - Open doc readers re-fetch on tree change
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** Readers re-fetch on every structural hub update (watcher debounce keeps only the last path, so path-exact matching would miss edits); byte-identical text skips the state update; an open task is followed by id across folder moves; failed live re-fetches keep the last content; subscription injected from board.js.
+
+---
+
 ## 2026-11-03 20:56 -- Modeling / Refined: agentic-workflow-wq4nd - Fix stale wording on the guard carve-out and the README lint count
 
 **Type:** Modeling / Refine
