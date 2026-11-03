@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 14:55 -- Modeling / Refined: agentic-workflow-dd8yn - context-map.md carries an authored mermaid relationship diagram
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** todo
+**Summary:** Builder decisions: lint the doctrine surfaces (notation reference, brainstorm template, strategic-modeler, worker.md) as ADR-0059 enforcement; only strategic-modeler/brainstorm edit the diagram (README_DELTA cannot edit inside a fence), prose wins on conflict; backfill existing maps when next touched. Canonical notation in a new references/context-map-notation.md with theme-neutral classDefs and a fixed edge-label vocabulary.
+
+---
+
 ## 2026-11-03 14:51 -- Modeling / Captured: agentic-workflow-dd8yn - context-map.md carries an authored ```mermaid relationship diagram alongside its prose — brainstorm's template and the strategic-modeler's output emit and maintain it
 
 **Type:** Modeling / Capture
