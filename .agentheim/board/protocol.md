@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 20:55 -- Capture / Captured: agentic-workflow-wq4nd - Fix stale wording on the guard's styleguide carve-out and the README lint count
+
+**Type:** Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Fix stale wording: worker/verifier/work SKILL omit the ADR-0085 styleguide carve-out; README lint count likely stale after dd8yn
+
+---
+
 ## 2026-11-03 19:57 -- Work session ended
 
 **Type:** Work / Session end
