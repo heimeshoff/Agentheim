@@ -1,7 +1,7 @@
 ---
 id: design-system-kw15t
 title: Markdown primitive renders ```mermaid fenced blocks as diagrams, in every doc the dashboard shows (context map, ADRs, READMEs, research)
-status: backlog
+status: todo
 type: feature
 context: design-system
 created: 2026-11-03

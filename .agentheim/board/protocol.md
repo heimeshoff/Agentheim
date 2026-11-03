@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 15:24 -- Modeling / Promoted: design-system-kw15t - Markdown primitive renders ```mermaid fenced blocks as diagrams, in every doc the dashboard shows (context map, ADRs, READMEs, research)
+
+**Type:** Modeling / Promote
+**BC:** design-system
+**From → To:** backlog → todo
+
+---
+
 ## 2026-11-03 15:24 -- Work session ended
 
 **Type:** Work / Session end
