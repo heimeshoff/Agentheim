@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 15:19 -- Batch started: [infrastructure-yaajt]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-yaajt - Dashboard build emits lazily-loaded code-split chunks (dist/app.js + dist/chunks/), dependency pins become build-stamp inputs
+**Parallel:** scoped — builder named infrastructure-yaajt; 0 other ready tasks not dispatched
+
+---
+
 ## 2026-11-03 15:08 -- Work session ended
 
 **Type:** Work / Session end
