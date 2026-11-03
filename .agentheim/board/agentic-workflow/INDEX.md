@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
+- **Backlog:** 2
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 209
@@ -58,6 +58,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-e3zby** — Fix the red "real checkpoint invocation" lib test — realpath its mkdtemp fixture root (macOS /var vs /private/var mismatch) (bug) — `backlog/agentic-workflow-e3zby-fix-checkpoint-cli-test-macos-var-realpath.md`
 - **agentic-workflow-es288** — Open doc readers (slide-over + main-pane reader) re-fetch when their file changes on disk (feature) — `backlog/agentic-workflow-es288-open-doc-readers-refetch-on-change.md`
 <!-- backlog-list:end -->
 

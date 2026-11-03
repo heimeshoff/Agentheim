@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 19:36 -- Capture / Captured: agentic-workflow-e3zby - Fix the red "real checkpoint invocation" lib test — realpath its mkdtemp fixture root (macOS /var vs /private/var mismatch)
+
+**Type:** Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Fix the red real-checkpoint-invocation lib test: realpath the mkdtemp fixture root (macOS /var vs /private/var).
+
+---
+
 ## 2026-11-03 19:34 -- Work session ended
 
 **Type:** Work / Session end
