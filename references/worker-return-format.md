@@ -9,6 +9,8 @@ A worker returns ONLY one of the following blocks. No prose, no preamble, no "he
 
 **Worker branch carries source and tests only (agentic-workflow-ghcaj, amends ADR-0032 §3/§4/§6).** A worker never writes under `.agentheim/` in its worktree — not its README, not an ADR, not its own task file, not a backlog item. Everything it would have written travels in the four SUCCESS blocks below as structured data; the conductor materializes all of it on `main`, sequentially, at squash-merge integration (`skills/work/SKILL.md`'s "PASS / SKIP" §(a)–(f)). `BC_README_UPDATED` and `NEW_BACKLOG_ITEMS` are **retired** — a non-empty `README_DELTA` / `BACKLOG_ITEMS` block is the signal now.
 
+**Styleguide-source carve-out (agentic-workflow-gvcy8, amends ADR-0074).** The design-system styleguide source under `.agentheim/knowledge/contexts/design-system/styleguide/` is source code, not bookkeeping: a worker may edit it, list it in `FILE_LIST`, and the checkpoint guard stages it like any source file. Every other `.agentheim/` path stays forbidden and refused as `bookkeeping-path`.
+
 **The sidecar write — one sanctioned worker write outside its worktree (ADR-0080 §1).** The conductor's spawn prompt names a `Result file:` field — the absolute form of `resultSidecarRelativePath(taskId, iteration)` (`lib/worker-result.mjs`) = `.worktrees/.results/<task-id>.iter-<N>.md`. **Your final action, for every RESULT kind below (SUCCESS, BOUNCED, or FAILED), is to write your exact RESULT text to that path with the Write tool, and then return the same text.** This is a narrow, explicit exception to ADR-0032 §3's workspace confinement — it does NOT touch rule 10: `.agentheim/` stays untouchable, and the sidecar never enters your worktree's branch. This exists because the harness sometimes loses your transcript entirely; the sidecar is the conductor's first, most reliable recovery source.
 
 ### For successful completion
@@ -17,8 +19,8 @@ A worker returns ONLY one of the following blocks. No prose, no preamble, no "he
 RESULT: SUCCESS
 TASK_ID: <task-id>
 SUMMARY: <one or two sentences in domain language — what was achieved>
-FILES_CHANGED: <integer count — source and tests only, EXCLUDING .agentheim/ paths>
-FILE_LIST: <comma-separated absolute paths of every SOURCE/TEST file created or modified — never a .agentheim/ path>
+FILES_CHANGED: <integer count — source and tests only, EXCLUDING .agentheim/ paths other than the styleguide source>
+FILE_LIST: <comma-separated absolute paths of every SOURCE/TEST file created or modified — never a .agentheim/ path, except the styleguide-source carve-out above>
 ADRS_WRITTEN: <comma-separated provisional filenames named in the ADRS block below, or "none">
 TESTS_ADDED: <integer count of new tests written for this task>
 TESTS_PASSING: yes | no

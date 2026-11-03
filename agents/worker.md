@@ -19,7 +19,7 @@ You take one refined task and make it real. You do not take two. You do not rede
 The conductor passes these in your spawn prompt:
 
 - The `Workspace` field — the absolute path to your task's private git worktree (ADR-0032). Run ALL commands, including reads and tests, from inside it.
-- The `Result file:` field — the absolute path to your RESULT sidecar (ADR-0080). Your literal final action, for every RESULT kind, is to write your exact RESULT text there with the Write tool, then return the same text — see "Return format — STRICT" below. This is the one sanctioned worker write outside your worktree; it doesn't touch rule 10 below (`.agentheim/` stays untouchable).
+- The `Result file:` field — the absolute path to your RESULT sidecar (ADR-0080). Your literal final action, for every RESULT kind, is to write your exact RESULT text there with the Write tool, then return the same text — see "Return format — STRICT" below. This is the one sanctioned worker write outside your worktree; it doesn't touch rule 10 below (`.agentheim/` stays untouchable except the styleguide-source carve-out (canonical statement: `references/worker-return-format.md`)).
 - Absolute path to your task file (in `board/<bc>/doing/` **on `main`** — the conductor's mechanized batch claim already moved it there before spawning you). This path is **read-only** to you: you may re-read it, you never write it, and you never move it — your worktree carries source and tests only (agentic-workflow-ghcaj, amends ADR-0032 §3/§4/§6).
 - The target bounded context name
 - Absolute path to the BC's README
@@ -157,7 +157,7 @@ Only report a delta targeting *your* BC's README (or the shared context-map). Ne
 
 **Do NOT run git commands.** Not `git add`, not `git commit`, not `git status` (unless you specifically need to check state — but do not `git add` or commit). The work skill owns all git writes.
 
-**Do NOT write under `.agentheim/` anywhere in your worktree** — not the README, not an ADR file, not your task file, not a backlog item, not `protocol.md`. A worktree that still does is rendered inert, not failed: the conductor's checkpoint guard refuses every `.agentheim/` path with reason `bookkeeping-path` (`lib/derived-artifact-guard.mjs`), the same posture ADR-0057 already gives a rebuilt `dashboard/dist/`.
+**Do NOT write under `.agentheim/` anywhere in your worktree** (except the styleguide-source carve-out (canonical statement: `references/worker-return-format.md`): the design-system styleguide source is writable) — not the README, not an ADR file, not your task file, not a backlog item, not `protocol.md`. A worktree that still does is rendered inert, not failed: the conductor's checkpoint guard refuses every `.agentheim/` path with reason `bookkeeping-path` (`lib/derived-artifact-guard.mjs`), the same posture ADR-0057 already gives a rebuilt `dashboard/dist/`.
 
 ## Return format — STRICT
 
@@ -170,7 +170,7 @@ If `TESTS_PASSING: no`, do **not** return SUCCESS. That's either a FAIL (you cou
 ## What you do NOT do
 
 - No git writes (`add`, `commit`, `push`) — the work skill owns git
-- No writes anywhere under `.agentheim/` — not `protocol.md`, not an `INDEX.md`, not your BC README, not an ADR, not your own task file, not a backlog item. Report `README_DELTA` / `ADRS` / `OUTCOME` / `BACKLOG_ITEMS` instead; the conductor materializes all of it on `main` (agentic-workflow-ghcaj). Touching `.agentheim/` from a worktree is a structural violation the checkpoint guard renders inert and the verifier will FAIL.
+- No writes anywhere under `.agentheim/` (except the styleguide-source carve-out (canonical statement: `references/worker-return-format.md`)) — not `protocol.md`, not an `INDEX.md`, not your BC README, not an ADR, not your own task file, not a backlog item. Report `README_DELTA` / `ADRS` / `OUTCOME` / `BACKLOG_ITEMS` instead; the conductor materializes all of it on `main` (agentic-workflow-ghcaj). Touching `.agentheim/` from a worktree is a structural violation the checkpoint guard renders inert and the verifier will FAIL.
 - No modeling (no strategic or tactical DDD changes — those are separate tasks of type `decision`)
 - No refining other tasks (even if they look under-refined — not your job)
 - No touching files outside the task's implied scope

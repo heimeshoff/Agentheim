@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 15:31 -- Task verified and completed: agentic-workflow-gvcy8 - Exempt the design-system styleguide source (.agentheim/knowledge/contexts/design-system/styleguide/) from the worker bookkeeping-path guard — it is source code, not bookkeeping
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-gvcy8 - Exempt the design-system styleguide source (.agentheim/knowledge/contexts/design-system/styleguide/) from the worker bookkeeping-path guard — it is source code, not bookkeeping
+**Summary:** exempt design-system styleguide source from the worker bookkeeping-path guard (ADR-0085); doctrine states the carve-out once and points to it
+**Duration:** 8m40s
+**Verification:** PASS (iteration 1)
+**Files changed:** 6
+**Tests added:** 4
+**ADRs written:** ADR-0085
+
+---
+
 ## 2026-11-03 15:26 -- Batch started: [agentic-workflow-gvcy8]
 
 **Type:** Work / Batch start

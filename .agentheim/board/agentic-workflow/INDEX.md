@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 208
+- **Doing:** 0
+- **Done:** 209
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-gvcy8** — Exempt the design-system styleguide source (.agentheim/knowledge/contexts/design-system/styleguide/) from the worker bookkeeping-path guard — it is source code, not bookkeeping (bug) — `doing/agentic-workflow-gvcy8-exempt-styleguide-source-from-bookkeeping-guard.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-gvcy8** — Exempt the design-system styleguide source (.agentheim/knowledge/contexts/design-system/styleguide/) from the worker bookkeeping-path guard — it is source code, not bookkeeping (bug) — `done/agentic-workflow-gvcy8-exempt-styleguide-source-from-bookkeeping-guard.md`
 - **agentic-workflow-dd8yn** — context-map.md carries an authored ```mermaid relationship diagram alongside its prose — brainstorm's template and the strategic-modeler's output emit and maintain it (feature) — `done/agentic-workflow-dd8yn-context-map-mermaid-diagram.md`
 - **agentic-workflow-nm16k** — parseWorkerResult tolerates the two sidecar shape slips that have cost lost-result re-dispatches — an unclosed last block is implicitly closed at the RESULT_END sentinel with repair provenance, and block names may carry digits; amends ADR-0080 §3 (feature) — `done/agentic-workflow-nm16k-parser-fence-tolerance-implicit-close-and-digit-block-names.md`
 - **agentic-workflow-vsb06** — The `migrate` verb reports the legacy `.agentheim/contexts/` references it does not rewrite — project files outside `.agentheim/` such as `CLAUDE.md` and `.claude/commands/` — as a read-only manifest field the step-0 notice names, so a consumer learns what still points at the old layout instead of finding out when a command breaks (feature) — `done/agentic-workflow-vsb06-migrate-reports-residual-legacy-path-references-outside-its-rewrite-scope.md`

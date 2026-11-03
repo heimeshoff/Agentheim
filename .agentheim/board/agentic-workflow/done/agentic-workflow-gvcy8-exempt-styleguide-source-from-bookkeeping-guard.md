@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-gvcy8
 title: Exempt the design-system styleguide source (.agentheim/knowledge/contexts/design-system/styleguide/) from the worker bookkeeping-path guard — it is source code, not bookkeeping
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-11-03
@@ -9,7 +9,7 @@ completed:
 depends_on: []
 blocks: [design-system-kw15t]
 tags: [worktree, checkpoint-guard, styleguide, two-root-layout]
-related_adrs: [ADR-0057, ADR-0074, ADR-0078, ADR-0003]
+related_adrs: [ADR-0057, ADR-0074, ADR-0078, ADR-0003, ADR-0085]
 related_research: []
 prior_art: [agentic-workflow-ghcaj, agentic-workflow-q7v3k, agentic-workflow-g5ez5]
 ---
@@ -72,3 +72,13 @@ of `.agentheim/`.
 - Workers still never write task files, READMEs, ADRs, INDEXes or protocol. ghcaj's report-carried
   bookkeeping model is unchanged.
 - Found while preparing design-system-kw15t, which now depends on this task.
+
+## Outcome
+
+The checkpoint guard (`lib/derived-artifact-guard.mjs`) gained `SOURCE_UNDER_AGENTHEIM_PREFIXES`, derived from the board-layout `styleguideDir()` via a phantom root (no `layout:` override literal, which `sole-path-constructor.test.mjs` reserves for layout-migration). A path under `.agentheim/knowledge/contexts/design-system/styleguide/` now stages as ordinary source; sibling paths (the design-system README, board, decisions) are still `bookkeeping-path`. Decision recorded as ADR-0085, amending ADR-0074.
+
+Doctrine: the canonical carve-out sentence lives in `references/worker-return-format.md`; `agents/worker.md`, `agents/verifier.md` and `skills/work/SKILL.md` (rule 10, checkpoint paragraph, rung 2) point at it. `references/lib-bootstrap.md` does not restate the rule, so it was left alone. Rung 2 no longer reverts styleguide source.
+
+Tests (`lib/test/derived-artifact-guard.test.mjs`, 4 new): prefix equals `styleguideDir()`; styleguide paths stage while other `.agentheim/` paths refuse; the real CLI `checkpoint` returns a styleguide path in `changed`; a live-tree pin of the canonical sentence plus pointers. `node --test lib/test/*.test.mjs`: only the pre-existing "real checkpoint invocation" failure remains. It is NOT fixed by this change: it is a macOS `/var` vs `/private/var` symlink mismatch (cwd realpath vs the `mkdtemp` path puts the file "outside worktree"); my new CLI test uses `realpathSync` to avoid it. A one-line fix to that old test would be `realpathSync` on its root.
+
+No other source-under-`.agentheim/` cases were found.
