@@ -128,7 +128,7 @@ Out of scope:
 - [ ] Canvas: the `styleguide/index.html` import map maps `mermaid` to `https://esm.sh/mermaid@<v>`.
   A test asserts that `<v>` equals the exact `mermaid` version in `dashboard/package.json`, and
   asserts the same for `marked`, `react` and `htm`.
-- [ ] Diagrams use the design-system tokens (node fill, stroke, text, font), show no clipped labels,
+- [x] Diagrams use the design-system tokens (node fill, stroke, text, font), show no clipped labels,
   and re-render correctly when switching between Dark and Light. Check this in the canvas Markdown
   section and on the live dashboard: the context map in the main pane and an ADR in the slide-over.
   This also serves as the design-system gate re-review of the new canvas specimen. [human-eye]
@@ -182,3 +182,5 @@ Measured sizes (scratch build, never the committed dist/):
 Test results: dashboard `node --test` 1120 tests, 5 failures = the 4 baseline failures plus `committed dashboard/dist/ matches current declared sources` (expected stale-dist, ADR-0057; the conductor rebuilds dist at integration). Styleguide suite: 209 tests, 2 failures = the baseline `collapsible.test.mjs` and `menu.test.mjs`. No new failures.
 
 Human-eye criterion left unchecked [human-eye]. The builder should look at: (1) the canvas Markdown section "Mermaid fences" in Dark and Light (node fill/stroke/text/font from tokens, no clipped labels, the invalid fence showing its code plus the quiet note); (2) the live dashboard context map in the main pane and an ADR with a mermaid fence in the slide-over, flipping Dark/Light and confirming the diagram recolours; (3) that the first diagram's lazy-load delay (about 740 KB) feels acceptable. This also serves as the design-system gate re-review of the new specimen.
+
+Builder eye-check 2026-11-03: diagrams look fine in Light and Dark. The [human-eye] criterion is signed off, including the design-system gate re-review.
