@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-e3zby
 title: Checkpoint guard compares real paths on both sides, so symlinked project paths (incl. macOS /var → /private/var) no longer silently refuse worker files; fixes the red "real checkpoint invocation" lib test
-status: doing
+status: done
 type: bug
 context: agentic-workflow
 created: 2026-11-03
@@ -67,3 +67,47 @@ guard, not only the test.
   working tree. Resolving real paths for the declared entries and the root is the only filesystem
   access added.
 - No `dashboard/` change, so no node_modules link is needed for this task.
+
+## Verifier note (iteration 1)
+
+**REASONS:**
+- Criterion 2 is only partly covered. The one new test (`lib/test/derived-artifact-guard.test.mjs:208`) checks a single form: symlinked file paths against a real root. Nothing tests real file paths against a symlinked root, and no `.agentheim/board/` path is asserted as `bookkeeping-path` under a symlinked root.
+- Criterion 3 has no dedicated test. A deleted FILE_LIST entry is exercised only in passing (`lib/x.mjs` doesn't exist in the fixture). Nothing asserts that a missing path under a refused prefix gets the right reason rather than `outside-worktree`.
+- Criterion 4 has no new test. The pre-existing test at line 80 doesn't go through the realpath code.
+- Criterion 5 is covered for one form only. Nothing asserts `changed` keeps the caller's exact strings in the reverse mixed form.
+- The verifier stopped at check 1; checks 2–8 were not evaluated.
+
+**SUGGESTED_FIX:** In `lib/test/derived-artifact-guard.test.mjs`, add tests named after each behaviour that fail without the `realish()` change:
+- (a) A symlinked root with real file paths, plus the existing reverse form. Each asserts source in `changed` with the caller's exact strings, `dashboard/dist/` refused as `derived-artifact`, and `.agentheim/board/` refused as `bookkeeping-path`.
+- (b) A deleted FILE_LIST entry under a symlinked or real root: a source path (staged) and a refused-prefix path (refused with the correct reason, not `outside-worktree`), with no throw.
+- (c) A path genuinely outside the worktree (e.g. a sibling temp dir reached through the symlink) still refused as `outside-worktree`.
+
+**ITERATION_HINT:** likely-fixable
+
+## Verifier note (iteration 2)
+
+**REASONS:**
+- Check 6b (honored related ADRs) FAILS. ADR-0057's Decision → Implementation (lines 87–88) states the guard is "pure, stdlib-only (`node:path`), git-free, side-effect-free". The diff adds `realpathSync` from `node:fs` and filesystem reads in `realish()`, so the guard's output now depends on filesystem state. That is a recorded decision being relaxed with no amendment (ADRS block empty). ADR-0057 already uses the `## Amendment (...)` pattern (w2njd, w45ce).
+- The module's own header (`lib/derived-artifact-guard.mjs:17–23`) still says "stdlib-only (node:path)" and "never touches the filesystem". The code now contradicts it.
+- Everything else passes:
+  - Check 1: all 6 criteria map to assertions; C4's "still refused" reading as a regression guard holds.
+  - Iteration-1 note: fully addressed.
+  - Suite: 884/885, with the one failure being the known-flaky lifecycle-lock test.
+  - Scope: clean.
+
+**SUGGESTED_FIX:**
+- Update the header comment to name the one bounded, read-only filesystem access: realpath resolution of the root and the declared entries, still never a tree walk, still git-free and write-free.
+- Record an `## Amendment (agentic-workflow-e3zby)` to ADR-0057 explaining the relaxation from "pure / node:path-only" and why: macOS /var → /private/var, and symlinked project paths.
+
+**ITERATION_HINT:** likely-fixable
+
+## Outcome
+
+`lib/derived-artifact-guard.mjs` normalises both sides of `path.relative` through `realish()`. It resolves symlinks on the longest existing ancestor and re-appends the missing tail, so deleted FILE_LIST entries still resolve. The module header now describes the bounded read-only realpath access, and an ADR-0057 amendment is reported in the ADRS block. The ADR-0085 styleguide carve-out is unchanged.
+
+Three tests in `lib/test/derived-artifact-guard.test.mjs` cover:
+- a symlinked root with real paths, and the reverse;
+- deleted entries under a symlinked root;
+- a genuinely outside path reached through a symlink.
+
+The full run gives 885 pass on a clean run. On other runs the only failure is the known flaky layout-migration lifecycle-lock test (a race between two child processes). It fails intermittently when run alone too, and is unrelated to this change.

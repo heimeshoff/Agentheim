@@ -4,7 +4,7 @@ title: Derived artifacts are unstageable from a worktree — the conductor's che
 scope: agentic-workflow
 status: accepted
 date: 2026-07-13
-related_tasks: [agentic-workflow-q7v3k, infrastructure-w45ce]
+related_tasks: [agentic-workflow-q7v3k, infrastructure-w45ce, agentic-workflow-e3zby]
 related_adrs: [0003, 0013, 0026, 0032, 0038, 0052, 0055]
 ---
 
@@ -235,3 +235,11 @@ worktree bundle (this ADR's Context section) leak into `main` on a lucky green r
 - `infrastructure-w45ce` — added the complementary staleness check (amendment above); fixed
   `dist-build.test.mjs`'s `before()` hook to stop rebuilding the committed `dashboard/dist/`
   in place.
+
+## Amendment (agentic-workflow-e3zby — 2026-11-03): the guard resolves real paths (read-only)
+
+The guard was specified as pure: `node:path` only, operating on the declared strings alone and never touching the filesystem. That purity broke on symlinked project paths. On macOS `/var` is a symlink to `/private/var`, so a worktree root and a `FILE_LIST` entry naming the same location could differ as strings. `path.relative` then climbed out of the root, and the guard silently refused every worker file as `outside-worktree`. The checkpoint staged nothing and reported `changed: []`.
+
+`lib/derived-artifact-guard.mjs` now does one bounded, read-only filesystem access. It calls `realpathSync` on the worktree root and on each declared entry. For a deleted entry, which no longer exists, it resolves the deepest existing ancestor and re-appends the missing tail. Both sides of the comparison are then in real-path form. The caller's original strings are still what land in `changed` and `refused`.
+
+Unchanged: the guard is git-free, never writes, and judges only the declared list, never a tree walk. The `DERIVED_ARTIFACT_PREFIXES` and `BOOKKEEPING_PATH_PREFIXES` classification and the ADR-0085 styleguide carve-out hold as before. A path genuinely outside the worktree is still refused as `outside-worktree`.

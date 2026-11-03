@@ -5,6 +5,41 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 19:56 -- Task verified and completed: agentic-workflow-e3zby - Checkpoint guard compares real paths on both sides, so symlinked project paths (incl. macOS /var → /private/var) no longer silently refuse worker files; fixes the red "real checkpoint invocation" lib test
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-e3zby - Checkpoint guard compares real paths on both sides, so symlinked project paths (incl. macOS /var → /private/var) no longer silently refuse worker files; fixes the red "real checkpoint invocation" lib test
+**Summary:** checkpoint guard resolves real paths on both sides so symlinked project paths (macOS /var) no longer silently refuse worker files; ADR-0057 amended
+**Duration:** 14m
+**Verification:** PASS (iteration 3)
+**Files changed:** 2
+**Tests added:** 3
+**ADRs written:** ADR-0057 amendment
+
+---
+
+## 2026-11-03 19:54 -- Verification failed: agentic-workflow-e3zby - Checkpoint guard compares real paths on both sides
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-e3zby - Checkpoint guard compares real paths on both sides
+**Iteration:** 2 of 3
+**Reasons:** realpathSync relaxes ADR-0057 pure/node:path-only guard without an amendment; module header now contradicts code
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
+## 2026-11-03 19:51 -- Verification failed: agentic-workflow-e3zby - Checkpoint guard compares real paths on both sides
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-e3zby - Checkpoint guard compares real paths on both sides
+**Iteration:** 1 of 3
+**Reasons:** one test added for criteria naming four behaviours; missing reverse mixed form, deleted-entry, genuinely-outside and caller-path-preservation tests
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-03 19:49 -- Batch started: [agentic-workflow-e3zby]
 
 **Type:** Work / Batch start
