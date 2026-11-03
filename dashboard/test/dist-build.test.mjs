@@ -169,3 +169,36 @@ test('dashboard/package.json pins mermaid to an exact version (no ^ or ~) (ADR-0
   assert.ok(v, 'mermaid is a devDependency');
   assert.match(v, /^\d+\.\d+\.\d+$/, `mermaid must be an exact version, got ${v}`);
 });
+
+// ---- design-system-kw15t: mermaid ships as a lazy chunk (ADR-0083) ----
+// MERMAID_MARKER is a string that occurs only inside mermaid's own code (its
+// flowchart diagram registry id), never in Agentheim source: if it shows up in
+// app.js, a static import has dragged mermaid into the entry bundle.
+const MERMAID_MARKER = 'flowchart-v2';
+// app.js size on main before design-system-kw15t (infrastructure-yaajt Outcome).
+const APP_JS_BASELINE_BYTES = 328694;
+const APP_JS_MAX_GROWTH_BYTES = 20 * 1024;
+
+test('mermaid is a lazy chunk: app.js has a dynamic chunk import and no mermaid-only marker; chunks/ holds it', () => {
+  const app = readFileSync(BUNDLE, 'utf8');
+  assert.ok(app.includes('import("./chunks/'), 'app.js dynamically imports ./chunks/');
+  assert.ok(!app.includes(MERMAID_MARKER), 'mermaid code must not be in app.js');
+  const chunks = allJsFiles(path.join(DIST, 'chunks'));
+  assert.ok(chunks.some((f) => readFileSync(f, 'utf8').includes(MERMAID_MARKER)), 'some chunk contains mermaid');
+});
+
+test('no .js under dist/ contains a CDN host or a remote dynamic import("http', () => {
+  const bad = [];
+  for (const f of allJsFiles(DIST)) {
+    const js = readFileSync(f, 'utf8');
+    for (const needle of ['esm.sh', 'unpkg', 'cdn.jsdelivr', 'cdnjs', 'import("http']) {
+      if (js.includes(needle)) bad.push(`${path.relative(DIST, f)}: ${needle}`);
+    }
+  }
+  assert.deepEqual(bad, []);
+});
+
+test('app.js grows by at most 20 KB over the pre-mermaid baseline', () => {
+  const size = readFileSync(BUNDLE).length;
+  assert.ok(size - APP_JS_BASELINE_BYTES <= APP_JS_MAX_GROWTH_BYTES, `app.js is ${size} bytes (baseline ${APP_JS_BASELINE_BYTES})`);
+});

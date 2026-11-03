@@ -1,7 +1,7 @@
 ---
 id: design-system-kw15t
 title: Markdown primitive renders ```mermaid fenced blocks as diagrams, in every doc the dashboard shows (context map, ADRs, READMEs, research)
-status: doing
+status: done
 type: feature
 context: design-system
 created: 2026-11-03
@@ -145,3 +145,40 @@ Out of scope:
   always inject a fake: jsdom has no `getBBox`, so real mermaid cannot render there.
 - Size and first-render latency are unmeasured; the lazy-load criterion above records them.
 - Paired with agentic-workflow-dd8yn; neither blocks the other.
+
+## Verifier note (iteration 1)
+
+**REASONS:**
+- Check 5 (README sync) FAILS. The README_DELTA's single `append` targets section "Ubiquitous language", which does not exist in the design-system README. The dry-run disposition is `appended-fallback`, so the bullet would land at the end of the file, inside `## Pointers` (a list of file-location pointers). This README records primitives under `## The styleguide` (e.g. Collapsible at line 418, Menu at 664, ModelSplitButton at 950), each with a matching file-location bullet under `## Pointers` (lines 1118–1130).
+- Checks 1–4 pass. All 8 machine-checkable criteria map to new, behaviour-named tests, and the [human-eye] criterion is builder eye-check pending. Both suites show only baseline failures plus the expected stale-dist failure; all 14 new tests pass. Scope is clean (styleguide paths are allowed per ADR-0085).
+
+**SUGGESTED_FIX:** Retarget README_DELTA. No code changes are needed.
+- Builder direction (2026-11-03): put the term under `## The styleguide`.
+- The delta grammar is append/replace bullets only (no `###` subsection creation), so do two things:
+  - Append the md-mermaid bullet to section "The styleguide". Include a "Builder confirmation PENDING" gate note for the new canvas specimen.
+  - Append a short bullet to section "Pointers" naming `styleguide/app/mermaid-render.js` (`mermaidThemeVariables`, `renderMermaidBlocks`, `defaultLoadMermaid`), the `Markdown.mermaidLoader` prop in `styleguide/app/primitives.js`, and the `.md-mermaid` rules in `styles/agentheim.css`.
+
+**ITERATION_HINT:** likely-fixable
+
+## Outcome
+
+The styleguide `Markdown` primitive renders ```mermaid fences as SVG diagrams in every doc the dashboard shows; all other fences are unchanged. Shipping follows ADR-0083 exactly: the only reach into mermaid is the dynamic `import("mermaid")` in `app/mermaid-render.js` (`defaultLoadMermaid`).
+
+Implemented:
+- `styleguide/app/mermaid-render.js` (new): `mermaidThemeVariables(readToken, theme)` (hex tokens only, values trimmed, never `--accent-ochre*`, `darkMode` follows theme, `fontFamily` from `--font-ui`); `renderMermaidBlocks(rootEl, {loadMermaid, readToken})` wrapping each `pre > code.language-mermaid` in `div.md-mermaid`, serialized promise queue, connected + generation guard, `document.fonts.ready`, `parse` before `render`, stray `#id`/`#d<id>` removal on error, `.md-mermaid-error` (role=note) after the kept code block; render cache (cap 50, keyed on hash(source)+hash(themeVariables)) with id rewriting (`agentheim-mmd-<n>-`) on reuse; one `MutationObserver` on `documentElement[data-theme]` re-rendering mounted diagrams (not ThemeCtx).
+- `app/primitives.js`: `Markdown` gets optional `mermaidLoader` prop (default real import), calls `renderMermaidBlocks` in its post-process effect, highlighter skips `language-mermaid`.
+- `styles/agentheim.css`: scoped `.prose .md-mermaid` reset, svg `max-width:100%; height:auto`, token-styled `.md-mermaid-error`.
+- Canvas: `index.html` import map gains `"mermaid": "https://esm.sh/mermaid@11.17.2"`; the Markdown section shows a "Mermaid fences" specimen (valid flowchart plus an invalid fence) from `MD_MERMAID` in `app/data.js`.
+- Tests: `dashboard/test/markdown-mermaid.test.mjs` (fake loader: render, js fence, no-loader-call, config, invalid source with stray body element, theme switch once + cache on flip back, source change renders only the edited diagram with unique ids, cross-mount id uniqueness, import-map versions for mermaid/marked/react/htm equal package.json); `styleguide/test/mermaid-theme.test.mjs` (no DOM); three new scratch-build tests in `dashboard/test/dist-build.test.mjs`.
+
+Mermaid-only marker string chosen: `flowchart-v2` (mermaid's flowchart diagram id; 0 hits in app.js, present in 3 chunks). Documented in the test.
+
+Measured sizes (scratch build, never the committed dist/):
+- app.js: baseline 328,694 bytes, now 331,228 bytes (+2,534 B, limit 20 KB).
+- chunks/: 106 files, 3,431,253 bytes of JS (3,636 KB on disk).
+- First flowchart fetch (approximate, from the static import closure of the entry chunk `mermaid.core-*.js` plus the `flowDiagram-*` chunk): 26 chunk files, about 740 KB uncompressed (entry closure 20 files, 674 KB, plus flowDiagram closure 66 KB). Latency not measured; no gzip applied.
+- No `.js` under the scratch dist contains esm.sh, unpkg, cdn.jsdelivr, cdnjs or `import("http` (no narrowing was needed).
+
+Test results: dashboard `node --test` 1120 tests, 5 failures = the 4 baseline failures plus `committed dashboard/dist/ matches current declared sources` (expected stale-dist, ADR-0057; the conductor rebuilds dist at integration). Styleguide suite: 209 tests, 2 failures = the baseline `collapsible.test.mjs` and `menu.test.mjs`. No new failures.
+
+Human-eye criterion left unchecked [human-eye]. The builder should look at: (1) the canvas Markdown section "Mermaid fences" in Dark and Light (node fill/stroke/text/font from tokens, no clipped labels, the invalid fence showing its code plus the quiet note); (2) the live dashboard context map in the main pane and an ADR with a mermaid fence in the slide-over, flipping Dark/Light and confirming the diagram recolours; (3) that the first diagram's lazy-load delay (about 740 KB) feels acceptable. This also serves as the design-system gate re-review of the new specimen.

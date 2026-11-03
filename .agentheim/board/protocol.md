@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 19:34 -- Task verified and completed: design-system-kw15t - Markdown primitive renders ```mermaid fenced blocks as diagrams, in every doc the dashboard shows (context map, ADRs, READMEs, research)
+
+**Type:** Work / Task completion
+**Task:** design-system-kw15t - Markdown primitive renders ```mermaid fenced blocks as diagrams, in every doc the dashboard shows (context map, ADRs, READMEs, research)
+**Summary:** Markdown primitive renders mermaid fences as token-themed SVG diagrams via a lazy mermaid chunk (ADR-0083); error fallback, theme-flip re-render, render cache, unique ids, canvas specimen
+**Duration:** 1h12m (incl. rate-limit pause)
+**Verification:** PASS (iteration 2)
+**Files changed:** 9
+**Tests added:** 14
+**ADRs written:** none
+
+---
+
+## 2026-11-03 19:32 -- Verification failed: design-system-kw15t - Markdown primitive renders mermaid fences as diagrams
+
+**Type:** Work / Verification failure
+**Task:** design-system-kw15t - Markdown primitive renders mermaid fences as diagrams
+**Iteration:** 1 of 3
+**Reasons:** README_DELTA targets nonexistent section Ubiquitous language (appended-fallback would land inside ## Pointers); code and tests pass
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-03 15:32 -- Batch started: [design-system-kw15t]
 
 **Type:** Work / Batch start

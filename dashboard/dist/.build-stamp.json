@@ -1,5 +1,5 @@
 {
-  "hash": "e6ee0bad58d30a88006484fef404645ebb24e318264fbf44552c66e0415a92e8",
+  "hash": "1807a05621dfdf76478a707199c61179779952c33ac1b1416e87c437de5d4cf1",
   "algorithm": "sha256",
   "rebuildCommand": "cd dashboard && npm run build"
 }
