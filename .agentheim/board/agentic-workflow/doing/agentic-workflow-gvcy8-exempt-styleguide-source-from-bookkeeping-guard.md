@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-gvcy8
 title: Exempt the design-system styleguide source (.agentheim/knowledge/contexts/design-system/styleguide/) from the worker bookkeeping-path guard — it is source code, not bookkeeping
-status: todo
+status: doing
 type: bug
 context: agentic-workflow
 created: 2026-11-03

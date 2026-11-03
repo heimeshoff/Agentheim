@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 15:26 -- Batch started: [agentic-workflow-gvcy8]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-gvcy8 - Exempt the design-system styleguide source (.agentheim/knowledge/contexts/design-system/styleguide/) from the worker bookkeeping-path guard — it is source code, not bookkeeping
+**Parallel:** scoped — builder named agentic-workflow-gvcy8; design-system-kw15t waits on it (not ready), no other ready tasks
+
+---
+
 ## 2026-11-03 15:26 -- Modeling / Captured: agentic-workflow-gvcy8 - Exempt the design-system styleguide source (.agentheim/knowledge/contexts/design-system/styleguide/) from the worker bookkeeping-path guard — it is source code, not bookkeeping
 
 **Type:** Modeling / Capture
