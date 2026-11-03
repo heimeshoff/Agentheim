@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-es288
 title: Open doc readers (slide-over + main-pane reader) re-fetch when the tree changes, follow a moved task by id, and never flicker on unchanged text
-status: doing
+status: done
 type: feature
 context: agentic-workflow
 created: 2026-11-03
@@ -88,3 +88,49 @@ update while a doc is open.
 - Pairs with design-system-kw15t (mermaid fences), but does not depend on it.
 - Not done in the reader: diffing or patching. A changed doc is re-fetched whole and re-rendered,
   per ADR-0001 and ADR-0070 §3.
+
+## Verifier note (iteration 1)
+
+**REASONS**
+- Check 1 (acceptance criteria coverage): the criteria describe how the two readers behave, but all behavioural tests in dashboard/test/live-doc-refetch.test.mjs exercise only the pure `createLiveDocRefetch` controller. The only test that touches the readers (`wiring: readers take an injected subscribeTree...`) is a regex over source text. The test file's header says "The readers have no DOM harness". That is false: dashboard/test/dom-harness.mjs (jsdom, infrastructure-d2n8s) exists and is already used by board-render-probe-*.test.mjs and board-prompt-bar-dom.test.mjs. These criteria have no test that would fail if the reader code were wrong:
+  - Criterion 1: nothing mounts MainPaneReader, and there is no unrelated-path frame case.
+  - Criterion 2: nothing mounts SlideOver.
+  - Criterion 3: no render probe or prop spy on the Markdown `source` in either reader.
+  - Criterion 4: there is no test that no loading body appears on a live re-fetch, or that `expanded` is preserved.
+  - Criterion 5: nothing checks either reader's body after a failed re-fetch.
+  - Criterion 6: nothing checks that SlideOver's `{ ...intent, path }` branch (slide-over.js:211) produces an updated path sub-line.
+  - Criterion 7: nothing checks that reader unmount, close, or an intent/doc change reaches `live.stop()` and unsubscribes.
+- Criterion 8 (source check) is adequate. Criterion 9 (dist) is the conductor's job at integration.
+
+**SUGGESTED_FIX**
+Add jsdom render tests through dashboard/test/dom-harness.mjs for both MainPaneReader and SlideOver, with an injected fake `subscribeTree` and a `fetchDoc` spy. Cover:
+- one re-fetch per delivered tree, including one after an unrelated-path frame;
+- a changed body;
+- the same Markdown `source` on identical text;
+- no loading body on a live re-fetch;
+- `expanded` kept across a re-fetch;
+- the last good body kept on a failed re-fetch;
+- the moved-task re-fetch with an updated path sub-line, and no re-fetch when the id is absent;
+- unsubscribe on unmount, close, or intent change.
+
+Also fix the false "no DOM harness" comment.
+
+**ITERATION_HINT:** likely-fixable
+
+## Outcome
+Both doc readers (SlideOver, MainPaneReader) re-fetch their open doc on every structural live-tree update. A pure controller, `dashboard/app/live-doc-refetch.js` (`createLiveDocRefetch`, `findTaskPath`), does this: one fetch per delivered tree, no path match, last-started wins, failures swallowed so the last good content stays, and byte-identical text (same path) causes no callback. Each reader takes an injected `subscribeTree` prop that defaults to a no-op. Neither reader touches the hub or an EventSource. `board.js` defines `subscribeTree` over `liveTreeHub.subscribeStructural` and passes it to both readers. The SlideOver follows an open task by id to its new path, and the path sub-line updates with it. An absent id causes no re-fetch. A live re-fetch never shows a loading body and never resets `expanded`. Unmount, close, and an intent or doc change unsubscribe and drop in-flight responses.
+
+Tests:
+- `dashboard/test/live-doc-refetch.test.mjs` covers the pure controller plus source checks on the wiring.
+- `dashboard/test/live-doc-refetch-dom.test.mjs` mounts the real MainPaneReader and SlideOver through `dom-harness.mjs` (jsdom) with a fake `subscribeTree` and a `fetchDoc` spy. It covers:
+  - one re-fetch per tree, including one after an unrelated-path frame;
+  - a changed body;
+  - identical text, probed with a MutationObserver (zero DOM mutations);
+  - no loading body;
+  - `expanded` preserved;
+  - the last good body kept on a rejected re-fetch;
+  - a moved task and an absent id;
+  - unsubscribe on unmount, close, and intent or doc change, with a late response dropped.
+- The test file polyfills `requestAnimationFrame`, which the Drawer needs under jsdom.
+
+The conductor rebuilt `dashboard/dist/` from merged source at integration (ADR-0057). Verifier caveat (iteration 2): in MainPaneReader, React already skips a same-string setState, so the DOM probe there is weak on its own; the controller unit test is what actually exercises the byte-identical guard.

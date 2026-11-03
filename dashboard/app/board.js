@@ -90,6 +90,11 @@ import { IN_FLIGHT_DOC_PATH, deriveInFlightView } from "./in-flight-state.js";
 // hub's own defaults hit the real EventSource + the real fetch.
 const liveTreeHub = createLiveTreeHub();
 
+// Hub-backed structural subscription injected into the doc readers (es288): they
+// re-fetch their open doc on each structural update and never touch the hub or an
+// EventSource themselves. Shares the hub's single /api/tree fetch (ADR-0070).
+const subscribeTree = (cb) => liveTreeHub.subscribeStructural(cb);
+
 /**
  * React hook: subscribe to the shared live-tree hub.
  *
@@ -3941,13 +3946,13 @@ export function DashboardApp() {
                 : mainView === "about"
                   ? html`<${AboutPage} />`
                   : selectedDoc
-                    ? html`<${MainPaneReader} doc=${selectedDoc} />`
+                    ? html`<${MainPaneReader} doc=${selectedDoc} subscribeTree=${subscribeTree} />`
                     : html`<${DashboardBoard} onOpen=${onOpen} skipPermissions=${skipPermissions} scrollContainerRef=${scrollContainerRef} />`}
             </div>
             ${stopped ? html`<${StoppedOverlay} />` : null}
           </div>
         </div>
       </div>
-      <${SlideOver} intent=${openIntent} onClose=${onClose} onOpenFullScreen=${onOpenFullScreen} />
+      <${SlideOver} intent=${openIntent} onClose=${onClose} onOpenFullScreen=${onOpenFullScreen} subscribeTree=${subscribeTree} />
     </${ThemeCtx.Provider}>`;
 }

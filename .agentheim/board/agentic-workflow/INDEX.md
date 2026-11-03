@@ -12,8 +12,8 @@ research touching this BC, and concept synthesis pages.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 210
+- **Doing:** 0
+- **Done:** 211
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ research touching this BC, and concept synthesis pages.
 
 ### Doing
 <!-- doing-list:start -->
-- **agentic-workflow-es288** — Open doc readers (slide-over + main-pane reader) re-fetch when the tree changes, follow a moved task by id, and never flicker on unchanged text (feature) — `doing/agentic-workflow-es288-open-doc-readers-refetch-on-change.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **agentic-workflow-es288** — Open doc readers (slide-over + main-pane reader) re-fetch when the tree changes, follow a moved task by id, and never flicker on unchanged text (feature) — `done/agentic-workflow-es288-open-doc-readers-refetch-on-change.md`
 - **agentic-workflow-e3zby** — Checkpoint guard compares real paths on both sides, so symlinked project paths (incl. macOS /var → /private/var) no longer silently refuse worker files; fixes the red "real checkpoint invocation" lib test (bug) — `done/agentic-workflow-e3zby-fix-checkpoint-cli-test-macos-var-realpath.md`
 - **agentic-workflow-gvcy8** — Exempt the design-system styleguide source (.agentheim/knowledge/contexts/design-system/styleguide/) from the worker bookkeeping-path guard — it is source code, not bookkeeping (bug) — `done/agentic-workflow-gvcy8-exempt-styleguide-source-from-bookkeeping-guard.md`
 - **agentic-workflow-dd8yn** — context-map.md carries an authored ```mermaid relationship diagram alongside its prose — brainstorm's template and the strategic-modeler's output emit and maintain it (feature) — `done/agentic-workflow-dd8yn-context-map-mermaid-diagram.md`

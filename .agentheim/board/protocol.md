@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 21:07 -- Task verified and completed: agentic-workflow-es288 - Open doc readers (slide-over + main-pane reader) re-fetch when the tree changes, follow a moved task by id, and never flicker on unchanged text
+
+**Type:** Work / Task completion
+**Task:** agentic-workflow-es288 - Open doc readers (slide-over + main-pane reader) re-fetch when the tree changes, follow a moved task by id, and never flicker on unchanged text
+**Summary:** open doc readers re-fetch on every structural live-tree update, follow a moved task by id, and skip identical text
+**Duration:** 8m
+**Verification:** PASS (iteration 2)
+**Files changed:** 6
+**Tests added:** 13
+**ADRs written:** none
+
+---
+
+## 2026-11-03 21:03 -- Verification failed: agentic-workflow-es288 - Open doc readers re-fetch on tree change
+
+**Type:** Work / Verification failure
+**Task:** agentic-workflow-es288 - Open doc readers re-fetch on tree change
+**Iteration:** 1 of 3
+**Reasons:** Criteria 1-7 have only controller-level or source-regex tests; neither reader is mounted although dashboard/test/dom-harness.mjs (jsdom) exists
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-03 20:59 -- Batch started: [agentic-workflow-es288]
 
 **Type:** Work / Batch start
