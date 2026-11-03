@@ -5,6 +5,23 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 20:56 -- Modeling / Refined: agentic-workflow-wq4nd - Fix stale wording on the guard carve-out and the README lint count
+
+**Type:** Modeling / Refine
+**BC:** agentic-workflow
+**Status after:** dismissed
+**Summary:** Refinement found the guard-wording half already done (worker.md, verifier.md, work/SKILL.md name the ADR-0085 styleguide carve-out since gvcy8). The README half was a prose paragraph a worker cannot edit via README_DELTA, so modeling fixed it directly: the Test command paragraph now lists all four live-tree lints (adds context-map-notation-lint) and drops the stale count. Task dismissed per builder.
+
+---
+
+## 2026-11-03 20:56 -- Modeling / Dismissed: agentic-workflow-wq4nd
+
+**Type:** Modeling / Dismiss
+**Dismissed:**
+- agentic-workflow-wq4nd - Fix stale wording on the guard's styleguide carve-out and the README lint count (agentic-workflow)
+
+---
+
 ## 2026-11-03 20:55 -- Capture / Captured: agentic-workflow-wq4nd - Fix stale wording on the guard's styleguide carve-out and the README lint count
 
 **Type:** Capture

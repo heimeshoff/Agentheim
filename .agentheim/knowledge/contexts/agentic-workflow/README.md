@@ -1312,8 +1312,9 @@ Intents entering the context (normalized to a bullet list, agentic-workflow-ghca
 
 **Test command:** `node --test lib/test/*.test.mjs` (run from the repo root; the Node-25 explicit
 glob form is required — the bare-dir form `node --test lib/test/` finds nothing under Node 25).
-This covers every `lib/` module in this BC, including the three live-tree lints
-(`lib/human-eye-criteria.mjs`, `lib/index-entry-length.mjs`, `lib/spike-stop-loss.mjs`) that
+This covers every `lib/` module in this BC, including the live-tree lints
+(`lib/human-eye-criteria.mjs`, `lib/index-entry-length.mjs`, `lib/spike-stop-loss.mjs`,
+`lib/context-map-notation-lint.mjs`) that
 assert invariants against this repo's own `.agentheim/` tree — see ADR-0059's "Self-hosting-only
 enforcement scope" note. Declared here so `work`'s per-batch test-command resolution (the BC
 README first, then the project root — `agentic-workflow-g9s3w`) finds a command for any
