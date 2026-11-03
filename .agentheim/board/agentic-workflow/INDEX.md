@@ -10,14 +10,15 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 1
-- **Todo:** 0
+- **Backlog:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 210
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **agentic-workflow-es288** — Open doc readers (slide-over + main-pane reader) re-fetch when the tree changes, follow a moved task by id, and never flicker on unchanged text (feature) — `todo/agentic-workflow-es288-open-doc-readers-refetch-on-change.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -59,7 +60,6 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **agentic-workflow-es288** — Open doc readers (slide-over + main-pane reader) re-fetch when their file changes on disk (feature) — `backlog/agentic-workflow-es288-open-doc-readers-refetch-on-change.md`
 <!-- backlog-list:end -->
 
 

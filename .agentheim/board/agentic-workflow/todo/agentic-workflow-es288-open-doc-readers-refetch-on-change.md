@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-es288
 title: Open doc readers (slide-over + main-pane reader) re-fetch when the tree changes, follow a moved task by id, and never flicker on unchanged text
-status: backlog
+status: todo
 type: feature
 context: agentic-workflow
 created: 2026-11-03

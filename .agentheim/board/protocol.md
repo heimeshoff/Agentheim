@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 20:58 -- Modeling / Promoted: agentic-workflow-es288 - Open doc readers (slide-over + main-pane reader) re-fetch when the tree changes, follow a moved task by id, and never flicker on unchanged text
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-11-03 20:58 -- Modeling / Refined: agentic-workflow-es288 - Open doc readers re-fetch on tree change
 
 **Type:** Modeling / Refine
