@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 14:55 -- Modeling / Promoted: agentic-workflow-dd8yn - context-map.md carries an authored ```mermaid relationship diagram alongside its prose — brainstorm's template and the strategic-modeler's output emit and maintain it
+
+**Type:** Modeling / Promote
+**BC:** agentic-workflow
+**From → To:** backlog → todo
+
+---
+
 ## 2026-11-03 14:55 -- Modeling / Refined: agentic-workflow-dd8yn - context-map.md carries an authored mermaid relationship diagram
 
 **Type:** Modeling / Refine
