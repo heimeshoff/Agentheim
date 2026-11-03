@@ -6,7 +6,7 @@ type: feature
 context: design-system
 created: 2026-11-03
 completed:
-depends_on: [design-system-001-styleguide, infrastructure-yaajt]
+depends_on: [design-system-001-styleguide, infrastructure-yaajt, agentic-workflow-gvcy8]
 blocks: []
 tags: [dashboard, markdown, mermaid, diagram]
 related_adrs: [ADR-0002, ADR-0003, ADR-0009, ADR-0016, ADR-0048, ADR-0056, ADR-0057, ADR-0083]

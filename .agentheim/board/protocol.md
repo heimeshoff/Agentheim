@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 15:26 -- Modeling / Captured: agentic-workflow-gvcy8 - Exempt the design-system styleguide source (.agentheim/knowledge/contexts/design-system/styleguide/) from the worker bookkeeping-path guard — it is source code, not bookkeeping
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** todo
+**Summary:** Bug found preparing design-system-kw15t: ADR-0078 put styleguide source under .agentheim/, and the ghcaj checkpoint guard refuses every .agentheim/ path, so no worker can edit the styleguide. Builder chose a narrow exemption; kw15t now depends on this.
+
+---
+
 ## 2026-11-03 15:24 -- Modeling / Promoted: design-system-kw15t - Markdown primitive renders ```mermaid fenced blocks as diagrams, in every doc the dashboard shows (context map, ADRs, READMEs, research)
 
 **Type:** Modeling / Promote
