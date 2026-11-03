@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 15:04 -- Modeling / Promoted: infrastructure-yaajt - Dashboard build emits lazily-loaded code-split chunks (dist/app.js + dist/chunks/), dependency pins become build-stamp inputs
+
+**Type:** Modeling / Promote
+**BC:** infrastructure
+**From → To:** backlog → todo
+
+---
+
 ## 2026-11-03 15:04 -- Modeling / Refined: design-system-kw15t - Markdown primitive renders mermaid fences as diagrams
 
 **Type:** Modeling / Refine

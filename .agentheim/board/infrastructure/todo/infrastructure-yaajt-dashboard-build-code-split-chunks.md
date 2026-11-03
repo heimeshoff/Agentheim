@@ -1,7 +1,7 @@
 ---
 id: infrastructure-yaajt
 title: Dashboard build emits lazily-loaded code-split chunks (dist/app.js + dist/chunks/), dependency pins become build-stamp inputs
-status: backlog
+status: todo
 type: feature
 context: infrastructure
 created: 2026-11-03
