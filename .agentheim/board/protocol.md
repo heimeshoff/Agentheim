@@ -5,6 +5,35 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 15:04 -- Modeling / Refined: design-system-kw15t - Markdown primitive renders mermaid fences as diagrams
+
+**Type:** Modeling / Refine
+**BC:** design-system
+**Status after:** backlog
+**Summary:** Architect pass: mermaid ships as a lazily-loaded esbuild chunk (ADR-0083, accepted by builder); token-to-themeVariables mapping, MutationObserver theme re-render, strict security, serialized render queue and cache specified; SSE re-render assumption corrected (open docs do not re-fetch today).
+**Split into:** infrastructure-yaajt (build code-splitting, blocks kw15t), agentic-workflow-es288 (optional open-doc re-fetch)
+**ADRs written:** ADR-0083
+
+---
+
+## 2026-11-03 15:04 -- Modeling / Captured: agentic-workflow-es288 - Open doc readers (slide-over + main-pane reader) re-fetch when their file changes on disk
+
+**Type:** Modeling / Capture
+**BC:** agentic-workflow
+**Filed to:** backlog
+**Summary:** Optional follow-up from design-system-kw15t refinement: open doc readers re-fetch when their file changes on disk.
+
+---
+
+## 2026-11-03 15:04 -- Modeling / Captured: infrastructure-yaajt - Dashboard build emits lazily-loaded code-split chunks (dist/app.js + dist/chunks/), dependency pins become build-stamp inputs
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** backlog
+**Summary:** Split from design-system-kw15t refinement: dashboard build switches to esbuild code-splitting (dist/app.js + dist/chunks/), pins mermaid, adds dependency pins to the build stamp (ADR-0083).
+
+---
+
 ## 2026-11-03 14:59 -- Batch started: [agentic-workflow-dd8yn]
 
 **Type:** Work / Batch start

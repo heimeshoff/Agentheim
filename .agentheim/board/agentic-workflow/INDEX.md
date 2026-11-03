@@ -10,7 +10,7 @@ research touching this BC, and concept synthesis pages.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 1
 - **Done:** 207
@@ -57,6 +57,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **agentic-workflow-es288** — Open doc readers (slide-over + main-pane reader) re-fetch when their file changes on disk (feature) — `backlog/agentic-workflow-es288-open-doc-readers-refetch-on-change.md`
 <!-- backlog-list:end -->
 
 
