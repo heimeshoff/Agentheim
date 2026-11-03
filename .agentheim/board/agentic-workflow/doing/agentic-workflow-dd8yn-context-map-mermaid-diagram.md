@@ -1,7 +1,7 @@
 ---
 id: agentic-workflow-dd8yn
 title: context-map.md carries an authored ```mermaid relationship diagram alongside its prose — brainstorm's template and the strategic-modeler's output emit and maintain it
-status: todo
+status: doing
 type: feature
 context: agentic-workflow
 created: 2026-11-03
