@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 21:07 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 9m
+**Completed:** 1 (first-try PASS: 0, re-dispatched: 1, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 1
+**Lost-result escalations:** 0
+**Dispatches:** es288: 2
+**Commits:** 2
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (1 task)
+**Carry-over:** left behind (user WIP, 1 files)
+
+---
+
 ## 2026-11-03 21:07 -- Task verified and completed: agentic-workflow-es288 - Open doc readers (slide-over + main-pane reader) re-fetch when the tree changes, follow a moved task by id, and never flicker on unchanged text
 
 **Type:** Work / Task completion
