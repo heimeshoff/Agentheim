@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 15:32 -- Batch started: [design-system-kw15t]
+
+**Type:** Work / Batch start
+**Tasks:** design-system-kw15t - Markdown primitive renders ```mermaid fenced blocks as diagrams, in every doc the dashboard shows (context map, ADRs, READMEs, research)
+**Parallel:** scoped — builder named design-system-kw15t; no other ready tasks dispatched
+
+---
+
 ## 2026-11-03 15:31 -- Work session ended
 
 **Type:** Work / Session end
