@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-03 19:49 -- Batch started: [agentic-workflow-e3zby]
+
+**Type:** Work / Batch start
+**Tasks:** agentic-workflow-e3zby - Checkpoint guard compares real paths on both sides, so symlinked project paths (incl. macOS /var → /private/var) no longer silently refuse worker files; fixes the red "real checkpoint invocation" lib test
+**Parallel:** scoped — builder named agentic-workflow-e3zby; no other ready tasks dispatched
+
+---
+
 ## 2026-11-03 19:48 -- Modeling / Promoted: agentic-workflow-e3zby - Checkpoint guard compares real paths on both sides, so symlinked project paths (incl. macOS /var → /private/var) no longer silently refuse worker files; fixes the red "real checkpoint invocation" lib test
 
 **Type:** Modeling / Promote
