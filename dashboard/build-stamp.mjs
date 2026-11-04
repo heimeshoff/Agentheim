@@ -69,6 +69,10 @@ export function declaredInputRoots({ dashboardDir, repoRoot }) {
     { label: 'dashboard/app', dir: path.join(dashboardDir, 'app') },
     { label: 'dashboard/assets', dir: path.join(dashboardDir, 'assets') },
     { label: 'dashboard/build.mjs', file: path.join(dashboardDir, 'build.mjs') },
+    // ADR-0083: dependency pins are build inputs (a mermaid/marked/react bump
+    // must mark dist/ stale).
+    { label: 'dashboard/package.json', file: path.join(dashboardDir, 'package.json') },
+    { label: 'dashboard/package-lock.json', file: path.join(dashboardDir, 'package-lock.json') },
     { label: 'styleguide/app', dir: path.join(styleguide, 'app') },
     { label: 'styleguide/styles', dir: path.join(styleguide, 'styles') },
   ];

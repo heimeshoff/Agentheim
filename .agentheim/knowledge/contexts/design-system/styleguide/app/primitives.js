@@ -8,6 +8,7 @@ import { marked } from "marked";
 import { html } from "./html.js";
 import { Icon } from "./icons.js";
 import { CONTENT_TYPES, STATUSES } from "./data.js";
+import { renderMermaidBlocks, defaultLoadMermaid } from "./mermaid-render.js";
 
 // ---- Content-type badge: colored icon + optional label ----
 export function TypeBadge({ type, showLabel = true, size = 15 }) {
@@ -131,7 +132,7 @@ function highlightCode(text) {
   return out;
 }
 
-export function Markdown({ source }) {
+export function Markdown({ source, mermaidLoader = defaultLoadMermaid }) {
   const ref = useRef(null);
   const htmlOut = useMemo(() => {
     if (!marked) return escapeHtml(source);
@@ -151,9 +152,11 @@ export function Markdown({ source }) {
       }
     });
     // Syntax highlight code blocks
-    el.querySelectorAll("pre code").forEach((code) => {
+    el.querySelectorAll("pre code:not(.language-mermaid)").forEach((code) => {
       code.innerHTML = highlightCode(code.textContent);
     });
+    // Mermaid fences -> diagrams (lazy chunk, only if a fence is present)
+    renderMermaidBlocks(el, { loadMermaid: mermaidLoader });
   }, [htmlOut]);
 
   return html`<div className="prose" ref=${ref} dangerouslySetInnerHTML=${{ __html: htmlOut }} />`;

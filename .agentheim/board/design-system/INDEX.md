@@ -13,7 +13,7 @@ research touching this BC, and concept synthesis pages.
 - **Backlog:** 0
 - **Todo:** 0
 - **Doing:** 0
-- **Done:** 37
+- **Done:** 38
 <!-- task-counts:end -->
 
 ### Todo
@@ -26,6 +26,7 @@ research touching this BC, and concept synthesis pages.
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
 <!-- done-list:start -->
+- **design-system-kw15t** — Markdown primitive renders ```mermaid fenced blocks as diagrams, in every doc the dashboard shows (context map, ADRs, READMEs, research) (feature) — `done/design-system-kw15t-markdown-mermaid-fences.md`
 - **design-system-pk4qd** — Two ambient cues repaint every frame — ambient-rail-pulse and rail-attention-breathe animate box-shadow inside their keyframes, contradicting the compositor-only claim (bug) — `done/design-system-pk4qd-ambient-keyframes-compositor-only-glow-layer.md`
 - **design-system-me97j** — ModelSplitButton's `disabled` deadens the model caret along with Enter — an empty prompt shouldn't block picking a model (bug) — `done/design-system-me97j-split-button-disabled-spares-caret.md`
 - **design-system-k3f7q** — ModelSplitButton's model menu opens upward and escapes the prompt console's clip (bug) — `done/design-system-k3f7q-model-menu-opens-upward-unclipped.md`

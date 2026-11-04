@@ -93,6 +93,25 @@ resolves.
 See the [billing context README](#) and the [context map](#) for how this
 aggregate relates to **Identity** and **Catalog**.`;
 
+export const MD_MERMAID = `## Context map as a diagram
+
+A fenced block with language \`mermaid\` renders as an SVG diagram, themed from the design tokens.
+
+\`\`\`mermaid
+flowchart LR
+  Board[Board] -->|reads| Tasks[Task system]
+  Board --> Reader[Markdown reader]
+  Reader --> DS[Design system]
+\`\`\`
+
+An invalid fence keeps its source and shows a quiet note, and the rest of the document is unaffected.
+
+\`\`\`mermaid
+flowchart LR
+  A --> ((( broken
+\`\`\`
+`;
+
 export const MD_TICKET = `# Implement the ticket drawer markdown renderer
 
 Render a ticket's full markdown description inside the right-hand slide-over,

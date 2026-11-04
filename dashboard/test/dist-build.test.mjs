@@ -8,7 +8,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { readFileSync, existsSync, mkdtempSync, rmSync, readdirSync, mkdirSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -51,10 +51,44 @@ test('build emits index.html, the bundled JS, and both token CSS files', () => {
   assert.ok(existsSync(path.join(DIST, 'agentheim.css')), 'token CSS agentheim.css present');
 });
 
-test('bundle fetches no framework over the network (no CDN, no import map)', () => {
-  const js = readFileSync(BUNDLE, 'utf8');
-  for (const forbidden of ['esm.sh', 'unpkg', 'cdn.jsdelivr', 'importmap']) {
-    assert.equal(js.includes(forbidden), false, `bundle must not reference ${forbidden}`);
+// ADR-0083: the dist contract is "entry + chunks" — scan EVERY .js under a dist dir.
+function allJsFiles(dir) {
+  const out = [];
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const abs = path.join(dir, e.name);
+    if (e.isDirectory()) out.push(...allJsFiles(abs));
+    else if (e.name.endsWith('.js')) out.push(abs);
+  }
+  return out;
+}
+
+const FORBIDDEN_NETWORK = ['esm.sh', 'unpkg', 'cdn.jsdelivr', 'importmap'];
+
+// Returns the list of violations (file + token) across every .js under `dir`.
+function networkViolations(dir) {
+  const bad = [];
+  for (const f of allJsFiles(dir)) {
+    const js = readFileSync(f, 'utf8');
+    for (const forbidden of FORBIDDEN_NETWORK) {
+      if (js.includes(forbidden)) bad.push(`${path.relative(dir, f)}: ${forbidden}`);
+    }
+  }
+  return bad;
+}
+
+test('no .js under dist/ (entry or chunks) fetches a framework over the network (no CDN, no import map)', () => {
+  assert.deepEqual(networkViolations(DIST), []);
+});
+
+test('the network scan covers chunks/: a planted chunks/x.js containing esm.sh is caught', () => {
+  const planted = mkdtempSync(path.join(os.tmpdir(), 'yaajt-planted-'));
+  try {
+    mkdirSync(path.join(planted, 'chunks'));
+    writeFileSync(path.join(planted, 'app.js'), 'export {};');
+    writeFileSync(path.join(planted, 'chunks', 'x.js'), 'import "https://esm.sh/mermaid";');
+    assert.deepEqual(networkViolations(planted), ['chunks/x.js: esm.sh']);
+  } finally {
+    rmSync(planted, { recursive: true, force: true });
   }
 });
 
@@ -72,8 +106,9 @@ test('no in-browser Babel and no React development build in the bundle', () => {
 // here rather than merely asserted, exactly as infrastructure-002 verified
 // esbuild's own equivalent claim by grepping the committed bundle.
 test('jsdom (a test-time-only devDependency, ADR-0002/ADR-0003) never reaches the committed dist/ bundle', () => {
-  const js = readFileSync(BUNDLE, 'utf8');
-  assert.equal(js.includes('jsdom'), false, 'the string "jsdom" must not appear anywhere in the committed bundle');
+  for (const f of allJsFiles(DIST)) {
+    assert.equal(readFileSync(f, 'utf8').includes('jsdom'), false, `"jsdom" must not appear in ${path.relative(DIST, f)}`);
+  }
 });
 
 test('React PRODUCTION build is bundled in (process.env.NODE_ENV resolved to production)', () => {
@@ -126,4 +161,44 @@ test('token CSS in dist matches the styleguide source (single source of truth)',
     const b = readFileSync(path.join(DIST, css), 'utf8');
     assert.equal(b, a, `${css} in dist must be a verbatim copy of the styleguide source`);
   }
+});
+
+test('dashboard/package.json pins mermaid to an exact version (no ^ or ~) (ADR-0083)', () => {
+  const pkg = JSON.parse(readFileSync(path.join(DASHBOARD, 'package.json'), 'utf8'));
+  const v = pkg.devDependencies?.mermaid;
+  assert.ok(v, 'mermaid is a devDependency');
+  assert.match(v, /^\d+\.\d+\.\d+$/, `mermaid must be an exact version, got ${v}`);
+});
+
+// ---- design-system-kw15t: mermaid ships as a lazy chunk (ADR-0083) ----
+// MERMAID_MARKER is a string that occurs only inside mermaid's own code (its
+// flowchart diagram registry id), never in Agentheim source: if it shows up in
+// app.js, a static import has dragged mermaid into the entry bundle.
+const MERMAID_MARKER = 'flowchart-v2';
+// app.js size on main before design-system-kw15t (infrastructure-yaajt Outcome).
+const APP_JS_BASELINE_BYTES = 328694;
+const APP_JS_MAX_GROWTH_BYTES = 20 * 1024;
+
+test('mermaid is a lazy chunk: app.js has a dynamic chunk import and no mermaid-only marker; chunks/ holds it', () => {
+  const app = readFileSync(BUNDLE, 'utf8');
+  assert.ok(app.includes('import("./chunks/'), 'app.js dynamically imports ./chunks/');
+  assert.ok(!app.includes(MERMAID_MARKER), 'mermaid code must not be in app.js');
+  const chunks = allJsFiles(path.join(DIST, 'chunks'));
+  assert.ok(chunks.some((f) => readFileSync(f, 'utf8').includes(MERMAID_MARKER)), 'some chunk contains mermaid');
+});
+
+test('no .js under dist/ contains a CDN host or a remote dynamic import("http', () => {
+  const bad = [];
+  for (const f of allJsFiles(DIST)) {
+    const js = readFileSync(f, 'utf8');
+    for (const needle of ['esm.sh', 'unpkg', 'cdn.jsdelivr', 'cdnjs', 'import("http']) {
+      if (js.includes(needle)) bad.push(`${path.relative(DIST, f)}: ${needle}`);
+    }
+  }
+  assert.deepEqual(bad, []);
+});
+
+test('app.js grows by at most 20 KB over the pre-mermaid baseline', () => {
+  const size = readFileSync(BUNDLE).length;
+  assert.ok(size - APP_JS_BASELINE_BYTES <= APP_JS_MAX_GROWTH_BYTES, `app.js is ${size} bytes (baseline ${APP_JS_BASELINE_BYTES})`);
 });

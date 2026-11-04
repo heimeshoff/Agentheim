@@ -27,7 +27,7 @@ import {
 } from "./foundations.js";
 import { TypographySection, SpacingSection, IconSection } from "./foundations2.js";
 import { Markdown } from "./primitives.js";
-import { TICKETS, LIBRARY, CONTENT_TYPES, MD_ADR } from "./data.js";
+import { TICKETS, LIBRARY, CONTENT_TYPES, MD_ADR, MD_MERMAID } from "./data.js";
 import { edgeBlinkClass } from "./motion.js";
 
 const SAMPLE_TICKET = TICKETS.find((t) => t.id === "AGH-128"); // status: doing
@@ -286,6 +286,10 @@ function MarkdownSection() {
         <div className="scroll-quiet" style=${{ maxHeight: 760, overflowY: "auto", padding: "30px 40px 48px" }}>
           <${Markdown} source=${MD_ADR} />
         </div>
+      </div>
+      <${SubHead}>Mermaid fences</${SubHead}>
+      <div style=${{ border: "1px solid var(--hairline-strong)", borderRadius: "var(--radius-md)", overflow: "hidden", background: "var(--surface-0)", boxShadow: "var(--shadow-md)", maxWidth: 720, margin: "0 auto", padding: "30px 40px 40px" }}>
+        <${Markdown} source=${MD_MERMAID} />
       </div>
     </${GuideSection}>`;
 }
