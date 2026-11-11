@@ -201,6 +201,20 @@ html, body { transition: background var(--duration-base) var(--ease-base); }
 .prose pre .c-fn { color: var(--ct-research); }
 .prose pre .c-num { color: var(--accent-ochre); }
 
+/* Mermaid diagrams (design-system-kw15t) — SVG swapped in for the fence */
+.prose .md-mermaid { margin: 0 0 1.4em; }
+.prose .md-mermaid > pre[hidden] { display: none; }
+.prose .md-mermaid :is(p, span, div) { margin: 0; line-height: inherit; }
+.prose .md-mermaid svg { max-width: 100%; height: auto; }
+.prose .md-mermaid-error {
+  margin: -0.6em 0 1.4em;
+  padding: 8px 12px;
+  font-family: var(--font-ui); font-size: 12.5px;
+  color: var(--fg-3);
+  border: 1px solid var(--obligation);
+  border-radius: var(--radius-sm, 4px);
+}
+
 /* Blockquote / callout */
 .prose blockquote {
   margin: 0 0 1.4em;

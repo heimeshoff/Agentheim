@@ -8,6 +8,23 @@ its **plugin contract** (skills, commands, `.agentheim/` layout) with
 
 ## [Unreleased]
 
+**Context maps get a Mermaid diagram, and the dashboard draws it.** A project's
+`context-map.md` now carries an authored relationship diagram alongside its prose. The
+dashboard renders every ```` ```mermaid ```` fence as a diagram themed from the design tokens, in
+light and dark. GitHub and VS Code render the same fence natively.
+
+### Added
+- **Authored context-map diagram** — `references/context-map-notation.md` defines the notation in one place (ADR-0068): a `## Diagram` section between `## Contexts` and `## Relationships` holding one `flowchart LR` fence, one node per context, theme-neutral classification `classDef`s (stroke only, no colour), and upstream→downstream edges with a fixed label vocabulary. `brainstorm`, the `strategic-modeler` and the `worker` point to it, and only `strategic-modeler`/`brainstorm` edit the diagram. It is authored, not derived; when the diagram and the prose disagree, the prose wins (ADR-0084). Existing maps get a diagram the next time they are touched. A live-tree lint, `lib/context-map-notation-lint.mjs`, guards the notation.
+- **Mermaid fences render in every dashboard doc** — the styleguide `Markdown` primitive turns ```` ```mermaid ```` fences into SVG diagrams. Colours come from the design tokens (theme `base`), diagrams re-render on a light/dark switch, and an invalid fence shows its source with a quiet note instead of breaking the page. Mermaid is pinned exactly (`11.17.2`) and is loaded only when a doc actually contains a diagram.
+- **Open docs reload when their file changes** — the slide-over and the main-pane reader re-fetch their open doc on every structural live-tree update, through a subscription injected from `board.js` (no reader opens its own `EventSource`). Byte-identical text causes no re-render, so diagrams don't flicker. A task open in the slide-over follows itself by id as it moves todo → doing → done. A live reload never shows a loading state, never collapses a widened panel, and keeps the last good content if it fails.
+
+### Changed
+- **Dashboard build is code-split** — esbuild now emits `dist/app.js` plus content-hashed lazy chunks under `dist/chunks/`. Mermaid is reached only through a dynamic `import("mermaid")`, so the main bundle grows by about 2.5 KB and the roughly 740 KB diagram engine is fetched on the first diagram only (ADR-0083). `package.json` and `package-lock.json` are now build-stamp inputs.
+- **Styleguide source is exempt from the worker bookkeeping-path guard** — workers may write `.agentheim/knowledge/contexts/design-system/styleguide/`, which is source code, not bookkeeping. The exempt prefix is derived from `styleguideDir()`, and every other `.agentheim/` path is still refused (ADR-0085).
+
+### Fixed
+- **Checkpoint guard no longer drops worker files on symlinked project paths** — the guard compared paths as plain text, so a worktree reached through a symlink (macOS `/var` → `/private/var`, or a symlinked project folder) had every changed file treated as outside the worktree and silently dropped. It now resolves real paths on both sides, read-only, and still reports paths exactly as the worker listed them. ADR-0057 is amended.
+
 ## [0.9.7] - 2026-11-01
 
 **Herdr launches open a split pane next to you, not a new tab.** A patch to the Herdr bridge:

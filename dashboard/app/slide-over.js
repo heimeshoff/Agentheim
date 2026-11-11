@@ -30,6 +30,7 @@ import { Drawer } from "../../.agentheim/knowledge/contexts/design-system/styleg
 
 import { docUrl, intentToDrawerItem } from "./slide-over-data.js";
 import { withFrontmatterSection } from "./frontmatter.js";
+import { createLiveDocRefetch, findTaskPath, noopSubscribeTree } from "./live-doc-refetch.js";
 
 // The Drawer renders position:absolute inside its nearest positioned ancestor
 // (in the styleguide demo, the framed app). On the live dashboard the panel must
@@ -63,8 +64,12 @@ const EXPANDED_WIDTH = `calc(100vw - ${RAIL_WIDTH_PX}px)`;
  *   guard hides the action, leaving a Close-only header. In-place widening (the ds-020
  *   body-top chevron) replaces "promote out" as the slide-over's enlargement affordance.
  * @param {(path: string) => Promise<string>} [fetchDoc] — overridable doc fetcher (tests).
+ * @param {(cb: (tree) => void) => () => void} [subscribeTree] — hub-backed structural
+ *   subscription injected by board.js (es288). Each delivered tree silently re-fetches the
+ *   open doc (a task is followed by id to its new path); never resets `expanded`, never
+ *   shows _Loading…_, and a failure keeps the last good body. Defaults to a no-op.
  */
-export function SlideOver({ intent, onClose, onOpenFullScreen, fetchDoc = defaultFetchDoc }) {
+export function SlideOver({ intent, onClose, onOpenFullScreen, fetchDoc = defaultFetchDoc, subscribeTree = noopSubscribeTree }) {
   // `phase` drives the body the Drawer shows while the markdown is in flight.
   const [item, setItem] = useState(null);
   // In-place expand state (aw-074), driving the ds-020 controlled seam. The slide-over
@@ -87,11 +92,20 @@ export function SlideOver({ intent, onClose, onOpenFullScreen, fetchDoc = defaul
     // Show an immediate, quiet loading body so the panel opens without waiting
     // on the network — the Drawer animates in, then the body swaps to the doc.
     setItem(intentToDrawerItem(intent, "_Loading…_"));
+    const isTask = !!intent.status && intent.id;
+    const live = createLiveDocRefetch({
+      subscribeTree, fetchDoc,
+      initialPath: intent.path,
+      resolvePath: (tree) => (isTask ? findTaskPath(tree, intent.id) : intent.path),
+      onFresh: (md, path) => {
+        setItem(intentToDrawerItem(path === intent.path ? intent : { ...intent, path }, withFrontmatterSection(md)));
+      },
+    });
     fetchDoc(intent.path)
       // Fold the fetched body's YAML frontmatter into a quiet collapsible section
       // BEFORE it becomes the Drawer item's body (aw-043). The _Loading…_ / error
       // bodies above carry no frontmatter, so only the success path is transformed.
-      .then((md) => { if (alive) setItem(intentToDrawerItem(intent, withFrontmatterSection(md))); })
+      .then((md) => { if (alive) live.seed(md); if (alive) setItem(intentToDrawerItem(intent, withFrontmatterSection(md))); })
       .catch(() => {
         if (alive) {
           setItem(intentToDrawerItem(
@@ -100,8 +114,8 @@ export function SlideOver({ intent, onClose, onOpenFullScreen, fetchDoc = defaul
           ));
         }
       });
-    return () => { alive = false; };
-  }, [intent, fetchDoc]);
+    return () => { alive = false; live.stop(); };
+  }, [intent, fetchDoc, subscribeTree]);
 
   return html`
     <div style=${OVERLAY_STYLE}>

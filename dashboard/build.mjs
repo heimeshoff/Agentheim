@@ -151,7 +151,14 @@ export async function runBuild({ repoRoot = REPO_ROOT, outDir = DIST } = {}) {
   // marked / htm from dashboard/node_modules at build time and inlines them.
   await build({
     entryPoints: [ENTRY],
-    outfile: path.join(outDir, BUNDLE_NAME),
+    // ADR-0083: outdir + splitting so a dynamic import() of a heavy renderer
+    // (mermaid) becomes a lazily-loaded chunk under dist/chunks/ instead of
+    // being inlined into app.js. entryNames keeps the entry at dist/app.js;
+    // [hash] in chunkNames is required (esbuild names shared chunks `chunk`).
+    outdir: outDir,
+    splitting: true,
+    entryNames: '[name]',
+    chunkNames: 'chunks/[name]-[hash]',
     bundle: true,
     // The styleguide source lives OUTSIDE dashboard/, so esbuild's default
     // node_modules walk (rooted at each importing file) never reaches our
@@ -202,7 +209,7 @@ export async function runBuild({ repoRoot = REPO_ROOT, outDir = DIST } = {}) {
 
 async function main() {
   const { outDir } = await runBuild({ repoRoot: REPO_ROOT, outDir: DIST });
-  process.stdout.write(`Built ${path.relative(REPO_ROOT, outDir)}/ (${BUNDLE_NAME} + ${CSS_FILES.join(', ')} + fonts/ + index.html + .build-stamp.json)\n`);
+  process.stdout.write(`Built ${path.relative(REPO_ROOT, outDir)}/ (${BUNDLE_NAME} + chunks/ + ${CSS_FILES.join(', ')} + fonts/ + index.html + .build-stamp.json)\n`);
 }
 
 // Only run the CLI entry when this file is EXECUTED, not when it is imported

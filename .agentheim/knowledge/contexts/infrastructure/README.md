@@ -378,6 +378,7 @@ Apply write request.
   worktree remove --force` recurses through an un-unlinked junction and silently deletes the
   real target's contents; `unlinkDashboardNodeModules` only knows about `dashboard/
   node_modules`).
+- **ADR-0083 — Dashboard dist gains lazily-loaded code-split chunks (amends ADR-0003 consumer 2).** `dashboard/dist/` is no longer exactly one `app.js`: it is the `app.js` entry plus content-hashed chunks under `dist/chunks/`, produced by `build.mjs` (`outdir` + `splitting: true`, `entryNames: '[name]'`, `chunkNames: 'chunks/[name]-[hash]'`; `index.html` still loads only `./app.js`). Heavy optional renderers (mermaid first, via design-system-kw15t) are reached only through a dynamic `import()` and load on demand; the entry graph must never statically import them. `dashboard/package.json` and `package-lock.json` are declared build-stamp inputs (a dependency bump marks `dist/` stale), `mermaid` is pinned to an exact version, and the dist-build no-CDN / no-`jsdom` assertions scan every `.js` under `dist/`. The static handler (ADR-0002) is unchanged. Implemented by infrastructure-yaajt.
 
 ## Testing
 

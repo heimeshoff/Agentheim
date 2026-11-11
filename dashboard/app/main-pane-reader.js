@@ -27,6 +27,7 @@ import { Icon } from "../../.agentheim/knowledge/contexts/design-system/stylegui
 
 import { docUrl } from "./slide-over-data.js";
 import { withFrontmatterSection } from "./frontmatter.js";
+import { createLiveDocRefetch, noopSubscribeTree } from "./live-doc-refetch.js";
 
 function ReaderState({ children }) {
   return html`
@@ -45,8 +46,11 @@ function ReaderState({ children }) {
  *   (library-data.js item shape). Null = nothing selected (the parent then renders
  *   the board instead — this component only mounts when a doc is selected).
  * @param {(path: string) => Promise<string>} [fetchDoc] — overridable fetcher (tests).
+ * @param {(cb: (tree) => void) => () => void} [subscribeTree] — hub-backed structural
+ *   subscription injected by board.js (es288); each delivered tree re-fetches the open doc
+ *   silently (no loading state; failures keep the last good body). Defaults to a no-op.
  */
-export function MainPaneReader({ doc, fetchDoc = defaultFetchDoc }) {
+export function MainPaneReader({ doc, fetchDoc = defaultFetchDoc, subscribeTree = noopSubscribeTree }) {
   // phase: loading | ready | error. The body swaps in once /api/doc resolves.
   const [phase, setPhase] = useState("loading");
   const [body, setBody] = useState("");
@@ -59,11 +63,17 @@ export function MainPaneReader({ doc, fetchDoc = defaultFetchDoc }) {
     }
     let alive = true;
     setPhase("loading");
+    const live = createLiveDocRefetch({
+      subscribeTree, fetchDoc,
+      resolvePath: () => doc.path,
+      initialPath: doc.path,
+      onFresh: (md) => { setBody(md); setPhase("ready"); },
+    });
     fetchDoc(doc.path)
-      .then((md) => { if (alive) { setBody(md); setPhase("ready"); } })
+      .then((md) => { if (alive) { live.seed(md); setBody(md); setPhase("ready"); } })
       .catch(() => { if (alive) { setBody(""); setPhase("error"); } });
-    return () => { alive = false; };
-  }, [doc, fetchDoc]);
+    return () => { alive = false; live.stop(); };
+  }, [doc, fetchDoc, subscribeTree]);
 
   if (!doc) return null;
 
