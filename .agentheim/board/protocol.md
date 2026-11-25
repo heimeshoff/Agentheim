@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-25 07:16 -- Modeling / Captured: infrastructure-b86b4 - The herdr bridge is never reported live on macOS and Linux because socketPath looks for <home>/.herdr/herdr.sock, while herdr puts its socket under ${XDG_CONFIG_HOME:-<home>/.config}/herdr/; every dashboard launch silently falls back to the clipboard (bug)
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** POSIX herdr socket path fix: resolve ${XDG_CONFIG_HOME||~/.config}/herdr/herdr.sock instead of ~/.herdr/herdr.sock, with env injected hermetically and threaded through /api/bridge and /setup status. Keeps the socket pre-check (alternative of relying on herdr status alone rejected).
+
+---
+
 ## 2026-11-01 15:32 -- Release shipped: v0.9.7
 
 **Type:** Release

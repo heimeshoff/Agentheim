@@ -11,13 +11,14 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 49
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **infrastructure-b86b4** — The herdr bridge is never reported live on macOS and Linux because socketPath looks for <home>/.herdr/herdr.sock, while herdr puts its socket under ${XDG_CONFIG_HOME:-<home>/.config}/herdr/; every dashboard launch silently falls back to the clipboard (bug) (bug) — `todo/infrastructure-b86b4-herdr-socket-path-xdg-config-dir.md`
 <!-- todo-list:end -->
 
 ### Doing
