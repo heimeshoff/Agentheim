@@ -94,7 +94,24 @@ export function bindSequence(root, lastGood) {
  * preferred port is free the sequence is never walked past it (tryListen is
  * called exactly once).
  */
-export async function listenOnLadder(root, tryListen, lastGood) {
+export async function listenOnLadder(root, tryListen, lastGood, fixedPort = null) {
+  if (fixedPort !== null && fixedPort !== undefined) {
+    // Operator-pinned port (infrastructure-t6qqg): exactly one attempt, never a
+    // fallback to another port.
+    try {
+      await tryListen(fixedPort);
+      return fixedPort;
+    } catch (err) {
+      if (err && err.code === 'EADDRINUSE') {
+        const e = new Error(
+          `Port ${fixedPort} (from ${PORT_ENV}) is already in use; no other port is tried.`,
+        );
+        e.code = 'EADDRINUSE_FIXED';
+        throw e;
+      }
+      throw err;
+    }
+  }
   const sequence = bindSequence(root, lastGood);
   for (const port of sequence) {
     try {
@@ -111,4 +128,39 @@ export async function listenOnLadder(root, tryListen, lastGood) {
   );
   err.code = 'EADDRINUSE_LADDER_EXHAUSTED';
   throw err;
+}
+
+/** Env var naming the interface to bind (infrastructure-t6qqg). */
+export const HOST_ENV = 'AGENTHEIM_DASHBOARD_HOST';
+
+/** Env var pinning exactly one fixed port (infrastructure-t6qqg). */
+export const PORT_ENV = 'AGENTHEIM_DASHBOARD_PORT';
+
+/** Default bind interface: loopback only. */
+export const DEFAULT_HOST = '127.0.0.1';
+
+/**
+ * Pure read of the opt-in bind overrides from `env` (never touches process.env).
+ * Blank / whitespace-only values count as unset. Returns `{ host, port }` with
+ * host defaulting to 127.0.0.1 and port === null when no fixed port is set.
+ * Throws naming the variable and value when the port is not an integer in 1..65535.
+ */
+export function readBindOverrides(env) {
+  const e = env || {};
+  const rawHost = typeof e[HOST_ENV] === 'string' ? e[HOST_ENV].trim() : '';
+  const rawPort = typeof e[PORT_ENV] === 'string' ? e[PORT_ENV].trim() : '';
+  const host = rawHost === '' ? DEFAULT_HOST : rawHost;
+  if (rawPort === '') return { host, port: null };
+  const port = /^\d+$/.test(rawPort) ? Number(rawPort) : NaN;
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error(
+      `${PORT_ENV}=${JSON.stringify(e[PORT_ENV])} is invalid: expected an integer in 1..65535.`,
+    );
+  }
+  return { host, port };
+}
+
+/** Host shown in the printed URL: wildcard binds display as 127.0.0.1. */
+export function displayHost(host) {
+  return host === '0.0.0.0' || host === '::' ? '127.0.0.1' : host;
 }

@@ -5,6 +5,77 @@ Newest entries on top.
 
 ---
 
+## 2026-11-25 06:50 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** ~11m (batch start 06:39 to session end)
+**Completed:** 1 (first-try PASS: 0, re-dispatched: 1, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** infrastructure-t6qqg: 3
+**Commits:** 2
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (1 task)
+**Carry-over:** none — working tree clean; no non-main worktrees; 2 stranded RESULT sidecars removed
+
+---
+
+## 2026-11-25 06:50 -- Task verified and completed: infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+
+**Type:** Work / Task completion
+**Task:** infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+**Summary:** Dashboard gains opt-in AGENTHEIM_DASHBOARD_HOST / AGENTHEIM_DASHBOARD_PORT for sandboxed runs (wildcard bind, one fixed port, no fallback, last-good marker untouched); ADR-0002 addendum relaxes never-0.0.0.0 to loopback-by-default
+**Duration:** 10m53s
+**Verification:** PASS (iteration 3)
+**Result source:** sidecar · layout both+sentinel · sidecar present (iterations 2 and 3; iteration 1 came from transcript, sidecar missing)
+**Files changed:** 5
+**Tests added:** 11
+**ADRs written:** none (ADR-0002 addendum 2026-11-25)
+
+---
+
+## 2026-11-25 06:46 -- Verification failed: infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+**Iteration:** 2 of 3
+**Reasons:** BC README invariant "127.0.0.1 only, never 0.0.0.0" and last-good bind-order entry contradicted with empty README_DELTA, ADR-0002 "never 0.0.0.0" clause relaxed without addendum
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
+## 2026-11-25 06:42 -- Verification failed: infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+**Iteration:** 1 of 3
+**Reasons:** invalid-port exit 1 / no runfile untested (manual only), last-good marker skip on fixed port untested, bind host from AGENTHEIM_DASHBOARD_HOST untested, printed wildcard URL in serve.mjs untested
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
+## 2026-11-25 06:39 -- Batch started: [infrastructure-t6qqg]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+**Parallel:** scoped — builder named infrastructure-t6qqg; 0 other ready tasks not dispatched
+
+---
+
+## 2026-11-25 06:38 -- Modeling / Captured: infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** Opt-in AGENTHEIM_DASHBOARD_HOST / AGENTHEIM_DASHBOARD_PORT so the dashboard is reachable from the host when Claude Code runs inside a container or VM sandbox; unset means unchanged behavior. Builder decisions settled at capture, filed straight to todo.
+
+---
+
 ## 2026-11-01 15:32 -- Release shipped: v0.9.7
 
 **Type:** Release
