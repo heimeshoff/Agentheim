@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-11-25 07:26 -- Task verified and completed: infrastructure-b86b4 - The herdr bridge is never reported live on macOS and Linux because socketPath looks for <home>/.herdr/herdr.sock, while herdr puts its socket under ${XDG_CONFIG_HOME:-<home>/.config}/herdr/; every dashboard launch silently falls back to the clipboard (bug)
+
+**Type:** Work / Task completion
+**Task:** infrastructure-b86b4 - The herdr bridge is never reported live on macOS and Linux because socketPath looks for <home>/.herdr/herdr.sock, while herdr puts its socket under ${XDG_CONFIG_HOME:-<home>/.config}/herdr/; every dashboard launch silently falls back to the clipboard (bug)
+**Summary:** resolve herdr socket under XDG config dir on macOS/Linux
+**Duration:** 6m41s
+**Verification:** PASS (iteration 2)
+**Files changed:** 7
+**Tests added:** 8
+**ADRs written:** none
+
+---
+
+## 2026-11-25 07:24 -- Verification failed: infrastructure-b86b4 - herdr socket path ignores XDG config dir
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-b86b4 - herdr bridge never live on macOS/Linux: socket path ignores XDG config dir
+**Iteration:** 1 of 3
+**Reasons:** README_DELTA replace op malformed (body is a stub with meta-text, expected is one sentence not the full bullet); code and tests pass checks 1-4
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-25 07:19 -- Batch started: [infrastructure-b86b4]
 
 **Type:** Work / Batch start

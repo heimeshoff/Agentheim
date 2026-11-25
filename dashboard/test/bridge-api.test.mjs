@@ -276,6 +276,37 @@ test('token is absent from the response body when kind !== "herdr"', async () =>
   }
 });
 
+test('GET /api/bridge consults the XDG socket location (env is forwarded to checkHerdrLiveness)', async () => {
+  const { base, dist, home } = makeProject();
+  writeBridgeSelectionFile(home, 'herdr');
+  const seen = [];
+  const server = createDashboardServer({
+    root: base,
+    assetRoot: dist,
+    homedir: home,
+    env: { XDG_CONFIG_HOME: '/xdg' },
+    herdr: {
+      resolve: { which: () => '/fake/bin/herdr' },
+      liveness: {
+        platform: 'linux',
+        existsSync: (p) => (seen.push(p), true),
+        exec: () => 'ok',
+        cache: { value: false, expiresAt: 0 },
+      },
+    },
+  });
+  try {
+    const { port } = await start(server);
+    const body = await (await fetch(`http://127.0.0.1:${port}/api/bridge`)).json();
+    assert.equal(body.live, true);
+    assert.deepEqual(seen, [path.join('/xdg', 'herdr', 'herdr.sock')]);
+  } finally {
+    server.close();
+    rmSync(base, { recursive: true, force: true });
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
 test('GET /api/bridge reports live:true when the herdr socket exists and `herdr status` succeeds', async () => {
   const { base, dist, home } = makeProject();
   writeBridgeSelectionFile(home, 'herdr');
