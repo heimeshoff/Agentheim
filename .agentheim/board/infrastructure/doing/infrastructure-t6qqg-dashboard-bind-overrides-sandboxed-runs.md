@@ -1,7 +1,7 @@
 ---
 id: infrastructure-t6qqg
 title: The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
-status: todo
+status: doing
 type: feature
 context: infrastructure
 created: 2026-11-25

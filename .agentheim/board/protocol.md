@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-25 06:39 -- Batch started: [infrastructure-t6qqg]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+**Parallel:** scoped — builder named infrastructure-t6qqg; 0 other ready tasks not dispatched
+
+---
+
 ## 2026-11-25 06:38 -- Modeling / Captured: infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
 
 **Type:** Modeling / Capture

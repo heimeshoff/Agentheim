@@ -11,18 +11,18 @@ research touching this BC, and concept synthesis pages.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 49
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **infrastructure-t6qqg** — The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables (feature) — `todo/infrastructure-t6qqg-dashboard-bind-overrides-sandboxed-runs.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **infrastructure-t6qqg** — The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables (feature) — `doing/infrastructure-t6qqg-dashboard-bind-overrides-sandboxed-runs.md`
 <!-- doing-list:end -->
 
 ### Done (current-month entries live; older months archived verbatim under `done-archive/` — kept for prior-art search, ADR-0039 convention)
