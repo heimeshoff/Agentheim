@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-11-25 06:50 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** ~11m (batch start 06:39 to session end)
+**Completed:** 1 (first-try PASS: 0, re-dispatched: 1, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** infrastructure-t6qqg: 3
+**Commits:** 2
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (1 task)
+**Carry-over:** none — working tree clean; no non-main worktrees; 2 stranded RESULT sidecars removed
+
+---
+
 ## 2026-11-25 06:50 -- Task verified and completed: infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
 
 **Type:** Work / Task completion
