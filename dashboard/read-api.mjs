@@ -134,10 +134,12 @@ export function handleSearch(req, res, root, requestUrl) {
  * @param {string} root
  * @param {object} [opts]
  * @param {string} [opts.homedir] — defaults to `os.homedir()`.
+ * @param {NodeJS.ProcessEnv} [opts.env] — source of `XDG_CONFIG_HOME` for the socket path; defaults to `process.env` only when `homedir` is also defaulted, else `{}`.
  * @param {string} [opts.token] — the per-process bridge token; only surfaced when `kind === 'herdr'`.
  * @param {{resolve?: object, liveness?: object}} [opts.herdr] — deps forwarded to `resolveHerdrBinary`/`checkHerdrLiveness`.
  */
 export function handleBridge(req, res, root, opts = {}) {
+  const env = opts.env ?? (opts.homedir === undefined ? process.env : {});
   const homedir = opts.homedir ?? os.homedir();
   const { bridge: kind } = readBridgeSelection(homedir);
 
@@ -145,7 +147,7 @@ export function handleBridge(req, res, root, opts = {}) {
     const resolveDeps = opts.herdr?.resolve ?? {};
     const livenessDeps = opts.herdr?.liveness ?? {};
     const resolved = resolveHerdrBinary({ homedir, ...resolveDeps });
-    const live = checkHerdrLiveness({ homedir, binaryPath: resolved.path ?? undefined, ...livenessDeps });
+    const live = checkHerdrLiveness({ homedir, env, binaryPath: resolved.path ?? undefined, ...livenessDeps });
     res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
     res.end(
       JSON.stringify({

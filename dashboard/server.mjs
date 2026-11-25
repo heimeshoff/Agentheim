@@ -72,10 +72,15 @@ export function createDashboardServer({
   assetRoot = defaultAssetRoot(root),
   sse = {},
   stop = {},
-  homedir = os.homedir(),
+  homedir,
+  env,
   herdr = {},
   bridgeLaunch = {},
 }) {
+  // A caller that fakes `homedir` without `env` gets no XDG override (hermetic);
+  // production (neither given) reads the real process.env and os.homedir().
+  env = env ?? (homedir === undefined ? process.env : {});
+  homedir = homedir ?? os.homedir();
   // Per-process bridge token (ADR-0082 §4): minted ONCE per server instance,
   // in memory only — no disk write, since producer (this handler) and
   // consumer (the frontend, via GET /api/bridge) are the same process.
@@ -182,7 +187,7 @@ export function createDashboardServer({
     // Grows an additive `kind` field, plus a wholly distinct Herdr shape when
     // the recorded selection is `'herdr'` (ADR-0082 §1/§3, read-api.mjs).
     if (pathname === '/api/bridge') {
-      handleBridge(req, res, root, { homedir, herdr, token: bridgeToken });
+      handleBridge(req, res, root, { homedir, env, herdr, token: bridgeToken });
       return;
     }
 
