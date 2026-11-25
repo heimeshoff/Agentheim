@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-11-25 07:26 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 7m30s
+**Completed:** 1 (first-try PASS: 0, re-dispatched: 1, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** infrastructure-b86b4: 2
+**Commits:** 2
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (1 task)
+**Carry-over:** none — working tree clean
+
+---
+
 ## 2026-11-25 07:26 -- Task verified and completed: infrastructure-b86b4 - The herdr bridge is never reported live on macOS and Linux because socketPath looks for <home>/.herdr/herdr.sock, while herdr puts its socket under ${XDG_CONFIG_HOME:-<home>/.config}/herdr/; every dashboard launch silently falls back to the clipboard (bug)
 
 **Type:** Work / Task completion
