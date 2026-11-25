@@ -128,6 +128,22 @@ port back, and writes the sole runtime artifact:
 Relaunch is idempotent: a **live** runfile is reused (no second process); a **stale**
 runfile (dead pid) is reaped and replaced — nothing is orphaned.
 
+### Bind overrides for sandboxed runs (opt-in)
+
+When Claude Code runs inside a container or VM sandbox (for example Docker Sandboxes), a
+loopback-only server is not reachable from the host browser. Two environment variables change that:
+
+- `AGENTHEIM_DASHBOARD_HOST`: the interface to bind, e.g. `0.0.0.0`. Default `127.0.0.1`.
+- `AGENTHEIM_DASHBOARD_PORT`: exactly one fixed port (integer, 1..65535). It replaces the derived
+  port, the ladder and the last-good marker (which is neither read nor written). There is **no
+  fallback**: a busy or invalid value is an error and the server exits 1.
+
+Blank values count as unset. For a wildcard bind the printed URL shows `127.0.0.1`. Set both in the
+sandbox environment and publish the same port to the host.
+
+**Warning: the dashboard has no authentication.** A non-loopback interface exposes the board's
+write transport to everyone who can reach it. Use it only inside a private network such as a sandbox.
+
 ### Windows stop fallback
 
 `stop` uses `process.kill(pid)` on both OSes. On Windows, if the process is stubborn

@@ -4,7 +4,7 @@ title: Dashboard runtime — Node-stdlib localhost transport with detached launc
 scope: infrastructure
 status: proposed
 date: 2026-06-05
-related_tasks: [infrastructure-001, agentic-workflow-001, agentic-workflow-002, agentic-workflow-003, infrastructure-010, infrastructure-018, infrastructure-019, infrastructure-rgknz, infrastructure-k9t2v]
+related_tasks: [infrastructure-001, agentic-workflow-001, agentic-workflow-002, agentic-workflow-003, infrastructure-010, infrastructure-018, infrastructure-019, infrastructure-rgknz, infrastructure-k9t2v, infrastructure-t6qqg]
 related_adrs: [ADR-0006, ADR-0018]
 superseded_in_part_by: [ADR-0006]
 ---
@@ -510,3 +510,26 @@ infrastructure-r4mzp's ADR (**ADR-0079**) extends this ADR's process-launcher sl
 command, `/setup` (a one-time, per-machine install of the CLI and/or VS Code bridge), and demotes
 `/dashboard` itself to a pointer. The bounding rule — the allowlist is now `{ /dashboard, /setup }`
 — is recorded as prose-only, unenforced (ADR-0059). See ADR-0079 for the full reasoning.
+
+## Addendum — opt-in bind host and fixed port for sandboxed runs (2026-11-25, infrastructure-t6qqg)
+
+> Relaxes two clauses of the base decision: the Decision's "bind `127.0.0.1` only — **never** `0.0.0.0`" (Launch mechanism, Host/port) and the Context's "Single-user, localhost-only. No multi-user, no auth, no network exposure" premise. Both become "**loopback by default, non-loopback only by explicit operator opt-in**". It also refines the port-selection order of the infrastructure-018 and infrastructure-019 addenda: a fixed port bypasses it. Not a new ADR number; it is part of this transport decision.
+
+### Context
+
+Running Claude Code inside a container or VM sandbox (for example Docker Sandboxes) makes the dashboard unreachable from the host browser. A sandbox publishes a port to the host only for services listening on a non-loopback interface, and the host-side mapping must be declared before the dashboard starts. Loopback binding and a per-machine derived port both defeat that. The builder verified in a Docker sandbox that a server on `127.0.0.1` behind a published port is unreachable from the host, while the same server on `0.0.0.0` is reachable.
+
+### Decision
+
+- **Two opt-in environment variables**, read by `dashboard/serve.mjs` through the pure `readBindOverrides(env)` in `dashboard/port.mjs`: `AGENTHEIM_DASHBOARD_HOST` (interface to bind; default `127.0.0.1`) and `AGENTHEIM_DASHBOARD_PORT` (exactly one fixed port). Blank values count as unset. No CLI flags, no config file.
+- **Loopback stays the default.** With neither variable set, behavior is unchanged: `127.0.0.1`, last-good → derived → ladder, last-good marker written. A non-loopback bind is an explicit operator choice, never a default.
+- **A fixed port bypasses the port-selection order.** With `AGENTHEIM_DASHBOARD_PORT` set, the bind sequence is exactly that one port: the last-good → derived → ladder order is skipped and the last-good marker is neither read nor written, so removing the variable restores the derived origin. A busy fixed port fails loudly (error naming the port and the variable) and an invalid value (non-integer or outside 1..65535) exits 1 before anything binds or a runfile is written. There is never a silent fallback to another port.
+- **Display host.** For a wildcard bind (`0.0.0.0`, `::`) the printed "Dashboard listening at" URL shows `127.0.0.1`, the address a sandbox publishes on the host; any other host prints itself.
+- **No authentication or allowlist is added** (builder decision at capture). The opt-in plus the warning in `dashboard/README.md` is the only guard. The dashboard has no authentication, so a non-loopback interface exposes the board's write transport to everyone who can reach it and belongs only inside a private network such as a sandbox.
+
+### Consequences
+
+- The "never `0.0.0.0`" invariant is no longer absolute; the BC README's Runtime/transport invariant is restated as "loopback by default, non-loopback only via the explicit `AGENTHEIM_DASHBOARD_HOST` opt-in".
+- `dashboard/launch.mjs` already forwards its environment to the server child, so `/dashboard` and `agentheim-dashboard` pick the variables up unchanged.
+- Server-only change; no frontend or `dashboard/dist/` impact.
+- Misuse (setting a non-loopback host on an untrusted network) is possible by design. Mitigation is documentation only, accepted by the builder.

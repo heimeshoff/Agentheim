@@ -10,6 +10,8 @@ import {
   portLadder,
   bindSequence,
   listenOnLadder,
+  readBindOverrides,
+  displayHost,
 } from '../port.mjs';
 
 function eaddrinuse() {
@@ -269,4 +271,54 @@ test('listenOnLadder re-throws a non-EADDRINUSE error immediately (it is not a c
     /EACCES/,
   );
   assert.equal(attempts.length, 1, 'a fatal error must not advance the ladder');
+});
+
+test('readBindOverrides: defaults to loopback and no fixed port', () => {
+  assert.deepEqual(readBindOverrides({}), { host: '127.0.0.1', port: null });
+});
+
+test('readBindOverrides: blank and whitespace values count as unset', () => {
+  assert.deepEqual(
+    readBindOverrides({ AGENTHEIM_DASHBOARD_HOST: '  ', AGENTHEIM_DASHBOARD_PORT: '' }),
+    { host: '127.0.0.1', port: null },
+  );
+});
+
+test('readBindOverrides: reads host and port', () => {
+  assert.deepEqual(
+    readBindOverrides({ AGENTHEIM_DASHBOARD_HOST: '0.0.0.0', AGENTHEIM_DASHBOARD_PORT: ' 8123 ' }),
+    { host: '0.0.0.0', port: 8123 },
+  );
+});
+
+test('readBindOverrides: invalid ports throw naming variable and value', () => {
+  for (const bad of ['abc', '1.5', '0', '65536', '-1', '80x']) {
+    assert.throws(
+      () => readBindOverrides({ AGENTHEIM_DASHBOARD_PORT: bad }),
+      (e) => e.message.includes('AGENTHEIM_DASHBOARD_PORT') && e.message.includes(bad),
+    );
+  }
+});
+
+test('listenOnLadder: fixed port tries exactly that port', async () => {
+  const tried = [];
+  const got = await listenOnLadder('/p', async (p) => { tried.push(p); }, 41500, 9999);
+  assert.equal(got, 9999);
+  assert.deepEqual(tried, [9999]);
+});
+
+test('listenOnLadder: busy fixed port errors naming port and variable, no other port', async () => {
+  const tried = [];
+  await assert.rejects(
+    listenOnLadder('/p', async (p) => { tried.push(p); throw eaddrinuse(); }, undefined, 9999),
+    (e) => e.message.includes('9999') && e.message.includes('AGENTHEIM_DASHBOARD_PORT'),
+  );
+  assert.deepEqual(tried, [9999]);
+});
+
+test('displayHost: wildcard binds show 127.0.0.1, others themselves', () => {
+  assert.equal(displayHost('0.0.0.0'), '127.0.0.1');
+  assert.equal(displayHost('::'), '127.0.0.1');
+  assert.equal(displayHost('192.168.1.5'), '192.168.1.5');
+  assert.equal(displayHost('127.0.0.1'), '127.0.0.1');
 });

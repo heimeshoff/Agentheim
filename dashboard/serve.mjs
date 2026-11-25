@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { discoverRoot } from './discovery.mjs';
 import { createDashboardServer, defaultAssetRoot } from './server.mjs';
 import { writeRunfile, readLastPort, writeLastPort } from './runfile.mjs';
-import { listenOnLadder } from './port.mjs';
+import { listenOnLadder, readBindOverrides, displayHost } from './port.mjs';
 import { resolvePluginRoot, readPluginVersion } from './plugin-version.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -36,6 +36,17 @@ const pluginVersion = readPluginVersion(pluginRoot);
 // (ADR-0004 decouples the two). AGENTHEIM_DASHBOARD_DIST is a dev override seam.
 const assetRoot = process.env.AGENTHEIM_DASHBOARD_DIST || defaultAssetRoot();
 
+// Opt-in bind overrides (infrastructure-t6qqg). Validated before anything binds
+// or writes a runfile; an invalid value exits 1.
+let bindHost;
+let fixedPort;
+try {
+  ({ host: bindHost, port: fixedPort } = readBindOverrides(process.env));
+} catch (err) {
+  process.stderr.write(`Dashboard failed to start: ${err.message}\n`);
+  process.exit(1);
+}
+
 const server = createDashboardServer({ root, assetRoot });
 
 /**
@@ -56,7 +67,7 @@ function tryListen(port) {
     };
     server.once('error', onError);
     server.once('listening', onListening);
-    server.listen(port, '127.0.0.1');
+    server.listen(port, bindHost);
   });
 }
 
@@ -65,8 +76,9 @@ try {
   // so a transient collision can't flap the origin launch-to-launch. Absent /
   // out-of-window / busy ⇒ falls back to the derived port then the ladder. A
   // corrupt/foreign marker is ignored by bindSequence's in-window guard.
-  const lastGood = readLastPort(root);
-  const port = await listenOnLadder(root, tryListen, lastGood);
+  // A fixed port bypasses the last-good marker entirely (neither read nor written).
+  const lastGood = fixedPort === null ? readLastPort(root) : undefined;
+  const port = await listenOnLadder(root, tryListen, lastGood, fixedPort);
   writeRunfile(root, {
     pid: process.pid,
     port,
@@ -76,9 +88,9 @@ try {
   });
   // Remember this origin so the next launch sticks to it. Written at bind time
   // (not coupled to stale-reap) so it survives both a crash and a clean stop.
-  writeLastPort(root, port);
+  if (fixedPort === null) writeLastPort(root, port);
   // When attached (parent kept a pipe), announce the URL; harmless when detached.
-  process.stdout.write(`Dashboard listening at http://127.0.0.1:${port}/\n`);
+  process.stdout.write(`Dashboard listening at http://${displayHost(bindHost)}:${port}/\n`);
 } catch (err) {
   // A genuine third-party collision across the whole ladder (or a fatal bind
   // error): fail loudly and exit cleanly — no orphaned, never-listening process.

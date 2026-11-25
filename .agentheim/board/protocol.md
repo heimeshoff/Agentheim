@@ -5,6 +5,42 @@ Newest entries on top.
 
 ---
 
+## 2026-11-25 06:50 -- Task verified and completed: infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+
+**Type:** Work / Task completion
+**Task:** infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+**Summary:** Dashboard gains opt-in AGENTHEIM_DASHBOARD_HOST / AGENTHEIM_DASHBOARD_PORT for sandboxed runs (wildcard bind, one fixed port, no fallback, last-good marker untouched); ADR-0002 addendum relaxes never-0.0.0.0 to loopback-by-default
+**Duration:** 10m53s
+**Verification:** PASS (iteration 3)
+**Result source:** sidecar · layout both+sentinel · sidecar present (iterations 2 and 3; iteration 1 came from transcript, sidecar missing)
+**Files changed:** 5
+**Tests added:** 11
+**ADRs written:** none (ADR-0002 addendum 2026-11-25)
+
+---
+
+## 2026-11-25 06:46 -- Verification failed: infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+**Iteration:** 2 of 3
+**Reasons:** BC README invariant "127.0.0.1 only, never 0.0.0.0" and last-good bind-order entry contradicted with empty README_DELTA, ADR-0002 "never 0.0.0.0" clause relaxed without addendum
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
+## 2026-11-25 06:42 -- Verification failed: infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+**Iteration:** 1 of 3
+**Reasons:** invalid-port exit 1 / no runfile untested (manual only), last-good marker skip on fixed port untested, bind host from AGENTHEIM_DASHBOARD_HOST untested, printed wildcard URL in serve.mjs untested
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-25 06:39 -- Batch started: [infrastructure-t6qqg]
 
 **Type:** Work / Batch start
