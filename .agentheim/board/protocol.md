@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-25 06:38 -- Modeling / Captured: infrastructure-t6qqg - The dashboard should be reachable from the host when Claude Code runs inside a container or VM sandbox; opt-in bind host and fixed port via environment variables
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** Opt-in AGENTHEIM_DASHBOARD_HOST / AGENTHEIM_DASHBOARD_PORT so the dashboard is reachable from the host when Claude Code runs inside a container or VM sandbox; unset means unchanged behavior. Builder decisions settled at capture, filed straight to todo.
+
+---
+
 ## 2026-11-01 15:32 -- Release shipped: v0.9.7
 
 **Type:** Release
