@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-25 07:19 -- Batch started: [infrastructure-b86b4]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-b86b4 - The herdr bridge is never reported live on macOS and Linux because socketPath looks for <home>/.herdr/herdr.sock, while herdr puts its socket under ${XDG_CONFIG_HOME:-<home>/.config}/herdr/; every dashboard launch silently falls back to the clipboard (bug)
+**Parallel:** no (1 worker) — only ready task; running on branch fix/herdr-socket-xdg-path for a standalone PR
+
+---
+
 ## 2026-11-25 07:16 -- Modeling / Captured: infrastructure-b86b4 - The herdr bridge is never reported live on macOS and Linux because socketPath looks for <home>/.herdr/herdr.sock, while herdr puts its socket under ${XDG_CONFIG_HOME:-<home>/.config}/herdr/; every dashboard launch silently falls back to the clipboard (bug)
 
 **Type:** Modeling / Capture

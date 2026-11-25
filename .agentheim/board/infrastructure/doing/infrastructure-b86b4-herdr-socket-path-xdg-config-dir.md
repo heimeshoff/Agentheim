@@ -1,7 +1,7 @@
 ---
 id: infrastructure-b86b4
 title: The herdr bridge is never reported live on macOS and Linux because socketPath looks for <home>/.herdr/herdr.sock, while herdr puts its socket under ${XDG_CONFIG_HOME:-<home>/.config}/herdr/; every dashboard launch silently falls back to the clipboard (bug)
-status: todo
+status: doing
 type: bug
 context: infrastructure
 created: 2026-11-25
