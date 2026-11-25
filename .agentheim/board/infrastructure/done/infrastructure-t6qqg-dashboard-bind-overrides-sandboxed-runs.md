@@ -76,7 +76,7 @@ sandbox.
 - [ ] New `node --test` cases in `dashboard/test/port.test.mjs` cover the criteria above that
       `port.mjs` owns (defaults, blank values, invalid ports, fixed port with and without
       collision, display host).
-- [ ] From a Docker sandbox with a published port and `AGENTHEIM_DASHBOARD_HOST=0.0.0.0`,
+- [x] From a Docker sandbox with a published port and `AGENTHEIM_DASHBOARD_HOST=0.0.0.0`,
       `AGENTHEIM_DASHBOARD_PORT=<published>`, the dashboard opens in the host browser.
       [human-eye]
 
